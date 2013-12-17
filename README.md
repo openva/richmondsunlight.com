@@ -1,4 +1,3 @@
-richmondsunlight
-================
+# Richmond Sunlight
 
 Assets for and issues pertaining to Richmond Sunlight
