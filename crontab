@@ -1,0 +1,63 @@
+# The core update script. This runs hourly at 55 after, 4 minutes after DLAS outputs their data
+55 * * * * /usr/bin/wget --quiet --timeout=240 --delete-after -O /dev/null https://parser.richmondsunlight.com/cron/update_db.php >/dev/null 2>&1
+
+# The update script that handles the advancing of bills. This runs hourly at 2 after, 2 minutes after DLAS outputs their data.
+02 * * * * /usr/bin/wget --quiet --timeout=240 --delete-after -O /dev/null https://parser.richmondsunlight.com/cron/update_db.php?type=history >/dev/null 2>&1
+
+# The daily script that collects and tallies votes. This runs at 2:05, 5 minutes after DLAS outputs their data.
+05 2 * * * /usr/bin/wget --quiet --timeout=300 --delete-after -O /dev/null https://parser.richmondsunlight.com/cron/update_vote.php >/dev/null 2>&1
+
+# Collects scheduled meetings and hearings.
+09 6-15 * * * /usr/bin/wget --quiet --timeout=240 --delete-after -O /dev/null https://parser.richmondsunlight.com/cron/update_dockets.php >/dev/null 2>&1
+
+# Get the floor minutes from the House and the Senate.
+0 6,9,12,15,18,21 * * * /usr/bin/wget --quiet --timeout=240 --delete-after -O /dev/null https://parser.richmondsunlight.com/cron/update_minutes.php >/dev/null 2>&1
+
+# Update the bill summaries.
+10,20,30,40,50 * * * * /usr/bin/wget --quiet --timeout=240 --delete-after -O /dev/null https://parser.richmondsunlight.com/cron/update_db.php?type=summaries >/dev/null 2>&1
+
+# Update the bill full text.
+11,21,31,41,51 * * * * /usr/bin/wget --quiet --timeout=240 --delete-after -O /dev/null https://parser.richmondsunlight.com/cron/update_db.php?type=full_text >/dev/null 2>&1
+
+# Update the meeting schedules.
+03,33 * * * * /usr/bin/wget --quiet --timeout=240 --delete-after -O /dev/null https://parser.richmondsunlight.com/cron/update_meetings.php >/dev/null 2>&1
+
+# Update the place names found in bills.
+20,21,22,23,24,25 * * 1-3,10-12 * /usr/bin/wget --quiet --timeout=240 --delete-after -O /dev/null https://parser.richmondsunlight.com/cron/update_places.php > /dev/null 2>&1
+
+# Update the website mirrors.
+36 03,15 * * * /usr/bin/wget --quiet --delete-after -O /dev/null https://www.richmondsunlight.com/cron/mirror.php > /dev/null 2>&1
+
+# Update the PDF mirror.
+41 02,16 * * * /usr/bin/wget --quiet --delete-after -O /dev/null https://www.richmondsunlight.com/cron/download_pdfs.php > /dev/null 2>&1
+
+# Updates the sections of the code referred to within each bill.
+5,15,25,35,45,55 * * 1-3,10-12 * /usr/bin/wget --quiet --timeout=240 --delete-after -O /dev/null https://parser.richmondsunlight.com/cron/code_sections.php > /dev/null 2>&1
+
+# Mirror the contents of the real-time status tracking system.
+* 10-17 * 1-3 1-5 /usr/bin/wget --quiet --timeout=240 --delete-after -O /dev/null https://www.richmondsunlight.com/cron/chamber_status.php > /dev/null 2>&1
+
+# Re-zip the current year's downloadable bill full-text HTML.
+* 3 * * * /usr/bin/zip -rj /vol/www/richmondsunlight.com/html/downloads/bills/2016 /vol/www/richmondsunlight.com/html/downloads/bills/2016
+
+# Run a daily database backup.
+* 6 * * * /usr/sbin/logrotate -f /vol/www/richmondsunlight.com/backups/logrotate.db -s /var/www/richmondsunlight.com/backups/logrotate.status
+
+# Run a daily contributions update.
+* 7 * * * /usr/bin/wget --quiet --timeout=240 --delete-after -O /dev/null https://www.richmondsunlight.com/cron/update_contributions.php > /dev/null 2>&1
+
+# Convert bill data to JSON.
+0 * * * * csvtojson --ignoreEmpty=true /vol/www/richmondsunlight.com/html/cron/bills.csv > /vol/www/richmondsunlight.com/html/downloads/bills.json
+
+# Capture legislative video.
+*/5 * * * * /vol/www/richmondsunlight.com/html/cron/video-trigger.sh -c house -t 300
+*/5 * * * * /vol/www/richmondsunlight.com/html/cron/video-trigger.sh -c senate -t 300
+
+# Store downloads on S3.
+5 * * * * aws s3 sync /vol/www/richmondsunlight.com/html/downloads s3://downloads.richmondsunlight.com --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers --storage-class REDUCED_REDUNDANCY >/dev/null 2>&1
+
+# Store mirrored sites on S3.
+30 3 * * sun /vol/www/richmondsunlight.com/html/cron/mirror_to_s3.sh >/dev/null 2>&1
+
+# Back up the site to S3.
+45 3 * * sun /vol/www/richmondsunlight.com/html/cron/backup_to_s3.sh >/dev/null 2>&1
