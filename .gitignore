@@ -7,6 +7,10 @@ downloads/*
 *.srt
 video/metadata.csv
 admin/memcache.php
+audio/
+cache/
+finance/
+mirror/
 
 # Wordpress
 blog/*
