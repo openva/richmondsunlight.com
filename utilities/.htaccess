@@ -1,0 +1,15 @@
+# If the IP matches, skip auth. Otherwise, require a username and password.
+Satisfy any
+
+# By User
+AuthUserFile /vol/www/richmondsunlight.com/html/admin/.users
+AuthName "Utilities"
+AuthType Basic
+require valid-user
+
+# By IP
+order deny,allow
+deny from all
+allow from 127.0.0.1
+allow from localhost
+allow from 54.209.110.70

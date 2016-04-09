@@ -1,0 +1,155 @@
+/* Nearly Pure CSS Drop-Down Menus
+   By http://koivi.com/css-menus/ */
+/* This is the part for the CSS menu - these settings are for a horizontal menu */
+#nav {                        /* menu list container */
+	list-style-type: none;      /* disable the display of the list item bullets */
+	margin: 0;                 /* space around the list container */
+	padding: 0;                 /* space within the list container */
+	position: static;           /* need this so that the z-index stuff works correctly */
+	background: #234053 url('/images/templates/new/navbar-background.png') repeat-x;     /* the default background color within the main menu container */
+	border-bottom: 1px solid #404040;
+	/*color: #000;*/                /* the default font color (not links) within the main menu container */
+	z-index: 20;                /* push the menu up in the layer order a bit so it isn't hidden behind anything */
+	font-size: 117%;
+	/*font: 7.5pt Verdana, 'Lucida Sans', Helvetica, Arial;*/
+	/* Browser plug-ins like Flash or Quicktime may not allow you to overlap then with this menu! */
+}
+#nav a {
+	font-weight: 400;
+	color: white;
+}
+#nav li {                     /* top-level menu element */
+	list-style-type: none;      /* disable the display of the list item bullets */
+	float: left;                /* this is to allow for the horizontal main menu */
+	/*background-color: #d3c598;*/  /* main menu item background color */
+	color: white;                /* main menu item font color (not links) */
+	margin: 0;                /* spacing between main menu items */
+	padding: 5px 11px;           /* padding within main menu items */
+	display: block;
+	/*border-right: 1px solid #000;*/
+}
+#nav ul {                     /* third-level (or greater) menu element list elements */
+	position: absolute;         /* this is so that it doesn't push that page content around on hover */
+	margin: 0;                /* space around the list container */
+	padding: 0;               /* space within the list container */
+	list-style-type: none;      /* disable the display of the list item bullets */
+	display: none;
+	width: 120px;               /* should be the same as #nav li width */
+	/*background-color: #d3c598;*/  /* sub-menu default background color */
+	/*border: #000 solid 1px;*/     /* the border around the sub-menu list */
+	color: white;                /* sub-menu default font color (not links) */
+	z-index: 99;                /* want to be sure this is above the rest of the menu */
+	border-left: 2px solid #404040;
+}
+
+#nav ul li {                  /* second-level or greater menu element links */
+	background-color: #234053;  /* default background color for sub-menu container */
+	color: #eee;                /* default font color (not links) for sub-menu container */
+	border: none;               /* sub-menu item border settings */
+	margin: 0px;                /* spacing between sub-menu containers */
+	padding: 6px;               /* This is for padding between menu items in the drop-downs */
+	width: 114px;                /* (padding*2) must be subtracted from #nav li width and set for this one, or borders won't display properly. */
+	text-align: left;
+	font-size: 90%;
+	line-height: 120%;
+}
+
+#nav > li > ul {
+	margin-top: -5px;
+}
+
+/* And "A-M" ranges narrower. */
+ul#nav ul.alphabetic {
+	width: 46px;
+}
+	ul#nav ul.alphabetic li {
+		width: 40px;
+	}
+	/* But make sure that subsequent sublevels are back to normal */
+	ul#nav ul.alphabetic > li > ul {
+		width: 120px;
+	}
+		ul#nav ul.alphabetic > li > ul > li {
+			width: 114px;
+		}
+	/* Make listings of legislators wider. */
+	ul#nav ul.alphabetic > li > ul.legislators {
+		width: 160px;
+		margin-left: 40px;
+	}
+		ul#nav ul.alphabetic > li > ul.legislators li {
+			width: 154px;
+			padding-bottom: 3px;
+		}
+			ul#nav ul.alphabetic > li > ul.legislators li a {
+				width: 154px;
+			}
+
+ul#nav > li > ul > li {
+	border-bottom: 1px solid #404040;
+}
+
+#nav li a {                   /* top-level menu element links */
+	text-align: left;         /* text alignment in main menu item links */
+	display: block;
+	color: white;
+	text-decoration: none;
+}
+
+#nav ul a {                   /* all the other level menu link elements */
+	margin: 0px;
+	width: 108px;             /* (padding*2) must be subtracted from #nav ul li width and set for this one, or borders won't display properly. */
+	display: block;
+	color: white;
+	text-decoration: none;
+}
+
+#nav a:hover,                 /* top-level hovering properties */
+#nav li:hover {
+	display: block;
+	color: #999;
+	/* background-color: transparent !important; */
+}
+
+#nav ul li:hover,             /* higher level hovering properties */
+#nav ul li a:hover {
+	display: block;
+	width: 114px;               /* should be set to the same value as #nav ul li width */
+	color: #999;
+	/* background-color: transparent !important; */
+}
+
+#nav ul ul {                   /* higher-level list containers */
+	display: none;              /* don't display by default */
+	position: absolute;
+	margin-left: 114px;         /* this should be the width of #nav ul li */
+	/*width: 194px;*/
+	margin-top: -1.8em;           /* this will push the sub-menu up to the level of its parent */
+}
+
+/* only non-MSIE browsers use this */
+#nav ul li>ul,
+#nav ul ul li>ul {
+	margin-top: -1.8em;           /* should be set to the same as #nav ul ul margin-top */
+}
+
+/* additional sub-menu levels in the next 2 blocks. (For up to 5 levels of drop menus) */
+#nav li:hover ul ul,              
+#nav li:hover ul ul ul,
+#nav li:hover ul ul ul ul,
+#nav li:hover ul ul ul ul ul {
+	display:none;
+}
+
+#nav li:hover ul,
+#nav ul li:hover ul,
+#nav ul ul li:hover ul,
+#nav ul ul ul li:hover ul,
+#nav ul ul ul ul li:hover ul {
+	display:block;
+}
+
+li>ul {
+	top: auto;
+	left: auto;
+}

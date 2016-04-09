@@ -1,0 +1,662 @@
+.footer a { color: #808080; background: #fff; }
+
+.footer p.quote {
+	font-family: Georgia;
+	font-size: 1.25em;
+	color: #999;
+	font-style: italic;
+}
+
+table.sortable span.sortarrow {
+    color: black;
+    text-decoration: none;
+}
+
+/* Legislators' Bio Table */
+div#bio {
+	background-color: #f4eee5;
+}
+	div#bio dl {		
+		background-color: #f4eee5;
+	}
+	div#bio dt, div#bio dd {
+		padding: 2px 4px;
+		line-height: 1.5em;
+	}
+	div#bio dt {
+		clear: left;
+		float: left;
+		width: 100px;
+		text-align: right;
+		font-weight: bold;
+	}
+	div#bio dd {
+		max-width: 350px;
+		overflow: hidden;
+	}
+	
+#body-legislators div.bills {
+	background-color: #f4eee5;
+	padding: 1em;
+}
+	#body-legislators div.bills ul {
+		list-style-type: none;
+		padding-left: 0;
+	}
+
+table#bill-progress {
+	margin: 0;
+	padding: 0;
+	border-collapse: collapse;
+	width: 100%;
+	background: transparent;
+}
+	table#bill-progress tr td {
+		border: 0;
+		border-top: 1px solid #ccc;
+		margin: 0;
+		padding: 0 3px;
+	}
+
+/* The status history, displayed within a hidden DIV on every bill page. */
+div#status-history {
+	margin-bottom: 2em;
+}
+
+
+/* IMAGES */
+img#legislator {
+	margin: 0 auto;
+	border: 2px solid #000;
+	float: right;
+}
+a img {
+	border: 0;
+}
+
+
+#comments div.comment {
+	margin: 1em 0;
+}
+		#comments div.comment div.metadata {
+			margin-top: -1em;
+		}
+		#comments div.comment span.date {
+			clear: left;
+			font-size: .85em;
+			color: #666;
+		}
+		#comments div.comment a.permalink {
+			text-decoration: none;
+		}
+	#comments div.legislator {
+		border: 1px solid #c00;
+		background-color: #eee;
+		padding: .5em;
+	}
+		#comments div.legislator img.photo {
+			float: right;
+			margin: 0 0 .5em .5em;
+			border: 1px solid #000;
+		}
+	#comments div.editors-pick {
+		border: 1px solid #000;
+		background-color: #eee;
+		padding: .5em;
+	}
+	#comments div.editors-pick div.notice {
+		float: right;
+		color: #900;
+		font-family: 'Gill Sans', Verdana, Arial, Helvetica;
+		font-size: .85em;
+		letter-spacing: .2em;
+		text-transform: uppercase;
+		margin: -.75em -.5em .5em .5em;
+	}
+	
+.fineprint {
+	font-size: .85em;
+}
+
+.highlight {
+	background-color: #ff0;
+}
+	
+
+/* TAGS */
+ul.tags {
+	margin: 0 0 1em 1em;
+	padding : 0;
+	list-style: none;
+}
+ul.tags li a {
+	color: #666;
+	text-decoration: none;
+}
+ul.tags li a:hover {
+	color: #0095eb;
+	text-decoration: underline;
+}
+	div.tags a {
+		color: #666;
+		text-decoration: none;
+		font-weight: normal;
+	}
+		div.tags a:hover {
+			color: #0095eb;
+			text-decoration: underline;
+		}
+
+/* POLLS */
+div.poll-graph {
+	background-color: #0095eb;
+	border-right: 1px solid #666;
+	border-bottom: 1px solid #666;
+	margin-right: 5px;
+	height: 15px;
+}
+div.poll-number {
+	text-align: right;
+}
+
+/*	INFO BALLOONS */
+
+.balloon {
+	position: relative;
+	z-index: 0;
+}
+
+a.balloon {
+	text-decoration: none;
+	border-bottom: #66c;
+	border-width: 0 0 1px 0;
+	border-style: none none dotted none;
+}
+
+a.balloon:hover {
+	background-color: transparent;
+	z-index: 50;
+}
+
+.balloon div {
+	position: absolute;
+	font-size: .9em;
+	line-height: 1.4em;
+	font-weight: normal;
+	background-color: #eee;
+	padding: 5px;
+	left: -1000px;
+	border: 1px solid gray;
+	visibility: hidden;
+	color: black;
+	text-decoration: none;
+	width: 150px;
+}
+
+.balloon div img {
+	float: left;
+	margin: 0 3px 0 0;
+}
+
+.balloon:hover div {
+	visibility: visible;
+	top: 0;
+	left: 75px; /*position where balloon should offset horizontally */
+}
+
+span.dictionary {
+	border-bottom: 1px dotted #c6a952;
+}
+
+/* ERRORS
+   We have two methods of displaying errors: as their own DIV and as a subset of
+   the messages div, the latter being a replacement for the former.
+*/
+div.error, div.errors {
+	background-color: #f00;
+	padding: .5em;
+	color: #fff;
+}
+div.error ul {
+	list-style: disc;
+}
+div#messages {
+	width: 300px;
+	padding: 1em;
+}
+div#messages.updated {
+	background-color: #ff0;
+}
+div#messages.errors {
+	background-color: #c00;
+}
+
+/*  MISC */
+div.full-text del, div.full-text s {
+	color: #c00;
+}
+div.full-text ins {
+	background-color: #ff0;
+	color: #000;
+	font-style: normal;
+	text-decoration: none;
+}
+
+img.help-icon {
+	width: 14px;
+	height: 14px;
+	float: right;
+	margin-left: 4px;
+}
+
+#comments p {
+	line-height: 1.2em;
+}
+#comments cite {
+	font-style: normal;
+	font-weight: bold;
+}
+#comments blockquote {
+	margin: 1em;
+	font-size: .9em;
+	border-left: 1px dotted #666;
+	color: #666;
+	padding-left: 1em;
+}
+
+#registration fieldset {
+	margin-top: 1em;
+	padding: 1em 2em;
+	width: 75%
+}
+	#registration fieldset legend {
+		font-weight: bold;
+	}
+	#registration fieldset table {
+		margin: 0 auto;
+	}
+		#registration th {
+			text-align: right;
+			font-weight: normal;
+			vertical-align: top;
+			padding-right: .25em;
+		}
+		
+		#registration td small {
+			font-size: .9em;
+			color: #666;
+		}
+
+/* PHOTOSYNTHESIS PUBLIC PORTFOLIOS */
+div#public-portfolio .bill {
+	margin: 1em 0 1.5em 0;
+	border-bottom: 1px dotted #000;
+}
+	div#public-portfolio .bill.dead {
+		-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=70)";
+		filter: alpha(opacity=70);
+		opacity: .70;
+	}
+	div#public-portfolio .notes {
+		background-color: #eee;
+		padding: .5em;
+	}
+		div#public-portfolio .notes > p:last-child {
+			padding-bottom: 0;
+		}
+	div#public-portfolio .comments {
+		font-size: .8em;
+	}
+	
+/* Subsection Tabs
+--------------------*/
+.tabs > ul {
+	list-style: none;
+	margin: 0 1em 0 0;
+	padding: 0;
+	clear: both;
+	border-bottom: 1px solid #ccc;
+	height: 20px;
+	clear: both;
+}
+	.tabs > ul li {
+		float: left;
+		margin-right: 5px;
+		text-align: center;
+		font-weight: bold;
+	}
+		.tabs > ul li a {
+			display: block;
+			height: 20px;
+			padding: 0 3px 0 3px;
+			background-color: transparent;
+			color: #333;
+			text-decoration: none;
+		}
+		.ui-tabs .ui-tabs-nav li a {
+			padding: .33em .5em !important;
+		}
+			.tabs > ul li a:hover {
+				color: #666;
+			}
+			.tabs > ul li a.active {
+				background-color: #ddd;
+			}
+	.tabs > div {
+		clear: left;
+	}
+table.tabbed  {
+	clear: left;
+}
+ul.register_tabs {
+	border-bottom:none;
+}
+	ul.register_tabs li a.active {
+		background-color: #6d7a81;
+		color: #fff;
+	}
+
+
+div.docket {
+	width: 300px;
+	padding: .5em;
+	background-color: #eee;
+	border: 1px solid #000;
+	margin: 2em 0;
+}
+	div.docket h2 {
+		margin-top: 0;
+		font-size: 1.2em;
+		font-weight: bold;
+	}
+	
+/* For displaying embedded video */
+div.video {
+	float: left;
+	background-color: #eee;
+	margin: auto 0;
+	width: 500px;
+}
+	div.video h1 {
+		background: #6c757a url(/images/templates/default/corner.gif) no-repeat top right;
+		color: #fff;
+		padding: 7px 0 7px 5px;
+		font: bold 1em Tahoma, Arial, Sans-Serif;
+		margin: 0 0 3px 0;
+		text-align: left;
+	}
+	div.video a#player {
+		float: left;
+		width: 350px;
+	}
+	
+	div.video div.index {
+		width: 140px;
+		float: right;
+		max-height: 250px;
+		overflow-x: hidden;
+		overflow-y: auto;
+	}
+		div.video div.index h2 {
+			font-size: 1.1em;
+			margin-top: 0;
+		}
+		div.video div.index h3 {
+			font-size: 1em;
+			padding-bottom: 0;
+		}
+		div.video div.index ul {
+			list-style: none !important;
+			padding-left: 0 !important;
+			font-size: .85em;
+		}
+	
+
+/* The bill progress checkboxes */
+div.checkbox {
+	font-family: Helvetica, Verdana, Arial, 'Arial MS', 'sans serif';
+	font-size: 12px;
+	font-weight: bold;
+}
+	div.checkbox.failed {
+		color: #900;
+		font-size: 18px;
+	}
+	div.checkbox.passed {
+		color: #090;
+		font-size: 16px;
+	}
+
+/* Video sponsors graphics */
+div.box a.sponsor {
+	display: block;
+	text-align: center;
+}
+
+/* The Blue Ridge Internetworks button */
+img#bri {
+	width: 100px;
+	height: 35px;
+	margin: 5px;
+}
+
+/* The Blue Ridge Internetworks button */
+img#peo {
+	width: 50px;
+	height: 49px;
+	margin: 5px;
+}
+
+/* The links for Delicious, StumbleUpon, etc. */
+div#share {
+	margin: 4px;
+	height: 16px;
+	float: right;
+	background-color: #f4eee5;
+	padding: 2px;
+}
+	div#share img {
+		margin: 0 1px;
+		padding: 0;
+		border: 0;
+	}
+
+/* The Ajax autocompletion dropdown */
+div.autocomplete {
+	position: absolute;
+	width: 250px;
+	background-color: white;
+	border: 1px solid #888;
+	margin: 0;
+	padding: 0;
+}
+	div.autocomplete ul {
+		list-style-type: none;
+		margin: 0;
+		padding: 0;
+	}
+		div.autocomplete ul li {
+			list-style-type: none;
+			display: block;
+			margin: 0;
+			padding: 2px;
+			height: 12px;
+			cursor: pointer;
+		}
+			div.autocomplete ul li.selected { background-color: #ffb;}
+
+/* Good old-fashioned unordered lists */
+ul.classic {
+	list-style-position: outside;
+	list-style-type: disc;
+	margin-left: 2em;
+}
+	ul.classic ul {
+		list-style-position: outside;
+		list-style-type: circle;
+		margin-left: 2em;
+	}
+
+/* Partisanship Graph */
+div#partisanship-graph {
+	background: url('/images/partisanship-bg.png');
+	width: 200px;
+	height: 20px;
+	padding: 0;
+	float: left;
+}
+	div#partisanship-graph > div {
+		height: 16px;
+		margin: 2px 0;
+		float: left;
+		border-right: 6px solid #fff;
+	}
+
+/* The box that slides out for Photosynthesis. */
+#slidebox {
+	text-align: left;
+	position: absolute;
+	width: auto;
+	height: auto;
+	top: 140px;
+	right: 0;
+}
+
+	#slidebox h2 {
+		color: #fff;
+		font-size: 110%;
+		font-family: arial;
+		margin: 10px;
+		font-weight: bold !important;
+	}
+	
+		#slidebox h2 span {
+			font-size: 125%;
+			font-weight: normal !important;
+		}
+
+	#slidebox ul {
+		margin: 0;
+		padding: 0;
+	}
+	
+		#slidebox li {
+			margin: 0 10px 3px 10px;
+			padding: 2px;
+			list-style-type: none;
+			display: block;
+			background-color: #da1074;
+			width: 177px;
+			color: #fff;
+		}
+			#slidebox li a {
+				width:100%;
+			}
+				#slidebox li a:link,
+				#slidebox li a:visited {
+					color: #ffffff;
+					font-family: verdana;
+					font-size: 100%;
+					text-decoration: none;
+					display: block;
+					margin: 0p;
+					padding: 0;
+					width: 100%;
+				}
+				#slidebox li a:hover {
+					color: #fff;
+					text-decoration: underline;
+				}
+
+#slideboxTab {
+	float: left;
+	height: 155px;
+	width: 23px;
+}
+	#slideboxTab img {
+		border: 0 solid #fff;
+	}
+
+#slideboxContents {
+	float:left;
+	overflow:hidden !important;
+	width: 200px;
+	height: 200px;
+	background-color: #f4eee5;
+	padding: 3px 5px;
+	border: 1px solid #dccbaf;
+}
+
+#slideboxContentsInner {
+	width: 200px;
+}
+
+#slidebox p#photosynthesis-notes
+{
+	line-height: 1em;
+}
+
+/* Whenever an Ajax editor is saving in-place edited text. */
+.inplaceeditor-saving {
+	background: url(/images/wait.gif) bottom right no-repeat;
+}
+
+/* The Facebook "Like" button */
+#facebook {
+	float: right;
+	width: 100px;
+}
+
+/* The list of sessions on sidebar of the the main listing of bills */
+body#body-bills div#options ul {
+	margin-left: 2em;
+}
+
+/* Display this to MobileSafari visitors. */
+#iphone-alert {
+	font-family: 'Helvetica Neue', Helvetica, Arial, 'sans serif';
+	font-size: 36px;
+	background: #fff;
+	height: 90px;
+}
+	#iphone-alert a {
+		color: #000;
+		text-decoration: none;
+	}
+
+
+/* A visual index to videos. */
+#video-index {
+	width: 99%;
+	height: 275px;
+	overflow: scroll;
+}
+	#video-index > div > a, #video-index > div > div {
+		display: block;
+		position: relative;
+		width: 150px;
+		height: 112px;
+		background-size: 150px 112px;
+		margin: 2px;
+		float: left;
+		text-decoration: none;
+		color: #fff;
+		text-shadow: 0 0 4px #000;
+		line-height: 1.2em;
+		cursor: pointer;
+	}
+		#video-index a span, #video-index div span {
+			position: absolute;
+			bottom: 0;
+			left: 0;
+		}
+
+/*
+ * Sample data, used on the data downloads page.
+ */
+.code-sample {
+	background-color: #ddd;
+	line-height: 1.0em;
+	text-overflow: wrap;
+	padding: 1em;
+}

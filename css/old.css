@@ -1,0 +1,683 @@
+/* project: internet services template
+   author: luka cvrk (www.solucija.com) */
+
+   
+/* default styles
+   -------------- */
+   
+body { 
+	padding: 0; 
+	margin: 0; 
+	font: 0.8em Tahoma, sans-serif; 
+	line-height: 1.35em;
+	background: #fff; 
+	color: #333; 
+}
+
+a {	color: #0095eb;	background: inherit; }
+a:hover { color: #6c757a; background: inherit; }
+
+h1 { color: #000; font: normal 1.9em Arial, Sans-Serif; letter-spacing: -1px; padding: 7px 0 0 0; margin: 0; }
+h1 a, h2 a { text-decoration: none; }
+h1 a:hover, h2 a:hover { color: #ebd700; background: inherit; }
+h2 { margin: 1em 0 0 0; padding: 0; font: bold 1.5em Arial, Sans-Serif; letter-spacing: -1px; color: #000; }
+
+p {	margin: 0 0 5px 0; }
+
+ul {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+	.left ul ul {
+		margin-left: 4em;
+		padding: 0;
+		list-style: disc;
+	}
+	.right ul ul {
+		margin-left: 1em;
+		padding: 0;
+	}
+	ul.classic {
+	margin-left: 1.5em;
+	padding: 0;
+	list-style: disc;
+	}
+	ul li.failed {
+		color: #999;
+	}
+
+form { 	margin: 0; }
+
+input.search { 
+	width: 100px; 
+	border: 0;
+	background: #fff url(/images/templates/default/input.gif) no-repeat;
+	padding: 4px;
+	font-weight: bold;
+}
+
+input.login { 
+	width: 150px;
+	border: none; 
+	padding: 4px; 
+}
+
+small {
+	font-size: .85em;
+}
+
+/* layout
+   ------ */
+
+.content { 
+	margin: 0 auto;
+	width: 780px;
+	padding: 10px; 
+}
+
+.header { 
+	height: 55px;
+	background: #eee;
+	color: #808080;
+	margin: 3px 0;
+	padding: 10px 0 0 0;
+	border-bottom: 1px solid #ccc;
+}
+	.header div.logo h1 {
+		padding: 7px 0 0 9px;
+	}
+	.header div.logo h1 .dark  { color: #737373; background: inherit; font-weight: bold; }
+	.header div.logo h1 .bright { color: #fc0; }
+
+.top_info {
+	float: right;
+	width: 555px;
+	padding: 5px 0 4px 0;
+	border-bottom: 1px solid #eee;
+	background: #eee;
+	color: #808080;
+}
+
+	.top_info_left {
+		text-align: center;
+		line-height: 1.1em;
+		padding-top: 1em;
+		font-size: .85em;
+		width: 200px;
+		float: left;
+	}
+
+	.top_info_right {
+		font-size: .85em;
+		float: right;
+		width: 290px;
+		padding: 0 0 0 20px;
+		border-left: 1px solid #eee;
+	}
+
+.browse_category  {
+	font-size: 0.9em;
+	width: 190px;
+	color: #fff;
+	background: inherit;
+}
+
+.bar { 
+	clear: both;
+	font-size: 1em;
+	height: 30px; 
+	color: #000;
+	background: #fc0;
+}
+
+	.bar li { 
+		margin: 0; 
+		padding: 7px 12px 5px 12px;
+		color: #666;
+		background: #fc0;
+		float: left; 
+	}
+	
+	.bar li.active {
+		background: #66bcee url(/images/templates/default/bar.gif) no-repeat center top;
+		font-weight: bold; 
+		padding: 7px 10px 6px 10px;
+		margin: 0;
+	}
+	
+	.bar li a { 
+		font-weight: bold;
+		color: #333; 
+		background: inherit;
+		text-decoration: none;
+	} 
+	
+	.bar li a:hover { 
+		color: #000; 
+		background: inherit;
+	} 
+
+.search_field { 
+	background: #f0f0f0;
+	color: #808080;
+	clear: both;
+	font-weight: bold;
+	padding: 7px 25px 10px 10px;
+	margin: 3px 0;
+	border-top: 1px solid #ccc;
+}
+
+#account {
+	text-align: right;
+	font-size: .85em;
+	margin-right: 5px;
+}
+	#account a {
+		color: #000;
+		text-decoration: none;
+	}
+
+.grey {
+	color: #808080;
+	background: inherit;
+	font-weight: normal;
+}
+
+.search_form { float: right; }
+
+.subheader {
+	margin: 0px 0 10px 0;
+	border-bottom: 1px solid #eee;
+	padding: 5px 0 5px 0;
+	background: #A4A4A4;
+	color: #fff;
+}
+
+/* left side
+   --------- */
+
+.left {
+	float: left;
+	width: 65%;
+	margin: 0 0 10px 0;
+}
+
+	.left h3 {
+		clear: both;
+		background: #66bcee url(/images/templates/default/corner.gif) no-repeat top right;
+		color: #000;
+		padding: 5px 0 5px 5px;
+		font: bold 1.5em Arial, Sans-Serif; letter-spacing: -1px;
+		margin: 0;
+	}
+	.left h4 {
+		clear: both;
+		color: #000;
+		font: bold 1.2em Arial, Sans-Serif; letter-spacing: -1px;
+		margin: 1em 0 0 0;
+	}
+	.left_side {
+		float: left;
+		width: 180px;
+		padding: 0 0 0 10px;
+		margin: 0;
+	}
+		
+	.left_side a, .right_side a { color: #414141; background: #FFF; }
+		
+	.right_side {
+		float: right;
+		width: 220px;
+		background: #fff url(/images/templates/default/dotted.gif) repeat-y;
+		color: #414141;
+		padding: 0 0 0 40px;
+		margin: 0;
+	}
+		
+	.left_box { margin: 0 0 10px 0; color: #000; background: #FFF; padding: 3px 0; }
+	
+		
+/* right side
+   ---------- */
+		
+div.right {
+	float: right;
+	width: 34.6%;
+	margin: 0 0 10px 0;
+	font-size: .9em;
+}
+
+	div.right h3 {
+		background: #6C757A  url(/images/templates/default/corner.gif) no-repeat top right;
+		color: #fff;
+		padding: 7px 0 7px 5px;
+		font: bold 1em Tahoma, Arial, Sans-Serif;
+		margin: 0 0 3px 0;
+	}
+
+	div.right h3 a {
+		color: #fff;
+		text-decoration: none;
+	}
+
+	div.right h3 a:hover {
+		text-decoration: underline;
+	}
+
+	div.right div.box {
+		background: #f5f5f5;
+		color: #333;
+		padding: 8px;	
+		margin: 0 0 3px 0;
+	}
+	
+.image {
+	float: left;
+	margin: 0 9px 3px 0;
+}
+
+/* footer
+   ------ */
+
+.footer { 
+	clear: both;
+	text-align: center;
+	padding: 10px 0 10px 0;
+	margin: 0;
+	border-top: 1px solid #ccc;
+	line-height: 1.8em;
+}
+
+.footer a { color: #808080; background: #fff; }
+
+.footer p.quote {
+	font-family: Georgia;
+	font-size: 1.25em;
+	color: #999;
+	font-style: italic;
+}
+
+/* Tables */
+table {
+	border-collapse: collapse;
+}
+table thead {
+	font-weight: bold;
+	cursor: default;
+	background-color: #eee;
+	border-bottom: 1px solid #ccc;
+}
+table th a {
+	color: #000;
+	text-decoration: none;
+}
+table td {
+	padding: 2px;
+}
+table.sortable span.sortarrow {
+    color: black;
+    text-decoration: none;
+}
+
+/* Legislators' Bio Table */
+table.legislator {
+	padding: 0;
+	width: 500px;
+	border-bottom: 1px solid #999;
+	background-color: #eee;
+}
+	table.legislator td {
+		border-top: 1px solid #999;
+		margin: 0 1em 0 .5em;
+		padding: .25em;
+		vertical-align: top;
+	}
+	
+/* Bill Progress Table */
+div#bill-progress {
+	width: 125px;
+	float: right;
+	margin: 0 0 1em 1em;
+	font-size: .85em;
+}
+	div#bill-progress h2 {
+		font: bold 1em Tahoma, Arial, Sans-Serif;
+		padding: 3px 0 3px 5px;
+		font-size: 1.1em;
+		letter-spacing: 0;
+		font-weight: bold;
+		background: #6C757A  url(/images/templates/default/corner.gif) no-repeat top right;
+		color: #fff;
+	}
+table#bill-progress {
+	margin: 0;
+	padding: 0;
+	border-collapse: collapse;
+	width: 100%;
+	border: 1px solid #000;
+}
+	table#bill-progress tr td {
+		border: 0;
+		border-top: 1px solid #ccc;
+		margin: 0;
+	}
+		table#bill-progress tr.alt td {
+			background-color: #eee;
+		}
+/* IMAGES */
+img.rep-photo {
+	margin: 0 auto;
+	border: 2px solid #000;
+}
+a img {
+	border: 0;
+}
+
+
+#comments div.comment {
+	margin: 1em 0;
+}
+		#comments div.comment div.metadata {
+			margin-top: -1em;
+		}
+		#comments div.comment span.date {
+			clear: left;
+			font-size: .85em;
+			color: #666;
+		}
+		#comments div.comment p {
+			margin-bottom: 1em;
+		}
+		#comments div.comment a.permalink {
+			text-decoration: none;
+		}
+	#comments div.legislator {
+		border: 2px solid #c00;
+		padding: .5em;
+	}
+	
+.fineprint {
+	font-size: .85em;
+}
+
+.highlight {
+	background-color: #ff0;
+}
+	
+
+/* TAGS */
+ul.tags {
+	margin: 0 0 1em 1em;
+	padding : 0;
+	list-style: none;
+}
+ul.tags li a {
+	color: #666;
+	text-decoration: none;
+}
+ul.tags li a:hover {
+	color: #0095eb;
+	text-decoration: underline;
+}
+div.tags a {
+	color: #666;
+	text-decoration: none;
+}
+div.tags a:hover {
+	color: #0095eb;
+	text-decoration: underline;
+}
+
+/* POLLS */
+div.poll-graph {
+	background-color: #0095eb;
+	border-right: 1px solid #666;
+	border-bottom: 1px solid #666;
+	margin-right: 5px;
+	height: 15px;
+}
+div.poll-number {
+	text-align: right;
+}
+
+/*	INFO BALLOONS */
+
+/* Credits: Dynamic Drive CSS Library */
+/* URL: http://www.dynamicdrive.com/style/ */
+
+.balloon {
+	position: relative;
+	z-index: 0;
+}
+
+a.balloon {
+	text-decoration: none;
+	border-bottom: #66c;
+	border-width: 0 0 1px 0;
+	border-style: none none dotted none;
+}
+
+a.balloon:hover {
+	background-color: transparent;
+	z-index: 50;
+}
+
+.balloon div {
+	position: absolute;
+	font-size: .9em;
+	background-color: #eee;
+	padding: 5px;
+	left: -1000px;
+	border: 1px solid gray;
+	visibility: hidden;
+	color: black;
+	text-decoration: none;
+	width: 150px;
+}
+
+.balloon div img {
+	float: left;
+	margin: 0 3px 0 0;
+}
+
+.balloon:hover div {
+	visibility: visible;
+	top: 0;
+	left: 75px; /*position where balloon should offset horizontally */
+}
+
+/* ERRORS
+   We have two methods of displaying errors: as their own DIV and as a subset of
+   the messages div, the latter being a replacement for the former.
+*/
+div.error, div.errors {
+	background-color: #f00;
+	padding: .5em;
+	color: #fff;
+}
+div.error ul {
+	list-style: disc;
+}
+div#messages {
+	width: 300px;
+	padding: 1em;
+}
+div#messages.updated {
+	background-color: #ff0;
+}
+div#messages.errors {
+	background-color: #c00;
+}
+
+/*  MISC */
+div.full-text del {
+	color: #c00;
+}
+div.full-text ins {
+	background-color: #ff0;
+	color: #000;
+	font-style: normal;
+	text-decoration: none;
+}
+
+img.help-icon {
+	width: 14px;
+	height: 14px;
+	float: right;
+	margin-top: 6px;
+	margin-right: 5px;
+}
+
+#comments p {
+	line-height: 1.2em;
+}
+#comments cite {
+	font-style: normal;
+	font-weight: bold;
+}
+#comments blockquote {
+	margin: 1em;
+	font-size: .9em;
+	border-left: 1px dotted #666;
+	color: #666;
+	padding-left: 1em;
+}
+
+#registration fieldset {
+	margin-top: 1em;
+	background-color: #eee;
+	padding: 1em 2em;
+	width: 75%
+}
+	#registration fieldset legend {
+		font-weight: bold;
+	}
+	#registration fieldset table {
+		margin: 0 auto;
+	}
+		#registration th {
+			text-align: right;
+			font-weight: normal;
+			vertical-align: top;
+			padding-right: .25em;
+		}
+		
+		#registration td small {
+			font-size: .9em;
+			color: #666;
+		}
+
+/* PHOTOSYNTHESIS PUBLIC PORTFOLIOS */
+div#public-portfolio div.bill {
+	margin: 1em 0 1.5em 0;
+	border-bottom: 1px dotted #000;
+}
+	div#public-portfolio div.notes {
+		background-color: #eee;
+		padding: .5em;
+	}
+	
+/* Subsection Tabs
+--------------------*/
+ul.tabs {
+	list-style: none;
+	margin: 0 1em 0 0;
+	padding: 0;
+	clear: both;
+	border-bottom: 1px solid #ccc;
+	height: 20px;
+	clear: both;
+}
+
+ul.tabs li {
+	float: left;
+	margin-right: 7px;
+	text-align: center;
+	font-weight: bold;
+}
+
+ul.tabs li a {
+	display: block;
+	height: 20px;
+	padding: 0 6px 0 6px;
+	background-color: transparent;
+	color: #333;
+	width: 60px;
+	text-decoration: none;
+}
+
+ul.tabs li a:hover {
+	color: #666;
+}
+
+ul.tabs li a.active {
+	background-color: #ddd;
+}
+
+ul.register_tabs {
+	border-bottom:none;
+}
+
+ul.register_tabs li a.active {
+	background-color: #6d7a81;
+	color: #fff;
+}
+
+div.docket {
+	width: 300px;
+	padding: .5em;
+	background-color: #eee;
+	border: 1px solid #000;
+}
+	div.docket h2 {
+		margin-top: 0;
+		font-size: 1.2em;
+		font-weight: bold;
+	}
+	
+div.video {
+	background-color: #eee;
+	margin: auto 0;
+	width: 420px;
+	text-align: center;
+}
+	div.video h1 {
+		background: #6c757a url(/images/templates/default/corner.gif) no-repeat top right;
+		color: #fff;
+		padding: 7px 0 7px 5px;
+		font: bold 1em Tahoma, Arial, Sans-Serif;
+		margin: 0 0 3px 0;
+		text-align: left;
+	}
+	div.video embed#VideoPlayback{
+		margin: 5px auto;
+	}
+
+/* The bill progress checkboxes */
+div.checkbox {
+	font-size: 12px;
+	font-weight: bold;
+}
+div.failed {
+	color: #900;
+	font-size: 20px;
+	font-weight: normal;
+}
+div.passed {
+	color: #090;
+	font-size: 19px;
+	font-weight: normal;
+}
+
+/* The links for Delicious, StumbleUpon, etc. */
+div#share {
+	margin: 4px;
+	height: 16px;
+	float: right;
+}
+	div#share img {
+		margin: 0 1px;
+		padding: 0;
+		border: 0;
+	}

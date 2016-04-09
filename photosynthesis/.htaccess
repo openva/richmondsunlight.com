@@ -1,0 +1,19 @@
+RewriteEngine On
+
+RewriteRule ^delete/([a-z0-9]{5})-([0-9]+)?/?$ process-actions.php?delete-bill=$1-$2 [QSA]
+RewriteRule ^add/([A-Za-z0-9]+)?/?$ process-actions.php?add-bill=$1 [QSA]
+RewriteRule ^edit/([a-z0-9]{5})-([0-9]+)?/?$ edit-bill.php?hash=$1&bill=$2 [QSA]
+RewriteRule ^portfolios?/?$ list-portfolios.php [QSA]
+RewriteRule ^portfolios/([a-z0-9]{5})?/?$ portfolio.php?hash=$1 [QSA]
+RewriteRule ^portfolios/add/([A-Za-z0-9]+)?/?$ process-actions.php?add-portfolio=$1 [QSA]
+RewriteRule ^portfolios/delete/([a-z0-9]{5})?/?$ process-actions.php?delete-portfolio=$1 [QSA]
+RewriteRule ^portfolios/edit/([a-z0-9]{5})?/?$ edit-portfolio.php?hash=$1 [QSA]
+RewriteRule ^notes/([a-z0-9]{5})-([0-9]+)?/?$ bill-notes.php?hash=$1&id=$2 [QSA]
+RewriteRule ^notes-ajax/([a-z0-9]{5})-([0-9]+)?/?$ ajax-bill-notes.php?hash=$1&id=$2 [QSA]
+RewriteRule ^preferences?/?$ preferences.php [QSA]
+RewriteRule ^([a-z0-9]{5})/$ public-portfolio.php?hash=$1 [QSA]
+RewriteRule ^unsubscribe/([a-z0-9]{8})/$ unsubscribe.php?hash=$1 [QSA]
+RewriteRule ^pro?/?$ pro.php [QSA]
+
+# RSS
+RewriteRule ^rss/portfolio/([a-z0-9]{5})?/?$ rss/portfolio.php?hash=$1 [QSA]

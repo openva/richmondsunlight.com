@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName "Admin Section"
+AuthUserFile /vol/www/richmondsunlight.com/html/admin/.users
+require valid-user

@@ -1,0 +1,11 @@
+RewriteEngine On
+
+RewriteRule ^bysection/(.*).json$ code-section.php?section=$1 [QSA]
+RewriteRule ^section-video/(.*).json$ code-section-video.php?section=$1 [QSA]
+RewriteRule ^photosynthesis/([a-z0-9]{5}).json$ photosynthesis.php?hash=$1 [QSA]
+RewriteRule ^bills/([0-9]{4}).json$ bills.php?year=$1 [QSA]
+RewriteRule ^bill/([0-9]{4})/([A-Za-z0-9]+).json$ bill.php?year=$1&bill=$2 [QSA]
+RewriteRule ^legislator/([a-z]+).json$ legislator.php?shortname=$1 [QSA]
+
+# By default, API data expires in just one hour.
+#Header set Cache-Control "max-age=360, public"

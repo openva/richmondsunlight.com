@@ -1,0 +1,222 @@
+
+/* Suppress display of the right column */
+div.right {
+	display: none !important;
+}
+
+/* Suppress display of a third of the top menu */
+div.search_field {
+	display: none !important;
+}
+
+div.left {
+	width: 100%;
+}
+div.portfolio {
+	background-color: #eee;
+	border: 1px solid #ccc;
+	padding: 0;
+	margin: 0 0 2em 0;
+	clear: both;
+}
+	div.portfolio div.name {
+		padding: 1px 0 1px 3px;
+		background-color: #aaa;
+	}
+		div.portfolio div.name h1 {
+			display: inline;
+			font-size: 1.3em;
+			background: transparent;
+		}
+			div.portfolio div.name h1 a {
+				color: #000;
+			}		
+				div.portfolio div.name h1 a:hover {
+					color: #0095eb;
+				}
+		div.portfolio div.name div.type {
+			margin-left: .5em;
+			display: inline;
+			font-size: .75em;
+			text-transform: uppercase;
+		}
+		div.portfolio div.name div.rss {
+			display: inline;
+			float: right;
+			margin-right: 3px;
+			vertical-align: bottom;
+		}
+			div.portfolio div.name div.rss img {
+				width: 14px;
+				height: 14px;
+			}
+	div.portfolio div.modify {
+		width: 100%;
+		font-size: .75em;
+		text-align: right;
+		text-transform: uppercase;
+		vertical-align: bottom;
+		background-color: #ccc;
+	}
+		div.portfolio div.modify a {
+			text-decoration: none;
+			color: #000;
+		}
+		div.portfolio div.modify a:hover {
+			background-color: #ccc;
+		}
+	div.portfolio table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+		div.portfolio table thead {
+			background-color: #ccc;
+			font-weight: normal;
+		}
+			div.portfolio table thead tr th#bill, div.portfolio table thead tr th#catch-line,
+			div.portfolio table thead tr th#last-action {
+				border-right: 1px solid #666;
+			}
+			div.portfolio table thead tr th#catch-line {
+				width: 400px;
+			}
+		div.portfolio table tr.notes td {
+			font-family: Verdana, 'Lucida Sans', Helvetica, Arial;
+			font-size: .85em;
+			background-color: #eef;
+		}
+		div.portfolio table tr {
+			border-bottom: 1px solid #ccc;
+		}
+			div.portfolio table tr.changed {
+				background-color: #ffa;
+			}
+			div.portfolio table tbody tr:hover {
+				background-color: #fff;
+			}
+			div.portfolio table tr td {
+				padding: 0 3px;
+				vertical-align: top;
+				border-right: 1px solid #999;
+			}		
+				div.portfolio table tr td textarea {
+					width: 100%;
+					height: 3em;
+				}
+			div.portfolio table tr td.options {
+				text-align: center;
+			}
+				div.portfolio table tr td.options a {
+					color: #000;
+					text-decoration: none;
+				}
+		div.portfolio div.no-bills {
+			width: 100%;
+			clear: left;
+			text-align: center;
+			margin: 2em 0 1em 0;
+		}
+div#create-portfolio {
+	float: right;
+	clear: both;
+}
+div#create-bill {
+	float: right;
+	clear: both;
+}
+
+/* Form Layout */
+table.form {
+	width: 300px;
+}
+	table.form tr {
+		border: 0;
+	}
+	table.form * label {
+		display: block;
+		margin-top: 10px;
+	}
+	table.form * input[type=text] {
+		font-family: Verdana, 'Lucida Sans', Helvetica, Arial;
+		font-size: 1.1em;
+		font-weight: bold;
+		width: 100%;
+	}
+	table.form * input#submit {
+		margin-top: 10px;
+	}
+	table.form * textarea {
+		font-family: Verdana, 'Lucida Sans', Helvetica, Arial;
+		width: 100%;
+		height: .25em 5em;
+		color: #000;
+	}
+	table.form * fieldset#notify {
+		border: 0;
+		padding: 0;
+	}
+		table.form * fieldset#notify input {
+			float: left;
+			clear: both;
+		}
+	table.form * fieldset#public {
+		border: 0;
+		padding: 0;
+	}
+		table.form * fieldset#public input {
+			float: left;
+			clear: both;
+		}
+
+div#messages {
+	width: 300px;
+	padding: 1em;
+}
+div#messages.updated {
+	background-color: #ff0;
+}
+div#messages.error {
+	background-color: #c00;
+}
+
+/* Portfolio Creation Forms */
+fieldset#create-smart-portfolio, fieldset#create-portfolio {
+	width: 300px;
+	border: 0;
+	background-color: #eee;
+}
+	fieldset#create-portfolio table {
+		width: 100%;
+	}
+	fieldset#create-smart-portfolio legend, fieldset#create-portfolio legend {
+		font-weight: bold;
+	}
+	fieldset#create-smart-portfolio select {
+		width: 100%;
+	}
+	fieldset#create-smart-portfolio #submit, fieldset#create-portfolio #submit {
+		float: right;
+	}
+	fieldset#create-smart-portfolio input[type=text], fieldset#create-portfolio input[type=text]{
+		width: 90%;
+	}
+	fieldset#create-smart-portfolio textarea#notes, fieldset#create-portfolio textarea#notes {
+		width: 90%;
+		height: 4em;
+	}
+
+div#add-bill {
+	float: right;
+}
+
+/* Portfolio Creation Tabs */
+div#create-portfolios {
+	width: 300px;
+	float: right;
+}
+	div#create-portfolios h1 {
+		font-size: 1.3em;
+	}
+ul.tabs li a {
+	width: 100px;
+}

@@ -1,0 +1,39 @@
+body {
+	font-family: Helvetica, Arial, sans-serif;
+	margin: 0;
+	padding: 0;
+	background-image: none;
+	background-color: #243a51;
+	-webkit-text-size-adjust: 200%;
+}
+
+body p {
+	line-height: normal;
+}
+
+div#page {
+	width: 100%;
+}
+div#page-wrap {
+	width: 100%;
+}
+div#content {
+	background-color: white;
+	width: 100%;
+}
+
+div#sidebar {
+	clear: left;
+	width: 100%;
+	font-size: 20px;
+}	
+
+#date-status, p.quote, #bri, div#watch, div#bill-progress, #facebook {
+	display: none;
+}
+
+textarea {
+	clear: left;
+	display: block;
+	width: 100%;
+}

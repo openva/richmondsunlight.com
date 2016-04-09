@@ -1,0 +1,17 @@
+.htpasswd
+.users
+vendor/
+wp-config.php
+settings.inc.php
+downloads/*
+*.srt
+video/metadata.csv
+admin/memcache.php
+
+# Wordpress
+blog/*
+!blog/wp-content/
+blog/wp-content/*
+!blog/wp-content/mu-plugins/
+!blog/wp-content/plugins/
+!blog/wp-content/themes/

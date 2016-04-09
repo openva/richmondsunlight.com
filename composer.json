@@ -1,0 +1,8 @@
+{
+    "require": {
+        "elasticsearch/elasticsearch": "~0.4"
+    },
+    "autoload": {
+    	"classmap": ["includes/"]
+    }
+}

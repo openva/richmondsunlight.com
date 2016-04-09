@@ -1,0 +1,85 @@
+User-agent: *
+Disallow: /bills/tags
+Disallow: /search
+Disallow: /charts
+Disallow: /process-tags.php
+Disallow: /process-comments.php
+Disallow: /process-polls.php
+Disallow: /process-pingbacks.php
+Disallow: /downloads/bills/
+
+User-agent: Speedy
+Disallow: /
+
+User-agent: Twiceler
+Disallow: /
+
+User-agent: BecomeBot 
+Disallow: /
+
+User-agent: dotbot
+Disallow: /
+
+User-agent: Sproose
+Disallow: /
+
+User-agent: WebAlta Crawler
+Disallow: /
+
+User-agent: SummizeBot
+Disallow: /
+
+User-agent: wwwster
+Disallow: /
+
+User-agent: Gigabot
+Disallow: /
+
+User-agent: psbot
+Disallow: /
+
+User-agent: BlogPulseLive
+Disallow: /
+
+User-agent: Sphere Scout
+Disallow: /
+
+User-agent: IIITBOT
+Disallow: /
+
+User-agent: BDFetch
+Disallow: /
+
+User-agent: Snapbot
+Disallow: /
+
+User-agent: dotbot 
+Disallow: /
+
+User-agent: Yandex
+Disallow: /
+
+User-agent: Accelobot
+Disallow: /
+
+User-agent: ichiro
+Disallow: /
+
+User-agent: Exabot
+Disallow: /
+
+User-agent: NG
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: Baiduspider
+Disallow: /
+
+User-agent: msnbot 
+Crawl-delay: 1
+
+User-agent: bingbot 
+Crawl-delay: 1
+

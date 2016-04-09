@@ -1,0 +1,660 @@
+/*
+Colors:
+	background: 243a51
+	status (red): 790806
+	sidebar (cream): f4eee5
+	sidebar title (dark cream); dccbaf
+	navbar (dark blue): 234053
+*/
+
+/* Main */
+body {
+	font-family: Verdana, Arial, sans-serif;
+	font-size: medium;
+	text-align: center;
+	color: #333;
+	background: #243a51 url('/images/templates/new/background.png') no-repeat top center;
+	margin: 0 0.4em 0 0.4em;
+}
+
+a { text-decoration: underline; font-weight: bold; }
+	a:link { color: #c6a952; }
+	a:hover { color: #c6a952; }
+	a:visited { color: #c6a952; }
+
+h1 {
+	font: 200% Georgia, Times, serif;
+	padding-bottom: 0.667em;
+}
+h2 {
+	font: 150% Georgia, Times, serif;
+	padding-bottom: 0;
+	margin-top: 1em;
+}
+h3 {
+	font: 125% Georgia, Times, serif;
+	padding-bottom: 0.667em;
+	margin-top: 1em;
+	margin-bottom: .25em;
+}
+h4 {
+	font: 110% Georgia, Times, serif;
+	padding-bottom: 0;
+	margin-top: 1em;
+	margin-bottom: .25em;
+}
+	h1 a, h2 a, h3 a, h4 a {
+		text-decoration: none;
+		color: #000 !important;
+	}
+		h1 a:hover, h2 a:hover, h3 a:hover {
+			text-decoration: underline
+			color: #c6a952;
+		}
+
+
+small {
+	font-size: .85em;
+}
+strong {
+	font-weight: bold;
+}
+em {
+	font-style: italic;
+}
+code {
+	font-family: Courier, 'Courier New';
+}
+
+/* The default look for tables. */
+table {
+	border-collapse: collapse;
+}
+	table caption {
+		background-color: #f4eee5;
+		font: 150% Georgia, Times, serif;
+		padding: .25em .5em;
+	}
+	table thead {
+		background-color: #dccbaf;
+	}
+		table > thead > tr > th {
+			text-align: left;
+			font-weight: bold;
+			padding: 2px 4px;
+		}
+			table > thead > tr > th > a {
+				text-decoration: none;
+				color: #000 !important;
+			}
+	table > tbody > tr
+	{
+		background-color: #f4eee5;
+	}
+	table > tbody > tr > td {
+		border-bottom: 1px solid #ccc;
+		padding: 2px 4px;
+		line-height: 1.5em;
+	}
+	table > tbody > tr > td + td {
+		border-left: 1px solid #ccc;
+	}
+
+/* Unordered lists. */
+div#content ul {
+	list-style-type: disc;
+	padding-left: 2em;
+	line-height: 1.3em;
+}
+#content ul + p {
+	margin-top: 1em;
+}
+
+#page-wrap {
+	font-size: 75%; /* ~12px */
+	line-height: 1.666em;
+	width: 66em;
+	margin: 0 auto;
+	text-align: center;
+	background: rgba(0,0,0,0.1);
+}
+
+#page {
+	margin: 0 auto;
+	text-align: left;
+	width: 65.167em;
+	background: white;
+	border-left: 2px solid #333333;
+	border-right: 2px solid #333333;
+}
+
+#content {
+	clear: both;
+}
+
+#header {
+	color: black;
+}
+
+	#header div, #header ul {
+		padding: 0 0.8333em;
+	}
+	
+	#header #logo {
+		float: left;
+	}
+	
+	#header #from-and-search {
+		float: right;
+		text-align: right;
+		margin-top: 0.667em;
+	}
+	
+	#header #recommendations {
+		width: 320px;
+		height: 45px;
+		line-height: 1.3em;
+	}
+	
+	#header label img {
+		vertical-align: -20%;
+		margin-right: -0.333em;
+		width: 4.667em;
+	}
+	
+	#header #search-box {
+		width: 17.5em;
+	}
+	
+	#header #search input[type="image"] {
+		vertical-align: bottom;
+		width: 2.833em;
+	}
+	
+	#header #logo img {
+		width: 274px;
+		height: 88px;
+	}
+	
+	#header #date-status {
+		color: white;
+		clear: both;
+		padding: 0 1.667em;
+		font-size: 83.333%;
+		background: #790806 url('/images/templates/new/date-status-background.png') repeat-x;
+		height: 2.3em;
+		line-height: 2.3em;
+	}
+	div#header div#date-status div#date {
+		float: left;
+	}
+	div#header div#date-status div#status {
+		float: left;
+	}
+	div#header div#date-status div#account {
+		float: right;
+		margin-right: 5px;
+	}
+		div#header div#date-status div#account a {
+			color: white;
+			text-decoration: none;
+		}
+	
+	#header strong {
+		font-weight: bold;
+		padding-right: 0.667em;
+	}
+
+#nav {
+	clear: both;
+	overflow: hidden;
+	height: 3.167em;
+	line-height: 3.167em;
+}
+
+/* selected tab */
+#body-home #t-home,
+#body-bills #t-bills,
+#body-legislators #t-legislators,
+#body-committees #t-committees,
+#body-statistics #t-statistics,
+#body-photosynthesis #t-photosynthesis,
+#body-blog #t-blog {
+	background: #406e91 url('/images/templates/new/tab-hl-background.png') repeat-x;
+	margin-top: 0.2em;
+	line-height: 2.91em;
+}
+
+#content {
+	padding: 1em 1.667em;
+	width: 41.667em;
+	float: left;
+}
+
+	/* For dividing the page into left and right columns. */
+	div#content div.left_side {
+		width: 45%;
+		float: left;
+		margin-right: 10%;
+	}
+	div#content div.right_side {
+		width: 44%;
+		float: right;
+	}
+
+#sidebar {
+	background: #f4eee5;
+	margin-left: 45em;
+}
+	#sidebar h3 {
+		font-family: Verdana, 'Lucida Sans', Arial, Helvetica, 'sans serif';
+		font-weight: bold;
+		font-size: 100%;
+		background: #dccbaf;
+		padding: 0.333em 0.833em;
+		margin-bottom: 0.5em;
+	}
+	#sidebar ul.tags {
+		line-height: 1.3em;
+	}
+	#sidebar div.box {
+		padding: .5em;
+		font-size: .9em;
+		line-height: 1.5em;
+	}	
+		#sidebar div.box p {
+			padding: 0 0.909em;
+			margin-bottom: .5em;
+		}
+	#sidebar ul, #sidebar ol {
+		margin-bottom: 0;
+	}
+		
+#footer {
+	clear: both;
+	font-size: 85%;
+	padding: 1em 0 0 2.5em;
+	margin-top: 2em;
+	color: #333;
+	text-align: center;
+	background-color: #f4eee5;
+	border-top: 1px solid #dccbaf;
+}
+	#footer p.quote {
+		font-family: Georgia;
+		font-size: 1.75em;
+		color: #666;
+		font-style: italic;
+	}
+
+/* Repeated elements */
+#page p {
+	padding-bottom: 1em;
+}
+
+#house-bill-count {
+	margin-top: 1em;
+	width: 213px;
+	height: 49px;
+	background-image: url('/images/templates/new/house-bill-count.jpg');
+	background-repeat: no-repeat;
+}
+
+#senate-bill-count {
+	margin-top: 1em;
+	width: 213px;
+	height: 49px;
+	background-image: url('/images/templates/new/senate-bill-count.jpg');
+	background-repeat: no-repeat;
+}
+
+/* The bill count */
+.stat-number {
+	font: bold 240% "Georgia", serif;
+	color: #333333;
+	position: absolute;
+	margin-top: 0.4em;
+	margin-left: 4.25em;
+}
+
+/* Page specific elements */
+#sidebar div.stats img {
+	width: 19.364em;
+}
+
+/* Clear fix elements */
+#page:after, #column:after {
+	content: ".";
+	display: block;
+	height: 0;
+	clear: both;
+	visibility: hidden;
+}
+
+#page:after, 
+#column:after {
+	display: inline-block;
+}
+
+/* Hides from IE-mac \*/
+* html #page,
+* html #column {height: 1%;}
+#page, 
+#column {
+	display: block;
+}
+/* End hide from IE-mac */
+
+	
+/* Tables using sortable.js */
+table.sortable span.sortarrow {
+		color: black;
+		text-decoration: none;
+}
+
+/* Bill Metadata */
+#bill-metadata h2 {
+	margin: 0;	
+}
+
+/* Bill Progress Table */
+#bill-progress {
+	width: 125px;
+	float: right;
+	margin: 0 0 1em 1em;
+	font-size: .85em;
+}
+	#bill-progress h2 {
+		font: bold 1em Verdana, Arial, Helvetica, 'sans serif';
+		padding: 3px 0 3px 5px;
+		font-size: 1.1em;
+		background-color: #dccbaf;
+	}
+/* The bill's ultimate outcome */
+.bill-outcome {
+	font-size: 1.5em;
+}
+	div.bill-outcome.failed {
+		color: #f00;
+	}
+	div.bill-outcome.passed {
+		color: #0c0;
+	}
+/* News about the bill */
+body#body-bills div#news h3 {
+	margin: .5em 0 0 0;
+	padding: 0;
+}
+	body#body-bills div#news h3 a {
+		font-weight: normal;
+	}
+
+#comments textarea {
+	width: 95%;
+}
+
+/* Tab styles, expanding on and overriding default tab styles. */
+ul.tabs {
+	list-style-type: none !important;
+	padding: 0 !important;
+}
+ul.tabs li {
+	background-color: #dccbaf;
+	margin-right: 3px !important;
+	border: 1px solid #999;
+	border-bottom: 0;
+}
+	ul.tabs li a {
+		color: #666;
+	}
+		ul.tabs li a.active {
+			background-color: #f4eee5 !important;
+			border-bottom: 0 !important;
+		}
+		ul.tabs li a:hover {
+			background-color: #f4eee5;
+		}
+
+/* A legislator's biographical section */
+div.tabs > div {
+	background-color: #f4eee5;
+}
+div#bio {
+	clear: left;
+}
+	div#bio table {
+		border-top: 0;
+	}
+	div#bio img#legislator {
+		border: 2px solid #dccbaf;
+	}
+	div#bio td#activity {
+		padding: 0;
+	}
+		div#bio td#activity img {
+			width: 400px;
+			height: 70px;
+		}
+
+/* The Blue Ridge Internetworks button */
+img#bri {
+	background-color: white;
+	padding: 3px;
+	border: 1px solid black;
+	width: 100px;
+	height: 35px;
+}
+
+/* The floating promo box for live video streams. */
+div#watch {
+	z-index: 100;
+	position: absolute;
+	top: 10px;
+	right: 10px;
+	margin: 0 auto;
+	padding: .5em;
+	width: 200px;
+	border: 5px solid #790806;
+	background-color: #f4eee5;
+	color: #000;
+	cursor: move;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: small;
+}
+	div#watch h1 {
+		font-size: 1.2em;
+		line-height: 1.3em;
+	}
+	div#watch ul {
+		margin-top: 1em;
+	}
+		div#watch ul li + li {
+			margin-top: .5em;
+		}
+	div#watch div#close {
+		text-align: right;
+		margin: .75em -.5em -.5em 0;
+		font-size: .8em;
+	}
+		div#watch div#close a {
+			color: #000;
+			text-decoration: none;
+			font-weight: normal;
+		}
+
+/* The registration form */
+#registration fieldset {
+	background-color: #f4eee5;
+}
+
+/* The video player. */
+#player {
+	display:block;
+	width:400px;
+	height:300px;
+	background-repeat: no-repeat;
+	background-size: cover, 75px 75px;
+	-webkit-background-size: cover, 75px 75px;
+	background-position: left top, center middle;
+}
+
+/* The pop-up balloons */
+a.balloon div {
+	background-color: #dccbaf;
+	border-color: #790806;
+}
+
+/* Bill updates on the homepage */
+#body-home #updates {
+	height: 25em;
+	overflow: scroll;
+}
+
+/* The blog on the homepage */
+#body-home #blog h2 {
+	margin-bottom: 1em;
+}
+#body-home #blog div.date {
+	margin: 0;
+	padding: 0;
+}
+#body-home div#blog h3 {
+	margin: 0;
+	padding: 0;
+}
+	#body-home div#blog div.entry + div.entry {
+		margin-top: 2em;
+	}
+
+/* The search page. */
+#body-search .results h2 {
+	color: #c6a952;
+	font-size: 125%;
+}
+#body-search .excerpt {
+	padding-bottom: 0;
+}
+	#body-search .excerpt strong {
+		font-weight: normal;
+		background-color: yellow;
+	}
+#body-search .results url {
+	color: #999;
+	font-size: .85em;
+	margin-top: 0;
+}
+#body-search .paging ul {
+	list-style-type: none;
+}
+	#body-search .paging li {
+		text-align: left;
+		float: left;
+		list-style: none;
+	}
+		#body-search .paging li a {
+			background-color: #dccbaf;
+			color: #000;
+			font-weight: normal;
+			display: block;
+			width: 20px;
+			height: 16px;
+			text-align: center;
+			vertical-align: middle;
+			margin: 5px;
+			border: 1px solid #000;
+			text-decoration: none;
+		}
+			#body-search .paging li a.current {
+				border: 1px solid transparent;
+				margin: 5px;
+				background-color: transparent;
+			}
+
+/* The blog */
+#content > .post {
+	padding-right: 2em;
+}
+#commentform {
+	max-width: 40em;
+}
+
+/* Campaign finance */
+#body-finance dl {
+  width: 90%;
+  overflow: hidden;
+}
+	#body-finance dt {
+	  float:left;
+	  width:140px;
+	  text-align: right;
+	  clear:both; 
+	  padding:3px 20px 4px 0;
+	  margin-right:-1px;
+	  position:relative;
+	}
+	#body-finance dd {
+	  float:left;
+	  width:419px;
+	  padding:3px 0 0 20px;
+	  margin-left:0;
+	}
+
+
+/* Responsive layout */
+@media screen and (min-width: 1100px) {
+	#page {
+		width: 86.947em;
+	}
+	#page-wrap {
+		width: 87.78em;
+	}
+	#content {
+		width: 62em;
+	}
+	#sidebar {
+		margin-left: 66.78em;
+	}
+}
+@media only screen and (max-device-width: 480px), only screen and (min-device-width: 640px) and (max-device-width: 1136px) and (-webkit-min-device-pixel-ratio: 2) {
+	body {
+		background-color: #243a51;
+		background-image: none;
+	}
+	#page-wrap {
+		width: 100%
+	}
+	#page {
+		width: 99%;
+	}
+	#content {
+		padding: 0;
+		width: 100%;
+		font-size: 133.33%; /* ~16px */
+		line-height: 1.666em;
+		overflow: hidden;
+
+	}
+	#body-bills h1 {
+		font-size: 150%;
+	}
+	#body-bills h2 {
+		font-size: 125%;
+	}
+	#recommendations, #status, #date {
+		display: none;
+	}
+	#sidebar {
+		display: none;
+	}
+	#date-status, p.quote, #bri, #watch, #bill-progress, #facebook {
+		display: none;
+	}
+
+	#comments textarea {
+		clear: left;
+		display: block;
+		width: 100%;
+		font-size: 100%;
+	}
+
+}
