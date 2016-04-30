@@ -64,6 +64,10 @@ define('OPENSTATES_KEY', '');
 define('OPENVA_KEY', '');
 define('VA_DECODED_KEY', '');
 
+# Mapbox API access ID and token
+define('MAPBOX_ID', '');
+define('MAPBOX_TOKEN', '');
+
 # Pushover API Key
 define('PUSHOVER_KEY', '');
 
