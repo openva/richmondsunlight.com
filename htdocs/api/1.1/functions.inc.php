@@ -3,7 +3,7 @@
 # As of this writing, the server is running PHP 5.1.8. So here's a function to substitute for
 # json_encode, which wasn't added until 5.2, courtesy of boukeversteegh@gmail.com, found at
 # http://www.php.net/manual/en/function.json-encode.php#100835.
-if (!function_exists(json_encode))
+if (!function_exists('json_encode'))
 {
 	function json_encode( $data ) {            
 		if( is_array($data) || is_object($data) ) { 
