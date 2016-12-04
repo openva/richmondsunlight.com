@@ -369,9 +369,10 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 				<a href="https://waldo.jaquith.org/">Waldo Jaquith</a>. Design by <a
 				href="http://www.meticulous.com/">Meticulous Design Group</a>. All data is released
 				under a <a href="https://creativecommons.org/publicdomain/zero/1.0/">Creative
-				Commons Zero license</a>. Everything else is published under a
+				Commons Zero license</a>. All creative content published under a
 				<a href="https://creativecommons.org/licenses/by-sa/3.0/us/">CC BY-SA 3.0 US</a>
-				license.</p>
+				license. <a href="https://github.com/openva/richmondsunlight.com">All source code is
+				available on GitHub</a>—pull requests welcome!—published under the MIT License.</p>
 
 				<p
 				class="quote">“Sunlight is said to be the best of disinfectants.” —Justice Louis
