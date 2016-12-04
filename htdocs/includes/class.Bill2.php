@@ -560,14 +560,14 @@ class Bill2
 		/*
 		 * Figure out what the text of the law is currently.
 		 */
-		$before = preg_replace('/<ins>(.+)<\/ins>/sU', '\\2', $subsection);
+		$before = preg_replace('/<ins>(.+)<\/ins>/sU', '\\2', $this->text);
 		$before = str_replace('<s>', '', $before);
 		$before = str_replace('</s>', '', $before);
 		
 		/*
 		 * Figure out what the text of the law would be under this bill.
 		 */
-		$after = preg_replace('/<s>(.+)<\/s>/sU', '\\2', $subsection);
+		$after = preg_replace('/<s>(.+)<\/s>/sU', '\\2', $this->text);
 		$after = str_replace('<ins>', '', $after);
 		$after = str_replace('</ins>', '', $after);
 
