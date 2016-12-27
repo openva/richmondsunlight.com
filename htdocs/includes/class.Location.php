@@ -55,7 +55,7 @@ class Location
 	{
 		if (!isset($this->latitude) || !isset($this->longitude))
 		{
-			return false;
+			return FALSE;
 		}
 		
 		# Assemble our URL.
@@ -66,9 +66,9 @@ class Location
 		$district = get_content($url);
 		
 		# If we couldn't retrieve that content, then bail.
-		if ($district === false)
+		if ($district === FALSE)
 		{
-			return false;
+			return FALSE;
 		}
 		
 		# Turn the XML into an array.
@@ -77,7 +77,7 @@ class Location
 		# If this isn't an array with two elements (one for each legislator), bail.
 		if (count($district) != 2)
 		{
-			return false;
+			return FALSE;
 		}
 
 		$result = new stdClass();
