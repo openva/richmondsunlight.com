@@ -50,9 +50,9 @@ $browser_title = 'Tracking the Virginia General Assembly';
 $site_section = 'home';
 
 # PAGE CONTENT
-$page_body = '<p>The 2016 Virginia General Assembly session will begin on January 13, 2016, and
-	continue for 60 days. Here you can see <a href="/bills/">the bills that are proposed</a>,
-	voted on, and the few that ultimately become law.</p>';
+$page_body = '<p>The 2017 Virginia General Assembly session will begin on January 11, 2017, and
+	continue for 45 days. Here you can track <a href="/bills/">the bills that are proposed</a>,
+	voted on, and the few that will ultimately become law.</p>';
 
 $sql = 'SELECT COUNT(*) AS count, tags.tag
 		FROM tags
