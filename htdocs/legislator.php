@@ -132,8 +132,9 @@ if ($district_data == FALSE)
 
 	if ($legislator['chamber'] == 'house') $c = 'l';
 	else $c = 'u';
-	$url = 'http://openstates.org/api/v1/districts/boundary/ocd-division/country:us/state:va/sld' . $c . ':' . $legislator['district'] . '/?apikey=' . OPENSTATES_KEY;
+	$url = 'https://openstates.org/api/v1/districts/boundary/ocd-division/country:us/state:va/sld' . $c . ':' . $legislator['district'] . '/?apikey=' . OPENSTATES_KEY;
 	$json = get_content($url);
+
 	if ($json != FALSE)
 	{
 
