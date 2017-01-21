@@ -1,0 +1,15 @@
+@media print {
+	#nav, #header, #footer {
+		display: none !important;
+	}
+	p a[href^="http://"]:after {
+		content: " (" attr(href) ")";
+		font-size: 90%;
+	}
+	p a {
+		word-wrap: break-word;
+	}
+	a {
+		color: #000 !important;
+	}
+}
