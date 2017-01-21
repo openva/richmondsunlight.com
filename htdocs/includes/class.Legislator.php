@@ -57,7 +57,7 @@ class Legislator
 				DATE_FORMAT(representatives.date_started, "%Y") AS year_started,
 				DATE_FORMAT(representatives.date_ended, "%Y") AS year_ended,
 				representatives.party,
-				representatives.bio, representatives.rss_url, representatives.twitter_rss_url,
+				representatives.bio, representatives.rss_url, representatives.twitter_rss_url AS twitter,
 				(DATE_FORMAT(now(), "%Y") - DATE_FORMAT(representatives.birthday, "%Y") -
 				(DATE_FORMAT(now(), "00-%m-%d") < DATE_FORMAT(representatives.birthday, "00-%m-%d")))
 				AS age, representatives.address_district, representatives.address_richmond,
