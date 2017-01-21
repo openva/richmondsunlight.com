@@ -118,7 +118,7 @@ foreach ($video as $name => $option)
 # Store the directory contents as an array.
 $dir = scandir($video['dir']);
 
-# Iterate through every file, although all we're really interested in is the color.txt files.
+# Iterate through every file in the directory.
 foreach ($dir as $file)
 {
 	
@@ -129,12 +129,6 @@ foreach ($dir as $file)
 	$image_number = substr($file, 0, 8);
 	
 	if (substr($file, -4) != '.txt')
-	{
-		continue;
-	}
-		
-	# If this is a holdover from the old system, when colors were calculated, skip it.
-	if (strstr($file, 'color'))
 	{
 		continue;
 	}
