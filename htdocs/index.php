@@ -9,8 +9,8 @@
 ###
 
 # INCLUDES
-include_once('includes/settings.inc.php');
-include_once('includes/functions.inc.php');
+include_once('settings.inc.php');
+include_once('functions.inc.php');
 
 # INITIALIZE SESSION
 session_start();

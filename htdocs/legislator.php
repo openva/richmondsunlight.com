@@ -11,11 +11,11 @@
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('includes/settings.inc.php');
-include_once('includes/functions.inc.php');
-include_once('includes/charts.php');
-include_once('includes/magpierss/rss_fetch.inc');
-include_once('includes/simplepie.inc.php');
+include_once('settings.inc.php');
+include_once('functions.inc.php');
+include_once('charts.php');
+include_once('magpierss/rss_fetch.inc');
+include_once('simplepie.inc.php');
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
