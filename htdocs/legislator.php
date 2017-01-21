@@ -162,7 +162,10 @@ else
 	$district_data = unserialize($district_data);
 }
 
-if ($district_data !== FALSE)
+/*
+ * Double check, since sometimes we're caching bad responses from OpenStates.
+ */
+if ($district_data !== FALSE && isset($district_data->region->center_lat) )
 {
 
 	$html_head .= ' <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css">
