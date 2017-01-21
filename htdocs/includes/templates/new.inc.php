@@ -476,7 +476,7 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 					content: {
 						text: 'Loading .&thinsp;.&thinsp;.',
 						ajax: {
-							url: 'https://www.richmondsunlight.com/api/1.0/legislator/'+legislator+'.json',
+							url: 'https://www.richmondsunlight.com/api/1.1/legislator/'+legislator+'.json',
 							type: 'GET',
 							dataType: 'jsonp',
 							success: function(data, status) {
