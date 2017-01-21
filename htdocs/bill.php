@@ -454,13 +454,39 @@ else
 # Allow people to add tags.
 $page_sidebar .= '
 			<form method="post" action="/process-tags.php">
-				<input type="text" id="tags" name="tags[tags]" size="25" maxlength="'.$maxlength.'" />
+				<div class="ui-widget">
+					<input type="text" id="tags" name="tags[tags]" size="25" maxlength="'.$maxlength.'" />
+				</div>
 				<input type="hidden" name="tags[bill_id]" value="'.$bill['id'].'" />
 				<input type="hidden" name="tags[return_to]" value="'.$_SERVER['REQUEST_URI'].'" />
 				<input type="submit" name="submit" value="Add" />
 				<p>Separate each tag with a space: <em>tax highway vdot</em>. Multiple word tags
 				must be enclosed within quotes: <em>“capital murder”</em>.</p>
 			</form>
+			<script>
+				$( function() {
+				  $( "#tags" ).autocomplete({
+				    source: "/api/1.1/tag-suggest/",
+				    minLength: 2
+				  });
+				} );
+			</script>
+			<style>
+				.ui-autocomplete-loading {
+				    background: white url("/images/wait.gif") right center no-repeat;
+				}
+				.ui-autocomplete {
+					background-color: white;
+					font-size: 11px;
+					font-weight: normal;
+				}
+				.ui-autocomplete li {
+					text-align: left;
+				}
+				.ui-autocomplete a {
+					font-weight: normal;
+				}
+			</style>
 		</div>';
 		
 # Provide options to view the full bill text, etc.	
