@@ -6,12 +6,6 @@
 	# PURPOSE
 	# A straight-up 404 page.
 	# 
-	# NOTES
-	# None.
-	# 
-	# TODO
-	# None.
-	# 
 	###
 	
 	# INCLUDES

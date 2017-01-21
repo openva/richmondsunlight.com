@@ -6,12 +6,6 @@
 # PURPOSE
 # Edit account information.
 #
-# NOTES
-# None.
-#
-# TODO
-# None.
-#
 ###
 
 # INCLUDES
