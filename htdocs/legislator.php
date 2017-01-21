@@ -448,6 +448,12 @@ if (!empty($legislator['website']))
 		<dt>Website</dt>
 		<dd><a href="'.$legislator['website'].'">'.$legislator['website_name'].'</a></dd>';
 }
+if ( !empty($legislator['twitter']) && !filter_var($legislator['twitter_rss_url'], FILTER_VALIDATE_URL) === TRUE )
+{
+	$page_body .= '
+		<dt>Twitter</dt>
+		<dd><a href="https://twitter.com/' . $legislator['twitter'] . '">@' . $legislator['twitter'] . '</a></dd>';
+}
 
 if (!empty($legislator['activity']) && IN_SESSION == 'Y')
 {
