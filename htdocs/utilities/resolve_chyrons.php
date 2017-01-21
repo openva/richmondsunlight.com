@@ -25,12 +25,12 @@ function insert_match($linked_id, $chyron_id)
 		return false;
 	}
 	$sql = 'UPDATE video_index
-			SET linked_id='.$linked_id.'
-			WHERE id='.$chyron_id;
+			SET linked_id=' . $linked_id . '
+			WHERE id=' . $chyron_id;
 	$result = mysql_query($sql);
 	if (!$result)
 	{
-		echo '<p style="color: #f00;">Insert of chyron ID '.$chyron_id.' failed.</p>';
+		echo '<p style="color: #f00;">Insert of chyron ID ' . $chyron_id . ' failed.</p>';
 		return false;
 	}
 }
@@ -48,7 +48,7 @@ if (isset($_GET['id']))
 			LEFT JOIN files
 				ON video_index.file_id=files.id
 			WHERE video_index.type="bill" AND video_index.linked_id IS NULL
-			AND files.id='.$_GET['id'].'
+			AND files.id=' . $_GET['id'] . '
 			GROUP BY file_id';
 }
 else
@@ -81,7 +81,7 @@ if (mysql_num_rows($result) > 0)
 			FROM bills_status
 			LEFT JOIN bills
 				ON bills_status.bill_id = bills.id
-			WHERE bills_status.date = "'.$video['date'].'"';
+			WHERE bills_status.date = "' . $video['date'] . '"';
 	$result = mysql_query($sql);
 	if (mysql_num_rows($result) == 0)
 	{
