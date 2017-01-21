@@ -180,7 +180,6 @@ if ($district_data !== FALSE)
 				    accessToken: "' . MAPBOX_TOKEN . '"
 				}).addTo(district_map);
 				var district = L.polygon(' . json_encode($district_data->shape[0][0]) . ').addTo(district_map);
-				var marker = L.marker([' . $legislator['longitude'] . ', ' . $legislator['latitude'] . ']).addTo(district_map);
 				district_map.fitBounds(district.getBounds());
 			});
 		</script>';
