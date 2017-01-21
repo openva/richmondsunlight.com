@@ -73,7 +73,7 @@ if ($bill_text->get_terms() === TRUE)
 # Retrieve every version of this bill's text.
 $sql = 'SELECT number, date_introduced, text
 		FROM bills_full_text
-		WHERE bill_id = '.$bill['id'].' AND bills_full_text.text IS NOT NULL
+		WHERE bill_id = ' . $bill['id'] . ' AND bills_full_text.text IS NOT NULL
 		ORDER BY date_introduced DESC';
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
@@ -135,7 +135,7 @@ if (mysql_num_rows($result) > 0)
 }
 
 # PAGE METADATA
-$page_title = strtoupper($bill['number']).': '.$bill['catch_line'];
+$page_title = strtoupper($bill['number']) . ': ' . $bill['catch_line'];
 $site_section = 'bills';
 
 # PAGE SIDEBAR
@@ -143,8 +143,8 @@ $page_sidebar = '
 	<div class="box">
 		<h3>Explanation</h3>
 		<p>For a plain English description of this bill, comments, voting, tagging, etc.,
-		<a href="/bill/'.$bill['year'].'/'.$bill['number'].'/">return to the main page for
-		'.strtoupper($bill['number']).'</a>.</p>
+		<a href="/bill/' . $bill['year'] . '/' . $bill['number'] . '/">return to the main page for
+		' . strtoupper($bill['number']) . '</a>.</p>
 		
 		<p>This is the actual text of the bill—the legislation itself. Generally this is
 		amending existing law, proposing the addition or removal of words from laws that are
@@ -171,7 +171,7 @@ $page_body = '
 # Iterate through to create the tabs.
 foreach ($versions as $version)
 {
-	$page_body .= '<li><a href="#'.$version['number'].'">'.strtoupper($version['number']).'</a></li>';
+	$page_body .= '<li><a href="#' . $version['number'] . '">' . strtoupper($version['number']) . '</a></li>';
 }
 $page_body .= '
 	</ul>';
