@@ -33,7 +33,7 @@ $html_head = '<script src="/js/scriptaculous/control-tabs.js" type="text/javascr
 if (@logged_in() === false)
 {
 	# If the user isn't logged in, have the user create an account (or log in).
-	header('Location: http://www.richmondsunlight.com/account/login/');
+	header('Location: https://www.richmondsunlight.com/account/login/');
 	exit;
 }
 
