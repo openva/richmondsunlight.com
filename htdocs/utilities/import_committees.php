@@ -11,7 +11,7 @@ include_once('../includes/functions.inc.php');
 connect_to_db();
 
 # The date of the committee assignments.
-$start_date = '2016-01-13';
+$start_date = '2017-01-11';
 
 # Get a list of all committees.
 $sql = 'SELECT c1.id, c1.lis_id, c1.parent_id, c1.chamber, c2.lis_id AS parent_lis_id
