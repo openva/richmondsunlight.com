@@ -26,19 +26,8 @@ $site_section = '';
 # INITIALIZE SESSION
 session_start();
 
-$html_head = '<link href="/js/strength/strength.css" rel="stylesheet" type="text/css">
-	<style>
-		.button_strength {
-			margin-left: .75em;
-			font-size: .85em;
-		}
-	</style>
-	<script src="/js/strength/strength.js"></script>
-	<script>
-		$(document).ready(function ($) {
-			$("#pwd").strength();
-		});
-	</script>';
+$html_head = '<script src="/js/zxcvbn.js"></script>
+			<script src="/js/password-test.js"></script>';
 
 # CUSTOM FUNCTIONS
 function display_form($form_data)
@@ -72,7 +61,9 @@ function display_form($form_data)
 					<tr>
 						<th>Password</th>
 						<td>
-							<input type="password" name="form_data[password]" id="pwd" size="30" maxlength="60" />
+							<input type="password" name="form_data[password]" id="password" size="30" maxlength="60" />
+							<meter max="4" id="password-strength-meter"></meter>
+							<p id="password-strength-text"></p>
 						</td>
 					</tr>
 					<tr>
@@ -343,5 +334,3 @@ $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
 $page->html_head = $html_head;
 $page->process();
-
-?>

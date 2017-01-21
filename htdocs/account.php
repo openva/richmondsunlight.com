@@ -27,7 +27,11 @@ $site_section = '';
 session_start();
 
 # Include the tabbing code.
-$html_head = '<script src="/js/scriptaculous/control-tabs.js" type="text/javascript"></script>';
+$html_head = '<script src="/js/scriptaculous/control-tabs.js"></script>';
+
+# Include the password-strength-meter code.
+$html_head .= '<script src="/js/zxcvbn.js"></script>
+				<script src="/js/password-test.js"></script>';
 
 # See if the user is logged in.
 if (@logged_in() === false)
@@ -68,13 +72,15 @@ function display_form($form_data)
 						<th>E-Mail</th>
 						<td>
 							<input type="text" name="form_data[email]" size="30" maxlength="60" value="'.$form_data['email'].'" /><br />
-							<small>It\'s our secret. No spam, ever.</small>
+							<small>It’s our secret. No spam, ever.</small>
 						</td>
 					</tr>
 					<tr>
 						<th>Password</th>
 						<td>
-							<input type="password" name="form_data[password]" size="30" maxlength="60" />
+							<input type="password" name="form_data[password]" id="password" size="30" maxlength="60" />
+							<meter max="4" id="password-strength-meter"></meter>
+							<p id="password-strength-text"></p>
 						</td>
 					</tr>
 					<tr>
