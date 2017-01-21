@@ -78,11 +78,13 @@
 Facebook will still parse this when it's within comment tags, which avoids the problem of it
 being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 -->
+
 %html_head%
 </head>
 <body%body_tag%>
 	<div id="page-wrap">	
 		<div id="page">
+			<header>
 			<div id="header">
 				<div id="logo">
 					<a href="/"><img src="/images/templates/new/richmond-sunlight-logo.png"
@@ -111,7 +113,8 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 					</div>
 					<div id="account">%account%</div>
 				</div>
-			
+				
+				<nav>
 				<ul id="nav">
 					<li id="t-home"><a href="/" accesskey="h">Home</a></li>
 					<li id="t-bills"><a href="/bills/" accesskey="b">Bills</a>
@@ -347,17 +350,24 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 					</ul>
 					</li>
 				</ul>
+				</nav>
 			</div>
+			</header>
 
+			<main>
 			<div id="content">
 				<h1>%page_title%</h1>
 				%page_body%
 			</div>
+			</main>
 		
+			<aside>
 			<div id="sidebar">
 				%page_sidebar%
 			</div>
+			</aside>
 
+			<footer>
 			<div id="footer">
 				<p><a href="/about/site/">About the Site</a> | <a href="/about/rss/">RSS
 				Subscriptions</a> | <a href="/about/api/">API</a> | <a href="/downloads/">Bulk Downloads</a>
@@ -378,7 +388,8 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 				Brandeis, 1914</p> <a href="http://www.briworks.com/"><img src="/images/bri.gif"
 				id="bri" width="100" height="35" alt="Hosting Donated by Blue Ridge InternetWorks" /></a>
 
-			</div>		
+			</div>
+			</footer>	
 		</div>
 	</div>
 	<script>
