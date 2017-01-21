@@ -165,7 +165,7 @@ else
 if ($district_data !== FALSE)
 {
 
-	$html_head .= ' <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css" />
+	$html_head .= ' <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css">
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js"></script>
 		<style>
 			#district_map { height: 250px; }
