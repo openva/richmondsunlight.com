@@ -22,7 +22,7 @@ done
 
 # Set a default filename.
 if [ -z "$FILENAME" ]; then
-	FILENAME="$CHAMBER"-"$(date +%Y%m%d)".avi
+	FILENAME="$CHAMBER"-"$(date +%Y%m%d)".m4v
 fi
 
 if [ "$CHAMBER" = "house" ]; then
