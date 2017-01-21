@@ -585,34 +585,6 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 			});
 		});
 	</script>
-<?php
-	# If the GA is in session, then show a promotion to watch the session live.
-	/*if ( (IN_SESSION == 'Y') && !isset($_COOKIE['stream']) )
-	{
-		# And if it's between 10 AM and 1 PM on Friday or 12 PM and 3 PM Monday-Thursday.
-		if (
-				( (date('N') == 5) && (date('G') >= 10) && (date('G') < 12) )
-				||
-				( (date('N') < 5) && (date('G') >= 12) && (date('G') < 14) )
-			)
-		{*/
-	if (0 == 1)
-	{
-?>
-	<div id="watch">
-		<h1>Watch the Session Live!</h1>
-		<p>The House and the Senate are scheduled to be in session right now, with video
-		streaming live over the internet!</p>
-		<ul>
-			<li><a href="http://virginia-house.granicus.com/ViewPublisher.php?view_id=3">Watch the House</a></li>
-			<li><a href="http://virginia-senate.granicus.com/ViewPublisher.php?view_id=3">Watch the Senate</a></li>
-		</ul>
-		<div id="close"><a href="#" onclick="$('watch').fade(); createCookie('stream', false, 20); return false;"
-			title="Close Window">Close Window</a></div>
-	</div>
-<?php
-		}
-	//}
-?>
+
 </body>
 </html>
