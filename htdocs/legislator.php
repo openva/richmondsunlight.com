@@ -119,8 +119,14 @@ $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
 $district_data = $mc->get('district-map-' . $legislator['id']);
 
 /*
- * If we haven't cached this data, get it from OpenStates.
+ * Deal with a transient data caching issue (01/2017). This can be removed in a few
+ * days.
  */
+if (!isset($district_data->region->center_lat))
+{
+	$district_data = FALSE;
+}
+
 if ($district_data == FALSE)
 {
 
