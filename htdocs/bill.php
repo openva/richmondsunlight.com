@@ -1126,6 +1126,8 @@ $page_body .= '
 	</div>';
 
 # Get our own blog entries about this bill.
+/*
+// COMMENTED OUT UNTIL VCU STARTS DOING THIS AGAIN -- IT'S TOO SLOW
 $mc = new Memcached();
 $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
 $news = $mc->get('blog-entries-' . $bill['id']);
@@ -1186,7 +1188,7 @@ if (!empty($news))
 	</div>';
 }
 
-$debug_timing['blog entries retrieved'] = microtime(TRUE);
+$debug_timing['blog entries retrieved'] = microtime(TRUE);*/
 
 # BILL COMMENTS
 $page_body .= '
