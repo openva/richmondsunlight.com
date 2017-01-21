@@ -107,7 +107,7 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 						<strong><script>document.write($.datepicker.formatDate('DD, MM dd, yy', new Date()));</script></strong>
 					</div>
 					<div id="status">
-						The General Assembly is not in session.
+						The General Assembly is now in session.
 					</div>
 					<div id="account">%account%</div>
 				</div>
