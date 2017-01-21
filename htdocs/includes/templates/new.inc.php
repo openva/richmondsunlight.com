@@ -483,7 +483,7 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 								var d = new Date(Date.parse(data.date_started));
 								var content = '<img src="/images/legislators/medium/' + legislator + '.jpg" height="50" style="float: left; margin: 0 .5em .5em 0" \/>'
 									+ '<strong>' + data.name_formatted + '</strong></br >Represents: '
-									+ data.district_description + '<br />Took Office ' + data.date_started;
+									+ data.district_description + '<br />Took Office: ' + data.date_started.substring(0,4);
 								this.set('content.text', content);
 							}
 						}
