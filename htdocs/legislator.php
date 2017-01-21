@@ -152,9 +152,9 @@ if ($district_data == FALSE)
 	}
 
 	/*
-	 * Cache the district data.
+	 * Cache the district data for three months.
 	 */
-	$mc->set('district-map-' . $legislator['id'], serialize($district_data), (60 * 60 * 24 * 30) );
+	$mc->set('district-map-' . $legislator['id'], serialize($district_data), (60 * 60 * 24 * 30.5 * 3) );
 
 }
 else
