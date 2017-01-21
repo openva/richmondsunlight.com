@@ -108,12 +108,15 @@ if (mysql_num_rows($result) > 0)
 		
 		# All subsequent <i> tags should become <ins> tags, and <s> tags should become
 		# <del> tags.
-		for ($i=20; $i<count($version['text']); $i++)
+		if ($bill['type'] == 'bill')
 		{
-			$version['text'][$i] = str_replace('<i>', '<ins>', $version['text'][$i]);
-			$version['text'][$i] = str_replace('</i>', '</ins>', $version['text'][$i]);
-			$version['text'][$i] = str_replace('<s>', '<del>', $version['text'][$i]);
-			$version['text'][$i] = str_replace('</s>', '</del>', $version['text'][$i]);
+			for ($i=20; $i<count($version['text']); $i++)
+			{
+				$version['text'][$i] = str_replace('<i>', '<ins>', $version['text'][$i]);
+				$version['text'][$i] = str_replace('</i>', '</ins>', $version['text'][$i]);
+				$version['text'][$i] = str_replace('<s>', '<del>', $version['text'][$i]);
+				$version['text'][$i] = str_replace('</s>', '</del>', $version['text'][$i]);
+			}
 		}
 		$version['text'] = implode("\r", $version['text']);
 		
