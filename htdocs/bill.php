@@ -1046,7 +1046,7 @@ if ( ($bill['video'] !== FALSE) && (count($bill['video']) > 0) )
 
 		</script>";
 
-	if (isset($transcript))
+	if (count($transcript) > 0)
 	{
 		
 		$page_body .= '<h3>Transcript</h3>
