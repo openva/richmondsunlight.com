@@ -167,6 +167,7 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 							<li>D-H »
 								<ul class="legislators">
 									<li><a href="/legislator/grdavis/">Del. Glenn Davis (R-Virginia Beach)</a></li>
+									<li><a href="/legislator/lmdudenhefer/">Del. Mark Dudenhefer (R-Stafford)</a></li>
 									<li><a href="/legislator/jeedmunds/">Del. James Edmunds (R-South Boston)</a></li>
 									<li><a href="/legislator/cmfariss/">Del. Matt Fariss (R-Rustburg)</a></li>
 									<li><a href="/legislator/pffarrell/">Del. Peter Farrell (R-Henrico)</a></li>
@@ -182,14 +183,14 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 									<li><a href="/legislator/seheretick/">Del. Steve Heretick (D-Portsmouth)</a></li>
 									<li><a href="/legislator/clherring/">Del. Charniele Herring (D-Alexandria)</a></li>
 									<li><a href="/legislator/dshester/">Del. Daun Hester (D-Norfolk)</a></li>
+								</ul>
+							</li>
+							<li>I-L »
+								<ul class="legislators">
 									<li><a href="/legislator/mkhodges/">Del. Keith Hodges (R-Urbanna)</a></li>
 									<li><a href="/legislator/pahope/">Del. Patrick Hope (D-Arlington)</a></li>
 									<li><a href="/legislator/wjhowell/">Del. Bill Howell (R-Fredericksburg)</a></li>
 									<li><a href="/legislator/tdhugo/">Del. Tim Hugo (R-Centreville)</a></li>
-								</ul>
-							</li>
-							<li>I-M »
-								<ul class="legislators">
 									<li><a href="/legislator/reingram/">Del. Riley Ingram (R-Hopewell)</a></li>
 									<li><a href="/legislator/mjames/">Del. Matthew James (D-Portsmouth)</a></li>
 									<li><a href="/legislator/scjones/">Del. Chris Jones (R-Suffolk)</a></li>
@@ -207,22 +208,21 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 									<li><a href="/legislator/lslingamfelter/">Del. Scott Lingamfelter (R-Woodbridge)</a></li>
 									<li><a href="/legislator/ahlopez/">Del. Alfonso Lopez (D-Arlington)</a></li>
 									<li><a href="/legislator/gmloupassi/">Del. Manoli Loupassi (R-Richmond)</a></li>
+								</ul>
+							</li>
+							<li>M-R »
+								<ul class="legislators">
 									<li><a href="/legislator/rgmarshall/">Del. Bob Marshall (R-Manassas)</a></li>
 									<li><a href="/legislator/dwmarshall/">Del. Danny Marshall (R-Danville)</a></li>
-									<li><a href="/legislator/tmmason/">Del. Monty Mason (D-Williamsburg)</a></li>
 									<li><a href="/legislator/jpmassie/">Del. Jimmie Massie (R-Richmond)</a></li>
-									<li><a href="/legislator/jlmcclellan/">Del. Jennifer McClellan (D-Richmond)</a></li>
 									<li><a href="/legislator/dlmcquinn/">Del. Delores McQuinn (D-Richmond)</a></li>
 									<li><a href="/legislator/jhmiller/">Del. Jackson Miller (R-Manassas)</a></li>
 									<li><a href="/legislator/jrminchew/">Del. Randy Minchew (R-Leesburg)</a></li>
 									<li><a href="/legislator/jsmiyares/">Del. Jason Miyares (R-Virginia Beach)</a></li>
 									<li><a href="/legislator/jwmorefield/">Del. Will Morefield (R-North Tazewell)</a></li>
 									<li><a href="/legislator/rlmorris/">Del. Rick Morris (R-Carrollton)</a></li>
+									<li><a href="/legislator/mpmullin/">Del. Mike Mullin (D-Newport News)</a></li>
 									<li><a href="/legislator/kjmurphy/">Del. Kathleen Murphy (D-McLean)</a></li>
-								</ul>
-							</li>
-							<li>N-S »
-								<ul class="legislators">
 									<li><a href="/legislator/idoquinn/">Del. Israel O'Quinn (R-Bristol)</a></li>
 									<li><a href="/legislator/rdorrock/">Del. Bobby Orrock (R-Thornburg)</a></li>
 									<li><a href="/legislator/jmobannon/">Del. John O'Bannon (R-Richmond)</a></li>
@@ -232,21 +232,18 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 									<li><a href="/legislator/blpogge/">Del. Brenda Pogge (R-Williamsburg)</a></li>
 									<li><a href="/legislator/cdpoindexter/">Del. Charles Poindexter (R-Glade Hill)</a></li>
 									<li><a href="/legislator/msprice/">Del. Marcia Price (D-Newport News)</a></li>
-									<li><a href="/legislator/diramadan/">Del. David Ramadan (R-South Riding)</a></li>
 									<li><a href="/legislator/mbransone/">Del. Margaret Ransone (R-Kinsale)</a></li>
 									<li><a href="/legislator/srasoul/">Del. Sam Rasoul (D-Roanoke)</a></li>
 									<li><a href="/legislator/rlrobinson/">Del. Roxann Robinson (R-Chesterfield)</a></li>
 									<li><a href="/legislator/lnrush/">Del. Nick Rush (R-Christiansburg)</a></li>
-									<li><a href="/legislator/mdsickles/">Del. Mark Sickles (D-Alexandria)</a></li>
-									<li><a href="/legislator/mbsimon/">Del. Marcus Simon (D-Falls Church)</a></li>
-									<li><a href="/legislator/lspruill/">Del. Lionell Spruill (D-Chesapeake)</a></li>
-									<li><a href="/legislator/cpstolle/">Del. Chris Stolle (R-Virginia Beach)</a></li>
-									<li><a href="/legislator/rcsullivan/">Del. Rip Sullivan (D-Arlington)</a></li>
 								</ul>
 							</li>
-							<li>T-Z »
+							<li>S-Z »
 								<ul class="legislators">
-									<li><a href="/legislator/swtaylor/">Del. Scott Taylor (R-Virginia Beach)</a></li>
+									<li><a href="/legislator/mdsickles/">Del. Mark Sickles (D-Alexandria)</a></li>
+									<li><a href="/legislator/mbsimon/">Del. Marcus Simon (D-Falls Church)</a></li>
+									<li><a href="/legislator/cpstolle/">Del. Chris Stolle (R-Virginia Beach)</a></li>
+									<li><a href="/legislator/rcsullivan/">Del. Rip Sullivan (D-Arlington)</a></li>
 									<li><a href="/legislator/letorian/">Del. Luke Torian (D-Woodbridge)</a></li>
 									<li><a href="/legislator/djtoscano/">Del. David Toscano (D-Charlottesville)</a></li>
 									<li><a href="/legislator/rctyler/">Del. Roslyn Tyler (D-Jarratt)</a></li>
@@ -267,10 +264,10 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 							<ul class="alphabetic">
 								<li>A-M »
 									<ul class="legislators">
-										<li><a href="/legislator/kcalexander/">Sen. Kenneth Alexander (D-Norfolk)</a></li>
 										<li><a href="/legislator/glbarker/">Sen. George Barker (D-Alexandria)</a></li>
 										<li><a href="/legislator/rhblack/">Sen. Dick Black (R-Leesburg)</a></li>
 										<li><a href="/legislator/cwcarrico/">Sen. Bill Carrico (R-Grayson)</a></li>
+										<li><a href="/legislator/abchafin/">Sen. Ben Chafin (R-Lebanon)</a></li>
 										<li><a href="/legislator/afchase/">Sen. Amanda Chase (R-Midlothian)</a></li>
 										<li><a href="/legislator/jacosgrove/">Sen. John Cosgrove (R-Chesapeake)</a></li>
 										<li><a href="/legislator/rrdance/">Sen. Roz Dance (D-Petersburg)</a></li>
@@ -280,17 +277,16 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 										<li><a href="/legislator/apebbin/">Sen. Adam Ebbin (D-Alexandria)</a></li>
 										<li><a href="/legislator/jsedwards/">Sen. John Edwards (D-Roanoke)</a></li>
 										<li><a href="/legislator/bafavola/">Sen. Barbara Favola (D-Arlington)</a></li>
-										<li><a href="/legislator/tagarrett/">Sen. Tom Garrett (R-Lynchburg)</a></li>
 										<li><a href="/legislator/ewhanger/">Sen. Emmett Hanger (R-Mount Solon)</a></li>
 										<li><a href="/legislator/jdhowell/">Sen. Janet Howell (D-Reston)</a></li>
 										<li><a href="/legislator/lwlewis/">Sen. Lynwood Lewis (D-Accomac)</a></li>
 										<li><a href="/legislator/melocke/">Sen. Mamie Locke (D-Hampton)</a></li>
 										<li><a href="/legislator/lllucas/">Sen. Louise Lucas (D-Portsmouth)</a></li>
 										<li><a href="/legislator/dwmarsden/">Sen. Dave Marsden (D-Burke)</a></li>
+										<li><a href="/legislator/tmmason/">Sen. Monty Mason (D-Williamsburg)</a></li>
+										<li><a href="/legislator/jlmcclellan/">Sen. Jennifer McClellan (D-Richmond)</a></li>
 										<li><a href="/legislator/rtmcdougle/">Sen. Ryan McDougle (R-Mechanicsville)</a></li>
-										<li><a href="/legislator/admceachin/">Sen. Don McEachin (D-Richmond)</a></li>
 										<li><a href="/legislator/jsmcpike/">Sen. Jeremy McPike (D-Dale City)</a></li>
-										<li><a href="/legislator/jcmiller/">Sen. John Miller (D-Newport News)</a></li>
 									</ul>
 								</li>
 								<li>N-Z »
@@ -298,10 +294,12 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 										<li><a href="/legislator/sdnewman/">Sen. Steve Newman (R-Forest)</a></li>
 										<li><a href="/legislator/tknorment/">Sen. Tommy Norment (R-Williamsburg)</a></li>
 										<li><a href="/legislator/mdobenshain/">Sen. Mark Obenshain (R-Harrisonburg)</a></li>
+										<li><a href="/legislator/mjpeake/">Sen. Mark Peake (R-Lynchburg)</a></li>
 										<li><a href="/legislator/jcpetersen/">Sen. Chap Petersen (D-Fairfax)</a></li>
 										<li><a href="/legislator/bereeves/">Sen. Bryce Reeves (R-Spotsylvania)</a></li>
 										<li><a href="/legislator/fmruff/">Sen. Frank Ruff (R-Clarksville)</a></li>
 										<li><a href="/legislator/rlsaslaw/">Sen. Dick Saslaw (D-Springfield)</a></li>
+										<li><a href="/legislator/lspruill/">Sen. Lionell Spruill (D-Chesapeake)</a></li>
 										<li><a href="/legislator/wmstanley/">Sen. Bill Stanley (R-Moneta)</a></li>
 										<li><a href="/legislator/rhstuart/">Sen. Richard Stuart (R-Westmoreland)</a></li>
 										<li><a href="/legislator/ghsturtevant/">Sen. Glen Sturtevant (R-Midlothian)</a></li>
