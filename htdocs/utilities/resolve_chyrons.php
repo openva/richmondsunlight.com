@@ -85,9 +85,22 @@ if (mysql_num_rows($result) > 0)
 	$result = mysql_query($sql);
 	if (mysql_num_rows($result) == 0)
 	{
-		die('Cannot resolve bill number chyrons for ' . $video['date'] . ': no bills were found in '
-			.'bills_status for that date. It’s likely that the wrong date is associated with this '
-			.'video.');
+
+		# If we can't get the bills heard on this date (generally because we're
+		# parsing the video on the same ay that it was recorded), then use all
+		# bill numbers from this session, instead.
+		$sql = 'SELECT id, number
+				FROM bills
+				WHERE session_id = (
+					SELECT id
+					FROM sessions
+					WHERE date_started <= ' . $video['date'] . '
+					AND (date_ended >= ' . $video['date'] . '
+						OR 
+						date_ended IS NULL)
+				)';
+		$result = mysql_query($sql);
+
 	}
 	
 	# Build up an array of bills, using the ID as the key and the number as the content.
