@@ -103,7 +103,7 @@ if (!empty($legislator['address_richmond']))
 if (!empty($legislator['email']))
 {
 	$page_sidebar .= '
-	<p><strong>E-Mail</strong><br />
+	<p><strong>Email</strong><br />
 	<a href="mailto:' . spam_proof($legislator['email']) . '" class="email">' . spam_proof($legislator['email']) . '</a></p>';
 }
 
