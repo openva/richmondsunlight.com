@@ -6,15 +6,12 @@
 # PURPOSE
 # Provides administrative video-editing functions.
 #
-# NOTES
-# None.
-#
 ###
 
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('../../includes/settings.inc.php');
+include_once('settings.inc.php');
 include_once('functions.inc.php');
 
 # DECLARATIVE FUNCTIONS
@@ -45,8 +42,8 @@ function show_form($form_data)
 			<fieldset>
 			<legend class="required">Chamber</legend>
 			<select name="form_data[chamber]" id="chamber">
-				<option value="house"'.(($form_data['chamber'] == 'house') ? ' selected="selected"' : '').'>House</option>
-				<option value="senate"'.(($form_data['chamber'] == 'senate') ? ' selected="selected"' : '').'>Senate</option>
+				<option value="house"' . (($form_data['chamber'] == 'house') ? ' selected="selected"' : '') . '>House</option>
+				<option value="senate"' . (($form_data['chamber'] == 'senate') ? ' selected="selected"' : '') . '>Senate</option>
 			</select>
 			</fieldset>
 			
@@ -142,113 +139,16 @@ $html_head = '
 if (isset($_POST['form_data']))
 {
 
-	# Clean up the data.
-	$video = array_map('stripslashes', $_POST['form_data']);
-	$video = array_map('mysql_real_escape_string', $_POST['form_data']);
-	
-	# When in doubt, the video is public domain.
-	if (empty($video['license']))
+	$video = new Video;
+	$video->video = $_POST['form_data'];
+	if ($video->submit() === FALSE)
 	{
-		$video['license'] = 'public domain';
+		die('Submitting video failed.');
 	}
-	
-	# Assemble the SQL string.
-	if (isset($video['id']))
-	{
-		$sql = 'UPDATE files';
-	}
-	else
-	{
-		$sql = 'INSERT INTO files';
-	}
-	$sql .= '
-			SET chamber="'.$video['chamber'].'", title="'.$video['title'].'",
-			type="'.$video['type'].'", date="'.$video['date'].'", length="'.$video['length'].'"';
-	if (!empty($video['committee_id']))
-	{
-		$sql .= ', committee_id='.$video['committee_id'];
-	}
-	if (!empty($video['author_name']))
-	{
-		$sql .= ', author_name='.$video['author_name'].'"';
-	}
-	if (!empty($video['html']))
-	{
-		$sql .= ', html="'.$video['html'].'"';
-	}
-	else
-	{
-		$sql .= ', html = NULL';
-	}
-	if (!empty($video['path']))
-	{
-		$sql .= ', path="'.$video['path'].'"';		
-	}
-	if (!empty($video['fps']))
-	{
-		$sql .= ', fps="'.$video['fps'].'"';		
-	}
-	if (!empty($video['capture_rate']))
-	{
-		$sql .= ', capture_rate="'.$video['capture_rate'].'"';		
-	}
-	if (!empty($video['width']))
-	{
-		$sql .= ', width="'.$video['width'].'"';		
-	}
-	if (!empty($video['height']))
-	{
-		$sql .= ', height="'.$video['height'].'"';		
-	}
-	if (!empty($video['description']))
-	{
-		$sql .= ', description="'.$video['description'].'"';	
-	}
-	if (!empty($video['license']))
-	{
-		$sql .= ', license="'.$video['license'].'"';	
-	}
-	if (!empty($video['sponsor']))
-	{
-		$sql .= ', sponsor="'.$video['sponsor'].'"';	
-	}
-	if (isset($video['id']))
-	{
-		$sql .= ' WHERE id='.$video['id'];
-	}
-	else
-	{
-		$sql .= ', date_created=now()';
-	}
-	
-	# Perform the database query.
-	$result = mysql_query($sql);
-	
-	# If the query fails, complain,
-	if (!$result)
-	{
-		echo mysql_error();
-		die();
-	}
-	
-	# If the query is successful, display the form again.
-	else
-	{
-		
-		# Grab the DB ID to use in the HTTP redirect below.
-		if (isset($video['id']))
-		{
-			$id = $video['id'];
-		}
-		else
-		{
-			$id = mysql_insert_id();
-		}
-		
-		# Redirect the browser to edit this video.
-		header('Location: http://www.richmondsunlight.com/admin/video/?id='.$id);
-		exit();
-	}
+
+	# Redirect the browser to edit this video.
+	header('Location: https://www.richmondsunlight.com/admin/video/?id=' . $video->id);
+	exit();
 	
 }
 
@@ -280,6 +180,16 @@ if (isset($_GET['id']) && !isset($_GET['op']))
 			<a href="/utilities/parse_video.php?id=' . $id . '">Parse Video</a></p>';
 	}
 	
+	$page_body .= '
+		<div style="float: right;" id="reimport">
+		<form method="get" action="/admin/video/">
+			<input type="hidden" name="op" value="metadata">
+			<input type="hidden" name="path" value="' . $video['path'] . '">
+			<input type="hidden" name="id" value="' . $video['id'] . '">
+			<input type="submit" value="Reimport File Metadata">
+		</form>
+		</div>
+	';
 	$page_body .= show_form($video);
 
 }
@@ -436,6 +346,43 @@ elseif ( isset($_GET['id']) && ($_GET['op'] == 'clips') )
 	$video->store_clips();
 	header('Location: https://www.richmondsunlight.com/admin/video/');
 	exit();
+
+}
+
+/*
+ * Reextract metadata about this file (e.g., after a file has been replaced with
+ * a new one, such as a captured webstream being replaced with a DVD rip).
+ */
+elseif ( isset($_GET['id']) && ($_GET['op'] == 'metadata') && isset($_GET['path']))
+{
+
+	/*
+	 * Get data about the file from MPlayer.
+	 */
+	$video = new Video;
+	$video->path = $_GET['path'];
+	$video->extract_file_data();
+
+	/*
+	 * Get our own metadata from the database.
+	 */
+	$sql = 'SELECT id, chamber, committee_id, author_name, title, html, path, description,
+			license, type, length, date, fps, capture_rate, width, height, sponsor
+			FROM files
+			WHERE id=' . $_GET['id'];
+	$result = mysql_query($sql);
+	$video_data = mysql_fetch_array($result);
+
+	/*
+	 * Switch the fields in question to our updated values.
+	 */
+	$fields = array('fps', 'width', 'height', 'length');
+	foreach ($fields as $name)
+	{
+		$video_data[$name] = $video->$name;
+	}
+	
+	$page_body .= show_form($video_data);
 
 }
 

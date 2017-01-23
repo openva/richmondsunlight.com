@@ -32,15 +32,131 @@ class Video
 			}
 		}
 	}
+
+	# Add (or edit) a video.
+	function submit()
+	{
+
+		if (isset($this->video))
+		{
+			return FALSE;
+		}
+
+		# Clean up the data.
+		$this->video = array_map('stripslashes', $this->video);
+		$this->video = array_map('mysql_real_escape_string', $this->video);
+		
+		# When in doubt, the video is public domain.
+		if (empty($this->video['license']))
+		{
+			$this->video['license'] = 'public domain';
+		}
+		
+		# Assemble the SQL string.
+		if (isset($this->video['id']))
+		{
+			$sql = 'UPDATE files';
+		}
+		else
+		{
+			$sql = 'INSERT INTO files';
+		}
+		$sql .= '
+				SET chamber="' . $this->video['chamber'] . '",
+				title="' . $this->video['title'] . '",
+				type="' . $this->video['type'] . '",
+				date="' . $this->video['date'] . '",
+				length="' . $this->video['length'] . '"';
+		if (!empty($this->video['committee_id']))
+		{
+			$sql .= ', committee_id='.$this->video['committee_id'];
+		}
+		if (!empty($this->video['author_name']))
+		{
+			$sql .= ', author_name='.$this->video['author_name'].'"';
+		}
+		if (!empty($this->video['html']))
+		{
+			$sql .= ', html="'.$this->video['html'].'"';
+		}
+		else
+		{
+			$sql .= ', html = NULL';
+		}
+		if (!empty($this->video['path']))
+		{
+			$sql .= ', path="'.$this->video['path'].'"';		
+		}
+		if (!empty($this->video['fps']))
+		{
+			$sql .= ', fps="'.$this->video['fps'].'"';		
+		}
+		if (!empty($this->video['capture_rate']))
+		{
+			$sql .= ', capture_rate="'.$this->video['capture_rate'].'"';		
+		}
+		if (!empty($this->video['width']))
+		{
+			$sql .= ', width="'.$this->video['width'].'"';		
+		}
+		if (!empty($this->video['height']))
+		{
+			$sql .= ', height="'.$this->video['height'].'"';		
+		}
+		if (!empty($this->video['description']))
+		{
+			$sql .= ', description="'.$this->video['description'].'"';	
+		}
+		if (!empty($this->video['license']))
+		{
+			$sql .= ', license="'.$this->video['license'].'"';	
+		}
+		if (!empty($this->video['sponsor']))
+		{
+			$sql .= ', sponsor="'.$this->video['sponsor'].'"';	
+		}
+		if (isset($this->video['id']))
+		{
+			$sql .= ' WHERE id='.$this->video['id'];
+		}
+		else
+		{
+			$sql .= ', date_created=now()';
+		}
+		
+		# Perform the database query.
+		$result = mysql_query($sql);
+		
+		# If the query fails, complain,
+		if (!$result)
+		{
+			return FALSE;
+		}
+		
+		# Grab the DB ID to use in the HTTP redirect below.
+		if (isset($this->video['id']))
+		{
+			$this->id = $this->video['id'];
+		}
+		else
+		{
+			$this->id = mysql_insert_id();
+		}
+
+		return TRUE;
 	
+	}
+
+
 	# Get vital stats about this video via MPlayer and the filesystem..
 	function extract_file_data()
 	{
-		exec('/usr/bin/mplayer -identify '.$_SERVER['DOCUMENT_ROOT'].$this->path, $mplayer);
+
+		exec('/usr/bin/mplayer -identify ' . $_SERVER['DOCUMENT_ROOT'] . $this->path, $mplayer);
 		
 		foreach ($mplayer as $option)
 		{
-			if (strpos($option, '=') !== false)
+			if (strpos($option, '=') !== FALSE)
 			{
 				$tmp = explode('=', $option);
 				$tmp[0] = strtolower($tmp[0]);
@@ -64,6 +180,7 @@ class Video
 		}
 		
 		return TRUE;
+
 	}
 	
 	
