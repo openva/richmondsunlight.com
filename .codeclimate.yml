@@ -12,8 +12,8 @@ engines:
     enabled: true
     config:
       languages:
-      -php
-      -bash
+        -php
+        -bash
 exclude_paths:
 - htdocs/includes/Zend/
 - htdocs/includes/htmlpurifier/
