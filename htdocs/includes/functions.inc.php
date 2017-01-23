@@ -964,7 +964,7 @@ function bill_sections($bill_id)
 	{
 		while ($section = mysql_fetch_array($result))
 		{
-			$section['url'] = 'http://vacode.org/'.$section['section_number'].'/';
+			$section['url'] = 'https://vacode.org/'.$section['section_number'].'/';
 			$sections[] = $section;
 		}
 	}

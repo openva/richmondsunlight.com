@@ -507,7 +507,7 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 			
 				/* Use the URL to determine the section number. */
 				var url = $(this).attr("href");
-				var url_components = url.match(/http:\/\/vacode.org\/(.*)\//);
+				var url_components = url.match(/https:\/\/vacode.org\/(.*)\//);
 				var section_number = url_components[1];
 			
 				$(this).qtip({
