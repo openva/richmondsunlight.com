@@ -1,9 +1,9 @@
 # Exclude third-party libraries
 exclude_paths:
-- "htdocs/includes/Zend/"
-- "htdocs/includes/htmlpurifier/"
-- "htdocs/includes/phpxmlrpc/"
-- "htdocs/includes/phpmailer/"
-- "htdocs/includes/magpierss/"
-- "htdocs/js/scriptaculous/"
-- "htdocs/js/flowplayer-6.0.5/"
+- htdocs/includes/Zend/
+- htdocs/includes/htmlpurifier/
+- htdocs/includes/phpxmlrpc/
+- htdocs/includes/phpmailer/
+- htdocs/includes/magpierss/
+- htdocs/js/scriptaculous/
+- htdocs/js/flowplayer-6.0.5/
