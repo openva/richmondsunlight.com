@@ -1,5 +1,0 @@
-language: php
-before_script:
-  - if find . -name "*.php" ! -path "./vendor/*" -exec php -l {} \; | grep "Fatal error"; then exit 1; fi
-script:
-  - true
