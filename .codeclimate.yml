@@ -13,6 +13,13 @@ engines:
     config:
       languages:
         - php
+        - css
+        - javascript
+ratings:
+  paths:
+  - "**.php"
+  - "**.css"
+  - "**.js"
 exclude_paths:
 - htdocs/includes/Zend/
 - htdocs/includes/htmlpurifier/
