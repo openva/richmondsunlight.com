@@ -29,6 +29,9 @@ exclude_paths:
 - htdocs/includes/phpxmlrpc/**
 - htdocs/includes/phpmailer/**
 - htdocs/includes/magpierss/**
+- htdocs/includes/simplepie.inc.php
+- htdocs/js/jquery.*.js
+- htdocs/includes/sphinxapi.php
 - htdocs/js/scriptaculous/**
 - htdocs/js/flowplayer-6.0.5/**
 - htdocs/admin/apc.php
