@@ -37,7 +37,7 @@ class Video
 	function submit()
 	{
 
-		if (isset($this->video))
+		if (!isset($this->video))
 		{
 			return FALSE;
 		}
@@ -45,7 +45,7 @@ class Video
 		# Clean up the data.
 		$this->video = array_map('stripslashes', $this->video);
 		$this->video = array_map('mysql_real_escape_string', $this->video);
-		
+
 		# When in doubt, the video is public domain.
 		if (empty($this->video['license']))
 		{
