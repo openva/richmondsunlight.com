@@ -1,8 +1,5 @@
 <?php
 
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
-
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
