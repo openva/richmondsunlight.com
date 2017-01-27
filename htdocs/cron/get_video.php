@@ -141,6 +141,23 @@ foreach ($sources as $chamber => $url)
 			$log->put('Action required: Found and stored new ' . ucfirst($chamber)
 					. ' video, for ' . $date . '.', 5);
 
+			/*
+			 * Process the video.
+			 */
+			exec('cd ' . $_SERVER['DOCUMENT_ROOT'] . 'video/' . $chamber . '/floor/; '
+				. '/vol/www/richmondsunlight.com/process-video ' . $date . ' ' . $chamber,
+				$output, $status);
+			if ($status === 0)
+			{
+				$log->put('Action required: Processed video for ' . ucfirst($chamber)
+					. ' video, for ' . $date . '.', 5);
+			}
+			else
+			{
+				$log->put('Error: Could not process video for ' . ucfirst($chamber)
+					. ' video, for ' . $date . '.', 5);
+			}
+
 		}
 
 	}
