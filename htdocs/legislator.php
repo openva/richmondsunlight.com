@@ -116,16 +116,8 @@ if (!empty($legislator['email']))
  */
 $mc = new Memcached();
 $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-$district_data = $mc->get('district-map-' . $legislator['id']);
-
-/*
- * Deal with a transient data caching issue (01/2017). This can be removed in a few
- * days.
- */
-if (!isset($district_data->region->center_lat))
-{
-	$district_data = FALSE;
-}
+$mc_slug = 'district-map-' . $legislator['id'];
+$district_data = $mc->get($mc_slug);
 
 if ($district_data == FALSE)
 {
@@ -135,6 +127,9 @@ if ($district_data == FALSE)
 	$url = 'https://openstates.org/api/v1/districts/boundary/ocd-division/country:us/state:va/sld' . $c . ':' . $legislator['district'] . '/?apikey=' . OPENSTATES_KEY;
 	$json = get_content($url);
 
+	/*
+	 * If this is valid JSON.
+	 */
 	if ($json != FALSE)
 	{
 
@@ -149,17 +144,14 @@ if ($district_data == FALSE)
 			$tmp[1] = $pair[0];
 			$pair = $tmp;
 		}
+
 	}
 
 	/*
 	 * Cache the district data for three months.
 	 */
-	$mc->set('district-map-' . $legislator['id'], serialize($district_data), (60 * 60 * 24 * 30.5 * 3) );
+	$result = $mc->set($mc_slug, $district_data, 60 * 60 * 24 * 30.5 * 3 );
 
-}
-else
-{
-	$district_data = unserialize($district_data);
 }
 
 /*
