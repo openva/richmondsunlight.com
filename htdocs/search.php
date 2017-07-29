@@ -62,18 +62,13 @@ $page_sidebar = '
 		<h3>Options</h3>
 		<form method="get" action="/search/">
 			<fieldset name="year">
-				<legend name="year">Year</legend>
-				<input type="radio" name="year" id="2006" value="2006"'.($year == '2006' ? ' checked="checked"' : '').' /><label for="2006">2006</label><br />
-				<input type="radio" name="year" id="2007" value="2007"'.($year == '2007' ? ' checked="checked"' : '').' /><label for="2007">2007</label><br />
-				<input type="radio" name="year" id="2008" value="2008"'.($year == '2008' ? ' checked="checked"' : '').' /><label for="2008">2008</label><br />
-				<input type="radio" name="year" id="2009" value="2009"'.($year == '2009' ? ' checked="checked"' : '').' /><label for="2009">2009</label><br />
-				<input type="radio" name="year" id="2010" value="2010"'.($year == '2010' ? ' checked="checked"' : '').' /><label for="2010">2010</label><br />
-				<input type="radio" name="year" id="2011" value="2011"'.($year == '2011' ? ' checked="checked"' : '').' /><label for="2011">2011</label><br />
-				<input type="radio" name="year" id="2012" value="2012"'.($year == '2012' ? ' checked="checked"' : '').' /><label for="2012">2012</label><br />
-				<input type="radio" name="year" id="2013" value="2013"'.($year == '2013' ? ' checked="checked"' : '').' /><label for="2013">2013</label><br />
-				<input type="radio" name="year" id="2014" value="2014"'.($year == '2014' ? ' checked="checked"' : '').' /><label for="2014">2014</label><br />
-				<input type="radio" name="year" id="2015" value="2015"'.($year == '2015' ? ' checked="checked"' : '').' /><label for="2015">2015</label><br />
-				<input type="radio" name="year" id="2016" value="2016"'.($year == '2016' ? ' checked="checked"' : '').' /><label for="2016">2016</label><br />
+				<legend name="year">Year</legend>';
+for ($i=2006; $i<=SESSION_YEAR; $i++)
+{
+	$page_sidebar .= '<input type="radio" name="year" id="year-'. $i . ' " value="'. $i . ' "' . ($year == $i ? ' checked="checked"' : '') . ' /><label for="year-'. $i . ' ">'. $i . ' </label><br />';
+}
+				
+$page_sidebar .= '
 				<input type="radio" name="year" id="all" value=""'.($year == '' ? ' checked="checked"' : '').' /><label for="all">All</label>
 			</fieldset>
 			<input type="submit" name="submit" value="Go" />
@@ -232,5 +227,3 @@ $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
 $page->process();
-
-?>
