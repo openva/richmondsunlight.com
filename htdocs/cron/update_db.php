@@ -131,6 +131,12 @@ if (($type == 'all') || ($type == 'cache'))
 	require 'cache.php';
 }
 
+# Run search_index.php, which exports bill data to be indexed by Elasticsearch.
+if (($type == 'all') || ($type == 'index'))
+{
+	require 'search_index.php';
+}
+
 # Run export.php, which gathers up data to be exported into flat files for folks to download and
 # play with.
 if (($type == 'all') || ($type == 'export'))
