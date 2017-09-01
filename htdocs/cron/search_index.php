@@ -26,22 +26,13 @@ $files = scandir('.');
 /*
  * Assemble the SQL query.
  */
-$sql = 'SELECT sessions.year, bills.number, bills.catch_line, bills.summary,
+$sql = 'SELECT bills.id, sessions.year, bills.number, bills.catch_line, bills.summary,
 		bills.full_text, bills.interestingness,
 		(SELECT GROUP_CONCAT(tag) FROM tags WHERE bill_id=bills.id) AS tags
 		FROM bills
 		LEFT JOIN sessions
-			ON bills.session_id = sessions.id';
-
-/*
- * If we already have files exported, then only get the bills that have been changed since
- * the most recently-exported file.
- */
-if (count($files) > 2)
-{
-	//$last_exported = '';
-	//$sql .= ' WHERE DATEDIFF(date_modified, ' . $last_exported . ') < 1';
-}
+			ON bills.session_id = sessions.id
+		WHERE bills.session_id = ' . SESSION_ID;
 
 /*
  * Iterate through the results.
@@ -52,7 +43,7 @@ while ($bill = $sth->fetchObject())
 {
 
 	/*
-	 * Strip out newlines, which are a deal-breaker for Elasticsearch imports.
+	 * Clean everything up for export.
 	 */
 	$bill->summary = str_replace("\r", ' ', $bill->summary);
 	$bill->summary = str_replace("\n", ' ', $bill->summary);
@@ -64,25 +55,30 @@ while ($bill = $sth->fetchObject())
 	$bill->summary = strip_tags($bill->summary);
 	$bill->full_text = strip_tags($bill->full_text);
 	$bill->catch_line = strip_tags($bill->catch_line);
+	$tmp = explode(',', $bill->tags);
+	$bill->tags = $tmp;
 
 	/*
 	 * Set up the JSON preamble header, as instructinos for ElasticSearch.
 	 */
-	$header = array('index');
+	$header = array();
+	$header['index'] = array();
 	$header['index']['_index'] = 'rs';
 	$header['index']['_type'] = 'bills';
-	$header['index']['_id'] = $bill->year . '-' . $bill->number;
+	$header['index']['_id'] = $bill->id;
 
 	/*
-	 * Export as JSON.
+	 * Convert to JSON.
 	 */
 	$json = json_encode($bill);
 
-	$filename = $bill->year . '-' . $bill->number . '.json';
+	/*
+	 * Create a single file for each session.
+	 */
+	$filename = $bill->year . '.json';
 
 	$file_contents = json_encode($header) . "\n" . $json . "\n";
-
-	if (!file_put_contents($filename, $file_contents))
+	if (!file_put_contents($filename, $file_contents, FILE_APPEND))
 	{
 		$log->put($bill->number . ' (' .$bill->year . ') could not be exported as JSON for indexing.', 3);
 	}
