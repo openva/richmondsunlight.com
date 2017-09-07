@@ -132,6 +132,16 @@ $html_head .= '<meta property="og:title" content="' . strtoupper($bill['number']
 	<meta property="og:locale" content="en_US" />';
 
 /*
+ * Twitter metadata.
+ */
+$html_head .= '<meta name="twitter:card" content="summary" />
+	<meta property="twitter:title" content="' . strtoupper($bill['number']) . ', introduced by ' . $bill['patron_name_formatted'].'"/>
+	<meta property="twitter:image" content="https://www.richmondsunlight.com/images/legislators/medium/'
+		. $bill['patron_shortname'] . '.jpg"/>
+	<meta name="twitter:site" content="@richmond_sun" />
+	<meta property="twitter:description" content="' . $bill['catch_line'] . '" />';
+
+/*
  * Alternate representations of the data on this page.
  */
 $html_head .= '
