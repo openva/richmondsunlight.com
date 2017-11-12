@@ -46,20 +46,46 @@ $dlas_session_id = SESSION_LIS_ID;
 $max_age_bills = 50 * 60;			// for how many seconds to refuse to refresh the bills CSV
 $max_age_history = 12 * 60 * 60;	// for how many seconds to refuse to refresh the history CSV
 
+
+
 # WHAT TYPE OF AN UPDATE WE'RE RUNNING.
 # If this page is loaded straight-up, we probably want to run everything. But we also provide the
 # options of running any of the below individually, in order to update particular components or
 # portions of the website.
-if (!isset($_GET['type']))
+
+# If this is being run from the CLI
+if (PHP_SAPI === 'cli')
 {
-	$type = 'all';
+
+	# If there are no command-line switches, update everything.
+	if ($_SERVER['argc'] <= 1)
+	{
+		$type = 'all';
+	}
+	else
+	{
+		$type = $_SERVER['argv'][1];
+		if ($type == 'history')
+		{
+			$_GLOBAL['history'] = 'y';
+		}
+	}
+
 }
+# If this is being run via HTTP.
 else
 {
-	$type = $_GET['type'];
-	if ($type == 'history')
+	if (!isset($_GET['type']))
 	{
-		$_GLOBAL['history'] = 'y';
+		$type = 'all';
+	}
+	else
+	{
+		$type = $_GET['type'];
+		if ($type == 'history')
+		{
+			$_GLOBAL['history'] = 'y';
+		}
 	}
 }
 
