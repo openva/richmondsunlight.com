@@ -90,7 +90,7 @@ class Log
 
         $room = ($room) ? $room : 'general';
         $data = 'payload=' . json_encode(array(
-                'channel'       =>  '#' . $room',
+                'channel'       =>  '#' . $room,
                 'text'          =>  $message,
                 'icon_emoji'    =>  $icon
             ));
