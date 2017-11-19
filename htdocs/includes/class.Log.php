@@ -73,7 +73,7 @@ class Log
 
     }
 
-    function slack($message, $room = 'rs' $icon = ':longbox:'')
+    function slack($message, $room = 'rs' $icon = ':longbox:')
     {
 
         $room = ($room) ? $room : "engineering";
