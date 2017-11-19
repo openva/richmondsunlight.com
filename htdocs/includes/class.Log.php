@@ -58,7 +58,19 @@ class Log
          */
         if ($this->output == 'slack')
         {
-            $this->slack($message);
+
+            $emoji = array(
+                1 => ':white_large_square:',
+                2 => ':white_large_square:',
+                3 => ':white_large_square:',
+                4 => ':large_orange_diamond: ',
+                5 => ':large_orange_diamond: ',
+                6 => ':rotating_light:',
+                7 => ':scream:',
+                8 => ':skull:'
+                );
+            $this->slack($message, 'rs', $emoji[$level]);
+
         }
 
         /*
@@ -73,25 +85,52 @@ class Log
 
     }
 
-    function slack($message, $room = 'rs' $icon = ':longbox:')
+    function slack($message, $room = 'rs', $icon = ':longbox:')
     {
 
-        $room = ($room) ? $room : "engineering";
-        $data = "payload=" . json_encode(array(
-                "channel"       =>  "#{$room}",
-                "text"          =>  $message,
-                "icon_emoji"    =>  $icon
+        $room = ($room) ? $room : 'general';
+        $data = 'payload=' . json_encode(array(
+                'channel'       =>  '#{$room}',
+                'text'          =>  $message,
+                'icon_emoji'    =>  $icon
             ));
 
         // You can get your webhook endpoint from your Slack settings
         $ch = curl_init(SLACK_WEBHOOK);
-        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $result = curl_exec($ch);
         curl_close($ch);
         
         return $result;
+
+    }
+
+    /**
+     * Log an error to a text file.
+     */
+    function filesystem($message)
+    {
+
+       
+        /*
+         * Keep logs in different locations, depending on how this has been invoked.
+         */
+        if (PHP_SAPI === 'cli')
+        {
+            $file = __DIR__ . '../logs/site.log';
+        }
+        else
+        {
+            $file = __DIR__ . '../../logs/site.log';
+        }
+
+        if (file_put_contents($file, $message) === FALSE)
+        {
+            return FALSE;
+        }
+        return TRUE;
 
     }
 
