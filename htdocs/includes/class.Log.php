@@ -46,6 +46,14 @@ class Log
         }
 
         /*
+         * If this is being invoked at the CLI, display all messages.
+         */
+	    if (PHP_SAPI === 'cli')
+	    {
+		    echo $message . "\n";
+	    }
+
+        /*
          * If the level of this message is below our verbosity level, ignore it.
          */
         if ($level < $this->verbosity)
