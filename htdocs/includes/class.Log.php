@@ -121,7 +121,11 @@ class Log
     function filesystem($message)
     {
 
-       
+	/*
+	 * Prepend the message with a timestamp.
+	 */
+       	$message = date('Y-m-d H:i:s') . ' ' . $message;
+	 
         /*
          * Keep logs in different locations, depending on how this has been invoked.
          */
