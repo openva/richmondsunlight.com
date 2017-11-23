@@ -1,6 +1,6 @@
 {
     "config": {
-    	"vendor-dir": "includes/vendor"
+    	"vendor-dir": "htdocs/includes/vendor"
     },
     "require": {
         "elasticsearch/elasticsearch": "~0.4",
