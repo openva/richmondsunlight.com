@@ -11,8 +11,8 @@
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('includes/functions.inc.php');
-include_once('includes/settings.inc.php');
+include_once('settings.inc.php');
+include_once('functions.inc.php');
 include_once('includes/sphinxapi.php');
 
 # DECLARATIVE FUNCTIONS

@@ -11,8 +11,8 @@
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-require_once('includes/functions.inc.php');
-require_once('includes/settings.inc.php');
+include_once('settings.inc.php');
+include_once('functions.inc.php');
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -137,6 +137,12 @@ if (isset($_POST['submit']))
 	{
 		die();
 	}
+
+	# If the email address ends with ".ru", this is a spammer.
+	if (substr($form_data['email'], -3) == '.ru')
+	{
+		die();
+	}
 	
 	# Spammers tend to give URLs that start with "www." and claim to be with one of three tech
 	# companies as their organization. Bar anybody registering in this manner.
@@ -231,7 +237,7 @@ if (isset($_POST['submit']))
 				$form_data['url'] = strtolower($form_data['url']);
 				
 				# If we've got content, but no schema, prepend a schema.
-				if (!stristr($form_data['url'], 'http://'))
+				if (!stristr($form_data['url'], '://'))
 				{
 					$form_data['url'] = 'http://' . $form_data['url'];
 				}	

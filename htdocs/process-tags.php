@@ -7,19 +7,13 @@
 # Receives submitted tags, adds them, and returns the user back to the
 # bill page.
 # 
-# NOTES
-# None.
-# 
-# TODO
-# None.
-# 
 ###
 
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('includes/settings.inc.php');
-include_once('includes/functions.inc.php');
+include_once('settings.inc.php');
+include_once('functions.inc.php');
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -46,7 +40,6 @@ if (isset($_REQUEST['bill_id']))
 # REJECT MISSING TAGS
 if (empty($tags['tags']))
 {
-
 	# But if the tags are missing because a trusted user is deleting one, that's fine.
 	if (!empty($delete) && ($user['trusted'] == 'y'))
 	{
@@ -92,11 +85,11 @@ if (!logged_in())
 	create_user();
 }
 
-if ((!empty($_SESSION['id'])) && !blacklisted())
+if ((!empty($_SESSION['id'])))// && !blacklisted())
 {
 	
 	# Explode the tags into an array to be inserted individually.
-	$tag = explode(' ', $tags['tags']);
+	$tag = explode(',', $tags['tags']);
 	
 	for ($i=0; $i<count($tag); $i++)
 	{
@@ -104,13 +97,11 @@ if ((!empty($_SESSION['id'])) && !blacklisted())
 		$tag[$i] = strtolower(trim($tag[$i]));
 		
 		# Check the tag against the dirty words.
-		// We need to also penalize the string "http://"
-		// Check for crapflooding and ban accordingly.
-		if (in_array($tag[$i], $GLOBALS['dirty_words']))
+		/*if (in_array($tag[$i], $GLOBALS['banned_words']))
 		{
 			@blacklist($tag[$i]);
 			break;
-		}
+		}*/
 		
 		# Drop useless tags.
 		if ($tag[$i] === '1')
@@ -118,26 +109,8 @@ if ((!empty($_SESSION['id'])) && !blacklisted())
 			continue;
 		}
 		
-		# If the string contains a quotation mark, build up a multiple-word
-		# tag using everything up until the terminating quotation mark.
-		if (stristr($tag[$i], '"'))
-		{
-			if (!isset($assembled_tag)) $assembled_tag = $tag[$i];
-			else
-			{
-				$tag[$i] = $assembled_tag.' '.$tag[$i];
-				$tag[$i] = str_replace('"', '', $tag[$i]);
-				unset($assembled_tag);
-			}
-		}
-		
-		elseif (isset($assembled_tag))
-		{
-			$assembled_tag .= ' ' . $tag[$i];
-		}
-		
 		# Don't proceed if it's blank.
-		if ((!empty($tag[$i])) && (!isset($assembled_tag)))
+		if (!empty($tag[$i]))
 		{
 		
 			# Make sure it's safe.
@@ -155,7 +128,7 @@ if ((!empty($_SESSION['id'])) && !blacklisted())
 							FROM users
 							WHERE cookie_hash = "' . $_SESSION['id'] . '"),
 						date_created=now()';
-				$result = @mysql_query($sql);
+				$result = mysql_query($sql);
 			}
 			
 		}
@@ -169,6 +142,10 @@ if ((!empty($_SESSION['id'])) && !blacklisted())
 		$mc = new Memcached();
 		$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
 		$result = $mc->delete('bill-' . $tags['bill_id']);
+	
+		$tag_list = implode(', ', $tag);
+		$log = new Log;
+		$result = $log->put('New tags added: ' . $tag_list . ' https://' . $_SERVER['SERVER_NAME'] . $tags['return_to'], 3);
 		
 		# Redirect the user back to the page of origin.
 		header('Location: https://' . $_SERVER['SERVER_NAME'] . $tags['return_to']);
@@ -183,5 +160,3 @@ else
 	header('Location: https://' . $_SERVER['SERVER_NAME'] . $tags['return_to']);
 	exit;
 }
-
-?>

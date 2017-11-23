@@ -12,16 +12,13 @@
 # in order to catch spammers.  These are renamed promptly, but incoming
 # data will be named oddly.
 # 
-# TODO
-# None.
-# 
 ###
 
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('includes/settings.inc.php');
-include_once('includes/functions.inc.php');
+include_once('settings.inc.php');
+include_once('functions.inc.php');
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -147,23 +144,23 @@ else
 }
 
 # If this user is blacklisted, don't let him post.
-if (@blacklisted() === TRUE)
+/*if (@blacklisted() === TRUE)
 {
 	die();
-}
+}*/
 
 # Check the comments against the dirty words.
-$comment_words = explode(' ', $comment['comment']);
+/*$comment_words = explode(' ', $comment['comment']);
 foreach ($comment_words AS $word)
 {
 	$word = ereg_replace('[[:punct:]]', '', $word);
 	$word = strip_tags($word);
-	if (in_array($word, $GLOBALS['dirty_words']))
+	if (in_array($word, $GLOBALS['banned_words']))
 	{
 		@blacklist($word);
 		die();
 	}
-}
+}*/
 
 # Make sure that this person hasn't posted in the past 5 seconds.
 $sql = 'SELECT id
@@ -278,6 +275,9 @@ if (!isset($errors))
 	$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
 	$comments = $mc->delete('comments-' . $comment['bill_id']);
 	
+	$log = new Log;
+	$log->put('New comment posted: https://' . $_SERVER['SERVER_NAME'] . $comment['return_to'], 3);
+
 	# Redirect the user back to the page of origin.
 	if (!empty($comment['return_to']))
 	{

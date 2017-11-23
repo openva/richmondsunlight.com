@@ -462,24 +462,36 @@ else
 	$maxlength = '40';
 }
 # Allow people to add tags.
+$html_head .= '
+		<script src="/js/jquery.tagsinput.js"></script>
+		<link rel="stylesheet" href="/css/jquery.tagsinput.css"/>';
 $page_sidebar .= '
 			<form method="post" action="/process-tags.php">
 				<div class="ui-widget">
-					<input type="text" id="tags" name="tags[tags]" size="25" maxlength="'.$maxlength.'" />
+					<input type="text" id="tags" name="tags[tags]" size="25" maxlength="' . $maxlength . '" />
 				</div>
-				<input type="hidden" name="tags[bill_id]" value="'.$bill['id'].'" />
-				<input type="hidden" name="tags[return_to]" value="'.$_SERVER['REQUEST_URI'].'" />
-				<input type="submit" name="submit" value="Add" />
-				<p>Separate each tag with a space: <em>tax highway vdot</em>. Multiple word tags
-				must be enclosed within quotes: <em>“capital murder”</em>.</p>
+				<input type="hidden" name="tags[bill_id]" value="' . $bill['id'] . '" />
+				<input type="hidden" name="tags[return_to]" value="' . $_SERVER['REQUEST_URI'] . '" />
+				<input type="submit" name="submit" value="Save" />
+				<p>Separate each tag with a comma: <em>crime, capital murder, jury</em>.</p>
 			</form>
 			<script>
-				$( function() {
-				  $( "#tags" ).autocomplete({
-				    source: "/api/1.1/tag-suggest/",
-				    minLength: 2
-				  });
-				} );
+				$( document ).ready(function() {
+
+					$("#tags").tagsInput({
+						autocomplete_url: "https://www.richmondsunlight.com/api/1.1/tag-suggest/",
+						width: "80%",
+						height: "10px",
+						minChars: "3",
+						defaultText: ""
+					});
+
+					$("#tags_tagsinput").focusin(function() {
+						$("#tags_tagsinput").height(100);
+						$("#tags_tagsinput").width("95%");
+					});
+
+				});
 			</script>
 			<style>
 				.ui-autocomplete-loading {

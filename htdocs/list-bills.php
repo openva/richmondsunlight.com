@@ -6,19 +6,13 @@
 # PURPOSE
 # Lists all current bills.
 #
-# NOTES
-# None.
-#
-# TODO
-# None.
-#
 ###
 
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('includes/settings.inc.php');
-include_once('includes/functions.inc.php');
+include_once('settings.inc.php');
+include_once('functions.inc.php');
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -227,8 +221,8 @@ if ($num_results > 0)
 				<li><a href="#house">House</a></li>
 				<li><a href="#senate">Senate</a></li>
 			</ul>
-			<div id="'.$chamber.'">
-				<table id="'.$chamber.'" class="bill-listing sortable">
+			<div id="' . $chamber . '">
+				<table id="' . $chamber . '" class="bill-listing sortable">
 					<thead>
 						<tr>
 							<th>#</th>
@@ -256,11 +250,11 @@ if ($num_results > 0)
 					<tbody>';
 		}
 		$page_body .= '<tr>
-						<td><a href="/bill/'.$bill['year'].'/'.$bill['number'].
-							'/" class="balloon">'.strtoupper($bill['number']).
+						<td><a href="/bill/' . $bill['year'] . '/' . $bill['number'] .
+							'/" class="balloon">' . strtoupper($bill['number']) .
 							balloon($bill, 'bill').'</a></td>
-						<td>'.$bill['catch_line'].'</td>
-						<td>'.$bill['status'].'</td>
+						<td>' . $bill['catch_line'] . '</td>
+						<td>' . $bill['status'] . '</td>
 					</tr>';
 	}
 	$page_body .= '</tbody></table></div></div>';
@@ -268,7 +262,7 @@ if ($num_results > 0)
 
 else
 {
-	$page_body = '<p>No bills have yet been filed for the '.$year.' session.</p>';
+	$page_body = '<p>No bills have yet been filed for the ' . $year . ' session.</p>';
 }
 
 # PAGE SIDEBAR
@@ -313,13 +307,15 @@ if (!empty($year))
 			</li>
 			<li><a href="/bills/2015/">2015</a></li>
 			<li><a href="/bills/2016/">2016</a></li>
+			<li><a href="/bills/2017/">2017</a></li>
+			<li><a href="/bills/2018/">2018</a></li>
 		</ul>
 		
 		<p style="margin-top: 1em;">View bills that:</p>
 		<ul>
-			<li><a href="/bills/'.$year.'/passed/">passed</a></li>
-			<li><a href="/bills/'.$year.'/failed/">failed</a></li>
-			<li><a href="/bills/'.$year.'/">all</a></li>
+			<li><a href="/bills/' . $year . '/passed/">passed</a></li>
+			<li><a href="/bills/' . $year . '/failed/">failed</a></li>
+			<li><a href="/bills/' . $year . '/">all</a></li>
 		</ul>
 	</div>';
 

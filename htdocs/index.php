@@ -17,7 +17,7 @@ session_start();
 
 # Retrieve the home page from a cache.
 $mc = new Memcached();
-$mc->addServer("127.0.0.1", 11211);
+$mc->addServer(MEMCACHED_SERVER, 11211);
 $cached_html = $mc->get('homepage');
 if ($mc->getResultCode() === 0)
 {
@@ -50,9 +50,10 @@ $browser_title = 'Tracking the Virginia General Assembly';
 $site_section = 'home';
 
 # PAGE CONTENT
-$page_body = '<p>The 2017 Virginia General Assembly session will begin on January 11, 2017, and
-	continue for 45 days. Here you can track <a href="/bills/">the bills that are proposed</a>,
-	voted on, and the few that will ultimately become law.</p>';
+$page_body = '<p>The 2018 Virginia General Assembly session will begin on January 10, 2018, and
+	continue for 60 days. Bills started being introduced on November 20. Here you can track
+	<a href="/bills/">the bills that are proposed</a>, voted on, and the few that will ultimately
+	become law.</p>';
 
 $sql = 'SELECT COUNT(*) AS count, tags.tag
 		FROM tags
