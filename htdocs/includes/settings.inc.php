@@ -10,32 +10,32 @@
 
 # THE CURRENT SESSION
 # As defined by Richmond Sunlight's database
-define('SESSION_ID', 1);
+define('SESSION_ID', 21);
 
 # Is this the main session or a special session? As defined by Richmond Sunlight's database.
 define('SESSION_SUFFIX', '');
 
 # As defined by the GA LIS' database.
-define('SESSION_LIS_ID', '161');
+define('SESSION_LIS_ID', '181');
 
 # As defined by the year.
-define('SESSION_YEAR', 2016);
+define('SESSION_YEAR', 2018);
 
 # Determine whether the GA is currently in session.
-define('IN_SESSION', 'N');
+define('IN_SESSION', 'Y');
 
 # Set the FTP auth pair for legislative data.
-define('LIS_FTP_USERNAME', 'janesmith');
-define('LIS_FTP_PASSWORD', 's3cr3+p@ssw0rd');
+define('LIS_FTP_USERNAME', '');
+define('LIS_FTP_PASSWORD', '');
 
 # The DSN to connect to MySQL.
-define('PDO_DSN', 'mysql:dbname=richmondsunlight;host=localhost;charset=utf8');
-define('PDO_SERVER', 'localhost');
-define('PDO_USERNAME', 'dbuser');
-define('PDO_PASSWORD', 's3cr3+p@ssw0rd');
+define('PDO_DSN', '');
+define('PDO_SERVER', '');
+define('PDO_USERNAME', '');
+define('PDO_PASSWORD', '');
 
 # Specify how to connect to Memcached.
-define('MEMCACHED_SERVER', 'localhost');
+define('MEMCACHED_SERVER', '');
 define('MEMCACHED_PORT', '11211');
 
 # The House Speaker's IDs. This is used in update_vote.php to translate votes credited to
