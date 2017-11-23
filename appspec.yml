@@ -1,0 +1,21 @@
+version: 0.0
+os: linux
+files:
+  - source: ./
+    destination: /vol/www/richmondsunlight.com/
+permissions:
+    - object: /vol/www/richmondsunlight.com/
+      owner: ricsun
+      group: web
+      mode: 755
+      acls:
+        - "d:u::rwx"
+        - "d:g::rwx"
+        - "d:o::rwx"
+      type:
+       - directory
+hooks:
+  BeforeInstall:
+    - location: deploy/predeploy.sh
+  AfterInstall:
+    - location: deploy/postdeploy.sh

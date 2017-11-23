@@ -19,3 +19,29 @@ install:
 - composer install
 script:
 - find cron/*.php includes/*.php -print0 |xargs -0 -n1 -P8 php -l
+  && ./deploy/config_variables.sh
+  && ./deploy/aws_credentials.sh
+  && zip -r latest *
+  && mkdir -p upload
+  && mv latest.zip upload/latest.zip
+deploy:
+- provider: s3
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
+  local_dir: upload
+  skip_cleanup: true
+  on:
+    branch: master
+  bucket: deploy.richmondsunlight.com
+  region: us-east-1
+- provider: codedeploy
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
+  bucket: deploy.richmondsunlight.com
+  key: latest.zip
+  bundle_type: zip
+  application: RS-Web
+  deployment_group: RS-Web-Fleet
+  region: us-east-1
+  on:
+    branch: master
