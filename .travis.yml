@@ -16,7 +16,7 @@ addons:
       - zip
       - awscli
 install:
-- composer install
+- composer install htdocs/composer.json
 script:
 - find cron/*.php includes/*.php -print0 |xargs -0 -n1 -P8 php -l
   && ./deploy/config_variables.sh
