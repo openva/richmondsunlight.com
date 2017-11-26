@@ -6,12 +6,6 @@
 # PURPOSE
 # List all committees.
 # 
-# NOTES
-# None.
-# 
-# TODO
-# None.
-# 
 ###
 
 # INCLUDES

@@ -6,12 +6,6 @@
 # PURPOSE
 # A function library for the Photosynthesis bill-tracking tools.
 # 
-# NOTES
-# None
-# 
-# TODO
-# None.
-# 
 ###
 
 # Populates a portfolio with the contents of a watch list, whether for the first time

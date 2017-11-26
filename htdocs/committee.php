@@ -6,12 +6,6 @@
 # PURPOSE
 # Individual committees.
 # 
-# NOTES
-# None.
-# 
-# TODO
-# None.
-# 
 ###
 
 # INCLUDES

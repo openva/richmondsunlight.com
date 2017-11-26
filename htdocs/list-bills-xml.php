@@ -9,9 +9,6 @@
 # NOTES
 # This is not intended to be viewed. It just spits out an XML file and that's that.
 # 
-# TODO
-# None.
-# 
 ###
 
 # INCLUDES
