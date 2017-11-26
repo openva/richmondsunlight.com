@@ -5,7 +5,7 @@
     "require": {
         "elasticsearch/elasticsearch": "~0.4",
         "kellan/magpierss": "dev-master",
-        "PHPMailer/PHPMailer": "~6.0",
+        "PHPMailer/PHPMailer": "~5.2",
         "ezyang/htmlpurifier":"dev-master"
     }
 }
