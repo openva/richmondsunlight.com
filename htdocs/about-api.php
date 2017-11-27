@@ -18,6 +18,7 @@
 	# Include any files or libraries that are necessary for this specific
 	# page to function.
 	include_once('includes/functions.inc.php');	
+	include_once('vendor/autoload.php');
 	
 	# PAGE METADATA
 	$page_title = 'API v1.0';
@@ -219,5 +220,3 @@ EOD;
 	$page->page_sidebar = $page_sidebar;
 	$page->site_section = $site_section;
 	$page->process();
-
-?>

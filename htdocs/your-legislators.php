@@ -4,10 +4,11 @@
 # Include any files or libraries that are necessary for this specific page to function.
 include_once('includes/settings.inc.php');
 include_once('includes/functions.inc.php');
+include_once('vendor/autoload.php');
 	
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific page.
-@connect_to_db();
+connect_to_db();
 	
 # INITIALIZE SESSION
 session_start();

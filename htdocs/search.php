@@ -14,6 +14,7 @@
 include_once('settings.inc.php');
 include_once('functions.inc.php');
 include_once('includes/sphinxapi.php');
+include_once('vendor/autoload.php');
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific

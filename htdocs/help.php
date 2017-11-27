@@ -16,6 +16,7 @@
 	# page to function.
 	include_once('includes/settings.inc.php');
 	include_once('includes/functions.inc.php');
+	include_once('vendor/autoload.php');
 	
 	# LOCALIZE VARIABLES
 	$topic = $_REQUEST['topic'];

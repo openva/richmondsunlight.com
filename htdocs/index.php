@@ -11,6 +11,7 @@
 # INCLUDES
 include_once('settings.inc.php');
 include_once('functions.inc.php');
+include_once('vendor/autoload.php');
 
 # INITIALIZE SESSION
 session_start();

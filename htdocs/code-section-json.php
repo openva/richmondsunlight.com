@@ -16,11 +16,12 @@
 # page to function.
 require_once 'includes/settings.inc.php';
 require_once 'includes/functions.inc.php';
+include_once('vendor/autoload.php');
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-@connect_to_db();
+connect_to_db();
 
 # LOCALIZE VARIABLES
 $section = mysql_escape_string(urldecode($_REQUEST['section']));

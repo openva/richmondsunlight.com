@@ -41,7 +41,7 @@
 	}
 
 	# Open a database connection.
-	@connect_to_db();
+	connect_to_db();
 	
 	# Query the database for information about that patron.
 	$sql = 'SELECT representatives.id, representatives.name, representatives.chamber,
