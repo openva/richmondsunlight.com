@@ -449,7 +449,7 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 					content: {
 						text: 'Loading .&thinsp;.&thinsp;.',
 						ajax: {
-							url: 'https://www.richmondsunlight.com/api/1.0/bill/'+year+'/'+bill_number+'.json',
+							url: 'https://api.richmondsunlight.com/1.0/bill/'+year+'/'+bill_number+'.json',
 							type: 'GET',
 							dataType: 'jsonp',
 							success: function(data, status) {
@@ -487,7 +487,7 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 					content: {
 						text: 'Loading .&thinsp;.&thinsp;.',
 						ajax: {
-							url: 'https://www.richmondsunlight.com/api/1.1/legislator/'+legislator+'.json',
+							url: 'https://api.richmondsunlight.com/1.1/legislator/'+legislator+'.json',
 							type: 'GET',
 							dataType: 'jsonp',
 							success: function(data, status) {

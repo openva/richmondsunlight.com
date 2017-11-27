@@ -479,7 +479,7 @@ $page_sidebar .= '
 				$( document ).ready(function() {
 
 					$("#tags").tagsInput({
-						autocomplete_url: "https://www.richmondsunlight.com/api/1.1/tag-suggest/",
+						autocomplete_url: "https://api.richmondsunlight.com/1.1/tag-suggest/",
 						width: "80%",
 						height: "10px",
 						minChars: "3",
