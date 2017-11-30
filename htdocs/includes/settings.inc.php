@@ -68,6 +68,9 @@ define('VA_DECODED_KEY', '');
 define('MAPBOX_ID', '');
 define('MAPBOX_TOKEN', '');
 
+# Slack API URL
+define('SLACK_WEBHOOK', '');
+
 # Pushover API Key
 define('PUSHOVER_KEY', '');
 
