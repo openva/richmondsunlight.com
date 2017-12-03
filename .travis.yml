@@ -44,5 +44,5 @@ deploy:
   deployment_group: RS-Web-Fleet
   region: us-east-1
   on:
-    branch: master
+    all_branches: true
   wait-until-deployed: true
