@@ -36,7 +36,7 @@ deploy:
   local_dir: upload
   skip_cleanup: true
   on:
-    all_branches: true
+    branch: deploy
   bucket: deploy.richmondsunlight.com
   region: us-east-1
 - provider: codedeploy
@@ -49,5 +49,5 @@ deploy:
   deployment_group: RS-Web-Fleet
   region: us-east-1
   on:
-    all_branches: true
+    branch: deploy
   wait-until-deployed: true
