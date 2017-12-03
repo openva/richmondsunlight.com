@@ -38,8 +38,8 @@ class Page
 			include dirname(__FILE__) . '/templates/' . $this->template . '.inc.php';
 			$page = ob_get_contents();
 			
-			# Cache this template, with no expiration date.
-			$mc->set('template-' . $this->template, serialize($page));
+			# Cache this template, with a 24-hour expiration date.
+			$mc->set( 'template-' . $this->template, serialize($page), (60 * 60 * 24) );
 			
 		}
 		

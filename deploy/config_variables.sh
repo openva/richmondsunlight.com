@@ -13,6 +13,7 @@ variables=(
 	PDO_SERVER
 	PDO_USERNAME
 	PDO_PASSWORD
+	MYSQL_DATABASE
 	GMAPS_KEY
 	YAHOO_KEY
 	OPENSTATES_KEY
@@ -32,6 +33,13 @@ do
 		exit 1
 	fi
 done
+
+# If this is our staging site, then set the PDO_DSN value to that of our staging database.
+if [ "$TRAVIS_BRANCH" = "master" ]
+then
+	sed -i -e "s|define('PDO_DSN', '')|define('PDO_DSN', '${PDO_DSN_STAGING}')|g" htdocs/includes/settings.inc.php
+	sed -i -e "s|define('MYSQL_DATABASE', '')|define('MYSQL_DATABASE', '${MYSQL_DATABASE_STAGING}')|g" htdocs/includes/settings.inc.php
+fi
 
 # Now iterate over again and perform the replacement.
 for i in "${variables[@]}"

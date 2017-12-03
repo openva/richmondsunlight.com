@@ -33,6 +33,7 @@ define('PDO_DSN', '');
 define('PDO_SERVER', '');
 define('PDO_USERNAME', '');
 define('PDO_PASSWORD', '');
+define('MYSQL_DATABASE', '');
 
 # Specify how to connect to Memcached.
 define('MEMCACHED_SERVER', '');
