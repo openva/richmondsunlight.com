@@ -35,7 +35,7 @@ deploy:
   local_dir: upload
   skip_cleanup: true
   on:
-    branch: master
+    all_branches: true
   bucket: deploy.richmondsunlight.com
   region: us-east-1
 - provider: codedeploy
