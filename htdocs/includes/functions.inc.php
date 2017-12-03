@@ -168,7 +168,7 @@ function connect_to_db($type = 'old')
 			header('Location: https://www.richmondsunlight.com/site-down/');
 			exit;
 		}
-		mysql_select_db('richmondsunlight',$db);
+		mysql_select_db(MYSQL_DATABASE,$db);
 		mysql_query('SET NAMES "utf8"');
 	}
 	
