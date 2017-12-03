@@ -23,6 +23,7 @@ install:
 - composer install
 script:
 - find htdocs/*.php -print0 |xargs -0 -n1 -P8 php -l
+  && ./deploy/branch_deploy.sh
   && ./deploy/config_variables.sh
   && ./deploy/aws_credentials.sh
   && zip -qr latest *
