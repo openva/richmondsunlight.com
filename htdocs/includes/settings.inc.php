@@ -69,6 +69,9 @@ define('VA_DECODED_KEY', '');
 define('MAPBOX_ID', '');
 define('MAPBOX_TOKEN', '');
 
+# Logging verbosity, on a scale of 1–8
+define('LOGGING_VERBOSITY', 3);
+
 # Slack API URL
 define('SLACK_WEBHOOK', '');
 
