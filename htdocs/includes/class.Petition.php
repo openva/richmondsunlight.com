@@ -15,9 +15,9 @@ class Petition
 		$result = mysql_query($sql);
 		
 		// If the query fails.
-		if ($result === false)
+		if ($result === FALSE)
 		{
-			return false;
+			return FALSE;
 		}
 		
 		$i=0;
@@ -63,7 +63,7 @@ class Petition
 		
 		// If we've specified that this is a new user (that is, if the visitor isn't logged
 		// into his account).
-		if ($this->new_user === true)
+		if ($this->new_user === TRUE)
 		{
 			$this->form .= '
 				<label for="user_name">Your Name</label>
@@ -84,7 +84,7 @@ class Petition
 	{
 		if (!isset($this->title) || !isset($this->text) || !isset($this->user_id))
 		{
-			return false;
+			return FALSE;
 		}
 		
 		$sql = 'INSERT INTO petitions
@@ -96,9 +96,9 @@ class Petition
 		$result = mysql_query($sql);
 		
 		// If the query fails.
-		if ($result === false)
+		if ($result === FALSE)
 		{
-			return false;
+			return FALSE;
 		}
 		
 		# Return the ID of the just-added petition.
@@ -125,7 +125,7 @@ class Petition
 		// Require a petition ID.
 		if (!isset($this->id))
 		{
-			return false;
+			return FALSE;
 		}
 
 		$sql = 'SELECT petitions.date_created AS date, petitions.text, users.name AS creator
@@ -136,9 +136,9 @@ class Petition
 		$result = mysql_query($sql);
 		
 		// If the query fails.
-		if ( ($result === false) || (mysql_num_rows($result) > 0) )
+		if ( ($result === FALSE) || (mysql_num_rows($result) > 0) )
 		{
-			return false;
+			return FALSE;
 		}
 		
 		$petition = mysql_fetch_object($result);
@@ -164,7 +164,7 @@ class Petition
 		// Require a petition ID.
 		if (!isset($this->id))
 		{
-			return false;
+			return FALSE;
 		}
 		
 		$sql = 'SELECT users.name, petition_signers.date_created
@@ -174,9 +174,9 @@ class Petition
 		$result = mysql_query($sql);
 		
 		// If the query fails.
-		if ( ($result === false) || (mysql_num_rows($result) > 0) )
+		if ( ($result === FALSE) || (mysql_num_rows($result) > 0) )
 		{
-			return false;
+			return FALSE;
 		}
 		
 		// Fetch all results.
@@ -197,7 +197,7 @@ class Petition
 		
 		if (!isset($this->user_id) || !isset($this->petition_id))
 		{
-			return false;
+			return FALSE;
 		}
 		
 		$sql = 'INSERT DELAYED into petition_signers
@@ -208,9 +208,9 @@ class Petition
 		$result = mysql_query($sql);
 		
 		// If the query fails.
-		if ($result === false)
+		if ($result === FALSE)
 		{
-			return false;
+			return FALSE;
 		}
 		
 		return true;

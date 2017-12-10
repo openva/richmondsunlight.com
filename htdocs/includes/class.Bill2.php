@@ -14,21 +14,21 @@ class Bill2
 		# Make sure we've got the information that we need.
 		if (!isset($number) || empty($number))
 		{
-			return false;
+			return FALSE;
 		}
 		if (!isset($year) || empty($year))
 		{
-			return false;
+			return FALSE;
 		}
 		
 		# Check that the data is clean.
 		if (strlen($year) != 4)
 		{
-			return false;
+			return FALSE;
 		}
 		if (strlen($number) > 7)
 		{
-			return false;
+			return FALSE;
 		}
 		$number = strtolower($number);
 		
@@ -60,7 +60,7 @@ class Bill2
 		$result = mysql_query($sql);
 		if (mysql_num_rows($result) < 1)
 		{
-			return false;
+			return FALSE;
 		}
 		$bill = mysql_fetch_array($result);
 		return $bill['id'];
@@ -147,7 +147,7 @@ class Bill2
 		$result = mysql_query($sql);
 		if (mysql_num_rows($result) == 0)
 		{
-			return false;
+			return FALSE;
 		}
 		$bill = mysql_fetch_array($result, MYSQL_ASSOC);
 		$bill = array_map('stripslashes', $bill);

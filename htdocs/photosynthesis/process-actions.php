@@ -154,7 +154,7 @@
 	{
 		
 		# Localize $form_data and clean it up.
-		if (!array($_POST['form_data'])) return false;
+		if (!array($_POST['form_data'])) return FALSE;
 		$form_data = array_map('addslashes', $_POST['form_data']);
 		
 		# Don't allow a nameless portfolio.
@@ -189,7 +189,7 @@
 	{
 		
 		# Localize $form_data and clean it up.
-		if (!array($_POST['form_data'])) return false;
+		if (!array($_POST['form_data'])) return FALSE;
 		$form_data = array_map('addslashes', $_POST['form_data']);
 		
 		# Don't allow a watch list with no criteria.

@@ -2043,7 +2043,7 @@ foreach ($files as $file)
 	rename($container_directory.$file, $new_container_directory.$video[$file]);
 	
 	# Rename the video directory (if it exists), making it the ID.
-	if (file_exists($screenshot_directory) !== false)
+	if (file_exists($screenshot_directory) !== FALSE)
 	{
 		rename($screenshot_directory, $new_container_directory.$video[$file]);
 	}

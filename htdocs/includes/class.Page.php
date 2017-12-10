@@ -143,7 +143,7 @@ class Page
 		$this->output = $page;
 		unset($page);
 		
-		return true;
+		return TRUE;
 		
 	}
 	

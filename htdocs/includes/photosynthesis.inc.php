@@ -20,7 +20,7 @@ function populate_smart_portfolio($portfolio_id)
 	$result = mysql_query($sql);
 	if (mysql_num_rows($result) == 0)
 	{
-		return false;
+		return FALSE;
 	}
 	$watch_list = mysql_fetch_array($result);
 	
@@ -31,7 +31,7 @@ function populate_smart_portfolio($portfolio_id)
 	$result = mysql_query($sql);
 	if (mysql_num_rows($result) == 0)
 	{
-		return false;
+		return FALSE;
 	}
 	$user = mysql_fetch_array($result);
 	$user_id = $user['id'];
@@ -43,7 +43,7 @@ function populate_smart_portfolio($portfolio_id)
 	$result = mysql_query($sql);
 	if (mysql_num_rows($result) == 0)
 	{
-		return false;
+		return FALSE;
 	}
 	$portfolio = mysql_fetch_array($result);
 	

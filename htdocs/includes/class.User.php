@@ -97,7 +97,7 @@ class User
 		# The user must be logged in.
 		if (logged_in() !== TRUE)
 		{
-			return false;
+			return FALSE;
 		}
 		
 		# Get the user's account data.
@@ -118,7 +118,7 @@ class User
 		# Unless we have ten tags, we just don't have enough data to continue.
 		if (mysql_num_rows($result) < 10)
 		{
-			return false;
+			return FALSE;
 		}
 			
 		# Build up an array of tags, with the key being the tag and the value being the count.
@@ -160,7 +160,7 @@ class User
 		if ($mc->getResultCode() === 0)
 		{
 			$bills = unserialize($result);
-			if ($bills !== false)
+			if ($bills !== FALSE)
 			{
 				return $bills;
 			}	
@@ -168,9 +168,9 @@ class User
 		
 		$tags = User::views_cloud();
 
-		if ($tags === false)
+		if ($tags === FALSE)
 		{
-			return false;
+			return FALSE;
 		}
 		
 		# Get a list of every bill that this user has looked at.
@@ -240,7 +240,7 @@ class User
 		$result = mysql_query($sql);
 		if (@mysql_num_rows($result) == 0)
 		{
-			return false;
+			return FALSE;
 		}
 		else
 		{
@@ -280,7 +280,7 @@ class User
 		
 		if (!isset($user['latitude']) || !isset($user['longitude']))
 		{
-			return false;
+			return FALSE;
 		}
 		
 		$sql = 'SELECT bills.id, bills.number, bills.catch_line, sessions.year,
@@ -301,7 +301,7 @@ class User
 		$result = mysql_query($sql);
 		if (mysql_num_rows($result) == 0)
 		{
-			return false;
+			return FALSE;
 		}
 		
 		$bills = array();
@@ -319,9 +319,9 @@ class User
 	{
 	
 		# The user must be logged in.
-		if (logged_in() !== true)
+		if (logged_in() !== TRUE)
 		{
-			return false;
+			return FALSE;
 		}
 		
 		# Get the user's account data.
@@ -339,7 +339,7 @@ class User
 		$result = mysql_query($sql);
 		if (mysql_num_rows($result) == 0)
 		{
-			return false;
+			return FALSE;
 		}
 		$stats = mysql_fetch_object($result);
 		return $stats;
@@ -350,9 +350,9 @@ class User
 	{
 	
 		# The user must be logged in.
-		if (logged_in() !== true)
+		if (logged_in() !== TRUE)
 		{
-			return false;
+			return FALSE;
 		}
 		
 		# Get the user's account data.
@@ -373,7 +373,7 @@ class User
 		$result = mysql_query($sql);
 		if (mysql_num_rows($result) == 0)
 		{
-			return false;
+			return FALSE;
 		}
 		while ($comment = mysql_fetch_assoc($result))
 		{

@@ -10,7 +10,7 @@ class Comments
 	
 		if (empty($this->bill_id))
 		{
-			return false;
+			return FALSE;
 		}
 		
 		if ( !isset($this->config->get_all) || ($this->config->get_all === TRUE) )
@@ -25,7 +25,7 @@ class Comments
 		$bill_info = $bill->info();
 		if ($bill_info === FALSE)
 		{
-			return false;
+			return FALSE;
 		}
 		
 		# Initliaze the array to store comments.
