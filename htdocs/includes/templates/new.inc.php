@@ -385,8 +385,7 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 
 				<p
 				class="quote">“Sunlight is said to be the best of disinfectants.” —Justice Louis
-				Brandeis, 1914</p> <a href="http://www.briworks.com/"><img src="/images/bri.gif"
-				id="bri" width="100" height="35" alt="Hosting Donated by Blue Ridge InternetWorks" /></a>
+				Brandeis, 1914</p>
 
 			</div>
 			</footer>	
