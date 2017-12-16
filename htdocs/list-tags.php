@@ -57,14 +57,14 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 		GROUP BY tags.tag
 		HAVING count > 1
 		ORDER BY tag ASC';
-$result = @mysql_query($sql);
-$tag_count = @mysql_num_rows($result);
+$result = mysql_query($sql);
+$tag_count = mysql_num_rows($result);
 if ($tag_count > 0)
 {
 	$page_body .= '
 	<div class="tags">';		
 	# Build up an array of tags, with the key being the tag and the value being the count.
-	while ($tag = @mysql_fetch_array($result))
+	while ($tag = mysql_fetch_array($result))
 	{
 		$tag = array_map('stripslashes', $tag);
 		$tags[$tag{tag}] = $tag['count'];

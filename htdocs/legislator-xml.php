@@ -29,7 +29,7 @@
 	$database->connect_old();
 	
 	# LOCALIZE VARIABLES
-	$shortname = @mysql_real_escape_string($_GET['shortname']);
+	$shortname = mysql_real_escape_string($_GET['shortname']);
 	
 	# Select the vote data from the database.
 	$sql = 'SELECT representatives.id, representatives.shortname, representatives.name,
@@ -42,13 +42,13 @@
 				AS bill_count
 			FROM representatives LEFT JOIN districts ON representatives.district_id=districts.id
 			WHERE shortname = "'.$shortname.'"';
-	$result = @mysql_query($sql);
-	if (@mysql_num_rows($result) > 0)
+	$result = mysql_query($sql);
+	if (mysql_num_rows($result) > 0)
 	{
 		
 		// Send the headers to have the data downloaded as XML.
 		
-		$legislator = @mysql_fetch_array($result);
+		$legislator = mysql_fetch_array($result);
 		$legislator = array_map('stripslashes', $legislator);
 		echo '<legislator>
 	<name>'.$legislator['name'].'</name>
@@ -72,12 +72,12 @@
 				WHERE representatives.id = '.$legislator['id'].'
 				GROUP BY tags.tag
 				ORDER BY tags.tag ASC';
-		$result = @mysql_query($sql);
-		if (@mysql_num_rows($result) > 0)
+		$result = mysql_query($sql);
+		if (mysql_num_rows($result) > 0)
 		{
 				echo '
 	<tags>';
-			while ($tags = @mysql_fetch_array($result))
+			while ($tags = mysql_fetch_array($result))
 			{
 				$tags = array_map('stripslashes', $tags);
 				echo '
@@ -96,12 +96,12 @@
 				ON committees.id = committee_members.committee_id
 				WHERE committee_members.representative_id = '.$legislator['id'].'
 				AND (date_ended = "0000-00-00" OR date_ended IS NULL)';
-		$result = @mysql_query($sql);
-		if (@mysql_num_rows($result) > 0)
+		$result = mysql_query($sql);
+		if (mysql_num_rows($result) > 0)
 		{
 			echo '
 	<committees>';
-			while ($committee = @mysql_fetch_array($result))
+			while ($committee = mysql_fetch_array($result))
 			{
 				$committee = array_map('stripslashes', $committee);
 				if (empty($committee['position']))
@@ -126,12 +126,12 @@
 				ORDER BY bills.chamber DESC,
 				SUBSTRING(bills.number FROM 1 FOR 2) ASC,
 				CAST(LPAD(SUBSTRING(bills.number FROM 3), 4, "0") AS unsigned) ASC';
-		$result = @mysql_query($sql);
-		if (@mysql_num_rows($result) > 0)
+		$result = mysql_query($sql);
+		if (mysql_num_rows($result) > 0)
 		{
 			echo '
 	<bills>';
-			while ($bill = @mysql_fetch_array($result))
+			while ($bill = mysql_fetch_array($result))
 			{
 				echo '
 		<bill>

@@ -122,7 +122,7 @@ class User
 		}
 			
 		# Build up an array of tags, with the key being the tag and the value being the count.
-		while ($tag = @mysql_fetch_array($result))
+		while ($tag = mysql_fetch_array($result))
 		{
 			$tag = array_map('stripslashes', $tag);
 			$tags[$tag{'tag'}] = $tag['count'];
@@ -238,7 +238,7 @@ class User
 				LIMIT 100';
 
 		$result = mysql_query($sql);
-		if (@mysql_num_rows($result) == 0)
+		if (mysql_num_rows($result) == 0)
 		{
 			return FALSE;
 		}

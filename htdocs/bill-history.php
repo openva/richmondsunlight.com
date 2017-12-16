@@ -80,9 +80,9 @@ $sql = 'SELECT DATE_FORMAT(date, "%m/%d/%Y") AS date, date AS date_raw, status
 		FROM bills_status
 		WHERE bill_id='.$bill['id'].' AND session_id='.$bill['session_id'].'
 		ORDER BY date_raw ASC, id ASC';
-$result = @mysql_query($sql);
+$result = mysql_query($sql);
 $page_body .= '<ul>';
-while ($history = @mysql_fetch_array($result))
+while ($history = mysql_fetch_array($result))
 {
 	$page_body .= '<li>'.$history['date'].' '.$history['status'].'</li>';
 }

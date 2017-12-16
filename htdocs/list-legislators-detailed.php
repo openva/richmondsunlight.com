@@ -59,8 +59,8 @@ $sql = 'SELECT representatives.shortname, representatives.name, representatives.
 		WHERE (representatives.date_ended IS NULL
 			OR representatives.date_ended > now())
 		ORDER BY representatives.chamber ASC, representatives.name ASC';
-$result = @mysql_query($sql);
-if (@mysql_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
 	
 	# This is the code we'll use to specify that a checkbox should be checked by default.
@@ -174,7 +174,7 @@ if (@mysql_num_rows($result) > 0)
 			</tr>
 		</thead>
 		<tbody>';
-	while ($legislator = @mysql_fetch_array($result))
+	while ($legislator = mysql_fetch_array($result))
 	{
 		$legislator = array_map('stripslashes', $legislator);
 		

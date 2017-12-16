@@ -51,11 +51,11 @@ class Comments
 					)
 					AND comments.status="published" 
 					ORDER BY comments.date_created ASC';
-			$result = @mysql_query($sql);
-			if (@mysql_num_rows($result) > 0)
+			$result = mysql_query($sql);
+			if (mysql_num_rows($result) > 0)
 			{
 			
-				while ($comment = @mysql_fetch_array($result))
+				while ($comment = mysql_fetch_array($result))
 				{
 				
 					# Clean up the data.
@@ -91,11 +91,11 @@ class Comments
 						ON dashboard_user_data.user_id = users.id
 					WHERE dashboard_bills.bill_id='.$bill_info['id'].' AND dashboard_bills.notes IS NOT NULL
 					ORDER BY date_modified ASC';
-			$result = @mysql_query($sql);
-			if (@mysql_num_rows($result) > 0)
+			$result = mysql_query($sql);
+			if (mysql_num_rows($result) > 0)
 			{
 			
-				while ($comment = @mysql_fetch_array($result))
+				while ($comment = mysql_fetch_array($result))
 				{
 				
 					# Clean up the data.

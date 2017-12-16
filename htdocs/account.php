@@ -177,7 +177,7 @@ if (isset($_POST['submit']))
 		else $sql .= '"'.$form_data['mailing_list'].'"';
 		if (!empty($form_data['password'])) $sql .= ', password="'.$form_data['password'].'"';
 		$sql .= ' WHERE id='.$user['id'];
-		$result = @mysql_query($sql);
+		$result = mysql_query($sql);
 		if ($result === FALSE) die('Your account could not be updated.');
 
 		# Update the organization data.
@@ -231,12 +231,12 @@ if (!isset($_POST['submit']))
 			FROM users LEFT JOIN dashboard_user_data
 			ON users.id=dashboard_user_data.user_id
 			WHERE id='.$user['id'];
-	$result = @mysql_query($sql);
-	if (@mysql_num_rows($result) == 0)
+	$result = mysql_query($sql);
+	if (mysql_num_rows($result) == 0)
 	{
 		die('No user data found.');
 	}
-	$user_data = @mysql_fetch_array($result);
+	$user_data = mysql_fetch_array($result);
 	
 	$user_data = array_map('stripslashes', $user_data);
 	

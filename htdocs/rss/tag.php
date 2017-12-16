@@ -39,7 +39,7 @@
 
 	# Open a database connection.
 	$database = new Database;
-$database->connect_old();
+	$database->connect_old();
 
 	# Query the database for all bills by that tag.
 	$sql = 'SELECT bills.number, bills.catch_line, bills.summary,
@@ -53,7 +53,7 @@ $database->connect_old();
 			ON tags.bill_id=bills.id
 			WHERE bills.session_id = '.SESSION_ID.'
 			AND tags.tag="'.mysql_real_escape_string($tag).'"';
-	$result = @mysql_query($sql);
+	$result = mysql_query($sql);
 	
 	// Don't check to make sure the query was successful -- we want to make sure that people can
 	// even subscribe to feeds for tags that have nothing introduced yet.
@@ -61,7 +61,7 @@ $database->connect_old();
 	$rss_content = '';
 	
 	# Generate the RSS.
-	while ($bill = @mysql_fetch_array($result))
+	while ($bill = mysql_fetch_array($result))
 	{
 		
 		# Aggregate the variables into their RSS components.

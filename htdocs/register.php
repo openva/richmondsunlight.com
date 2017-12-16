@@ -195,7 +195,7 @@ if (isset($_POST['submit']))
 				WHERE email = "' . mysql_real_escape_string($form_data['email']) . '"
 				AND password IS NOT NULL';
 		$result = mysql_query($sql);
-		if (@mysql_num_rows($result) > 0)
+		if (mysql_num_rows($result) > 0)
 		{
 			$errors[] = 'an e-mail address that’s not already in use; better yet,
 				<a href="/account/reset-password/">reset your password</a> and use your existing
@@ -310,7 +310,7 @@ if (isset($_POST['submit']))
 			$sql = 'INSERT INTO dashboard_portfolios
 					SET name = "Bills", public="y", user_id = '.$user['id'].',
 					hash = "'.$hash.'", date_created = now()';
-			@mysql_query($sql);
+			mysql_query($sql);
 			
 			# Acknowledge the registration.
 			$page_body = '

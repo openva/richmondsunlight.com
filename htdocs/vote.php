@@ -300,11 +300,11 @@ $sql = 'SELECT DISTINCT bills_status.status, bills_status.translation,
 			ON bills_status.lis_vote_id = votes.lis_id
 		WHERE bills_status.bill_id = '.$bill['id'].'
 		ORDER BY date_raw DESC, bills_status.id DESC';
-$result = @mysql_query($sql);
-if (@mysql_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
 	$bill['status_history'] = '';
-	while ($status = @mysql_fetch_array($result))
+	while ($status = mysql_fetch_array($result))
 	{
 		
 		# Provide a link to view this vote, but only if it's not the vote that we're currently

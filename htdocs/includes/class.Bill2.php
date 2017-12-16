@@ -14,21 +14,21 @@ class Bill2
 		# Make sure we've got the information that we need.
 		if (!isset($number) || empty($number))
 		{
-			return FALSE;
+			return false;
 		}
 		if (!isset($year) || empty($year))
 		{
-			return FALSE;
+			return false;
 		}
 		
 		# Check that the data is clean.
 		if (strlen($year) != 4)
 		{
-			return FALSE;
+			return false;
 		}
 		if (strlen($number) > 7)
 		{
-			return FALSE;
+			return false;
 		}
 		$number = strtolower($number);
 		
@@ -47,6 +47,9 @@ class Bill2
 			}
 			
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		/*
 		 * Query the DB.
@@ -60,7 +63,7 @@ class Bill2
 		$result = mysql_query($sql);
 		if (mysql_num_rows($result) < 1)
 		{
-			return FALSE;
+			return false;
 		}
 		$bill = mysql_fetch_array($result);
 		return $bill['id'];
@@ -96,6 +99,9 @@ class Bill2
 		{
 			return unserialize($bill);
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		# RETRIEVE THE BILL INFO FROM THE DATABASE
 		$sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber,
@@ -147,7 +153,7 @@ class Bill2
 		$result = mysql_query($sql);
 		if (mysql_num_rows($result) == 0)
 		{
-			return FALSE;
+			return false;
 		}
 		$bill = mysql_fetch_array($result, MYSQL_ASSOC);
 		$bill = array_map('stripslashes', $bill);

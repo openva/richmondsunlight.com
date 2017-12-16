@@ -45,14 +45,14 @@ $sql = 'SELECT tags.id, tags.tag, bills.number AS bill, sessions.year, users.nam
 		WHERE DATE_SUB(CURDATE(), INTERVAL 3 DAY) <= tags.date_created
 		AND users.trusted = "n"
 		ORDER BY tags.date_created DESC, bills.id DESC';
-$result = @mysql_query($sql);
+$result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
 	$page_body .= '
 		<h2>Recent Tags</h2>
 		<p>The following tags have been applied to bills in the last three days by non-trusted
 		users.</p>';
-	while ($tag = @mysql_fetch_array($result))
+	while ($tag = mysql_fetch_array($result))
 	{
 		$tag = array_map('stripslashes', $tag);
 		$tag['bill'] = strtolower($tag['bill']);
@@ -67,13 +67,13 @@ $sql = 'SELECT name, url
 		FROM users
 		WHERE DATE_SUB(CURDATE(), INTERVAL 3 DAY) <= date_created AND name IS NOT NULL
 		ORDER BY date_created DESC';
-$result = @mysql_query($sql);
+$result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
 	$page_body .= '
 		<h2>Recent Registrants</h2>
 		<p>The following people have signed up in the past 3 days.</p>';
-	while ($user = @mysql_fetch_array($result))
+	while ($user = mysql_fetch_array($result))
 	{
 		$user = array_map('stripslashes', $user);
 		if (!empty($user['url']))
@@ -210,7 +210,7 @@ $sql = 'SELECT bills.number, bills.catch_line, sessions.year, COUNT(*) AS views
 		GROUP BY bills_views.bill_id
 		ORDER BY views DESC
 		LIMIT 10';
-$result = @mysql_query($sql);
+$result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
 	$page_body .= '
@@ -219,7 +219,7 @@ if (mysql_num_rows($result) > 0)
 		<table class="sortable" id="popular-bills">
 			<thead><tr><th>Year</th><th>Title</th><th>Views</th></tr></thead>
 			<tbody>';
-	while ($bill = @mysql_fetch_array($result))
+	while ($bill = mysql_fetch_array($result))
 	{
 		$bill = array_map('stripslashes', $bill);
 		$bill['number'] = strtolower($bill['number']);

@@ -65,15 +65,15 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 		GROUP BY tags.tag
 		HAVING count > 10
 		ORDER BY tag ASC';
-$result = @mysql_query($sql);
-$tag_count = @mysql_num_rows($result);
+$result = mysql_query($sql);
+$tag_count = mysql_num_rows($result);
 if ($tag_count > 0)
 {
 	$page_body .= '
 	<h2>Bill Topics</h2>
 	<div class="tags">';		
 	# Build up an array of tags, with the key being the tag and the value being the count.
-	while ($tag = @mysql_fetch_array($result))
+	while ($tag = mysql_fetch_array($result))
 	{
 		$tag = array_map('stripslashes', $tag);
 		$tags[$tag{tag}] = $tag['count'];
@@ -191,8 +191,8 @@ $sql = 'SELECT chamber, COUNT(*) AS count
 		FROM bills
 		WHERE session_id='.SESSION_ID.'
 		GROUP BY chamber';
-$result = @mysql_query($sql);
-while ($stats = @mysql_fetch_array($result))
+$result = mysql_query($sql);
+while ($stats = mysql_fetch_array($result))
 {
 	if ($stats['chamber'] == 'house')
 	{
@@ -230,14 +230,14 @@ $sql = 'SELECT bills.number, bills.catch_line,
 		WHERE bills.session_id = '.SESSION_ID.'
 		ORDER BY bills.hotness DESC
 		LIMIT 5';
-$result = @mysql_query($sql);
-if (@mysql_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
 	$page_sidebar .= '
 		<h3>Today’s Most Interesting Bills</h3>
 		<div class="box" id="interesting">
 			<ul>';
-	while ($bill = @mysql_fetch_array($result))
+	while ($bill = mysql_fetch_array($result))
 	{
 		$bill = array_map('stripslashes', $bill);
 		$bill['summary'] = substr($bill['summary'], 0, 175).' .&thinsp;.&thinsp;.';
@@ -270,14 +270,14 @@ if (IN_SESSION == 'y')
 				ON bills.chief_patron_id = representatives.id
 			ORDER BY bills.date_introduced DESC, bills.id DESC
 			LIMIT 5';
-	$result = @mysql_query($sql);
-	if (@mysql_num_rows($result) > 0)
+	$result = mysql_query($sql);
+	if (mysql_num_rows($result) > 0)
 	{
 		$page_sidebar .= '
 			<h3>Newest Bills</h3>
 			<div class="box" id="newest">
 				<ul>';
-		while ($bill = @mysql_fetch_array($result))
+		while ($bill = mysql_fetch_array($result))
 		{
 			$bill = array_map('stripslashes', $bill);
 			$bill['summary'] = substr($bill['summary'], 0, 175).'...';
@@ -310,14 +310,14 @@ $sql = 'SELECT comments.id, comments.bill_id, comments.date_created AS date,
 		WHERE comments.status="published"
 		ORDER BY comments.date_created DESC
 		LIMIT 5';
-$result = @mysql_query($sql);
+$result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
 	$page_sidebar .= '
 		<h3>Newest Comments</h3>
 		<div class="box" id="newest-comments">
 			<ul>';
-	while ($comment = @mysql_fetch_array($result))
+	while ($comment = mysql_fetch_array($result))
 	{
 		$comment = array_map('stripslashes', $comment);
 		if (strlen($comment['comment']) > 175)

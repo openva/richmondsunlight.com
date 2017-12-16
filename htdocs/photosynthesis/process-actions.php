@@ -64,7 +64,7 @@
 					FROM dashboard_portfolios
 					WHERE hash="'.$portfolio_hash.'"),
 				date_created=now()';
-		@mysql_query($sql);
+		mysql_query($sql);
 		
 		# Return the user back to his dashboard listing.
 		header('Location: '.$_SERVER['HTTP_REFERER']);
@@ -123,26 +123,26 @@
 		$sql = 'SELECT id, hash, watch_list_id
 				FROM dashboard_portfolios
 				WHERE hash="'.$portfolio_hash.'"';
-		$result = @mysql_query($sql);
-		if (@mysql_num_rows($result) == 0) die('Error: No portfolio found. Could not delete it.');
-		$portfolio = @mysql_fetch_array($result);
+		$result = mysql_query($sql);
+		if (mysql_num_rows($result) == 0) die('Error: No portfolio found. Could not delete it.');
+		$portfolio = mysql_fetch_array($result);
 			
 		# Remove all of the bills associated with this portfolio.
 		$sql = 'DELETE FROM dashboard_bills
 				WHERE portfolio_id='.$portfolio['id'].' AND user_id='.$user['id'];
-		@mysql_query($sql);
+		mysql_query($sql);
 		
 		# Delete the portfolio.
 		$sql = 'DELETE FROM dashboard_portfolios
 				WHERE id='.$portfolio['id'].' AND user_id='.$user['id'];
-		@mysql_query($sql);
+		mysql_query($sql);
 			
 		# Finally, if this is a smart portfolio, remove the watch list entry.
 		if (!empty($portfolio['watch_list_id']))
 		{
 			$sql = 'DELETE FROM dashboard_watch_lists
 					WHERE id = '.$portfolio['watch_list_id'];
-			@mysql_query($sql);
+			mysql_query($sql);
 		}
 		
 		header('Location: '.$_SERVER['HTTP_REFERER']);
@@ -180,7 +180,7 @@
 		if (!empty($form_data['notes'])) $sql .= ', notes="'.$form_data['notes'].'"';
 		if (!empty($form_data['public'])) $sql .= ', public="'.$form_data['public'].'"';
 		if (!empty($form_data['notify'])) $sql .= ', notify="'.$form_data['notify'].'"';
-		@mysql_query($sql);
+		mysql_query($sql);
 		header('Location: '.$_SERVER['HTTP_REFERER']);
 		exit;
 	}
@@ -229,7 +229,7 @@
 		$sql .= ' user_id='.$user['id'].', date_created=now()';
 		
 		# Perform the insert and preserve the watch list ID.
-		@mysql_query($sql);
+		mysql_query($sql);
 		$watch_list_id = mysql_insert_id();
 		
 		# Generate a random five-digit hash to ID this portfolio. It's in base 30,
@@ -243,7 +243,7 @@
 		if (!empty($form_data['notes'])) $sql .= ', notes="'.$form_data['notes'].'"';
 		if (!empty($form_data['public'])) $sql .= ', public="'.$form_data['public'].'"';
 		if (!empty($form_data['notify'])) $sql .= ', notify="'.$form_data['notify'].'"';
-		$result = @mysql_query($sql);
+		$result = mysql_query($sql);
 		$portfolio_id = mysql_insert_id();
 		
 		populate_smart_portfolio($portfolio_id);

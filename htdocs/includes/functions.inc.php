@@ -421,7 +421,7 @@ if (!function_exists('create_user'))
 		{
 			$sql .= $sql_inserts;
 		}
-		$result = @mysql_query($sql);
+		$result = mysql_query($sql);
 		if (!$result)
 		{
 			return FALSE;

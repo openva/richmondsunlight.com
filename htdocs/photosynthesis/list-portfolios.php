@@ -49,8 +49,8 @@
 				WHERE portfolio_id = dashboard_portfolios.id
 				AND sessions.year = ' . SESSION_YEAR . ') > 0
 			ORDER BY dashboard_user_data.organization ASC';
-	$result = @mysql_query($sql);
-	if (@mysql_num_rows($result) == 0)
+	$result = mysql_query($sql);
+	if (mysql_num_rows($result) == 0)
 	{
 		$page_body .= '<p>No organizations have yet added any bills to Photosynthesis for the current
 			General Assembly session.</p>';

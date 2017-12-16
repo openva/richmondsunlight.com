@@ -54,15 +54,15 @@
 			AND bills.number="'.mysql_real_escape_string($bill['number']).'"
 			ORDER BY bills_status.date DESC, bills_status.id DESC';
 
-	$result = @mysql_query($sql);
+	$result = mysql_query($sql);
 
-	if (@mysql_num_rows($result) > 0)
+	if (mysql_num_rows($result) > 0)
 	{
 		
 		$rss_content = '';
 
 		# Generate the RSS.
-		while ($status = @mysql_fetch_array($result))
+		while ($status = mysql_fetch_array($result))
 		{
 			
 			$status = array_map('stripslashes', $status);

@@ -436,7 +436,7 @@ if (!empty($tag))
 	<div class="box">
 		<h3>Related Tag Cloud</h3>
 		<div class="tags">';
-		while ($tag_data = @mysql_fetch_array($result))
+		while ($tag_data = mysql_fetch_array($result))
 		{
 			$tags[] = array_map('stripslashes', $tag_data);
 		}

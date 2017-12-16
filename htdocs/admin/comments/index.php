@@ -6,12 +6,6 @@
 # PURPOSE
 # Provides administrative comment-editing functions.
 #
-# NOTES
-# None.
-#
-# TODO
-# None.
-#
 ###
 
 # INCLUDES
@@ -106,9 +100,9 @@ else
 				ON comments.bill_id = bills.id
 			ORDER BY comments.date_created DESC
 			LIMIT 30';
-	$result = @mysql_query($sql);
+	$result = mysql_query($sql);
 	$page_body = '<div id="comments">';
-	while ($comment = @mysql_fetch_array($result))
+	while ($comment = mysql_fetch_array($result))
 	{
 		$page_body .= '
 			<div class="comment"'.(($comment['status'] == 'deleted') ? ' style="color: #999;"' : '').'>

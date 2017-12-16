@@ -66,14 +66,14 @@ $sql = 'SELECT bills.number, sessions.year, representatives.name AS patron,
 		WHERE DATE_SUB(CURDATE(), INTERVAL ' . $days . ' DAY) <= bills.date_introduced
 		ORDER BY bills.date_introduced DESC, bills.id DESC';
 
-$result = @mysql_query($sql);
-$num_results = @mysql_num_rows($result);
+$result = mysql_query($sql);
+$num_results = mysql_num_rows($result);
 if ($num_results > 0)
 {
 	$page_body .= '<p>'.$num_results.' bill'.($num_results > 1 ? 's': '').' found.</p>';
 	$date = '';
 	$i=0;
-	while ($bill = @mysql_fetch_assoc($result))
+	while ($bill = mysql_fetch_assoc($result))
 	{
 		$bill = array_map('stripslashes', $bill);
 		if ($bill['date_introduced'] != $date)
