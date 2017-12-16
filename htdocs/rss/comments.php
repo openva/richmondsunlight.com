@@ -35,7 +35,8 @@
 	
 	# PAGE CONTENT
 	# Open a database connection.
-	connect_to_db();
+	$database = new Database;
+	$database->connect_old();
 	
 	# Query the database for the last 20 comments.
 	$sql = 'SELECT comments.id, comments.bill_id, comments.date_created AS date,

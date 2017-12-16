@@ -43,7 +43,8 @@ if ((file_exists('cache/portfolio-'.$hash.'.xml')) && ((filemtime('cache/portfol
 }	
 
 # Open a database connection.
-connect_to_db();
+$database = new Database;
+$database->connect_old();
 
 # Query the database for information on this portfolio.
 $sql = 'SELECT id, name

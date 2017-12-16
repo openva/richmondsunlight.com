@@ -24,7 +24,8 @@
 	# DECLARATIVE FUNCTIONS
 	# Run those functions that are necessary prior to loading this specific
 	# page.
-	connect_to_db();
+	$database = new Database;
+	$database->connect_old();
 	
 	# PAGE METADATA
 	$page_title = 'Photosynthesis &raquo; Preferences';

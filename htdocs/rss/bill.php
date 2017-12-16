@@ -42,7 +42,8 @@
 	}
 
 	# Open a database connection.
-	connect_to_db();
+	$database = new Database;
+	$database->connect_old();
 
 	# Query the database for all bills by that bill number.
 	$sql = 'SELECT bills_status.status, bills.catch_line

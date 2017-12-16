@@ -38,7 +38,8 @@
 	}	
 
 	# Open a database connection.
-	connect_to_db();
+	$database = new Database;
+$database->connect_old();
 
 	# Query the database for all bills by that tag.
 	$sql = 'SELECT bills.number, bills.catch_line, bills.summary,

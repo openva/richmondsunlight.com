@@ -6,12 +6,6 @@
 # PURPOSE
 # Lists the bill activity in the past X days.
 #
-# NOTES
-# None.
-#
-# TODO
-# None.
-#
 ###
 
 # INCLUDES
@@ -24,7 +18,8 @@ include_once('vendor/autoload.php');
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-connect_to_db();
+$database = new Database;
+$database->connect_old();
 
 # LOCALIZE VARIABLES
 $days = @mysql_real_escape_string($_REQUEST['days']);

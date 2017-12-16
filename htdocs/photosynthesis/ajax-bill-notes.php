@@ -24,7 +24,8 @@ include_once('../includes/photosynthesis.inc.php');
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-connect_to_db();
+$database = new Database;
+$database->connect_old();
 
 # Make sure we have all of the appropriate data.
 if ( !isset($_POST['user_hash']) || !isset($_POST['id']) || !isset($_POST['value']) )
