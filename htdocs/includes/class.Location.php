@@ -53,6 +53,7 @@ class Location
 	# Convert coordinates into district IDs.
 	function coords_to_districts()
 	{
+		
 		if (!isset($this->latitude) || !isset($this->longitude))
 		{
 			return FALSE;

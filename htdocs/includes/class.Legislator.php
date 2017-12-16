@@ -5,10 +5,14 @@ class Legislator
 
 	function getid($shortname)
 	{
+
 		if (!isset($shortname) || empty($shortname))
 		{
 			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		$sql = 'SELECT id
 				FROM representatives
@@ -20,6 +24,7 @@ class Legislator
 		}
 		$legislator = mysql_fetch_array($result);
 		return $legislator['id'];
+		
 	} // end function "getid"
 	
 	function info($id)
@@ -44,6 +49,9 @@ class Legislator
 		{
 			return unserialize($result);
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		/*
 		 * RETRIEVE THE LEGISLATOR'S INFO FROM THE DATABASE

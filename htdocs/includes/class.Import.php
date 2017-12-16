@@ -118,5 +118,3 @@ class Import
 		$this->text = $purifier->purify($this->text);
 	}
 }
-
-?>

@@ -27,6 +27,9 @@ class Comments
 		{
 			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		# Initliaze the array to store comments.
 		$comments = array();
@@ -34,6 +37,7 @@ class Comments
 		# If instructed to retrieve directly posted comments.
 		if ($this->config->get_comments === TRUE)
 		{
+
 			# Start with directly posted comments.
 			$sql = 'SELECT comments.name, comments.date_created, comments.email, comments.url,
 					comments.comment, UNIX_TIMESTAMP(comments.date_created) AS timestamp,
@@ -146,5 +150,3 @@ class Comments
 	} // end method "get"
 	
 } // end class "comments"
-
-?>

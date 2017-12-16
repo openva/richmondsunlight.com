@@ -11,6 +11,10 @@ class CommentSubscription
 		{
 			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
+
 		$sql = 'INSERT INTO comments_subscriptions
 				SET user_id='.$this->user_id.', bill_id='.$this->bill_id.',
 				hash="'.generate_hash(8).'", date_created=now()';
@@ -21,15 +25,21 @@ class CommentSubscription
 		}
 		
 		return true;
+
 	}
 	
 	# Terminate an existing subscription. Requires the unique hash.
 	function delete()
 	{
+
 		if (!isset($this->hash))
 		{
 			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
+
 		$sql = 'DELETE FROM comments_subscriptions
 				WHERE hash="'.$hash.'"';
 		$result = mysql_query($sql);
@@ -49,6 +59,10 @@ class CommentSubscription
 		{
 			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
+
 		$sql = 'SELECT users.name, users.email, comments_subscriptions.hash
 				FROM comments_subscriptions LEFT JOIN users
 				ON comments_subscriptions.user_id=users.id
@@ -76,10 +90,15 @@ class CommentSubscription
 	# if so, returns the subscription hash.
 	function is_subscribed()
 	{
+
 		if (!isset($this->user_id) || !isset($this->bill_id))
 		{
 			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
+
 		$sql = 'SELECT hash
 				FROM comments_subscriptions
 				WHERE user_id='.$this->user_id.' AND bill_id='.$this->bill_id;
@@ -91,6 +110,7 @@ class CommentSubscription
 		$subscription = mysql_fetch_array($result);
 		
 		return $subscription['hash'];
+		
 	}
 	
 	# Send out an e-mail notifying a list of subscribers that a new comment has been posted to a
