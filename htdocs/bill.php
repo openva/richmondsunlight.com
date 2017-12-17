@@ -93,7 +93,7 @@ $debug_timing['definitions retrieved'] = microtime(TRUE);
 # We want to record a view count hit for this bill, but only if this is a real user, not a
 # search engine. Start by defining a list of bots.
 $bots = array('Googlebot', 'msnbot', 'Gigabot', 'Slurp', 'Teoma', 'ia_archiver', 'Yandex',
-			'Heritrix', 'twiceler', 'bingbot');
+			'Heritrix', 'twiceler', 'bingbot', 'bot');
 # Check to see if the current user agent is a known bot.
 foreach ($bots as $bot)
 {
@@ -335,43 +335,8 @@ else
 }
 
 # Display the poll results
-
-/*
- * Connect to Memcached to retrieve these poll results.
- */
-$mc = new Memcached();
-$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-$poll = $mc->get('poll-' . $bill['id']);
-
-/*
- * If we have poll results in the cache.
- */
-if ($poll != FALSE)
-{
-	$poll = unserialize($poll);
-}
-
-/*
- * Else if there are no poll results in the cache.
- */
-else
-{
-
-	$sql = 'SELECT COUNT(*) AS total,
-				(SELECT COUNT(*) 
-				FROM polls
-				WHERE bill_id = ' . $bill['id'] . '
-				AND vote = "y") AS yes
-			FROM polls
-			WHERE bill_id= ' . $bill['id'];
-	$result = mysql_query($sql);
-	if (mysql_num_rows($result) > 0)
-	{
-		$poll = mysql_fetch_array($result);
-		$mc->set( 'poll-' . $bill['id'], serialize($poll), (60 * 60 * 24) );
-	}
-	
-}
+$poll = new Poll;
+$poll->get_results();
 
 $debug_timing['poll results retrieved'] = microtime(TRUE);
 
@@ -385,26 +350,26 @@ else
 	$page_sidebar .= '>';
 }
 
-if ($poll['total'] > 0)
+if ($poll->results['total'] > 0)
 {
 	
 	# Do the math to determine the percentage for each.
-	$poll['no'] = round((($poll['total'] - $poll['yes']) / $poll['total']) * 100);
-	$poll['yes'] = round(($poll['yes'] / $poll['total']) * 100);
+	$poll->results['no'] = round((($poll->results['total'] - $poll->results['yes']) / $poll->results['total']) * 100);
+	$poll->results['yes'] = round(($poll->results['yes'] / $poll->results['total']) * 100);
 	
 	# Establish the label text for the graph.
-	$poll['no_text'] = urlencode('no '.$poll['no'].'%');
-	$poll['yes_text'] = urlencode('yes '.$poll['yes'].'%');
+	$poll->results['no_text'] = urlencode('no '.$poll->results['no'].'%');
+	$poll->results['yes_text'] = urlencode('yes '.$poll->results['yes'].'%');
 	
 	# Assemble the URL for, and display, the chart for the voting percentage.
 	$page_sidebar .= '<img src="'
 		.'//chart.googleapis.com/chart?chs=215x115&amp;cht=p&amp;chd=t:'
-		.$poll['yes'].','.$poll['no']
-		.'&amp;chl='.(($poll['yes']) ? $poll['yes_text']: '')
-		.((isset($poll['yes']) && isset($poll['no'])) ? '|': '').
-		(($poll['no']) ? $poll['no_text']: '')
+		.$poll->results['yes'].','.$poll->results['no']
+		.'&amp;chl='.(($poll->results['yes']) ? $poll->results['yes_text']: '')
+		.((isset($poll->results['yes']) && isset($poll->results['no'])) ? '|': '').
+		(($poll->results['no']) ? $poll->results['no_text']: '')
 		.'&amp;chf=bg,s,f4eee5&amp;chts=333333,9" />
-		<p>'.$poll['total'].' vote'.($poll['total'] > 1 ? 's' : '').'</p>';
+		<p>'.$poll->results['total'].' vote'.($poll->results['total'] > 1 ? 's' : '').'</p>';
 }
 else
 {
