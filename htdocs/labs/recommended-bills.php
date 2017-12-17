@@ -27,7 +27,8 @@
 	# DECLARATIVE FUNCTIONS
 	# Run those functions that are necessary prior to loading this specific
 	# page.
-	connect_to_db();
+	$database = new Database;
+	$database->connect_old();
 	
 	# INITIALIZE SESSION
 	session_start();
@@ -102,7 +103,7 @@ EOD;
 					<div class="tags">';
 				
 			# Build up an array of tags, with the key being the tag and the value being the count.
-			while ($tag = @mysql_fetch_array($result))
+			while ($tag = mysql_fetch_array($result))
 			{
 				$tag = array_map('stripslashes', $tag);
 				$tags[$tag{'tag'}] = $tag['count'];

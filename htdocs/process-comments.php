@@ -24,7 +24,8 @@ include_once('vendor/autoload.php');
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-connect_to_db();
+$database = new Database;
+$database->connect_old();
 
 # INITIALIZE SESSION
 session_start();
@@ -168,8 +169,8 @@ $sql = 'SELECT id
 		FROM comments
 		WHERE (name="'.$comment['email'].'" OR ip="'.$_SERVER['REMOTE_ADDR'].'")
 		AND (TIMESTAMPDIFF(SECOND, date_created, now()) < 5)';
-$result = @mysql_query($sql);
-if (@mysql_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
 	die('Slow down, cowboy: Only one comment is allowed every five seconds. That’s pretty reasonable.');
 }
@@ -179,8 +180,8 @@ $sql = 'SELECT *
 		FROM comments
 		WHERE (name="'.$comment['email'].'" OR ip="'.$_SERVER['REMOTE_ADDR'].'")
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 5)';
-$result = @mysql_query($sql);
-if (@mysql_num_rows($result) > 10)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 10)
 {
 	die('Slow down, cowboy: You’re posting way too many comments too fast. Relax, think, then write.');
 }
@@ -191,8 +192,8 @@ $sql = 'SELECT id
 		WHERE (name="'.$comment['email'].'" OR ip="'.$_SERVER['REMOTE_ADDR'].'")
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 60)
 		AND comment="'.$comment['comment'].'"';
-$result = @mysql_query($sql);
-if (@mysql_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
 	die('You’ve already posted that exact comment. You may not post it again. And, no, don’t '
 		.'just change it a little bit and repost it—a moderator will just delete it.');

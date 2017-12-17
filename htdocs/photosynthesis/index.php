@@ -18,7 +18,8 @@ include_once('../includes/photosynthesis.inc.php');
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-connect_to_db();
+$database = new Database;
+$database->connect_old();
 
 # PAGE METADATA
 $page_title = 'Photosynthesis';
@@ -68,21 +69,21 @@ $sql = 'SELECT id, hash, name, watch_list_id
 		FROM dashboard_portfolios
 		WHERE watch_list_id IS NULL AND user_id='.$user['id'].'
 		ORDER BY name ASC';
-$result = @mysql_query($sql);
+$result = mysql_query($sql);
 
 # If the user has no portfolios. It shouldn't happen, but it could.
-if (@mysql_num_rows($result) == 0)
+if (mysql_num_rows($result) == 0)
 {
 	# We want a portfolio to exist at all times. Create one.
 	$sql = 'INSERT INTO dashboard_portfolios
 			SET name = "Bills", public="y", user_id = '.$user['id'].',
 			date_created = now()';
-	@mysql_query($sql);
+	mysql_query($sql);
 	$bypass = 1;
 }
 
 # If the user has at least one portfolio, or if one was just created.
-if ((@mysql_num_rows($result) > 0) || ($bypass == 1))
+if ((mysql_num_rows($result) > 0) || ($bypass == 1))
 {
 	
 	# Display the header for the bill add form field.
@@ -93,9 +94,9 @@ if ((@mysql_num_rows($result) > 0) || ($bypass == 1))
 				<input type="text" size="7" maxlength="9" name="add-bill" id="add-bill" />';
 	
 	# Store the portfolio ID in a hidden form field, if there's just one portfolio.
-	if (@mysql_num_rows($result) == 1)
+	if (mysql_num_rows($result) == 1)
 	{
-		$portfolio = @mysql_fetch_array($result);
+		$portfolio = mysql_fetch_array($result);
 		$portfolio = array_map('stripslashes', $portfolio);
 		$page_body .= '<input type="hidden" name="portfolio" value="'.$portfolio['hash'].'" />';
 		
@@ -105,12 +106,12 @@ if ((@mysql_num_rows($result) > 0) || ($bypass == 1))
 	}
 	
 	# If there are multiple portfolios, display them as a SELECT.
-	elseif (@mysql_num_rows($result) > 1)
+	elseif (mysql_num_rows($result) > 1)
 	{
 		$page_body .= '
 					<select name="portfolio" size="1">
 					<option disabled>Select a Portfolio</option>';
-		while ($portfolio = @mysql_fetch_array($result))
+		while ($portfolio = mysql_fetch_array($result))
 		{
 			$portfolio = array_map('stripslashes', $portfolio);
 			$page_body .= '
@@ -136,11 +137,11 @@ $sql = 'SELECT id, name, hash, notes, watch_list_id
 		FROM dashboard_portfolios
 		WHERE user_id='.$user['id'].'
 		ORDER BY name ASC';
-$result = @mysql_query($sql);
+$result = mysql_query($sql);
 
-if (@mysql_num_rows($result) > 0)
+if (mysql_num_rows($result) > 0)
 {
-	while ($portfolio = @mysql_fetch_array($result))
+	while ($portfolio = mysql_fetch_array($result))
 	{
 		$portfolio = array_map('stripslashes', $portfolio);
 		

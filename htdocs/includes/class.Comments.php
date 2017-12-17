@@ -10,7 +10,7 @@ class Comments
 	
 		if (empty($this->bill_id))
 		{
-			return false;
+			return FALSE;
 		}
 		
 		if ( !isset($this->config->get_all) || ($this->config->get_all === TRUE) )
@@ -25,8 +25,11 @@ class Comments
 		$bill_info = $bill->info();
 		if ($bill_info === FALSE)
 		{
-			return false;
+			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		# Initliaze the array to store comments.
 		$comments = array();
@@ -34,6 +37,7 @@ class Comments
 		# If instructed to retrieve directly posted comments.
 		if ($this->config->get_comments === TRUE)
 		{
+
 			# Start with directly posted comments.
 			$sql = 'SELECT comments.name, comments.date_created, comments.email, comments.url,
 					comments.comment, UNIX_TIMESTAMP(comments.date_created) AS timestamp,
@@ -51,11 +55,11 @@ class Comments
 					)
 					AND comments.status="published" 
 					ORDER BY comments.date_created ASC';
-			$result = @mysql_query($sql);
-			if (@mysql_num_rows($result) > 0)
+			$result = mysql_query($sql);
+			if (mysql_num_rows($result) > 0)
 			{
 			
-				while ($comment = @mysql_fetch_array($result))
+				while ($comment = mysql_fetch_array($result))
 				{
 				
 					# Clean up the data.
@@ -91,11 +95,11 @@ class Comments
 						ON dashboard_user_data.user_id = users.id
 					WHERE dashboard_bills.bill_id='.$bill_info['id'].' AND dashboard_bills.notes IS NOT NULL
 					ORDER BY date_modified ASC';
-			$result = @mysql_query($sql);
-			if (@mysql_num_rows($result) > 0)
+			$result = mysql_query($sql);
+			if (mysql_num_rows($result) > 0)
 			{
 			
-				while ($comment = @mysql_fetch_array($result))
+				while ($comment = mysql_fetch_array($result))
 				{
 				
 					# Clean up the data.
@@ -146,5 +150,3 @@ class Comments
 	} // end method "get"
 	
 } // end class "comments"
-
-?>

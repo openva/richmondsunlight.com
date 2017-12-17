@@ -24,7 +24,8 @@ include_once('vendor/autoload.php');
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-connect_to_db();
+$database = new Database;
+$database->connect_old();
 
 # INITIALIZE SESSION
 session_start();
@@ -92,7 +93,7 @@ $debug_timing['definitions retrieved'] = microtime(TRUE);
 # We want to record a view count hit for this bill, but only if this is a real user, not a
 # search engine. Start by defining a list of bots.
 $bots = array('Googlebot', 'msnbot', 'Gigabot', 'Slurp', 'Teoma', 'ia_archiver', 'Yandex',
-			'Heritrix', 'twiceler', 'bingbot');
+			'Heritrix', 'twiceler', 'bingbot', 'bot');
 # Check to see if the current user agent is a known bot.
 foreach ($bots as $bot)
 {
@@ -306,118 +307,59 @@ if ($bill['session_id'] == SESSION_ID)
 
 $debug_timing['portfolio data retrieved'] = microtime(TRUE);
 
-# Display the poll voting form, but only if this user hasn't voted on this bill and
-# this bill is from the current session.
-if (($bill['session_id'] == SESSION_ID) && (has_voted($bill['id']) === FALSE))
-{
-	$page_sidebar .= '
-	<div class="box">
-		<h3>Cast Your Vote</h3>
-		<p>Do you think this bill should become law?</p>
-		<form method="post" action="/process-polls.php">
-			<input type="radio" name="poll[vote]" value="y" />Yes<br />
-			<input type="radio" name="poll[vote]" value="n" />No<br />
-			<div style="display: none;"><input type="radio" name="poll[vote]" value="x" />I’m a Spammer<br /></div>
-			<input type="hidden" name="poll[bill_id]" value="' . $bill['id'] . '">
-			<input type="hidden" name="poll[return_to]" value="' . $_SERVER['REQUEST_URI'] . '" />
-			<input type="submit" name="submit" value="Vote"><br />
-			<p><a id="show-poll-results" style="cursor: pointer;">View Results</a></p>
-		</form>
-	</div>';
-}
-
-else
-{
-	$has_voted = 'yes';
-	$page_sidebar .= '
-	<h3>Poll Results</h3>';
-}
-
-# Display the poll results
-
-/*
- * Connect to Memcached to retrieve these poll results.
- */
-$mc = new Memcached();
-$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-$poll = $mc->get('poll-' . $bill['id']);
-
-/*
- * If we have poll results in the cache.
- */
-if ($poll != FALSE)
-{
-	$poll = unserialize($poll);
-}
-
-/*
- * Else if there are no poll results in the cache.
- */
-else
+# Get poll results.
+$poll = new Poll;
+if ($poll->get_results() !== FALSE)
 {
 
-	$sql = 'SELECT COUNT(*) AS total,
-				(SELECT COUNT(*) 
-				FROM polls
-				WHERE bill_id = ' . $bill['id'] . '
-				AND vote = "y") AS yes
-			FROM polls
-			WHERE bill_id= ' . $bill['id'];
-	$result = mysql_query($sql);
-	if (mysql_num_rows($result) > 0)
+	$debug_timing['poll results retrieved'] = microtime(TRUE);
+
+	$page_sidebar .= '<div id="poll-results"';
+	if (!isset($has_voted))
 	{
-		$poll = mysql_fetch_array($result);
-		$mc->set( 'poll-' . $bill['id'], serialize($poll), (60 * 60 * 24) );
-	}
-	
-}
-
-$debug_timing['poll results retrieved'] = microtime(TRUE);
-
-$page_sidebar .= '<div id="poll-results"';
-if (!isset($has_voted))
-{
-	$page_sidebar .= ' style="display: none;">';
-}
-else
-{
-	$page_sidebar .= '>';
-}
-
-if ($poll['total'] > 0)
-{
-	
-	# Do the math to determine the percentage for each.
-	$poll['no'] = round((($poll['total'] - $poll['yes']) / $poll['total']) * 100);
-	$poll['yes'] = round(($poll['yes'] / $poll['total']) * 100);
-	
-	# Establish the label text for the graph.
-	$poll['no_text'] = urlencode('no '.$poll['no'].'%');
-	$poll['yes_text'] = urlencode('yes '.$poll['yes'].'%');
-	
-	# Assemble the URL for, and display, the chart for the voting percentage.
-	$page_sidebar .= '<img src="'
-		.'//chart.googleapis.com/chart?chs=215x115&amp;cht=p&amp;chd=t:'
-		.$poll['yes'].','.$poll['no']
-		.'&amp;chl='.(($poll['yes']) ? $poll['yes_text']: '')
-		.((isset($poll['yes']) && isset($poll['no'])) ? '|': '').
-		(($poll['no']) ? $poll['no_text']: '')
-		.'&amp;chf=bg,s,f4eee5&amp;chts=333333,9" />
-		<p>'.$poll['total'].' vote'.($poll['total'] > 1 ? 's' : '').'</p>';
-}
-else
-{
-	if ($bill['session_id'] == SESSION_ID)
-	{
-		$page_sidebar .= '<p>No Richmond Sunlight visitors have voted on this bill yet.</p>';
+		$page_sidebar .= ' style="display: none;">';
 	}
 	else
 	{
-		$page_sidebar .= '<p>No Richmond Sunlight visitors voted on this bill while voting was open.</p>';
+		$page_sidebar .= '>';
 	}
+
+	if ($poll->results['total'] > 0)
+	{
+		
+		# Do the math to determine the percentage for each.
+		$poll->results['no'] = round((($poll->results['total'] - $poll->results['yes']) / $poll->results['total']) * 100);
+		$poll->results['yes'] = round(($poll->results['yes'] / $poll->results['total']) * 100);
+		
+		# Establish the label text for the graph.
+		$poll->results['no_text'] = urlencode('no '.$poll->results['no'].'%');
+		$poll->results['yes_text'] = urlencode('yes '.$poll->results['yes'].'%');
+		
+		# Assemble the URL for, and display, the chart for the voting percentage.
+		$page_sidebar .= '<img src="'
+			.'//chart.googleapis.com/chart?chs=215x115&amp;cht=p&amp;chd=t:'
+			.$poll->results['yes'].','.$poll->results['no']
+			.'&amp;chl='.(($poll->results['yes']) ? $poll->results['yes_text']: '')
+			.((isset($poll->results['yes']) && isset($poll->results['no'])) ? '|': '').
+			(($poll->results['no']) ? $poll->results['no_text']: '')
+			.'&amp;chf=bg,s,f4eee5&amp;chts=333333,9" />
+			<p>'.$poll->results['total'].' vote'.($poll->results['total'] > 1 ? 's' : '').'</p>';
+	}
+	else
+	{
+		if ($bill['session_id'] == SESSION_ID)
+		{
+			$page_sidebar .= '<p>No Richmond Sunlight visitors have voted on this bill yet.</p>';
+		}
+		else
+		{
+			$page_sidebar .= '<p>No Richmond Sunlight visitors voted on this bill while voting was open.</p>';
+		}
+	}
+	$page_sidebar .= '</div>';
+
 }
-$page_sidebar .= '</div>';
-	
+
 # Tags
 $page_sidebar .= '
 	<div class="box">

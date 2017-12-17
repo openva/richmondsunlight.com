@@ -18,7 +18,8 @@ include_once('vendor/autoload.php');
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-connect_to_db();
+$database = new Database;
+$database->connect_old();
 
 # INITIALIZE SESSION
 session_start();
@@ -32,15 +33,15 @@ $sql = 'SELECT id, shortname, name, chamber, meeting_time, url
 		FROM committees
 		WHERE shortname="'.$committee.'"
 		AND chamber="'.$chamber.'"';
-$result = @mysql_query($sql);
-if (@mysql_num_rows($result) == 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) == 0)
 {
 	header("Status: 404 Not Found\n\r");
 	include('404.php');
 	exit();
 }
 
-$committee = @mysql_fetch_array($result);
+$committee = mysql_fetch_array($result);
 
 # Select the representatives on this committee.
 $sql = 'SELECT representatives.shortname, representatives.name_formatted AS name,
@@ -53,8 +54,8 @@ $sql = 'SELECT representatives.shortname, representatives.name_formatted AS name
 		AND (committee_members.date_ended > now() OR committee_members.date_ended IS NULL)
 		AND (representatives.date_ended >= now() OR representatives.date_ended IS NULL)
 		ORDER BY committee_members.position DESC, representatives.name ASC';
-$result = @mysql_query($sql);
-while ($member = @mysql_fetch_array($result))
+$result = mysql_query($sql);
+while ($member = mysql_fetch_array($result))
 {
 	$member['name_simple'] = pivot($member['name_simple']);
 	$committee['member'][] = $member;
@@ -137,10 +138,10 @@ $sql = 'SELECT COUNT(*) AS failed,
 		WHERE status = "failed" AND last_committee_id = '.$committee['id'].'
 		AND session_id='.SESSION_ID;
 
-$result = @mysql_query($sql);
-if (@mysql_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
-	$stats = @mysql_fetch_array($result);
+	$stats = mysql_fetch_array($result);
 	
 	# "We'll have no dividing by zero in this house, young man."
 	if (($stats['failed'] > 0) && ($stats['total'] > 0))
@@ -172,12 +173,12 @@ $sql = 'SELECT representatives.party, representatives.party AS party1,
 		AND session_id='.SESSION_ID.'
 		GROUP BY party
 		ORDER BY party DESC';
-$result = @mysql_query($sql);
-if (@mysql_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
 	$page_sidebar .= '<p>';
 	
-	while ($stats = @mysql_fetch_array($result))
+	while ($stats = mysql_fetch_array($result))
 	{
 		
 		if ($stats['party'] == 'R') $stats['party'] = 'Republican';
@@ -204,11 +205,11 @@ $sql = 'SELECT chamber, number, catch_line
 		AND status != "passed '.$committee['chamber'].'" AND status != "passed"
 		AND status != "vetoed" AND status != "passed committee" AND status != "failed committee"
 		ORDER BY hotness';
-$result = @mysql_query($sql);
-if (@mysql_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
 	
-	$total_bills = @mysql_num_rows($result);
+	$total_bills = mysql_num_rows($result);
 	
 	# List only the last five.
 	if ($total_bills < 5)
@@ -237,7 +238,7 @@ if (@mysql_num_rows($result) > 0)
 	$page_sidebar .= '</p>
 		<ul>';
 	$i=0;
-	while ($bill = @mysql_fetch_array($result))
+	while ($bill = mysql_fetch_array($result))
 	{
 		$bill = array_map('stripslashes', $bill);
 		$page_sidebar .= '<li><a href="/bill/'.SESSION_YEAR.'/'.$bill['number'].'/" class="bill">'
@@ -264,8 +265,8 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 		WHERE committees.id='.$committee['id'].' AND bills.session_id = '.SESSION_ID.'
 		GROUP BY tags.tag
 		ORDER BY tags.tag ASC';
-$result = @mysql_query($sql);
-if (@mysql_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
 	$page_sidebar .= '
 	<a href="javascript:openpopup(\'/help/tag-clouds/\')"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
@@ -275,7 +276,7 @@ if (@mysql_num_rows($result) > 0)
 		<div class="tags">';
 	$top_tag = 1;
 	$top_tag_size = 3;
-	while ($tag = @mysql_fetch_array($result))
+	while ($tag = mysql_fetch_array($result))
 	{
 		$tags[] = array_map('stripslashes', $tag);
 		if ($tag['count'] > $top_tag) $top_tag = $tag['count'];
@@ -326,10 +327,10 @@ $sql = 'SELECT name, meeting_time
 		FROM committees
 		WHERE parent_id='.$committee['id'].'
 		ORDER BY name ASC';
-$result = @mysql_query($sql);
+$result = mysql_query($sql);
 
 # If there are no subcommittees.
-if (@mysql_num_rows($result) == 0)
+if (mysql_num_rows($result) == 0)
 {
 	$page_body .= '<p>This committee has no subcommittees.</p>';
 }
@@ -338,7 +339,7 @@ if (@mysql_num_rows($result) == 0)
 else
 {
 	$page_body .= '<ul>';
-	while ($subcommittee = @mysql_fetch_array($result))
+	while ($subcommittee = mysql_fetch_array($result))
 	{
 		$subcommittee = array_map('stripslashes', $subcommittee);
 		$page_body .= '<li>'.$subcommittee['name'];

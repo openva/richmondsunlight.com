@@ -381,12 +381,12 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 				Commons Zero license</a>. All creative content published under a
 				<a href="https://creativecommons.org/licenses/by-sa/3.0/us/">CC BY-SA 3.0 US</a>
 				license. <a href="https://github.com/openva/richmondsunlight.com">All source code is
-				available on GitHub</a>—pull requests welcome!—published under the MIT License.</p>
+				available on GitHub</a> — pull requests welcome! — published under the MIT License.
+				<a href="https://updown.io/vyvj">See our system status dashboard</a>.</p>
 
 				<p
 				class="quote">“Sunlight is said to be the best of disinfectants.” —Justice Louis
-				Brandeis, 1914</p> <a href="http://www.briworks.com/"><img src="/images/bri.gif"
-				id="bri" width="100" height="35" alt="Hosting Donated by Blue Ridge InternetWorks" /></a>
+				Brandeis, 1914</p>
 
 			</div>
 			</footer>	

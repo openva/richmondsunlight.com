@@ -9,7 +9,7 @@ class Import
 		
 		if (!isset($this->bill_number) || !isset($this->lis_session_id))
 		{
-			return false;
+			return FALSE;
 		}
 	
 		# Retrieve the full text.
@@ -88,7 +88,7 @@ class Import
 		# In the unlikely possibility that we are now left with no text at all, then give up.
 		if (empty($text))
 		{
-			return false;
+			return FALSE;
 		}
 		
 		# Provide a domain name for all links.
@@ -104,7 +104,7 @@ class Import
 		
 		if (!isset($this->text))
 		{
-			return false;
+			return FALSE;
 		}
 		
 		# Convert the legislature's Windows-1252 text to UTF-8.
@@ -118,5 +118,3 @@ class Import
 		$this->text = $purifier->purify($this->text);
 	}
 }
-
-?>

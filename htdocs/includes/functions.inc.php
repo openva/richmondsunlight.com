@@ -86,7 +86,7 @@ function cache_open($key)
 	}
 	else
 	{
-		return false;
+		return FALSE;
 	}
 	
 }
@@ -127,7 +127,7 @@ function cache_age($key)
 	$result = mysql_query($sql);
 	if ($result === false)
 	{
-		return false;
+		return FALSE;
 	}
 	$cache = mysql_fetch_array($result);
 	
@@ -197,14 +197,14 @@ function validate_email($email)
 	
 	if (empty($email))
 	{
-		return false;
+		return FALSE;
 	}
 	
 	if (filter_var($email, FILTER_VALIDATE_EMAIL))
 	{
 		return true;
 	}
-	return false;
+	return FALSE;
 	
 }
 	
@@ -218,7 +218,7 @@ function pivot($text)
 	
 	if (empty($text))
 	{
-		return false;
+		return FALSE;
 	}
 	if (strpos($text, ', ') !== false)
 	{
@@ -261,7 +261,7 @@ function spam_proof($email)
 {
 	if (empty($email))
 	{
-		return false;
+		return FALSE;
 	}
 	$email = str_replace('@', '&#064;', $email);
 	return $email;
@@ -421,10 +421,10 @@ if (!function_exists('create_user'))
 		{
 			$sql .= $sql_inserts;
 		}
-		$result = @mysql_query($sql);
+		$result = mysql_query($sql);
 		if (!$result)
 		{
-			return false;
+			return FALSE;
 		}
 		elseif ($options['dashboard'] == 'y')
 		{
@@ -498,11 +498,11 @@ function update_user($options)
 	parse_str($options, $options);
 	if (count($options) < 1)
 	{
-		return false;
+		return FALSE;
 	}
 	if (empty($_SESSION['id']))
 	{
-		return false;
+		return FALSE;
 	}
 	
 	# If this user's data is cached in APC, delete it, since it's now out of date.
@@ -531,7 +531,7 @@ function update_user($options)
 	$result = mysql_query($sql);
 	if (!$result)
 	{
-		return false;
+		return FALSE;
 	}
 	return true;
 }
@@ -557,7 +557,7 @@ function logged_in($registered = '')
 	 */
 	if (empty($_SESSION['id']))
 	{
-		return false;
+		return FALSE;
 	}
 	
 	/*
@@ -614,7 +614,7 @@ function logged_in($registered = '')
 		return true;
 	}
 	
-	return false;
+	return FALSE;
 	
 }
 	
@@ -637,7 +637,7 @@ function blacklisted()
 	}
 	else
 	{
-		return false;
+		return FALSE;
 	}
 }
 	
@@ -706,7 +706,7 @@ function balloon($bill, $type)
 # status into meaningful description.
 function explain_status($status)
 {
-	if (empty($status)) return false;
+	if (empty($status)) return FALSE;
 	if ($status == 'continued') return 'Continued to Next Session';
 	elseif ($status == 'introduced') return 'Introduced';
 	elseif ($status == 'committee') return 'In Committee';
@@ -743,7 +743,7 @@ function get_content($url)
 	
 	if (empty($string))
 	{
-		return false;
+		return FALSE;
 	}
 	
 	return $string;
@@ -754,7 +754,7 @@ function district_to_id($number, $chamber)
 {
 	if (!isset($number) || !isset($chamber))
 	{
-		return false;
+		return FALSE;
 	}
 	
 	# Select the information from the database.
@@ -772,7 +772,7 @@ function district_to_id($number, $chamber)
 		return $district['id'];
 	}
 	
-	return false;
+	return FALSE;
 }
 
 # nl2p is WordPress' wpautop(), renamed
@@ -870,7 +870,7 @@ function tag_cloud($tags)
 
 	if ( !isset($tags) || !is_array($tags) )
 	{
-		return false;
+		return FALSE;
 	}
 	
 	$html = '';
@@ -952,7 +952,7 @@ function bill_sections($bill_id)
 	
 	if (!isset($bill_id))
 	{
-		return false;
+		return FALSE;
 	}
 	
 	$sql = 'SELECT vacode.section_number, vacode.section_name AS catch_line
@@ -966,7 +966,7 @@ function bill_sections($bill_id)
 	$result = mysql_query($sql);
 	if (mysql_num_rows($result) < 1)
 	{
-		return false;
+		return FALSE;
 	}
 	else
 	{
@@ -980,7 +980,7 @@ function bill_sections($bill_id)
 	# In case we wound up with no viable sections.
 	if (count($section) == 0)
 	{
-		return false;
+		return FALSE;
 	}
 	
 	return $sections;

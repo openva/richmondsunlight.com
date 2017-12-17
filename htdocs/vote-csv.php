@@ -25,11 +25,12 @@
 	# DECLARATIVE FUNCTIONS
 	# Run those functions that are necessary prior to loading this specific
 	# page.
-	connect_to_db();
+	$database = new Database;
+$database->connect_old();
 	
 	# LOCALIZE VARIABLES
-	$shortname = @mysql_real_escape_string($_GET['shortname']);
-	$year = @mysql_real_escape_string($_GET['year']);
+	$shortname = mysql_real_escape_string($_GET['shortname']);
+	$year = mysql_real_escape_string($_GET['year']);
 	
 	# Select the vote data from the database.
 	$sql = 'SELECT bills.number AS bill_number, bills.catch_line, representatives_votes.vote,
@@ -45,8 +46,8 @@
 			AND sessions.year = '.$year.' AND bills_status.date IS NOT NULL
 			AND votes.session_id=sessions.id
 			ORDER BY date ASC, committee ASC';
-	$result = @mysql_query($sql);
-	if (@mysql_num_rows($result) > 0)
+	$result = mysql_query($sql);
+	if (mysql_num_rows($result) > 0)
 	{
 		
 		# Send the headers to have the data downloaded as a CSV file.

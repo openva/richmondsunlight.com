@@ -12,6 +12,9 @@ class Video
 		{
 			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		$sql = 'SELECT id, committee_id, author_name, title, html, path, capture_directory,
 				description, license, length, fps, capture_rate, sponsor, width, height, date,
@@ -41,6 +44,9 @@ class Video
 		{
 			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 
 		# Clean up the data.
 		$this->video = array_map('stripslashes', $this->video);
@@ -193,6 +199,10 @@ class Video
 			return FALSE;
 		}
 		$start = microtime(TRUE);
+
+		$database = new Database;
+		$database->connect_old();
+
 		/*$sql = 'SELECT DISTINCT
 		
 					(SELECT TIME_TO_SEC(MIN(time))
@@ -241,10 +251,14 @@ class Video
 	
 	function by_legislator()
 	{
+
 		if (!isset($this->legislator_id))
 		{
 			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		$sql = 'SELECT files.id, files.path, files.date, files.chamber, files.capture_directory,
 				video_clips.legislator_id, video_clips.bill_id, video_clips.time_start,
@@ -284,6 +298,9 @@ class Video
 		{
 			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		$sql = 'SELECT files.id, files.path, files.capture_directory, files.date, files.chamber,
 				files.capture_rate, video_index.time, video_index.screenshot
@@ -388,6 +405,9 @@ class Video
 		{
 			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		# Generate a list of all tags applied to this file, getting each tag for every screenshot
 		# that we have. So if we have ten screenshots of a bill tagged with "business," that would
@@ -504,6 +524,9 @@ class Video
 			$this->fuzz = 0;
 			$this->fuzz_default = $this->fuzz;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 	
 		# Generates a list of every moment.
 		$sql = 'SELECT files.path, files.capture_directory, files.date, files.chamber,
@@ -669,6 +692,9 @@ class Video
 		{
 			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		# First, remove every clip already stored for this file.
 		$sql = 'DELETE FROM video_clips
@@ -755,6 +781,9 @@ class Video
 		{
 			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		$sql = 'SELECT files.path, files.date, DATE_FORMAT(files.date, "%b %e, %Y") AS date_formatted,
 				representatives.name_formatted AS legislator_name, bills.number AS bill_number,
@@ -813,6 +842,9 @@ class Video
 		{
 			$this->fuzz = 5;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		if ($this->clip_type == 'legislators')
 		{
@@ -933,6 +965,9 @@ class Video
 		{
 			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		$sql = 'UPDATE files
 				SET transcript = "'.mysql_real_escape_string($this->transcript).'",
@@ -968,6 +1003,9 @@ class Video
 		{
 			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		$this->transcript = new stdClass;
 		
@@ -1271,6 +1309,9 @@ class Video
 			return FALSE;
 		}
 
+		$database = new Database;
+		$database->connect_old();
+
 		/*
 		 * Delete all existing text for this video.
 		 */
@@ -1420,6 +1461,9 @@ class Video
 		{
 			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 
 		/*
 		 * Retrieve all captions for this file.
@@ -1776,11 +1820,17 @@ class Video
 		/*
 		 * Require a file ID.
 		 */
-		if (isset($this->id)) $this->file_id = $this->id;
+		if (isset($this->id))
+		{
+			$this->file_id = $this->id;
+		}
 		if (!isset($this->file_id))
 		{
 			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 
 		/*
 		 * Retrieve all captions for this file.
@@ -2043,7 +2093,7 @@ foreach ($files as $file)
 	rename($container_directory.$file, $new_container_directory.$video[$file]);
 	
 	# Rename the video directory (if it exists), making it the ID.
-	if (file_exists($screenshot_directory) !== false)
+	if (file_exists($screenshot_directory) !== FALSE)
 	{
 		rename($screenshot_directory, $new_container_directory.$video[$file]);
 	}

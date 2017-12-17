@@ -41,7 +41,8 @@
 	}
 
 	# Open a database connection.
-	connect_to_db();
+	$database = new Database;
+	$database->connect_old();
 	
 	# Query the database for information about that patron.
 	$sql = 'SELECT representatives.id, representatives.name, representatives.chamber,
@@ -50,12 +51,12 @@
 			LEFT JOIN districts
 				ON representatives.district_id=districts.id
 			WHERE representatives.shortname = "'.mysql_real_escape_string($legislator['shortname']).'"';
-	$result = @mysql_query($sql);
-	if (@mysql_num_rows($result) == 0)
+	$result = mysql_query($sql);
+	if (mysql_num_rows($result) == 0)
 	{
 		die();
 	}
-	$legislator = @mysql_fetch_array($result);	
+	$legislator = mysql_fetch_array($result);	
 	# Clean up some data.
 	$legislator = array_map('stripslashes', $legislator);
 	$legislator['suffix'] = '('.$legislator['party'].'-'.$legislator['district'].')';
@@ -84,7 +85,7 @@
 			WHERE bills.session_id = '.SESSION_ID.'
 			AND representatives.shortname="'.$legislator['shortname'].'"
 			ORDER BY bills.date_modified DESC';
-	$result = @mysql_query($sql);
+	$result = mysql_query($sql);
 	
 	// Don't check to make sure the query was successful -- we want to make sure that people can
 	// even subscribe to feeds for legislators that have introduced nothing yet.
@@ -92,7 +93,7 @@
 	$rss_content = '';
 	
 	# Generate the RSS.
-	while ($bill = @mysql_fetch_array($result))
+	while ($bill = mysql_fetch_array($result))
 	{
 		
 		# Aggregate the variables into their RSS components.

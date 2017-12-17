@@ -57,6 +57,9 @@ class User
 			
 		}
 
+		$database = new Database;
+		$database->connect_old();
+
 		$sql = 'SELECT id, password
 				FROM users
 				WHERE cookie_hash="' . mysql_real_escape_string($_SESSION['id']) . '"';
@@ -97,8 +100,11 @@ class User
 		# The user must be logged in.
 		if (logged_in() !== TRUE)
 		{
-			return false;
+			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		# Get the user's account data.
 		$user = get_user();
@@ -118,11 +124,11 @@ class User
 		# Unless we have ten tags, we just don't have enough data to continue.
 		if (mysql_num_rows($result) < 10)
 		{
-			return false;
+			return FALSE;
 		}
 			
 		# Build up an array of tags, with the key being the tag and the value being the count.
-		while ($tag = @mysql_fetch_array($result))
+		while ($tag = mysql_fetch_array($result))
 		{
 			$tag = array_map('stripslashes', $tag);
 			$tags[$tag{'tag'}] = $tag['count'];
@@ -137,6 +143,7 @@ class User
 		ksort($tags);
 		
 		return $tags;
+
 	}
 	
 	# Provide a listing of bills that this bill has not seen, but would probably be interested
@@ -160,7 +167,7 @@ class User
 		if ($mc->getResultCode() === 0)
 		{
 			$bills = unserialize($result);
-			if ($bills !== false)
+			if ($bills !== FALSE)
 			{
 				return $bills;
 			}	
@@ -168,10 +175,13 @@ class User
 		
 		$tags = User::views_cloud();
 
-		if ($tags === false)
+		if ($tags === FALSE)
 		{
-			return false;
+			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		# Get a list of every bill that this user has looked at.
 		$sql = 'SELECT DISTINCT bills_views.bill_id AS id
@@ -238,9 +248,9 @@ class User
 				LIMIT 100';
 
 		$result = mysql_query($sql);
-		if (@mysql_num_rows($result) == 0)
+		if (mysql_num_rows($result) == 0)
 		{
-			return false;
+			return FALSE;
 		}
 		else
 		{
@@ -280,8 +290,11 @@ class User
 		
 		if (!isset($user['latitude']) || !isset($user['longitude']))
 		{
-			return false;
+			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		$sql = 'SELECT bills.id, bills.number, bills.catch_line, sessions.year,
 				bills_places.placename, bills_places.latitude, bills_places.longitude,
@@ -301,7 +314,7 @@ class User
 		$result = mysql_query($sql);
 		if (mysql_num_rows($result) == 0)
 		{
-			return false;
+			return FALSE;
 		}
 		
 		$bills = array();
@@ -319,13 +332,16 @@ class User
 	{
 	
 		# The user must be logged in.
-		if (logged_in() !== true)
+		if (logged_in() !== TRUE)
 		{
-			return false;
+			return FALSE;
 		}
 		
 		# Get the user's account data.
 		$user = get_user();
+
+		$database = new Database;
+		$database->connect_old();
 		
 		$sql = 'SELECT
 					(SELECT COUNT(*)
@@ -339,7 +355,7 @@ class User
 		$result = mysql_query($sql);
 		if (mysql_num_rows($result) == 0)
 		{
-			return false;
+			return FALSE;
 		}
 		$stats = mysql_fetch_object($result);
 		return $stats;
@@ -350,13 +366,16 @@ class User
 	{
 	
 		# The user must be logged in.
-		if (logged_in() !== true)
+		if (logged_in() !== TRUE)
 		{
-			return false;
+			return FALSE;
 		}
 		
 		# Get the user's account data.
 		$user = get_user();
+
+		$database = new Database;
+		$database->connect_old();
 		
 		$sql = 'SELECT sessions.year AS bill_year, bills.number AS bill_number,
 				bills.catch_line,
@@ -373,7 +392,7 @@ class User
 		$result = mysql_query($sql);
 		if (mysql_num_rows($result) == 0)
 		{
-			return false;
+			return FALSE;
 		}
 		while ($comment = mysql_fetch_assoc($result))
 		{
@@ -382,5 +401,3 @@ class User
 		return $comments;
 	}
 }
-
-?>

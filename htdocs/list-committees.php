@@ -18,7 +18,8 @@ include_once('vendor/autoload.php');
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-connect_to_db();
+$database = new Database;
+$database->connect_old();
 
 # INITIALIZE SESSION
 session_start();
@@ -67,14 +68,14 @@ $sql = 'SELECT id, shortname, name, chamber, meeting_time,
 		FROM committees
 		WHERE chamber="senate" AND parent_id IS NULL
 		ORDER BY name ASC';
-$result = @mysql_query($sql);
-if (@mysql_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
 		$page_body .= '
 					<div class="right_side">
 						<h2>Senate</h2>
 						<ul>';
-	while ($committee = @mysql_fetch_array($result))
+	while ($committee = mysql_fetch_array($result))
 	{
 		$committee = array_map('stripslashes', $committee);
 		$page_body .= '<li><a href="/committee/senate/'.$committee['shortname'].'/">'.$committee['name'].'</a>';
@@ -103,14 +104,14 @@ $sql = 'SELECT id, shortname, name, chamber, meeting_time,
 		FROM committees
 		WHERE chamber="house" AND parent_id IS NULL
 		ORDER BY name ASC';
-$result = @mysql_query($sql);
-if (@mysql_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
 		$page_body .= '
 					<div class="left_side">
 						<h2>House</h2>
 						<ul>';
-	while ($committee = @mysql_fetch_array($result))
+	while ($committee = mysql_fetch_array($result))
 	{
 		$committee = array_map('stripslashes', $committee);
 		$page_body .= '<li><a href="/committee/house/'.$committee['shortname'].'/">'.$committee['name'].'</a>';

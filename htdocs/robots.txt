@@ -5,7 +5,6 @@ Disallow: /charts
 Disallow: /process-tags.php
 Disallow: /process-comments.php
 Disallow: /process-polls.php
-Disallow: /process-pingbacks.php
 Disallow: /downloads/bills/
 
 User-agent: Speedy
@@ -75,6 +74,12 @@ User-agent: MJ12bot
 Disallow: /
 
 User-agent: Baiduspider
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: AhrefsBot
 Disallow: /
 
 User-agent: msnbot 

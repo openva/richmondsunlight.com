@@ -25,7 +25,8 @@
 	# DECLARATIVE FUNCTIONS
 	# Run those functions that are necessary prior to loading this specific
 	# page.
-	connect_to_db();
+	$database = new Database;
+	$database->connect_old();
 	
 	# PAGE METADATA
 	$page_title = 'Reset Your Password';
@@ -42,12 +43,12 @@
 		$sql = 'SELECT cookie_hash
 				FROM users
 				WHERE private_hash = "'.$hash.'"';
-		$result = @mysql_query($sql);
-		if (@mysql_num_rows($result) == 0)
+		$result = mysql_query($sql);
+		if (mysql_num_rows($result) == 0)
 		{
 			die('Your password reset link has failed mysteriously.');
 		}
-		$user_data = @mysql_fetch_array($result);
+		$user_data = mysql_fetch_array($result);
 		$_SESSION['id'] = $user_data['cookie_hash'];
 		header('Location: http://www.richmondsunlight.com/account/?reset');
 		exit();
@@ -65,16 +66,16 @@
 					FROM users
 					WHERE private_hash IS NOT NULL AND password IS NOT NULL
 					AND email = "'.mysql_real_escape_string($email).'"';
-			$result = @mysql_query($sql);
+			$result = mysql_query($sql);
 			
 			# If we find nothing.
-			if (@mysql_num_rows($result) == 0)
+			if (mysql_num_rows($result) == 0)
 			{
 				$error = 'You don\'t have an account on Richmond Sunlight under that e-mail address.';
 			}
 			else
 			{
-				$user_data = @mysql_fetch_array($result);
+				$user_data = mysql_fetch_array($result);
 				
 				$user_data = array_map('stripslashes', $user_data);
 				

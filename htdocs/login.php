@@ -18,7 +18,8 @@ include_once('vendor/autoload.php');
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-connect_to_db();
+$database = new Database;
+$database->connect_old();
 
 # PAGE METADATA
 $page_title = 'Login';
@@ -64,16 +65,16 @@ if (isset($_POST['submit']))
 		$sql = 'SELECT id, name, cookie_hash
 				FROM users
 				WHERE email = "'.$form_data['email'].'" AND password = "'.$form_data['password_hash'].'"';
-		$result = @mysql_query($sql);
+		$result = mysql_query($sql);
 		
-		if (@mysql_num_rows($result) == 0)
+		if (mysql_num_rows($result) == 0)
 		{
 			$page_body = '<div id="messages" class="errors">That e-mail/password combination didn’t work.</div>';
 		}
 		else
 		{
 			
-			$user = @mysql_fetch_array($result);
+			$user = mysql_fetch_array($result);
 			$_SESSION['id'] = $user['cookie_hash'];
 			
 			# We store the user's name in session data because a) it's a handy shortcut to refer
@@ -89,10 +90,10 @@ if (isset($_POST['submit']))
 					FROM dashboard_portfolios
 					WHERE watch_list_id IS NULL AND user_id='.$user['id'].'
 					ORDER BY name ASC';
-			$result = @mysql_query($sql);
-			if (@mysql_num_rows($result) > 0)
+			$result = mysql_query($sql);
+			if (mysql_num_rows($result) > 0)
 			{	
-				while ($portfolio = @mysql_fetch_array($result))
+				while ($portfolio = mysql_fetch_array($result))
 				{
 					$portfolio = array_map('stripslashes', $portfolio);
 			

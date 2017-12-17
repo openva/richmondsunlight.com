@@ -47,6 +47,9 @@ class Bill2
 			}
 			
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		/*
 		 * Query the DB.
@@ -96,6 +99,9 @@ class Bill2
 		{
 			return unserialize($bill);
 		}
+
+		$database = new Database;
+		$database->connect_old();
 		
 		# RETRIEVE THE BILL INFO FROM THE DATABASE
 		$sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber,

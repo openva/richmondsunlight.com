@@ -19,7 +19,8 @@ include_once('vendor/autoload.php');
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-connect_to_db();
+$database = new Database;
+$database->connect_old();
 
 # INITIALIZE SESSION
 session_start();
@@ -75,8 +76,8 @@ $sql = 'SELECT bills.number AS bill_number, bills.catch_line, representatives_vo
 		AND sessions.year = '.mysql_real_escape_string($year).'
 		AND bills_status.date IS NOT NULL AND votes.session_id=sessions.id
 		ORDER BY date ASC, committee ASC';
-$result = @mysql_query($sql);
-if (@mysql_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
 	$page_body = '
 		<p><a href="/legislator/'.$shortname.'/votes/'.$year.'.csv">Download List as a

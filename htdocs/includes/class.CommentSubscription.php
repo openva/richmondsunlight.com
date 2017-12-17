@@ -9,33 +9,43 @@ class CommentSubscription
 	{
 		if (!isset($this->user_id) || !isset($this->bill_id))
 		{
-			return false;
+			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
+
 		$sql = 'INSERT INTO comments_subscriptions
 				SET user_id='.$this->user_id.', bill_id='.$this->bill_id.',
 				hash="'.generate_hash(8).'", date_created=now()';
 		$result = mysql_query($sql);
-		if ($result === false)
+		if ($result === FALSE)
 		{
-			return false;
+			return FALSE;
 		}
 		
 		return true;
+
 	}
 	
 	# Terminate an existing subscription. Requires the unique hash.
 	function delete()
 	{
+
 		if (!isset($this->hash))
 		{
-			return false;
+			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
+
 		$sql = 'DELETE FROM comments_subscriptions
 				WHERE hash="'.$hash.'"';
 		$result = mysql_query($sql);
-		if ($result === false)
+		if ($result === FALSE)
 		{
-			return false;
+			return FALSE;
 		}
 		
 		return true;
@@ -47,16 +57,20 @@ class CommentSubscription
 	{
 		if (!isset($this->bill_id))
 		{
-			return false;
+			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
+
 		$sql = 'SELECT users.name, users.email, comments_subscriptions.hash
 				FROM comments_subscriptions LEFT JOIN users
 				ON comments_subscriptions.user_id=users.id
 				WHERE comments_subscriptions.bill_id='.$this->bill_id;
 		$result = mysql_query($sql);
-		if (($result === false) || (mysql_num_rows($result) < 1))
+		if (($result === FALSE) || (mysql_num_rows($result) < 1))
 		{
-			return false;
+			return FALSE;
 		}
 		
 		# Initialize the array that will store a list of the subscribers for this bill.
@@ -76,21 +90,27 @@ class CommentSubscription
 	# if so, returns the subscription hash.
 	function is_subscribed()
 	{
+
 		if (!isset($this->user_id) || !isset($this->bill_id))
 		{
-			return false;
+			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
+
 		$sql = 'SELECT hash
 				FROM comments_subscriptions
 				WHERE user_id='.$this->user_id.' AND bill_id='.$this->bill_id;
 		$result = mysql_query($sql);
 		if (mysql_num_rows($result) < 1)
 		{
-			return false;
+			return FALSE;
 		}
 		$subscription = mysql_fetch_array($result);
 		
 		return $subscription['hash'];
+		
 	}
 	
 	# Send out an e-mail notifying a list of subscribers that a new comment has been posted to a
@@ -100,13 +120,13 @@ class CommentSubscription
 		# Make sure that we have a list of subscriptions to this bill.
 		if ( !isset($this->subscriptions) || !array($this->subscriptions) || (count($this->subscriptions) < 1))
 		{
-			return false;
+			return FALSE;
 		}
 		
 		# And make sure that we have an array containing the comment, its author, etc.
 		if ( !isset($this->comment) || !array($this->comment) || (count($this->comment) < 1))
 		{
-			return false;
+			return FALSE;
 		}
 		
 		$tmp = new Bill2;

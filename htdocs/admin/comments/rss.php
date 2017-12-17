@@ -6,9 +6,6 @@
 	# PURPOSE
 	# Lists the last 40 comments posted.
 	#
-	# NOTES
-	# None.
-	#
 	# TODO
 	# * Support If-Modified-Since and If-None-Match headers to reduce bandwidth.
 	# * The session year in the RSS URL is hard-coded due to soem kind of a weird
@@ -25,7 +22,8 @@
 	# PAGE CONTENT
 
 	# Open a database connection.
-	connect_to_db();
+	$database = new Database;
+	$database->connect_old();
 	
 	# Query the database for the last 40 comments.
 	$sql = 'SELECT comments.id, comments.bill_id, comments.date_created AS date,
@@ -44,12 +42,12 @@
 			ON bills.session_id=sessions.id
 			ORDER BY comments.date_created DESC
 			LIMIT 40';
-	$result = @mysql_query($sql);
+	$result = mysql_query($sql);
 	
 	$rss_content = '';
 	
 	# Generate the RSS.
-	while ($comment = @mysql_fetch_array($result))
+	while ($comment = mysql_fetch_array($result))
 	{
 		
 		# Aggregate the variables into their RSS components.
@@ -95,5 +93,3 @@
 </rss>';
 
 	echo $rss;
-	
-?>
