@@ -726,12 +726,13 @@ function explain_status($status)
 }
 
 # A simple wrapper for CURL.
-function get_content($url)
+function get_content($url, $timeout=10)
 {
 	$ch = curl_init();
 	
 	curl_setopt ($ch, CURLOPT_URL, $url);
 	curl_setopt ($ch, CURLOPT_HEADER, 0);
+	curl_setopt ($ch, CURLOPT_TIMEOUT, $timeout);
 	
 	ob_start();
 	
