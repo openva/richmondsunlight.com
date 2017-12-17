@@ -307,83 +307,59 @@ if ($bill['session_id'] == SESSION_ID)
 
 $debug_timing['portfolio data retrieved'] = microtime(TRUE);
 
-# Display the poll voting form, but only if this user hasn't voted on this bill and
-# this bill is from the current session.
-if (($bill['session_id'] == SESSION_ID) && (has_voted($bill['id']) === FALSE))
-{
-	$page_sidebar .= '
-	<div class="box">
-		<h3>Cast Your Vote</h3>
-		<p>Do you think this bill should become law?</p>
-		<form method="post" action="/process-polls.php">
-			<input type="radio" name="poll[vote]" value="y" />Yes<br />
-			<input type="radio" name="poll[vote]" value="n" />No<br />
-			<div style="display: none;"><input type="radio" name="poll[vote]" value="x" />I’m a Spammer<br /></div>
-			<input type="hidden" name="poll[bill_id]" value="' . $bill['id'] . '">
-			<input type="hidden" name="poll[return_to]" value="' . $_SERVER['REQUEST_URI'] . '" />
-			<input type="submit" name="submit" value="Vote"><br />
-			<p><a id="show-poll-results" style="cursor: pointer;">View Results</a></p>
-		</form>
-	</div>';
-}
-
-else
-{
-	$has_voted = 'yes';
-	$page_sidebar .= '
-	<h3>Poll Results</h3>';
-}
-
-# Display the poll results
+# Get poll results.
 $poll = new Poll;
-$poll->get_results();
+if ($poll->get_results() !== FALSE)
+{
 
-$debug_timing['poll results retrieved'] = microtime(TRUE);
+	$debug_timing['poll results retrieved'] = microtime(TRUE);
 
-$page_sidebar .= '<div id="poll-results"';
-if (!isset($has_voted))
-{
-	$page_sidebar .= ' style="display: none;">';
-}
-else
-{
-	$page_sidebar .= '>';
-}
-
-if ($poll->results['total'] > 0)
-{
-	
-	# Do the math to determine the percentage for each.
-	$poll->results['no'] = round((($poll->results['total'] - $poll->results['yes']) / $poll->results['total']) * 100);
-	$poll->results['yes'] = round(($poll->results['yes'] / $poll->results['total']) * 100);
-	
-	# Establish the label text for the graph.
-	$poll->results['no_text'] = urlencode('no '.$poll->results['no'].'%');
-	$poll->results['yes_text'] = urlencode('yes '.$poll->results['yes'].'%');
-	
-	# Assemble the URL for, and display, the chart for the voting percentage.
-	$page_sidebar .= '<img src="'
-		.'//chart.googleapis.com/chart?chs=215x115&amp;cht=p&amp;chd=t:'
-		.$poll->results['yes'].','.$poll->results['no']
-		.'&amp;chl='.(($poll->results['yes']) ? $poll->results['yes_text']: '')
-		.((isset($poll->results['yes']) && isset($poll->results['no'])) ? '|': '').
-		(($poll->results['no']) ? $poll->results['no_text']: '')
-		.'&amp;chf=bg,s,f4eee5&amp;chts=333333,9" />
-		<p>'.$poll->results['total'].' vote'.($poll->results['total'] > 1 ? 's' : '').'</p>';
-}
-else
-{
-	if ($bill['session_id'] == SESSION_ID)
+	$page_sidebar .= '<div id="poll-results"';
+	if (!isset($has_voted))
 	{
-		$page_sidebar .= '<p>No Richmond Sunlight visitors have voted on this bill yet.</p>';
+		$page_sidebar .= ' style="display: none;">';
 	}
 	else
 	{
-		$page_sidebar .= '<p>No Richmond Sunlight visitors voted on this bill while voting was open.</p>';
+		$page_sidebar .= '>';
 	}
+
+	if ($poll->results['total'] > 0)
+	{
+		
+		# Do the math to determine the percentage for each.
+		$poll->results['no'] = round((($poll->results['total'] - $poll->results['yes']) / $poll->results['total']) * 100);
+		$poll->results['yes'] = round(($poll->results['yes'] / $poll->results['total']) * 100);
+		
+		# Establish the label text for the graph.
+		$poll->results['no_text'] = urlencode('no '.$poll->results['no'].'%');
+		$poll->results['yes_text'] = urlencode('yes '.$poll->results['yes'].'%');
+		
+		# Assemble the URL for, and display, the chart for the voting percentage.
+		$page_sidebar .= '<img src="'
+			.'//chart.googleapis.com/chart?chs=215x115&amp;cht=p&amp;chd=t:'
+			.$poll->results['yes'].','.$poll->results['no']
+			.'&amp;chl='.(($poll->results['yes']) ? $poll->results['yes_text']: '')
+			.((isset($poll->results['yes']) && isset($poll->results['no'])) ? '|': '').
+			(($poll->results['no']) ? $poll->results['no_text']: '')
+			.'&amp;chf=bg,s,f4eee5&amp;chts=333333,9" />
+			<p>'.$poll->results['total'].' vote'.($poll->results['total'] > 1 ? 's' : '').'</p>';
+	}
+	else
+	{
+		if ($bill['session_id'] == SESSION_ID)
+		{
+			$page_sidebar .= '<p>No Richmond Sunlight visitors have voted on this bill yet.</p>';
+		}
+		else
+		{
+			$page_sidebar .= '<p>No Richmond Sunlight visitors voted on this bill while voting was open.</p>';
+		}
+	}
+	$page_sidebar .= '</div>';
+
 }
-$page_sidebar .= '</div>';
-	
+
 # Tags
 $page_sidebar .= '
 	<div class="box">
