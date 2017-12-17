@@ -410,7 +410,7 @@ class Bill2
 			 * works.
 			 */
 			$url .= $code_sections[0]['section_number'];
-			$terms = get_content(urldecode($url));
+			$terms = get_content(urldecode($url), 1);
 			$terms = (array) json_decode($terms);
 			if (count($terms) == 0)
 			{
