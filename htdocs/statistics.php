@@ -6,12 +6,6 @@
 	# PURPOSE
 	# Lists misc. statistics about bills.
 	#
-	# NOTES
-	# None.
-	#
-	# TODO
-	# None.
-	#
 	###
 	
 	# INCLUDES
