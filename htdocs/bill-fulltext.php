@@ -158,7 +158,7 @@ $page_sidebar = '
 if ($bill['type'] != 'resolution')
 {
 	$page_sidebar .= '
-		<p>Words that are <span style="background-color: #ff0;">highlighted in yellow</span> are
+		<p>Words that are <span style="background-color: #98fb98;">highlighted in green</span> are
 		proposed additions to the existing law, and words that are <s style="color:
 		#c00;">crossed out in red</s> are proposed to be removed from the existing law.</p>';
 }

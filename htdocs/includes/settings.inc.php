@@ -65,8 +65,7 @@ define('OPENSTATES_KEY', '');
 define('OPENVA_KEY', '');
 define('VA_DECODED_KEY', '');
 
-# Mapbox API access ID and token
-define('MAPBOX_ID', '');
+# Mapbox API access token
 define('MAPBOX_TOKEN', '');
 
 # Logging verbosity, on a scale of 1–8

@@ -173,7 +173,7 @@ if ($district_data !== FALSE && isset($district_data->region->center_lat) )
 				L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
     				attribution: "Map data &copy; <a href=http://openstreetmap.org>OpenStreetMap</a> contributors, <a href=http://creativecommons.org/licenses/by-sa/2.0/>CC-BY-SA</a>, Imagery © <a href=http://mapbox.com>Mapbox</a>",
 				    maxZoom: 18,
-				    id: "' . MAPBOX_ID . '",
+				    id: "mapbox.streets",
 				    accessToken: "' . MAPBOX_TOKEN . '"
 				}).addTo(district_map);
 				var district = L.polygon(' . json_encode($district_data->shape[0][0]) . ').addTo(district_map);
