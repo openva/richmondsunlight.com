@@ -233,22 +233,6 @@ if (mysql_num_rows($result) > 0)
 		</div>';
 }
 
-# Subscribe
-if (empty($legislator['date_ended']))
-{
-	$html_head .= '
-<link rel="alternate" type="application/rss+xml" title="RSS 0.92" href="/rss/legislator/'.$legislator['shortname'].'/" />';
-	$page_sidebar .= '
-	<div class="box">
-		<h3>Subscribe</h3>
-		<p><a href="/rss/legislator/' . $legislator['shortname'] . '/"><img src="/images/rss-icon.png"
-		width="14" height="14" alt="RSS Feed" /></a>
-		Keep track of all bills introduced by ' . $legislator['prefix'] . ' ' . $legislator['name'] . ' &mdash;
-		<a href="/rss/legislator/' . $legislator['shortname'] . '/">subscribe via RSS</a>.</p>
-	</div>
-';
-}
-
 
 # Voting Record
 $page_sidebar .= '
