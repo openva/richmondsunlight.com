@@ -29,6 +29,7 @@ script:
   && zip -qr latest *
   && mkdir -p upload
   && mv latest.zip upload/latest.zip
+- if [ "$TRAVIS_BRANCH" = "master" ]; then mv upload/latest.zip upload/staging.zip
 deploy:
 - provider: s3
   access_key_id: $AWS_ACCESS_KEY
@@ -51,3 +52,12 @@ deploy:
   on:
     branch: deploy
   wait-until-deployed: true
+- provider: s3
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
+  local_dir: upload
+  skip_cleanup: true
+  on:
+    branch: master
+  bucket: deploy.richmondsunlight.com
+  region: us-east-1
