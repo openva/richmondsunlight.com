@@ -29,7 +29,7 @@ script:
   && zip -qr latest *
   && mkdir -p upload
   && mv latest.zip upload/latest.zip
-- if [ "$TRAVIS_BRANCH" = "master" ]; then mv upload/latest.zip upload/staging.zip
+- if [ "$TRAVIS_BRANCH" = "master" ]; then mv upload/latest.zip upload/staging.zip; fi
 deploy:
 - provider: s3
   access_key_id: $AWS_ACCESS_KEY
