@@ -278,8 +278,8 @@ if (!isset($errors))
 	$comments = $mc->delete('comments-' . $comment['bill_id']);
 	
 	$log = new Log;
-	$log->put('New comment posted: https://' . $_SERVER['SERVER_NAME'] . $comment['return_to']
-		. '#comments', 3);
+	$log->put('New comment posted, by ' . $comment['name'] . '.' . "\n\n" . $comment['comment']
+		. ' https://' . $_SERVER['SERVER_NAME'] . $comment['return_to']. '#comments', 3);
 
 	# Redirect the user back to the page of origin.
 	if (!empty($comment['return_to']))
