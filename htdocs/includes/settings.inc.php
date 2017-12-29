@@ -74,8 +74,13 @@ define('LOG_VERBOSITY', 3);
 # Slack API URL
 define('SLACK_WEBHOOK', '');
 
-# Pushover API Key
+# Pushover API key
 define('PUSHOVER_KEY', '');
+
+# AWS auth info
+# This is only used in some RS instances.
+define('AWS_ACCESS_KEY', '');
+define('AWS_SECRET_KEY', '');
 
 # The list of words that, when used, will lead to instant blacklisting. They're rot 13ed here.
 $GLOBALS['banned_words'] = array('fuvg','shpx','nffubyr','chffl','phag','shpxre','zbgureshpxre',
