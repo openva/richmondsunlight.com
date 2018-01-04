@@ -154,7 +154,7 @@ class Video
 	}
 
 
-	# Get vital stats about this video via MPlayer and the filesystem..
+	# Get vital stats about this video via MPlayer and the filesystem.
 	function extract_file_data()
 	{
 
@@ -178,7 +178,7 @@ class Video
 	
 		if (empty($this->capture_rate) && !empty($this->capture_directory))
 		{
-			$dir = scandir($_SERVER['DOCUMENT_ROOT'].$this->capture_directory, 1);
+			$dir = scandir($_SERVER['DOCUMENT_ROOT'] . $this->capture_directory, 1);
 			$largest = $dir[0];
 			$largest = explode('.', $largest);
 			$largest = round($largest[0]);
