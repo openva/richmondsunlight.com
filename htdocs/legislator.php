@@ -748,10 +748,10 @@ $page_body .= '
 	<caption>Recent Mentions in the Media</caption>
 	<tbody>';
 # Assemble the Google News URL.
-$google_rss = 'http://news.google.com/news?svnum=10&ned=us&as_drrb=q&as_qdr=&as_mind=6&as_minm=1&as_maxd=5&as_maxm=1'.
-	'&q=%22'.urlencode($legislator['name']).'%22+'.(($legislator['chamber'] == 'house') ? 'del+OR+delegate' : 'sen+OR+senator').
-	'&output=rss';
-$google_link = 'http://news.google.com/news?q=%22'.urlencode($legislator['name']).'%22+'.(($legislator['chamber'] == 'house') ? 'del+OR+delegate' : 'sen+OR+senator');
+$google_rss = 'https://news.google.com/news/rss/search/section/q/' .
+	urlencode($legislator['name']).'%22+'.(($legislator['chamber'] == 'house') ? 'del+OR+delegate' : 'sen+OR+senator');
+$google_link = 'https://news.google.com/news/search/section/q/' . urlencode($legislator['name']) .
+	'%22+'.(($legislator['chamber'] == 'house') ? 'del+OR+delegate' : 'sen+OR+senator');
 $rss = fetch_rss($google_rss);
 $items = array_slice($rss->items, 0, 5);
 if (count($items) == 0)
