@@ -35,7 +35,7 @@ $leg = new Legislator();
 
 # Get the ID for this shortname.
 $leg_id = $leg->getid($shortname);
-if ($leg_id === false)
+if ($leg_id === FALSE)
 {
 	header("Status: 404 Not Found\n\r");
 	include('404.php');
@@ -642,7 +642,7 @@ if ($tag_count > 0)
 	# Sort the tags in reverse order by key (their count), shave off the top 30, and then
 	# resort alphabetically.
 	arsort($tags);
-	$tags = array_slice($tags, 0, 30, true);
+	$tags = array_slice($tags, 0, 30, TRUE);
 	ksort($tags);
 		
 	# Establish a scale -- the average size in this list should be 1.25em, with the scale
@@ -833,7 +833,7 @@ if (!empty($legislator['rss_url']))
 	</div>';
 }
 
-if ($legislator['videos'] !== false)
+if ($legislator['videos'] !== FALSE)
 {
 
 	$video = new Video;
