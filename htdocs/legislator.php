@@ -309,11 +309,6 @@ if (!empty($legislator['rss_url']))
 	$page_body .= '
 	<li><a href="#news">News</a></li>';
 }
-if (!empty($legislator['twitter_rss_url']))
-{
-	$page_body .= '
-	<li><a href="#twitter">Twitter</a></li>';
-}
 if (!empty($legislator['videos']))
 {
 	$page_body .= '
@@ -426,7 +421,7 @@ if (!empty($legislator['website']))
 		<dt>Website</dt>
 		<dd><a href="'.$legislator['website'].'">'.$legislator['website_name'].'</a></dd>';
 }
-if ( !empty($legislator['twitter']) && !filter_var($legislator['twitter_rss_url'], FILTER_VALIDATE_URL) === TRUE )
+if ( !empty($legislator['twitter']) )
 {
 	$page_body .= '
 		<dt>Twitter</dt>
@@ -835,43 +830,6 @@ if (!empty($legislator['rss_url']))
 	$page_body .= '
 				</tbody>
 			</table>
-	</div>';
-}
-
-if (!empty($legislator['twitter_rss_url']))
-{	
-	# Start a new DIV for legislator's Twitter feed.
-	$page_body .= '
-	<div id="twitter">
-		<table style="width: 100%">';
-	$rss = fetch_rss($legislator['twitter_rss_url']);
-	if ($rss !== FALSE)
-	{
-		$page_body .= '
-		<caption>From this Legislator’s Twitter Feed</caption>
-		<tbody>';
-		$items = array_slice($rss->items, 0, 5);
-		foreach ($items as $item)
-		{
-			$page_body .= '<tr><td>';
-			if (!empty($item['pubdate']))
-			{
-				$page_body .= '<h3>'.date('F j, Y', strtotime($item['pubdate'])).'</h3>';
-			}
-			$page_body .= '<p>'.$item['title'].' <a href="'.$item['guid'].'">#</a></p></td></tr>';
-		}
-	}
-	# End the DIV for the Twitter feed.
-	$page_body .= '
-		<tr>
-			<td>
-				<div style="float: right;">
-					<a href="'.$rss->link.'">More Twitter Entries &gt;&gt;</a>
-				</div>
-			</td>
-		</tr>
-		</tbody>
-		</table>
 	</div>';
 }
 

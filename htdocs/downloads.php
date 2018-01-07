@@ -68,8 +68,8 @@
 
 		<h4>Links</h4>
 		<ul>
-			<li><a href="https://s3.amazonaws.com/downloads.richmondsunlight.com/bills.csv">CSV</a></li>
-			<li><a href="https://s3.amazonaws.com/downloads.richmondsunlight.com/bills.json">JSON</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills.csv">CSV</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills.json">JSON</a></li>
 		</ul>
 
 		<h3>Text</h3>
@@ -80,17 +80,17 @@
 
 		<h4>Links</h4>
 		<ul>
-			<li><a href="https://s3.amazonaws.com/downloads.richmondsunlight.com/bills/2006.zip">2006</a></li>
-			<li><a href="https://s3.amazonaws.com/downloads.richmondsunlight.com/bills/2007.zip">2007</a></li>
-			<li><a href="https://s3.amazonaws.com/downloads.richmondsunlight.com/bills/2008.zip">2008</a></li>
-			<li><a href="https://s3.amazonaws.com/downloads.richmondsunlight.com/bills/2009.zip">2009</a></li>
-			<li><a href="https://s3.amazonaws.com/downloads.richmondsunlight.com/bills/2010.zip">2010</a></li>
-			<li><a href="https://s3.amazonaws.com/downloads.richmondsunlight.com/bills/2011.zip">2011</a></li>
-			<li><a href="https://s3.amazonaws.com/downloads.richmondsunlight.com/bills/2012.zip">2012</a></li>
-			<li><a href="https://s3.amazonaws.com/downloads.richmondsunlight.com/bills/2013.zip">2013</a></li>
-			<li><a href="https://s3.amazonaws.com/downloads.richmondsunlight.com/bills/2014.zip">2014</a></li>
-			<li><a href="https://s3.amazonaws.com/downloads.richmondsunlight.com/bills/2015.zip">2015</a></li>
-			<li><a href="https://s3.amazonaws.com/downloads.richmondsunlight.com/bills/2016.zip">2016</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2006.zip">2006</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2007.zip">2007</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2008.zip">2008</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2009.zip">2009</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2010.zip">2010</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2011.zip">2011</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2012.zip">2012</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2013.zip">2013</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2014.zip">2014</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2015.zip">2015</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2016.zip">2016</a></li>
 		</ul>
 
 		<h2>Legislators</h2>
@@ -103,7 +103,7 @@
 
 		<h3>Links</h3>
 		<ul>
-			<li><a href="https://s3.amazonaws.com/downloads.richmondsunlight.com/legislators.csv">CSV</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/legislators.csv">CSV</a></li>
 		</ul>
 
 		<h2>Committees</h2>
@@ -157,7 +157,7 @@
 
 		<h3>Links</h3>
 		<ul>
-			<li><a href="https://s3.amazonaws.com/downloads.richmondsunlight.com/committees.json">JSON</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/committees.json">JSON</a></li>
 		</ul>
 
 		<h2>Changes to Laws</h2>
@@ -177,10 +177,10 @@
 
 		<h3>Links</h3>
 		<ul>
-			<li><a href="https://s3.amazonaws.com/downloads.richmondsunlight.com/law-changes.json">JSON</a>:
+			<li><a href="https://downloads.richmondsunlight.com/law-changes.json">JSON</a>:
 			Includes the bill number, bill catch line, law identifier, and the bill’s URL. This
 			includes <em>only</em> the current (or most recent) session, and no historical data.</li>
-			<li><a href="https://s3.amazonaws.com/downloads.richmondsunlight.com/sections.csv">CSV</a>:
+			<li><a href="https://downloads.richmondsunlight.com/sections.csv">CSV</a>:
 			Includes only the year, bill number, and section number affected, going back to 2006.</li>
 		</ul>
 
@@ -207,7 +207,7 @@
 
 		<h3>Links</h3>
 		<ul>
-			<li><a href="https://s3.amazonaws.com/downloads.richmondsunlight.com/video-index.json">JSON</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/video-index.json">JSON</a></li>
 		</ul>
 
 EOD;
