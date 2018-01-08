@@ -957,6 +957,58 @@ class Video
 
 	}
 	
+	
+	# Turn an SBV file into an object of times and text. Expects to receive raw SBV text, not a file
+	# path.
+	function parse_webvtt()
+	{
+
+		if ( empty($this->webvtt) )
+		{
+			return FALSE;
+		}
+
+		# Intialize a variable to store our complete transcript.
+		$this->complete = '';
+		
+		# YouTube's SBVs quite frequently contain whitespace at the end.
+		$this->webvtt = trim($this->webvtt);
+
+		# Set aside the raw SBV data.
+		$this->raw_webvtt = $this->webvtt;
+		
+		# Turn the raw data into an array.
+		$this->webvtt = explode('\n\n', $this->webvtt);
+		
+		# Step through every moment in the array.
+		$i=0;
+		foreach ($this->webvtt as $moment)
+		{
+			# Each moment is bracketed in newlines. Strip those out.
+			$moment = trim($moment);
+			
+			# Break the moment up into individual lines.
+			$moment = explode(PHP_EOL, $moment);
+			
+			$this->moments->$i->time_start = implode(array_slice(explode(' --> ', $moment[0]), 0, 1));
+			$this->moments->$i->time_end = implode(array_slice(explode(' --> ', $moment[0]), 1, 1));
+			$this->moments->$i->text = str_replace("\n",' ', implode(' ', array_slice($moment, 1)));
+			
+			# Append the text to our master transcript of text.
+			$this->transcript .= $this->moments->$i->text . ' ';
+			
+			$i++;
+		}
+		
+		# Restore the transcript to its original variable.
+		$this->webvtt = $this->sbv_webvtt;
+		unset($this->sbv_webvtt);
+		
+		return TRUE;
+
+	}
+
+	
 	# Store a transcript object in the database.
 	function store_transcript()
 	{
