@@ -958,8 +958,10 @@ class Video
 	}
 	
 	
-	# Turn an SBV file into an object of times and text. Expects to receive raw SBV text, not a file
-	# path.
+	/*
+	 * Turn a WebVTT file into an object of times and text. Expects to receive raw WebVTT text, not
+	 * a file path.
+	 */
 	function parse_webvtt()
 	{
 
@@ -968,49 +970,59 @@ class Video
 			return FALSE;
 		}
 
-		# Intialize a variable to store our complete transcript.
-		$this->complete = '';
+		/*
+		 * Intialize a variable to store our complete transcript.
+		 */
+		$this->transcript = '';
 		
-		# YouTube's SBVs quite frequently contain whitespace at the end.
+		/*
+		 * Turn the raw WebVTT data into an array.
+		 */
 		$this->webvtt = trim($this->webvtt);
-
-		# Set aside the raw SBV data.
-		$this->raw_webvtt = $this->webvtt;
-		
-		# Turn the raw data into an array.
 		$this->webvtt = explode('\n\n', $this->webvtt);
 		
-		# Step through every moment in the array.
+		/*
+		 * Store the resulting data here.
+		 */
+		$this->captions = new stdClass;
+
+		/*
+		 * Step through every caption, one by one.
+		 */
 		$i=0;
-		foreach ($this->webvtt as $moment)
+		foreach ($this->webvtt as $caption)
 		{
-			# Each moment is bracketed in newlines. Strip those out.
-			$moment = trim($moment);
+
+			$caption = trim($caption);
+			$caption = explode(PHP_EOL, $caption);
 			
-			# Break the moment up into individual lines.
-			$moment = explode(PHP_EOL, $moment);
+			$this->captions->$i->time_start = implode(array_slice(explode(' --> ', $caption[0]), 0, 1));
+			$this->captions->$i->time_end = implode(array_slice(explode(' --> ', $caption[0]), 1, 1));
+			$this->captions->$i->text = str_replace("\n",' ', implode(' ', array_slice($caption, 1)));
 			
-			$this->moments->$i->time_start = implode(array_slice(explode(' --> ', $moment[0]), 0, 1));
-			$this->moments->$i->time_end = implode(array_slice(explode(' --> ', $moment[0]), 1, 1));
-			$this->moments->$i->text = str_replace("\n",' ', implode(' ', array_slice($moment, 1)));
-			
-			# Append the text to our master transcript of text.
-			$this->transcript .= $this->moments->$i->text . ' ';
+			/*
+			 * Append the text to our master transcript.
+			 */
+			$this->transcript .= $this->captions->$i->text . ' ';
 			
 			$i++;
 		}
-		
-		# Restore the transcript to its original variable.
-		$this->webvtt = $this->sbv_webvtt;
-		unset($this->sbv_webvtt);
+
+		/*
+		 * Replace any markers 
+		 */
+		$this->transcript = str_replace('>>>', "\n\n", $this->transcript);
+		$this->transcript = str_replace('>>', "\n\n", $this->transcript);
 		
 		return TRUE;
 
 	}
 
 	
-	# Store a transcript object in the database.
-	function store_transcript()
+	/*
+	 * Store a WebVTT and a trasncript in the database.
+	 */
+	function store_webvtt()
 	{
 
 		if ( !isset($this->file_id) || !isset($this->moments) || !isset($this->transcript) )
@@ -1022,23 +1034,13 @@ class Video
 		$database->connect_old();
 		
 		$sql = 'UPDATE files
-				SET transcript = "'.mysql_real_escape_string($this->transcript).'",
-				sbv = "'.mysql_real_escape_string($this->sbv_raw).'",
-				WHERE id='.$this->file_id;
+				SET transcript = "' . mysql_real_escape_string($this->transcript) . '",
+				webvtt = "' . mysql_real_escape_string($this->webvtt) . '",
+				WHERE id=' . $this->file_id;
 		$result = mysql_query($sql);
 		if ($result === FALSE)
 		{
 			return FALSE;
-		}
-		
-		foreach ($this->moments as $moment)
-		{
-			$sql = 'INSERT INTO
-					video_transcript
-					SET file_id = '.$this->file_id.', date_created = now(),
-					text = "'.$moment->text.'", time_start = "'.$moment->time_start.'",
-					time_end = "'.$moment->time_end.'"';
-			mysql_query($sql);
 		}
 		
 		return TRUE;
@@ -1114,9 +1116,9 @@ class Video
 ////////////////////////////////////////////////////////////////////////
 	
 	/**
-	 * Normalize an SRT file's carriage returns.
+	 * Normalize a WebVTT file's carriage returns.
 	 *
-	 * @param string $this->srt, the SRT
+	 * @param string $this->webvtt, the WebVTT file
 	 *
 	 * @return TRUE or FALSE
 	 */
@@ -1126,24 +1128,24 @@ class Video
 		/*
 		 * Require transcript text.
 		 */
-		if (!isset($this->srt))
+		if (!isset($this->webvtt))
 		{
 			return FALSE;
 		}
 
-		$this->srt = preg_replace('~\R~u', "\n", $this->srt);
+		$this->webvtt = preg_replace('~\R~u', "\n", $this->webvtt);
 
 		return TRUE;
 
 	}
 
 	/**
-	 * Adjust an SRT file by X seconds
+	 * Adjust captions by X seconds
 	 * 
 	 * The default is +10.
 	 *
 	 * @param int    $this->offset, in seconds, defaults to 10
-	 * @param string $this->srt, the SRT
+	 * @param string $this->captions, the captions
 	 *
 	 * @return TRUE or FALSE
 	 */
@@ -1153,7 +1155,7 @@ class Video
 		/*
 		 * Require transcript text.
 		 */
-		if (!isset($this->srt))
+		if (!isset($this->captions))
 		{
 			return FALSE;
 		}
@@ -1167,175 +1169,62 @@ class Video
 		}
 
 		/*
-		 * Break the SRT file into stanzas.
+		 * Step through each of the captions.
 		 */
-		$stanzas = explode("\n\n", $this->srt);
-
-		/*
-		 * Create an output array.
-		 */
-		$output = array();
-
-		/*
-		 * Structure each stanza.
-		 */
-		foreach ($stanzas as &$stanza)
+		foreach ($this->captions as &$caption)
 		{
-
-			$stanza = explode("\n", $stanza);
-			$stanza['transcript'] = array_slice($stanza, 2);
-			$stanza['number'] = $stanza[0];
 
 			/*
 			 * Step through the two timestamps.
 			 */
-			$stanza['timestamps'] = explode(' --> ', $stanza[1]);
-			foreach ($stanza['timestamps'] AS &$timestamp)
+			$times = array('time_start', 'time_end');
+			foreach ($times as &$time)
 			{
-				
+			
 				/*
 				 * Convert the time to seconds (dropping microseconds).
 				 */
-				$timestamp = preg_replace("/^([\d]{2})\:([\d]{2})\:([\d]{2}),([\d]{3})$/", "$1:$2:$3.$4", $timestamp);
-				sscanf($timestamp, "%d:%d:%d.%d", $hours, $minutes, $seconds, $microseconds);
-				$timestamp = $hours * 3600 + $minutes * 60 + $seconds;
+				$caption->{$time} = preg_replace("/^([\d]{2})\:([\d]{2})\:([\d]{2}),([\d]{3})$/", "$1:$2:$3.$4", $caption->{$time});
+				sscanf($caption->time_start, "%d:%d:%d.%d", $hours, $minutes, $seconds, $microseconds);
+				$caption->{$time} = $hours * 3600 + $minutes * 60 + $seconds;
 
 				/*
 				 * Adjust the timestamp by the prescribed number of seconds.
 				 */
-				$timestamp = $timestamp + $this->offset;
+				$caption->{$time} = $caption->{$time} + $this->offset;
 
 				/*
 				 * Format the seconds as HH:MM:SS again.
 				 */
-				$timestamp = gmdate("H:i:s", $timestamp) . '.' . $microseconds;
+				$caption->{$time} = gmdate("H:i:s", $caption->{$time}) . '.' . $microseconds;
 
 			}
 
-			/*
-			 * Format this array as an SRT stanza again.
-			 */
-			$output[] = $stanza['number'] . "\n" . $stanza['timestamps'][0] .' --> '
-				. $stanza['timestamps'][1] . "\n" . implode("\n", $stanza['transcript']);
-
 		}
-
-		/*
-		 * Bring all of the stanzas back together again, into a single string.
-		 */
-		$this->srt = implode("\n\n", $output);
-
-		return TRUE;
-
-	}
-
-	/*
-	 * Move from a rolling transcript (one that repeats 2/3 of each caption from the
-	 * prior 2 captions) to a straight-through transcript (no repeats).
-	 */
-	function eliminate_duplicates()
-	{
-
-		/*
-		 * Require transcript text.
-		 */
-		if (!isset($this->srt))
-		{
-			return FALSE;
-		}
-
-		/*
-		 * Break up the SRT file into stanzas.
-		 */
-		$stanzas = explode("\n\n", $this->srt);
-
-		/*
-		 * Structure each stanza.
-		 */
-		$i=1;
-		foreach ($stanzas as &$stanza)
-		{
-
-			$stanza = explode("\n", $stanza);
-			$stanza['transcript'] = array_slice($stanza, 2);
-			$stanza['number'] = $i;
-			$stanza['timestamps'] = explode(' --> ', $stanza[1]);
-			foreach ($stanza['transcript'] as &$line)
-			{
-				$line = trim($line);
-			}
-			for ($i=0; $i<5; $i++)
-			{
-				unset($stanza[$i]);
-			}
-			$i++;
-
-		}
-
-		/*
-		 * Step through and eliminate duplicates from each stanza.
-		 */
-		for ($i=1; $i<count($stanzas); $i++)
-		{
-
-			for($j=0; $j<count($stanzas[$i]['transcript']); $j++)
-			{
-
-				if (
-					(in_array($stanzas[$i]['transcript'][$j], $stanzas[$i-1]['transcript']))
-					||
-					(in_array($stanzas[$i]['transcript'][$j], $stanzas[$i-2]['transcript']))
-				   )
-				{
-					unset($stanzas[$i]['transcript'][$j]);
-				}
-
-			}
-			
-			$stanzas[$i]['transcript'] = array_values($stanzas[$i]['transcript']);
-
-		}
-
-		/*
-		 * Turn this back into an SRT.
-		 */
-		$this->srt = array();
-
-		foreach ($stanzas as $stanza)
-		{
-
-			$this->srt[] = $stanza['number'] . "\n" .
-					  $stanza['timestamps'][0] .' --> ' . $stanza['timestamps'][1] . "\n" .
-					  implode("\n", $stanza['transcript']);
-
-		}
-
-		$this->srt = implode("\n\n", $this->srt);
 
 		return TRUE;
 
 	}
 
 	/**
-	 * Load an SRT into the database
+	 * Load captions into the database
 	 *
-	 * Given the contents of an SRT file, break it into chunks and load each one
-	 * into the database.
+	 * Given captions, load each one into the database.
 	 *
-	 * @param string $this->srt The SRT text.
+	 * @param string $this->captions The captions.
 	 * @param int $this->file_id The ID of this video file.
 	 * 
 	 * @access public
 	 *
 	 * @return true or false
 	 */
-	function srt_to_database()
+	function captions_to_database()
 	{
 
 		/*
 		 * Require transcript text.
 		 */
-		if (!isset($this->srt))
+		if (!isset($this->captions))
 		{
 			return FALSE;
 		}
@@ -1349,14 +1238,9 @@ class Video
 		}
 
 		/*
-		 * Break up the SRT file into stanzas.
+		 * Don't accept suspiciously small numbers of captions.
 		 */
-		$stanzas = explode("\n\n", $this->srt);
-
-		/*
-		 * Don't accept suspiciously small numbers of stanzas.
-		 */
-		if (count($stanzas) <= 1)
+		if (count($this->captions) <= 1)
 		{
 			return FALSE;
 		}
@@ -1365,7 +1249,7 @@ class Video
 		$database->connect_old();
 
 		/*
-		 * Delete all existing text for this video.
+		 * Delete all existing text for this video (which there may or may not be already).
 		 */
 		$sql = 'DELETE FROM video_transcript
 				WHERE file_id=' . $this->file_id;
@@ -1374,34 +1258,33 @@ class Video
 		/*
 		 * Structure each stanza and load it into the database.
 		 */
-		foreach ($stanzas as &$stanza)
+		foreach ($this->captions as &$caption)
 		{
 
-			$stanza = explode("\n", $stanza);
-			$stanza['transcript'] = array_slice($stanza, 2);
-			$stanza['timestamps'] = explode(' --> ', $stanza[1]);
-			foreach ($stanza['transcript'] as &$line)
+			/*
+			 * Identify when a new speaker is speaking. New speakers are indicated by a ">>" or a
+			 * ">>>" prefix. Sometimes we have captions that consist entirely of these markers. We
+			 * ignore these.
+			 */
+			if (strlen($caption->text) > 3)
 			{
-				$line = trim($line);
-			}
-			$stanza['transcript'] = trim(implode(' ', $stanza['transcript']));
-
-			if (substr($stanza['transcript'], 0, 3) == '>> ')
-			{
-				$stanza['new_speaker'] = TRUE;
-				$stanza['transcript'] = str_replace('>> ', '', $stanza['transcript']);
-			}
-			elseif (substr($stanza['transcript'], 0, 4) == '>>> ')
-			{
-				$stanza['new_speaker'] = TRUE;
-				$stanza['transcript'] = str_replace('>>> ', '', $stanza['transcript']);
+				if (substr($caption->text, 0, 3) == '>> ')
+				{
+					$caption->new_speaker = TRUE;
+					$caption->text = substr($caption->text, 3);
+				}
+				elseif (substr($stanza['transcript'], 0, 4) == '>>> ')
+				{
+					$caption->new_speaker = TRUE;
+					$caption->text = substr($caption->text, 4);
+				}
 			}
 
 			/*
-			 * If we don't have core fields, skip this stanza.
+			 * If we don't have core fields, post-replacement, skip this caption.
 			 */
-			if ( empty($stanza['transcript']) || empty($stanza['timestamps'][0])
-				|| empty($stanza['timestamps'][1]) )
+			if ( empty($caption->text) || empty($caption->time_start)
+				|| empty($caption->time_end) )
 			{
 				continue;
 			}
@@ -1411,10 +1294,10 @@ class Video
 			 */
 			$sql = 'INSERT INTO video_transcript
 					SET file_id=' . $this->file_id . ',
-					time_start="' . $stanza['timestamps'][0] . '",
-					time_end="' . $stanza['timestamps'][1] . '",
-					text="' . mysql_real_escape_string($stanza['transcript']) . '"';
-			if (isset($stanza['new_speaker']))
+					time_start="' . $caption->time_start . '",
+					time_end="' . $caption->time_end . '",
+					text="' . mysql_real_escape_string($caption->text) . '"';
+			if (isset($caption->new_speaker))
 			{
 				$sql .= ', new_speaker="y"';
 			}
@@ -1429,66 +1312,6 @@ class Video
 
 		return TRUE;
 
-
-	}
-
-	/**
-	 * Convert an SRT into a transcript
-	 * 
-	 * Given an SRT file, as produced from legislative DVDs, it simplifies
-	 * the captions and streams them together as a transcript.
-	 *
-	 * @param string $this->srt The SRT text.
-	 *
-	 * @access public
-	 * @return true or false, output at $this->transcript
-	 */
-	function srt_to_transcript()
-	{
-
-		/*
-		 * Require transcript text.
-		 */
-		if (!isset($this->srt))
-		{
-			return FALSE;
-		}
-
-		/*
-		 * Break up the SRT file into stanzas.
-		 */
-		$stanzas = explode("\n\n", $this->srt);
-
-		/*
-		 * Structure each stanza.
-		 */
-		foreach ($stanzas as &$stanza)
-		{
-
-			$stanza = explode("\n", $stanza);
-			$stanza['transcript'] = array_slice($stanza, 2);
-			$stanza['timestamps'] = explode(' --> ', $stanza[1]);
-			foreach ($stanza['transcript'] as &$line)
-			{
-				$line = trim($line);
-			}
-			for ($i=0; $i<5; $i++)
-			{
-				unset($stanza[$i]);
-			}
-
-		}
-
-		$this->transcript = '';
-		foreach($stanzas as $stanza)
-		{
-			$this->transcript .= implode(' ', $stanza['transcript']) . ' ';
-		}
-		$this->transcript = $this->sentence_case(strtolower($this->transcript));
-		$this->transcript = str_replace('>>', "\n\n", $this->transcript);
-		$this->transcript = nl2p($this->transcript);
-
-		return TRUE;
 
 	}
 
