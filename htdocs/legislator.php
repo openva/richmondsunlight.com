@@ -54,7 +54,7 @@ $legislator['videos'] = $video->legislator_sample();
 
 # Gin up a meta description for search engines.
 $html_head .= '
-<meta name="description" content="Information about ' . $legislator['name'] . ' ' . $legislator['suffix']
+<meta name="description" content="Information about ' . $legislator['name_formatted']
 	.', including a list of ' . $legislator['possessive'] . ' bills, ' . $legislator['possessive']
 	.' full voting record, contact information, donors, recent media coverage, and more." />';
 
