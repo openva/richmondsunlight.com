@@ -349,7 +349,7 @@ if ($legislator['batting']['total'] == 0)
 }
 
 $page_body .= '
-	<img src="/images/legislators/medium/'.$legislator['shortname'].'.jpg" alt="Photo of '
+	<img src="/images/legislators/thumbnails/'.$legislator['shortname'].'.jpg" alt="Photo of '
 		.$legislator['name'].'" id="legislator" />
 	<dl>
 		<dt>Party</dt>

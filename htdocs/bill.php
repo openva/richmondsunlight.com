@@ -126,7 +126,7 @@ $site_section = 'bills';
  */
 $html_head .= '<meta property="og:title" content="' . strtoupper($bill['number']) . ': '
 	. $bill['catch_line'] . '"/>
-	<meta property="og:image" content="https://www.richmondsunlight.com/images/legislators/medium/'
+	<meta property="og:image" content="https://www.richmondsunlight.com/images/legislators/thumbnail/'
 		. $bill['patron_shortname'] . '.jpg"/>
 	<meta property="og:url" content="' . $bill['url'] . '"/>
 	<meta property="og:type" content="website" />
@@ -138,7 +138,7 @@ $html_head .= '<meta property="og:title" content="' . strtoupper($bill['number']
  */
 $html_head .= '<meta name="twitter:card" content="summary" />
 	<meta property="twitter:title" content="' . strtoupper($bill['number']) . ', introduced by ' . $bill['patron_name_formatted'].'"/>
-	<meta property="twitter:image" content="https://www.richmondsunlight.com/images/legislators/medium/'
+	<meta property="twitter:image" content="https://www.richmondsunlight.com/images/legislators/thumbnail/'
 		. $bill['patron_shortname'] . '.jpg"/>
 	<meta name="twitter:site" content="@richmond_sun" />
 	<meta property="twitter:description" content="' . $bill['catch_line'] . '" />';
@@ -1243,7 +1243,7 @@ if ( isset($comments) && is_array($comments) )
 				.$bill['patron_suffix'];
 			
 			# Display the legislator's photograph.
-			$badge = '<img src="/images/legislators/thumbnails/'
+			$badge = '<img src="/images/legislators/medium/'
 				.$bill['patron_shortname'].'.jpg" width="50" class="photo" />';
 		}
 		
