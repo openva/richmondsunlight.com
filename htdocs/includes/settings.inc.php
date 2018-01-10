@@ -41,10 +41,10 @@ define('MEMCACHED_PORT', '11211');
 
 # The House Speaker's IDs. This is used in update_vote.php to translate votes credited to
 # "H0000," which bizarrely indicates the speaker, to that legislator's ID, and in
-# Video::identify_speakers to match the speaker to his identity. Here, H0046 and 41 indicate
-# Bill Howell.
-define('HOUSE_SPEAKER_LIS_ID', 'H0046');
-define('HOUSE_SPEAKER_ID', '41');
+# Video::identify_speakers to match the speaker to his identity. Here, H0021 and 24 indicate
+# Kirk Cox.
+define('HOUSE_SPEAKER_LIS_ID', 'H0021');
+define('HOUSE_SPEAKER_ID', '24');
 	
 # Set the directory to look to for cache data.
 define('CACHE_DIR', '/vol/www/richmondsunlight.com/html/cache/');
