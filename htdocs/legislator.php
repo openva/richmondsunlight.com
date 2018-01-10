@@ -54,14 +54,25 @@ $legislator['videos'] = $video->legislator_sample();
 
 # Gin up a meta description for search engines.
 $html_head .= '
-<meta name="description" content="Information about ' . $legislator['name'] . ' ' . $legislator['suffix']
+<meta name="description" content="Information about ' . $legislator['name_formatted']
 	.', including a list of ' . $legislator['possessive'] . ' bills, ' . $legislator['possessive']
 	.' full voting record, contact information, donors, recent media coverage, and more." />';
 
 # PAGE METADATA
-$page_title = (($legislator['prefix'] == 'Del.') ? 'Delegate' : 'Senator') . ' '
-	. $legislator['name'] . ' ' . $legislator['suffix'];
+$page_title = $legislator['name_formatted'];
 $site_section = 'legislators';
+
+/*
+ * Twitter metadata.
+ */
+$html_head .= '<meta name="twitter:card" content="summary" />
+	<meta property="twitter:title" content="' . $legislator['name_formatted']. ' "/>
+	<meta property="twitter:image" content="https://www.richmondsunlight.com/images/legislators/thumbnails/'
+		. $bill['patron_shortname'] . '.jpg"/>
+	<meta name="twitter:site" content="@richmond_sun" />
+	<meta property="twitter:description" content="Representing Virginia ' . ucfirst($legislator['chamber'])
+		. ' District ' . $legislator['district'] . ', including ' . $legislator['district_description'] . ', '
+		. 'since ' . date(strtotime($legislator['date_started']), 'Y') . '." />';
 
 # PAGE SIDEBAR
 $page_sidebar = '';
