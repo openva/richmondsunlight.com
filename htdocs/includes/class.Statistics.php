@@ -37,6 +37,38 @@ class Statistics
 	}
 	
 	/*
+	 * Return the number of bills filed per day
+	 *
+	 * Query the bills table to generate a daily count of the number of bills filed.
+	 *
+	 * @param none
+	 * @access public
+	 * @return array
+	 */	
+	function bills_filed_daily()
+	{
+
+		$database = new Database;
+		$database->connect();
+
+		$sql = 'SELECT date_introduced AS date, COUNT(*) AS number
+				FROM bills
+				WHERE session_id = ' . SESSION_ID . '
+				GROUP BY date_introduced
+				ORDER BY date_introduced ASC';
+		$stmt = $db->prepare($sql);
+		$stmt->execute();
+		$result = $stmt->fetchAll();
+		if (count($result) == 0)
+		{
+			return FALSE;
+		}
+
+		return $result;
+
+	}
+	
+	/*
 	 * Return the number of views that a bill has had over time
 	 *
 	 * Query the bill views table to generate a daily count of the number of times that a bill
