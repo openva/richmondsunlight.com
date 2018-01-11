@@ -12,6 +12,7 @@
 include_once('settings.inc.php');
 include_once('functions.inc.php');
 include_once('vendor/autoload.php');
+include_once('magpierss/rss_fetch.inc');
 
 # INITIALIZE SESSION
 session_start();
@@ -34,11 +35,8 @@ if ($mc->getResultCode() === 0)
 	echo $cached_html;
 	echo '<!-- Generated from cache -->';
 	exit();
-}
 
-# FURTHER INCLUDES
-include_once('includes/charts.php');
-include_once('includes/magpierss/rss_fetch.inc');
+}
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -142,46 +140,38 @@ if (mysql_num_rows($result) > 0)
 	$page_body .= '</table></div>';
 }
 		
-
-# Ask APC for recent blog entries.
-$blog_entries = apc_fetch('homepage_blog');
+# Ask Memcached for recent blog entries.
+$blog_entries = $mc->get('homepage_blog');
 
 if (!$blog_entries)
 {
-	# Gather the headlines with SimplePie, our RSS library.
-	require_once('includes/simplepie.inc.php');
-	$feed = new SimplePie();
-	$feed->set_feed_url('http://www.richmondsunlight.com/blog/feed/');
-	$feed->set_output_encoding('UTF-8');
-	$feed->init();
+
+	$rss = fetch_rss('https://www.richmondsunlight.com/blog/feed/');
+	$items = array_slice($rss->items, 0, 5);
 	
 	# Limit the output to eight blog entries.
 	$blog_entries = '';
-	$i=0;
-	foreach ($feed->get_items() as $item)
+	foreach ($items as $item)
 	{
-		$author = $item->get_author();
+
 		$blog_entries .= '
 			<div class="entry">
-			<h3><a href="'.$item->get_permalink().'">'.$item->get_title().'</a></h3>
-			<div class="date">'.$item->get_date($date_format = 'n/d/Y').' by '.$author->name.'</div>
-			'.$item->get_description().'
+			<h3><a href="' . $item['guid'] . '">' . $item['title'] . '</a></h3>
+			<div class="date">' . date('F j, Y', strtotime($item['pubdate'])) . ' by ' . $item['dc']['creator'] . '</div>
+			' . $item['summary'] . '
 			</div>';
-		$i++;
-		if ($i == 6)
-		{
-			break;
-		}
+
 	}
 	
 	# Store these in APC.
-	apc_store('homepage_blog', $blog_entries, 900);
+	$mc->set( 'homepage_blog', $blog_entries, (60 * 15) );
+
 }
 
 $page_body .= '
 		<div id="blog">
 		<h2>Blog</h2>
-		'.$blog_entries.'
+		' . $blog_entries . '
 		</div>';
 
 $page_sidebar = '';
