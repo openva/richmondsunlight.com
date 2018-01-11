@@ -18,7 +18,7 @@ session_start();
 
 # Retrieve the home page from a cache.
 $mc = new Memcached();
-$mc->addServer(MEMCACHED_SERVER, 11211);
+$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
 $cached_html = $mc->get('homepage');
 if ($mc->getResultCode() === 0)
 {
@@ -336,15 +336,11 @@ if (mysql_num_rows($result) > 0)
 	}
 	$page_sidebar .= '
 			</ul>
-			
-			<p><a href="/rss/comments/"><img src="/images/rss-icon.png"
-				width="14" height="14" alt="RSS Feed" style="float: left; margin: 0 .5em .5em 0;" /></a>
-				Subscribe to all comments.</p>
 		</div>';
 }
 
 $page_sidebar .= '
-		<h3>Keep Up with Us</h3>
+		<h3>Keep Up With Us</h3>
 		<div class="box" id="social-networking" style="text-align: center;">
 			
 			<p><a href="http://twitter.com/richmond_sun"><img src="/images/twitter.gif" width="100"

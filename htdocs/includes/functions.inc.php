@@ -660,38 +660,6 @@ function blacklist($word)
 	mysql_query($sql);
 	
 }
-
-# Determine whether the current user has voted on this poll before.
-function has_voted($bill_id)
-{
-	if (empty($bill_id))
-	{
-		return FALSE;
-	}
-	if (logged_in() === FALSE)
-	{
-		return FALSE;
-	}
-	else
-	{
-		$sql = 'SELECT *
-				FROM polls
-				WHERE user_id=
-					(SELECT id
-					FROM users
-					WHERE cookie_hash = "' . $_SESSION['id'] . '")
-				AND bill_id=' . $bill_id;
-		$result = mysql_query($sql);
-		if (mysql_num_rows($result) > 0)
-		{
-			return TRUE;
-		}
-		else
-		{
-			return FALSE;
-		}
-	}
-}
 	
 # Display the CSS balloon providing a tooltip-type interface for bills and legislators.
 function balloon($bill, $type)

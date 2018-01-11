@@ -307,8 +307,37 @@ if ($bill['session_id'] == SESSION_ID)
 
 $debug_timing['portfolio data retrieved'] = microtime(TRUE);
 
-# Get poll results.
+# Instantiate our poll functionality.
 $poll = new Poll;
+$poll->bill_id = $bill['id'];
+
+$page_sidebar .= '<div class="box">';
+
+# Display the poll voting form, but only if this user hasn't voted on this bill and
+# this bill is from the current session.
+if (($bill['session_id'] == SESSION_ID) && ($poll->has_voted() === FALSE))
+{
+	$page_sidebar .= '
+		<h3>Cast Your Vote</h3>
+		<p>Do you think this bill should become law?</p>
+		<form method="post" action="/process-polls.php">
+			<input type="radio" name="poll[vote]" value="y" />Yes<br />
+			<input type="radio" name="poll[vote]" value="n" />No<br />
+			<div style="display: none;"><input type="radio" name="poll[vote]" value="x" />I’m a Spammer<br /></div>
+			<input type="hidden" name="poll[bill_id]" value="' . $bill['id'] . '">
+			<input type="hidden" name="poll[return_to]" value="' . $_SERVER['REQUEST_URI'] . '" />
+			<input type="submit" name="submit" value="Vote"><br />
+			<p><a id="show-poll-results" style="cursor: pointer;">View Results</a></p>
+		</form>';
+}
+else
+{
+	$has_voted = 'yes';
+	$page_sidebar .= '
+	<h3>Poll Results</h3>';
+}
+
+# Get poll results.
 if ($poll->get_results() !== FALSE)
 {
 
@@ -344,6 +373,7 @@ if ($poll->get_results() !== FALSE)
 			(($poll->results['no']) ? $poll->results['no_text']: '')
 			.'&amp;chf=bg,s,f4eee5&amp;chts=333333,9" />
 			<p>'.$poll->results['total'].' vote'.($poll->results['total'] > 1 ? 's' : '').'</p>';
+
 	}
 	else
 	{
@@ -356,9 +386,9 @@ if ($poll->get_results() !== FALSE)
 			$page_sidebar .= '<p>No Richmond Sunlight visitors voted on this bill while voting was open.</p>';
 		}
 	}
-	$page_sidebar .= '</div>';
 
 }
+$page_sidebar .= '</div>';
 
 # Tags
 $page_sidebar .= '
@@ -463,7 +493,7 @@ $page_sidebar .= '
 			<li><a href="http://lis.virginia.gov/cgi-bin/legp604.exe?'.$bill['session_lis_id'].'+ful+'.strtoupper($bill['number']).'+pdf">View as PDF</a></li>';
 $page_sidebar .= '
 			<li><a href="http://lis.virginia.gov/cgi-bin/legp604.exe?'.$bill['session_lis_id'].'+sum+'.strtoupper($bill['number']).'">View on the Legislature’s Site</a></li>
-			<li><a href="https://api.richmondsunlight.com/1.0/bill/' . $bill['year'] . '/' . $bill['number'] . '.json">View as JSON</a></li>';
+			<li><a href="https://api.richmondsunlight.com/1.1/bill/' . $bill['year'] . '/' . $bill['number'] . '.json">View as JSON</a></li>';
 
 if (!empty($bill['impact_statement_id']))
 {
