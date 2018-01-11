@@ -329,8 +329,6 @@ being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
 						<ul>
 						<li><a href="/photosynthesis/" accesskey="p">Photosynthesis</a></li>
 						<li><a href="/photosynthesis/portfolios/">Public Portfolios</a></li>
-						<!--<li><a href="/about/rss/">RSS Feeds</a></li>-->
-						<!--<li><a href="/labs/">Labs</a></li>-->
 						<li><a href="/about/api/">API</a></li>
 						<li><a href="/downloads/">Bulk Downloads</a></li>
 						</ul>
