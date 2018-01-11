@@ -2,6 +2,42 @@
 
 class Poll
 {
+
+	/*
+	 * Determine whether the current user has voted on this poll before.
+	 */
+	function has_voted()
+	{
+
+		if (empty($this->bill_id))
+		{
+			return FALSE;
+		}
+
+		if (logged_in() === FALSE)
+		{
+			return FALSE;
+		}
+
+		$database = new Database;
+		$database->connect_old();
+
+		$sql = 'SELECT *
+				FROM polls
+				WHERE user_id=
+					(SELECT id
+					FROM users
+					WHERE cookie_hash = "' . $_SESSION['id'] . '")
+				AND bill_id=' . $this->bill_id;
+		$result = mysql_query($sql);
+		if (mysql_num_rows($result) === 0)
+		{
+			return FALSE;
+		}
+			
+		return TRUE;
+		
+	} // end has_voted()
 	
 	/*
 	 * Retrieve the results for a given poll.
@@ -19,7 +55,7 @@ class Poll
 		 */
 		$mc = new Memcached();
 		$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-		$this->results = $mc->get('poll-' . $bill['id']);
+		$this->results = $mc->get('poll-' . $this->bill_id);
 
 		/*
 		 * If we have poll results in the cache.
@@ -42,10 +78,10 @@ class Poll
 			$sql = 'SELECT COUNT(*) AS total,
 						(SELECT COUNT(*) 
 						FROM polls
-						WHERE bill_id = ' . $bill['id'] . '
+						WHERE bill_id = ' . $this->bill_id . '
 						AND vote = "y") AS yes
 					FROM polls
-					WHERE bill_id= ' . $bill['id'];
+					WHERE bill_id= ' . $this->bill_id;
 			$result = mysql_query($sql);
 			if (mysql_num_rows($result) == 0)
 			{
