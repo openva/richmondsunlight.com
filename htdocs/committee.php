@@ -269,8 +269,6 @@ $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
 	$page_sidebar .= '
-	<a href="javascript:openpopup(\'/help/tag-clouds/\')"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
-	
 	<div class="box">
 		<h3>Tag Cloud</h3>
 		<div class="tags">';
