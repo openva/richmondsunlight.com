@@ -21,6 +21,8 @@ include_once('vendor/autoload.php');
 $database = new Database;
 $database->connect_old();
 
+$log = new Log;
+
 # PAGE METADATA
 $page_title = 'Register';
 $site_section = '';
@@ -291,6 +293,7 @@ if (isset($_POST['submit']))
 		
 		if ($result === FALSE)
 		{
+			$log->put('Somebody tried to create an account, and it failed entirely. They are frustrated now.', 5);
 			$page_body = '<p>Your registration has failed mysteriously, in a way that indicates
 				that some sort of a bug is at work. Please do us a favor and <a
 				href="/contact/">contact us</a> to report that you got this error. We’ll figure
@@ -323,6 +326,9 @@ if (isset($_POST['submit']))
 				</p>
 				
 				<p>(Or, if you prefer, you can just <a href="/">go back to the home page</a>.)';
+
+			$log->put('New user registration: ' . $user['name'], 3);
+
 		}
 	}
 }
