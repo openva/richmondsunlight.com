@@ -354,7 +354,7 @@ if (is_array($committee['member']))
 {
 	# Generate a list of all e-mail addresses for the members of this committee.
 	$page_body .= '
-			<h2>E-Mail Contact List</h2>
+			<h2>Email Contact List</h2>
 			<p>Copy the below into your e-mail client’s “To” field to e-mail every member
 			of this committee.</p>
 			<textarea style="width: 100%; height: 12em; font-size: .85em;">';
