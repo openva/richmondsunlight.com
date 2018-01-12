@@ -358,16 +358,19 @@ if (is_array($committee['member']))
 			<p>Copy the below into your e-mail client’s “To” field to e-mail every member
 			of this committee.</p>
 			<textarea style="width: 100%; height: 12em; font-size: .85em;">';
+	$num_members = count($committee['member']);
+	$i=0;
 	foreach ($committee['member'] as $member)
 	{
 		if (!empty($member['email']))
 		{
-			$page_body .= '&quot;'.$member['name_simple'].'&quot; &lt;'.$member['email'].'&gt;';
-			if (next($committee['member']))
+			$page_body .= '&quot;' . $member['name_simple'] . '&quot; &lt;' . $member['email'] . '&gt;';
+			if ($i+1 < $num_members)
 			{
 				$page_body .= ', ';
 			}
 		}
+		$i++;
 	}
 	$page_body .= '</textarea>';
 }
