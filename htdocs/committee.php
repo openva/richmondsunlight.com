@@ -262,7 +262,7 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 		LEFT JOIN committees
 			ON bills.last_committee_id=committees.id
 		AND bills.current_chamber=committees.chamber
-		WHERE committees.id='.$committee['id'].' AND bills.session_id = '.SESSION_ID.'
+		WHERE committees.id=' . $committee['id'] . ' AND bills.session_id = ' . SESSION_ID . '
 		GROUP BY tags.tag
 		ORDER BY tags.tag ASC';
 $result = mysql_query($sql);
@@ -285,7 +285,7 @@ if (mysql_num_rows($result) > 0)
 		$font_size = round(($tags[$i]['count'] / $top_tag * $top_tag_size), 2);
 		if ($font_size < '.75') $font_size = '.75';
 		$page_sidebar .= '<span style="font-size: '.$font_size.'em;">
-				<a href="/bills/tags/'.urlencode($tags[$i]['tag']).'/">'.$tags[$i]['tag'].'</a>
+				<a href="/bills/tags/' . urlencode($tags[$i]['tag']) . '/">' . $tags[$i]['tag'] . '</a>
 			</span>';
 	}
 	$page_sidebar .= '
@@ -304,11 +304,11 @@ if (is_array($committee['member']))
 			<ul>';
 	foreach ($committee['member'] AS $member)
 	{
-		$page_body .= '<li><a href="/legislator/'.$member['shortname'].'/" class="legislator">'.$member['name']
+		$page_body .= '<li><a href="/legislator/' . $member['shortname'] . '/" class="legislator">' . $member['name']
 			.'</a>';
 		if (!empty($member['position']))
 		{
-			$page_body .= ' <strong>'.ucwords($member['position']).'</strong>';
+			$page_body .= ' <strong>' . ucwords($member['position']) . '</strong>';
 		}
 	}
 	$page_body .= '
@@ -323,7 +323,7 @@ $page_body .= '
 # Perform the database query.
 $sql = 'SELECT name, meeting_time
 		FROM committees
-		WHERE parent_id='.$committee['id'].'
+		WHERE parent_id=' . $committee['id'] . '
 		ORDER BY name ASC';
 $result = mysql_query($sql);
 
@@ -378,5 +378,3 @@ $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
 $page->process();
-
-?>
