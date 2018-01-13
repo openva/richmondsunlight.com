@@ -21,6 +21,8 @@ include_once('vendor/autoload.php');
 $database = new Database;
 $database->connect_old();
 
+$log = new Log;
+
 # PAGE METADATA
 $page_title = 'Login';
 $site_section = '';
@@ -52,7 +54,7 @@ if (isset($_POST['submit']))
 			<div id="messages" class="errors">
 				<p>Please provide:</p>
 				<ul>
-					<li>'.$error_text.'</li>
+					<li>' . $error_text . '</li>
 				</ul>
 			</div>';
 	}
@@ -64,7 +66,7 @@ if (isset($_POST['submit']))
 		$form_data['password_hash'] = md5($form_data['password']);
 		$sql = 'SELECT id, name, cookie_hash
 				FROM users
-				WHERE email = "'.$form_data['email'].'" AND password = "'.$form_data['password_hash'].'"';
+				WHERE email = "' . $form_data['email'] . '" AND password = "' . $form_data['password_hash'] . '"';
 		$result = mysql_query($sql);
 		
 		if (mysql_num_rows($result) == 0)
@@ -88,7 +90,7 @@ if (isset($_POST['submit']))
 			# to be used throughout the site.
 			$sql = 'SELECT id, hash, name, watch_list_id
 					FROM dashboard_portfolios
-					WHERE watch_list_id IS NULL AND user_id='.$user['id'].'
+					WHERE watch_list_id IS NULL AND user_id=' . $user['id'] . '
 					ORDER BY name ASC';
 			$result = mysql_query($sql);
 			if (mysql_num_rows($result) > 0)
@@ -106,10 +108,13 @@ if (isset($_POST['submit']))
 				$_SESSION['registered'] = 'y';
 			}
 			
+			$log->put('User ' . $user['name'] . ' has logged in.', 2);
+
 			if (empty($form_data['return_uri']))
 			{
 				$form_data['return_uri'] = '/';
 			}
+
 			header('Location: https://www.richmondsunlight.com' . urldecode($form_data['return_uri']));
 			exit();
 		}
@@ -138,4 +143,3 @@ $page->site_section = $site_section;
 $page->html_head = $html_head;
 $page->process();
 
-?>

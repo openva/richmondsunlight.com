@@ -262,15 +262,13 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 		LEFT JOIN committees
 			ON bills.last_committee_id=committees.id
 		AND bills.current_chamber=committees.chamber
-		WHERE committees.id='.$committee['id'].' AND bills.session_id = '.SESSION_ID.'
+		WHERE committees.id=' . $committee['id'] . ' AND bills.session_id = ' . SESSION_ID . '
 		GROUP BY tags.tag
 		ORDER BY tags.tag ASC';
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
 	$page_sidebar .= '
-	<a href="javascript:openpopup(\'/help/tag-clouds/\')"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
-	
 	<div class="box">
 		<h3>Tag Cloud</h3>
 		<div class="tags">';
@@ -287,7 +285,7 @@ if (mysql_num_rows($result) > 0)
 		$font_size = round(($tags[$i]['count'] / $top_tag * $top_tag_size), 2);
 		if ($font_size < '.75') $font_size = '.75';
 		$page_sidebar .= '<span style="font-size: '.$font_size.'em;">
-				<a href="/bills/tags/'.urlencode($tags[$i]['tag']).'/">'.$tags[$i]['tag'].'</a>
+				<a href="/bills/tags/' . urlencode($tags[$i]['tag']) . '/">' . $tags[$i]['tag'] . '</a>
 			</span>';
 	}
 	$page_sidebar .= '
@@ -306,11 +304,11 @@ if (is_array($committee['member']))
 			<ul>';
 	foreach ($committee['member'] AS $member)
 	{
-		$page_body .= '<li><a href="/legislator/'.$member['shortname'].'/" class="legislator">'.$member['name']
+		$page_body .= '<li><a href="/legislator/' . $member['shortname'] . '/" class="legislator">' . $member['name']
 			.'</a>';
 		if (!empty($member['position']))
 		{
-			$page_body .= ' <strong>'.ucwords($member['position']).'</strong>';
+			$page_body .= ' <strong>' . ucwords($member['position']) . '</strong>';
 		}
 	}
 	$page_body .= '
@@ -325,7 +323,7 @@ $page_body .= '
 # Perform the database query.
 $sql = 'SELECT name, meeting_time
 		FROM committees
-		WHERE parent_id='.$committee['id'].'
+		WHERE parent_id=' . $committee['id'] . '
 		ORDER BY name ASC';
 $result = mysql_query($sql);
 
@@ -356,20 +354,23 @@ if (is_array($committee['member']))
 {
 	# Generate a list of all e-mail addresses for the members of this committee.
 	$page_body .= '
-			<h2>E-Mail Contact List</h2>
+			<h2>Email Contact List</h2>
 			<p>Copy the below into your e-mail client’s “To” field to e-mail every member
 			of this committee.</p>
 			<textarea style="width: 100%; height: 12em; font-size: .85em;">';
+	$num_members = count($committee['member']);
+	$i=0;
 	foreach ($committee['member'] as $member)
 	{
 		if (!empty($member['email']))
 		{
-			$page_body .= '&quot;'.$member['name_simple'].'&quot; &lt;'.$member['email'].'&gt;';
-			if (next($committee['member']))
+			$page_body .= '&quot;' . $member['name_simple'] . '&quot; &lt;' . $member['email'] . '&gt;';
+			if ($i+1 < $num_members)
 			{
 				$page_body .= ', ';
 			}
 		}
+		$i++;
 	}
 	$page_body .= '</textarea>';
 }
@@ -380,5 +381,3 @@ $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
 $page->process();
-
-?>
