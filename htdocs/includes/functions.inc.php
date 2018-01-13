@@ -794,8 +794,8 @@ function login_form()
 			<table class="form">
 				<tr><td><label for="name">E-Mail Address</label></td></tr>
 				<tr><td><input type="email" size="20" maxlength="60" id="email" name="form_data[email]" /></td></tr>
-				<tr><td><label for="name">Password</label></td></tr>
-				<tr><td><input type="password" size="20" maxlength="30" id="password" name="form_data[password]" /></td></tr>
+				<tr><td><label for="password">Password</label></td></tr>
+				<tr><td><input type="password" size="20" maxlength="255" id="password" name="form_data[password]" /></td></tr>
 				<tr><td><input type="submit" name="submit" value="Log In" /></td></tr>
 			</table>';
 	if (isset($return_uri)) $returned_data .= '

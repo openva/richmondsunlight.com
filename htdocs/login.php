@@ -9,15 +9,11 @@
 ###
 
 # INCLUDES
-# Include any files or libraries that are necessary for this specific
-# page to function.
 include_once('includes/functions.inc.php');
 include_once('includes/settings.inc.php');
 include_once('vendor/autoload.php');
 
 # DECLARATIVE FUNCTIONS
-# Run those functions that are necessary prior to loading this specific
-# page.
 $database = new Database;
 $database->connect_old();
 
@@ -40,11 +36,11 @@ if (isset($_POST['submit']))
 	}
 	if (empty($form_data['email']))
 	{
-		$errors[] = 'your e-mail address';
+		$errors[] = 'your email address';
 	}
 	elseif (!validate_email($form_data['email']))
 	{
-		$errors[] = 'a valid e-mail address';
+		$errors[] = 'a valid email address';
 	}
 	
 	if (isset($errors))
@@ -71,7 +67,7 @@ if (isset($_POST['submit']))
 		
 		if (mysql_num_rows($result) == 0)
 		{
-			$page_body = '<div id="messages" class="errors">That e-mail/password combination didn’t work.</div>';
+			$page_body = '<div id="messages" class="errors">That email/password combination didn’t work.</div>';
 		}
 		else
 		{
@@ -142,4 +138,3 @@ $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
 $page->html_head = $html_head;
 $page->process();
-
