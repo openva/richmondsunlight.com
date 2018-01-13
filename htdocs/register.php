@@ -261,7 +261,7 @@ if (isset($_POST['submit']))
 		
 		$form_data = array_map('mysql_real_escape_string', $_POST['form_data']);
 		
-		# Generate a random eight-digit hash in case this user has to recover his password.
+		# Generate a random eight-digit hash in case this user has to recover her password.
 		$chars = 'bcdfghjklmnpqrstvxyz0123456789';
 		$hash = substr(str_shuffle($chars), 0, 8);
 		
