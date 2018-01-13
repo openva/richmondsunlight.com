@@ -42,60 +42,60 @@ function display_form($form_data)
 				<legend>Create Your Account</legend>
 				<table>
 					<tr>
-						<th>Name</th>
+						<th><label for="name">Name</label></th>
 						<td>
-							<input type="text" name="form_data[name]" size="30" maxlength="60" value="'.$form_data['name'].'" /><br />
+							<input type="text" id="name" name="form_data[name]" size="30" maxlength="60" value="'.$form_data['name'].'" required /><br />
 							<small>Only your first name and last initial will be shown publicly.</small>
 						</td>
 					</tr>
 					<tr>
-						<th>Organization/Company</th>
+						<th><label for="organization">Organization/Company</label></th>
 						<td>
-							<input type="text" name="form_data[organization]" size="30" maxlength="128" value="'.$form_data['organization'].'" /><br />
+							<input type="text" id="organization" name="form_data[organization]" size="30" maxlength="128" value="'.$form_data['organization'].'" /><br />
 							<small>If you do this stuff professionally and want that known publicly.</small>
 						</td>
 					</tr>
 					<tr>
-						<th>E-Mail</th>
+						<th><label for="email">E-Mail</label></th>
 						<td>
-							<input type="email" name="form_data[email]" size="30" maxlength="60" value="'.$form_data['email'].'" /><br />
+							<input type="email" id="email" name="form_data[email]" size="30" maxlength="60" value="'.$form_data['email'].'" required /><br />
 							<small>It’s our secret. No spam, ever. We promise.</small>
 						</td>
 					</tr>
 					<tr>
-						<th>Password</th>
+						<th><label for="password">Password</label></th>
 						<td>
-							<input type="password" name="form_data[password]" id="password" size="30" maxlength="255" />
+							<input type="password" id="password" name="form_data[password]" id="password" size="30" maxlength="255" required />
 							<meter max="4" id="password-strength-meter"></meter>
 							<p id="password-strength-text"></p>
 						</td>
 					</tr>
 					<tr>
-						<th>Password Again</th>
+						<th><label for="password2">Password Again</label></th>
 						<td>
-							<input type="password" name="form_data[password_2]" size="30" maxlength="255" /><br />
+							<input type="password" id="password2" name="form_data[password_2]" size="30" maxlength="255" required /><br />
 							<small>Enter it one more time so we can check for typos.</small>
 						</td>
 					</tr>
 					<tr>
-						<th>Website Address</th>
+						<th><label for="url">Website Address</label></th>
 						<td>
-							<input type="url" name="form_data[url]" size="30" maxlength="60" value="'.$form_data['url'].'" /><br />
+							<input type="url" id="url" name="form_data[url]" size="30" maxlength="60" value="'.$form_data['url'].'" /><br />
 							<small>Only, of course, if you have a website.</small>
 						</td>
 					</tr>
 					<tr>
-						<th>ZIP</th>
+						<th><label for="zip">ZIP</label></th>
 						<td>
-							<input type="text" name="form_data[zip]" size="30" maxlength="5" value="'.$form_data['zip'].'" /><br />
+							<input type="text" id="zip" name="form_data[zip]" size="30" maxlength="5" value="'.$form_data['zip'].'" pattern="[0-9]{5}" /><br />
 							<small>So we can ID your legislators, for site customization.</small>
 						</td>
 					</tr>
 					<tr>
-						<th>Mailing List</th>
+						<th><label for="mailing_list">Mailing List</label></th>
 						<td>
-							<input type="checkbox" name="form_data[mailing_list]" value="y" '.(($form_data['mailing_list'] == 'y') ? 'checked="checked"' : '').' />
-							<small>May we e-mail you (only rarely)?</small>
+							<input type="checkbox" id="mailing_list" name="form_data[mailing_list]" value="y" '.(($form_data['mailing_list'] == 'y') ? 'checked="checked"' : '').' />
+							<small>May we e-mail you (very rarely)?</small>
 						</td>
 					</tr>
 					<tr>
@@ -181,10 +181,6 @@ if (isset($_POST['submit']))
 	{
 		$errors[] = 'a password that’s at least 8 characters long';
 	}
-	elseif (strlen($form_data['password']) > 255)
-	{
-		$errors[] = 'a password of no more than 255 characters, which doesn’t seem unreasonable?';
-	}
 	if (empty($form_data['email']))
 	{
 		$errors[] = 'your e-mail address';
@@ -216,7 +212,7 @@ if (isset($_POST['submit']))
 			<div id="messages" class="errors">
 				<p>Please provide:</p>
 				<ul>
-					<li>' . $error_text . '</li>
+					<li>'.$error_text.'</li>
 				</ul>
 			</div>';
 
@@ -261,7 +257,7 @@ if (isset($_POST['submit']))
 		
 		$form_data = array_map('mysql_real_escape_string', $_POST['form_data']);
 		
-		# Generate a random eight-digit hash in case this user has to recover her password.
+		# Generate a random eight-digit hash in case this user has to recover his password.
 		$chars = 'bcdfghjklmnpqrstvxyz0123456789';
 		$hash = substr(str_shuffle($chars), 0, 8);
 		
