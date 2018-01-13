@@ -196,7 +196,11 @@ $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
 	die('You’ve already posted that exact comment. You may not post it again. And, no, don’t '
-		.'just change it a little bit and repost it—a moderator will just delete it.');
+		. 'just change it a little bit and repost it—a moderator will just delete it. If you’re '
+		. 'trying to post the same comment on identical bills, we’ve saved you the trouble. Within '
+		. 'an hour, your prior comment will show up on every identical bill, automatically. (You’re '
+		. 'welcome!)'
+	);
 }
 
 if (!isset($errors))
