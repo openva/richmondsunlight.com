@@ -27,12 +27,10 @@ session_destroy();
 # Redirect the user back to the prior page or the homepage.
 if (!empty($_SERVER['HTTP_REFERER']))
 {
-	header('Location: '.$_SERVER['HTTP_REFERER']);
+	header('Location: ' . $_SERVER['HTTP_REFERER']);
 }
 else
 {
 	header('Location: http://www.richmondsunlight.com/');
 }
 exit;
-
-?>

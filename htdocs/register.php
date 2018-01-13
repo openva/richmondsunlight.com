@@ -216,7 +216,7 @@ if (isset($_POST['submit']))
 			<div id="messages" class="errors">
 				<p>Please provide:</p>
 				<ul>
-					<li>'.$error_text.'</li>
+					<li>' . $error_text . '</li>
 				</ul>
 			</div>';
 
