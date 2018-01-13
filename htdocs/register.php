@@ -65,7 +65,7 @@ function display_form($form_data)
 					<tr>
 						<th>Password</th>
 						<td>
-							<input type="password" name="form_data[password]" id="password" size="30" maxlength="60" />
+							<input type="password" name="form_data[password]" id="password" size="30" maxlength="255" />
 							<meter max="4" id="password-strength-meter"></meter>
 							<p id="password-strength-text"></p>
 						</td>
