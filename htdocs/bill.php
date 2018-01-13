@@ -1273,7 +1273,7 @@ if ( isset($comments) && is_array($comments) )
 				.$bill['patron_suffix'];
 			
 			# Display the legislator's photograph.
-			$badge = '<img src="/images/legislators/medium/'
+			$badge = '<img src="/images/legislators/thumbnails/'
 				.$bill['patron_shortname'].'.jpg" width="50" class="photo" />';
 		}
 		
