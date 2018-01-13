@@ -73,7 +73,7 @@ function display_form($form_data)
 					<tr>
 						<th>Password Again</th>
 						<td>
-							<input type="password" name="form_data[password_2]" size="30" maxlength="60" /><br />
+							<input type="password" name="form_data[password_2]" size="30" maxlength="255" /><br />
 							<small>Enter it one more time so we can check for typos.</small>
 						</td>
 					</tr>
@@ -180,6 +180,10 @@ if (isset($_POST['submit']))
 	elseif (strlen($form_data['password']) < 8)
 	{
 		$errors[] = 'a password that’s at least 8 characters long';
+	}
+	elseif (strlen($form_data['password']) > 255)
+	{
+		$errors[] = 'a password of no more than 255 characters, which doesn’t seem unreasonable?';
 	}
 	if (empty($form_data['email']))
 	{
