@@ -74,10 +74,6 @@
 	/* End the menu JavaScript conditional */
 	}
 ?>
-<!--
-Facebook will still parse this when it's within comment tags, which avoids the problem of it
-being invalid HTML5. <meta property="fb:page_id" content="35073492485" />
--->
 
 %html_head%
 </head>
