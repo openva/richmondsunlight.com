@@ -138,7 +138,7 @@ $html_head .= '<meta property="og:title" content="' . strtoupper($bill['number']
  */
 $html_head .= '<meta name="twitter:card" content="summary" />
 	<meta property="twitter:title" content="' . strtoupper($bill['number']) . ', introduced by ' . $bill['patron_name_formatted'].'"/>
-	<meta property="twitter:image" content="https://www.richmondsunlight.com/images/legislators/thumbnail/'
+	<meta property="twitter:image" content="https://www.richmondsunlight.com/images/legislators/thumbnails/'
 		. $bill['patron_shortname'] . '.jpg"/>
 	<meta name="twitter:site" content="@richmond_sun" />
 	<meta property="twitter:description" content="' . $bill['catch_line'] . '" />';
