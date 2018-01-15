@@ -158,7 +158,7 @@ class Video
 	function extract_file_data()
 	{
 
-		exec('/usr/bin/mplayer -identify ' . $_SERVER['DOCUMENT_ROOT'] . $this->path, $mplayer);
+		exec('/usr/bin/mplayer -ao dummy -vo dummy -identify ' . $_SERVER['DOCUMENT_ROOT'] . $this->path, $mplayer);
 		
 		foreach ($mplayer as $option)
 		{
