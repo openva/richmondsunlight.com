@@ -101,6 +101,10 @@ class Video
 		{
 			$sql .= ', capture_rate="'.$this->video['capture_rate'].'"';		
 		}
+		if (!empty($this->video['capture_directory']))
+		{
+			$sql .= ', capture_directory="'.$this->video['capture_directory'].'"';		
+		}
 		if (!empty($this->video['width']))
 		{
 			$sql .= ', width="'.$this->video['width'].'"';		
