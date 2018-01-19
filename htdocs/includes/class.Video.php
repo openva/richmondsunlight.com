@@ -101,6 +101,10 @@ class Video
 		{
 			$sql .= ', capture_rate="'.$this->video['capture_rate'].'"';		
 		}
+		if (!empty($this->video['capture_directory']))
+		{
+			$sql .= ', capture_directory="'.$this->video['capture_directory'].'"';		
+		}
 		if (!empty($this->video['width']))
 		{
 			$sql .= ', width="'.$this->video['width'].'"';		
@@ -158,7 +162,7 @@ class Video
 	function extract_file_data()
 	{
 
-		exec('/usr/bin/mplayer -identify ' . $_SERVER['DOCUMENT_ROOT'] . $this->path, $mplayer);
+		exec('/usr/bin/mplayer -ao dummy -vo dummy -identify ' . $_SERVER['DOCUMENT_ROOT'] . $this->path, $mplayer);
 		
 		foreach ($mplayer as $option)
 		{
@@ -175,7 +179,7 @@ class Video
 		$this->width = $mplayer['id_video_width'];
 		$this->height = $mplayer['id_video_height'];
 		$this->length = seconds_to_time($mplayer['id_length']);
-	
+		
 		if (empty($this->capture_rate) && !empty($this->capture_directory))
 		{
 			$dir = scandir($_SERVER['DOCUMENT_ROOT'] . $this->capture_directory, 1);
@@ -969,18 +973,13 @@ class Video
 		{
 			return FALSE;
 		}
-
-		/*
-		 * Intialize a variable to store our complete transcript.
-		 */
-		$this->transcript = '';
 		
 		/*
 		 * Turn the raw WebVTT data into an array.
 		 */
 		$this->webvtt = trim($this->webvtt);
-		$this->webvtt = explode('\n\n', $this->webvtt);
-		
+		$this->webvtt = explode("\n\n", $this->webvtt);
+
 		/*
 		 * Store the resulting data here.
 		 */
@@ -993,39 +992,37 @@ class Video
 		foreach ($this->webvtt as $caption)
 		{
 
+			/*
+			 * If there's no time range, skip this one.
+			 */
+			if (strpos($caption, '-->') === FALSE)
+			{
+				continue;
+			}
+
 			$caption = trim($caption);
-			$caption = explode(PHP_EOL, $caption);
+			$caption = explode("\n", $caption);
 			
+			$this->captions->$i = new stdClass;
 			$this->captions->$i->time_start = implode(array_slice(explode(' --> ', $caption[0]), 0, 1));
 			$this->captions->$i->time_end = implode(array_slice(explode(' --> ', $caption[0]), 1, 1));
 			$this->captions->$i->text = str_replace("\n",' ', implode(' ', array_slice($caption, 1)));
 			
-			/*
-			 * Append the text to our master transcript.
-			 */
-			$this->transcript .= $this->captions->$i->text . ' ';
-			
 			$i++;
 		}
 
-		/*
-		 * Replace any markers 
-		 */
-		$this->transcript = str_replace('>>>', "\n\n", $this->transcript);
-		$this->transcript = str_replace('>>', "\n\n", $this->transcript);
-		
 		return TRUE;
 
 	}
 
 	
 	/*
-	 * Store a WebVTT and a trasncript in the database.
+	 * Store a WebVTT in the database.
 	 */
 	function store_webvtt()
 	{
 
-		if ( !isset($this->file_id) || !isset($this->moments) || !isset($this->transcript) )
+		if ( !isset($this->file_id) || !isset($this->webvtt) )
 		{
 			return FALSE;
 		}
@@ -1034,8 +1031,7 @@ class Video
 		$database->connect_old();
 		
 		$sql = 'UPDATE files
-				SET transcript = "' . mysql_real_escape_string($this->transcript) . '",
-				webvtt = "' . mysql_real_escape_string($this->webvtt) . '",
+				SET webvtt = "' . mysql_real_escape_string($this->webvtt) . '"
 				WHERE id=' . $this->file_id;
 		$result = mysql_query($sql);
 		if ($result === FALSE)
@@ -1240,7 +1236,7 @@ class Video
 		/*
 		 * Don't accept suspiciously small numbers of captions.
 		 */
-		if (count($this->captions) <= 1)
+		if (count((array)$this->captions) <= 1)
 		{
 			return FALSE;
 		}
@@ -1273,7 +1269,7 @@ class Video
 					$caption->new_speaker = TRUE;
 					$caption->text = substr($caption->text, 3);
 				}
-				elseif (substr($stanza['transcript'], 0, 4) == '>>> ')
+				elseif (substr($caption->text, 0, 4) == '>>> ')
 				{
 					$caption->new_speaker = TRUE;
 					$caption->text = substr($caption->text, 4);
@@ -1360,7 +1356,7 @@ class Video
 		while ($caption = mysql_fetch_assoc($result))
 		{
 
-			if ($caption['new_speaker'] == y)
+			if ($caption['new_speaker'] == 'y')
 			{
 				$i++;
 				$caption[$i] = array();
@@ -1536,9 +1532,12 @@ class Video
 			 */
 			$prior_text = '';
 
-			foreach ($captions[$id-1] as $segment)
+			if ($id-1 > 0)
 			{
-				$prior_text .= $segment['text'] . ' ';
+				foreach ($captions[$id-1] as $segment)
+				{
+					$prior_text .= $segment['text'] . ' ';
+				}
 			}
 
 			$regex = '/(?:gentleman|gentlewoman|senator) from (.{3,30}),? (senator|ms\.|miss|mr\.)\s([a-z-]+)/i';
@@ -1559,9 +1558,12 @@ class Video
 				 * but not the second.
 				 */
 				$prior_text = '';
-				foreach ($captions[$id-3] as $segment)
+				if ($id-3 > 0)
 				{
-					$prior_text .= $segment['text'] . ' ';
+					foreach ($captions[$id-3] as $segment)
+					{
+						$prior_text .= $segment['text'] . ' ';
+					}
 				}
 				preg_match($regex, $prior_text, $matches);
 
