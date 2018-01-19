@@ -295,8 +295,11 @@ elseif (mysql_num_rows($result) > 0)
 			$page_body .= '<p><a href="'.$video2->path.'">Download this Video</a></p>';
 		}
 		
-		if (isset($video['html']))
+		if ( isset($video['html']) &&
+			( count($bill_clips) > 0 || count($legislator_clips) > 0 || count($video2->screenshots) > 0 )
+			)
 		{
+
 			$page_body .= '<h3>Index</h3>
 				<div id="video-index" class="tabs">
 				<ul>';
