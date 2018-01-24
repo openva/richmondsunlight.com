@@ -57,6 +57,19 @@ class Video
 		{
 			$this->video['license'] = 'public domain';
 		}
+
+		# Check whether we have this exact video saved already. If so, we'll just update it.
+		$sql = 'SELECT id
+				FROM files
+				WHERE chamber="' . $this->video['chamber'] . '" AND
+				date="' . $this->video['date'] . '" AND
+				length="' . $this->video['length'] . ' "';
+		$result = mysql_query($sql);
+		if (mysql_num_rows($result) > 0)
+		{
+			$file = mysql_fetch_array($result);
+			$this->video['id'] = $file['id'];
+		}
 		
 		# Assemble the SQL string.
 		if (isset($this->video['id']))
