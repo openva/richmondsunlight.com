@@ -721,6 +721,12 @@ class Video
 		# Get a list of all bill clips.
 		$this->clip_type = 'bills';
 		$this->index_clips();
+
+		# If there no clips were identified by index_clips(), then we're done here.
+		if (count($this->clips) == 0)
+		{
+			return FALSE;
+		}
 		
 		# Increment our counter.
 		$this->clip_count = $this->clip_count + count($this->clips);
