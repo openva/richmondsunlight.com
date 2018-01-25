@@ -439,8 +439,8 @@ if (!function_exists('create_user'))
 			
 			# Insert the Dashboard user data.
 			$sql = 'INSERT INTO dashboard_user_data
-				SET user_id = '.$user_id.', email_active="y", last_access=now(),
-				date_created=now(), unsub_hash="'.$hash.'"';
+					SET user_id = '.$user_id.', email_active="y", last_access=now(),
+					date_created=now(), unsub_hash="'.$hash.'"';
 			if (!empty($dashboard_inserts)) $sql .= $dashboard_inserts;
 			mysql_query($sql);
 		}		
