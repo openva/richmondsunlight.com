@@ -86,4 +86,59 @@ class Committee
 
 	}
 
+	/**
+	 * Return the ID of a committee, when provided with a chamber and a name.
+	 */
+	function get_id()
+	{
+		
+		if ( !isset($this->chamber) || !isset($this->name) )
+		{
+			return FALSE;
+		}
+
+		/*
+		* First, get a list of all committees' names and IDs.
+		*/
+		$sql = 'SELECT id, name
+				FROM committees
+				WHERE parent_id IS NULL
+				AND chamber = "' . $this->chamber . '"';
+		$result = mysql_query($sql);
+		if (mysql_num_rows($result) == 0)
+		{
+			return FALSE;
+		}
+
+		$committees = array();
+		while ($committee = mysql_fetch_array($result))
+		{
+			$committees[$committee{'id'}] = $committee['name'];
+		}
+
+		$shortest = -1;
+		foreach ($committees as $id => $name)
+		{
+
+			$distance = levenshtein($this->name, $name);
+			if ($distance === 0)
+			{
+				$closest = $id;
+				$shortest = 0;
+				break;
+			}
+
+			elseif ($distance <= $shortest || $shortest < 0)
+			{
+				$closest = $id;
+				$shortest = $distance;
+			}
+
+		}
+
+		$this->id = $closest;
+		return $this->id;
+
+	} // end get_id()
+
 }
