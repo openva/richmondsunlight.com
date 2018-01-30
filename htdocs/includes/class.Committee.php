@@ -98,8 +98,8 @@ class Committee
 		}
 
 		/*
-		* First, get a list of all committees' names and IDs.
-		*/
+		 * First, get a list of all committees' names and IDs.
+		 */
 		$sql = 'SELECT id, name
 				FROM committees
 				WHERE parent_id IS NULL
