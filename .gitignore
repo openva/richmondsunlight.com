@@ -25,3 +25,5 @@ process-audio
 process-video
 lobbyist.php
 petition.php
+
+*.cache
