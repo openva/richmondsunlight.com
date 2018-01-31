@@ -34,14 +34,14 @@ class Poll
 		{
 			return FALSE;
 		}
-			
+
 		return TRUE;
-		
+
 	} // end has_voted()
-	
+
 	/*
 	 * Retrieve the results for a given poll.
-	 */	
+	 */
 	function get_results()
 	{
 
@@ -76,7 +76,7 @@ class Poll
 			$database->connect_old();
 
 			$sql = 'SELECT COUNT(*) AS total,
-						(SELECT COUNT(*) 
+						(SELECT COUNT(*)
 						FROM polls
 						WHERE bill_id = ' . $this->bill_id . '
 						AND vote = "y") AS yes
@@ -87,14 +87,13 @@ class Poll
 			{
 				return FALSE;
 			}
-			
+
 			$this->results = mysql_fetch_array($result);
 			$mc->set( 'poll-' . $bill['id'], serialize($this->results), (60 * 60 * 24) );
 			return TRUE;
-			
+
 		}
 
 	} // end get_results()
 
 }
-

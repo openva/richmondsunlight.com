@@ -2,10 +2,10 @@
 
 ###
 # List Committees
-# 
+#
 # PURPOSE
 # List all committees.
-# 
+#
 ###
 
 # INCLUDES
@@ -30,7 +30,7 @@ $site_section = 'committees';
 
 # PAGE SIDEBAR
 $page_sidebar = '
-		
+
 		<div class="box">
 			<h3>Explanation</h3>
 			<p>The House of Delegates and the Senate can’t possibly consider every bill that’s
@@ -38,9 +38,9 @@ $page_sidebar = '
 			committees most appropriate to them, and those committees act as a filter, weeding
 			out the bad bills and sending the good bills on to be considered by the entire body.
 			 (At least, that’s the theory.)</p>
-			
+
 			<p>The House has 14 committees, and the Senate has 11.</p>
-			
+
 			<p>Committees are where much of the real work of the General Assembly gets done.
 			Committee meetings are where people can testify about bills, where deals are made,
 			and legislators speak more freely than they tend to before their entire body.

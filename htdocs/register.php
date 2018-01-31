@@ -2,7 +2,7 @@
 
 ###
 # Register
-# 
+#
 # PURPOSE
 # Allows the user to establish an account.
 #
@@ -111,7 +111,7 @@ function display_form($form_data)
 			<input type="hidden" name="form_data[time]" value="'.time().'" />
 		</form>
 	';
-	
+
 	return $returned_data;
 }
 
@@ -121,21 +121,21 @@ if (isset($_POST['submit']))
 {
 	$form_data = array_map('stripslashes', $_POST['form_data']);
 	$form_data = array_map('trim', $form_data);
-	
+
 	# If somebody filled out this form in an implausibly short time (two seconds), then it's a
 	# spammer.
 	if ( (time() - $form_data['time']) <= 2)
 	{
 		die();
 	}
-	
+
 	# Spammers tend to overload the ZIP field with an extra character, and always
 	# specify a URL, so that combination should be enough to just silently bail.
 	if ( (strlen($form_data['zip']) == 6) && !empty($form_data['url']) )
 	{
 		die();
 	}
-	
+
 	# Spammers also tend to provide a ZIP of "123456," "10001," and "30332."
 	if ( ($form_data['zip'] == '123456') || ($form_data['zip'] == '10001')  || ($form_data['zip'] == '30332') )
 	{
@@ -147,7 +147,7 @@ if (isset($_POST['submit']))
 	{
 		die();
 	}
-	
+
 	# Spammers tend to give URLs that start with "www." and claim to be with one of three tech
 	# companies as their organization. Bar anybody registering in this manner.
 	if (
@@ -158,13 +158,13 @@ if (isset($_POST['submit']))
 	{
 		die();
 	}
-	
+
 	# Spammers would also fill out the (hidden) age field.
 	if (!empty($form_data['age']))
 	{
 		die();
 	}
-	
+
 	if (empty($form_data['name']))
 	{
 		$errors[] = 'your name';
@@ -204,7 +204,7 @@ if (isset($_POST['submit']))
 				account!';
 		}
 	}
-	
+
 	if (isset($errors))
 	{
 		$error_text = implode('</li><li>', $errors);
@@ -221,13 +221,13 @@ if (isset($_POST['submit']))
 	}
 	else
 	{
-		
+
 		$form_data['password_hash'] = md5($form_data['password']);
-		
+
 		# Validate any provided URL, and silently drop it if it's invalid.
 		if (!empty($form_data['url']))
 		{
-			
+
 			# If there's an at sign in this URL, then it's probably somebody entering an e-mail
 			# address, thinking it's a URL.
 			if (strstr($form_data['url'], '@') !== false)
@@ -236,31 +236,31 @@ if (isset($_POST['submit']))
 			}
 			else
 			{
-			
+
 				# Make URLs lowercase.
 				$form_data['url'] = strtolower($form_data['url']);
-				
+
 				# If we've got content, but no schema, prepend a schema.
 				if (!stristr($form_data['url'], '://'))
 				{
 					$form_data['url'] = 'http://' . $form_data['url'];
-				}	
-				
+				}
+
 				# Validate the URL.
 				if (filter_var($form_data['url'], FILTER_VALIDATE_URL) === FALSE)
 				{
 					$form_data['url'] = '';
 				}
-				
+
 			}
 		}
-		
+
 		$form_data = array_map('mysql_real_escape_string', $_POST['form_data']);
-		
+
 		# Generate a random eight-digit hash in case this user has to recover his password.
 		$chars = 'bcdfghjklmnpqrstvxyz0123456789';
 		$hash = substr(str_shuffle($chars), 0, 8);
-		
+
 		# Assemble the URL-style account creation/update data.
 		$user_query = 'dashboard=y&type=free&name='.urlencode($form_data['name']).'&email='.$form_data['email'].
 			'&password='.$form_data['password'].'&private_hash='.$hash;
@@ -275,7 +275,7 @@ if (isset($_POST['submit']))
 		if (!empty($form_data['zip']))
 		{
 			$user_query .= '&zip='.$form_data['zip'];
-			
+
 			# Get this user's coordinates.
 			$location = new Location;
 			$location->zip = $form_data['zip'];
@@ -286,11 +286,11 @@ if (isset($_POST['submit']))
 		{
 			$user_query .= '&mailing_list='.$form_data['mailing_list'];
 		}
-		
+
 		# Create a brand-new account. Though it's tempting to merge this new account with
 		# any existing account data, it's really just more trouble than it's worth.
 		$result = create_user($user_query);
-		
+
 		if ($result === FALSE)
 		{
 			$log->put('Somebody tried to create an account, and it failed entirely. They are frustrated now.', 5);
@@ -299,13 +299,13 @@ if (isset($_POST['submit']))
 				href="/contact/">contact us</a> to report that you got this error. We’ll figure
 				out what went wrong and get you set up with an account in no time.</p>';
 		}
-		
+
 		else
 		{
-			
+
 			# Grab the user data.
 			$user = get_user();
-	
+
 			# Generate a random five-digit hash to ID this portfolio. It's in base 30,
 			# allowing for a namespace of 24,300,000.
 			$chars = 'bcdfghjklmnpqrstvxyz0123456789';
@@ -314,17 +314,17 @@ if (isset($_POST['submit']))
 					SET name = "Bills", public="y", user_id = '.$user['id'].',
 					hash = "'.$hash.'", date_created = now()';
 			mysql_query($sql);
-			
+
 			# Acknowledge the registration.
 			$page_body = '
 				<h2>Thanks for Registering!</h2>
 				<p>Now that you’re set up, you can start using Photosynthesis to track legislation.</p>
-				
+
 				<p style="font-family: Georgia, Palatino, \'Times New Roman\', Times, sans-serif;
 					font-size: 2em; text-align: center; margin: 2em 0;">
 					<a href="/photosynthesis/">Get Started &gt;&gt;</a>
 				</p>
-				
+
 				<p>(Or, if you prefer, you can just <a href="/">go back to the home page</a>.)';
 
 			$log->put('New user registration: ' . $user['name'], 3);

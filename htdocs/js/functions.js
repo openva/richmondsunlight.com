@@ -36,13 +36,13 @@ function ts_makeSortable(table) {
         var firstRow = table.rows[0];
     }
     if (!firstRow) return;
-    
+
     // We have a first row: assume it's the header, and make its contents clickable links
     for (var i=0;i<firstRow.cells.length;i++) {
         var cell = firstRow.cells[i];
         var txt = ts_getInnerText(cell);
-        cell.innerHTML = '<a href="#" class="sortheader" '+ 
-        'onclick="ts_resortTable(this, '+i+');return false;">' + 
+        cell.innerHTML = '<a href="#" class="sortheader" '+
+        'onclick="ts_resortTable(this, '+i+');return false;">' +
         txt+'<span class="sortarrow">&nbsp;&nbsp;&nbsp;</span></a>';
     }
 }
@@ -52,7 +52,7 @@ function ts_getInnerText(el) {
 	if (typeof el == "undefined") { return el };
 	if (el.innerText) return el.innerText;	//Not needed but it is faster
 	var str = "";
-	
+
 	var cs = el.childNodes;
 	var l = cs.length;
 	for (var i = 0; i < l; i++) {
@@ -78,7 +78,7 @@ function ts_resortTable(lnk,clid) {
     var td = lnk.parentNode;
     var column = clid || td.cellIndex;
     var table = getParent(td,'TABLE');
-    
+
     // Work out a type for the column
     if (table.rows.length <= 1) return;
     var itm = ts_getInnerText(table.rows[1].cells[column]);
@@ -103,13 +103,13 @@ function ts_resortTable(lnk,clid) {
         ARROW = '&nbsp;&nbsp;&darr;';
         span.setAttribute('sortdir','down');
     }
-    
+
     // We appendChild rows that already exist to the tbody, so it moves them rather than creating new ones
     // don't do sortbottom rows
     for (i=0;i<newRows.length;i++) { if (!newRows[i].className || (newRows[i].className && (newRows[i].className.indexOf('sortbottom') == -1))) table.tBodies[0].appendChild(newRows[i]);}
     // do sortbottom rows only
     for (i=0;i<newRows.length;i++) { if (newRows[i].className && (newRows[i].className.indexOf('sortbottom') != -1)) table.tBodies[0].appendChild(newRows[i]);}
-    
+
     // Delete any other arrows there may be showing
     var allspans = document.getElementsByTagName("span");
     for (var ci=0;ci<allspans.length;ci++) {
@@ -119,7 +119,7 @@ function ts_resortTable(lnk,clid) {
             }
         }
     }
-        
+
     span.innerHTML = ARROW;
 }
 
@@ -153,16 +153,16 @@ function ts_sort_date(a,b) {
     return 1;
 }
 
-function ts_sort_currency(a,b) { 
+function ts_sort_currency(a,b) {
     aa = ts_getInnerText(a.cells[SORT_COLUMN_INDEX]).replace(/[^0-9.]/g,'');
     bb = ts_getInnerText(b.cells[SORT_COLUMN_INDEX]).replace(/[^0-9.]/g,'');
     return parseFloat(aa) - parseFloat(bb);
 }
 
-function ts_sort_numeric(a,b) { 
+function ts_sort_numeric(a,b) {
     aa = parseFloat(ts_getInnerText(a.cells[SORT_COLUMN_INDEX]));
     if (isNaN(aa)) aa = 0;
-    bb = parseFloat(ts_getInnerText(b.cells[SORT_COLUMN_INDEX])); 
+    bb = parseFloat(ts_getInnerText(b.cells[SORT_COLUMN_INDEX]));
     if (isNaN(bb)) bb = 0;
     return aa-bb;
 }
@@ -218,7 +218,7 @@ Object.extend(Ajax.InPlaceEditor.prototype, {
 
 /* Some basic session functionality, written by Scott Andrew.
    <http://www.quirksmode.org/js/cookies.html> */
-   
+
 /*function createCookie(name,value,hours) {
 	if (days) {
 		var date = new Date();

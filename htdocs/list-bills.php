@@ -2,7 +2,7 @@
 
 ###
 # Bills Listing Page
-# 
+#
 # PURPOSE
 # Lists all current bills.
 #
@@ -134,7 +134,7 @@ elseif (!empty($committee))
 # If we're searching by year.
 else
 {
-	
+
 	# If we're also searching by status.
 	if (!empty($status))
 	{
@@ -147,18 +147,18 @@ else
 			$where_sql = 'AND outcome="failed"';
 		}
 	}
-	
+
 	# If we're also searching by the presence of tags
 	if (!empty($tagless))
 	{
 		$where_sql = '
-			AND 
+			AND
 				(SELECT COUNT(*)
 				FROM tags
 				WHERE tags.bill_id=bills.id)
 			= 0';
 	}
-	
+
 	# If we're also searching by session ID suffix.
 	if (!empty($session_suffix))
 	{
@@ -182,9 +182,9 @@ else
 $result = mysql_query($sql);
 $num_results = mysql_num_rows($result);
 if ($num_results > 0)
-{	
+{
 	$page_body .= '<p>'.number_format($num_results).' bill'.($num_results > 1 ? 's': '').' found.</p>';
-		
+
 	# If this is a listing of bills currently in a given committee.
 	if (!empty($committee) && !empty($chamber))
 	{
@@ -199,19 +199,19 @@ if ($num_results > 0)
 				</thead>
 				<tbody>';
 	}
-	
+
 	# Loop through the bill results.
 	while ($bill = mysql_fetch_array($result))
 	{
-		
+
 		$bill = array_map('stripslashes', $bill);
-		
+
 		# Simplify the status text.
 		if (stristr($bill['status'], 'failed') !== FALSE)
 		{
 			$bill['status'] = 'dead';
 		}
-	
+
 		# We want to display the house bills, then the senate bills. But we need some way to
 		# know when we've crossed that boundary, and that's what we use the $chamber flag for.
 		if (!isset($chamber))
@@ -294,7 +294,7 @@ if (!empty($year))
 					<li><a href="/bills/2011/2/">Redistricting Session</li>
 				</ul>
 			</li>
-			<li><a href="/bills/2012/">2012</a>			
+			<li><a href="/bills/2012/">2012</a>
 				<ul>
 					<li><a href="/bills/2012/1/">General Session</li>
 					<li><a href="/bills/2012/2/">Budget Session</li>
@@ -312,7 +312,7 @@ if (!empty($year))
 			<li><a href="/bills/2017/">2017</a></li>
 			<li><a href="/bills/2018/">2018</a></li>
 		</ul>
-		
+
 		<p style="margin-top: 1em;">View bills that:</p>
 		<ul>
 			<li><a href="/bills/' . $year . '/passed/">passed</a></li>
@@ -325,7 +325,7 @@ if (!empty($year))
 	<div class="box">
 		<h3>Explanation</h3>
 		<p>These are all of the bills proposed for '.$year;
-		
+
 	if (isset($status))
 	{
 		if ($status == 'passed')
@@ -354,7 +354,7 @@ if (!empty($year))
 		kind of like sea turtle hatchlings: out of dozens and dozens of eggs,
 		only a few make it safely past the seagulls to the water, and of those
 		just one is likely to grow to adulthood.</p>
-		
+
 		<p>That being the world’s only known sea turtle / lawmaking analogy.</p>';
 		}
 	}
@@ -385,7 +385,7 @@ if (!empty($year))
 	{
 		$page_sidebar .= '
 	<a href="javascript:openpopup(\'/help/tag-clouds/\')"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
-	
+
 	<div class="box">
 		<h3>Tag Cloud</h3>
 		<div class="tags">';
@@ -414,7 +414,7 @@ if (!empty($year))
 
 if (!empty($tag))
 {
-	
+
 	# Tag Cloud
 	# Show every tag cloud of all tags related to this tag.
 	$sql = 'SELECT COUNT(*) AS count, tags2.tag
@@ -432,7 +432,7 @@ if (!empty($tag))
 	{
 		$page_sidebar .= '
 	<a href="javascript:openpopup(\'/help/tag-clouds/\')"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
-	
+
 	<div class="box">
 		<h3>Related Tag Cloud</h3>
 		<div class="tags">';
@@ -452,7 +452,7 @@ if (!empty($tag))
 		</div>
 	</div>';
 	}
-	
+
 
 	$page_sidebar .= '
 	<div class="box">
@@ -462,11 +462,11 @@ if (!empty($tag))
 		Keep track of all bills tagged with &ldquo;'.$tag.'&rdquo; &mdash;
 		<a href="/rss/tag/'.urlencode($tag).'/">subscribe via RSS</a>.</p>
 	</div>';
-	
-	# Insert the RSS header.		
+
+	# Insert the RSS header.
 	$html_head .= '
 <link rel="alternate" type="application/rss+xml" title="RSS 0.92" href="/rss/tag/'.urlencode($tag).'/" />';
-	
+
 }
 
 if (!empty($committee) && !empty($chamber))

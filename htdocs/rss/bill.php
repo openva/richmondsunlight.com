@@ -2,7 +2,7 @@
 
 	###
 	# Bills' Activity by Individual Bill
-	# 
+	#
 	# PURPOSE
 	# Lists the last 20 bill actions for a specific bill.
 	#
@@ -18,18 +18,18 @@
 	#   numbers) as well as the cache filename structure.
 	#
 	###
-	
+
 	# INCLUDES
 	# Include any files or libraries that are necessary for this specific
 	# page to function.
 	include_once($_SERVER['DOCUMENT_ROOT'].'/includes/settings.inc.php');
 	include_once($_SERVER['DOCUMENT_ROOT'].'/includes/functions.inc.php');
-	
+
 	# LOCALIZE VARIABLES
 	$bill['number'] = strtolower($_REQUEST['number']);
-	
+
 	# PAGE CONTENT
-	
+
 	# Check to see if there's any need to regenerate this RSS feed -- only do so
 	# if it's more than a half hour old.
 	if ((file_exists('cache/bill-'.$bill['number'].'.xml')) && ((filemtime('cache/bill-'.$bill['number'].'.xml') + 1800) > time()))
@@ -58,20 +58,20 @@
 
 	if (mysql_num_rows($result) > 0)
 	{
-		
+
 		$rss_content = '';
 
 		# Generate the RSS.
 		while ($status = mysql_fetch_array($result))
 		{
-			
+
 			$status = array_map('stripslashes', $status);
-			
+
 			# Aggregate the variables into their RSS components.
 			$title = '<![CDATA['.$status['status'].']]>';
 			$link = 'http://www.richmondsunlight.com/bill/'.SESSION_YEAR.'/'.$bill['number'].'/';
 			$description = '<![CDATA['.$status['status'].']]>';
-			
+
 			# Now assemble those RSS components into an XML fragment.
 			$rss_content .= '
 			<item>
@@ -82,7 +82,7 @@
 		}
 	}
 
-	
+
 	$rss = '<?xml version="1.0" encoding=\'utf-8\'?>
 <!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN" "http://www.rssboard.org/rss-0.91.dtd">
 <rss version="0.91">
@@ -95,13 +95,13 @@
 		'.$rss_content.'
 	</channel>
 </rss>';
-	
-	
+
+
 	# Cache the RSS file.
 	$fp = @file_put_contents('cache/bill-'.$bill['number'].'.xml', $rss);
-	
+
 	header('Content-Type: application/rss+xml');
 	header('Last-Modified: '.date('r', filemtime('cache/bill-'.$bill['number'].'.xml')));
 	header('ETag: '.md5_file('cache/bill-'.$bill['number'].'.xml'));
-	echo $rss;	
+	echo $rss;
 ?>

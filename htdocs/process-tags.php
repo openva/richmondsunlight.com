@@ -2,11 +2,11 @@
 
 ###
 # Accept Tag Additions
-# 
+#
 # PURPOSE
 # Receives submitted tags, adds them, and returns the user back to the
 # bill page.
-# 
+#
 ###
 
 # INCLUDES
@@ -45,24 +45,24 @@ if (empty($tags['tags']))
 	# But if the tags are missing because a trusted user is deleting one, that's fine.
 	if (!empty($delete) && ($user['trusted'] == 'y'))
 	{
-		
+
 		# Delete the tag.
 		$sql = 'DELETE FROM tags
 				WHERE id=' . $delete;
 		mysql_query($sql);
-		
+
 		# Delete the bill from Memcached.
 		$mc = new Memcached();
 		$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
 		$result = $mc->delete('bill-' . $bill_id);
-		
+
 		$tmp = parse_url($_SERVER['HTTP_REFERER']);
 		$return_to = $tmp['path'];
-		
+
 		header('Location: '.$return_to);
 		exit;
 	}
-	
+
 	header('Location: https://' . $_SERVER['SERVER_NAME'] . $tags['return_to']);
 	exit;
 }
@@ -89,36 +89,36 @@ if (!logged_in())
 
 if ((!empty($_SESSION['id'])))// && !blacklisted())
 {
-	
+
 	# Explode the tags into an array to be inserted individually.
 	$tag = explode(',', $tags['tags']);
-	
+
 	for ($i=0; $i<count($tag); $i++)
 	{
 
 		$tag[$i] = strtolower(trim($tag[$i]));
-		
+
 		# Check the tag against the dirty words.
 		/*if (in_array($tag[$i], $GLOBALS['banned_words']))
 		{
 			@blacklist($tag[$i]);
 			break;
 		}*/
-		
+
 		# Drop useless tags.
 		if ($tag[$i] === '1')
 		{
 			continue;
 		}
-		
+
 		# Don't proceed if it's blank.
 		if (!empty($tag[$i]))
 		{
-		
+
 			# Make sure it's safe.
 			$tag[$i] = ereg_replace("[[:punct:]]", '', $tag[$i]);
 			$tag[$i] = trim(mysql_real_escape_string($tag[$i]));
-			
+
 			# Check one more time to make sure it's not empty.
 			if (!empty($tag[$i]))
 			{
@@ -132,27 +132,27 @@ if ((!empty($_SESSION['id'])))// && !blacklisted())
 						date_created=now()';
 				$result = mysql_query($sql);
 			}
-			
+
 		}
 	}
-	
+
 	# If the insert was successful
 	if (!empty($tags['return_to']))
 	{
-		
+
 		# Delete the bill from Memcached.
 		$mc = new Memcached();
 		$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
 		$result = $mc->delete('bill-' . $tags['bill_id']);
-	
+
 		$tag_list = implode(', ', $tag);
 		$log = new Log;
 		$result = $log->put('New tags added: ' . $tag_list . ' https://' . $_SERVER['SERVER_NAME'] . $tags['return_to'], 3);
-		
+
 		# Redirect the user back to the page of origin.
 		header('Location: https://' . $_SERVER['SERVER_NAME'] . $tags['return_to']);
 		exit;
-		
+
 	}
 }
 

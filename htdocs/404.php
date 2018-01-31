@@ -2,34 +2,34 @@
 
 	###
 	# 404 Error
-	# 
+	#
 	# PURPOSE
 	# A straight-up 404 page.
-	# 
+	#
 	###
-	
+
 	# INCLUDES
 	# Include any files or libraries that are necessary for this specific
 	# page to function.
 	include_once('settings.inc.php');
 	include_once('functions.inc.php');
 	include_once('vendor/autoload.php');
-	
+
 	# PAGE METADATA
 	$page_title = 'Page Not Found';
-	$site_section = '';	
-	
+	$site_section = '';
+
 	# PAGE CONTENT
 	$page_body = <<<EOD
 		<p>We're sorry, the page you've attempted to load cannot be found.</p>
-		
+
 		<h2>Cause</h2>
 		<p>If you've followed a link to Richmond Sunlight from another website, the
 		link may just be wrong.  If you've followed a link from within our website,
 		then <em>we</em> are wrong.  In either case, the fact that you've had this
 		trouble has been noted, and we'll investigate how we can keep this from
 		happening again.</p>
-		
+
 		<h2>Solutions</h2>
 		<ul class="classic">
 			<li><a href="/">Start back at the home page</a> and browse your way to the
@@ -42,9 +42,9 @@
 			page that provide you the inaccurate link, and any other information that
 			you think might help us track down and solve the problem for you.</li>
 		</ul>
-		
+
 EOD;
-	
+
 	# OUTPUT THE PAGE
 	/*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
 		'&site_section='.urlencode($site_section));*/

@@ -2,47 +2,47 @@
 
 class Page
 {
-	
+
 	function process()
 	{
 		Page::assemble();
 		Page::display();
 	}
-	
+
 	function assemble()
 	{
-		
+
 		# We use at least two templates -- the standard ("new") template, and the "help" template.
 		if (empty($this->template) || ($this->template == 'default'))
 		{
 			$this->template = 'new';
 		}
-		
+
 		# Connect to Memcached.
 		$mc = new Memcached();
 		$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-		
+
 		# Try to retrieve this template from Memcached.
 		$result = $mc->get('template-' . $this->template);
 		if ($mc->getResultCode() == 0)
 		{
 			$page = unserialize($result);
 		}
-		
+
 		# The template isn't in Memcached, so get it from the filesystem.
 		else
-		{	
+		{
 
 			# Get the contents of the template.
 			ob_start();
 			include dirname(__FILE__) . '/templates/' . $this->template . '.inc.php';
 			$page = ob_get_contents();
-			
+
 			# Cache this template, with a 24-hour expiration date.
 			$mc->set( 'template-' . $this->template, serialize($page), (60 * 60 * 24) );
-			
+
 		}
-		
+
 		# Establish the full browser title.
 		if (empty($this->page_title))
 		{
@@ -66,7 +66,7 @@ class Page
 				$this->page_title = str_replace('» ', '', $end_bit);
 			}
 		}
-		
+
 		# Create the account header.
 		if ( isset($_SESSION['registered']) && ($_SESSION['registered'] == 'y') )
 		{
@@ -76,7 +76,7 @@ class Page
 		{
 			$account = '<a href="/account/register/">Register</a> | <a href="/account/login/">Log In</a>';
 		}
-		
+
 		# Mark the body tag with the ID corresponding to the current site section. (This is used by
 		# the CSS to highlight the current section in the menu.)
 		if (!empty($this->site_section))
@@ -87,7 +87,7 @@ class Page
 			}
 			$this->body_tag .= ' id="body-'.$this->site_section.'"';
 		}
-		
+
 		# Step through and replace each variable in the template with the
 		# contents of the page.
 		$page = str_replace('%browser_title%', $this->browser_title, $page);
@@ -116,7 +116,7 @@ class Page
 		}
 
 		# See if we have any recommended bills and, if so, insert a promo for them.
-		
+
 		$user = new User();
 		$bills = $user->recommended_bills();
 		if ($bills != FALSE)
@@ -125,7 +125,7 @@ class Page
 		}
 		else
 		{
-		
+
 			$user->get();
 			if ( empty($user->data['house_district_id']) || empty($user->data['senate_district_id']) )
 			{
@@ -135,29 +135,29 @@ class Page
 			{
 				$recommended_Bills = '';
 			}
-			
+
 		}
 		$page = str_replace('%recommended_bills%', $recommended_bills, $page);
-		
+
 		# Make this variable accessible to the whole class.
 		$this->output = $page;
 		unset($page);
-		
+
 		return TRUE;
-		
+
 	}
-	
+
 	# Send the contents of the page to the browser.
 	function display()
 	{
-		
+
 		# Send the completed page to the browser by clearing the buffer and echoing
 		# its previously-saved contents.
 		ob_end_clean();
-		
+
 		echo $this->output;
-		
+
 		return TRUE;
-		
+
 	}
 }

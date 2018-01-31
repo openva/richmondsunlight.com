@@ -2,13 +2,13 @@
 
 ###
 # Create Bill JSON
-# 
+#
 # PURPOSE
 # Accepts a section of code, and responds with a listing of bills that addressed that section.
-# 
+#
 # NOTES
 # This is not intended to be viewed. It just spits out a JSON file and that's that.
-# 
+#
 ###
 
 # INCLUDES

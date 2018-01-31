@@ -21,7 +21,7 @@
 
 	max-width: 280px;
 	min-width: 50px;
-	
+
 	font-size: 10.5px;
 	line-height: 12px;
 }
@@ -69,7 +69,7 @@
 			border-width: 1px;
 			border-style: solid;
 		}
-		
+
 		* html .ui-tooltip-titlebar .ui-state-default{ top: 16px; } /* IE fix */
 
 		.ui-tooltip-titlebar .ui-icon,
@@ -104,7 +104,7 @@
 
 /* Applied on hover of tooltips i.e. added/removed on mouseenter/mouseleave respectively */
 .ui-tooltip-hover{
-	
+
 }
 
 
@@ -135,7 +135,7 @@
 		background: #F1F1F1;
 		color: #777;
 	}
-	
+
 	.ui-tooltip-default .ui-tooltip-titlebar .ui-state-hover{
 		border-color: #aaa;
 		color: #111;
@@ -151,7 +151,7 @@
 	.ui-tooltip .ui-tooltip-tip,
 	.ui-tooltip .ui-tooltip-tip *{
 		position: absolute;
-		
+
 		line-height: 0.1px !important;
 		font-size: 0.1px !important;
 		color: #123456;
@@ -159,7 +159,7 @@
 		background: transparent;
 		border: 0px dashed transparent;
 	}
-	
+
 	.ui-tooltip .ui-tooltip-tip canvas{ top: 0; left: 0; }
 
 
@@ -372,7 +372,7 @@
 	background: rgba(0, 0, 0, 0.7);
 	background-image: -moz-linear-gradient(top, #717171, #232323);
 	background-image: -webkit-gradient(linear, left top, left bottom, from(#717171), to(#232323));
-	
+
 	border: 2px solid #ddd;
 	border: 2px solid rgba(241,241,241,1);
 
@@ -429,11 +429,11 @@
 		color: #111;
 		border: 0 dashed transparent;
 	}
-	
+
 	.ui-tooltip-cluetip .ui-tooltip-icon{
 		border-color: #808064;
 	}
-	
+
 	.ui-tooltip-cluetip .ui-tooltip-titlebar .ui-state-hover{
 		border-color: #696952;
 		color: #696952;
@@ -454,7 +454,7 @@
 		background: rgba(0, 0, 0, .87);
 		filter:progid:DXImageTransform.Microsoft.gradient(startColorstr=#D9000000,endColorstr=#D9000000);
 		-ms-filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr=#D9000000,endColorstr=#D9000000)";
-		
+
 		color: white;
 		border: 0px transparent;
 
@@ -472,7 +472,7 @@
 	.ui-tooltip-tipsy .ui-tooltip-content{
 		padding: 6px 10;
 	}
-	
+
 	.ui-tooltip-tipsy .ui-tooltip-icon{
 		border-color: #222;
 		text-shadow: none;
@@ -487,7 +487,7 @@
 .ui-tooltip-tipped{
 
 }
-	
+
 	.ui-tooltip-tipped .ui-tooltip-titlebar,
 	.ui-tooltip-tipped .ui-tooltip-content{
 		border: 3px solid #959FA9;
@@ -511,7 +511,7 @@
 		-webkit-border-radius: 3px 3px 0 0;
 		border-radius: 3px 3px 0 0;
 	}
-	
+
 	.ui-tooltip-tipped .ui-tooltip-content{
 		background-color: #F9F9F9;
 		color: #454545;
@@ -525,7 +525,7 @@
 		border: 2px solid #285589;
 		background: #285589;
 	}
-		
+
 		.ui-tooltip-tipped .ui-tooltip-icon .ui-icon{
 			background-color: #FBFBFB;
 			color: #555;
@@ -537,4 +537,3 @@
 	filter: none;
 	-ms-filter: none;
 }
-

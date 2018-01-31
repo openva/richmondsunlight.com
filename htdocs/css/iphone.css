@@ -26,7 +26,7 @@ div#sidebar {
 	clear: left;
 	width: 100%;
 	font-size: 20px;
-}	
+}
 
 #date-status, p.quote, #bri, div#watch, div#bill-progress, #facebook {
 	display: none;

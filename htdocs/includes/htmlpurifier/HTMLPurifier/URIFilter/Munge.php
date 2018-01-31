@@ -5,9 +5,9 @@ class HTMLPurifier_URIFilter_Munge extends HTMLPurifier_URIFilter
     public $name = 'Munge';
     public $post = true;
     private $target, $parser, $doEmbed, $secretKey;
-    
+
     protected $replace = array();
-    
+
     public function prepare($config) {
         $this->target    = $config->get('URI', $this->name);
         $this->parser    = new HTMLPurifier_URIParser();
@@ -17,21 +17,21 @@ class HTMLPurifier_URIFilter_Munge extends HTMLPurifier_URIFilter
     }
     public function filter(&$uri, $config, $context) {
         if ($context->get('EmbeddedURI', true) && !$this->doEmbed) return true;
-        
+
         $scheme_obj = $uri->getSchemeObj($config, $context);
         if (!$scheme_obj) return true; // ignore unknown schemes, maybe another postfilter did it
         if (is_null($uri->host) || empty($scheme_obj->browsable)) {
             return true;
         }
-        
+
         $this->makeReplace($uri, $config, $context);
         $this->replace = array_map('rawurlencode', $this->replace);
-        
+
         $new_uri = strtr($this->target, $this->replace);
         $uri = $this->parser->parse($new_uri); // overwrite
         return true;
     }
-    
+
     protected function makeReplace($uri, $config, $context) {
         $string = $uri->toString();
         // always available
@@ -44,5 +44,5 @@ class HTMLPurifier_URIFilter_Munge extends HTMLPurifier_URIFilter
         // not always available
         if ($this->secretKey) $this->replace['%t'] = sha1($this->secretKey . ':' . $string);
     }
-    
+
 }

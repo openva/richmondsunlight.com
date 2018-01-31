@@ -1,8 +1,8 @@
 <?php
 
 ###
-# AJAX Handler for Bill Notes 
-# 
+# AJAX Handler for Bill Notes
+#
 # PURPOSE
 # Accepts AJAX callbacks for the creation and editing of public notes for individual bills.
 #
@@ -32,7 +32,7 @@ if ( !isset($_POST['user_hash']) || !isset($_POST['id']) || !isset($_POST['value
 {
 	die(' ');
 }
-	
+
 # Strip out all tags other than the following.
 $notes = trim(strip_tags($_POST['value'], '<a><em><strong><i><b><s><blockquote><embed><ol><ul><li>'));
 $hash = mysql_real_escape_string($_POST['user_hash']);
@@ -55,7 +55,7 @@ if ($result === FALSE)
 # If the query was successful, send the data back to the browser for display.
 else
 {
-			
+
 	/*
 	 * Clear the Memcached cache of comments on this bill, since Photosyntheis comments are
 	 * among them.
@@ -68,7 +68,7 @@ else
 	$mc = new Memcached();
 	$mc->addServer("127.0.0.1", 11211);
 	$mc->delete('comments-' . $bill['id']);
-	
+
 	echo $notes;
 }
 

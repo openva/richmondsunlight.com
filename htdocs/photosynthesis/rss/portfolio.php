@@ -2,7 +2,7 @@
 
 ###
 # RSS: Dashboard, by Portfolio
-# 
+#
 # PURPOSE
 # Lists the last 20 bill actions of bills for a particular portfolio.
 #
@@ -40,7 +40,7 @@ if ((file_exists('cache/portfolio-'.$hash.'.xml')) && ((filemtime('cache/portfol
 	header('ETag: '.md5_file('cache/portfolio-'.$hash.'.xml'));
 	readfile('cache/portfolio-'.$hash.'.xml');
 	exit();
-}	
+}
 
 # Open a database connection.
 $database = new Database;
@@ -79,12 +79,12 @@ $rss_content = '';
 # Generate the RSS.
 while ($bill = mysql_fetch_array($result))
 {
-	
+
 	# Aggregate the variables into their RSS components.
 	$title = '<![CDATA['.$bill['catch_line'].' ('.strtoupper($bill['number']).')]]>';
 	$link = 'https://www.richmondsunlight.com/bill/'.SESSION_YEAR.'/'.$bill['number'].'/';
 	$description = '<![CDATA[<p>'.$bill['summary'].'</p><p><strong>Status: '.$bill['status'].'</strong></p>]]>';
-	
+
 	# Now assemble those RSS components into an XML fragment.
 	$rss_content .= '
 	<item>
@@ -98,7 +98,7 @@ while ($bill = mysql_fetch_array($result))
 	unset($title);
 	unset($link);
 	unset($description);
-	
+
 }
 
 

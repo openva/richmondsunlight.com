@@ -2,7 +2,7 @@
 
 ###
 # Dashboard Portfolio Modification
-# 
+#
 # PURPOSE
 # Allows the modification of settings for a single portfolio.
 #
@@ -41,7 +41,7 @@ if (!isset($_GET['hash']))
 	exit;
 }
 else
-{	
+{
 	# Clean up and localize the portfolio hash.
 	$portfolio['hash'] = mysql_real_escape_string($_GET['hash']);
 }
@@ -55,7 +55,7 @@ if (isset($_POST['submit']))
 	if (empty($form_data['name'])) $errors[] = 'the name of this portfolio';
 	if (empty($form_data['public'])) $form_data['public'] = 'n';
 	if (empty($form_data['notify'])) $form_data['notify'] = 'none';
-	
+
 	if (isset($errors))
 	{
 		$error_text = implode('</li><li>', $errors);
@@ -74,18 +74,18 @@ if (isset($_POST['submit']))
 				notes = '.(empty($form_data['notes']) ? 'NULL' : '"'.$form_data['notes'].'"').'
 				WHERE id="'.$form_data['id'].'" AND user_id = '.$user['id'];
 		$result = mysql_query($sql);
-		
+
 		# If the update to the portfolio didn't work, say so.
 		if (!$result) $message = '<div id="messages" class="errors">Sorry: This portfolio could not be edited.</div>';
-		
+
 		# Else if the update worked, proceed.
 		else
 		{
-			
+
 			// It would be substantially more efficient to store the existing watch list criteria
 			// in a hidden form field, and only update the watch list row and repopulate the list
 			// if that watch list has changed.
-			
+
 			# If it's a smart portfolio, we need to update the watchlist.
 			if ($form_data['type'] == 'smart')
 			{
@@ -105,12 +105,12 @@ if (isset($_POST['submit']))
 				# If the update to the portfolio didn't work, say so.
 				if (!$result) $message = '<div id="messages" class="errors">Sorry: This portfolio could not be edited.</div>';
 				else
-				{				
+				{
 					# Now we have to repopulate the portfolio
 					populate_smart_portfolio($form_data['id']);
 				}
 			}
-			
+
 			# If we haven't encountered an error, present a "edit finished" message.
 			if (!isset($message))
 			{
@@ -119,7 +119,7 @@ if (isset($_POST['submit']))
 			}
 		}
 	}
-	
+
 }
 
 # Assemble the SQL query.
@@ -153,10 +153,10 @@ if ($portfolio['type'] == 'smart')
 			WHERE id = '.$portfolio['watch_list_id'];
 	$result = mysql_query($sql);
 	$watch_list = mysql_fetch_array($result);
-	
+
 	# Clean it up.
 	$watch_list = array_map('stripslashes', $watch_list);
-	
+
 	# Merge it into $portfolio.
 	$tmp = array_merge($watch_list, $portfolio);
 	$portfolio = $tmp;

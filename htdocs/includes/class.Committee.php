@@ -16,7 +16,7 @@ class Committee
 
 		$db = new Database;
 		$db->connect_old();
-		
+
 		/*
 		 * Select the basic committee information.
 		 */
@@ -91,7 +91,7 @@ class Committee
 	 */
 	function get_id()
 	{
-		
+
 		if ( !isset($this->chamber) || !isset($this->name) )
 		{
 			return FALSE;

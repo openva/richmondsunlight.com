@@ -2,7 +2,7 @@
 
 ###
 # Log Out
-# 
+#
 # PURPOSE
 # Destroys a session's cookies.
 #

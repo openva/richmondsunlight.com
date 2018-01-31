@@ -2,10 +2,10 @@
 
 ###
 # Committees
-# 
+#
 # PURPOSE
 # Individual committees.
-# 
+#
 ###
 
 include_once('includes/settings.inc.php');
@@ -97,8 +97,8 @@ if (isset($committee->meeting->next))
 		. '">Details »</a></p>';
 }
 $page_sidebar .= '</div>';
-		
-		
+
+
 # Overall batting average.
 $sql = 'SELECT COUNT(*) AS failed,
 			(SELECT COUNT(*)
@@ -113,7 +113,7 @@ $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
 	$stats = mysql_fetch_array($result);
-	
+
 	# "We'll have no dividing by zero in this house, young man."
 	if (($stats['failed'] > 0) && ($stats['total'] > 0))
 	{
@@ -125,8 +125,8 @@ if (mysql_num_rows($result) > 0)
 		this year have passed.</p>';
 	}
 }
-		
-		
+
+
 # Partisan batting average.
 $sql = 'SELECT representatives.party, representatives.party AS party1,
 		COUNT(*) AS failed,
@@ -148,14 +148,14 @@ $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
 	$page_sidebar .= '<p>';
-	
+
 	while ($stats = mysql_fetch_array($result))
 	{
-		
+
 		if ($stats['party'] == 'R') $stats['party'] = 'Republican';
 		elseif ($stats['party'] == 'D') $stats['party'] = 'Democrat';
 		elseif ($stats['party'] == 'I') $stats['party'] = 'Independent';
-	
+
 		# "We'll have no dividing by zero in this house, young man."
 		if (($stats['failed'] > 0) && ($stats['total'] > 0))
 		{
@@ -163,7 +163,7 @@ if (mysql_num_rows($result) > 0)
 			the ' . $stats['total'].' bills introduced by ' . $stats['party'].'s have passed.  ';
 		}
 	}
-		
+
 	$page_sidebar .= '</p>';
 }
 
@@ -179,9 +179,9 @@ $sql = 'SELECT chamber, number, catch_line
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-	
+
 	$total_bills = mysql_num_rows($result);
-	
+
 	# List only the last five.
 	if ($total_bills < 5)
 	{
@@ -191,7 +191,7 @@ if (mysql_num_rows($result) > 0)
 	{
 		$listed_bills = 4;
 	}
-	
+
 	$page_sidebar .= '
 	<div class="box">
 		<h3>Bills in this Committee</h3>

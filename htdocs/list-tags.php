@@ -2,7 +2,7 @@
 
 ###
 # Tags Listing Page
-# 
+#
 # PURPOSE
 # Displays tag clouds for a given grouping--year, party, chamber, committee, legislator, etc.
 #
@@ -58,18 +58,18 @@ $tag_count = mysql_num_rows($result);
 if ($tag_count > 0)
 {
 	$page_body .= '
-	<div class="tags">';		
+	<div class="tags">';
 	# Build up an array of tags, with the key being the tag and the value being the count.
 	while ($tag = mysql_fetch_array($result))
 	{
 		$tag = array_map('stripslashes', $tag);
 		$tags[$tag{tag}] = $tag['count'];
 	}
-	
+
 	# Sort the tags in reverse order by key (their count), shave off the top 30, and then
 	# resort alphabetically.
 	ksort($tags);
-	
+
 	foreach ($tags AS $tag => $count)
 	{
 		$font_size = round(log($count), 2);
@@ -96,7 +96,7 @@ $page_sidebar = '
 		word represents a different topic. The bigger the word is, the more bills that have been
 		filed on that topic. A tiny word might represent just have a couple of bills, while a huge
 		one (like “commendations”) might represent dozens of bills.</p>
-		
+
 		<p>All of these tags have been created by visitors to Richmond Sunlight—people just like
 		you.</p>
 	</div>';

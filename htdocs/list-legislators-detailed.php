@@ -2,7 +2,7 @@
 
 ###
 # Detailed Legislators Listing Page
-# 
+#
 # PURPOSE
 # Lists all current representatives, but with lots of details about them.
 #
@@ -63,65 +63,65 @@ $sql = 'SELECT representatives.shortname, representatives.name, representatives.
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-	
+
 	# This is the code we'll use to specify that a checkbox should be checked by default.
 	$checked = ' checked="checked"';
-	
+
 	$page_body .= '
 		<p>Check any attribute that you want to include. Click on the title of any column to
 		sort by that attribute.</p>
-		
+
 		<form method="get" action="/legislators/detailed/">
-		
+
 			<!--<input type="checkbox" name="options[age]" value="y" id="age" '
 			.( isset($options['age']) ? $checked : '' ).
 			'/>
 			<label for="age">Age</label>-->
-		
+
 			<input type="checkbox" name="options[location]" value="y" id="location" '
 			.( isset($options['location']) ? $checked : '' ).
 			'/>
 			<label for="location">Location</label>
-		
+
 			<input type="checkbox" name="options[chamber]" value="y" id="chamber" '
 			.( isset($options['chamber']) ? $checked : '' ).
 			'/>
 			<label for="chamber">Chamber</label>
-		
+
 			<input type="checkbox" name="options[party]" value="y" id="party" '
 			.( isset($options['party']) ? $checked : '' ).
 			'/>
 			<label for="party">Party</label>
-		
+
 			<!--<input type="checkbox" name="options[cash]" value="y" id="cash" '
 			.( isset($options['cash']) ? $checked : '' ).
 			'/>
 			<label for="cash">$ on Hand</label>-->
-		
+
 			<input type="checkbox" name="options[partisanship]" value="y" id="partisanship" '
 			.( isset($options['partisanship']) ? $checked : '' ).
 			'/>
 			<label for="partisanship">Partisanship</label>
-		
+
 			<input type="checkbox" name="options[sex]" value="y" id="sex" '
 			.( isset($options['sex']) ? $checked : '' ).
 			'/>
 			<label for="sex">Sex</label>
-		
+
 			<input type="checkbox" name="options[race]" value="y" id="race" '
 			.( isset($options['race']) ? $checked : '' ).
 			'/>
 			<label for="race">Race</label>
-		
+
 			<input type="checkbox" name="options[year_started]" value="y" id="year_started" '
 			.( isset($options['year_started']) ? $checked : '' ).
 			'/>
 			<label for="year_started">Started</label>
-			
+
 			<input type="submit" name="go" value="Go" />
-			
+
 		</form>
-		
+
 		<table id="legislators" class="sortable">
 		<thead>
 			<tr>
@@ -178,17 +178,17 @@ if (mysql_num_rows($result) > 0)
 	while ($legislator = mysql_fetch_array($result))
 	{
 		$legislator = array_map('stripslashes', $legislator);
-		
+
 		if (!empty($legislator['cash']))
 		{
 			$legislator['cash'] = '$'.number_format($legislator['cash']);
 		}
-		
+
 		$page_body .= '
 			<tr>
 				<td><a href="/legislator/'.$legislator['shortname'].'/">'
 					.pivot($legislator['name']).'</a></td>';
-					
+
 		if (isset($options['age']))
 		{
 			$page_body .= '

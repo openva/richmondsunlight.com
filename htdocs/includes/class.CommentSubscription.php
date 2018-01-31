@@ -3,7 +3,7 @@
 # Allow people to subscribe to (or cease subscribing to) comments to particular bills via e-mail.
 class CommentSubscription
 {
-	
+
 	# Save a new subscription for a given user for a given bill.
 	function save()
 	{
@@ -23,11 +23,11 @@ class CommentSubscription
 		{
 			return FALSE;
 		}
-		
+
 		return true;
 
 	}
-	
+
 	# Terminate an existing subscription. Requires the unique hash.
 	function delete()
 	{
@@ -47,10 +47,10 @@ class CommentSubscription
 		{
 			return FALSE;
 		}
-		
+
 		return true;
 	}
-	
+
 	# Get a listing of all subscriptions for a given bill. We call this "listing" and not "list"
 	# because list() is an existing PHP function.
 	function listing()
@@ -72,20 +72,20 @@ class CommentSubscription
 		{
 			return FALSE;
 		}
-		
+
 		# Initialize the array that will store a list of the subscribers for this bill.
 		$subscriptions = array();
-		
+
 		# Build up that array.
 		while ($subscriber = mysql_fetch_array($result))
 		{
 			$subscriber = array_map('stripslashes', $subscriber);
 			$subscriptions[] = $subscriber;
 		}
-		
+
 		return $subscriptions;
 	}
-	
+
 	# Determine whether a given user is subscribed to a given bill already. If not, returns false.
 	# if so, returns the subscription hash.
 	function is_subscribed()
@@ -108,11 +108,11 @@ class CommentSubscription
 			return FALSE;
 		}
 		$subscription = mysql_fetch_array($result);
-		
+
 		return $subscription['hash'];
-		
+
 	}
-	
+
 	# Send out an e-mail notifying a list of subscribers that a new comment has been posted to a
 	# bill.
 	function send_email()
@@ -122,27 +122,27 @@ class CommentSubscription
 		{
 			return FALSE;
 		}
-		
+
 		# And make sure that we have an array containing the comment, its author, etc.
 		if ( !isset($this->comment) || !array($this->comment) || (count($this->comment) < 1))
 		{
 			return FALSE;
 		}
-		
+
 		$tmp = new Bill2;
 		$tmp->id = $this->bill_id;
 		$bill = $tmp->info();
-		
+
 		// This is quite likely not the right place to include this, but what the heck?
 // THIS INCLUDE IS FAILING. THE FILE CAN'T BE FOUND.
 		include 'Mail.php';
-		
+
 		# Iterate through every subscriber and e-mail them.
 		// I have to suspect that PEAR::Mail can handle this without iterating through, in one
 		// fell swoop.
 		foreach ($this->subscriptions as $subscriber)
 		{
-			
+
 			# Put together the headers for our e-mail.
 			$headers['Content-Type'] = "text/plain; charset=\"UTF-8\"";
 			$headers['Content-Transfer-Encoding'] = "8bit";
@@ -151,16 +151,16 @@ class CommentSubscription
 				.strtoupper($bill['number']).')';
 			//$headers['To'] = '"'.$subscriber['name'].'" <'.$subscriber['email'].'>';
 			$headers['To'] = '"Waldo Jaquith" <waldo@jaquith.org>';
-			
+
 			# Specify the recipient as being the same as the "To" field.
 			$recipient = $headers['To'];
-			
+
 			# Assemble the body of the e-mail.
 			$body = 'In response to "'.$bill['catch_line'].'" ('.strtoupper($bill['number']).'), '
 				.$this->comment['name'].' wrote:'."\r\r".$this->comment['comment']."\r\r"
 				.$bill['url']."\r\rUnsubscribe from this Discussion \r"
 				.'http://www.richmondsunlight.com/unsubscribe/'.$subscriber['hash'].'/';
-			
+
 			# Send the e-mail.
 			// THIS SHOULD REALLY BE DONE AS A BASE-64 E-MAIL. 7-bit e-mails are limited to 998
 			// characters per line, which is a problem for some of these e-mails. Besides, the
@@ -170,11 +170,11 @@ class CommentSubscription
 			 * $mail_object =& Mail::factory( 'mail' );
 			 * $mail_object->send($recipient, $headers, $body);
 			 */
-			
+
 		} // end foreach
-		
+
 		return TRUE;
-		
+
 	} // end send_email
 
 }

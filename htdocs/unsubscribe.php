@@ -2,7 +2,7 @@
 
 ###
 # Unsubscribe
-# 
+#
 # PURPOSE
 # Lets people end their comments subscription. They have the ability to be e-mailed every time
 # somebody posts a comment to a bill that they're following -- this terminates that. Or, rather,
@@ -67,7 +67,7 @@ if ($url['host'] == $_SERVER['SERVER_NAME'])
 # But if we don't have a local referer, display a message, acknowledging that the subscription is
 # terminated.
 $page_body .= '<p>You have been unsubscribed.</p>';
-	
+
 # OUTPUT THE PAGE
 /*display_page('page_title='.urlencode($page_title).'&page_body='.urlencode($page_body).
 	'&page_sidebar='.urlencode($page_sidebar).'&site_section='.urlencode($site_section));*/

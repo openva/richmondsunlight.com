@@ -2,14 +2,14 @@
 
 ###
 # Create Vote CSV
-# 
+#
 # PURPOSE
 # Accepts the shortname of a given legislator and a year, and spits out a CSV file
 # of that legislator's voting record in that period.
-# 
+#
 # NOTES
 # This is not intended to be viewed. It just spits out a CSV file and that's that.
-# 
+#
 ###
 
 # INCLUDES
@@ -46,7 +46,7 @@ $sql = 'SELECT bills.number AS bill_number, bills.catch_line, representatives_vo
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-	
+
 	# Send the headers to have the data downloaded as a CSV file.
 	header('Content-Type: application/octet-stream');
 	header('Content-Disposition: attachment; filename='.$shortname.'-'.$year.'.csv');

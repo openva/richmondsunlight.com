@@ -2,7 +2,7 @@
 
 ###
 # Edit Comments
-# 
+#
 # PURPOSE
 # Provides administrative comment-editing functions.
 #
@@ -32,7 +32,7 @@ $site_section = 'comments';
 if (!empty($op))
 {
 	if (empty($id)) die('No ID found.');
-	
+
 	/*
 	 * We're going to have the Memcached cache of comments for the bill being affected here, so
 	 * let's get that out of the way at the outset.
@@ -45,7 +45,7 @@ if (!empty($op))
 	$result = mysql_query($sql);
 	$bill = mysql_fetch_array($result);
 	$mc->delete('comments-' . $bill['id']);
-	
+
 	if ($op == 'spam')
 	{
 		$sql = 'UPDATE comments
@@ -57,7 +57,7 @@ if (!empty($op))
 			$page_body = '<p>Comment marked as spam.</p>';
 		}
 	}
-	
+
 	elseif ($op == 'delete')
 	{
 		$sql = 'UPDATE comments
@@ -69,7 +69,7 @@ if (!empty($op))
 			$page_body = '<p>Comment marked as deleted.</p>';
 		}
 	}
-	
+
 	elseif ($op == 'pick')
 	{
 		$sql = 'UPDATE comments
@@ -81,7 +81,7 @@ if (!empty($op))
 			$page_body = '<p>Comment marked as an editor’s pick.</p>';
 		}
 	}
-	
+
 	elseif ($op == 'edit')
 	{
 		$page_body = '<p>This function doesn\'t exist yet &mdash it\'s only there

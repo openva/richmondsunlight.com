@@ -2,10 +2,10 @@
 
 ###
 # Site Settings
-# 
+#
 # PURPOSE
 # All the constants intended to be accessible throughout the site.
-# 
+#
 ###
 
 # THE CURRENT SESSION
@@ -45,10 +45,10 @@ define('MEMCACHED_PORT', '11211');
 # Kirk Cox.
 define('HOUSE_SPEAKER_LIS_ID', 'H0021');
 define('HOUSE_SPEAKER_ID', '24');
-	
+
 # Set the directory to look to for cache data.
 define('CACHE_DIR', '/vol/www/richmondsunlight.com/html/cache/');
-	
+
 # ESTABLISH API KEYS
 
 # Google Maps
@@ -89,7 +89,7 @@ foreach ($GLOBALS['banned_words'] as &$word)
 {
 	$word = str_rot13($word);
 }
-	
+
 # Format money for the U.S.
 setlocale(LC_MONETARY, 'en_US');
 

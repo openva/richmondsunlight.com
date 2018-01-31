@@ -13,7 +13,7 @@ class Legislator
 
 		$database = new Database;
 		$database->connect_old();
-		
+
 		$sql = 'SELECT id
 				FROM representatives
 				WHERE shortname="'.mysql_real_escape_string($shortname).'"';
@@ -24,23 +24,23 @@ class Legislator
 		}
 		$legislator = mysql_fetch_array($result);
 		return $legislator['id'];
-		
+
 	} // end function "getid"
-	
+
 	function info($id)
 	{
-	
+
 		if (!isset($id))
 		{
 			return FALSE;
 		}
-		
+
 		/*
 		 * Connect to Memcached.
 		 */
 		$mc = new Memcached();
 		$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-		
+
 		/*
 		 * If this legislator is cached in Memcached, retrieve it from there.
 		 */
@@ -52,7 +52,7 @@ class Legislator
 
 		$database = new Database;
 		$database->connect_old();
-		
+
 		/*
 		 * RETRIEVE THE LEGISLATOR'S INFO FROM THE DATABASE
 		 */
@@ -89,10 +89,10 @@ class Legislator
 			return FALSE;
 		}
 		$legislator = mysql_fetch_assoc($result);
-		
+
 		# Clean it up.
 		$legislator = array_map('stripslashes', $legislator);
-		
+
 		# Convert some data.
 		$legislator['suffix'] = '('.$legislator['party'].'-'.$legislator['place'].')';
 		$legislator['name'] = pivot($legislator['name']);
@@ -110,7 +110,7 @@ class Legislator
 		{
 			$legislator['contributions'] = unserialize($legislator['contributions']);
 		}
-		
+
 		# Set the pronoun to use for this legislator.
 		if ($legislator['sex'] == 'male')
 		{
@@ -126,7 +126,7 @@ class Legislator
 		{
 			$legislator['pronoun'] = 'their';
 		}
-		
+
 		# Set the full name of the legislator's party.
 		if ($legislator['party'] == 'R')
 		{
@@ -140,7 +140,7 @@ class Legislator
 		{
 			$legislator['party_name'] = 'Independent';
 		}
-		
+
 		# Create a visually friendly version of the legislator's website URL.
 		$legislator['website_name'] = parse_url($legislator['website'], PHP_URL_HOST);
 		$legislator['website_name'] = str_replace('www.', '', $legislator['website_name']);
@@ -160,19 +160,19 @@ class Legislator
 			{
 				# Clean it up.
 				$committee = array_map('stripslashes', $committee);
-				
+
 				# Append the committee membership data to the legislator array.
 				$legislator['committees'][] = $committee;
 			}
 		}
-		
+
 		/*
 		 * Cache this legislator in Memcached.
 		 */
 		$mc->set('legislator-' . $id, serialize($legislator), (60 * 60 * 24));
-		
+
 		return $legislator;
-		
+
 	} // end class "info"
 
 } // end class "legislator"

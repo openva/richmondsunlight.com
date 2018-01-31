@@ -2,12 +2,12 @@
 
 	###
 	# Statistics
-	# 
+	#
 	# PURPOSE
 	# Lists misc. statistics about bills.
 	#
 	###
-	
+
 	# INCLUDES
 	# Include any files or libraries that are necessary for this specific
 	# page to function.
@@ -15,22 +15,22 @@
 	include_once('includes/settings.inc.php');
 	include_once('includes/charts.php');
 	include_once('vendor/autoload.php');
-	
+
 	# DECLARATIVE FUNCTIONS
 	# Run those functions that are necessary prior to loading this specific
 	# page.
 	$database = new Database;
 	$database->connect_old();
-	
+
 	# PAGE METADATA
 	$page_title = 'Statistics';
 	$site_section = 'statistics';
-	
+
 	# PAGE CONTENT
-	
+
 	$page_body = '<h2>Daily Activity</h2>
 	'.InsertChart('/images/charts.swf', '/images/charts_library', '/charts/statistics.php?id=daily-activity', 400, 250);
-	
+
 	$page_body .= '<h2>Cumulative Bills Introduced</h2>
 	'.InsertChart('/images/charts.swf', '/images/charts_library', '/charts/statistics.php?id=cum-introduced', 400, 250);
 
@@ -39,10 +39,10 @@
 
 	$page_body .= '<h2>Top 10 Most-Viewed Bills</h2>
 	'.InsertChart('/images/charts.swf', '/images/charts_library', '/charts/statistics.php?id=most-viewed', 400, 250);
-	
-	
+
+
 	# SIDEBAR
-	
+
 	# Select the total number of bills introduced in each chamber.
 	$sql = 'SELECT chamber, COUNT(*) AS count
 			FROM bills
@@ -67,7 +67,7 @@
 				$senate['avg'] = round(($chamber['count'] / 40), 1);
 			}
 		}
-			
+
 		$page_sidebar .= '
 				<strong>Senate</strong>
 				<ul>
@@ -82,8 +82,8 @@
 		$page_sidebar .= '
 			</div>';
 	}
-	
-	
+
+
 	# Select the total number of bills introduced in each chamber.
 	$sql = 'SELECT representatives.party, COUNT(*) AS count,
 			(
@@ -121,7 +121,7 @@
 				$democratic['avg'] = round(($party['count'] / $party['democrats_count']), 1);
 			}
 		}
-			
+
 		$page_sidebar .= '
 				<strong>Republican</strong>
 				<ul>
@@ -136,7 +136,7 @@
 		$page_sidebar .= '
 			</div>';
 	}
-	
+
 	# Republican Tag Cloud
 	$sql = 'SELECT COUNT(*) AS count, tags.tag
 			FROM tags
@@ -153,7 +153,7 @@
 	{
 		$page_sidebar .= '
 		<a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-beige.gif" class="help-icon" alt="?" /></a>
-		
+
 		<div class="box">
 			<h3>Republican Tag Cloud</h3>
 			<div class="tags">';
@@ -174,7 +174,7 @@
 		</div>';
 		unset($tags);
 	}
-	
+
 	# Democratic Tag Cloud
 	$sql = 'SELECT COUNT(*) AS count, tags.tag
 			FROM tags
@@ -191,7 +191,7 @@
 	{
 		$page_sidebar .= '
 		<a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-beige.gif" class="help-icon" alt="?" /></a>
-		
+
 		<div class="box">
 			<h3>Democratic Tag Cloud</h3>
 			<div class="tags">';
@@ -211,7 +211,7 @@
 			</div>
 		</div>';
 	}
-	
+
 	# OUTPUT THE PAGE
 	display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
 		'&site_section='.urlencode($site_section));

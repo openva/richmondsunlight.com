@@ -1,16 +1,16 @@
 <?php
-	
+
 # INCLUDES
 # Include any files or libraries that are necessary for this specific page to function.
 include_once('includes/settings.inc.php');
 include_once('includes/functions.inc.php');
 include_once('vendor/autoload.php');
-	
+
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific page.
 $database = new Database;
 $database->connect_old();
-	
+
 # INITIALIZE SESSION
 session_start();
 
@@ -28,10 +28,10 @@ if ( !empty($_GET['street']) && !empty($_GET['city']) && !empty($_GET['zip']) )
 	$location->city = $_GET['city'];
 	$location->zip = $_GET['zip'];
 	$coordinates = $location->get_coordinates();
-	
+
 	if ($coordinates != FALSE)
 	{
-		
+
 		$districts = $location->coords_to_districts();
 		if ($districts != FALSE)
 		{
@@ -53,7 +53,7 @@ if ( !empty($_GET['street']) && !empty($_GET['city']) && !empty($_GET['zip']) )
 					$legislator = array_map('stripslashes', $legislator);
 					$page_body .= '<li><a href="/legislator/'.$legislator['shortname'].'/">'
 						.$legislator['name'].'</a></li>';
-						
+
 					# Save this for updating the user's account.
 					if ($legislator['chamber'] == 'house')
 					{
@@ -65,7 +65,7 @@ if ( !empty($_GET['street']) && !empty($_GET['city']) && !empty($_GET['zip']) )
 					}
 				}
 				$page_body .= '</ul>';
-				
+
 				# If this is a registered user, update his record to store his location and
 				# districts.
 				if (logged_in() === TRUE)
@@ -122,14 +122,14 @@ else
 		</style>
 		<form method="get" action="/your-legislators/" class="address">
 			<fieldset>
-			
+
 				<label for="form-street">Street Address</label>
 				<input type="text" size="39" name="street" id="form-street" placeholder="Street Address" /><br />
-			
+
 				<label for="form-city">City</label>
 				<input type="text" size="30" maxlength="30" name="city" id="form-city" placeholder="City" />
 
-				<label for="form-zip">ZIP</label>		
+				<label for="form-zip">ZIP</label>
 				<input type="text" size="5" maxlength="5" name="zip" id="form-zip" placeholder="ZIP" /><br />
 
 				<input type="submit" value="Submit" />

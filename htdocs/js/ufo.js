@@ -15,7 +15,7 @@ var UFO = {
 	pluginType: "",
 	fv: [0,0],
 	foList: [],
-		
+
 	create: function(FO, id) {
 		if (!UFO.uaHas("w3cdom") || UFO.uaHas("ieMac")) return;
 		UFO.getFlashVersion();
@@ -62,20 +62,20 @@ var UFO = {
 		}
 		document.getElementById(id).style.visibility = "visible";
 	},
-	
+
 	createCSS: function(selector, declaration) {
-		var _h = document.getElementsByTagName("head")[0]; 
+		var _h = document.getElementsByTagName("head")[0];
 		var _s = UFO.createElement("style");
 		if (!UFO.uaHas("ieWin")) _s.appendChild(document.createTextNode(selector + " {" + declaration + "}")); // bugs in IE/Win
 		_s.setAttribute("type", "text/css");
-		_s.setAttribute("media", "screen"); 
+		_s.setAttribute("media", "screen");
 		_h.appendChild(_s);
 		if (UFO.uaHas("ieWin") && document.styleSheets && document.styleSheets.length > 0) {
 			var _ls = document.styleSheets[document.styleSheets.length - 1];
 			if (typeof _ls.addRule == "object") _ls.addRule(selector, declaration);
 		}
 	},
-	
+
 	setContainerCSS: function(id) {
 		var _fo = UFO.foList[id];
 		var _w = /%/.test(_fo.width) ? "" : "px";
@@ -96,7 +96,7 @@ var UFO = {
 
 	createObjParam: function(el, aName, aValue) {
 		var _p = UFO.createElement("param");
-		_p.setAttribute("name", aName);	
+		_p.setAttribute("name", aName);
 		_p.setAttribute("value", aValue);
 		el.appendChild(_p);
 	},
@@ -127,9 +127,9 @@ var UFO = {
 				return false;
 		}
 	},
-	
+
 	getFlashVersion: function() {
-		if (UFO.fv[0] != 0) return;  
+		if (UFO.fv[0] != 0) return;
 		if (navigator.plugins && typeof navigator.plugins["Shockwave Flash"] == "object") {
 			UFO.pluginType = "npapi";
 			var _d = navigator.plugins["Shockwave Flash"].description;
@@ -146,10 +146,10 @@ var UFO = {
 				var _a = new ActiveXObject("ShockwaveFlash.ShockwaveFlash.7");
 			}
 			catch(e) {
-				try { 
+				try {
 					var _a = new ActiveXObject("ShockwaveFlash.ShockwaveFlash.6");
 					UFO.fv = [6, 0];
-					_a.AllowScriptAccess = "always"; // throws if fp < 6.47 
+					_a.AllowScriptAccess = "always"; // throws if fp < 6.47
 				}
 				catch(e) {
 					if (UFO.fv[0] == 6) return;
@@ -176,7 +176,7 @@ var UFO = {
 		}
 		return true;
 	},
-	
+
 	hasFlashVersion: function(major, release) {
 		return (UFO.fv[0] > major || (UFO.fv[0] == major && UFO.fv[1] >= release)) ? true : false;
 	},
@@ -230,7 +230,7 @@ var UFO = {
 			_e.innerHTML = '<object classid="clsid:D27CDB6E-AE6D-11cf-96B8-444553540000"' + _objAtt + ' width="' + _fo.width + '" height="' + _fo.height + '" codebase="' + _p + '//download.macromedia.com/pub/shockwave/cabs/flash/swflash.cab#version=' + _fo.majorversion + ',0,' + _fo.build + ',0"><param name="movie" value="' + _fo.movie + '" />' + _objPar + '</object>';
 		}
 	},
-		
+
 	createDialog: function(id) {
 		var _fo = UFO.foList[id];
 		UFO.createCSS("html", "height:100%; overflow:hidden;");

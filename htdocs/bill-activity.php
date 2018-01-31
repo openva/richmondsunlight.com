@@ -2,7 +2,7 @@
 
 ###
 # Bills' Activity
-# 
+#
 # PURPOSE
 # Lists the bill activity in the past X days.
 #
@@ -97,7 +97,7 @@ $page_sidebar = '
 			<li><a href="/bills/activity/60/">60 Days</a></li>
 		</ul>
 	</div>
-	
+
 	<div class="box">
 		<h3>Explanation</h3>
 		<p>There are many steps between the introduction of a bill and when (if) it becomes law.

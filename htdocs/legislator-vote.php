@@ -2,11 +2,11 @@
 
 ###
 # List Votes for a Specific Legislator
-# 
+#
 # PURPOSE
 # Accepts the shortname of a given legislator and a year, and provides a table of that
 # legislator's voting record in that period.
-# 
+#
 ###
 
 # INCLUDES

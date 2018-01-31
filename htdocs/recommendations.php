@@ -2,7 +2,7 @@
 
 ###
 # Recommended Bills
-# 
+#
 # PURPOSE
 # Provides a listing of bills that the user might be interested in, but hasn't seen.
 #
@@ -107,7 +107,7 @@ if ($bills !== false)
 			$tmp = explode(',', $bill['placename']);
 			$bill['placename'] = trim($tmp[1]);
 		}
-		
+
 		$place[$bill{placename}][] = $bill;
 	}
 	ksort($place);

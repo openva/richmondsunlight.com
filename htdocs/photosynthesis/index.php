@@ -2,7 +2,7 @@
 
 ###
 # Photosynthesis Home
-# 
+#
 # PURPOSE
 # The home page.
 #
@@ -63,7 +63,7 @@ $html_head = '
 
 # Start displaying the main page.
 $page_body = '';
-	
+
 # Generate a list of this user's portfolios.
 $sql = 'SELECT id, hash, name, watch_list_id
 		FROM dashboard_portfolios
@@ -85,26 +85,26 @@ if (mysql_num_rows($result) == 0)
 # If the user has at least one portfolio, or if one was just created.
 if ((mysql_num_rows($result) > 0) || ($bypass == 1))
 {
-	
+
 	# Display the header for the bill add form field.
 	$page_body = '
 		<div id="add-bill">
 			<form method="post" action="/photosynthesis/process-actions.php">
 				<label for="add-bill">Bill #</label>
 				<input type="text" size="7" maxlength="9" name="add-bill" id="add-bill" />';
-	
+
 	# Store the portfolio ID in a hidden form field, if there's just one portfolio.
 	if (mysql_num_rows($result) == 1)
 	{
 		$portfolio = mysql_fetch_array($result);
 		$portfolio = array_map('stripslashes', $portfolio);
 		$page_body .= '<input type="hidden" name="portfolio" value="'.$portfolio['hash'].'" />';
-		
+
 		# Store the name and ID of this portfolio in the session, for use on the
 		# rest of the site.
 		$_SESSION['portfolios'][0] = $portfolio;
 	}
-	
+
 	# If there are multiple portfolios, display them as a SELECT.
 	elseif (mysql_num_rows($result) > 1)
 	{
@@ -116,7 +116,7 @@ if ((mysql_num_rows($result) > 0) || ($bypass == 1))
 			$portfolio = array_map('stripslashes', $portfolio);
 			$page_body .= '
 						<option value="'.$portfolio['hash'].'">'.$portfolio['name'].'</option>';
-			
+
 			# Store the name and ID of each portfolio in the session, for use on the
 			# rest of the site.
 			$_SESSION['portfolios'][] = $portfolio;
@@ -124,7 +124,7 @@ if ((mysql_num_rows($result) > 0) || ($bypass == 1))
 		$page_body .= '
 					</select>';
 	}
-	
+
 	# The footer for the bill add form field.
 	$page_body .= '
 				<input type="submit" name="submit" value="Add">
@@ -144,15 +144,15 @@ if (mysql_num_rows($result) > 0)
 	while ($portfolio = mysql_fetch_array($result))
 	{
 		$portfolio = array_map('stripslashes', $portfolio);
-		
+
 		if (!empty($portfolio['watch_list_id'])) $portfolio['type'] = 'smart';
 		else $portfolio['type'] = 'normal';
-		
+
 		$page_body .= '
 		<div class="portfolio">
 			<a name="'.$portfolio['hash'].'"></a>
 			<div class="name">';
-		
+
 		# Only show the portfolio editing options to paid users.
 		if ($user['type'] == 'paid')
 		{
@@ -166,12 +166,12 @@ if (mysql_num_rows($result) > 0)
 			$page_body .= '<h1>'.$portfolio['name'].'</h1>
 				<div class="rss"><a href="/photosynthesis/rss/portfolio/'.$portfolio['hash'].'/" title="Subscribe to this portfolio via RSS"><img src="/images/rss-icon.png" alt="RSS" /></a></div>';
 		}
-		
+
 		$page_body .= '</div>';
-		
+
 		# Display the contents of the portfolio.
 		$page_body .= show_portfolio($portfolio, $user['id']);
-		
+
 		# Only show portfolio editing and deletion options to paid users.
 		if ($user['type'] == 'paid')
 		{
@@ -182,15 +182,15 @@ if (mysql_num_rows($result) > 0)
 				<a href="/photosynthesis/portfolios/edit/'.$portfolio['hash'].'/" title="Modify this portfolio">edit</a> &nbsp;
 			</div>';
 		}
-		
+
 		$page_body .= '
 			<div>'.$portfolio['notes'].'</div>
 		</div>';
-		
+
 		# Preserve the portfolio hash to use below, when presenting the user with the public URL
 		# for his portfolio.
 		$portfolio_hash = $portfolio['hash'];
-		
+
 	}
 }
 
@@ -204,11 +204,11 @@ if ($user['type'] == 'paid')
 			<li><a href="#create-portfolio">Portfolio</a></li>
 			<li><a href="#create-smart-portfolio">Smart Portfolio</a></li>
 		</ul>
-		
+
 		<div id="create-portfolio">
 			'.@portfolio_form().'
-		</div>			
-		
+		</div>
+
 		<div id="create-smart-portfolio">
 			'.@smart_portfolio_form().'
 		</div>

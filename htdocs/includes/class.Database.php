@@ -5,7 +5,7 @@
  */
 class Database
 {
-	
+
 	/*
 	 * Create a PDO-based MySQL connection.
 	 */
@@ -30,7 +30,7 @@ class Database
 			$GLOBALS['db'] = $this->db;
 			return $this->db;
 		}
-		
+
 		/*
 		 * If this is isn't a request to the API, send the browser to an error page.
 		 */
@@ -47,11 +47,11 @@ class Database
 		{
 			return FALSE;
 		}
-		
+
 	}
-		
+
 	/*
-	 * Connect via the  
+	 * Connect via the
 	 */
 	function connect_old()
 	{
@@ -78,7 +78,7 @@ class Database
 			return TRUE;
 
 		}
-		
+
 		/*
 		 * If this is isn't a request to the API, send the browser to an error page.
 		 */
@@ -95,7 +95,7 @@ class Database
 		{
 			return FALSE;
 		}
-		
+
 	}
 
 }

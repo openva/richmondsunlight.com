@@ -2,11 +2,11 @@
 
 ###
 # Accept Poll Votes
-# 
+#
 # PURPOSE
 # Receives submitted votesand adds them to the database, determining
 # whether they're likely to be spam or require authentication.
-# 
+#
 ###
 
 # INCLUDES
@@ -26,7 +26,7 @@ $database->connect_old();
 session_start();
 
 # LOCALIZE VARIABLES
-$poll = $_REQUEST['poll']; 
+$poll = $_REQUEST['poll'];
 
 # CHECK FOR SPAMMERS
 # If the third, DIV-hidden poll option is selected, we know it's a spammer, so just bail.
@@ -62,18 +62,18 @@ if (!empty($_SESSION['id']))
 	{
 		die("Poll vote could not be cast.");
 	}
-	
+
 	/*
 	 * Delete the cache.
 	 */
 	$mc = new Memcached();
 	$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
 	$mc->delete('poll-' . $poll['bill_id']);
-	
+
 	# If the insert was successful, redirect the user back to the page of
 	# origin.
 	if (!empty($poll['return_to']))
-	{	
+	{
 		header("Location: https://$_SERVER[SERVER_NAME]$poll[return_to]");
 		exit;
 	}

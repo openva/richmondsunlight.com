@@ -2,7 +2,7 @@
 
 ###
 # Representatives Listing Page
-# 
+#
 # PURPOSE
 # Lists all current representatives.
 #
@@ -39,16 +39,16 @@ $html_head = '<script src="/js/scriptaculous/control-tabs.js" type="text/javascr
 
 # PAGE SIDEBAR
 $page_sidebar = '
-	
+
 	<div class="box">
 		<h3>Explanation</h3>
 		<p>There are 100 members of the House of Delegates and 40 members of the Senate. Each
 		represents the people within a single district, and those districts are numbered
 		sequentially. Every Virginian is in one House district and in one Senate district, and so is
 		represented by one delegate and one senator.</p>
-		
+
 		<p><a href="/your-legislators/">Find out who represents you in the General Assembly!</a></p>
-		
+
 		<p>House members serve just two-year terms, and are reelected every November in odd-numbered
 		years—2013, 2015, etc. Senate members serve four-year terms, reelected in 2011, 2015,
 		etc.</p>
@@ -129,15 +129,15 @@ if (mysql_num_rows($result) > 0)
 {
 	# Create the HTML that defines the map.
 	$html_head .= "\r\t".'<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp;key=ABQIAAAAn01L8sl4uwWn5vTPpoEoXhS0gyL4OV3haSzsE_slDr_NsupiLRSOvHSKmqYYxuXboyr-TTQzL6K8gg" type="text/javascript"></script>';
-	
+
 	$page_body .= '
 	<div id="map" style="width: 100%; height: 300px;"></div>
-	
+
 	<script type="text/javascript">
 		//<![CDATA[
-		
+
 		if (GBrowserIsCompatible()) {
-			
+
 			function createMarker(point,html) {
 				var marker = new GMarker(point);
 				GEvent.addListener(marker, "click", function() {
@@ -145,21 +145,21 @@ if (mysql_num_rows($result) > 0)
 				});
 				return marker;
 			}
-			
+
 			var map = new GMap2(document.getElementById("map"));
-			
+
 			map.addControl(new GSmallZoomControl());
 			map.setCenter(new GLatLng(38, -79), 6);'."\r\r\t\t\t\t";
-	
+
 	while ($legislator = mysql_fetch_array($result))
 	{
 		$legislator = array_map('stripslashes', $legislator);
-		
+
 		$page_body .= "\r\r
 			var point = new GLatLng(".$legislator['longitude'].", ".$legislator['latitude'].");
 			var marker = createMarker(point,'".pivot($legislator['name'])."')
 			map.addOverlay(marker);";
-		
+
 	}
 	$page_body .= '
 		}

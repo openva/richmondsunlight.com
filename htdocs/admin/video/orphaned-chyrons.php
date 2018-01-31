@@ -3,13 +3,13 @@
 
 error_reporting(E_ALL);
 ini_set('display_errors', 'On');
-	
+
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
 include_once('../../includes/settings.inc.php');
 include_once('../../includes/functions.inc.php');
-	
+
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
@@ -18,7 +18,7 @@ $database->connect_old();
 
 if (count($_POST) == 0)
 {
-	
+
 	# Generate pulldown
 	$sql = 'SELECT id, name
 			FROM representatives
@@ -30,7 +30,7 @@ if (count($_POST) == 0)
 		$legislator_select .= '<option value="' . $legislator['id'] . '">' .  stripslashes($legislator['name'])
 			. '</option>';
 	}
-	
+
 	$sql = 'SELECT vi.raw_text, COUNT(*) AS number, CONCAT(files.capture_directory, vi2.screenshot, ".jpg") AS url
 			FROM video_index AS vi
 			LEFT JOIN video_index as vi2
@@ -59,7 +59,7 @@ if (count($_POST) == 0)
 	{
 		die('No orphaned chyrons found.');
 	}
-	
+
 	echo '
 	<style>
 		tbody tr {
@@ -81,19 +81,19 @@ if (count($_POST) == 0)
 			<tbody>';
 	while ($chyron = mysql_fetch_array($result))
 	{
-		
+
 		$chyron['url'] = str_replace('/video/', 'http://s3.amazonaws.com/video.richmondsunlight.com/',
 			$chyron['url']);
-	
+
 		echo '<tr>
 			<td><a href="' . $chyron['url'] . '" target="_new">' . stripslashes($chyron['raw_text']) . '</a></td>
 			<td>' . $chyron['number'] . '</td>
 			<td><select name="chyron[' . md5($chyron['raw_text']) . ']">' . $legislator_select
 				. '</select></td>
 			</tr>';
-		
+
 	}
-	
+
 	echo '</tbody></table>
 		<input type="submit" name="submit" value="Submit" />
 	</form>';
@@ -102,15 +102,15 @@ if (count($_POST) == 0)
 # If $_POST is set.
 else
 {
-	
+
 	foreach ($_POST['chyron'] as $chyron_md5 => $legislator_id)
 	{
-		
+
 		if (empty($legislator_id))
 		{
 			continue;
 		}
-		
+
 		# Ignore this chyron.
 		if ($legislator_id == 'ignore')
 		{
@@ -120,7 +120,7 @@ else
 					AND type = "legislator"
 					AND md5(raw_text) = "' . $chyron_md5 . '"';
 		}
-		
+
 		# Associate this chyron with a given legislator.
 		else
 		{
@@ -130,17 +130,17 @@ else
 					AND type = "legislator"
 					AND md5(raw_text) = "' . $chyron_md5 . '"';
 		}
-		
+
 		$result = mysql_query($sql);
 		if ($result === FALSE)
 		{
 			echo '<p>Error: Query failed. ' . $sql . '</p>';
 		}
-		
+
 		echo '.';
-		
+
 	}
-	
+
 	echo '<p>Done.</p>';
-	
+
 }

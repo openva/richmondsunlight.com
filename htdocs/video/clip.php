@@ -2,10 +2,10 @@
 
 ###
 # Video Clips
-# 
+#
 # PURPOSE
 # Displays a given video clip.
-# 
+#
 ###
 
 error_reporting(E_ALL);
@@ -39,7 +39,7 @@ $site_section = 'minutes';
  */
 if (!isset($clip_hash))
 {
-	
+
 	$sql = 'SELECT DISTINCT SUBSTRING(MD5(video_clips.id), 1, 6) AS hash, files.path, files.date,
 			DATE_FORMAT(files.date, "%b %e, %Y") AS date_formatted,
 			representatives.name_formatted AS legislator_name, bills.number AS bill_number
@@ -51,15 +51,15 @@ if (!isset($clip_hash))
 			LEFT JOIN bills
 				ON video_clips.bill_id = bills.id
 			ORDER BY files.date ASC, video_clips.time_start ASC';
-	
+
 	$result = mysql_query($sql);
 	if (mysql_num_rows($result) > 0)
 	{
-		
+
 		$page_body = '<ul>';
 		while ($clip = mysql_fetch_assoc($result))
 		{
-			
+
 			$page_body .= '<li><a href="/video/clip/' . $clip['hash'] . '/">';
 			if (!empty($clip['legislator_name']))
 			{
@@ -69,24 +69,24 @@ if (!isset($clip_hash))
 			{
 				$page_body .= 'Legislators Speak';
 			}
-			
+
 			if (!empty($clip['bill_number']))
 			{
 				$page_body .= ' about ' . strtoupper($clip['bill_number']);
 			}
-			
+
 			if (!empty($clip['date_formatted']))
 			{
 				$page_body .= ' on ' . $clip['date_formatted'];
 			}
-			
+
 			$page_body .= '</a></li>';
-			
+
 		}
 		$page_body .= '</ul>';
-	
+
 	}
-	
+
 }
 
 /*
@@ -99,22 +99,22 @@ else
 	$video->hash = $clip_hash;
 	if ($video->get_clip() == TRUE)
 	{
-		
+
 		$page_title = ' » ' . $video->clip->title;
-		
-		
+
+
 		$html_head = '
 			<script src="/js/flowplayer-3.2.18/flowplayer-3.2.13.min.js"></script>
 			<script src="/js/flowplayer/flowplayer.playlist-3.2.11.min.js"></script>';
-		
+
 		$page_body .= '
 		<style>
 			#video object { width: 720px; height:491px; }
 			#player { width: 720px; height: 491px; }
 		</style>
 		<div id="video">
-			
-			
+
+
 			<a href="' . $video->clip->path.'" style="background-image: url(' . $video->clip->screenshot
 				. ');" id="player">
 			<script>
@@ -150,10 +150,10 @@ else
 				});
 			</script>
 			</a>
-			
+
 		</div>';
-		
-		
+
+
 	}
 	else
 	{

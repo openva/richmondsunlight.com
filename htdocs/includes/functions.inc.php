@@ -2,11 +2,11 @@
 
 ###
 # Functions Library
-# 
+#
 # PURPOSE
 # All of the non-class-based functions that may be used on any page on the site. Class-based
 # functions are autoloaded.
-# 
+#
 ###
 
 # Any function that isn't included here will be included if it is requested.
@@ -23,13 +23,13 @@ function __autoload_libraries($name)
 	}
 
 	if (file_exists($includes_dir . 'class.' . $name . '.php') === TRUE)
-	{	
+	{
 		include 'class.' . $name . '.php';
 		return TRUE;
 	}
-	
+
 	return;
-	
+
 }
 
 spl_autoload_register('__autoload_libraries');
@@ -38,7 +38,7 @@ spl_autoload_register('__autoload_libraries');
 # its replacement, PEAR::Cache_Lite.
 function cache_save($data, $key)
 {
-	
+
 	# If a cache key hasn't been specified, assume it's the current page.
 	if (!isset($key) || empty($key))
 	{
@@ -50,20 +50,20 @@ function cache_save($data, $key)
 	 */
 	$mc = new Memcached();
 	$mc->addServer("127.0.0.1", 6379);
-			
+
 	/*
 	 * Cache this page in Memcached for one hour.
 	 */
 	$mc->set('page-' . $key, $data, 3600);
-	
+
 	return TRUE;
-	
+
 }
 
 # Retrieve data from the cache
 function cache_open($key)
 {
-	
+
 	# If a cache key hasn't been specified, assume it's the current page.
 	if (!isset($key))
 	{
@@ -75,7 +75,7 @@ function cache_open($key)
 	 */
 	$mc = new Memcached();
 	$mc->addServer("127.0.0.1", 6379);
-	
+
 	/*
 	 * If this page is cached in Memcached, retrieve it from there.
 	 */
@@ -88,38 +88,38 @@ function cache_open($key)
 	{
 		return FALSE;
 	}
-	
+
 }
-	
+
 # Delete data from the cache
 function cache_delete($key)
 {
-	
+
 	# If a cache file name hasn't been specified, assume it's the current page.
 	if (!isset($key))
 	{
 		$key = md5($_SERVER['REQUEST_URI']);
 	}
-	
+
 	# Delete the cache file.
 	$sql = 'DELETE FROM cache
 			WHERE key="' . $key . '"';
 	$result = mysql_query($sql);
-	
+
 	return true;
-	
+
 }
-	
+
 # Return the age of a specific cache record.
 function cache_age($key)
 {
-	
+
 	# If a cache record name hasn't been specified, assume it's the current page.
 	if (!isset($key))
 	{
 		$key = md5($_SERVER['REQUEST_URI']);
 	}
-	
+
 	# Select the age from the database.
 	$sql = 'SELECT now() - date_created AS age
 			FROM cache
@@ -130,11 +130,11 @@ function cache_age($key)
 		return FALSE;
 	}
 	$cache = mysql_fetch_array($result);
-	
+
 	return $cache['age'];
-	
+
 }
-	
+
 # Determine whether a cache file exists.
 function cache_exists($key)
 {
@@ -144,22 +144,22 @@ function cache_exists($key)
 	{
 		$key = md5($_SERVER['REQUEST_URI']);
 	}
-	
+
 	# See if the record is in the database.
 	$sql = 'SELECT *
 			FROM cache
 			WHERE key="' . $key . '"';
 	$result = mysql_query($sql);
-	
+
 	# We can return the result directly.
 	return $result;
-	
+
 }
-	
+
 # Connect to the database
 function connect_to_db($type = 'old')
 {
-	
+
 	if ($type == 'old')
 	{
 		$db = mysql_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
@@ -171,10 +171,10 @@ function connect_to_db($type = 'old')
 		mysql_select_db(MYSQL_DATABASE,$db);
 		mysql_query('SET NAMES "utf8"');
 	}
-	
+
 	elseif ($type == 'pdo')
 	{
-	
+
 		$db = new PDO(PDO_DSN, PDO_USERNAME, PDO_PASSWORD);
 		if ($db === FALSE)
 		{
@@ -182,11 +182,11 @@ function connect_to_db($type = 'old')
 			exit;
 		}
 		return $db;
-	
+
 	}
-	
+
 	return TRUE;
-	
+
 }
 
 
@@ -194,28 +194,28 @@ function connect_to_db($type = 'old')
 # Makes sure that an e-mail address has a valid format.
 function validate_email($email)
 {
-	
+
 	if (empty($email))
 	{
 		return FALSE;
 	}
-	
+
 	if (filter_var($email, FILTER_VALIDATE_EMAIL))
 	{
 		return true;
 	}
 	return FALSE;
-	
+
 }
-	
-	
+
+
 
 # Pivots text around a comma.  God knows what it would do if there was more than one comma. Good
 # for lastname, firstname type things.  If there is no comma, it just spits the text back out, happy
 # as can be.  If there's no text, then it returns false.
 function pivot($text)
 {
-	
+
 	if (empty($text))
 	{
 		return FALSE;
@@ -227,7 +227,7 @@ function pivot($text)
 		return trim($text);
 	}
 	return $text;
-	
+
 }
 
 function array_map_multi($func, $arr)
@@ -266,7 +266,7 @@ function spam_proof($email)
 	$email = str_replace('@', '&#064;', $email);
 	return $email;
 }
-	
+
 # Convert a number of seconds to a more reasonable unit.  This is for use as the datestamp on
 # comments, which uses a Flickr-style time-elapsed-since-posting datestamp.
 function seconds_to_units($seconds)
@@ -297,14 +297,14 @@ function seconds_to_units($seconds)
 		{
 			$returned_data = round($seconds / 60 / 60 / 24 / 30).' month';
 		}
-		
+
 		if (substr($returned_data, 0, 2) != '1 ')
 		{
 			$returned_data .= 's';
 		}
 		$returned_data .= ' ago';
 	}
-	
+
 	return $returned_data;
 }
 
@@ -320,10 +320,10 @@ function seconds_to_time($seconds, $lpad = false)
 {
 
 	return gmdate('H:i:s', $seconds);
-	
+
 }
-	
-	
+
+
 # Create a new user. We wrap the function in function_exists() because WordPress 2.6 turns out
 # to use exactly the same function name, thus preventing the Richmond Sunlight blog from
 # working. So here's the solution. We don't need create_user() on the blog, anyway.
@@ -334,9 +334,9 @@ if (!function_exists('create_user'))
 	{
 		# Turn the URL-style options into an array.
 		parse_str($options, $options);
-		
+
 		$options = array_map('urldecode', $options);
-		
+
 		# If this isn't a Dashboard user, parse the variables in the standard way.
 		if ($options['dashboard'] != 'y')
 		{
@@ -357,7 +357,7 @@ if (!function_exists('create_user'))
 				}
 			}
 		}
-		
+
 		# But if this is a Dashboard user, parse the variables out into two separate SQL inserts.
 		elseif ($options['dashboard'] == 'y')
 		{
@@ -369,7 +369,7 @@ if (!function_exists('create_user'))
 				{
 					# Make the data safe for the database.
 					$value = mysql_real_escape_string($value);
-					
+
 					# Determine which SQL string this data should be appended to.
 					if (($key == 'organization') || ($key == 'type') || ($key == 'expires'))
 					{
@@ -381,7 +381,7 @@ if (!function_exists('create_user'))
 					}
 					else
 					{
-					
+
 						/*
 						 * Handle passwords differently, since they need to be hashed.
 						 */
@@ -402,13 +402,13 @@ if (!function_exists('create_user'))
 						}
 					}
 				}
-				
+
 			}
 		}
-		
+
 		# Generate a session ID -- the cookie hash.
 		$_SESSION['id'] = create_session_id();
-		
+
 		# Insert the user data.
 		$sql = 'INSERT INTO users
 				SET cookie_hash="'.$_SESSION['id'].'",
@@ -428,34 +428,34 @@ if (!function_exists('create_user'))
 		}
 		elseif ($options['dashboard'] == 'y')
 		{
-			
+
 			# Get the user's ID.
 			$user_id = mysql_insert_id();
-						
+
 			# Generate a random eight-digit hash to send out in e-mails for unsubscribing
 			# instantly.
 			$chars = 'bcdfghjklmnpqrstvxyz0123456789';
 			$hash = substr(str_shuffle($chars), 0, 8);
-			
+
 			# Insert the Dashboard user data.
 			$sql = 'INSERT INTO dashboard_user_data
 					SET user_id = '.$user_id.', email_active="y", last_access=now(),
 					date_created=now(), unsub_hash="'.$hash.'"';
 			if (!empty($dashboard_inserts)) $sql .= $dashboard_inserts;
 			mysql_query($sql);
-		}		
+		}
 	}
 }
-	
+
 # Retrieve a user's data, returning an array.
 function get_user()
 {
-	
+
 	if (!isset($_SESSION['id']))
 	{
 		return FALSE;
 	}
-	
+
 	# If we have a record of this user cached in Memcached, use that instead.
 	$mc = new Memcached();
 	$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
@@ -467,7 +467,7 @@ function get_user()
 			return $result;
 		}
 	}
-	
+
 	$sql = 'SELECT users.id, users.name, users.password, users.email, users.url,
 			users.zip, users.city, users.state, users.house_district_id, users.senate_district_id,
 			users.latitude, users.longitude, users.trusted, users.ip, users.date_modified,
@@ -484,14 +484,14 @@ function get_user()
 	}
 	$user = mysql_fetch_array($result, MYSQL_ASSOC);
 	$user = array_map('stripslashes', $user);
-	
+
 	# Cache this user's data, and save it for one hour. (User sessions are unlikely to last longer.)
 	$mc->set( 'user-' . $_SESSION['id'], $user, (60 * 60) );
-	
+
 	return $user;
-	
+
 }
-	
+
 # Update a user's data.
 function update_user($options)
 {
@@ -504,13 +504,13 @@ function update_user($options)
 	{
 		return FALSE;
 	}
-	
+
 	# If this user's data is cached in APC, delete it, since it's now out of date.
 	if (apc_exists('user-'.$_SESSION['id']) !== false)
 	{
 		apc_delete('user-'.$_SESSION['id']);
 	}
-	
+
 	# Assemble the SQL string.
 	$sql = 'UPDATE users SET ';
 	$first = 'yes';
@@ -535,7 +535,7 @@ function update_user($options)
 	}
 	return true;
 }
-	
+
 # Generate a random session ID.
 function create_session_id()
 {
@@ -551,7 +551,7 @@ function create_session_id()
 # NOTE that this functionality is duplicated -- and modernized -- in the User class.
 function logged_in($registered = '')
 {
-	
+
 	/*
 	 * If there's no session ID, they can't be registered.
 	 */
@@ -559,10 +559,10 @@ function logged_in($registered = '')
 	{
 		return FALSE;
 	}
-	
+
 	/*
 	 * If this session ID is stored in Memcached, then we don't need to query the database.
-	 */	 
+	 */
 	$mc = new Memcached();
 	$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
 	$result = $mc->get('user-session-' . $_SESSION['id']);
@@ -570,7 +570,7 @@ function logged_in($registered = '')
 	{
 		return TRUE;
 	}
-	
+
 	/*
 	 * If this is a registered visitor (as opposed to somebody who has posted comments,
 	 * voted, etc., but hasn't created an account).
@@ -582,18 +582,18 @@ function logged_in($registered = '')
 				WHERE cookie_hash="' . mysql_real_escape_string($_SESSION['id']) . '"
 				AND password IS NOT NULL';
 	}
-	
+
 	/*
 	 * If this is not a registered user.
 	 */
 	else
-	{	
+	{
 		$sql = 'SELECT id
 				FROM users
 				WHERE cookie_hash="' . mysql_real_escape_string($_SESSION['id']) . '"';
 	}
 	$result = mysql_query($sql);
-	
+
 	/*
 	 * If one result is returned, then this user does have an account.
 	 */
@@ -613,11 +613,11 @@ function logged_in($registered = '')
 		$mc->set( 'user-session-' . $_SESSION['id'], $is_registered, (60 * 30) );
 		return true;
 	}
-	
+
 	return FALSE;
-	
+
 }
-	
+
 # Determine whether the current user is blacklisted from participating, by looking at his cumulative
 # score and, if it's 20 or greater, prevent him from participating.
 function blacklisted()
@@ -640,13 +640,13 @@ function blacklisted()
 		return FALSE;
 	}
 }
-	
+
 # Add the current user to the blacklist.
 function blacklist($word)
 {
-	
+
 	$sql = 'INSERT INTO blacklist
-			SET ip="' . $_SERVER['REMOTE_ADDR'] . '", user_id = 
+			SET ip="' . $_SERVER['REMOTE_ADDR'] . '", user_id =
 				(SELECT id
 				FROM users
 				WHERE cookie_hash = "'.$_SESSION['id'].'"),
@@ -656,11 +656,11 @@ function blacklist($word)
 	{
 		$sql .= ', reason="dirty word - ' . $word . '"';
 	}
-	
+
 	mysql_query($sql);
-	
+
 }
-	
+
 # Display the CSS balloon providing a tooltip-type interface for bills and legislators.
 function balloon($bill, $type)
 {
@@ -668,8 +668,8 @@ function balloon($bill, $type)
 	// DON'T return true. Due to an evaluation problem, it will insert a "1"!
 	return FALSE;
 }
-	
-	
+
+
 # Convert the abbreviated, database-stored description of a bill's
 # status into meaningful description.
 function explain_status($status)
@@ -697,24 +697,24 @@ function explain_status($status)
 function get_content($url, $timeout=10)
 {
 	$ch = curl_init();
-	
+
 	curl_setopt ($ch, CURLOPT_URL, $url);
 	curl_setopt ($ch, CURLOPT_HEADER, 0);
 	curl_setopt ($ch, CURLOPT_TIMEOUT, $timeout);
-	
+
 	ob_start();
-	
+
 	curl_exec ($ch);
 	curl_close ($ch);
 	$string = ob_get_contents();
-	
+
 	ob_end_clean();
-	
+
 	if (empty($string))
 	{
 		return FALSE;
 	}
-	
+
 	return $string;
 }
 
@@ -725,22 +725,22 @@ function district_to_id($number, $chamber)
 	{
 		return FALSE;
 	}
-	
+
 	# Select the information from the database.
 	$sql = 'SELECT id
 			FROM districts
 			WHERE number = '.$number.' AND chamber = "'.$chamber.'"
 			AND date_ended IS NULL';
 	$result = mysql_query($sql);
-	
+
 	# Continue if we've got a match.
 	if (mysql_num_rows($result) > 0)
-	{	
+	{
 		# Return the database ID.
 		$district = mysql_fetch_array($result);
 		return $district['id'];
 	}
-	
+
 	return FALSE;
 }
 
@@ -790,7 +790,7 @@ function login_form()
 	elseif (isset($form_data['return_uri'])) $return_uri = $_GET['return_uri'];
 	$returned_data = '
 		<form method="post" action="/account/login/">
-			
+
 			<table class="form">
 				<tr><td><label for="name">E-Mail Address</label></td></tr>
 				<tr><td><input type="email" size="20" maxlength="60" id="email" name="form_data[email]" /></td></tr>
@@ -803,7 +803,7 @@ function login_form()
 	$returned_data .= '
 		</form>';
 	return $returned_data;
-	
+
 }
 
 
@@ -824,7 +824,7 @@ function generate_hash($length)
 	// define a corpus of letters and numbers
 	$corpus = 'abcdefghijklmnopqrstuvwxyz1234567890';
 	$hash = '';
-	
+
 	for ($i=0; $i<$length; $i++)
 	{
 		$corpus = str_shuffle($corpus);
@@ -841,9 +841,9 @@ function tag_cloud($tags)
 	{
 		return FALSE;
 	}
-	
+
 	$html = '';
-	
+
 	# Determine if we're going to use a logarithmic or a square root scale for this tag cloud.
 	# That's based on the disparity between the smallest and the largest tags.
 	if ( reset($tags) / end($tags) > 10 )
@@ -854,15 +854,15 @@ function tag_cloud($tags)
 	{
 		$scale = 'sqrt';
 	}
-	
+
 	# Establish a scale -- the average size in this list should be 1.25em, with the scale moving
 	# up and down from there.
 	$multiple = 1.25 / ( array_sum($tags) / count($tags) );
-	
+
 	# Step through every tag and adjust the size downward, normalizing at 1em.
 	foreach ($tags AS $tag => &$count)
 	{
-		
+
 		$size = round( ($count * $multiple), 1);
 		if ($size > 4)
 		{
@@ -872,11 +872,11 @@ function tag_cloud($tags)
 		{
 			$size = .75;
 		}
-		
+
 		$html .= '<span style="font-size: '.$size.'em;"><a href="/bills/tags/'.urlencode($tag).'/">'.$tag.'</a></span> ';
-		
+
 	}
-	
+
 	return $html;
 }
 
@@ -889,7 +889,7 @@ if (!function_exists('json_decode'))
 	{
 		$comment = false;
 		$out = '$x=';
-	  
+
 		for ($i=0; $i<strlen($json); $i++)
 		{
 			if (!$comment)
@@ -897,7 +897,7 @@ if (!function_exists('json_decode'))
 				if (($json[$i] == '{') || ($json[$i] == '[')) $out .= ' array(';
 				else if (($json[$i] == '}') || ($json[$i] == ']')) $out .= ')';
 				else if ($json[$i] == ':') $out .= '=>';
-				else $out .= $json[$i];          
+				else $out .= $json[$i];
 			}
 			else
 			{
@@ -918,12 +918,12 @@ if (!function_exists('json_decode'))
 # question.
 function bill_sections($bill_id)
 {
-	
+
 	if (!isset($bill_id))
 	{
 		return FALSE;
 	}
-	
+
 	$sql = 'SELECT vacode.section_number, vacode.section_name AS catch_line
 			FROM bills_section_numbers
 			LEFT JOIN vacode
@@ -931,7 +931,7 @@ function bill_sections($bill_id)
 			WHERE bills_section_numbers.bill_id = ' . $bill_id . '
 			AND vacode.section_number IS NOT NULL
 			ORDER BY vacode.section_number ASC';
-	
+
 	$result = mysql_query($sql);
 	if (mysql_num_rows($result) < 1)
 	{
@@ -945,13 +945,13 @@ function bill_sections($bill_id)
 			$sections[] = $section;
 		}
 	}
-	
+
 	# In case we wound up with no viable sections.
 	if (count($section) == 0)
 	{
 		return FALSE;
 	}
-	
+
 	return $sections;
 }
 
@@ -979,7 +979,7 @@ function replace_terms($term)
 	{
 		return FALSE;
 	}
-	
+
 	/*
 	 * If the provided term is an array of terms, just use the first one. This might seem odd,
 	 * but note that this function is written to be used within preg_replace_callback(), the
@@ -1038,7 +1038,7 @@ function replace_terms($term)
 	}
 
 	return '<span class="dictionary">' . $term . '</span>';
-	
+
 }
 
 /**
@@ -1079,22 +1079,22 @@ function json_error($text, $status_code='400 OK')
  */
 function pushover_alert($title, $message)
 {
-	
+
 	if ( !defined('PUSHOVER_KEY') || !isset($title) || !isset($message) )
 	{
 		return FALSE;
 	}
-	
+
 	if (strlen($title) > 100)
 	{
 		$title = substr($title, 0, 100);
 	}
-	
+
 	if (strlen($message) > 412)
 	{
 		$message = substr($message, 0, 412);
 	}
-	
+
 	curl_setopt_array($ch = curl_init(), array(
 		CURLOPT_URL => "https://api.pushover.net/1/messages.json",
 		CURLOPT_RETURNTRANSFER => TRUE,
@@ -1108,7 +1108,7 @@ function pushover_alert($title, $message)
 	));
 	curl_exec($ch);
 	curl_close($ch);
-	
+
 	return TRUE;
-	
+
 }

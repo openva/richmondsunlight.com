@@ -2,7 +2,7 @@
 
 class Statistics
 {
-	
+
 	/*
 	 * Return the number of bill actions occuring daily over time
 	 *
@@ -12,7 +12,7 @@ class Statistics
 	 * @param none
 	 * @access public
 	 * @return array
-	 */	
+	 */
 	function daily_activity()
 	{
 
@@ -35,7 +35,7 @@ class Statistics
 		return $result;
 
 	}
-	
+
 	/*
 	 * Return the number of bills filed per day
 	 *
@@ -44,7 +44,7 @@ class Statistics
 	 * @param none
 	 * @access public
 	 * @return array
-	 */	
+	 */
 	function bills_filed_daily()
 	{
 
@@ -67,7 +67,7 @@ class Statistics
 		return $result;
 
 	}
-	
+
 	/*
 	 * Return the number of views that a bill has had over time
 	 *
@@ -77,7 +77,7 @@ class Statistics
 	 * @param none
 	 * @access public
 	 * @return array
-	 */	
+	 */
 	function bill_views()
 	{
 

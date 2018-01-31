@@ -2,7 +2,7 @@
 
 ###
 # Tag Bills
-# 
+#
 # PURPOSE
 # Provides administrative batch bill-tagging functionality.
 ###
@@ -29,32 +29,32 @@ $site_section = 'admin';
 # PAGE CONTENT
 if (!empty($_POST))
 {
-	
+
 	$bills = $_POST['bill'];
-	
+
 	# Connect to Memcached.
 	$mc = new Memcached();
 	$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-	
+
 	# Iterate through every bill's tags.
 	foreach ($bills as $bill_id => $tags)
 	{
-	
+
 		# If we don't have any tags, just skip to the next bill.
 		if (count($tags) == 0)
 		{
 			next;
 		}
-		
+
 		# Explode the tags into an array to be inserted individually.
 		$tag = explode(' ', $tags);
-		
+
 		for ($i=0; $i<count($tag); $i++)
 		{
 			# Trim it down.
 			$tag[$i] = trim($tag[$i]);
 			$tag[$i] = strtolower($tag[$i]);
-			
+
 			# If the string contains a quotation mark, build up a multiple-word
 			# tag using everything up until the terminating quotation mark.
 			if (stristr($tag[$i], '"'))
@@ -66,24 +66,24 @@ if (!empty($_POST))
 					unset($assembled_tag);
 				}
 			}
-			
+
 			elseif (isset($assembled_tag))
 			{
 				$assembled_tag .= ' '.$tag[$i];
 			}
-			
+
 			# Don't proceed if it's blank.
 			if ((!empty($tag[$i])) && (!isset($assembled_tag)))
 			{
-			
+
 				# Make sure it's safe.
 				$tag[$i] = ereg_replace("[[:punct:]]", '', $tag[$i]);
 				$tag[$i] = trim(mysql_real_escape_string($tag[$i]));
-				
+
 				# Check one more time to make sure it's not empty.
 				if (!empty($tag[$i]))
 				{
-				
+
 					# Assemble the insertion SQL
 					$sql = 'INSERT INTO tags
 							SET bill_id=' . $bill_id . ', tag="' . $tag[$i] . '",
@@ -93,11 +93,11 @@ if (!empty($_POST))
 								WHERE cookie_hash = "' . $_SESSION['id'] . '"),
 							date_created=now()';
 					$page_body .= '.';
-					mysql_query($sql);		
-					
+					mysql_query($sql);
+
 					# Delete this from the cache.
 					$mc->delete('bill-' . $bill_id);
-					
+
 				}
 			}
 		}
@@ -106,12 +106,12 @@ if (!empty($_POST))
 
 else
 {
-	
+
 	if (empty($_SESSION['id']))
 	{
 		die('Please log in before using this.');
 	}
-	
+
 	/*
 	 * Count how many bills still aren't tagged.
 	 */
@@ -124,7 +124,7 @@ else
 	$remaining = mysql_fetch_array($result);
 	$page_body .= '<p>There are ' . number_format($remaining['number']) . ' bills that don’t have
 		any tags.</p>';
-	
+
 	# Select twenty random bills that do not have tags. Order by session year (so that we begin
 	# with the current/most recent session's bills), and then just by ID for lack of any better
 	# idea.
@@ -133,7 +133,7 @@ else
 			LEFT JOIN sessions
 				ON bills.session_id=sessions.id
 			WHERE
-				(SELECT COUNT(*) 
+				(SELECT COUNT(*)
 				FROM tags
 				WHERE bill_id = bills.id) = 0
 			ORDER BY sessions.year DESC, RAND()
@@ -143,14 +143,14 @@ else
 	{
 		die('Huzzah! There are no untagged bills!');
 	}
-	
+
 	$page_body .= '
 	<div id="bills">
 		<form method="post" action="/admin/tag.php">';
-		
+
 	while ($bill = mysql_fetch_array($result))
 	{
-	
+
 		# If this bill doesn't have any tags (as, indeed, it should not), then generate some
 		# candidate tags, using other bills that amend the same law(s).
 		if (empty($bill['tags']))
@@ -175,29 +175,29 @@ else
 				$tags = array();
 				while ($tag = mysql_fetch_array($tag_result))
 				{
-				
+
 					if (!isset($first_score))
 					{
 						$first_score = $tag['number'];
 					}
-					
+
 					if ( ($tag['number'] / $first_score) > .5)
 					{
-					
+
 						if (stristr($tag['tag'], ' ') !== FALSE)
 						{
 							$tag['tag'] = '"' . $tag['tag'] . '"';
 						}
 						$tags[] = $tag['tag'];
-						
+
 					}
-					
+
 				}
 				$bill['tags'] = implode(', ', $tags);
 				unset($first_score);
 			}
 		}
-	
+
 		$page_body .= '
 			<div class="bill">
 				<div class="summary">
@@ -210,9 +210,9 @@ else
 						. '</textarea>
 				</div>
 			</div>';
-			
+
 	}
-	
+
 	$page_body .= '
 			<input type="submit" value="Submit" />
 		</form>

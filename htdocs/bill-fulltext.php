@@ -2,10 +2,10 @@
 
 ###
 # Bills' Full Text
-# 
+#
 # PURPOSE
 # List the full text of individual bills.
-# 
+#
 ###
 
 # INCLUDES
@@ -45,11 +45,11 @@ $bill = (array) $bill;
 
 if (
 	strpos($bill['number'], 'hr') !== FALSE
-	|| 
+	||
 	strpos($bill['number'], 'hjr') !== FALSE
-	|| 
+	||
 	strpos($bill['number'], 'sr') !== FALSE
-	|| 
+	||
 	strpos($bill['number'], 'sjr') !== FALSE
 )
 {
@@ -83,17 +83,17 @@ if (mysql_num_rows($result) > 0)
 
 	while ($version = mysql_fetch_array($result, MYSQL_ASSOC))
 	{
-	
+
 		$version = array_map('stripslashes', $version);
-	
+
 		# The HTML for amended versions of bills is beastly. Clean it up.
 		$version['text'] = str_replace('<center><b><br><center><b>', '<center><b>', $version['text']);
-		
+
 		# Replace every instance of a URL for a section of the state code with the URL
 		# for Virginia Decoded.
 		$version['text'] = preg_replace('/"http:\/\/leg1.state.va.us\/cgi-bin\/legp504\.exe\?000\+cod\+([0-9A-Z\.:-]+)"/',
 			'"https://vacode.org/$1/" class="code"', $version['text']);
-		
+
 		# Convert the <i> tags to <em> tags in the head of the bill, so that we can pretty
 		# up the bill text without affecting the header text.  Those tags should be found
 		# within the first 20 lines of the bill's text.
@@ -107,7 +107,7 @@ if (mysql_num_rows($result) > 0)
 				break;
 			}
 		}
-		
+
 		# All subsequent <i> tags should become <ins> tags, and <s> tags should become
 		# <del> tags.
 		if ($bill['type'] == 'bill')
@@ -121,22 +121,22 @@ if (mysql_num_rows($result) > 0)
 			}
 		}
 		$version['text'] = implode("\r", $version['text']);
-		
+
 		# If we have a list of terms (in regular expression form), then wrap every use of
 		# that term with <span class="dictionary"></span>.
 		if (is_array($term_pcres))
 		{
-			$version['text'] = preg_replace_callback($term_pcres, 'replace_terms', $version['text']);	
+			$version['text'] = preg_replace_callback($term_pcres, 'replace_terms', $version['text']);
 		}
 
 		# Every set of centered hyphens should become an HR.
 		$version['text'] = str_replace('<center>----------</center>', '<hr>', $version['text']);
-		
+
 		# Save all of this to an array.
 		$versions[] = $version;
-		
+
 	}
-	
+
 }
 
 # PAGE METADATA
@@ -150,7 +150,7 @@ $page_sidebar = '
 		<p>For a plain English description of this bill, comments, voting, tagging, etc.,
 		<a href="/bill/' . $bill['year'] . '/' . $bill['number'] . '/">return to the main page for
 		' . strtoupper($bill['number']) . '</a>.</p>
-		
+
 		<p>This is the actual text of the bill—the legislation itself. Generally this is
 		amending existing law, proposing the addition or removal of words from laws that are
 		already on the books, but sometimes it’s proposing an entirely new law.</p>';
@@ -172,7 +172,7 @@ $page_sidebar .= '
 $page_body = '
 <div class="full-text tabs">
 	<ul class="tabs">';
-	
+
 # Iterate through to create the tabs.
 foreach ($versions as $version)
 {

@@ -86,7 +86,7 @@ function sendMemcacheCommand($server,$port,$command){
     return parseMemcacheResults($buf);
 }
 function parseMemcacheResults($str){
-    
+
 	$res = array();
 	$lines = explode("\r\n",$str);
 	$cnt = count($lines);
@@ -660,7 +660,7 @@ if (isset($_GET['IMG'])){
 	       	fill_box($image, 30,$size,50,-$hits*($size-21)/$total,$col_black,$col_green,sprintf("%.1f%%",$hits*100/$total));
 		    fill_box($image,130,$size,50,-max(4,($total-$hits)*($size-21)/$total),$col_black,$col_red,sprintf("%.1f%%",$misses*100/$total));
 		break;
-		
+
     }
     header("Content-type: image/png");
 	imagepng($image);
@@ -869,7 +869,7 @@ EOB;
         $r = sendMemcacheCommand($h,$p,'delete '.$theKey);
         echo 'Deleting '.$theKey.':'.$r;
 	break;
-    
+
    case 6: // flush server
         $theserver = $MEMCACHE_SERVERS[(int)$_GET['server']];
         $r = flushServer($theserver);

@@ -2,63 +2,63 @@
 
 	###
 	# About Photosynthesis Pro
-	# 
+	#
 	# PURPOSE
 	# Provides a pitch to sign up for Photosynthesis Pro.
-	# 
+	#
 	# NOTES
 	# None.
-	# 
+	#
 	# TODO
 	# None.
-	# 
+	#
 	###
-	
+
 	# INCLUDES
 	# Include any files or libraries that are necessary for this specific
 	# page to function.
 	include_once('../includes/settings.inc.php');
 	include_once('../includes/functions.inc.php');
-	
+
 	# PAGE METADATA
 	$page_title = 'Photosynthesis Pro';
-	$site_section = 'photosynthesis';	
-	
+	$site_section = 'photosynthesis';
+
 	# PAGE CONTENT
 	$page_body = <<<EOD
 		<p><em>Stop tracking legislation like it&rsquo;s 1993. <strong>Photosynthesis works the way
 		you do</strong>, giving you a clear understanding of your legislation. Turn sunlight into
 		energy with Photosynthesis.</em></p>
-	
+
 		<div class="left_side">
 			<h2>The Tools You Need</h2>
 			<p>E-mail notifications. RSS feeds. Smart portfolios. Web dashboard. Tagging. Community
 			interface. <strong>Everything you need</strong> and everything you didn&rsquo;t know you
 			needed.</p>
-			
+
 			<h2>Legislation Finds You</h2>
 			<p>Provide the criteria for the sort of bills that you&rsquo;re
 			interested in and they&rsquo;ll be queued for you as
 			they&rsquo;re filed. <strong>It&rsquo;s that easy</strong>.
 			No more hunting down voting records or sneaky bills.</p>
-			
+
 		</div>
 		<div class="right_side">
 			<h2>The Way You Work</h2>
 			<p>Store bills in unlimited portfolios. Access from anywhere. Pipe legislative
 			data to applications or your intranet via XML or RSS. <strong>Flexible and
 			open.</strong></p>
-			
+
 			<h2>Crowdsource It</h2>
 			<p>Create a shared portfolio of bills and your organization&rsquo;s position papers will
 			be put in front of the grassroots on the bill&rsquo;s public page. Share video,
 			audio, images, or link back to resources on your own website. <strong>Work
 			<em>with</em> citizen activists</strong>.</p>
 		</div>
-		
+
 		<h3>Features</h3>
 		<ul style="list-style-type: disc; margin-left: 1.5em; margin-bottom: 1em;">
-			
+
 			<li><strong>Smart portfolios.</strong> Describe the sort of bills you&rsquo;re
 			interested in &mdash; <em>bills in Courts of Justice originally introduced in the House
 			tagged &ldquo;health&rdquo;</em> or <em>every bill containing the phrase &ldquo;eminent
@@ -97,16 +97,16 @@ EOD;
 		<h3>Pricing</h3>
 		<div class="box">
 			<p>The price structure is simple and competitive:</p>
-			
+
 			<ul style="list-style-type: disc; margin-left: 1.5em; margin-bottom: 1em;">
 				<li>$500/year/organization</li>
 				<li>$25/year/additional user</li>
 			</ul>
-			
+
 			<p>Registered 501(c) non-profits are charged half-price.</p>
-			
+
 			<p>For example:</p>
-			
+
 			<ul style="list-style-type: disc; margin-left: 1.5em;">
 				<li>Lobbyist: $500</li>
 				<li>Non-profit lobbyist: $250</li>
@@ -114,7 +114,7 @@ EOD;
 				<li>Non-profit with access for 11: $500</li>
 			</ul>
 		</div>
-		
+
 		<h3>Try It</h3>
 		<div class="box">
 			<p>You can sign up for <a href="/photosynthesis/">a free Photosynthesis account</a> now
@@ -122,7 +122,7 @@ EOD;
 			sense for how the system works. Or, <a href="/contact/">contact us</a> and we can
 			arrange for </p>
 		</div>
-		
+
 		<h3>Buy It</h3>
 		<div class="box">
 			<p style="font-size: 1.2em; font-weight: bold;">Sign up now!</p>
@@ -131,7 +131,7 @@ EOD;
 			running in no time.</p>
 		</div>
 EOD;
-	
+
 	# OUTPUT THE PAGE
 	/*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
 		'&site_section='.urlencode($site_section));*/

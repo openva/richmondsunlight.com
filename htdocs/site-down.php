@@ -2,11 +2,11 @@
 
 ###
 # Site Down Notice
-# 
+#
 # PURPOSE
 # Redirection page -- people pick whether they want to learn about the site
 # or about the GA.
-# 
+#
 ###
 
 # INCLUDES

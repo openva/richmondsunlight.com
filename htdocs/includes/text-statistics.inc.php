@@ -24,7 +24,7 @@ ini_set('display_errors', 1);
 	  * Sentence count
 	  * Average words per sentence
 	  * Average syllables per word
-	
+
 	Sample Code
 	----------------
 	$statistics = new TextStatistics;
@@ -148,7 +148,7 @@ class TextStatistics {
 	 * @param   strText      Text to be transformed
 	 */
 	protected function clean_text($strText) {
-		// all these tags should be preceeded by a full stop. 
+		// all these tags should be preceeded by a full stop.
 		$fullStopTags = array('li', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'dd');
 		foreach ($fullStopTags as $tag) {
 			$strText = str_ireplace('</'.$tag.'>', '.', $strText);
@@ -281,7 +281,7 @@ class TextStatistics {
 		$arrWords = explode(' ', $strText);
 		for ($i = 0; $i < $intWordCount; $i++) {
 			if ($this->syllable_count($arrWords[$i]) > 2) {
-				if ($blnCountProperNouns) { 
+				if ($blnCountProperNouns) {
 					$intLongWordCount++;
 				} else {
 					$strFirstLetter = $this->substring($arrWords[$i], 0, 1);
@@ -328,7 +328,7 @@ class TextStatistics {
 		if (isset($arrProblemWords[$strWord])) {
 			$intSyllableCount = $arrProblemWords[$strWord];
 		}
-		if ($intSyllableCount > 0) { 
+		if ($intSyllableCount > 0) {
 			return $intSyllableCount;
 		}
 

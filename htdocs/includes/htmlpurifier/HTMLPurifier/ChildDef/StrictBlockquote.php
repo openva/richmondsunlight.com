@@ -11,7 +11,7 @@ class HTMLPurifier_ChildDef_StrictBlockquote extends HTMLPurifier_ChildDef_Requi
     public $type = 'strictblockquote';
     protected $init = false;
     public function validateChildren($tokens_of_children, $config, $context) {
-        
+
         $def = $config->getHTMLDefinition();
         if (!$this->init) {
             // allow all inline elements
@@ -20,21 +20,21 @@ class HTMLPurifier_ChildDef_StrictBlockquote extends HTMLPurifier_ChildDef_Requi
             $this->fake_elements['#PCDATA'] = true;
             $this->init = true;
         }
-        
+
         // trick the parent class into thinking it allows more
         $this->elements = $this->fake_elements;
         $result = parent::validateChildren($tokens_of_children, $config, $context);
         $this->elements = $this->real_elements;
-        
+
         if ($result === false) return array();
         if ($result === true) $result = $tokens_of_children;
-        
+
         $block_wrap_start = new HTMLPurifier_Token_Start($def->info_block_wrapper);
         $block_wrap_end   = new HTMLPurifier_Token_End(  $def->info_block_wrapper);
         $is_inline = false;
         $depth = 0;
         $ret = array();
-        
+
         // assuming that there are no comment tokens
         foreach ($result as $i => $token) {
             $token = $result[$i];
@@ -69,4 +69,3 @@ class HTMLPurifier_ChildDef_StrictBlockquote extends HTMLPurifier_ChildDef_Requi
         return $ret;
     }
 }
-

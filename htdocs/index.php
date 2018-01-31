@@ -2,10 +2,10 @@
 
 ###
 # Index Page
-# 
+#
 # PURPOSE
 # The front page of the site.
-# 
+#
 ###
 
 # INCLUDES
@@ -23,7 +23,7 @@ $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
 $cached_html = $mc->get('homepage');
 if ($mc->getResultCode() === 0)
 {
-	
+
 	# If this is a logged-in visitor, replace the cached "Register," "Log In" text with "Profile"
 	# and "Log Out."
 	if ($_SESSION['registered'] == 'y')
@@ -69,24 +69,24 @@ if ($tag_count > 0)
 {
 	$page_body .= '
 	<h2>Bill Topics</h2>
-	<div class="tags">';		
+	<div class="tags">';
 	# Build up an array of tags, with the key being the tag and the value being the count.
 	while ($tag = mysql_fetch_array($result))
 	{
 		$tag = array_map('stripslashes', $tag);
 		$tags[$tag{tag}] = $tag['count'];
 	}
-	
+
 	# Sort the tags in reverse order by key (their count), shave off the top 30, and then
 	# resort alphabetically.
 	arsort($tags);
 	$tags = array_slice($tags, 0, 75);
 	ksort($tags);
-		
+
 	# Establish a scale -- the average size in this list should be 1.25em, with the scale
 	# moving up and down from there.
 	$multiple = 1.25 / (array_sum($tags) / count($tags));
-	
+
 	foreach ($tags AS $tag => $count)
 	{
 		$size = round( ($count * $multiple), 1);
@@ -98,7 +98,7 @@ if ($tag_count > 0)
 		{
 			$size = .75;
 		}
-		
+
 		$page_body .= '<span style="font-size: '.$size.'em;"><a href="/bills/tags/'.urlencode($tag).'/">'.$tag.'</a></span> ';
 	}
 	$page_body .= '
@@ -139,7 +139,7 @@ if (mysql_num_rows($result) > 0)
 	}
 	$page_body .= '</table></div>';
 }
-		
+
 # Ask Memcached for recent blog entries.
 $blog_entries = $mc->get('homepage_blog');
 
@@ -148,7 +148,7 @@ if (!$blog_entries)
 
 	$rss = fetch_rss('https://www.richmondsunlight.com/blog/feed/');
 	$items = array_slice($rss->items, 0, 5);
-	
+
 	# Limit the output to eight blog entries.
 	$blog_entries = '';
 	foreach ($items as $item)
@@ -162,7 +162,7 @@ if (!$blog_entries)
 			</div>';
 
 	}
-	
+
 	# Store these in APC.
 	$mc->set( 'homepage_blog', $blog_entries, (60 * 15) );
 
@@ -202,7 +202,7 @@ $page_sidebar .= '
 			<span class="stat-number">'.number_format($session['house_count']).'</span>
 			</a>
 		</p>
-		
+
 		<p id="senate-bill-count">
 			<a href="/bills/#senate" style="text-decoration: none;">
 			<span class="stat-number">'.number_format($session['senate_count']).'</span>
@@ -332,10 +332,10 @@ if (mysql_num_rows($result) > 0)
 $page_sidebar .= '
 		<h3>Keep Up With Us</h3>
 		<div class="box" id="social-networking" style="text-align: center;">
-			
+
 			<p><a href="http://twitter.com/richmond_sun"><img src="/images/twitter.gif" width="100"
 				height="31" alt="Twitter" /></a></p>
-			
+
 		</div>';
 
 

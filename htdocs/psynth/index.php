@@ -114,7 +114,7 @@
 <body>
 	<div id="container">
 		<div id="header-graphic">
-			
+
 		</div>
 		<div id="header-text">
 			<div class="left">
@@ -126,15 +126,15 @@
 				understanding of your legislation. At last.</p>
 			</div>
 		</div>
-		
+
 <?php
 	if (!empty($_POST['email']))
 	{
-		
+
 		mail('waldo@jaquith.org', 'Photosynthesis Beta Registrant', $_POST['email'].' '
 			.$_SERVER['REMOTE_ADDR'],
 			'From: Richmond Sunlight <do_not_reply@richmondsunlight.com>');
-		
+
 		?>
 		<div id="confirmation">
 			<h2>You&rsquo;re Registered!</h2>
@@ -143,7 +143,7 @@
 		</div>
 		<?php
 	}
-	
+
 	else
 	{
 ?>

@@ -6,11 +6,11 @@
  */
 class Bill2
 {
-	
+
 	# Take a year and a bill number, return a bill ID.
 	function getid($year, $number)
 	{
-		
+
 		# Make sure we've got the information that we need.
 		if (!isset($number) || empty($number))
 		{
@@ -20,7 +20,7 @@ class Bill2
 		{
 			return false;
 		}
-		
+
 		# Check that the data is clean.
 		if (strlen($year) != 4)
 		{
@@ -31,13 +31,13 @@ class Bill2
 			return false;
 		}
 		$number = strtolower($number);
-		
+
 		/*
 		 * If this bill is from the present year, try to retrieve the bill ID from Memcached.
 		 */
 		if ($year == SESSION_YEAR)
 		{
-		
+
 			$mc = new Memcached();
 			$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
 			$result = $mc->get('bill-' . $number);
@@ -45,12 +45,12 @@ class Bill2
 			{
 				return $result;
 			}
-			
+
 		}
 
 		$database = new Database;
 		$database->connect_old();
-		
+
 		/*
 		 * Query the DB.
 		 */
@@ -67,30 +67,30 @@ class Bill2
 		}
 		$bill = mysql_fetch_array($result);
 		return $bill['id'];
-		
+
 	}
-	
+
 	function info()
 	{
-		
+
 		# We'll accept the ID in either format.
 		if (isset($this->id))
 		{
 			$id = $this->id;
 		}
-		
+
 		# Don't proceed unless we have a bill ID.
 		if (!isset($id))
 		{
 			return FALSE;
 		}
-		
+
 		/*
 		 * Connect to Memcached.
 		 */
 		$mc = new Memcached();
 		$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-		
+
 		/*
 		 * If this bill is cached in Memcached, retrieve it from there.
 		 */
@@ -102,7 +102,7 @@ class Bill2
 
 		$database = new Database;
 		$database->connect_old();
-		
+
 		# RETRIEVE THE BILL INFO FROM THE DATABASE
 		$sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber,
 				bills.catch_line, bills.chief_patron_id, bills.summary, bills.summary_hash,
@@ -157,7 +157,7 @@ class Bill2
 		}
 		$bill = mysql_fetch_array($result, MYSQL_ASSOC);
 		$bill = array_map('stripslashes', $bill);
-		
+
 		# Data conversions
 		$bill['word_count'] = str_word_count($bill['full_text']);
 		$bill['patron_suffix'] = '('.$bill['patron_party'].'-'.$bill['patron_place'].')';
@@ -171,7 +171,7 @@ class Bill2
 		}
 		$bill['url'] = 'http://www.richmondsunlight.com/bill/'.$bill['year'].'/'
 			.strtolower($bill['number']).'/';
-		
+
 		# If this bill has any copatrons, we want to gather up all of them and include them in the bill
 		# array.
 		if ($bill['copatron_count'] > 0)
@@ -190,13 +190,13 @@ class Bill2
 				$bill['copatron'][] = $copatron;
 			}
 		}
-		
+
 		# Select all tags from the database.
 		$sql = 'SELECT id, tag
 				FROM tags
 				WHERE bill_id=' . $bill['id'];
 		$result = mysql_query($sql);
-		
+
 		# If there are any tags, display them.
 		if (mysql_num_rows($result) > 0)
 		{
@@ -207,7 +207,7 @@ class Bill2
 				$bill['tags'][$tag{'id'}] = $tag['tag'];
 			}
 		}
-	
+
 		# The status history.
 		$sql = 'SELECT bills_status.status, bills_status.translation,
 				DATE_FORMAT(bills_status.date, "%m/%d/%Y") AS date, bills_status.date AS date_raw,
@@ -228,12 +228,12 @@ class Bill2
 			{
 				# Clean it up.
 				$status = array_map('stripslashes', $status);
-				
+
 				# Append this status data to the status history array.
 				$bill['status_history'][] = $status;
 			}
 		}
-		
+
 		# Place names mentioned.
 		$sql = 'SELECT placename AS name, latitude, longitude
 				FROM bills_places
@@ -247,7 +247,7 @@ class Bill2
 				$bill['places'][] = array_map('stripslashes', $place);
 			}
 		}
-		
+
 		# Duplicates of this bill.
 		# Select all bills that share this summary.
 		$sql = 'SELECT bills.number, bills.chamber, bills.catch_line, bills.status,
@@ -263,9 +263,9 @@ class Bill2
 		$result = mysql_query($sql);
 		if (mysql_num_rows($result) > 0)
 		{
-			
+
 			$bill['duplicates'] = array();
-			
+
 			# Build up an array of duplicates.
 			while ($duplicate = mysql_fetch_array($result))
 			{
@@ -273,7 +273,7 @@ class Bill2
 				$bill['duplicates'][] = $duplicate;
 			}
 		}
-		
+
 		if (isset($bill['tags']))
 		{
 			# Display a list of related bills, by finding the bills that share the most tags with this
@@ -281,13 +281,13 @@ class Bill2
 			$sql = 'SELECT DISTINCT bills.id, bills.number, bills.catch_line,
 					DATE_FORMAT(bills.date_introduced, "%M %d, %Y") AS date_introduced,
 					committees.name, sessions.year,
-			
+
 						(SELECT translation
 						FROM bills_status
 						WHERE bill_id=bills.id AND translation IS NOT NULL
 						ORDER BY date DESC, id DESC
 						LIMIT 1) AS status,
-				
+
 						(SELECT COUNT(*)
 						FROM bills AS bills2
 						LEFT JOIN tags AS tags2
@@ -297,7 +297,7 @@ class Bill2
 			# through them to create the SQL. The actual tag SQL is built up and then reused,
 			# though slightly differently, later on in the SQL query, hence the str_replace.
 			$tags_sql = '';
-			
+
 			$i=0;
 			foreach ($bill['tags'] as $tag)
 			{
@@ -325,9 +325,9 @@ class Bill2
 					AND bills.summary_hash != "' . $bill['summary_hash'] . '"
 					ORDER BY count DESC
 					LIMIT 5';
-			
+
 			$result = mysql_query($sql);
-	
+
 			if (mysql_num_rows($result) > 0)
 			{
 				$bill['related'] = array();
@@ -342,7 +342,7 @@ class Bill2
 		 * Cache this bill in Memcached, for one week.
 		 */
 		$mc->set('bill-' . $id, serialize($bill), (60 * 60 * 24 * 7));
-		
+
 		/*
 		 * And cache the bill's number in Memcached, indefinitely, if the bill is from this
 		 * year.
@@ -351,18 +351,18 @@ class Bill2
 		{
 			$mc->set('bill-' . $bill['number'], $bill['id']);
 		}
-		
+
 		return $bill;
-		
+
 	} // function "info"
-	
+
 	/**
 	 * Returns a list of PCREs for all defined terms that exist within the Code of Virginia for the
 	 * affected section of the Code.
 	 */
 	function get_terms()
 	{
-		
+
 		/*
 		 * We must have a bill ID.
 		 */
@@ -370,27 +370,27 @@ class Bill2
 		{
 			return FALSE;
 		}
-		
+
 		/*
 		 * Get an array of all sections of the Code of Virginia mentioned in this bill.
 		 */
 		$code_sections = bill_sections($this->bill_id);
-		
+
 		if ($code_sections !== FALSE)
 		{
-		
+
 			/*
 			 * We need to include the section number in Javascript, since our API request (on
 			 * hover over each term) relies on it.
 			 */
 			$this->javascript = '<script>var section_number = "' . $code_sections[0]['section_number'] . '";</script>';
-		
+
 			/*
 			 * Connect to Memcached.
 			 */
 			$mc = new Memcached();
 			$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-		
+
 			/*
 			 * See if these terms are cached in Memcached.
 			 */
@@ -399,11 +399,11 @@ class Bill2
 			{
 				return TRUE;
 			}
-		
+
 			/*
 			 * The terms aren't cached in Memcached, so get them from the Virginia Decoded API.
 			 */
-				
+
 			$url = 'https://vacode.org/api/dictionary/?key=zxo8k592ztiwbgre&section=';
 			/*
 			 * Just use the first cited section of the code. It ain't fancy, but it kind of
@@ -473,26 +473,26 @@ class Bill2
 					}
 				}
 			}
-			
+
 			/*
 			 * Make the PCREs available externally.
 			 */
 			$this->term_pcres = $term_pcres;
-			
+
 			/*
 			 * Save this list of definitions.
 			 */
 			$mc->set( 'definitions-' . $this->bill_id, $this->term_pcres );
-		
+
 			return TRUE;
-			
+
 		}
-		
+
 		return FALSE;
-		
+
 	} // end method get_Terms
-	
-	
+
+
 	/**
 	 * Generate a list of all textual changes for a bill
 	 *
@@ -500,7 +500,7 @@ class Bill2
 	 */
 	function list_changes()
 	{
-		
+
 		/*
 		 * We must have bill text.
 		 */
@@ -508,17 +508,17 @@ class Bill2
 		{
 			return FALSE;
 		}
-		
+
 		/*
 		 * Eliminate all HTML other than insertions and deletions.
 		 */
 		$this->text = strip_tags($this->text, '<s><ins>');
-		
+
 		/*
 		 * Calculate a hash to use for caching.
 		 */
 		$this->text_hash = md5($this->text);
-		
+
 		/*
 		 * See if we have this cached.
 		 */
@@ -530,7 +530,7 @@ class Bill2
 			return $this->changes;
 		}
 		unset($this->changes);
-		
+
 		/*
 		 * If the phrase "A BILL to amend and reenact" is found in the first 500 characters of this
 		 * bill, then it's amending an existing law.
@@ -539,7 +539,7 @@ class Bill2
 		{
 			return FALSE;
 		}
-		
+
 		/*
 		 * Figure out where the law actually starts.
 		 */
@@ -549,7 +549,7 @@ class Bill2
 			return FALSE;
 		}
 		$start = strlen($parts[0]);
-		
+
 		/*
 		 * Hack off everything prior to the start of the proposed modifications.
 		 */
@@ -562,14 +562,14 @@ class Bill2
 		 */
 		$this->text = str_replace("\n", ' ', $this->text);
 		$this->text = str_replace('</p><p>', "</p>\n\n<p>", $this->text);
-		
+
 		/*
 		 * Figure out what the text of the law is currently.
 		 */
 		$before = preg_replace('/<ins>(.+)<\/ins>/sU', '\\2', $this->text);
 		$before = str_replace('<s>', '', $before);
 		$before = str_replace('</s>', '', $before);
-		
+
 		/*
 		 * Figure out what the text of the law would be under this bill.
 		 */
@@ -587,14 +587,14 @@ class Bill2
 		 * Establish an array in which we'll store the changes to the text.
 		 */
 		$this->changes = array();
-		
+
 		/*
 		 * Iterate through every insertion and deletion.
 		 */
 		$i=0;
 		foreach ($matches[2] as $key => $type)
 		{
-	
+
 			/*
 			 * Verbosely specify what type of change this is.
 			 */
@@ -607,18 +607,18 @@ class Bill2
 				$type = 'delete';
 			}
 			$this->changes[$i]['type'] = $type;
-	
+
 			/*
 			 * Include the text in question.
 			 */
 			$this->changes[$i]['text'] = $matches[3][$i];
-	
+
 			/*
 			 * Include the text and immediately precedes and follows the text in question.
 			 */
 			$this->changes[$i]['preceded_by'] = $matches[1][$i];
 			$this->changes[$i]['followed_by'] = $matches[5][$i];
-	
+
 			/*
 			 * Include both the original and the new text, which is to say that we apply the
 			 * transformation.
@@ -633,17 +633,17 @@ class Bill2
 				$this->changes[$i]['original'] = $this->changes[$i]['preceded_by'] . $this->changes[$i]['text'] . $this->changes[$i]['followed_by'];
 				$this->changes[$i]['new'] = $this->changes[$i]['preceded_by'] . $this->changes[$i]['followed_by'];
 			}
-	
+
 			$this->changes[$i]['diff'] = $matches[0][$i];
-	
+
 			/*
 			 * Indicate at what point we are in the text, which is useful as only an approximate
 			 * measure, to help provide guidance as to where this patch should be applied.
 			 */
 			$this->changes[$i]['position'] = strpos($this->text, $this->changes[$i]['diff']);
-	
+
 			$i++;
-	
+
 		}
 
 		/*
@@ -653,14 +653,14 @@ class Bill2
 		{
 			$this->changes = FALSE;
 		}
-		
+
 		/*
 		 * Cache the results for three days.
 		 */
 		$mc->set( 'bill-changes-' . $this->text_hash, $this->changes, (60 * 60 * 24 * 3) );
-		
+
 		return $this->changes;
-		
+
 	}
-	
+
 } // end class "Bill2"

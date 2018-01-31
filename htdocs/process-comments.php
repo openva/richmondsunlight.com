@@ -2,16 +2,16 @@
 
 ###
 # Accept Comments
-# 
+#
 # PURPOSE
 # Receives POSTed comments and adds them to the database, determining
 # whether they're likely to be spam or require authentication.
-# 
+#
 # NOTES
 # The elements of the array are deliberately given misleading names
 # in order to catch spammers.  These are renamed promptly, but incoming
 # data will be named oddly.
-# 
+#
 ###
 
 # INCLUDES
@@ -97,14 +97,14 @@ if (!empty($comment['url']))
 			$comment['email'] = $comment['url'];
 			unset($comment['url']);
 		}
-		
+
 		# Otherwise, just figure somebody neglected the prefix.
 		else
 		{
 			$comment['url'] = 'http://'.$comment['url'];
 		}
-	}	
-	
+	}
+
 	# If the URL still isn't valid, drop it.
 	if (filter_var($comment['url'], FILTER_VALIDATE_URL) === false)
 	{
@@ -231,17 +231,17 @@ if (!isset($errors))
 			.'message. These are the contents of the comment array:'."\n\n"
 			.print_r($comment, true));
 	}
-	
+
 	# If this thread has subscribers, e-mail a this comment to those subscribers.
-	
+
 	# Create a new instance of the comments-subscription class
 	$subscription = new CommentSubscription;
-	
+
 	# Pass this bill's ID to $subscription, and have it return a listing of subscriptions
 	# to the discussion of this bill (if any).
 	$subscription->bill_id = $comment['bill_id'];
 	$subscriptions = $subscription->listing();
-	
+
 	# If there are any subscriptions to this discussion, we want to send an e-mail to those
 	# subscribers.
 	if ($subscriptions !== FALSE)
@@ -251,36 +251,36 @@ if (!isset($errors))
 		$comment['name'] = strip_tags(stripslashes($comment['name']));
 		$comment['comment'] = strip_tags(stripslashes($comment['comment']));
 		$subscription->comment = $comment;
-		
+
 		# And pass the subscription data to $subscriptions.
 		$subscription->subscriptions = $subscriptions;
-		
+
 		# Finally, send out the e-mails.
 		$subscription->send_email();
-		
+
 	}
-	
+
 	# If the user has asked to be subscribed to this bill's comments, do so.
 	if (isset($comment['subscribe']) && ($comment['subscribe'] == 'y'))
 	{
 		# create a new instance of the comments-subscription class
 		$subscription = new CommentSubscription;
-		
+
 		# pass the user ID and the bill ID
 		$subscription->user_id = $user['id'];
 		$subscription->bill_id = $comment['bill_id'];
-		
+
 		# subscribe this person
 		$subscription->save();
 	}
-	
+
 	/*
 	 * Clear the Memcached cache for comments on this bill.
 	 */
 	$mc = new Memcached();
 	$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
 	$comments = $mc->delete('comments-' . $comment['bill_id']);
-	
+
 	$log = new Log;
 	$log->put('New comment posted, by ' . stripslashes($comment['name']) . ':'
 		. "\n\n" . str_replace("\r\n", ' ¶ ', stripslashes($comment['comment']))
@@ -297,7 +297,7 @@ if (!isset($errors))
 		header('Location: https://' . $_SERVER['SERVER_NAME']);
 		exit;
 	}
-	
+
 }
 
 else
@@ -305,19 +305,19 @@ else
 
 	# PAGE METADATA
 	$page_title = 'Comment Verification';
-	
+
 	$page_body = '<div class="error">
 		<p>You must provide:</p>
 		<ul>
 			<li>'.implode('</li><li>', $errors).'</li>
 		</ul>
 	</div>';
-	
+
 	# OUTPUT THE PAGE
 	$page = new Page;
 	$page->page_title = $page_title;
 	$page->page_body = $page_body;
 	$page->page_sidebar = $page_sidebar;
 	$page->process();
-	
+
 }

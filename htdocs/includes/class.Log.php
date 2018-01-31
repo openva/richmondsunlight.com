@@ -32,7 +32,7 @@ class Log
         }
 
     }
-    
+
     function put($message, $level)
     {
 
@@ -110,7 +110,7 @@ class Log
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $result = curl_exec($ch);
         curl_close($ch);
-        
+
         return $result;
 
     }
@@ -125,7 +125,7 @@ class Log
 	 * Prepend the message with a timestamp.
 	 */
        	$message = date('Y-m-d H:i:s') . ' ' . $message;
-	 
+
         /*
          * Keep logs in different locations, depending on how this has been invoked.
          */
@@ -151,22 +151,22 @@ class Log
      */
     function pushover($title, $message)
     {
-        
+
         if ( !defined('PUSHOVER_KEY') || !isset($title) || !isset($message) )
         {
             return FALSE;
         }
-        
+
         if (strlen($title) > 100)
         {
             $title = substr($title, 0, 100);
         }
-        
+
         if (strlen($message) > 412)
         {
             $message = substr($message, 0, 412);
         }
-        
+
         curl_setopt_array($ch = curl_init(), array(
             CURLOPT_URL => "https://api.pushover.net/1/messages.json",
             CURLOPT_RETURNTRANSFER => TRUE,
@@ -180,10 +180,10 @@ class Log
         ));
         curl_exec($ch);
         curl_close($ch);
-        
+
         return TRUE;
-        
+
     }
 
-    
+
 }

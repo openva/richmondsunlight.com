@@ -2,7 +2,7 @@
 
 ###
 # Bill Notes
-# 
+#
 # PURPOSE
 # Creation and editing of public notes for individual bills.
 #
@@ -38,7 +38,7 @@ function notes_form($notes)
 			&lt;embed&gt;, &lt;ol&gt;, &lt;ul&gt;, &lt;li&gt;)</small><br />
 		<input type="submit" name="submit" value="Save" />
 	</form>';
-	
+
 	return $returned_data;
 }
 
@@ -62,12 +62,12 @@ $id = mysql_real_escape_string($_GET['id']);
 # If the form is being posted, accept the updated notes and store them.
 if (isset($_POST['submit']))
 {
-	
+
 	# Strip out all tags other than the following.
 	$notes = strip_tags($_POST['notes'], '<a><em><strong><i><b><s><blockquote><embed><ol><ul><li>');
 	$notes = trim($notes);
 	$notes = mysql_real_escape_string($notes);
-	
+
 	$sql = 'UPDATE dashboard_bills
 			SET notes = '.(empty($notes) ? 'NULL' : '"'.$notes.'"').'
 			WHERE id=' . $id . ' AND user_id = '.$user['id'];
@@ -78,7 +78,7 @@ if (isset($_POST['submit']))
 	}
 	else
 	{
-			
+
 		/*
 		 * Clear the Memcached cache of comments on this bill, since Photosynthesis comments are
 		 * among them.
@@ -91,11 +91,11 @@ if (isset($_POST['submit']))
 		$mc = new Memcached();
 		$mc->addServer("127.0.0.1", 11211);
 		$comments = $mc->delete('comments-' . $bill['id']);
-		
+
 		header('Location: https://www.richmondsunlight.com/photosynthesis/#' . $portfolio['hash']);
 		exit();
 	}
-	
+
 }
 
 # Assemble the SQL query.

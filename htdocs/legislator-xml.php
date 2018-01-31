@@ -2,35 +2,35 @@
 
 	###
 	# Create Legislator XML
-	# 
+	#
 	# PURPOSE
 	# Accepts the shortname of a given legislator and spits out an XML file providing
 	# the basic specs on that legislator.
-	# 
+	#
 	# NOTES
 	# This is not intended to be viewed. It just spits out an XML file and that's that.
-	# 
+	#
 	# TODO
 	# None.
-	# 
+	#
 	###
-	
+
 	# INCLUDES
 	# Include any files or libraries that are necessary for this specific
 	# page to function.
 	include_once('includes/settings.inc.php');
 	include_once('includes/functions.inc.php');
 	include_once('vendor/autoload.php');
-	
+
 	# DECLARATIVE FUNCTIONS
 	# Run those functions that are necessary prior to loading this specific
 	# page.
 	$database = new Database;
 	$database->connect_old();
-	
+
 	# LOCALIZE VARIABLES
 	$shortname = mysql_real_escape_string($_GET['shortname']);
-	
+
 	# Select the vote data from the database.
 	$sql = 'SELECT representatives.id, representatives.shortname, representatives.name,
 			representatives.chamber, representatives.sex, representatives.birthday,
@@ -45,9 +45,9 @@
 	$result = mysql_query($sql);
 	if (mysql_num_rows($result) > 0)
 	{
-		
+
 		// Send the headers to have the data downloaded as XML.
-		
+
 		$legislator = mysql_fetch_array($result);
 		$legislator = array_map('stripslashes', $legislator);
 		echo '<legislator>
@@ -117,7 +117,7 @@
 			echo '
 	</committees>';
 		}
-		
+
 		# Select the bill data from the database.
 		$sql = 'SELECT bills.number, bills.catch_line AS title, bills.date_introduced, bills.status
 				FROM bills

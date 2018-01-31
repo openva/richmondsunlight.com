@@ -2,7 +2,7 @@
 
 ###
 # Login
-# 
+#
 # PURPOSE
 # Sets a cookie on the user's system and returns him to the page he came from.
 #
@@ -42,7 +42,7 @@ if (isset($_POST['submit']))
 	{
 		$errors[] = 'a valid email address';
 	}
-	
+
 	if (isset($errors))
 	{
 		$error_text = implode('</li><li>', $errors);
@@ -54,34 +54,34 @@ if (isset($_POST['submit']))
 				</ul>
 			</div>';
 	}
-	
+
 	else
 	{
-	
+
 		$form_data = array_map('mysql_real_escape_string', $_POST['form_data']);
 		$form_data['password_hash'] = md5($form_data['password']);
 		$sql = 'SELECT id, name, cookie_hash
 				FROM users
 				WHERE email = "' . $form_data['email'] . '" AND password = "' . $form_data['password_hash'] . '"';
 		$result = mysql_query($sql);
-		
+
 		if (mysql_num_rows($result) == 0)
 		{
 			$page_body = '<div id="messages" class="errors">That email/password combination didn’t work.</div>';
 		}
 		else
 		{
-			
+
 			$user = mysql_fetch_array($result);
 			$_SESSION['id'] = $user['cookie_hash'];
-			
+
 			# We store the user's name in session data because a) it's a handy shortcut to refer
 			# to the user by name and b) it enables Mint to track users by name.
 			if (!empty($user['name']))
 			{
 				$_SESSION['name'] = $user['name'];
 			}
-			
+
 			# Gather up the user's Photosynthesis portfolio data and store it in the session data,
 			# to be used throughout the site.
 			$sql = 'SELECT id, hash, name, watch_list_id
@@ -90,20 +90,20 @@ if (isset($_POST['submit']))
 					ORDER BY name ASC';
 			$result = mysql_query($sql);
 			if (mysql_num_rows($result) > 0)
-			{	
+			{
 				while ($portfolio = mysql_fetch_array($result))
 				{
 					$portfolio = array_map('stripslashes', $portfolio);
-			
+
 					# Store the name and ID of this portfolio in the session, for use on the
 					# rest of the site.
 					$_SESSION['portfolios'][] = $portfolio;
 				}
-				
+
 				# Indicate via session data that this is a registered user.
 				$_SESSION['registered'] = 'y';
 			}
-			
+
 			$log->put('User ' . $user['name'] . ' has logged in.', 2);
 
 			if (empty($form_data['return_uri']))
@@ -115,7 +115,7 @@ if (isset($_POST['submit']))
 			exit();
 		}
 	}
-	
+
 }
 
 

@@ -2,10 +2,10 @@
 
 ###
 # List Minutes
-# 
+#
 # PURPOSE
 # Lists all available minutes.
-# 
+#
 ###
 
 # INCLUDES
@@ -66,7 +66,7 @@ for ($i=2008; $i<=SESSION_YEAR; $i++)
 $page_sidebar .= '
 		</ul>
 	</div>
-	
+
 	<div class="box">
 		<h3>Explanation</h3>
 		<p>We have the official minutes of the General Assembly as recorded by the clerk,
@@ -74,7 +74,7 @@ $page_sidebar .= '
 		of stuff they did on that day” For lots of these dates we also have video and transcripts
 		which are a lot more informative than the minutes.</p>
 	</div>';
-	
+
 if (mysql_num_rows($result) == 0)
 {
 	$page_body = '<p>No minutes are yet available for ' . SESSION_YEAR . ', but you may select minutes
@@ -82,9 +82,9 @@ if (mysql_num_rows($result) == 0)
 }
 elseif (mysql_num_rows($result) > 0)
 {
-	
+
 	# PAGE CONTENT
-	
+
 	# Iterate through the query results.
 	while ($minutes = mysql_fetch_array($result))
 	{

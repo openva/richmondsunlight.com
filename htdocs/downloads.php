@@ -2,29 +2,29 @@
 
 	###
 	# Downloads
-	# 
+	#
 	# PURPOSE
 	# A list of files available for download.
-	# 
+	#
 	# NOTES
 	# None.
-	# 
+	#
 	# TODO
 	# None.
-	# 
+	#
 	###
-	
+
 	# INCLUDES
 	# Include any files or libraries that are necessary for this specific
 	# page to function.
 	include_once('includes/settings.inc.php');
 	include_once('includes/functions.inc.php');
 	include_once('vendor/autoload.php');
-	
+
 	# PAGE METADATA
 	$page_title = 'Downloads';
-	$site_section = '';	
-	
+	$site_section = '';
+
 	# PAGE CONTENT
 	$page_body = <<<EOD
 
@@ -211,7 +211,7 @@
 		</ul>
 
 EOD;
-	
+
 	# OUTPUT THE PAGE
 	$page = new Page;
 	$page->page_title = $page_title;

@@ -2,37 +2,37 @@
 
 	###
 	# Recommended Bills
-	# 
+	#
 	# PURPOSE
 	# Display a list of bills that an individual is likely to find interesting.
-	# 
+	#
 	# NOTES
 	# None.
-	# 
+	#
 	# TODO
 	# None.
-	# 
+	#
 	###
-	
+
 	# INCLUDES
 	# Include any files or libraries that are necessary for this specific
 	# page to function.
 	include_once('../includes/settings.inc.php');
 	include_once('../includes/functions.inc.php');
-	
+
 	# PAGE METADATA
 	$page_title = 'Recommended Bills';
-	$site_section = 'labs';	
-	
+	$site_section = 'labs';
+
 	# DECLARATIVE FUNCTIONS
 	# Run those functions that are necessary prior to loading this specific
 	# page.
 	$database = new Database;
 	$database->connect_old();
-	
+
 	# INITIALIZE SESSION
 	session_start();
-	
+
 	# PAGE CONTENT
 	$page_sidebar = <<<EOD
 
@@ -48,7 +48,7 @@
 			simply disappear without notice, so consider yourself warned.</p>
 		</div>
 EOD;
-	
+
 	# See if the user is logged in.
 	if (logged_in() === FALSE)
 	{
@@ -59,10 +59,10 @@ EOD;
 	}
 	else
 	{
-		
+
 		# If the user is logged in, get the user data.
 		$user = get_user();
-		
+
 		# Make sure that this user has checked out at least ten tags' worth of bills.
 		$sql = 'SELECT COUNT(*) AS count
 				FROM tags
@@ -78,13 +78,13 @@ EOD;
 			you. Go spend some quality time reading legislation and return for your
 			recommendations.</p>';
 		}
-		
+
 		else
 		{
-			
+
 			# We need to unset that $tags array from above.
 			unset($tags);
-			
+
 			# Select the user's personal tag cloud.
 			$sql = 'SELECT COUNT(*) AS count, tags.tag
 					FROM bills_views
@@ -99,16 +99,16 @@ EOD;
 				<div class="box">
 					<p>These are the topics in which you&rsquo;re most interested, as measured by the topics
 					of the bills that you&rsquo;ve looked at.</p>
-	
+
 					<div class="tags">';
-				
+
 			# Build up an array of tags, with the key being the tag and the value being the count.
 			while ($tag = mysql_fetch_array($result))
 			{
 				$tag = array_map('stripslashes', $tag);
 				$tags[$tag{'tag'}] = $tag['count'];
 			}
-			
+
 			# Sort the tags in reverse order by key (their count), shave off the top 30, and then
 			# resort alphabetically.
 			arsort($tags);
@@ -116,21 +116,21 @@ EOD;
 			$tag_data['biggest'] = max(array_values($tags));
 			$tag_data['smallest'] = min(array_values($tags));
 			ksort($tags);
-			
+
 			# Set the smallest and largest font sizes that we'll accept here, in %.
 			$font['max'] = 250;
 			$font['min'] = 100;
-			
+
 			# Determine the distance between the smallest and the largest tags.
 			$tag_data['spread'] = $tag_data['biggest'] - $tag_data['smallest'];
-			
+
 			# If the smallest and largest tags are the same size, let's avoid dividing by zero, and
 			# declare a spread of one.
 			if ($tag_data['spread'] == 0)
 			{
 				$tag_data['spread'] = 1;
 			}
-			
+
 			$step = ($font['max'] - $font['min']) / $tag_data['spread'];
 			foreach ($tags AS $tag => $count)
 			{
@@ -144,19 +144,19 @@ EOD;
 			$page_sidebar .= '
 					</div>
 				</div>';
-				
+
 			$page_body .= '
 				<p>The following bills from the '.SESSION_YEAR.' session, which you have not yet
 				seen on Richmond Sunlight, are likely to be of interest to you, given the bills that
 				you tend to be interested in.</p>';
-			
+
 			// The use of a subselect to make sure that this person has never before seen this bill
 			// slows down this query a lot, making it take 2.5x longer than it would otherwise
 			// (.08 seconds vs .2 seconds). It would be good to rewrite that bit as a join.
 			$sql = 'SELECT DISTINCT bills.id, bills.number, bills.catch_line,
 					DATE_FORMAT(bills.date_introduced, "%M %d, %Y") AS date_introduced,
 					committees.name, sessions.year,
-					
+
 					(
 						SELECT translation
 						FROM bills_status
@@ -164,7 +164,7 @@ EOD;
 						ORDER BY date DESC, id DESC
 						LIMIT 1
 					) AS status,
-					
+
 						(SELECT COUNT(*)
 						FROM bills AS bills2 LEFT JOIN tags AS tags2 ON bills2.id=tags2.bill_id
 						WHERE (';
@@ -183,7 +183,7 @@ EOD;
 			$sql .= ')
 						AND bills2.id = bills.id
 						) AS count,
-						
+
 						(SELECT COUNT(*)
 						FROM bills_views
 						WHERE bill_id=bills.id AND user_id='.$user['id'].'
@@ -219,7 +219,7 @@ EOD;
 			}
 		}
 	}
-	
+
 	# OUTPUT THE PAGE
 	display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
 		'&site_section='.urlencode($site_section));

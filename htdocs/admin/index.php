@@ -2,7 +2,7 @@
 
 ###
 # Dashboard
-# 
+#
 # PURPOSE
 # An administrative overview of the goings-on of Richmond Sunlight.
 #

@@ -15,7 +15,7 @@ class Video
 
 		$database = new Database;
 		$database->connect_old();
-		
+
 		$sql = 'SELECT id, committee_id, author_name, title, html, path, capture_directory,
 				description, license, length, fps, capture_rate, sponsor, width, height, date,
 				video_index_cache AS index_cache, transcript,
@@ -70,7 +70,7 @@ class Video
 			$file = mysql_fetch_array($result);
 			$this->video['id'] = $file['id'];
 		}
-		
+
 		# Assemble the SQL string.
 		if (isset($this->video['id']))
 		{
@@ -104,39 +104,39 @@ class Video
 		}
 		if (!empty($this->video['path']))
 		{
-			$sql .= ', path="'.$this->video['path'].'"';		
+			$sql .= ', path="'.$this->video['path'].'"';
 		}
 		if (!empty($this->video['fps']))
 		{
-			$sql .= ', fps="'.$this->video['fps'].'"';		
+			$sql .= ', fps="'.$this->video['fps'].'"';
 		}
 		if (!empty($this->video['capture_rate']))
 		{
-			$sql .= ', capture_rate="'.$this->video['capture_rate'].'"';		
+			$sql .= ', capture_rate="'.$this->video['capture_rate'].'"';
 		}
 		if (!empty($this->video['capture_directory']))
 		{
-			$sql .= ', capture_directory="'.$this->video['capture_directory'].'"';		
+			$sql .= ', capture_directory="'.$this->video['capture_directory'].'"';
 		}
 		if (!empty($this->video['width']))
 		{
-			$sql .= ', width="'.$this->video['width'].'"';		
+			$sql .= ', width="'.$this->video['width'].'"';
 		}
 		if (!empty($this->video['height']))
 		{
-			$sql .= ', height="'.$this->video['height'].'"';		
+			$sql .= ', height="'.$this->video['height'].'"';
 		}
 		if (!empty($this->video['description']))
 		{
-			$sql .= ', description="'.$this->video['description'].'"';	
+			$sql .= ', description="'.$this->video['description'].'"';
 		}
 		if (!empty($this->video['license']))
 		{
-			$sql .= ', license="'.$this->video['license'].'"';	
+			$sql .= ', license="'.$this->video['license'].'"';
 		}
 		if (!empty($this->video['sponsor']))
 		{
-			$sql .= ', sponsor="'.$this->video['sponsor'].'"';	
+			$sql .= ', sponsor="'.$this->video['sponsor'].'"';
 		}
 		if (isset($this->video['id']))
 		{
@@ -146,16 +146,16 @@ class Video
 		{
 			$sql .= ', date_created=now()';
 		}
-		
+
 		# Perform the database query.
 		$result = mysql_query($sql);
-		
+
 		# If the query fails, complain,
 		if (!$result)
 		{
 			return FALSE;
 		}
-		
+
 		# Grab the DB ID to use in the HTTP redirect below.
 		if (isset($this->video['id']))
 		{
@@ -167,7 +167,7 @@ class Video
 		}
 
 		return TRUE;
-	
+
 	}
 
 
@@ -176,7 +176,7 @@ class Video
 	{
 
 		exec('/usr/bin/mplayer -ao dummy -vo dummy -identify ' . $_SERVER['DOCUMENT_ROOT'] . $this->path, $mplayer);
-		
+
 		foreach ($mplayer as $option)
 		{
 			if (strpos($option, '=') !== FALSE)
@@ -192,7 +192,7 @@ class Video
 		$this->width = $mplayer['id_video_width'];
 		$this->height = $mplayer['id_video_height'];
 		$this->length = seconds_to_time($mplayer['id_length']);
-		
+
 		if (empty($this->capture_rate) && !empty($this->capture_directory))
 		{
 			$dir = scandir($_SERVER['DOCUMENT_ROOT'] . $this->capture_directory, 1);
@@ -201,12 +201,12 @@ class Video
 			$largest = round($largest[0]);
 			$this->capture_rate = round( ($mplayer['id_length'] * $mplayer['id_video_fps']) / $largest );
 		}
-		
+
 		return TRUE;
 
 	}
-	
-	
+
+
 	# Get a sampling of five videos, at random, for a given legislator. Each must be less than five
 	# minutes in length.
 	function legislator_sample()
@@ -221,17 +221,17 @@ class Video
 		$database->connect_old();
 
 		/*$sql = 'SELECT DISTINCT
-		
+
 					(SELECT TIME_TO_SEC(MIN(time))
 					FROM video_index AS vi2
 					WHERE vi2.file_id=video_index.file_id AND vi2.linked_id=video_index.linked_id
 					AND vi2.file_id=video_index.file_id) AS start,
-					
+
 					(SELECT TIME_TO_SEC(MAX(time))
 					FROM video_index AS vi2
 					WHERE vi2.file_id=video_index.file_id AND vi2.linked_id=video_index.linked_id
 					AND vi2.file_id=video_index.file_id) AS end,
-					
+
 				files.path, files.chamber, files.date
 				FROM video_index
 				LEFT JOIN files
@@ -265,7 +265,7 @@ class Video
 		}
 		return $clips;
 	}
-	
+
 	function by_legislator()
 	{
 
@@ -276,7 +276,7 @@ class Video
 
 		$database = new Database;
 		$database->connect_old();
-		
+
 		$sql = 'SELECT files.id, files.path, files.date, files.chamber, files.capture_directory,
 				video_clips.legislator_id, video_clips.bill_id, video_clips.time_start,
 				video_clips.time_end, video_clips.screenshot
@@ -307,7 +307,7 @@ class Video
 			}
 		}
 	}
-	
+
 	# Get all of the video clips, in order, that involve this bill.
 	function by_bill()
 	{
@@ -318,7 +318,7 @@ class Video
 
 		$database = new Database;
 		$database->connect_old();
-		
+
 		$sql = 'SELECT files.id, files.path, files.capture_directory, files.date, files.chamber,
 				files.capture_rate, video_index.time, video_index.screenshot
 				FROM video_index
@@ -333,19 +333,19 @@ class Video
 		}
 		else
 		{
-		
+
 			while ($moment = mysql_fetch_array($result, MYSQL_ASSOC))
 			{
 				$index[] = $moment;
 			}
-			
+
 			# Iteratively reduce the array to just the beginning and end of each segment. We start
 			# at position 1, rather than 0, since this is a comparative operation.
 			$index2 = array();
 			$index2[] = $index[0];
 			for ($i=1; $i<count($index); $i++)
 			{
-			
+
 				# If this isn't the same chamber and date as the prior position, or the timestamp
 				# isn't within 30 seconds after the prior position, then save this and the prior
 				# position.
@@ -360,36 +360,36 @@ class Video
 					$index2[] = $index[$i-1];
 					$index2[] = $index[$i];
 				}
-				
+
 				# If this is the last item in the array, save it, since it's the end of our current
 				# segment.
 				elseif (($i+1) == count($index))
 				{
 					$index2[] = $index[$i];
 				}
-				
+
 			}
-			
+
 			# In the unlikely event that we have nothing left.
 			if (count($index2) == 0)
 			{
 				return FALSE;
 			}
-			
+
 			# If we've saved an odd number of frames, then drop the last one. We really shouldn't
 			# have done that, and presumably it's indictive of larger problems, but what the heck?
 			if ( ((count($index2)+1)%2) == 0 )
 			{
 				$index2 = array_slice($index2, 0, -1);
 			}
-			
+
 			# At this point we have a listing of points in time that bracket each segment about
 			# this bill, one for the beginning of each segment and one for the end. Now we need to
 			# combine every pair into a single array element.
 			$clips = array();
 			for ($i=0; $i<count($index2); $i++)
 			{
-			
+
 				# If this is an odd number.
 				if ( ($i != 0) && ((($i+1)%2) == 0) )
 				{
@@ -405,19 +405,19 @@ class Video
 						'duration' => time_to_seconds($index2[$i]['time']) - time_to_seconds($index2[$i-1]['time']) + 20
 					);
 				}
-				
+
 			}
-			
+
 			return $clips;
 		}
-		
+
 	}
-	
+
 	# Get return an array of tag data for a given video file, scaled on the basis of the amount of
 	# time that is spent discussing each topic.
 	function file_tags()
 	{
-	
+
 		if (!isset($this->id))
 		{
 			return FALSE;
@@ -425,7 +425,7 @@ class Video
 
 		$database = new Database;
 		$database->connect_old();
-		
+
 		# Generate a list of all tags applied to this file, getting each tag for every screenshot
 		# that we have. So if we have ten screenshots of a bill tagged with "business," that would
 		# be ten appearances of that tag.
@@ -440,20 +440,20 @@ class Video
 				GROUP BY tag
 				ORDER BY number';
 		$result = mysql_query($sql);
-		
+
 		# Unless we have ten tags, we just don't have enough data to continue.
 		if (mysql_num_rows($result) < 10)
 		{
 			return FALSE;
 		}
-			
+
 		# Build up an array of tags, with the key being the tag and the value being the count.
 		while ($tag = mysql_fetch_array($result))
 		{
 			$tag = array_map('stripslashes', $tag);
 			$tags[$tag{'tag'}] = $tag['number'];
 		}
-		
+
 		# Sort the tags in reverse order by key (their count), shave off the top 30, and then
 		# resort alphabetically.
 		arsort($tags);
@@ -461,11 +461,11 @@ class Video
 		$tag_data['biggest'] = max(array_values($tags));
 		$tag_data['smallest'] = min(array_values($tags));
 		ksort($tags);
-		
+
 		return $tags;
-		
+
 	}
-	
+
 	# Get a list of screenshots, one for each X seconds of video. (Default is 60.)
 	function screenshots()
 	{
@@ -478,7 +478,7 @@ class Video
 		{
 			$this->frequency = 60;
 		}
-		
+
 		$increment = $this->frequency / round($this->capture_rate / $this->fps);
 		$tmp = array_reverse(explode(':', $this->length));
 		$this->length_in_seconds = 0;
@@ -497,9 +497,9 @@ class Video
 				$this->length_in_seconds = $this->length_in_seconds + ($tmp[$i] * 60 * 60);
 			}
 		}
-		
+
 		$this->total_screenshots = floor($this->length_in_seconds * $this->fps / $this->capture_rate);
-		
+
 		# Build up a list of screenshots.
 		$j=0;
 		$i=1;
@@ -512,27 +512,27 @@ class Video
 			$j++;
 			$i=$i+$increment;
 		}
-		
-		
+
+
 	} // end method file_tags()
 
 
 	# Indexes video clips by legislator and bill. Meant to be called by the store_clips() method.
 	function index_clips()
 	{
-		
+
 		# We must have a file ID.
 		if (!isset($this->id))
 		{
 			return FALSE;
 		}
-		
+
 		# Are we seeking clips based on bills or legislators?
 		if (!isset($this->clip_type))
 		{
 			$this->clip_type = 'bills';
 		}
-		
+
 		# By how many seconds should exerpts be fuzzed? "10" would provide 10 seconds of padding
 		# both before and after a clip -- a total of 20 extra seconds of video bookending the
 		# identified clip.
@@ -544,7 +544,7 @@ class Video
 
 		$database = new Database;
 		$database->connect_old();
-	
+
 		# Generates a list of every moment.
 		$sql = 'SELECT files.path, files.capture_directory, files.date, files.chamber,
 				video_index.time,
@@ -576,7 +576,7 @@ class Video
 					ON video_index.linked_id = representatives.id
 				WHERE video_index.type="legislator"';
 		}
-		
+
 		$sql .= ' AND files.id='.$this->id.'
 				AND video_index.linked_id IS NOT NULL
 				ORDER BY video_index.time ASC';
@@ -586,14 +586,14 @@ class Video
 		{
 			return FALSE;
 		}
-		
+
 		# Build up an array of "moments" -- each moment deriving from a single screenshot with
 		# a chyron.
 		while ($moment = mysql_fetch_array($result, MYSQL_ASSOC))
 		{
 			$moments[] = $moment;
 		}
-		
+
 		# Iteratively reduce the array to just the beginning and end of each segment. We start
 		# at position 1, rather than 0, since this is a comparative operation. (That is, we start by
 		# comparing 1 to 0, since we don't have anything to compare 0 to.)
@@ -601,24 +601,24 @@ class Video
 		$index[] = $moments[0];
 		for ($i=1; $i<count($moments); $i++)
 		{
-			
+
 			# Extract the prior match.
 			$tmp = end($index);
 			$last_match = $tmp['linked_id'];
-			
+
 			# If this is the last item in the array, save it, since it's the end of our current segment.
 			if (($i+1) == count($moments))
 			{
 				$index[] = $moments[$i];
 				break;
 			}
-			
+
 			# If this linked ID is the same as the last one that we matched, then carry on.
 			if ($moments[$i]['linked_id'] == $last_match)
 			{
 				continue;
 			}
-			
+
 			# Else if this linked ID different than the last one that we matched, then we're at a
 			# boundary between speakers.
 			else
@@ -627,16 +627,16 @@ class Video
 				$index[] = $moments[$i];
 			}
 		}
-		
+
 		# Eliminate $moments, since it's no longer needed.
 		unset($moments);
-		
+
 		# In the unlikely event that we've iteratively reduced $moments to nothing at all.
 		if (count($index) == 0)
 		{
 			return FALSE;
 		}
-		
+
 		# If we've saved an odd number of frames, then drop the last one. We really shouldn't
 		# have done that, and presumably it's indictive of larger problems, but what the heck?
 		if ( ( (count($index) + 1) %2 ) == 0 )
@@ -646,7 +646,7 @@ class Video
 
 		# Create a new, empty object to store these clips in.
 		$this->clips = new stdClass();
-		
+
 		# At this point we have a list of points in time that bracket each segment about this bill,
 		# one for the beginning of each segment and one for the end. Now we need to combine every
 		# pair into a single array element.
@@ -656,7 +656,7 @@ class Video
 			# If this is an odd number.
 			if ( ($i != 0) && ((($i+1)%2) == 0) )
 			{
-				
+
 				# If the beginning and end of this clip are the exact same time, then we obviously
 				# need to arrange for a clip that's longer than a single moment. Stretch it out to
 				# thirty seconds.
@@ -668,13 +668,13 @@ class Video
 				{
 					$this->fuzz = 15;
 				}
-				
+
 				# Otherwise make sure that we've set the fuzz level to the default.
 				else
 				{
 					$this->fuzz = $this->fuzz_default;
 				}
-				
+
 				$clip = array(
 					'path' => $index[$i]['path'],
 					'date' => $index[$i]['date'],
@@ -687,23 +687,23 @@ class Video
 					'bill_number' => strtoupper($index[$i]['bill_number']),
 					'legislator_name' => $index[$i]['legislator_name']
 				);
-				
+
 				$this->clips->{$j} = (object)$clip;
 			}
-			
+
 			$j++;
 		}
-		
+
 		return TRUE;
 	}
-	
+
 	# Indexes and stores clips.
 	function store_clips()
 	{
-		
+
 		# Create a counter, so that we can report the total number of clips indexed and stored.
 		$this->clip_count = 0;
-		
+
 		# We must have a file ID.
 		if (!isset($this->id))
 		{
@@ -712,12 +712,12 @@ class Video
 
 		$database = new Database;
 		$database->connect_old();
-		
+
 		# First, remove every clip already stored for this file.
 		$sql = 'DELETE FROM video_clips
 				WHERE file_id = '.$this->id;
 		mysql_query($sql);
-		
+
 		# Get a list of all bill clips.
 		$this->clip_type = 'bills';
 		$this->index_clips();
@@ -727,10 +727,10 @@ class Video
 		{
 			return FALSE;
 		}
-		
+
 		# Increment our counter.
 		$this->clip_count = $this->clip_count + count($this->clips);
-		
+
 		foreach ($this->clips as $clip)
 		{
 			$sql = 'INSERT INTO video_clips
@@ -742,17 +742,17 @@ class Video
 					date_created = now()';
 			mysql_query($sql);
 		}
-		
+
 		# Get a list of all legislators clips.
 		$this->clip_type = 'legislators';
 		$this->index_clips();
-		
+
 		# Increment our counter.
 		$this->clip_count = $this->clip_count + count($this->clips);
-		
+
 		foreach ($this->clips as $clip)
 		{
-			
+
 			# If the legislator was talking about a bill (as opposed to, for instance, introducing
 			# a visitor in the gallery), gather that bill ID. We actually generate a list of all
 			# bills that were discussed within the prescribed time range, but only retrieve the one
@@ -771,7 +771,7 @@ class Video
 				$bill = mysql_fetch_array($result);
 				$clip->bill_id = $bill['id'];
 			}
-			
+
 			$sql = 'INSERT INTO video_clips
 					SET legislator_id = '.$clip->linked_id.',
 					file_id = '.$this->id.',
@@ -779,23 +779,23 @@ class Video
 					time_end = "'.seconds_to_time($clip->end, true).'",
 					screenshot = "'.$clip->screenshot.'",
 					date_created = now()';
-			
+
 			if (isset($clip->bill_id))
 			{
 				$sql .= ', bill_id = '.$clip->bill_id;
 			}
-			
+
 			mysql_query($sql);
 		}
-		
+
 		return TRUE;
 	}
-	
-	
+
+
 	# Get a single clip.
 	function get_clip()
 	{
-		
+
 		/*
 		 * We accept either an ID or an MD5 hash of the ID. Note that we don't use the entire MD5
 		 * hash (we don't even accept a complete MD5 hash), but instead just the first 6 characters.
@@ -807,7 +807,7 @@ class Video
 
 		$database = new Database;
 		$database->connect_old();
-		
+
 		$sql = 'SELECT files.path, files.date, DATE_FORMAT(files.date, "%b %e, %Y") AS date_formatted,
 				representatives.name_formatted AS legislator_name, bills.number AS bill_number,
 				video_clips.bill_id, video_clips.time_start, video_clips.time_end, video_clips.screenshot
@@ -827,14 +827,14 @@ class Video
 		{
 			$sql .= 'video_clips.file_id = ' . $this->id;
 		}
-		
+
 		$result = mysql_query($sql);
-		
+
 		if ( ($result == FALSE) || (mysql_num_rows($result) == 0) )
 		{
 			return FALSE;
 		}
-		
+
 		$this->clip = mysql_fetch_object($result);
 		$this->clip->time_start_seconds = time_to_seconds($this->clip->time_start);
 		$this->clip->time_end_seconds = time_to_seconds($this->clip->time_end);
@@ -845,21 +845,21 @@ class Video
 		{
 			$this->clip->screenshot = 'https:' . $this->clip->screenshot;
 		}
-		
+
 		return TRUE;
-		
+
 	}
-	
-	
+
+
 	# Get all clips for a given file ID.
 	function get_clips()
 	{
-	
+
 		if ( !isset($this->id) || !isset($this->clip_type) )
 		{
 			return FALSE;
 		}
-		
+
 		# If a fuzz time has not been established, set it at 5 seconds.
 		if (!isset($this->fuzz))
 		{
@@ -868,7 +868,7 @@ class Video
 
 		$database = new Database;
 		$database->connect_old();
-		
+
 		if ($this->clip_type == 'legislators')
 		{
 			$sql = 'SELECT representatives.name_formatted AS legislator_name, video_clips.time_start,
@@ -878,7 +878,7 @@ class Video
 						ON video_clips.legislator_id = representatives.id
 					WHERE legislator_id IS NOT NULL AND video_clips.file_id=' . $this->id;
 		}
-		
+
 		elseif ($this->clip_type == 'bills')
 		{
 			$sql = 'SELECT bills.number AS bill_number, video_clips.time_start, video_clips.time_end,
@@ -889,7 +889,7 @@ class Video
 					WHERE bill_id IS NOT NULL AND legislator_id IS NULL
 					AND video_clips.file_id=' . $this->id;
 		}
-		
+
 		else
 		{
 			$sql = 'SELECT representatives.name_formatted AS legislator_name,
@@ -903,33 +903,33 @@ class Video
 						ON video_clips.bill_id = bills.id
 					WHERE video_clips.file_id='.$this->id;
 		}
-		
+
 		$result = mysql_query($sql);
-		
+
 		if (mysql_num_rows($result) < 1)
 		{
 			return FALSE;
 		}
-		
+
 		# Create a new, empty object to store these clips in.
 		$this->clips = new stdClass();
-		
+
 		$i=0;
 		while ($clip = mysql_fetch_object($result))
 		{
 			$clip->start = time_to_seconds($clip->time_start) - $this->fuzz;
 			$clip->end = time_to_seconds($clip->time_end) + $this->fuzz;
 			$clip->duration = time_to_seconds($clip->time_end) - time_to_seconds($clip->time_start) + ($this->fuzz * 2);
-			
+
 			$this->clips->{$i} = $clip;
 			$i++;
 		}
-		
+
 		return TRUE;
-		
+
 	}
-	
-	
+
+
 	# Turn an SBV file into an object of times and text. Expects to receive raw SBV text, not a file
 	# path.
 	function parse_sbv()
@@ -942,45 +942,45 @@ class Video
 
 		# Intialize a variable to store our complete transcript.
 		$this->complete = '';
-		
+
 		# YouTube's SBVs quite frequently contain whitespace at the end.
 		$this->sbv = trim($this->sbv);
 
 		# Set aside the raw SBV data.
 		$this->raw_sbv = $this->sbv;
-		
+
 		# Turn the raw data into an array.
 		$this->sbv = explode('-----', $this->sbv);
-		
+
 		# Step through every moment in the array.
 		$i=0;
 		foreach ($this->sbv as $moment)
 		{
 			# Each moment is bracketed in newlines. Strip those out.
 			$moment = trim($moment);
-			
+
 			# Break the moment up into individual lines.
 			$moment = explode(PHP_EOL, $moment);
-			
+
 			$this->moments->$i->time_start = implode(array_slice(explode(',', $moment[0]), 0, 1));
 			$this->moments->$i->time_end = implode(array_slice(explode(',', $moment[0]), 1, 1));
 			$this->moments->$i->text = implode(' ', array_slice($moment, 1));
-			
+
 			# Append the text to our master transcript of text.
 			$this->transcript .= $this->moments->$i->text.' ';
-			
+
 			$i++;
 		}
-		
+
 		# Restore the transcript to its original variable.
 		$this->sbv = $this->sbv_raw;
 		unset($this->sbv_raw);
-		
+
 		return TRUE;
 
 	}
-	
-	
+
+
 	/*
 	 * Turn a WebVTT file into an object of times and text. Expects to receive raw WebVTT text, not
 	 * a file path.
@@ -992,7 +992,7 @@ class Video
 		{
 			return FALSE;
 		}
-		
+
 		/*
 		 * Turn the raw WebVTT data into an array.
 		 */
@@ -1021,12 +1021,12 @@ class Video
 
 			$caption = trim($caption);
 			$caption = explode("\n", $caption);
-			
+
 			$this->captions->$i = new stdClass;
 			$this->captions->$i->time_start = implode(array_slice(explode(' --> ', $caption[0]), 0, 1));
 			$this->captions->$i->time_end = implode(array_slice(explode(' --> ', $caption[0]), 1, 1));
 			$this->captions->$i->text = str_replace("\n",' ', implode(' ', array_slice($caption, 1)));
-			
+
 			$i++;
 		}
 
@@ -1034,7 +1034,7 @@ class Video
 
 	}
 
-	
+
 	/*
 	 * Store a WebVTT in the database.
 	 */
@@ -1048,7 +1048,7 @@ class Video
 
 		$database = new Database;
 		$database->connect_old();
-		
+
 		$sql = 'UPDATE files
 				SET webvtt = "' . mysql_real_escape_string($this->webvtt) . '"
 				WHERE id=' . $this->file_id;
@@ -1057,7 +1057,7 @@ class Video
 		{
 			return FALSE;
 		}
-		
+
 		return TRUE;
 
 	}
@@ -1067,7 +1067,7 @@ class Video
 	// before being put into production.
 	function transcript_indexed()
 	{
-		
+
 		if (!isset($this->id))
 		{
 			return FALSE;
@@ -1075,9 +1075,9 @@ class Video
 
 		$database = new Database;
 		$database->connect_old();
-		
+
 		$this->transcript = new stdClass;
-		
+
 		# SELECT A LIST OF EVERY TRANSCRIPT ITEM, BY TIME.
 		$sql = 'SELECT time_start, time_end, text
 				FROM video_transcript
@@ -1092,7 +1092,7 @@ class Video
 			// THIS IS ACTUALLY A BAD IDEA. We'll miss some data by using the timestamp as the key.
 			$this->transcript->$key = $caption;
 		}
-		
+
 		# SELECT A LIST OF EVERY SPEAKER AND BILL, BY TIME
 		$sql = 'SELECT representatives.name_formatted AS legislator, bills.number AS bill,
 				video_clips.time_start, video_clips.time_end
@@ -1115,7 +1115,7 @@ class Video
 		$this->transcript = (array) $this->transcript;
 		ksort($this->transcript);
 		$this->transcript = (object) $this->transcript;
-		
+
 		return TRUE;
 
 	}
@@ -1129,7 +1129,7 @@ class Video
  * while the below were created for DVD captions.
  */
 ////////////////////////////////////////////////////////////////////////
-	
+
 	/**
 	 * Normalize a WebVTT file's carriage returns.
 	 *
@@ -1156,7 +1156,7 @@ class Video
 
 	/**
 	 * Adjust captions by X seconds
-	 * 
+	 *
 	 * The default is +10.
 	 *
 	 * @param int    $this->offset, in seconds, defaults to 10
@@ -1195,7 +1195,7 @@ class Video
 			$times = array('time_start', 'time_end');
 			foreach ($times as &$time)
 			{
-			
+
 				/*
 				 * Convert the time to seconds (dropping microseconds).
 				 */
@@ -1228,7 +1228,7 @@ class Video
 	 *
 	 * @param string $this->captions The captions.
 	 * @param int $this->file_id The ID of this video file.
-	 * 
+	 *
 	 * @access public
 	 *
 	 * @return true or false
@@ -1332,7 +1332,7 @@ class Video
 
 	/**
 	 * Identify speakers for transcription portions
-	 * 
+	 *
 	 * Attempt to label every speaker in video_transcript for a given file ID,
 	 * by combining chyron data and caption data.
 	 *
@@ -1520,7 +1520,7 @@ class Video
 				}
 
 			}
-			
+
 			// if this contains phrases that allow us to ID it as the lt. gov or the
 			// clerk, assign accordingly.
 			// Uh...how are we going to label these? These aren't in the representatives table.
@@ -1546,7 +1546,7 @@ class Video
 			}
 
 			/*
-			 * if we still can't ID it, use the text from the prior speaker to ID them 
+			 * if we still can't ID it, use the text from the prior speaker to ID them
 			 * (that is, using their introductions).
 			 */
 			$prior_text = '';
@@ -1567,7 +1567,7 @@ class Video
 				/*
 				 * Make another attempt, looking back 3 lines. This is to deal with the
 				 * exchange that goes like this:
-				 * 
+				 *
 				 * Speaker: The gentleman from Richmond, Mr. Smith.
 				 * Smith: I rise for purposes of an introduction.
 				 * Speaker: The gentleman has the floor.
@@ -1680,7 +1680,7 @@ class Video
 		 */
 		foreach ($captions as $segment)
 		{
-			
+
 			foreach ($segment as $caption)
 			{
 
@@ -1834,10 +1834,10 @@ class Video
 				'Reverend', 'Senator', 'Delegate',
 
 				'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday',
-				
+
 				'January', 'February', 'March', 'April', 'June', 'July', 'August',
 				'September', 'October', 'November', 'December',
-				
+
 				'Abbitt', 'Abbott', 'Adams', 'Aird', 'Albo', 'Alexander', 'Amundson', 'Anderson',
 				'Armstrong', 'Athey', 'Austin', 'BaCote', 'Bagby', 'Barker', 'Barlow', 'Bell', 'Berg',
 				'Black', 'Blevins', 'Bloxom', 'Bouchard', 'Bowling', 'Boysko', 'Brink', 'Bryant',
@@ -1846,10 +1846,10 @@ class Video
 				'Cosgrove', 'Cox', 'Cox', 'Crockett-Stark', 'Cuccinelli', 'Dance', 'Davis', 'Davis',
 				'Deeds', 'DeSteph', 'Dudenhefer', 'Dudley', 'Dunnavant', 'Ebbin', 'Edmunds', 'Edwards',
 				'Eisenberg', 'Englin', 'Fariss', 'Farrell', 'Favola', 'Filler-Corn', 'Fowler',
-				'Fralin', 'Frederick', 'Freitas', 'Futrell', 'Garrett', 'Gear', 'Gilbert', 
+				'Fralin', 'Frederick', 'Freitas', 'Futrell', 'Garrett', 'Gear', 'Gilbert',
 				'Sturtevant', 'Greason', 'Griffith', 'Habeeb', 'Hall', 'Hamilton', 'Hanger',
-				'Hargrove', 'Parrish', 'Hawkins', 'Head', 'Helsel', 'Heretick', 'Herring', 
-				'Hester', 'Hodges', 'Hogan', 'Houck', 'Howell', 'Hugo', 'Hull', 
+				'Hargrove', 'Parrish', 'Hawkins', 'Head', 'Helsel', 'Heretick', 'Herring',
+				'Hester', 'Hodges', 'Hogan', 'Houck', 'Howell', 'Hugo', 'Hull',
 				'Iaquinto', 'Ingram', 'James', 'Janis', 'Joannou', 'Johnson', 'Jones', 'Jones', 'Keam',
 				'Kilgore', 'Knight', 'Kory', 'Krizek', 'Krupicka', 'Lambert', 'Landes', 'LaRock',
 				'Leftwich', 'LeMunyon', 'Levine', 'Lewis', 'Lindsey', 'Lingamfelter', 'Locke', 'Lohr',
@@ -1868,7 +1868,7 @@ class Video
 				'Vanderhye', 'Villanueva', 'Vogel', 'Waddell', 'Wagner', 'Wampler', 'Ward', 'Wardrup',
 				'Ware', 'Ware', 'Watkins', 'Watson', 'Watts', 'Webert', 'Welch', 'Wexton', 'Whipple',
 				'Williams', 'Wilt', 'Wittman', 'Wright', 'Yancey', 'Yost',
-				
+
 				'Accomack County', 'Albemarle County', 'Alleghany County', 'Amelia County',
 				'Amherst County', 'Appomattox County', 'Arlington County', 'Augusta County',
 				'Bath County', 'Bedford County', 'Bland County', 'Botetourt County',
@@ -1919,7 +1919,7 @@ class Video
 				'Shenandoah', 'Smyth', 'Southampton', 'Spotsylvania',
 				'Stafford', 'Surry', 'Sussex', 'Tazewell', 'Warren',
 				'Washington', 'Westmoreland', 'Wise', 'Wythe',
-				'York', 
+				'York',
 
 				'Virginia Beach', 'Norfolk', 'Chesapeake', 'Richmond City', 'Richmond',
 				'Newport News', 'Alexandria', 'Hampton', 'Roanoke City', 'Roanoke', 'Portsmouth',
@@ -1975,25 +1975,25 @@ $files = scandir($container_directory);
 # Iterate through this list of files and move each of them.
 foreach ($files as $file)
 {
-	
+
 	# If this isn't an MP4, we're not going to be doing anything with it.
 	if (substr($file, -4, 4) != '.mp4')
 	{
 		continue;
 	}
-	
+
 	# Figure out the name of the directory containing the screenshots.
 	$screenshot_directory = str_replace($file, '.mp4', '');
-	
+
 	# Rename the video file, making it the ID
 	rename($container_directory.$file, $new_container_directory.$video[$file]);
-	
+
 	# Rename the video directory (if it exists), making it the ID.
 	if (file_exists($screenshot_directory) !== FALSE)
 	{
 		rename($screenshot_directory, $new_container_directory.$video[$file]);
 	}
-	
+
 	# Update every files record to use the new path
 	$sql = 'UPDATE video_index
 			SET path="'.$.'", cache

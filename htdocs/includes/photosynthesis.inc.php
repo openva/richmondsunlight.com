@@ -2,17 +2,17 @@
 
 ###
 # Photosynthesis Functions
-# 
+#
 # PURPOSE
 # A function library for the Photosynthesis bill-tracking tools.
-# 
+#
 ###
 
 # Populates a portfolio with the contents of a watch list, whether for the first time
 # or to update an existing portfolio.
 function populate_smart_portfolio($portfolio_id)
 {
-	
+
 	# Get the watch list ID.
 	$sql = 'SELECT watch_list_id AS id
 			FROM dashboard_portfolios
@@ -23,7 +23,7 @@ function populate_smart_portfolio($portfolio_id)
 		return FALSE;
 	}
 	$watch_list = mysql_fetch_array($result);
-	
+
 	# Get the ID of the user who owns this portfolio.
 	$sql = 'SELECT user_id AS id
 			FROM dashboard_portfolios
@@ -35,7 +35,7 @@ function populate_smart_portfolio($portfolio_id)
 	}
 	$user = mysql_fetch_array($result);
 	$user_id = $user['id'];
-	
+
 	# Get the smart portfolio criteria.
 	$sql = 'SELECT tag, patron_id, committee_id, keyword, status, current_chamber
 			FROM dashboard_watch_lists
@@ -46,13 +46,13 @@ function populate_smart_portfolio($portfolio_id)
 		return FALSE;
 	}
 	$portfolio = mysql_fetch_array($result);
-	
+
 	# Remove any criterion that's not being used in this smart portfolio.
 	foreach ($portfolio as $key => $criterion)
 	{
 		if (empty($criterion)) unset($portfolio[$key]);
 	}
-	
+
 	# Get all bills that meet these criteria (up to 200). Start by assembling the query.
 	$sql = 'SELECT id
 			FROM bills
@@ -87,7 +87,7 @@ function populate_smart_portfolio($portfolio_id)
 
 	# Run the actual query;
 	$result = mysql_query($sql);
-	
+
 	# We don't want to fail when no bills are found. It's totally reasonable for somebody to
 	# have a smart portfoilo that starts out blank. But we do want to erase any bills in the
 	# portfolio in question before we wrap up. Specifying the user ID isn't strictly necessary,
@@ -99,13 +99,13 @@ function populate_smart_portfolio($portfolio_id)
 		mysql_query($sql);
 		return true;
 	}
-	
+
 	# When bills *are* found, build them up into an ID listing.
 	while ($bill = mysql_fetch_array($result))
 	{
 		$new_bills[] = $bill['id'];
 	}
-	
+
 	# Generate a listing of all bills already in this portfolio.
 	$sql = 'SELECT bill_id AS id
 			FROM dashboard_bills
@@ -115,27 +115,27 @@ function populate_smart_portfolio($portfolio_id)
 	{
 		while ($bill = mysql_fetch_array($result)) $old_bills[] = $bill['id'];
 	}
-	
+
 	# Sort the array to figure out which to delete (because they're no longer a match),
 	# which to ignore, and which to add.
 	if (isset($old_bills))
 	{
 		# Bills already in the database that can be left alone.
 		$kept_bills = array_intersect($old_bills, $new_bills);
-		
+
 		# Bills that are in the database, but not in the latest query, which need to
 		# be deleted from the database.
 		foreach ($old_bills as $value) if (!in_array($value, $new_bills)) $delete_bills[] = $value;
-		
+
 		# Bills that are not in the database, but are in the latest query, which need to
 		# be inserted.
 		foreach ($new_bills as $value) if (!in_array($value, $old_bills)) $insert_bills[] = $value;
 	}
-	
+
 	# If there are no old bills to be filtered out, just go ahead and make the new bills the
 	# list of bills to insert.
 	else $insert_bills = $new_bills;
-	
+
 	# If any old bills are found (bills in this smart portfolio that no longer fit our
 	# criteria) then delete them.
 	if (isset($delete_bills))
@@ -150,7 +150,7 @@ function populate_smart_portfolio($portfolio_id)
 			mysql_query($sql);
 		}
 	}
-	
+
 	# If any new bills have been found, insert them.
 	if (isset($insert_bills))
 	{
@@ -163,7 +163,7 @@ function populate_smart_portfolio($portfolio_id)
 					ON DUPLICATE KEY UPDATE bill_id=bill_id';
 			$result = mysql_query($sql);
 		}
-	}	
+	}
 }
 
 ###
@@ -182,10 +182,10 @@ function smart_portfolio_form($form_data)
 	# Determine where the form is to be posted.
 	if (isset($form_data['id'])) $action = $_SERVER['REQUEST_URI'];
 	else $action = '/photosynthesis/process-actions.php';
-	
+
 	$content = '
 			<form method="post" action="'.$action.'">
-				
+
 				<fieldset id="create-smart-portfolio">
 					<table>
 						<tr><td><label for="name">Name</label></td></tr>
@@ -430,7 +430,7 @@ function smart_portfolio_form($form_data)
 	$content .= '
 				</fieldset>
 			</form>';
-	
+
 	return $content;
 }
 
@@ -454,7 +454,7 @@ function portfolio_form($form_data)
 		$submit_label = 'Save Changes';
 		$action = $_SERVER['REQUEST_URI'];
 	}
-	
+
 	# Else if we're creating a new portfolio.
 	else
 	{
@@ -463,7 +463,7 @@ function portfolio_form($form_data)
 	}
 	$content = '
 		<form method="post" action="'.$action.'">
-			
+
 			<fieldset id="create-portfolio">
 				<table class="form">
 					<tr><td><label for="name">Name</label></td></tr>
@@ -494,7 +494,7 @@ function portfolio_form($form_data)
 			<input type="hidden" name="add-portfolio" value="y" />';
 	$content .= '
 		</form>';
-	
+
 	return $content;
 }
 
@@ -511,23 +511,23 @@ function portfolio_form($form_data)
 # Accepts an ID as input, outputs HTML.
 ###
 function show_portfolio($portfolio, $user_id)
-{			
+{
 	# Get a listing of all of the bills in this portfolio.
 	$sql = 'SELECT dashboard_bills.id AS record_id, dashboard_bills.notes, bills.number,
 			bills.catch_line,
-	
+
 				(SELECT translation
 				FROM bills_status
 				WHERE bill_id = bills.id AND translation IS NOT NULL
 				ORDER BY date DESC, date_created DESC
 				LIMIT 1) AS last_action,
-				
+
 				(SELECT DATE_FORMAT(date, "%m/%d/%y") AS date_formatted
 				FROM bills_status
 				WHERE bill_id = bills.id AND translation IS NOT NULL
 				ORDER BY date DESC, date_created DESC
 				LIMIT 1) AS last_date
-			
+
 			FROM bills LEFT JOIN dashboard_bills
 			ON bills.id = dashboard_bills.bill_id
 			WHERE dashboard_bills.user_id='.$user_id.'
@@ -559,7 +559,7 @@ function show_portfolio($portfolio, $user_id)
 		{
 			$bill = array_map('stripslashes', $bill);
 			$bill['timestamp'] = strtotime($bill['last_date']);
-			
+
 			$content .= '
 				<tr'.(($_SESSION['last_access'] < $bill['timestamp']) ? ' class="changed"' : '').'>
 					<td><a href="/bill/'.SESSION_YEAR.'/'.$bill['number'].'/">'
@@ -576,14 +576,14 @@ function show_portfolio($portfolio, $user_id)
 					</td>';
 			}
 			$content .= '</tr>';
-			
+
 			if (empty($bill['notes']))
 			{
 				$bill['notes'] = 'Add your comments about this bill '
 					.'here—they’ll be listed on your public portfolio and on the bill’s page. '
 					.'Should this pass or fail? Why?';
 			}
-			
+
 			$content .= '
 			<tr id="'.$bill['record_id'].'-notes" class="notes">
 				<td></td>
@@ -613,7 +613,7 @@ function show_portfolio($portfolio, $user_id)
 			</div>';
 		}
 	}
-	
+
 	return $content;
 }
 

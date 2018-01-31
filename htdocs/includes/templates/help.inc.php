@@ -14,7 +14,7 @@
 <body>
 	<div class="content">
 		<h1>%page_title%</h1>
-	
+
 		%page_body%
 	</div>
 </body>

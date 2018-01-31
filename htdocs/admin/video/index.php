@@ -2,7 +2,7 @@
 
 ###
 # Edit and Add New Videos
-# 
+#
 # PURPOSE
 # Provides administrative video-editing functions.
 #
@@ -29,17 +29,17 @@ function show_form($form_data)
 {
 	$returned_data = '
 		<form method="post" action="/admin/video/">
-		
+
 			<fieldset>
 			<legend>Committee ID</legend>
 			<input type="text" name="form_data[committee_id]" id="committee_id" size="3" value="'.$form_data['committee_id'].'" />
 			</fieldset>
-			
+
 			<fieldset>
 			<legend>Author Credit</legend>
 			<input type="text" name="form_data[author_name]" id="author_name" value="'.$form_data['author_name'].'" />
 			</fieldset>
-			
+
 			<fieldset>
 			<legend class="required">Chamber</legend>
 			<select name="form_data[chamber]" id="chamber">
@@ -47,57 +47,57 @@ function show_form($form_data)
 				<option value="senate"' . (($form_data['chamber'] == 'senate') ? ' selected="selected"' : '') . '>Senate</option>
 			</select>
 			</fieldset>
-			
+
 			<fieldset>
 			<legend class="required">Title</legend>
 			<input type="text" name="form_data[title]" id="title" value="'.$form_data['title'].'" />
 			</fieldset>
-			
+
 			<fieldset>
 			<legend class="required">Path (prepend with a slash, e.g. <code>/video/house/floor/20190204.mp4</code>))</legend>
 			<input type="text" name="form_data[path]" id="path" size="60" value="'.$form_data['path'].'" />
 			</fieldset>
-			
+
 			<fieldset>
 			<legend>License</legend>
 			<input type="text" name="form_data[license]" id="license" value="'.$form_data['license'].'" />
 			</fieldset>
-			
+
 			<fieldset>
 			<legend>Length (HH:MM:SS)</legend>
 			<input type="text" name="form_data[length]" id="length" size="8" value="'.$form_data['length'].'" />
 			</fieldset>
-			
+
 			<fieldset>
 			<legend>FPS</legend>
 			<input type="text" name="form_data[fps]" id="length" size="5" value="'.$form_data['fps'].'" />
 			</fieldset>
-			
+
 			<fieldset>
 			<legend>Capture Rate in Frame Frequency (i.e. 60, 150)</legend>
 			<input type="text" name="form_data[capture_rate]" id="length" size="3" value="'.$form_data['capture_rate'].'" />
 			</fieldset>
-			
+
 			<fieldset>
 			<legend>Width</legend>
 			<input type="text" name="form_data[width]" id="length" size="4" value="'.$form_data['width'].'" />
 			</fieldset>
-			
+
 			<fieldset>
 			<legend>Height</legend>
 			<input type="text" name="form_data[height]" id="length" size="4" value="'.$form_data['height'].'" />
 			</fieldset>
-			
+
 			<fieldset>
 			<legend>Description</legend>
 			<textarea name="form_data[description]" id="description" rows="5" cols="60">'.$form_data['description'].'</textarea>
 			</fieldset>
-			
+
 			<fieldset>
 			<legend>Embed HTML</legend>
 			<textarea name="form_data[html]" id="html" rows="10" cols="60">'.$form_data['html'].'</textarea>
 			</fieldset>
-			
+
 			<fieldset>
 			<legend>Media Type</legend>
 			<select name="form_data[type]" id="type">
@@ -105,12 +105,12 @@ function show_form($form_data)
 				<option value="audio"'.(($form_data['type'] == 'audio') ? ' selected="selected"' : '').'>Audio</option>
 			</select>
 			</fieldset>
-			
+
 			<fieldset>
 			<legend class="required">Date Recorded (YYYY-MM-DD)</legend>
 			<input type="text" name="form_data[date]" id="date" size="10" value="'.$form_data['date'].'" />
 			</fieldset>
-			
+
 			<fieldset>
 			<legend>Sponsor</legend>
 			<textarea rows="4" cols="50" name="form_data[sponsor]" id="sponsor">'.$form_data['sponsor'].'</textarea>
@@ -150,7 +150,7 @@ if (isset($_POST['form_data']))
 	# Redirect the browser to edit this video.
 	header('Location: https://www.richmondsunlight.com/admin/video/?id=' . $video->id);
 	exit();
-	
+
 }
 
 /*
@@ -170,7 +170,7 @@ if (isset($_GET['id']) && !isset($_GET['op']))
 		die('No such file available.');
 	}
 	$video = mysql_fetch_array($result);
-	
+
 	$sql = 'SELECT *
 			FROM video_index
 			WHERE file_id='.$_GET['id'];
@@ -180,7 +180,7 @@ if (isset($_GET['id']) && !isset($_GET['op']))
 		$page_body .= '<p style="font-size: 1.5em; text-align: center;">
 			<a href="/utilities/parse_video.php?id=' . $id . '">Parse Video</a></p>';
 	}
-	
+
 	$page_body .= '
 		<div style="float: right;" id="reimport">
 		<form method="get" action="/admin/video/">
@@ -274,7 +274,7 @@ elseif ( isset($_GET['id']) && ($_GET['op'] == 'transcript') )
 	{
 		die('No captions generated');
 	}
-	
+
 	$sql = 'UPDATE files
 			SET transcript = "' . mysql_real_escape_string($captions->transcript) . '"
 			WHERE id = ' . $_GET['id'];
@@ -283,7 +283,7 @@ elseif ( isset($_GET['id']) && ($_GET['op'] == 'transcript') )
 	{
 		die('Transcript could not be inserted.');
 	}
-	
+
 	header('Location: https://www.richmondsunlight.com/admin/video/');
 	exit();
 
@@ -312,7 +312,7 @@ elseif ( isset($_GET['id']) && ($_GET['op'] == 'atomize') )
 	if ($captions->srt_to_database() === FALSE)
 	{
 		die('Could not atomize captions.');
-	}	
+	}
 
 	header('Location: https://www.richmondsunlight.com/admin/video/');
 	exit();
@@ -382,7 +382,7 @@ elseif ( isset($_GET['id']) && ($_GET['op'] == 'metadata') && isset($_GET['path'
 	{
 		$video_data[$name] = $video->$name;
 	}
-	
+
 	$page_body .= show_form($video_data);
 
 }
@@ -413,16 +413,16 @@ else
 	$video_paths = array();
 	while ($video = mysql_fetch_array($result))
 	{
-	
+
 		$videos[] = array_map('stripslashes', $video);
 		# We save this to a separate array, which we use to detect newly uploaded files.
 		if ($video['capture_directory'] != '')
 		{
 			$video_paths[] = $video['capture_directory'];
 		}
-		
+
 	}
-	
+
 	# Get a list of all video files.
 	foreach (array('house','senate') as $chamber)
 	{
@@ -460,7 +460,7 @@ else
 
 			if (!in_array($file, $video_paths))
 			{
-			
+
 				$tmp = explode('/', $file);
 				$chamber = $tmp[2];
 				$date = $tmp[4];
@@ -479,20 +479,20 @@ else
 				}
 				$page_body .= '">'.$file
 				.'</a> ';
-				
+
 			}
 
 		}
 
 	}
-	
+
 	# List all of the videos that we have in the database.
 	$page_body .= '
 	<p><a href="/admin/video/?new">Add New Video</a> |
 	<a href="/utilities/resolve_chyrons.php">Resolve Chyrons</a> |
 	<a href="/admin/video/orphaned-chyrons.php">Orphaned Chyrons</a> |
 	<a href="/utilities/internet_archive_video.php">IA Export</a></p>
-	
+
 	<table>
 		<thead>
 		<tr>
@@ -507,10 +507,10 @@ else
 		</tr>
 		</thead>
 		<tbody>';
-	
+
 	foreach ($videos as $video)
 	{
-	
+
 		$page_body .= '
 			<tr>
 				<td>' . $video['date'] . '</td>
@@ -548,11 +548,11 @@ else
 		$page_body .= '</td>
 				<td>[<a href="/admin/video/?id=' . $video['id'] . '">edit</a>]</td>
 			</tr>';
-		
+
 	}
-	
+
 	$page_body .= '</tbody></table>';
-	
+
 }
 
 # OUTPUT THE PAGE

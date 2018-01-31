@@ -2,10 +2,10 @@
 
 ###
 # List Votes
-# 
+#
 # PURPOSE
 # List how legislators voted on this particular vote.
-# 
+#
 ###
 
 # INCLUDES
@@ -46,7 +46,7 @@ $html_head = '';
 
 # PAGE METADATA
 $page_title = 'Vote';
-$site_section = '';	
+$site_section = '';
 
 # PAGE CONTENT
 
@@ -92,7 +92,7 @@ $page_body = '<p>';
 if (!empty($bill['committee_name']))
 {
 	$page_body .= 'This vote on <a href="/bill/'.$year.'/'.$bill['number'].'/">'.strtoupper($bill['number']).'</a>
-	was held in the <a href="/committee/'.$vote['chamber'].'/'.$bill['committee_shortname'].'/">'.ucfirst($vote['chamber']).' 
+	was held in the <a href="/committee/'.$vote['chamber'].'/'.$bill['committee_shortname'].'/">'.ucfirst($vote['chamber']).'
 	'.$bill['committee_name'].'</a> committee.  ';
 }
 else
@@ -106,7 +106,7 @@ $page_body .= 'This vote '.$vote['outcome'].'ed '.$vote['tally'].'.</p>';
  * Get detailed information about the vote -- who voted how.
  */
 $legislators = $vote_info->get_detailed($lis_id, $bill['session_id']);
-	
+
 # Step through the legislators data to establish which party voted which way, building up
 # an array of data.
 foreach ($legislators as $legislator)
@@ -175,10 +175,10 @@ if (count($graph) > 1)
 	$html_head .= '
 			data.addRows('.count($graph).');';
 	$i=0;
-		
+
 	foreach($graph as $outcome => $tally)
 	{
-		
+
 		if ($outcome == 'y')
 		{
 			$outcome = 'Voted Yes';
@@ -195,11 +195,11 @@ if (count($graph) > 1)
 		{
 			$outcome = 'Abstained';
 		}
-		
+
 		$html_head .= '
 				data.setValue('.$i.', 0, "'.$outcome.'");';
 		$j=1;
-		
+
 		foreach ($tally as $party => $count)
 		{
 			$html_head .= '
@@ -211,7 +211,7 @@ if (count($graph) > 1)
 	$html_head .= '
 			var chart = new google.visualization.ColumnChart(document.getElementById("chart"));
 			chart.draw(data, {isStacked: true, width: 400, height: 240,';
-		
+
 	# Specify the three colors that will color our graph, that correlate (alphabetically)
 	# to Democrats, independents, and Republicans.
 	if (count($parties) == 3)
@@ -224,7 +224,7 @@ if (count($graph) > 1)
 	else
 	{
 		$html_head .= '
-			colors:["blue", "red"]});';	
+			colors:["blue", "red"]});';
 	}
 	$html_head .= '
 		}
@@ -265,7 +265,7 @@ foreach ($legislators as $legislator)
 	$legislator['patron_started'] = $legislator['started'];
 	$legislator['patron_address'] = $legislator['address'];
 	$legislator['patron_shortname'] = $legislator['shortname'];
-	
+
 	$page_body .= '
 			<li><a href="/legislator/'.$legislator['shortname'].'/" class="balloon">'.pivot($legislator['name']).
 			 balloon($legislator, 'legislator').' '.$legislator['patron_suffix'].'</a></li>';
@@ -276,11 +276,11 @@ $page_body .= '
 
 
 $page_sidebar = <<<EOD
-	
+
 	<div class="box">
 		<h3>Explanation</h3>
 		<p>At left is the tally of who voted how on this bill.</p>
-		
+
 		<p>It’s important to understand that most bills are voted on multiple times, and the
 		vote is not necessarily simply whether or not the bill should pass.  Be sure to look at
 		the bill’s history to determine what, exactly, was being voted on, and at what point in
@@ -306,7 +306,7 @@ if (mysql_num_rows($result) > 0)
 	$bill['status_history'] = '';
 	while ($status = mysql_fetch_array($result))
 	{
-		
+
 		# Provide a link to view this vote, but only if it's not the vote that we're currently
 		# viewing.
 		if (!empty($status['lis_vote_id']) && ($status['vote_count'] > 0) && ($status['lis_vote_id'] != $lis_id))
@@ -317,12 +317,12 @@ if (mysql_num_rows($result) > 0)
 		$bill['status_history'] = '<li'.($status['lis_vote_id'] == $lis_id ? ' class="highlight"' : '').'>'.$status['date'].' '.$status['status'].'</li>'.$bill['status_history'];
 	}
 	$page_sidebar .= '
-		
+
 		<div class="box">
 			<h3>Progress History</h3>
 			'.$bill['status_history'].'
 		</div>';
-	
+
 }
 
 # OUTPUT THE PAGE

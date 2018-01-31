@@ -2,10 +2,10 @@
 
 ###
 # Minutes
-# 
+#
 # PURPOSE
 # Displays the minutes of a given chamber's meeting.
-# 
+#
 ###
 
 # INCLUDES
@@ -46,7 +46,7 @@ elseif (mysql_num_rows($result) > 0)
 
 	$minutes = mysql_fetch_array($result);
 	$minutes = stripslashes($minutes['text']);
-	
+
 	# Turn every bill number into a link.
 	// Unfortunately, this doesn't actually work for every bill number. Lists are often
 	// presented as "HRs 1 and 2," for instance, and this can't pick those up. Also, this
@@ -54,7 +54,7 @@ elseif (mysql_num_rows($result) > 0)
 	// lacks a mechanism by which to make changes mid-replacement.
 	// CORRECTION TO ABOVE: It can make changes -- use preg_replace_callback();
 	$minutes = preg_replace('/(HR|HB|SJR|SB) ([0-9A-Z]+)/', '<a href="/bill/'.$_REQUEST['year'].'/$1$2/">$1 $2</a>', $minutes);
-	
+
 	# Retrieve a single video, if it's available.
 	$sql = 'SELECT id, author_name, title, html, path, description, license, length, sponsor,
 			video_index_cache AS index_cache, transcript,
@@ -71,7 +71,7 @@ elseif (mysql_num_rows($result) > 0)
 		$video = mysql_fetch_array($result);
 		$video = array_map('stripslashes', $video);
 	}
-	
+
 	# Create a new video object.
 	$video2 = new Video();
 	$video2->id = $video['id'];
@@ -127,7 +127,7 @@ elseif (mysql_num_rows($result) > 0)
 		$video['transcript'] .= '</dl>';
 
 	}
-	
+
 	# If we have a path, use that.
 	if ( substr($video['path'], -3) == 'mp4' )
 	{
@@ -142,7 +142,7 @@ elseif (mysql_num_rows($result) > 0)
 					})
 				});
 			</script>';
-		
+
 		$video['html'] = '
 		<style>
 			#player, video {
@@ -155,10 +155,10 @@ elseif (mysql_num_rows($result) > 0)
 		</div>';
 	}
 
-	
+
 	# PAGE SIDEBAR
 	$page_sidebar = '
-		
+
 		<div class="box">
 			<h3>Explanation</h3>
 			<p>These are the official minutes of the '.ucfirst($chamber).', as recorded by the
@@ -172,7 +172,7 @@ elseif (mysql_num_rows($result) > 0)
 			chamber for the same date. It’s is in the public domain, and may be freely
 			copied, edited, or incorporated into other works.</p>';
 	}
-	
+
 	if (!empty($video['sponsor']))
 	{
 		if (strpos($video['sponsor'], 'img src') !== false)
@@ -181,7 +181,7 @@ elseif (mysql_num_rows($result) > 0)
 			<p>This video appears courtesy of:</p>
 			'.$video['sponsor'].'
 			<p>They purchased this video from the General Assembly for Richmond Sunlight, so that
-			it may be freely available to everybody.</p>';	
+			it may be freely available to everybody.</p>';
 		}
 		else
 		{
@@ -191,10 +191,10 @@ elseif (mysql_num_rows($result) > 0)
 			to everybody.</p>';
 		}
 	}
-	
+
 	$page_sidebar .= '
 		</div>';
-	
+
 	# Get a list of tags for this video.
 	$tags = $video2->file_tags();
 	if ($tags !== false)
@@ -208,7 +208,7 @@ elseif (mysql_num_rows($result) > 0)
 				</div>
 			</div>';
 	}
-	
+
 	# If we can't gather time-based tags, then display topic-based tags.
 	else
 	{
@@ -229,13 +229,13 @@ elseif (mysql_num_rows($result) > 0)
 				$tag = array_map('stripslashes', $tag);
 				$tags[$tag{tag}] = $tag['count'];
 			}
-			
+
 			# Sort the tags in reverse order by key (their count), shave off the top 30, and then
 			# resort alphabetically.
 			arsort($tags);
 			$tags = array_slice($tags, 0, 30, true);
 			ksort($tags);
-			
+
 			$page_sidebar .= '
 				<div class="box">
 					<h3>What the ' . ucfirst($chamber) . ' Dealt with Today</h3>
@@ -246,7 +246,7 @@ elseif (mysql_num_rows($result) > 0)
 				</div>';
 		}
 	}
-	
+
 	#  Create the tabs in the header.
 	$page_body = '
 		<div id="sources" class="tabs">
@@ -258,7 +258,7 @@ elseif (mysql_num_rows($result) > 0)
 	if (!empty($video['transcript']))
 	{
 		$page_body .= '<li><a href="#transcript">Transcript</a><li>';
-	}	
+	}
 	if (!empty($minutes))
 	{
 		$page_body .= '<li><a href="#minutes">Minutes</a><li>';
@@ -273,28 +273,28 @@ elseif (mysql_num_rows($result) > 0)
 				<div class="video" style="width: 100%;">
 					'.$video['html'].'
 				</div>';
-	
+
 		$video2->fuzz = 5;
-		
+
 		$video2->clip_type = 'bills';
 		$video2->get_clips();
 		if (isset($video2->clips))
 		{
 			$bill_clips = $video2->clips;
 		}
-		
+
 		$video2->clip_type = 'legislators';
 		$video2->index_clips();
 		if (isset($video2->clips))
 		{
 			$legislator_clips = $video2->clips;
 		}
-		
+
 		if (isset($video2->path))
 		{
 			$page_body .= '<p><a href="'.$video2->path.'">Download this Video</a></p>';
 		}
-		
+
 		if ( isset($video['html']) &&
 			( count($bill_clips) > 0 || count($legislator_clips) > 0 || count($video2->screenshots) > 0 )
 			)
@@ -311,19 +311,19 @@ elseif (mysql_num_rows($result) > 0)
 			{
 				$page_body .= '<li><a href="#legislator">By Legislator</a></li>';
 			}
-			
+
 			$page_body .= '<li><a href="#time">By Time</a></li>
 				</ul>
-				
+
 				<div id="bill">';
-			
+
 			foreach ($bill_clips as $clip)
 			{
 				$page_body .= '<div class="marker" data-time="'.$clip->start.'" style="background-image: url('.$clip->screenshot.')">
 					<span>'.strtoupper($clip->bill_number).'—'.seconds_to_time($clip->duration).'</span></div>';
 			}
 			$page_body .= '</div>
-				
+
 				<div id="legislator">';
 			foreach ($legislator_clips as $clip)
 			{
@@ -331,7 +331,7 @@ elseif (mysql_num_rows($result) > 0)
 				<span>'.$clip->legislator_name.'—'.substr(seconds_to_time($clip->duration), 3).'</span></div>';
 			}
 			$page_body .= '</div>';
-			
+
 			$video2->screenshots();
 			$page_body .= '<div id="time">';
 			foreach ($video2->screenshots as $screenshot)
@@ -347,14 +347,14 @@ elseif (mysql_num_rows($result) > 0)
 		$page_body .= '</div>';
 
 	}
-	
+
 	# Show the minutes.
 	$page_body .= '
 		<div id="minutes">
 			<h2>Minutes</h2>'
 			. nl2p($minutes) . '
 		</div>';
-	
+
 	# Show the transcript.
 	if ( !empty($video['transcript']) )
 	{
@@ -362,13 +362,13 @@ elseif (mysql_num_rows($result) > 0)
 		$page_body .= '
 
 			<div id="transcript">
-			
+
 			<h2>Transcript</h2>
 			<p><em>What follows is a transcript of this day’s session that was created as
 			closed-captioning text, written in real time during the session. We have made
 			an effort to automatically clean up the text, but it is far from perfect.</em></p>';
-		
-		
+
+
 		$page_body .= $video['transcript'];
 
 		# Close the transcript DIV.

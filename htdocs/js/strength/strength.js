@@ -77,7 +77,7 @@
                      thismeter.removeClass();
                    thismeter.addClass('strong').html('strong');
                 }
-                
+
                 if (total == -1) { thismeter.removeClass().html('Strength'); }
             }
 
@@ -93,12 +93,12 @@
             thisid = this.$elem.attr('id');
 
             this.$elem.addClass(this.options.strengthClass).attr('data-password',thisid).after('<input style="display:none" class="'+this.options.strengthClass+'" data-password="'+thisid+'" type="text" name="" value=""><a data-password-button="'+thisid+'" href="" class="'+this.options.strengthButtonClass+'">'+this.options.strengthButtonText+'</a><div class="'+this.options.strengthMeterClass+'"><div data-meter="'+thisid+'">Strength</div></div>');
-             
+
             this.$elem.bind('keyup keydown', function(event) {
                 thisval = $('#'+thisid).val();
                 $('input[type="text"][data-password="'+thisid+'"]').val(thisval);
                 check_strength(thisval,thisid);
-                
+
             });
 
              $('input[type="text"][data-password="'+thisid+'"]').bind('keyup keydown', function(event) {
@@ -106,7 +106,7 @@
                 console.log(thisval);
                 $('input[type="password"][data-password="'+thisid+'"]').val(thisval);
                 check_strength(thisval,thisid);
-                
+
             });
 
 
@@ -130,16 +130,16 @@
                     $('input[type="password"][data-password="'+thisid+'"]').hide();
                     $('a[data-password-button="'+thisid+'"]').addClass(thisclass).html(strengthButtonTextToggle);
                     isShown = true;
-   
+
                 }
 
 
-               
+
             });
 
 
-         
-            
+
+
         },
 
         yourOtherFunction: function(el, options) {
@@ -158,5 +158,3 @@
     };
 
 })( jQuery, window, document );
-
-

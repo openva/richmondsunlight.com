@@ -2,7 +2,7 @@
 
 ###
 # Legislative Schedule
-# 
+#
 # PURPOSE
 # Mashes up various sources of scheduling data to provide an over view of the legislative
 # calendar over the coming days.
@@ -106,14 +106,14 @@ if (mysql_num_rows($result) < 1)
 }
 else
 {
-	
+
 	# Step through each scheduled meeting.
 	while ($meeting = mysql_fetch_array($result))
 	{
-	
+
 		# Clean up the data.
 		$meeting = array_map('stripslashes', $meeting);
-		
+
 		# Select a listing of the bills being heard in this committee on this date.
 		// We use SELECT DISTINCT to work around a bug that exists as of this writing (January
 		// 2008) in the docket retrieval code that's inserting many duplicates of each bill.
@@ -137,15 +137,15 @@ else
 		{
 			# Initialize the array.
 			$bills = array();
-			
+
 			while ($bill = mysql_fetch_array($result2))
-			{	
+			{
 				# Save the bills into an array to use later.
 				$bill = array_map('stripslashes', $bill);
 				$bills[] = $bill;
 			}
 		}
-		
+
 		# If no bills are found, we want to unset the variable, if it was used last time, to
 		# avoid listing bills from a prior-listed committee in this one.
 		else
@@ -155,7 +155,7 @@ else
 				unset($bills);
 			}
 		}
-		
+
 		# If this a subcommittee, rather than a committee, shuffle around the names of the array
 		# elements.
 		if (!empty($meeting['parent_committee']))
@@ -163,7 +163,7 @@ else
 			$meeting['subcommittee'] = $meeting['committee'];
 			$meeting['committee'] = $meeting['parent_committee'];
 		}
-		
+
 		$page_body .= '<table id="'.$meeting['chamber'].'-'.$meeting['shortname'].'" '
 				.'class="bill-listing sortable">
 				<caption>';
@@ -213,7 +213,7 @@ else
 # PAGE SIDEBAR
 $sql = 'SELECT DISTINCT DATE_FORMAT(date, "%m/%d/%Y") AS date_formatted, date
 		FROM meetings
-		WHERE date >= now() 
+		WHERE date >= now()
 		ORDER BY date ASC
 		LIMIT 10';
 $result = mysql_query($sql);

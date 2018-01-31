@@ -12,6 +12,5 @@ class HTMLPurifier_AttrTransform_Border extends HTMLPurifier_AttrTransform {
         $this->prependCSS($attr, "border:{$border_width}px solid;");
         return $attr;
     }
-    
-}
 
+}

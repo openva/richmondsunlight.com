@@ -2,7 +2,7 @@
 
 ###
 # Reset Password
-# 
+#
 # PURPOSE
 # Allows a user to reset his password.
 #
@@ -52,7 +52,7 @@ if (!empty($_POST['email']))
 {
 	$email = $_POST['email'];
 	if (!validate_email($email)) $error = 'That’s not a valid e-mail address.';
-	
+
 	# If there are no errors so far, check the database.
 	if (!isset($error))
 	{
@@ -62,7 +62,7 @@ if (!empty($_POST['email']))
 				WHERE private_hash IS NOT NULL AND password IS NOT NULL
 				AND email = "'.mysql_real_escape_string($email).'"';
 		$result = mysql_query($sql);
-		
+
 		# If we find nothing.
 		if (mysql_num_rows($result) == 0)
 		{
@@ -72,9 +72,9 @@ if (!empty($_POST['email']))
 		{
 
 			$user_data = mysql_fetch_array($result);
-			
+
 			$user_data = array_map('stripslashes', $user_data);
-			
+
 			# Assemble the e-mail body.
 			$email_body = $user_data['name'] . ",\n\n" .
 				'As you requested, here is a link to a page where you can reset your password '.
@@ -83,7 +83,7 @@ if (!empty($_POST['email']))
 				'If you didn\'t request that your password be reset, don\'t worry -- you can just ' .
 				'ignore this e-mail. No harm done.' . "\n\n" .
 				"Best wishes,\nRichmond Sunlight";
-			
+
 			# Send the e-mail using PHP Mailer.
 			$mail = new PHPMailer();
 			$mail->From = 'do_not_reply@richmondsunlight.com';
@@ -93,16 +93,16 @@ if (!empty($_POST['email']))
 			$mail->Subject = 'Password Reset';
 			$mail->IsHTML(false);
 			$mail->Send();
-			
+
 			$page_body = '
 				<div id="messages" class="updated">
 					<p>An e-mail has been sent to you at that address. Check your e-mail and click
 					on the link provided and you’ll be in business.</p>
 				</div>';
-			
+
 		}
 	}
-	
+
 	if (isset($error))
 	{
 		$page_body = '

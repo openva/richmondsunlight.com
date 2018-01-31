@@ -2,7 +2,7 @@
 
 ###
 # Account Profile
-# 
+#
 # PURPOSE
 # Edit account information.
 #
@@ -121,7 +121,7 @@ function display_form($form_data)
 			</fieldset>
 		</form>
 	';
-	
+
 	return $returned_data;
 }
 
@@ -129,7 +129,7 @@ if (isset($_POST['submit']))
 {
 	$form_data = array_map('stripslashes', $_POST['form_data']);
 	$form_data = array_map('trim', $_POST['form_data']);
-	
+
 	# Alert users to mistakes.
 	if (empty($form_data['email'])) $errors[] = 'your e-mail address';
 	elseif (!validate_email($form_data['email'])) $errors[] = 'a valid e-mail address';
@@ -138,7 +138,7 @@ if (isset($_POST['submit']))
 		if ($form_data['password'] != $form_data['password_2']) $errors[] = 'the <em>same</em> password twice';
 		elseif (strlen($form_data['password']) < 7) $errors[] = 'a password that\'s at least seven characters long';
 	}
-	
+
 	# If we find any mistakes, stop the account update process and alert the user.
 	if (isset($errors))
 	{
@@ -153,16 +153,16 @@ if (isset($_POST['submit']))
 	}
 	else
 	{
-		
+
 		# Clean up the data to be inserted into the database.
 		$form_data = array_map('mysql_real_escape_string', $_POST['form_data']);
-		
+
 		# A blank mailing list variable is a "no."
 		if (empty($form_data['mailing_list'])) $form_data['mailing_list'] = 'n';
-		
+
 		# MD5 the password.
 		if (!empty($form_data['password'])) $form_data['password'] = md5($form_data['password']);
-		
+
 		# Assembly the SQL string.
 		$sql = 'UPDATE users
 				SET name="'.$form_data['name'].'", email="'.$form_data['email'].'"';
@@ -185,17 +185,17 @@ if (isset($_POST['submit']))
 				SET organization='.(empty($form_data['organization']) ? 'NULL' : '"'.$form_data['organization'].'"').'
 				WHERE user_id='.$user['id'];
 		$result = mysql_query($sql);
-		
+
 		header('Location: http://www.richmondsunlight.com/account/?updated');
 		exit();
 	}
-	
+
 }
 
 
 if (!isset($_POST['submit']))
 {
-	
+
 	$page_body .= '
 	<div class="tabs">
 	<ul>
@@ -203,9 +203,9 @@ if (!isset($_POST['submit']))
 		<li><a href="#stats">Statistics</a></li>
 		<li><a href="#comments">Comments</a></li>
 	</ul>
-	
+
 	<div id="settings">';
-	
+
 	if (isset($_GET['updated']))
 	{
 		$page_body .= '
@@ -223,8 +223,8 @@ if (!isset($_POST['submit']))
 		$page_body .= '
 			<p>You may change any of your account settings here.</p>';
 	}
-	
-	
+
+
 	# Get all of the user's data.
 	$sql = 'SELECT users.id, users.name, users.email, users.url, users.zip, users.mailing_list,
 			dashboard_user_data.organization
@@ -237,17 +237,17 @@ if (!isset($_POST['submit']))
 		die('No user data found.');
 	}
 	$user_data = mysql_fetch_array($result);
-	
+
 	$user_data = array_map('stripslashes', $user_data);
-	
+
 	# Display the account editing form.
 	$page_body .= @display_form($user_data);
-	
+
 	$page_body .= '
 		</div>
-		
+
 		<div id="stats">';
-	
+
 	$user_data = new User();
 	$stats = $user_data->tagging_stats();
 	if ($stats !== false)
@@ -265,7 +265,7 @@ if (!isset($_POST['submit']))
 			<p>You have provided '.number_format($stats->tags).' tags for '
 			.number_format($stats->bills).' bills. Thank you!</p>';
 	}
-	
+
 	$page_body .= '
 		</div>
 		<div id="comments">';
@@ -288,7 +288,7 @@ if (!isset($_POST['submit']))
 	$page_body .= '
 		</div>
 	</div>';
-	
+
 }
 
 # OUTPUT THE PAGE

@@ -1,17 +1,17 @@
 /* project: internet services template
    author: luka cvrk (www.solucija.com) */
 
-   
+
 /* default styles
    -------------- */
-   
-body { 
-	padding: 0; 
-	margin: 0; 
-	font: 0.75em Tahoma, sans-serif; 
+
+body {
+	padding: 0;
+	margin: 0;
+	font: 0.75em Tahoma, sans-serif;
 	line-height: 1.5em;
-	background: #fff; 
-	color: #000; 
+	background: #fff;
+	color: #000;
 }
 
 a {	color: #0095eb;	background: inherit;}
@@ -32,6 +32,6 @@ ul { margin: 0; padding: 1.25em; }
 /* layout
    ------ */
 
-.content { 
-	padding: 10px; 
+.content {
+	padding: 10px;
 }

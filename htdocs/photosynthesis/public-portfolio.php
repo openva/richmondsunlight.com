@@ -2,7 +2,7 @@
 
 ###
 # Photosynthesis Public Portfolio Listing
-# 
+#
 # PURPOSE
 # Lists the contents of a single public portfolio.
 #
@@ -48,7 +48,7 @@ if (@logged_in())
 
 # Start displaying the main page.
 $page_body = '';
-	
+
 # Get this portfolio's basic data.
 $sql = 'SELECT dashboard_portfolios.id, dashboard_portfolios.hash, dashboard_portfolios.name,
 		dashboard_portfolios.notes, users.name AS user_name, dashboard_user_data.organization,
@@ -72,13 +72,13 @@ else
 {
 	$portfolio = mysql_fetch_array($result);
 	$portfolio = array_map('stripslashes', $portfolio);
-	
+
 	# Increment the view count.
 	$sql = 'UPDATE dashboard_portfolios
 			SET view_count = view_count + 1
 			WHERE id = '.$portfolio['id'];
 	mysql_query($sql);
-	
+
 	# Make the user closer to anonymous.
 	$tmp = explode(' ', $portfolio['user_name']);
 	if (count($tmp) > 1)
@@ -89,7 +89,7 @@ else
 	{
 		$portfolio['user_name'] = $tmp[0];
 	}
-	
+
 	# Set the page title to the user's name.
 	if (!empty($portfolio['organization']))
 	{
@@ -100,13 +100,13 @@ else
 		$page_title .= ' &raquo; '.$portfolio['user_name'];
 	}
 	$page_title .= '’s Portfolio';
-	
+
 	# Establish a sidebar.
 	$page_sidebar = '
 		<h3>About This Portfolio</h3>
 		<div class="box">
 			<p>This is a collection of bills being tracked by ';
-			
+
 	# Make the user's name the link, unless there's an organization, in which case it should
 	# be on that.
 	if (empty($portfolio['url']))
@@ -130,15 +130,15 @@ else
 		$page_sidebar .= ' for '.$portfolio['organization'];
 	}
 	$page_sidebar .= ' using the Photosynthesis bill-tracking tool.</p>
-			
+
 			<p><a href="/photosynthesis/">Create a Photosynthesis account today</a> and
 			keep track of the legislation that interests you!</p>
-			
+
 			<script src="https://connect.facebook.net/en_US/all.js#xfbml=1"></script>
 			<fb:like layout="button_count" show_faces="false" width="100" action="recommend"></fb:like>
-			
+
 		</div>';
-		
+
 	# Display a tag cloud.
 	$sql = 'SELECT COUNT(*) AS count, tags.tag
 			FROM tags
@@ -185,8 +185,8 @@ else
 			</div>
 		</div>';
 	}
-	
-	
+
+
 	# List all of the bills in this portfolio.
 	$sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber,
 			bills.catch_line, bills.summary, bills.status, bills.outcome, sessions.year,
@@ -213,7 +213,7 @@ else
 	{
 		die('Empty portfolio.');
 	}
-	
+
 	# We've found bills in this portfolio.
 	else
 	{
@@ -226,14 +226,14 @@ else
 		{
 			$page_body .= '<p><em>'.$bill_count.' bills are being tracked.</em></p>';
 		}
-		
+
 		while ($bill = mysql_fetch_array($result))
 		{
 			$bill = array_map('stripslashes', $bill);
-			
+
 			# Remove the bit of the bill summary that just duplicates the catch line.
 			$bill['summary'] = str_replace($bill['catch_line'], '', $bill['summary']);
-			
+
 			# Optionally establish a modifying status that will affect the look of the whole
 			# bill in the portfolio.
 			if ($bill['outcome'] == 'dead')
@@ -244,7 +244,7 @@ else
 			{
 				$bill['status_class'] = '';
 			}
-			
+
 			$page_body .= '
 			<div class="bill'.$bill['status_class'].'">
 				<h4><a href="/bill/'.$bill['year'].'/'.$bill['number'].'/">'.$bill['catch_line']
@@ -252,7 +252,7 @@ else
 				<p>Patron: <a href="/legislator/'.$bill['patron_shortname'].'/">'
 					.$bill['patron'].'</a><br />
 				Status: '.$bill['status'].'</p>';
-			
+
 			# If the portfolio creator has provided notes on this bill.
 			if (!empty($bill['notes']))
 			{
@@ -281,7 +281,7 @@ else
 				.'/#comments">&raquo;</a></p>
 			</div>';
 		}
-		
+
 		$page_body .= '</div>';
 	}
 }

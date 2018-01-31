@@ -14,7 +14,7 @@ function ie_getElementsByTagName(str) {
 if(document.all) document.getElementsByTagName = ie_getElementsByTagName;
 
 var Fat = {
-	make_hex : function (r,g,b) 
+	make_hex : function (r,g,b)
 	{
 		r = r.toString(16); if (r.length == 1) r = '0' + r;
 		g = g.toString(16); if (g.length == 1) g = '0' + g;
@@ -24,7 +24,7 @@ var Fat = {
 	fade_all : function ()
 	{
 		var a = document.getElementsByTagName("*");
-		for (var i = 0; i < a.length; i++) 
+		for (var i = 0; i < a.length; i++)
 		{
 			var o = a[i];
 			var r = /fade-?(\w{3,6})?/.exec(o.className);
@@ -37,30 +37,30 @@ var Fat = {
 			o.className = o.className.replace(/fade/i, "");
 		}
 	},
-	fade_element : function (id, fps, duration, from, to) 
+	fade_element : function (id, fps, duration, from, to)
 	{
 		if (!fps) fps = 30;
 		if (!duration) duration = 3000;
 		if (!from || from=="#") from = "#FFFF33";
 		if (!to) to = this.get_bgcolor(id);
-		
+
 
 
 		var frames = Math.round(fps * (duration / 1000));
 		var interval = duration / frames;
 		var delay = interval;
 		var frame = 0;
-		
+
 		if (from.length < 7) from = from.replace(/#(.)(.)(.)/g, "#$1$1$2$2$3$3");
 		if (to.length < 7) to = to.replace(/#(.)(.)(.)/g, "#$1$1$2$2$3$3");
-		
+
 		var rf = parseInt(from.substr(1,2),16);
 		var gf = parseInt(from.substr(3,2),16);
 		var bf = parseInt(from.substr(5,2),16);
 		var rt = parseInt(to.substr(1,2),16);
 		var gt = parseInt(to.substr(3,2),16);
 		var bt = parseInt(to.substr(5,2),16);
-		
+
 		var r,g,b,h;
 		while (frame < frames)
 		{
@@ -68,11 +68,11 @@ var Fat = {
 			g = Math.floor(gf * ((frames-frame)/frames) + gt * (frame/frames));
 			b = Math.floor(bf * ((frames-frame)/frames) + bt * (frame/frames));
 			h = this.make_hex(r,g,b);
-		
+
 			setTimeout("Fat.set_bgcolor('"+id+"','"+h+"')", delay);
 
 			frame++;
-			delay = interval * frame; 
+			delay = interval * frame;
 		}
 		setTimeout("Fat.set_bgcolor('"+id+"','"+to+"')", delay);
 	},
