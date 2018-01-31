@@ -1,0 +1,11 @@
+-   repo: git://github.com/pre-commit/pre-commit-hooks
+    sha: v1.2.0
+    hooks:
+    -   id: check-executables-have-shebangs
+    -   id: check-json
+    -   id: check-merge-conflict
+    -   id: check-symlinks
+    -   id: check-yaml
+    -   id: detect-aws-credentials
+    -   id: end-of-file-fixer
+    -   id: trailing-whitespace
