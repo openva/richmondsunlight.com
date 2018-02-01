@@ -11,9 +11,9 @@
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('../includes/functions.inc.php');
-include_once('../includes/settings.inc.php');
-include_once('../includes/photosynthesis.inc.php');
+include_once '../includes/functions.inc.php';
+include_once '../includes/settings.inc.php';
+include_once '../includes/photosynthesis.inc.php';
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -31,15 +31,15 @@ $html_head = '<link rel="stylesheet" href="/css/photosynthesis.css" type="text/c
 # CUSTOM PAGE FUNCTIONS
 function notes_form($notes)
 {
-	$returned_data =
-	'<form method="post" action="/photosynthesis/notes/'.$GLOBALS['portfolio']['hash'].'-'.$GLOBALS['id'].'/">
+    $returned_data =
+    '<form method="post" action="/photosynthesis/notes/'.$GLOBALS['portfolio']['hash'].'-'.$GLOBALS['id'].'/">
 		<textarea rows="10" cols="80" name="notes">'.$notes['notes'].'</textarea><br />
 		<small>(Limited HTML is OK: &lt;a&gt;, &lt;em&gt;, &lt;strong&gt;, &lt;blockquote&gt;,
 			&lt;embed&gt;, &lt;ol&gt;, &lt;ul&gt;, &lt;li&gt;)</small><br />
 		<input type="submit" name="submit" value="Save" />
 	</form>';
 
-	return $returned_data;
+    return $returned_data;
 }
 
 # INITIALIZE SESSION
@@ -51,8 +51,8 @@ if ($user === FALSE) exit();
 
 if (!isset($_GET['id']))
 {
-	header('Location: '.$_SERVER['HTTP_REFERER']);
-	exit;
+    header('Location: '.$_SERVER['HTTP_REFERER']);
+    exit;
 }
 
 # Clean up and localize the portfolio and bill data.
@@ -63,38 +63,38 @@ $id = mysql_real_escape_string($_GET['id']);
 if (isset($_POST['submit']))
 {
 
-	# Strip out all tags other than the following.
-	$notes = strip_tags($_POST['notes'], '<a><em><strong><i><b><s><blockquote><embed><ol><ul><li>');
-	$notes = trim($notes);
-	$notes = mysql_real_escape_string($notes);
+    # Strip out all tags other than the following.
+    $notes = strip_tags($_POST['notes'], '<a><em><strong><i><b><s><blockquote><embed><ol><ul><li>');
+    $notes = trim($notes);
+    $notes = mysql_real_escape_string($notes);
 
-	$sql = 'UPDATE dashboard_bills
+    $sql = 'UPDATE dashboard_bills
 			SET notes = '.(empty($notes) ? 'NULL' : '"'.$notes.'"').'
 			WHERE id=' . $id . ' AND user_id = '.$user['id'];
-	$result = mysql_query($sql);
-	if (!$result)
-	{
-		$message = '<div id="messages" class="errors">Sorry: That note could not be saved.</div>';
-	}
-	else
-	{
+    $result = mysql_query($sql);
+    if (!$result)
+    {
+        $message = '<div id="messages" class="errors">Sorry: That note could not be saved.</div>';
+    }
+    else
+    {
 
-		/*
-		 * Clear the Memcached cache of comments on this bill, since Photosynthesis comments are
-		 * among them.
-		 */
-		$sql = 'SELECT bill_id AS id
+        /*
+         * Clear the Memcached cache of comments on this bill, since Photosynthesis comments are
+         * among them.
+         */
+        $sql = 'SELECT bill_id AS id
 				FROM dashboard_bills
 				WHERE id=' . $id . ' AND user_id = ' . $user['id'];
-		$result = mysql_query($sql);
-		$bill = mysql_fetch_array($result);
-		$mc = new Memcached();
-		$mc->addServer("127.0.0.1", 11211);
-		$comments = $mc->delete('comments-' . $bill['id']);
+        $result = mysql_query($sql);
+        $bill = mysql_fetch_array($result);
+        $mc = new Memcached();
+        $mc->addServer("127.0.0.1", 11211);
+        $comments = $mc->delete('comments-' . $bill['id']);
 
-		header('Location: https://www.richmondsunlight.com/photosynthesis/#' . $portfolio['hash']);
-		exit();
-	}
+        header('Location: https://www.richmondsunlight.com/photosynthesis/#' . $portfolio['hash']);
+        exit();
+    }
 
 }
 
@@ -107,8 +107,8 @@ $sql = 'SELECT dashboard_bills.id, dashboard_bills.notes, bills.number, bills.ca
 $result = mysql_query($sql);
 if (mysql_num_rows($result) == 0)
 {
-	header('Location: '.$_SERVER['HTTP_REFERER']);
-	exit;
+    header('Location: '.$_SERVER['HTTP_REFERER']);
+    exit;
 }
 $notes = mysql_fetch_array($result);
 $notes = array_map('stripslashes', $notes);

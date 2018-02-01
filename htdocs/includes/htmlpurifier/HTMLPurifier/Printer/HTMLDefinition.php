@@ -60,7 +60,7 @@ class HTMLPurifier_Printer_HTMLDefinition extends HTMLPurifier_Printer
 
         $ret .= $this->start('tr');
             $ret .= $this->element('th', 'Global attributes');
-            $ret .= $this->element('td', $this->listifyAttr($def->info_global_attr),0,0);
+            $ret .= $this->element('td', $this->listifyAttr($def->info_global_attr), 0, 0);
         $ret .= $this->end('tr');
 
         $ret .= $this->start('tr');
@@ -150,7 +150,7 @@ class HTMLPurifier_Printer_HTMLDefinition extends HTMLPurifier_Printer
             }
             $ret .= $this->start('tr');
                 $ret .= $this->element('th', 'Allowed attributes');
-                $ret .= $this->element('td',$this->listifyAttr($def->attr), array(), 0);
+                $ret .= $this->element('td', $this->listifyAttr($def->attr), array(), 0);
             $ret .= $this->end('tr');
 
             if (!empty($def->required_attr)) {
@@ -191,14 +191,22 @@ class HTMLPurifier_Printer_HTMLDefinition extends HTMLPurifier_Printer
 
             if ($def->type == 'chameleon') {
 
-                $ret .= $this->element('td',
+                $ret .= $this->element(
+                    'td',
                     '<em>Block</em>: ' .
-                    $this->escape($this->listifyTagLookup($def->block->elements)),0,0);
+                    $this->escape($this->listifyTagLookup($def->block->elements)),
+                    0,
+                    0
+                );
                 $ret .= $this->end('tr');
                 $ret .= $this->start('tr');
-                $ret .= $this->element('td',
+                $ret .= $this->element(
+                    'td',
                     '<em>Inline</em>: ' .
-                    $this->escape($this->listifyTagLookup($def->inline->elements)),0,0);
+                    $this->escape($this->listifyTagLookup($def->inline->elements)),
+                    0,
+                    0
+                );
 
             } elseif ($def->type == 'custom') {
 
@@ -206,9 +214,13 @@ class HTMLPurifier_Printer_HTMLDefinition extends HTMLPurifier_Printer
                     $def->dtd_regex);
 
             } else {
-                $ret .= $this->element('td',
+                $ret .= $this->element(
+                    'td',
                     '<em>'.ucfirst($def->type).'</em>: ' .
-                    $this->escape($this->listifyTagLookup($elements)),0,0);
+                    $this->escape($this->listifyTagLookup($elements)),
+                    0,
+                    0
+                );
             }
         $ret .= $this->end('tr');
         return $ret;

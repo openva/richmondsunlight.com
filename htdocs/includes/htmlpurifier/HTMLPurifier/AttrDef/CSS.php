@@ -59,7 +59,10 @@ class HTMLPurifier_AttrDef_CSS extends HTMLPurifier_AttrDef
             if (strtolower(trim($value)) !== 'inherit') {
                 // inherit works for everything (but only on the base property)
                 $result = $definition->info[$property]->validate(
-                    $value, $config, $context );
+                    $value,
+                    $config,
+                    $context
+                );
             } else {
                 $result = 'inherit';
             }

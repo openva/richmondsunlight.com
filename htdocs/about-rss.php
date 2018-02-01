@@ -1,32 +1,32 @@
 <?php
 
-	###
-	# About RSS
-	#
-	# PURPOSE
-	# Describes the RSS feeds that are available
-	#
-	# NOTES
-	# None.
-	#
-	# TODO
-	# None.
-	#
-	###
+    ###
+    # About RSS
+    #
+    # PURPOSE
+    # Describes the RSS feeds that are available
+    #
+    # NOTES
+    # None.
+    #
+    # TODO
+    # None.
+    #
+    ###
 
-	# INCLUDES
-	# Include any files or libraries that are necessary for this specific
-	# page to function.
-	include_once('settings.inc.php');
-	include_once('includes/functions.inc.php');
-	include_once('vendor/autoload.php');
+    # INCLUDES
+    # Include any files or libraries that are necessary for this specific
+    # page to function.
+    include_once 'settings.inc.php';
+    include_once 'includes/functions.inc.php';
+    include_once 'vendor/autoload.php';
 
-	# PAGE METADATA
-	$page_title = 'About Subscriptions';
-	$site_section = 'about';
+    # PAGE METADATA
+    $page_title = 'About Subscriptions';
+    $site_section = 'about';
 
-	# SIDEBAR CONTENT
-	$page_sidebar = <<<EOD
+    # SIDEBAR CONTENT
+    $page_sidebar = <<<EOD
 
 	<div class="box">
 		<h3>What is “RSS”?</h3>
@@ -56,8 +56,8 @@
 
 EOD;
 
-	# PAGE CONTENT
-	$page_body = <<<EOD
+    # PAGE CONTENT
+    $page_body = <<<EOD
 
 	<p>There are four types of data that can be subscribed to on Richmond Sunlight using an
 	aggregator. Links to activate these subscriptions are embedded within the page—your RSS reader
@@ -95,15 +95,13 @@ EOD;
 
 EOD;
 
-	# OUTPUT THE PAGE
-	/*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
-		'&site_section='.urlencode($site_section));*/
+    # OUTPUT THE PAGE
+    /*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
+        '&site_section='.urlencode($site_section));*/
 
-	$page = new Page;
-	$page->page_title = $page_title;
-	$page->page_body = $page_body;
-	$page->page_sidebar = $page_sidebar;
-	$page->site_section = $site_section;
-	$page->process();
-
-?>
+    $page = new Page;
+    $page->page_title = $page_title;
+    $page->page_body = $page_body;
+    $page->page_sidebar = $page_sidebar;
+    $page->site_section = $site_section;
+    $page->process();

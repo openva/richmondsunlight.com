@@ -6,7 +6,8 @@
 class HTMLPurifier_ConfigSchema_Interchange_Id
 {
 
-    public $namespace, $directive;
+    public $namespace;
+    public $directive;
 
     public function __construct($namespace, $directive) {
         $this->namespace = $namespace;

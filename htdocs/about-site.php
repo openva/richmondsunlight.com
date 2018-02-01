@@ -1,32 +1,32 @@
 <?php
 
-	###
-	# About the Site
-	#
-	# PURPOSE
-	# Basic information about this website.
-	#
-	# NOTES
-	# None.
-	#
-	# TODO
-	# None.
-	#
-	###
+    ###
+    # About the Site
+    #
+    # PURPOSE
+    # Basic information about this website.
+    #
+    # NOTES
+    # None.
+    #
+    # TODO
+    # None.
+    #
+    ###
 
-	# INCLUDES
-	# Include any files or libraries that are necessary for this specific
-	# page to function.
-	include_once('includes/settings.inc.php');
-	include_once('includes/functions.inc.php');
-	include_once('vendor/autoload.php');
+    # INCLUDES
+    # Include any files or libraries that are necessary for this specific
+    # page to function.
+    include_once 'includes/settings.inc.php';
+    include_once 'includes/functions.inc.php';
+    include_once 'vendor/autoload.php';
 
-	# PAGE METADATA
-	$page_title = 'About the Site';
-	$site_section = 'about';
+    # PAGE METADATA
+    $page_title = 'About the Site';
+    $site_section = 'about';
 
-	# PAGE CONTENT
-	$page_body = <<<EOD
+    # PAGE CONTENT
+    $page_body = <<<EOD
 		<h2>Overview</h2>
 		<p>Richmond Sunlight is a non-partisan website that aggregates information about the General
 		Assembly, the lawmaking body that governs the state of Virginia. It is an independent,
@@ -63,7 +63,7 @@
 
 EOD;
 
-	$page_sidebar = <<<EOD
+    $page_sidebar = <<<EOD
 		<div class="box">
 			<h3>Words of Praise</h3>
 
@@ -94,15 +94,13 @@ EOD;
 		</div>
 EOD;
 
-	# OUTPUT THE PAGE
-	/*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
-		'&site_section='.urlencode($site_section));*/
+    # OUTPUT THE PAGE
+    /*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
+        '&site_section='.urlencode($site_section));*/
 
-	$page = new Page;
-	$page->page_title = $page_title;
-	$page->page_body = $page_body;
-	$page->page_sidebar = $page_sidebar;
-	$page->site_section = $site_section;
-	$page->process();
-
-?>
+    $page = new Page;
+    $page->page_title = $page_title;
+    $page->page_body = $page_body;
+    $page->page_sidebar = $page_sidebar;
+    $page->site_section = $site_section;
+    $page->process();

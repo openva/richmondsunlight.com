@@ -3,7 +3,8 @@
 /**
  * Validates ftp (File Transfer Protocol) URIs as defined by generic RFC 1738.
  */
-class HTMLPurifier_URIScheme_ftp extends HTMLPurifier_URIScheme {
+class HTMLPurifier_URIScheme_ftp extends HTMLPurifier_URIScheme
+{
 
     public $default_port = 21;
     public $browsable = true; // usually

@@ -62,7 +62,10 @@ class HTMLPurifier_AttrDef_CSS_Font extends HTMLPurifier_AttrDef
                     foreach ($stage_1 as $validator_name) {
                         if (isset($caught[$validator_name])) continue;
                         $r = $this->info[$validator_name]->validate(
-                                                $bits[$i], $config, $context);
+                                                $bits[$i],
+                            $config,
+                            $context
+                        );
                         if ($r !== false) {
                             $final .= $r . ' ';
                             $caught[$validator_name] = true;
@@ -74,6 +77,7 @@ class HTMLPurifier_AttrDef_CSS_Font extends HTMLPurifier_AttrDef
                     if ($r !== false) break;
 
                 // attempting to catch font-size and perhaps line-height
+                // no break
                 case 1:
                     $found_slash = false;
                     if (strpos($bits[$i], '/') !== false) {
@@ -89,7 +93,10 @@ class HTMLPurifier_AttrDef_CSS_Font extends HTMLPurifier_AttrDef
                         $line_height = false;
                     }
                     $r = $this->info['font-size']->validate(
-                                              $font_size, $config, $context);
+                                              $font_size,
+                        $config,
+                        $context
+                    );
                     if ($r !== false) {
                         $final .= $r;
                         // attempt to catch line-height
@@ -116,7 +123,10 @@ class HTMLPurifier_AttrDef_CSS_Font extends HTMLPurifier_AttrDef
                         if ($found_slash) {
                             $i = $j;
                             $r = $this->info['line-height']->validate(
-                                              $line_height, $config, $context);
+                                              $line_height,
+                                $config,
+                                $context
+                            );
                             if ($r !== false) {
                                 $final .= '/' . $r;
                             }
@@ -132,7 +142,10 @@ class HTMLPurifier_AttrDef_CSS_Font extends HTMLPurifier_AttrDef
                     $font_family =
                         implode(' ', array_slice($bits, $i, $size - $i));
                     $r = $this->info['font-family']->validate(
-                                              $font_family, $config, $context);
+                                              $font_family,
+                        $config,
+                        $context
+                    );
                     if ($r !== false) {
                         $final .= $r . ' ';
                         // processing completed successfully

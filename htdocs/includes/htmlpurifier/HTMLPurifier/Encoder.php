@@ -225,7 +225,7 @@ class HTMLPurifier_Encoder
 
     public static function unichr($code) {
         if($code > 1114111 or $code < 0 or
-          ($code >= 55296 and $code <= 57343) ) {
+          ($code >= 55296 and $code <= 57343)) {
             // bits are set outside the "valid" range as defined
             // by UNICODE 4.1.0
             return '';
@@ -277,7 +277,8 @@ class HTMLPurifier_Encoder
             $str = strtr($str, HTMLPurifier_Encoder::testEncodingSupportsASCII($encoding));
             restore_error_handler();
             return $str;
-        } elseif ($encoding === 'iso-8859-1') {
+        }
+        if ($encoding === 'iso-8859-1') {
             $str = utf8_encode($str);
             restore_error_handler();
             return $str;
@@ -312,7 +313,8 @@ class HTMLPurifier_Encoder
             $str = iconv('utf-8', $encoding . '//IGNORE', $str);
             restore_error_handler();
             return $str;
-        } elseif ($encoding === 'iso-8859-1') {
+        }
+        if ($encoding === 'iso-8859-1') {
             $str = utf8_decode($str);
             restore_error_handler();
             return $str;
@@ -341,22 +343,22 @@ class HTMLPurifier_Encoder
         $result = '';
         $working = 0;
         $len = strlen($str);
-        for( $i = 0; $i < $len; $i++ ) {
-            $bytevalue = ord( $str[$i] );
-            if( $bytevalue <= 0x7F ) { //0xxx xxxx
-                $result .= chr( $bytevalue );
+        for($i = 0; $i < $len; $i++) {
+            $bytevalue = ord($str[$i]);
+            if($bytevalue <= 0x7F) { //0xxx xxxx
+                $result .= chr($bytevalue);
                 $bytesleft = 0;
-            } elseif( $bytevalue <= 0xBF ) { //10xx xxxx
+            } elseif($bytevalue <= 0xBF) { //10xx xxxx
                 $working = $working << 6;
                 $working += ($bytevalue & 0x3F);
                 $bytesleft--;
-                if( $bytesleft <= 0 ) {
+                if($bytesleft <= 0) {
                     $result .= "&#" . $working . ";";
                 }
-            } elseif( $bytevalue <= 0xDF ) { //110x xxxx
+            } elseif($bytevalue <= 0xDF) { //110x xxxx
                 $working = $bytevalue & 0x1F;
                 $bytesleft = 1;
-            } elseif( $bytevalue <= 0xEF ) { //1110 xxxx
+            } elseif($bytevalue <= 0xEF) { //1110 xxxx
                 $working = $bytevalue & 0x0F;
                 $bytesleft = 2;
             } else { //1111 0xxx

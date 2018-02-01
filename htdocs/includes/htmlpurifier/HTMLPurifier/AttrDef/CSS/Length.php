@@ -6,7 +6,8 @@
 class HTMLPurifier_AttrDef_CSS_Length extends HTMLPurifier_AttrDef
 {
 
-    protected $min, $max;
+    protected $min;
+    protected $max;
 
     /**
      * @param HTMLPurifier_Length $max Minimum length, or null for no bound. String is also acceptable.

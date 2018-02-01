@@ -23,7 +23,7 @@ class HTMLPurifier_VarParser
      * Lookup table of allowed types. Mainly for backwards compatibility, but
      * also convenient for transforming string type names to the integer constants.
      */
-    static public $types = array(
+    public static $types = array(
         'string'    => self::STRING,
         'istring'   => self::ISTRING,
         'text'      => self::TEXT,
@@ -41,7 +41,7 @@ class HTMLPurifier_VarParser
      * Lookup table of types that are string, and can have aliases or
      * allowed value lists.
      */
-    static public $stringTypes = array(
+    public static $stringTypes = array(
         self::STRING    => true,
         self::ISTRING   => true,
         self::TEXT      => true,
@@ -139,7 +139,7 @@ class HTMLPurifier_VarParser
         $this->error("Expected type ".HTMLPurifier_VarParser::getTypeName($type).", got $vtype");
     }
 
-    static public function getTypeName($type) {
+    public static function getTypeName($type) {
         static $lookup;
         if (!$lookup) {
             // Lazy load the alternative lookup table

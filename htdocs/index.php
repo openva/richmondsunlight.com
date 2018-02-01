@@ -9,10 +9,10 @@
 ###
 
 # INCLUDES
-include_once('settings.inc.php');
-include_once('functions.inc.php');
-include_once('vendor/autoload.php');
-include_once('magpierss/rss_fetch.inc');
+include_once 'settings.inc.php';
+include_once 'functions.inc.php';
+include_once 'vendor/autoload.php';
+include_once 'magpierss/rss_fetch.inc';
 
 # INITIALIZE SESSION
 session_start();
@@ -24,17 +24,19 @@ $cached_html = $mc->get('homepage');
 if ($mc->getResultCode() === 0)
 {
 
-	# If this is a logged-in visitor, replace the cached "Register," "Log In" text with "Profile"
-	# and "Log Out."
-	if ($_SESSION['registered'] == 'y')
-	{
-		$cached_html = str_replace('<a href="/account/register/">Register</a> | <a href="/account/login/">Log In</a>',
-			'<a href="/account/">Profile</a> | <a href="/account/logout/">Log Out</a>',
-			$cached_html);
-	}
-	echo $cached_html;
-	echo '<!-- Generated from cache -->';
-	exit();
+    # If this is a logged-in visitor, replace the cached "Register," "Log In" text with "Profile"
+    # and "Log Out."
+    if ($_SESSION['registered'] == 'y')
+    {
+        $cached_html = str_replace(
+            '<a href="/account/register/">Register</a> | <a href="/account/login/">Log In</a>',
+            '<a href="/account/">Profile</a> | <a href="/account/logout/">Log Out</a>',
+            $cached_html
+        );
+    }
+    echo $cached_html;
+    echo '<!-- Generated from cache -->';
+    exit();
 
 }
 
@@ -67,41 +69,41 @@ $result = mysql_query($sql);
 $tag_count = mysql_num_rows($result);
 if ($tag_count > 0)
 {
-	$page_body .= '
+    $page_body .= '
 	<h2>Bill Topics</h2>
 	<div class="tags">';
-	# Build up an array of tags, with the key being the tag and the value being the count.
-	while ($tag = mysql_fetch_array($result))
-	{
-		$tag = array_map('stripslashes', $tag);
-		$tags[$tag{tag}] = $tag['count'];
-	}
+    # Build up an array of tags, with the key being the tag and the value being the count.
+    while ($tag = mysql_fetch_array($result))
+    {
+        $tag = array_map('stripslashes', $tag);
+        $tags[$tag{tag}] = $tag['count'];
+    }
 
-	# Sort the tags in reverse order by key (their count), shave off the top 30, and then
-	# resort alphabetically.
-	arsort($tags);
-	$tags = array_slice($tags, 0, 75);
-	ksort($tags);
+    # Sort the tags in reverse order by key (their count), shave off the top 30, and then
+    # resort alphabetically.
+    arsort($tags);
+    $tags = array_slice($tags, 0, 75);
+    ksort($tags);
 
-	# Establish a scale -- the average size in this list should be 1.25em, with the scale
-	# moving up and down from there.
-	$multiple = 1.25 / (array_sum($tags) / count($tags));
+    # Establish a scale -- the average size in this list should be 1.25em, with the scale
+    # moving up and down from there.
+    $multiple = 1.25 / (array_sum($tags) / count($tags));
 
-	foreach ($tags AS $tag => $count)
-	{
-		$size = round( ($count * $multiple), 1);
-		if ($size > 4)
-		{
-			$size = 4;
-		}
-		elseif ($size < .75)
-		{
-			$size = .75;
-		}
+    foreach ($tags as $tag => $count)
+    {
+        $size = round(($count * $multiple), 1);
+        if ($size > 4)
+        {
+            $size = 4;
+        }
+        elseif ($size < .75)
+        {
+            $size = .75;
+        }
 
-		$page_body .= '<span style="font-size: '.$size.'em;"><a href="/bills/tags/'.urlencode($tag).'/">'.$tag.'</a></span> ';
-	}
-	$page_body .= '
+        $page_body .= '<span style="font-size: '.$size.'em;"><a href="/bills/tags/'.urlencode($tag).'/">'.$tag.'</a></span> ';
+    }
+    $page_body .= '
 	</div>';
 }
 
@@ -125,19 +127,19 @@ $sql = 'SELECT bills.number, bills.catch_line, bills.hotness, bills_status.statu
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-	$page_body .= '<div id="updates">
+    $page_body .= '<div id="updates">
 					<h2>Interesting Bill Updates</h2>
 					<table>';
-	while ($bill = mysql_fetch_array($result))
-	{
-		$bill['url'] = '/bill/'.SESSION_YEAR.'/'.$bill['number'].'/';
-		$page_body .= '<tr>
+    while ($bill = mysql_fetch_array($result))
+    {
+        $bill['url'] = '/bill/'.SESSION_YEAR.'/'.$bill['number'].'/';
+        $page_body .= '<tr>
 						<td><a href="'.$bill['url'].'" class="balloon">'.strtoupper($bill['number']).'</td>
 						<td>'.$bill['catch_line'].'</td>
 						<td>'.$bill['status_translation'].'</td>
 					</tr>';
-	}
-	$page_body .= '</table></div>';
+    }
+    $page_body .= '</table></div>';
 }
 
 # Ask Memcached for recent blog entries.
@@ -146,25 +148,25 @@ $blog_entries = $mc->get('homepage_blog');
 if (!$blog_entries)
 {
 
-	$rss = fetch_rss('https://www.richmondsunlight.com/blog/feed/');
-	$items = array_slice($rss->items, 0, 5);
+    $rss = fetch_rss('https://www.richmondsunlight.com/blog/feed/');
+    $items = array_slice($rss->items, 0, 5);
 
-	# Limit the output to eight blog entries.
-	$blog_entries = '';
-	foreach ($items as $item)
-	{
+    # Limit the output to eight blog entries.
+    $blog_entries = '';
+    foreach ($items as $item)
+    {
 
-		$blog_entries .= '
+        $blog_entries .= '
 			<div class="entry">
 			<h3><a href="' . $item['guid'] . '">' . $item['title'] . '</a></h3>
 			<div class="date">' . date('F j, Y', strtotime($item['pubdate'])) . ' by ' . $item['dc']['creator'] . '</div>
 			' . $item['summary'] . '
 			</div>';
 
-	}
+    }
 
-	# Store these in APC.
-	$mc->set( 'homepage_blog', $blog_entries, (60 * 15) );
+    # Store these in APC.
+    $mc->set('homepage_blog', $blog_entries, (60 * 15));
 
 }
 
@@ -184,14 +186,14 @@ $sql = 'SELECT chamber, COUNT(*) AS count
 $result = mysql_query($sql);
 while ($stats = mysql_fetch_array($result))
 {
-	if ($stats['chamber'] == 'house')
-	{
-		$session['house_count'] = $stats['count'];
-	}
-	elseif ($stats['chamber'] == 'senate')
-	{
-		$session['senate_count'] = $stats['count'];
-	}
+    if ($stats['chamber'] == 'house')
+    {
+        $session['house_count'] = $stats['count'];
+    }
+    elseif ($stats['chamber'] == 'senate')
+    {
+        $session['senate_count'] = $stats['count'];
+    }
 }
 
 $page_sidebar .= '
@@ -223,19 +225,19 @@ $sql = 'SELECT bills.number, bills.catch_line,
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-	$page_sidebar .= '
+    $page_sidebar .= '
 		<h3>Today’s Most Interesting Bills</h3>
 		<div class="box" id="interesting">
 			<ul>';
-	while ($bill = mysql_fetch_array($result))
-	{
-		$bill = array_map('stripslashes', $bill);
-		$bill['summary'] = substr($bill['summary'], 0, 175).' .&thinsp;.&thinsp;.';
-		$page_sidebar .= '
+    while ($bill = mysql_fetch_array($result))
+    {
+        $bill = array_map('stripslashes', $bill);
+        $bill['summary'] = substr($bill['summary'], 0, 175).' .&thinsp;.&thinsp;.';
+        $page_sidebar .= '
 			<li><a href="/bill/'.SESSION_YEAR.'/'.$bill['number'].'/" class="balloon">'.strtoupper($bill['number']).balloon($bill, 'bill').'</a>: '.$bill['catch_line'].'</li>
 		';
-	}
-	$page_sidebar .= '
+    }
+    $page_sidebar .= '
 			</ul>
 		</div>';
 }
@@ -243,7 +245,7 @@ if (mysql_num_rows($result) > 0)
 # Newest Bills
 if (IN_SESSION == 'y')
 {
-	$sql = 'SELECT bills.number, bills.catch_line, sessions.year,
+    $sql = 'SELECT bills.number, bills.catch_line, sessions.year,
 			DATE_FORMAT(bills.date_introduced, "%M %d, %Y") AS date_introduced,
 			representatives.name AS patron,
 			(
@@ -260,25 +262,25 @@ if (IN_SESSION == 'y')
 				ON bills.chief_patron_id = representatives.id
 			ORDER BY bills.date_introduced DESC, bills.id DESC
 			LIMIT 5';
-	$result = mysql_query($sql);
-	if (mysql_num_rows($result) > 0)
-	{
-		$page_sidebar .= '
+    $result = mysql_query($sql);
+    if (mysql_num_rows($result) > 0)
+    {
+        $page_sidebar .= '
 			<h3>Newest Bills</h3>
 			<div class="box" id="newest">
 				<ul>';
-		while ($bill = mysql_fetch_array($result))
-		{
-			$bill = array_map('stripslashes', $bill);
-			$bill['summary'] = substr($bill['summary'], 0, 175).'...';
-			$page_sidebar .= '
+        while ($bill = mysql_fetch_array($result))
+        {
+            $bill = array_map('stripslashes', $bill);
+            $bill['summary'] = substr($bill['summary'], 0, 175).'...';
+            $page_sidebar .= '
 				<li><a href="/bill/'.$bill['year'].'/'.strtolower($bill['number']).'/" class="balloon">'.$bill['number'].balloon($bill, 'bill').'</a>: '.$bill['catch_line'].'</li>
 			';
-		}
-		$page_sidebar .= '
+        }
+        $page_sidebar .= '
 				</ul>
 			</div>';
-	}
+    }
 }
 
 # Newest Comments
@@ -303,28 +305,28 @@ $sql = 'SELECT comments.id, comments.bill_id, comments.date_created AS date,
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-	$page_sidebar .= '
+    $page_sidebar .= '
 		<h3>Newest Comments</h3>
 		<div class="box" id="newest-comments">
 			<ul>';
-	while ($comment = mysql_fetch_array($result))
-	{
-		$comment = array_map('stripslashes', $comment);
-		if (strlen($comment['comment']) > 175)
-		{
-			$comment['comment'] = ereg_replace('<blockquote>(.*)</blockquote>', '', $comment['comment']);
-			$comment['comment'] = strip_tags($comment['comment']);
-			if (strlen($comment['comment']) > 120)
-			{
-				$comment['comment'] = substr($comment['comment'], 0, 120).'&thinsp;.&thinsp;.&thinsp;.';
-			}
-		}
-		$page_sidebar .= '
+    while ($comment = mysql_fetch_array($result))
+    {
+        $comment = array_map('stripslashes', $comment);
+        if (strlen($comment['comment']) > 175)
+        {
+            $comment['comment'] = ereg_replace('<blockquote>(.*)</blockquote>', '', $comment['comment']);
+            $comment['comment'] = strip_tags($comment['comment']);
+            if (strlen($comment['comment']) > 120)
+            {
+                $comment['comment'] = substr($comment['comment'], 0, 120).'&thinsp;.&thinsp;.&thinsp;.';
+            }
+        }
+        $page_sidebar .= '
 				<li style="margin-bottom: .75em;"><strong>'.strtoupper($comment['bill_number']).': '.$comment['bill_catch_line'].'</strong><br />
 				<a href="/bill/'.$comment['year'].'/'.$comment['bill_number'].'/#comment-'.$comment['number'].'">'.$comment['name'].' writes:</a>
 				'.$comment['comment'].'</li>';
-	}
-	$page_sidebar .= '
+    }
+    $page_sidebar .= '
 			</ul>
 		</div>';
 }
@@ -366,7 +368,7 @@ $page->assemble();
 # their customizations.)
 if (!isset($_SESSION['id']))
 {
-	$mc->set( 'homepage', $page->output, (60 * 10) );
+    $mc->set('homepage', $page->output, (60 * 10));
 }
 
 $page->display();

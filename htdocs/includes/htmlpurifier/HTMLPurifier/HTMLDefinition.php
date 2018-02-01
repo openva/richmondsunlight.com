@@ -153,7 +153,7 @@ class HTMLPurifier_HTMLDefinition extends HTMLPurifier_Definition
     // PUBLIC BUT INTERNAL VARIABLES --------------------------------------
 
     public $type = 'HTML';
-    public $manager; /**< Instance of HTMLPurifier_HTMLModuleManager */
+    public $manager; /*< Instance of HTMLPurifier_HTMLModuleManager */
 
     /**
      * Performs low-cost, preliminary initialization.
@@ -169,8 +169,8 @@ class HTMLPurifier_HTMLDefinition extends HTMLPurifier_Definition
 
         // cleanup some of the element definitions
         foreach ($this->info as $k => $v) {
-            unset($this->info[$k]->content_model);
-            unset($this->info[$k]->content_model_type);
+            unset($this->info[$k]->content_model, $this->info[$k]->content_model_type);
+
         }
     }
 
@@ -223,8 +223,10 @@ class HTMLPurifier_HTMLDefinition extends HTMLPurifier_Definition
         if (isset($this->info_content_sets['Block'][$block_wrapper])) {
             $this->info_block_wrapper = $block_wrapper;
         } else {
-            trigger_error('Cannot use non-block element as block wrapper',
-                E_USER_ERROR);
+            trigger_error(
+                'Cannot use non-block element as block wrapper',
+                E_USER_ERROR
+            );
         }
 
         $parent = $config->get('HTML', 'Parent');
@@ -233,8 +235,10 @@ class HTMLPurifier_HTMLDefinition extends HTMLPurifier_Definition
             $this->info_parent = $parent;
             $this->info_parent_def = $def;
         } else {
-            trigger_error('Cannot use unrecognized element as parent',
-                E_USER_ERROR);
+            trigger_error(
+                'Cannot use unrecognized element as parent',
+                E_USER_ERROR
+            );
             $this->info_parent_def = $this->manager->getElement($this->info_parent, true);
         }
 
@@ -256,8 +260,8 @@ class HTMLPurifier_HTMLDefinition extends HTMLPurifier_Definition
 
         if (is_array($allowed_elements)) {
             foreach ($this->info as $name => $d) {
-                if(!isset($allowed_elements[$name])) unset($this->info[$name]);
-                unset($allowed_elements[$name]);
+                if(!isset($allowed_elements[$name])) unset($this->info[$name], $allowed_elements[$name]);
+
             }
             // emit errors
             foreach ($allowed_elements as $element => $d) {
@@ -315,17 +319,22 @@ class HTMLPurifier_HTMLDefinition extends HTMLPurifier_Definition
                             if (!isset($this->info[$element])) {
                                 trigger_error("Cannot allow attribute '$attribute' if element '$element' is not allowed/supported $support");
                             } else {
-                                trigger_error("Attribute '$attribute' in element '$element' not supported $support",
-                                    E_USER_WARNING);
+                                trigger_error(
+                                    "Attribute '$attribute' in element '$element' not supported $support",
+                                    E_USER_WARNING
+                                );
                             }
                             break;
                         }
                         // otherwise fall through
+                        // no break
                     case 1:
                         $attribute = htmlspecialchars($bits[0]);
-                        trigger_error("Global attribute '$attribute' is not ".
+                        trigger_error(
+                            "Global attribute '$attribute' is not ".
                             "supported in any elements $support",
-                            E_USER_WARNING);
+                            E_USER_WARNING
+                        );
                         break;
                 }
             }
@@ -351,7 +360,7 @@ class HTMLPurifier_HTMLDefinition extends HTMLPurifier_Definition
                     unset($this->info[$tag]->attr[$attr]);
                     continue;
                 } // this segment might get removed eventually
-                elseif (isset($forbidden_attributes["$tag.$attr"])) {
+                if (isset($forbidden_attributes["$tag.$attr"])) {
                     // $tag.$attr are not user supplied, so no worries!
                     trigger_error("Error with $tag.$attr: tag.attr syntax not supported for HTML.ForbiddenAttributes; use tag@attr instead", E_USER_WARNING);
                 }

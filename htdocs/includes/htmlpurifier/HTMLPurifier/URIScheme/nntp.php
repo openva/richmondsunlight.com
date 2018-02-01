@@ -3,7 +3,8 @@
 /**
  * Validates nntp (Network News Transfer Protocol) as defined by generic RFC 1738
  */
-class HTMLPurifier_URIScheme_nntp extends HTMLPurifier_URIScheme {
+class HTMLPurifier_URIScheme_nntp extends HTMLPurifier_URIScheme
+{
 
     public $default_port = 119;
     public $browsable = false;

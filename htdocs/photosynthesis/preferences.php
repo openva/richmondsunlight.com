@@ -1,47 +1,47 @@
 <?php
 
-	###
-	# Photosynthesis Preferences
-	#
-	# PURPOSE
-	# Individual user settings.
-	#
-	# NOTES
-	# None.
-	#
-	# TODO
-	# None.
-	#
-	###
+    ###
+    # Photosynthesis Preferences
+    #
+    # PURPOSE
+    # Individual user settings.
+    #
+    # NOTES
+    # None.
+    #
+    # TODO
+    # None.
+    #
+    ###
 
-	# INCLUDES
-	# Include any files or libraries that are necessary for this specific
-	# page to function.
-	include_once('../includes/functions.inc.php');
-	include_once('../includes/settings.inc.php');
-	include_once('../includes/photosynthesis.inc.php');
+    # INCLUDES
+    # Include any files or libraries that are necessary for this specific
+    # page to function.
+    include_once '../includes/functions.inc.php';
+    include_once '../includes/settings.inc.php';
+    include_once '../includes/photosynthesis.inc.php';
 
-	# DECLARATIVE FUNCTIONS
-	# Run those functions that are necessary prior to loading this specific
-	# page.
-	$database = new Database;
-	$database->connect_old();
+    # DECLARATIVE FUNCTIONS
+    # Run those functions that are necessary prior to loading this specific
+    # page.
+    $database = new Database;
+    $database->connect_old();
 
-	# PAGE METADATA
-	$page_title = 'Photosynthesis &raquo; Preferences';
-	$site_section = 'photosynthesis';
+    # PAGE METADATA
+    $page_title = 'Photosynthesis &raquo; Preferences';
+    $site_section = 'photosynthesis';
 
-	# ADDITIONAL HTML HEADERS
-	$html_head = '<link rel="stylesheet" href="/css/photosynthesis.css" type="text/css" />';
+    # ADDITIONAL HTML HEADERS
+    $html_head = '<link rel="stylesheet" href="/css/photosynthesis.css" type="text/css" />';
 
-	# INITIALIZE SESSION
-	session_start();
+    # INITIALIZE SESSION
+    session_start();
 
-	# DEFINE FUNCTIONS
-	function show_form($form_data)
-	{
-		global $user;
-		$content = '
+    # DEFINE FUNCTIONS
+    function show_form($form_data)
+    {
+        global $user;
+        $content = '
 			<form method="post" action="'.$_SERVER['REQUEST_URI'].'">
 
 				<table class="form">
@@ -53,7 +53,7 @@
 					<tr><td><input type="password" size="20" maxlength="30" id="password" name="form_data[password]" value="'.(!empty($form_data['password']) ? $form_data['password'] : '').'" /></td></tr>
 					<tr><td><small>Enter a password to switch to a new one.</small></td>';
 
-		if ($user['type'] == 'paid') $content .= '
+        if ($user['type'] == 'paid') $content .= '
 					<tr><td>
 						<fieldset id="email-active">
 							<legend>Receive E-Mail Updates?</legend>
@@ -62,82 +62,82 @@
 						</fieldset>
 					</td></tr>';
 
-		$content .= '
+        $content .= '
 					<tr><td><input type="submit" name="submit" value="Save Changes" /></td></tr>
 				</table>
 
 			</form>';
 
-		return $content;
-	}
+        return $content;
+    }
 
-	# Grab the user data. Bail if none is available.
-	$user = get_user();
+    # Grab the user data. Bail if none is available.
+    $user = get_user();
 
-	if (isset($_POST['submit']))
-	{
+    if (isset($_POST['submit']))
+    {
 
-		$form_data = array_map('stripslashes', $_POST['form_data']);
+        $form_data = array_map('stripslashes', $_POST['form_data']);
 
-		# Error correction.
-		if (empty($form_data['name'])) $errors[] = 'your name';
-		if (empty($form_data['email'])) $errors[] = 'your e-mail address';
-		if ($user['type'] == 'paid')
-		{
-			if (empty($form_data['email_active'])) $form_data['email_active'] = 'n';
-		}
+        # Error correction.
+        if (empty($form_data['name'])) $errors[] = 'your name';
+        if (empty($form_data['email'])) $errors[] = 'your e-mail address';
+        if ($user['type'] == 'paid')
+        {
+            if (empty($form_data['email_active'])) $form_data['email_active'] = 'n';
+        }
 
-		# Alert the user if any of these errors are show-stoppers.
-		if (isset($errors))
-		{
-			$error_text = implode('</li><li>', $errors);
-			$message = '<div id="messages" class="errors">
+        # Alert the user if any of these errors are show-stoppers.
+        if (isset($errors))
+        {
+            $error_text = implode('</li><li>', $errors);
+            $message = '<div id="messages" class="errors">
 					<ul>
 						<li>'.$error_text.'</li>
 					</ul>
 				</div>';
-		}
-		else
-		{
-			# Clean up the data.
-			$form_data = array_map('mysql_real_escape_string', $_POST['form_data']);
+        }
+        else
+        {
+            # Clean up the data.
+            $form_data = array_map('mysql_real_escape_string', $_POST['form_data']);
 
-			# Create a password hash from the password and store that.
-			if (!empty($form_data['password'])) $form_data['password_hash'] = md5($form_data['password']);
+            # Create a password hash from the password and store that.
+            if (!empty($form_data['password'])) $form_data['password_hash'] = md5($form_data['password']);
 
-			# Conduct the actual query.
-			$sql = 'UPDATE users, dashboard_user_data
+            # Conduct the actual query.
+            $sql = 'UPDATE users, dashboard_user_data
 					SET users.name = "'.$form_data['name'].'", users.email = "'.$form_data['email'].'"
 					'.(!empty($form_data['password_hash']) ? ', users.password = "'.$form_data['password_hash'].'"' : '').'
 					'.(!empty($form_data['email_active']) ? ', dashboard_user_data.email_active = "'.$form_data['email_active'].'"' : '').'
 					WHERE users.cookie_hash="'.$_SESSION['id'].'"';
-			$result = mysql_query($sql);
+            $result = mysql_query($sql);
 
-			# Report on the results.
-			if (!$result) $message = '<div id="messages" class="errors">Your preferences could not be saved.</div>';
-			else $message = '<div id="messages" class="updated">Preferences updated successfully.</div>';
-		}
+            # Report on the results.
+            if (!$result) $message = '<div id="messages" class="errors">Your preferences could not be saved.</div>';
+            else $message = '<div id="messages" class="updated">Preferences updated successfully.</div>';
+        }
 
-	}
+    }
 
-	# Display the result of the query, if there was one.
-	if (isset($message)) $page_body = $message;
+    # Display the result of the query, if there was one.
+    if (isset($message)) $page_body = $message;
 
-	# Assemble the SQL query.
-	$sql = 'SELECT users.id, users.name, users.email, dashboard_user_data.email_active
+    # Assemble the SQL query.
+    $sql = 'SELECT users.id, users.name, users.email, dashboard_user_data.email_active
 			FROM users LEFT JOIN dashboard_user_data ON users.id = dashboard_user_data.user_id
 			WHERE users.cookie_hash="'.$_SESSION['id'].'"';
-	$result = mysql_query($sql);
-	if (mysql_num_rows($result) == 0) login_redirect();
-	$preferences = mysql_fetch_array($result);
-	$preferences = array_map('stripslashes', $preferences);
+    $result = mysql_query($sql);
+    if (mysql_num_rows($result) == 0) login_redirect();
+    $preferences = mysql_fetch_array($result);
+    $preferences = array_map('stripslashes', $preferences);
 
-	# Display the preferences form.
-	$page_body .= @show_form($preferences);
+    # Display the preferences form.
+    $page_body .= @show_form($preferences);
 
-	# OUTPUT THE PAGE
-	/*display_page('page_title='.urlencode($page_title).'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
-		'&site_section='.urlencode($site_section).'&html_head='.urlencode($html_head));*/
+    # OUTPUT THE PAGE
+    /*display_page('page_title='.urlencode($page_title).'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
+        '&site_section='.urlencode($site_section).'&html_head='.urlencode($html_head));*/
 
 $page = new Page;
 $page->page_title = $page_title;
@@ -146,5 +146,3 @@ $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
 $page->html_head = $html_head;
 $page->process();
-
-?>

@@ -1,31 +1,31 @@
 <?php
 
-	###
-	# About Photosynthesis Pro
-	#
-	# PURPOSE
-	# Provides a pitch to sign up for Photosynthesis Pro.
-	#
-	# NOTES
-	# None.
-	#
-	# TODO
-	# None.
-	#
-	###
+    ###
+    # About Photosynthesis Pro
+    #
+    # PURPOSE
+    # Provides a pitch to sign up for Photosynthesis Pro.
+    #
+    # NOTES
+    # None.
+    #
+    # TODO
+    # None.
+    #
+    ###
 
-	# INCLUDES
-	# Include any files or libraries that are necessary for this specific
-	# page to function.
-	include_once('../includes/settings.inc.php');
-	include_once('../includes/functions.inc.php');
+    # INCLUDES
+    # Include any files or libraries that are necessary for this specific
+    # page to function.
+    include_once '../includes/settings.inc.php';
+    include_once '../includes/functions.inc.php';
 
-	# PAGE METADATA
-	$page_title = 'Photosynthesis Pro';
-	$site_section = 'photosynthesis';
+    # PAGE METADATA
+    $page_title = 'Photosynthesis Pro';
+    $site_section = 'photosynthesis';
 
-	# PAGE CONTENT
-	$page_body = <<<EOD
+    # PAGE CONTENT
+    $page_body = <<<EOD
 		<p><em>Stop tracking legislation like it&rsquo;s 1993. <strong>Photosynthesis works the way
 		you do</strong>, giving you a clear understanding of your legislation. Turn sunlight into
 		energy with Photosynthesis.</em></p>
@@ -93,7 +93,7 @@
 		</ul>
 EOD;
 
-	$page_sidebar = <<<EOD
+    $page_sidebar = <<<EOD
 		<h3>Pricing</h3>
 		<div class="box">
 			<p>The price structure is simple and competitive:</p>
@@ -132,9 +132,9 @@ EOD;
 		</div>
 EOD;
 
-	# OUTPUT THE PAGE
-	/*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
-		'&site_section='.urlencode($site_section));*/
+    # OUTPUT THE PAGE
+    /*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
+        '&site_section='.urlencode($site_section));*/
 
 $page = new Page;
 $page->page_title = $page_title;
@@ -142,5 +142,3 @@ $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
 $page->process();
-
-?>

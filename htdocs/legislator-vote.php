@@ -12,9 +12,9 @@
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('includes/settings.inc.php');
-include_once('includes/functions.inc.php');
-include_once('vendor/autoload.php');
+include_once 'includes/settings.inc.php';
+include_once 'includes/functions.inc.php';
+include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -28,15 +28,15 @@ session_start();
 # LOCALIZE AND CLEAN UP VARIABLES
 if (isset($_GET['shortname']))
 {
-	$shortname = $_GET['shortname'];
+    $shortname = $_GET['shortname'];
 }
 if (isset($_GET['year']))
 {
-	$year = $_GET['year'];
+    $year = $_GET['year'];
 }
 if (isset($_GET['page']))
 {
-	$page = $_GET['page'];
+    $page = $_GET['page'];
 }
 
 # PAGE METADATA
@@ -51,9 +51,9 @@ $leg = new Legislator();
 $leg_id = $leg->getid($shortname);
 if ($leg_id === false)
 {
-	header("Status: 404 Not Found\n\r");
-	include('404.php');
-	exit();
+    header("Status: 404 Not Found\n\r") ;
+    include('404.php');
+    exit();
 }
 # Return the legislator's data as an array.
 $legislator = $leg->info($leg_id);
@@ -79,7 +79,7 @@ $sql = 'SELECT bills.number AS bill_number, bills.catch_line, representatives_vo
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-	$page_body = '
+    $page_body = '
 		<p><a href="/legislator/'.$shortname.'/votes/'.$year.'.csv">Download List as a
 			Spreadsheet</a> <code>('.$shortname.'-'.$year.'.csv)</code></p>
 		<p>Y = “yes” N = “no” X = “did not vote” A = “abstained from voting”</p>
@@ -95,39 +95,39 @@ if (mysql_num_rows($result) > 0)
 				</tr>
 			</thead>
 			<tbody>';
-	while ($vote = mysql_fetch_array($result))
-	{
-		$vote = array_map('stripslashes', $vote);
-		$page_body .= '
+    while ($vote = mysql_fetch_array($result))
+    {
+        $vote = array_map('stripslashes', $vote);
+        $page_body .= '
 			<tr>
 				<td><a href="/bill/'.$year.'/'.$vote['bill_number'].'/">'
-					.strtoupper($vote['bill_number']).'</a></td>
+                    .strtoupper($vote['bill_number']).'</a></td>
 				<td>'.$vote['catch_line'].'</td>
 				<td>'.$vote['vote'].'</td>
 				<td><a href="/bill/'.$year.'/'.$vote['bill_number'].'/'
-					.strtolower($vote['lis_id']).'/">'.$vote['outcome'].'</td>
+                    .strtolower($vote['lis_id']).'/">'.$vote['outcome'].'</td>
 				<td>';
-		if (empty($vote['committee']))
-		{
-			$page_body .= ucfirst($legislator['chamber']).' Floor';
-		}
-		else
-		{
-			$page_body .= '<a href="/committee/'.$legislator['chamber'].'/'
-				.$vote['committee_shortname'].'/">'.$vote['committee'].'</a>';
-		}
-		$page_body .= '</td>
+        if (empty($vote['committee']))
+        {
+            $page_body .= ucfirst($legislator['chamber']).' Floor';
+        }
+        else
+        {
+            $page_body .= '<a href="/committee/'.$legislator['chamber'].'/'
+                .$vote['committee_shortname'].'/">'.$vote['committee'].'</a>';
+        }
+        $page_body .= '</td>
 				<td>'.$vote['date'].'</td>
 			</tr>';
-	}
-	$page_body .= '
+    }
+    $page_body .= '
 			</tbody>
 		</table>';
 }
 
 # OUTPUT THE PAGE
 /*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
-	'&site_section='.urlencode($site_section));*/
+    '&site_section='.urlencode($site_section));*/
 
 $page = new Page;
 $page->page_title = $page_title;
@@ -135,5 +135,3 @@ $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
 $page->process();
-
-?>

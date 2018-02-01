@@ -13,157 +13,157 @@
 function populate_smart_portfolio($portfolio_id)
 {
 
-	# Get the watch list ID.
-	$sql = 'SELECT watch_list_id AS id
+    # Get the watch list ID.
+    $sql = 'SELECT watch_list_id AS id
 			FROM dashboard_portfolios
 			WHERE id = '.$portfolio_id;
-	$result = mysql_query($sql);
-	if (mysql_num_rows($result) == 0)
-	{
-		return FALSE;
-	}
-	$watch_list = mysql_fetch_array($result);
+    $result = mysql_query($sql);
+    if (mysql_num_rows($result) == 0)
+    {
+        return FALSE;
+    }
+    $watch_list = mysql_fetch_array($result);
 
-	# Get the ID of the user who owns this portfolio.
-	$sql = 'SELECT user_id AS id
+    # Get the ID of the user who owns this portfolio.
+    $sql = 'SELECT user_id AS id
 			FROM dashboard_portfolios
 			WHERE id = '.$portfolio_id;
-	$result = mysql_query($sql);
-	if (mysql_num_rows($result) == 0)
-	{
-		return FALSE;
-	}
-	$user = mysql_fetch_array($result);
-	$user_id = $user['id'];
+    $result = mysql_query($sql);
+    if (mysql_num_rows($result) == 0)
+    {
+        return FALSE;
+    }
+    $user = mysql_fetch_array($result);
+    $user_id = $user['id'];
 
-	# Get the smart portfolio criteria.
-	$sql = 'SELECT tag, patron_id, committee_id, keyword, status, current_chamber
+    # Get the smart portfolio criteria.
+    $sql = 'SELECT tag, patron_id, committee_id, keyword, status, current_chamber
 			FROM dashboard_watch_lists
 			WHERE id ='.$watch_list['id'];
-	$result = mysql_query($sql);
-	if (mysql_num_rows($result) == 0)
-	{
-		return FALSE;
-	}
-	$portfolio = mysql_fetch_array($result);
+    $result = mysql_query($sql);
+    if (mysql_num_rows($result) == 0)
+    {
+        return FALSE;
+    }
+    $portfolio = mysql_fetch_array($result);
 
-	# Remove any criterion that's not being used in this smart portfolio.
-	foreach ($portfolio as $key => $criterion)
-	{
-		if (empty($criterion)) unset($portfolio[$key]);
-	}
+    # Remove any criterion that's not being used in this smart portfolio.
+    foreach ($portfolio as $key => $criterion)
+    {
+        if (empty($criterion)) unset($portfolio[$key]);
+    }
 
-	# Get all bills that meet these criteria (up to 200). Start by assembling the query.
-	$sql = 'SELECT id
+    # Get all bills that meet these criteria (up to 200). Start by assembling the query.
+    $sql = 'SELECT id
 			FROM bills
 			WHERE session_id='.SESSION_ID;
-	if (isset($portfolio['patron_id']))
-	{
-		$sql .= ' AND chief_patron_id='.$portfolio['patron_id'];
-	}
-	if (isset($portfolio['committee_id']))
-	{
-		$sql .= ' AND last_committee_id='.$portfolio['committee_id'];
-	}
-	if (isset($portfolio['keyword']))
-	{
-		$sql .= ' AND MATCH (bills.catch_line, bills.summary, bills.full_text, bills.number, bills.notes) AGAINST ("'.$portfolio['keyword'].'")';
-	}
-	if (isset($portfolio['status']))
-	{
-		$sql .= ' AND status="'.$portfolio['status'].'"';
-	}
-	if (isset($portfolio['current_chamber']))
-	{
-		$sql .= ' AND current_chamber="'.$portfolio['current_chamber'].'"';
-	}
-	if (isset($portfolio['tag']))
-	{
-		$sql .= ' AND id IN
+    if (isset($portfolio['patron_id']))
+    {
+        $sql .= ' AND chief_patron_id='.$portfolio['patron_id'];
+    }
+    if (isset($portfolio['committee_id']))
+    {
+        $sql .= ' AND last_committee_id='.$portfolio['committee_id'];
+    }
+    if (isset($portfolio['keyword']))
+    {
+        $sql .= ' AND MATCH (bills.catch_line, bills.summary, bills.full_text, bills.number, bills.notes) AGAINST ("'.$portfolio['keyword'].'")';
+    }
+    if (isset($portfolio['status']))
+    {
+        $sql .= ' AND status="'.$portfolio['status'].'"';
+    }
+    if (isset($portfolio['current_chamber']))
+    {
+        $sql .= ' AND current_chamber="'.$portfolio['current_chamber'].'"';
+    }
+    if (isset($portfolio['tag']))
+    {
+        $sql .= ' AND id IN
 			(SELECT bill_id
 			FROM tags
 			WHERE tag="'.$portfolio['tag'].'")';
-	}
+    }
 
-	# Run the actual query;
-	$result = mysql_query($sql);
+    # Run the actual query;
+    $result = mysql_query($sql);
 
-	# We don't want to fail when no bills are found. It's totally reasonable for somebody to
-	# have a smart portfoilo that starts out blank. But we do want to erase any bills in the
-	# portfolio in question before we wrap up. Specifying the user ID isn't strictly necessary,
-	# but it's better to be cautious.
-	if (mysql_num_rows($result) == 0)
-	{
-		$sql = 'DELETE FROM dashboard_bills
+    # We don't want to fail when no bills are found. It's totally reasonable for somebody to
+    # have a smart portfoilo that starts out blank. But we do want to erase any bills in the
+    # portfolio in question before we wrap up. Specifying the user ID isn't strictly necessary,
+    # but it's better to be cautious.
+    if (mysql_num_rows($result) == 0)
+    {
+        $sql = 'DELETE FROM dashboard_bills
 				WHERE portfolio_id = '.$portfolio_id.' AND user_id='.$user_id;
-		mysql_query($sql);
-		return true;
-	}
+        mysql_query($sql);
+        return true;
+    }
 
-	# When bills *are* found, build them up into an ID listing.
-	while ($bill = mysql_fetch_array($result))
-	{
-		$new_bills[] = $bill['id'];
-	}
+    # When bills *are* found, build them up into an ID listing.
+    while ($bill = mysql_fetch_array($result))
+    {
+        $new_bills[] = $bill['id'];
+    }
 
-	# Generate a listing of all bills already in this portfolio.
-	$sql = 'SELECT bill_id AS id
+    # Generate a listing of all bills already in this portfolio.
+    $sql = 'SELECT bill_id AS id
 			FROM dashboard_bills
 			WHERE portfolio_id = '.$portfolio_id;
-	$result = mysql_query($sql);
-	if (mysql_num_rows($result) > 0)
-	{
-		while ($bill = mysql_fetch_array($result)) $old_bills[] = $bill['id'];
-	}
+    $result = mysql_query($sql);
+    if (mysql_num_rows($result) > 0)
+    {
+        while ($bill = mysql_fetch_array($result)) $old_bills[] = $bill['id'];
+    }
 
-	# Sort the array to figure out which to delete (because they're no longer a match),
-	# which to ignore, and which to add.
-	if (isset($old_bills))
-	{
-		# Bills already in the database that can be left alone.
-		$kept_bills = array_intersect($old_bills, $new_bills);
+    # Sort the array to figure out which to delete (because they're no longer a match),
+    # which to ignore, and which to add.
+    if (isset($old_bills))
+    {
+        # Bills already in the database that can be left alone.
+        $kept_bills = array_intersect($old_bills, $new_bills);
 
-		# Bills that are in the database, but not in the latest query, which need to
-		# be deleted from the database.
-		foreach ($old_bills as $value) if (!in_array($value, $new_bills)) $delete_bills[] = $value;
+        # Bills that are in the database, but not in the latest query, which need to
+        # be deleted from the database.
+        foreach ($old_bills as $value) if (!in_array($value, $new_bills)) $delete_bills[] = $value;
 
-		# Bills that are not in the database, but are in the latest query, which need to
-		# be inserted.
-		foreach ($new_bills as $value) if (!in_array($value, $old_bills)) $insert_bills[] = $value;
-	}
+        # Bills that are not in the database, but are in the latest query, which need to
+        # be inserted.
+        foreach ($new_bills as $value) if (!in_array($value, $old_bills)) $insert_bills[] = $value;
+    }
 
-	# If there are no old bills to be filtered out, just go ahead and make the new bills the
-	# list of bills to insert.
-	else $insert_bills = $new_bills;
+    # If there are no old bills to be filtered out, just go ahead and make the new bills the
+    # list of bills to insert.
+    else $insert_bills = $new_bills;
 
-	# If any old bills are found (bills in this smart portfolio that no longer fit our
-	# criteria) then delete them.
-	if (isset($delete_bills))
-	{
-		foreach ($delete_bills AS $bill_id)
-		{
-			# Delete from dashboard_bills. Though it's not necessary to specify the user ID
-			# here, we do so anyhow, because it's better to be overly cautious.
-			$sql = 'DELETE FROM dashboard_bills
+    # If any old bills are found (bills in this smart portfolio that no longer fit our
+    # criteria) then delete them.
+    if (isset($delete_bills))
+    {
+        foreach ($delete_bills as $bill_id)
+        {
+            # Delete from dashboard_bills. Though it's not necessary to specify the user ID
+            # here, we do so anyhow, because it's better to be overly cautious.
+            $sql = 'DELETE FROM dashboard_bills
 					WHERE portfolio_id = '.$portfolio_id.' AND bill_id = '.$bill_id.'
 					AND user_id='.$user_id;
-			mysql_query($sql);
-		}
-	}
+            mysql_query($sql);
+        }
+    }
 
-	# If any new bills have been found, insert them.
-	if (isset($insert_bills))
-	{
-		foreach ($insert_bills AS $bill_id)
-		{
-			# Insert into dashboard_bills.
-			$sql = 'INSERT INTO dashboard_bills
+    # If any new bills have been found, insert them.
+    if (isset($insert_bills))
+    {
+        foreach ($insert_bills as $bill_id)
+        {
+            # Insert into dashboard_bills.
+            $sql = 'INSERT INTO dashboard_bills
 					SET user_id = '.$user_id.', bill_id = '.$bill_id.',
 					portfolio_id = '.$portfolio_id.', date_created = now()
 					ON DUPLICATE KEY UPDATE bill_id=bill_id';
-			$result = mysql_query($sql);
-		}
-	}
+            $result = mysql_query($sql);
+        }
+    }
 }
 
 ###
@@ -179,11 +179,11 @@ function populate_smart_portfolio($portfolio_id)
 ###
 function smart_portfolio_form($form_data)
 {
-	# Determine where the form is to be posted.
-	if (isset($form_data['id'])) $action = $_SERVER['REQUEST_URI'];
-	else $action = '/photosynthesis/process-actions.php';
+    # Determine where the form is to be posted.
+    if (isset($form_data['id'])) $action = $_SERVER['REQUEST_URI'];
+    else $action = '/photosynthesis/process-actions.php';
 
-	$content = '
+    $content = '
 			<form method="post" action="'.$action.'">
 
 				<fieldset id="create-smart-portfolio">
@@ -419,19 +419,19 @@ function smart_portfolio_form($form_data)
 							</fieldset>
 						</td></tr>
 					</table>';
-	if (isset($form_data['id'])) $content .= '
+    if (isset($form_data['id'])) $content .= '
 				<input type="hidden" name="edit-smart-portfolio" value="y">
 				<input type="hidden" name="form_data[id]" id="portfolio-id" value="'.$form_data['id'].'" />
 				<input type="hidden" name="form_data[type]" value="smart">
 				<input type="submit" name="submit" id="submit" value="Save Changes">';
-	else $content .= '
+    else $content .= '
 				<input type="hidden" name="add-smart-portfolio" value="y">
 				<input type="submit" name="submit" id="submit" value="Create">';
-	$content .= '
+    $content .= '
 				</fieldset>
 			</form>';
 
-	return $content;
+    return $content;
 }
 
 ###
@@ -448,20 +448,20 @@ function smart_portfolio_form($form_data)
 function portfolio_form($form_data)
 {
 
-	# If we're editing an existing portfolio.
-	if (isset($form_data['id']))
-	{
-		$submit_label = 'Save Changes';
-		$action = $_SERVER['REQUEST_URI'];
-	}
+    # If we're editing an existing portfolio.
+    if (isset($form_data['id']))
+    {
+        $submit_label = 'Save Changes';
+        $action = $_SERVER['REQUEST_URI'];
+    }
 
-	# Else if we're creating a new portfolio.
-	else
-	{
-		$submit_label = 'Create';
-		$action = '/photosynthesis/process-actions.php';
-	}
-	$content = '
+    # Else if we're creating a new portfolio.
+    else
+    {
+        $submit_label = 'Create';
+        $action = '/photosynthesis/process-actions.php';
+    }
+    $content = '
 		<form method="post" action="'.$action.'">
 
 			<fieldset id="create-portfolio">
@@ -488,14 +488,14 @@ function portfolio_form($form_data)
 					<tr><td><input type="submit" name="submit" value="'.$submit_label.'" /></td></tr>
 				</table>
 			</fieldset>';
-	if (isset($form_data['id'])) $content .= '
+    if (isset($form_data['id'])) $content .= '
 			<input type="hidden" name="form_data[id]" id="portfolio-id" value="'.$form_data['id'].'" />';
-	else $content .= '
+    else $content .= '
 			<input type="hidden" name="add-portfolio" value="y" />';
-	$content .= '
+    $content .= '
 		</form>';
 
-	return $content;
+    return $content;
 }
 
 
@@ -512,8 +512,8 @@ function portfolio_form($form_data)
 ###
 function show_portfolio($portfolio, $user_id)
 {
-	# Get a listing of all of the bills in this portfolio.
-	$sql = 'SELECT dashboard_bills.id AS record_id, dashboard_bills.notes, bills.number,
+    # Get a listing of all of the bills in this portfolio.
+    $sql = 'SELECT dashboard_bills.id AS record_id, dashboard_bills.notes, bills.number,
 			bills.catch_line,
 
 				(SELECT translation
@@ -534,11 +534,11 @@ function show_portfolio($portfolio, $user_id)
 			AND dashboard_bills.portfolio_id = '.$portfolio['id'].'
 			AND bills.session_id = '.SESSION_ID.'
 			ORDER BY last_date DESC';
-	$result = mysql_query($sql);
-	if (mysql_num_rows($result) > 0)
-	{
+    $result = mysql_query($sql);
+    if (mysql_num_rows($result) > 0)
+    {
 
-		$content = '
+        $content = '
 		<table style="clear: both;" class="sortable" id="listing-'.$portfolio['hash'].'">
 			<thead>
 				<tr>
@@ -546,75 +546,73 @@ function show_portfolio($portfolio, $user_id)
 					<th id="catch-line">Catch Line</th>
 					<th id="last-action">Last Action</th>
 					<th id="date">Date</th>';
-		if ($portfolio['type'] == 'normal')
-		{
-			$content .= '
+        if ($portfolio['type'] == 'normal')
+        {
+            $content .= '
 					<th id="options">&nbsp;</th>';
-		}
-		$content .= '
+        }
+        $content .= '
 				</tr>
 			</thead>
 			<tbody>';
-		while ($bill = mysql_fetch_array($result))
-		{
-			$bill = array_map('stripslashes', $bill);
-			$bill['timestamp'] = strtotime($bill['last_date']);
+        while ($bill = mysql_fetch_array($result))
+        {
+            $bill = array_map('stripslashes', $bill);
+            $bill['timestamp'] = strtotime($bill['last_date']);
 
-			$content .= '
+            $content .= '
 				<tr'.(($_SESSION['last_access'] < $bill['timestamp']) ? ' class="changed"' : '').'>
 					<td><a href="/bill/'.SESSION_YEAR.'/'.$bill['number'].'/">'
-					.strtoupper($bill['number']).'</a></td>
+                    .strtoupper($bill['number']).'</a></td>
 					<td>'.$bill['catch_line'].'</td>
 					<td>'.$bill['last_action'].'</td>
 					<td sorttable_customkey="'.$bill['timestamp'].'">'.$bill['last_date'].'</td>';
-			if ($portfolio['type'] == 'normal')
-			{
-				$content .= '
+            if ($portfolio['type'] == 'normal')
+            {
+                $content .= '
 					<td class="options">
 						<a href="/photosynthesis/delete/'.$portfolio['hash'].'-'.$bill['record_id'].'/" title="Stop tracking this bill"
 							onclick="return confirm(\'Are you sure you want to stop tracking '.strtoupper($bill['number']).'?\')">x</a>
 					</td>';
-			}
-			$content .= '</tr>';
+            }
+            $content .= '</tr>';
 
-			if (empty($bill['notes']))
-			{
-				$bill['notes'] = 'Add your comments about this bill '
-					.'here—they’ll be listed on your public portfolio and on the bill’s page. '
-					.'Should this pass or fail? Why?';
-			}
+            if (empty($bill['notes']))
+            {
+                $bill['notes'] = 'Add your comments about this bill '
+                    .'here—they’ll be listed on your public portfolio and on the bill’s page. '
+                    .'Should this pass or fail? Why?';
+            }
 
-			$content .= '
+            $content .= '
 			<tr id="'.$bill['record_id'].'-notes" class="notes">
 				<td></td>
 				<td colspan="'.(($portfolio['type'] == 'normal') ? '4' : '3').'">
 					<div class="edit" id="'.$bill['record_id'].'">'.$bill['notes'].'</div>
 				</td>
 			</tr>';
-		}
-		$content .= '
+        }
+        $content .= '
 			</tbody>
 		</table>';
-	}
-	else
-	{
-		if ($portfolio['type'] == 'smart')
-		{
-			$content .= '
+    }
+    else
+    {
+        if ($portfolio['type'] == 'smart')
+        {
+            $content .= '
 			<div class="no-bills">No bills currently match your criteria for this smart portfolio.</div>';
-		}
-		else
-		{
-			$content .= '
+        }
+        else
+        {
+            $content .= '
 			<div class="no-bills">
 				<strong>Get started: Add some bills to your portfolio!</strong>
 				<p>You can either enter a bill ID here, or you can add them directly from any
 				<a href="/bills/">bill</a> page throughout the website.</p>
 			</div>';
-		}
-	}
+        }
+    }
 
-	return $content;
+    return $content;
 }
-
-?>

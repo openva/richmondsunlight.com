@@ -43,7 +43,7 @@ class HTMLPurifier_Length
      * @param string $s Unit string, like '2em' or '3.4in'
      * @warning Does not perform validation.
      */
-    static public function make($s) {
+    public static function make($s) {
         if ($s instanceof HTMLPurifier_Length) return $s;
         $n_length = strspn($s, '1234567890.+-');
         $n = substr($s, 0, $n_length);

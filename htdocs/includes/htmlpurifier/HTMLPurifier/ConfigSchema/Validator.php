@@ -14,7 +14,8 @@ class HTMLPurifier_ConfigSchema_Validator
     /**
      * Easy to access global objects.
      */
-    protected $interchange, $aliases;
+    protected $interchange;
+    protected $aliases;
 
     /**
      * Context-stack to provide easy to read error messages.
@@ -154,7 +155,7 @@ class HTMLPurifier_ConfigSchema_Validator
         $this->context[] = 'valueAliases';
         foreach ($d->valueAliases as $alias => $real) {
             if (!is_string($alias)) $this->error("alias $alias", 'must be a string');
-            if (!is_string($real))  $this->error("alias target $real from alias '$alias'",  'must be a string');
+            if (!is_string($real))  $this->error("alias target $real from alias '$alias'", 'must be a string');
             if ($alias === $real) {
                 $this->error("alias '$alias'", "must not be an alias to itself");
             }

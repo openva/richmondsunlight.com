@@ -85,7 +85,9 @@ class HTMLPurifier_LanguageFactory
         // validate language code
         if ($code === false) {
             $code = $this->validator->validate(
-              $config->get('Core', 'Language'), $config, $context
+              $config->get('Core', 'Language'),
+                $config,
+                $context
             );
         } else {
             $code = $this->validator->validate($code, $config, $context);
@@ -173,12 +175,12 @@ class HTMLPurifier_LanguageFactory
             $fallback_cache = $this->cache[$fallback];
 
             // merge fallback with current language
-            foreach ( $this->keys as $key ) {
-                if (isset($cache[$key]) && isset($fallback_cache[$key])) {
+            foreach ($this->keys as $key) {
+                if (isset($cache[$key], $fallback_cache[$key])) {
                     if (isset($this->mergeable_keys_map[$key])) {
                         $cache[$key] = $cache[$key] + $fallback_cache[$key];
                     } elseif (isset($this->mergeable_keys_list[$key])) {
-                        $cache[$key] = array_merge( $fallback_cache[$key], $cache[$key] );
+                        $cache[$key] = array_merge($fallback_cache[$key], $cache[$key]);
                     }
                 } else {
                     $cache[$key] = $fallback_cache[$key];
@@ -190,7 +192,7 @@ class HTMLPurifier_LanguageFactory
         // save to cache for later retrieval
         $this->cache[$code] = $cache;
 
-        return;
+
     }
 
 }

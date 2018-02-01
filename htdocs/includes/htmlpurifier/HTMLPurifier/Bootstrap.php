@@ -62,7 +62,7 @@ class HTMLPurifier_Bootstrap
      */
     public static function registerAutoload() {
         $autoload = array('HTMLPurifier_Bootstrap', 'autoload');
-        if ( ($funcs = spl_autoload_functions()) === false ) {
+        if (($funcs = spl_autoload_functions()) === false) {
             spl_autoload_register($autoload);
         } elseif (function_exists('spl_autoload_unregister')) {
             $compat = version_compare(PHP_VERSION, '5.1.2', '<=') &&

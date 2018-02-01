@@ -12,7 +12,7 @@ class HTMLPurifier_HTMLModule_Tidy_XHTMLAndHTML4 extends HTMLPurifier_HTMLModule
         $r['font']   = new HTMLPurifier_TagTransform_Font();
         $r['menu']   = new HTMLPurifier_TagTransform_Simple('ul');
         $r['dir']    = new HTMLPurifier_TagTransform_Simple('ul');
-        $r['center'] = new HTMLPurifier_TagTransform_Simple('div',  'text-align:center;');
+        $r['center'] = new HTMLPurifier_TagTransform_Simple('div', 'text-align:center;');
         $r['u']      = new HTMLPurifier_TagTransform_Simple('span', 'text-decoration:underline;');
         $r['s']      = new HTMLPurifier_TagTransform_Simple('span', 'text-decoration:line-through;');
         $r['strike'] = new HTMLPurifier_TagTransform_Simple('span', 'text-decoration:line-through;');

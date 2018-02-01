@@ -12,8 +12,11 @@ class HTMLPurifier_HTMLModule_Tables extends HTMLPurifier_HTMLModule
 
         $this->addElement('caption', false, 'Inline', 'Common');
 
-        $this->addElement('table', 'Block',
-            new HTMLPurifier_ChildDef_Table(),  'Common',
+        $this->addElement(
+            'table',
+            'Block',
+            new HTMLPurifier_ChildDef_Table(),
+            'Common',
             array(
                 'border' => 'Pixels',
                 'cellpadding' => 'Length',
@@ -52,7 +55,7 @@ class HTMLPurifier_HTMLModule_Tables extends HTMLPurifier_HTMLModule
             ),
             $cell_align
         );
-        $this->addElement('col',      false, 'Empty',         'Common', $cell_col);
+        $this->addElement('col', false, 'Empty', 'Common', $cell_col);
         $this->addElement('colgroup', false, 'Optional: col', 'Common', $cell_col);
 
         $this->addElement('tbody', false, 'Required: tr', 'Common', $cell_align);

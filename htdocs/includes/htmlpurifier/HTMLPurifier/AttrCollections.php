@@ -30,7 +30,9 @@ class HTMLPurifier_AttrCollections
                     if ($attr_i === 0 && isset($this->info[$coll_i][$attr_i])) {
                         // merge in includes
                         $this->info[$coll_i][$attr_i] = array_merge(
-                            $this->info[$coll_i][$attr_i], $attr);
+                            $this->info[$coll_i][$attr_i],
+                            $attr
+                        );
                         continue;
                     }
                     $this->info[$coll_i][$attr_i] = $attr;

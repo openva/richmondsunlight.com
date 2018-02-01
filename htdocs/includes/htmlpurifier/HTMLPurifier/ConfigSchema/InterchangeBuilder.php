@@ -35,7 +35,7 @@ class HTMLPurifier_ConfigSchema_InterchangeBuilder
         foreach ($files as $file) {
             $builder->build(
                 $interchange,
-                new HTMLPurifier_StringHash( $parser->parseFile($dir . $file) )
+                new HTMLPurifier_StringHash($parser->parseFile($dir . $file))
             );
         }
 

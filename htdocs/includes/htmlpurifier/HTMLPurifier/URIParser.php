@@ -62,7 +62,14 @@ class HTMLPurifier_URIParser
         }
 
         return new HTMLPurifier_URI(
-            $scheme, $userinfo, $host, $port, $path, $query, $fragment);
+            $scheme,
+            $userinfo,
+            $host,
+            $port,
+            $path,
+            $query,
+            $fragment
+        );
     }
 
 }

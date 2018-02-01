@@ -56,7 +56,8 @@ class HTMLPurifier_ContentSets
                     // must be recalculated each time due to
                     // changing substitutions
                     array_values($this->info),
-                $set);
+                $set
+                );
         }
         $this->values = array_values($this->info);
 
@@ -76,7 +77,10 @@ class HTMLPurifier_ContentSets
         $content_model = $def->content_model;
         if (is_string($content_model)) {
             $def->content_model = str_replace(
-                $this->keys, $this->values, $content_model);
+                $this->keys,
+                $this->values,
+                $content_model
+            );
         }
         $def->child = $this->getChildDef($def, $module);
     }

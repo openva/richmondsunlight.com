@@ -11,9 +11,9 @@
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('includes/settings.inc.php');
-include_once('includes/functions.inc.php');
-include_once('vendor/autoload.php');
+include_once 'includes/settings.inc.php';
+include_once 'includes/functions.inc.php';
+include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -33,9 +33,9 @@ $json_url = 'https://api.richmondsunlight.com/1.1/bill/' . $year . '/' . $bill .
 $json = get_content($json_url);
 if ($json === FALSE)
 {
-	header("Status: 404 Not Found\n\r");
-	include('404.php');
-	exit();
+    header("Status: 404 Not Found\n\r") ;
+    include('404.php');
+    exit();
 }
 $bill = json_decode($json);
 
@@ -44,20 +44,20 @@ $bill = json_decode($json);
 $bill = (array) $bill;
 
 if (
-	strpos($bill['number'], 'hr') !== FALSE
-	||
-	strpos($bill['number'], 'hjr') !== FALSE
-	||
-	strpos($bill['number'], 'sr') !== FALSE
-	||
-	strpos($bill['number'], 'sjr') !== FALSE
+    strpos($bill['number'], 'hr') !== FALSE
+    ||
+    strpos($bill['number'], 'hjr') !== FALSE
+    ||
+    strpos($bill['number'], 'sr') !== FALSE
+    ||
+    strpos($bill['number'], 'sjr') !== FALSE
 )
 {
-	$bill['type'] = 'resolution';
+    $bill['type'] = 'resolution';
 }
 else
 {
-	$bill['type'] = 'bill';
+    $bill['type'] = 'bill';
 }
 
 /*
@@ -68,8 +68,8 @@ $bill_text = new Bill2;
 $bill_text->bill_id = $bill['id'];
 if ($bill_text->get_terms() === TRUE)
 {
-	$html_head = $bill_text->javascript;
-	$term_pcres = $bill_text->term_pcres;
+    $html_head = $bill_text->javascript;
+    $term_pcres = $bill_text->term_pcres;
 }
 
 # Retrieve every version of this bill's text.
@@ -81,61 +81,64 @@ $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
 
-	while ($version = mysql_fetch_array($result, MYSQL_ASSOC))
-	{
+    while ($version = mysql_fetch_array($result, MYSQL_ASSOC))
+    {
 
-		$version = array_map('stripslashes', $version);
+        $version = array_map('stripslashes', $version);
 
-		# The HTML for amended versions of bills is beastly. Clean it up.
-		$version['text'] = str_replace('<center><b><br><center><b>', '<center><b>', $version['text']);
+        # The HTML for amended versions of bills is beastly. Clean it up.
+        $version['text'] = str_replace('<center><b><br><center><b>', '<center><b>', $version['text']);
 
-		# Replace every instance of a URL for a section of the state code with the URL
-		# for Virginia Decoded.
-		$version['text'] = preg_replace('/"http:\/\/leg1.state.va.us\/cgi-bin\/legp504\.exe\?000\+cod\+([0-9A-Z\.:-]+)"/',
-			'"https://vacode.org/$1/" class="code"', $version['text']);
+        # Replace every instance of a URL for a section of the state code with the URL
+        # for Virginia Decoded.
+        $version['text'] = preg_replace(
+            '/"http:\/\/leg1.state.va.us\/cgi-bin\/legp504\.exe\?000\+cod\+([0-9A-Z\.:-]+)"/',
+            '"https://vacode.org/$1/" class="code"',
+            $version['text']
+        );
 
-		# Convert the <i> tags to <em> tags in the head of the bill, so that we can pretty
-		# up the bill text without affecting the header text.  Those tags should be found
-		# within the first 20 lines of the bill's text.
-		$version['text'] = explode("\r", $version['text']);
-		for ($i=0; $i<19; $i++)
-		{
-			$version['text'][$i] = str_replace('<i>', '<em>', $version['text'][$i]);
-			$version['text'][$i] = str_replace('</i>', '</em>', $version['text'][$i]);
-			if ($i < count($version['text']))
-			{
-				break;
-			}
-		}
+        # Convert the <i> tags to <em> tags in the head of the bill, so that we can pretty
+        # up the bill text without affecting the header text.  Those tags should be found
+        # within the first 20 lines of the bill's text.
+        $version['text'] = explode("\r", $version['text']);
+        for ($i=0; $i<19; $i++)
+        {
+            $version['text'][$i] = str_replace('<i>', '<em>', $version['text'][$i]);
+            $version['text'][$i] = str_replace('</i>', '</em>', $version['text'][$i]);
+            if ($i < count($version['text']))
+            {
+                break;
+            }
+        }
 
-		# All subsequent <i> tags should become <ins> tags, and <s> tags should become
-		# <del> tags.
-		if ($bill['type'] == 'bill')
-		{
-			for ($i=20; $i<count($version['text']); $i++)
-			{
-				$version['text'][$i] = str_replace('<i>', '<ins>', $version['text'][$i]);
-				$version['text'][$i] = str_replace('</i>', '</ins>', $version['text'][$i]);
-				$version['text'][$i] = str_replace('<s>', '<del>', $version['text'][$i]);
-				$version['text'][$i] = str_replace('</s>', '</del>', $version['text'][$i]);
-			}
-		}
-		$version['text'] = implode("\r", $version['text']);
+        # All subsequent <i> tags should become <ins> tags, and <s> tags should become
+        # <del> tags.
+        if ($bill['type'] == 'bill')
+        {
+            for ($i=20; $i<count($version['text']); $i++)
+            {
+                $version['text'][$i] = str_replace('<i>', '<ins>', $version['text'][$i]);
+                $version['text'][$i] = str_replace('</i>', '</ins>', $version['text'][$i]);
+                $version['text'][$i] = str_replace('<s>', '<del>', $version['text'][$i]);
+                $version['text'][$i] = str_replace('</s>', '</del>', $version['text'][$i]);
+            }
+        }
+        $version['text'] = implode("\r", $version['text']);
 
-		# If we have a list of terms (in regular expression form), then wrap every use of
-		# that term with <span class="dictionary"></span>.
-		if (is_array($term_pcres))
-		{
-			$version['text'] = preg_replace_callback($term_pcres, 'replace_terms', $version['text']);
-		}
+        # If we have a list of terms (in regular expression form), then wrap every use of
+        # that term with <span class="dictionary"></span>.
+        if (is_array($term_pcres))
+        {
+            $version['text'] = preg_replace_callback($term_pcres, 'replace_terms', $version['text']);
+        }
 
-		# Every set of centered hyphens should become an HR.
-		$version['text'] = str_replace('<center>----------</center>', '<hr>', $version['text']);
+        # Every set of centered hyphens should become an HR.
+        $version['text'] = str_replace('<center>----------</center>', '<hr>', $version['text']);
 
-		# Save all of this to an array.
-		$versions[] = $version;
+        # Save all of this to an array.
+        $versions[] = $version;
 
-	}
+    }
 
 }
 
@@ -157,7 +160,7 @@ $page_sidebar = '
 
 if ($bill['type'] != 'resolution')
 {
-	$page_sidebar .= '
+    $page_sidebar .= '
 		<p>Words that are <span style="background-color: #98fb98;">highlighted in green</span> are
 		proposed additions to the existing law, and words that are <s style="color:
 		#c00;">crossed out in red</s> are proposed to be removed from the existing law.</p>';
@@ -176,14 +179,14 @@ $page_body = '
 # Iterate through to create the tabs.
 foreach ($versions as $version)
 {
-	$page_body .= '<li><a href="#' . $version['number'] . '">' . strtoupper($version['number']) . '</a></li>';
+    $page_body .= '<li><a href="#' . $version['number'] . '">' . strtoupper($version['number']) . '</a></li>';
 }
 $page_body .= '
 	</ul>';
 
 foreach ($versions as $version)
 {
-	$page_body .= '
+    $page_body .= '
 		<div id="' . $version['number'] . '"" class="bill-text">
 			<p style="clear: left;">' . $version['text'] . '</p>
 		</div>';

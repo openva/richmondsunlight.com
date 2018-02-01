@@ -3,7 +3,8 @@
 /**
  * Object that provides entity lookup table from entity name to character
  */
-class HTMLPurifier_EntityLookup {
+class HTMLPurifier_EntityLookup
+{
 
     /**
      * Assoc array of entity name to character represented.

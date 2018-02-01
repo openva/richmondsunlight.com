@@ -11,7 +11,13 @@
 class HTMLPurifier_URI
 {
 
-    public $scheme, $userinfo, $host, $port, $path, $query, $fragment;
+    public $scheme;
+    public $userinfo;
+    public $host;
+    public $port;
+    public $path;
+    public $query;
+    public $fragment;
 
     /**
      * @note Automatically normalizes scheme and port

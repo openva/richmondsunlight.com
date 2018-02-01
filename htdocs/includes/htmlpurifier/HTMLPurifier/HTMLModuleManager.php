@@ -47,8 +47,8 @@ class HTMLPurifier_HTMLModuleManager
     /** List of prefixes we should use for registering small names */
     public $prefixes = array('HTMLPurifier_HTMLModule_');
 
-    public $contentSets;     /**< Instance of HTMLPurifier_ContentSets */
-    public $attrCollections; /**< Instance of HTMLPurifier_AttrCollections */
+    public $contentSets;     /*< Instance of HTMLPurifier_ContentSets */
+    public $attrCollections; /*< Instance of HTMLPurifier_AttrCollections */
 
     /** If set to true, unsafe elements and attributes will be allowed */
     public $trusted = false;
@@ -71,7 +71,8 @@ class HTMLPurifier_HTMLModuleManager
 
         // setup basic doctypes
         $this->doctypes->register(
-            'HTML 4.01 Transitional', false,
+            'HTML 4.01 Transitional',
+            false,
             array_merge($common, $transitional, $non_xml),
             array('Tidy_Transitional', 'Tidy_Proprietary'),
             array(),
@@ -80,7 +81,8 @@ class HTMLPurifier_HTMLModuleManager
         );
 
         $this->doctypes->register(
-            'HTML 4.01 Strict', false,
+            'HTML 4.01 Strict',
+            false,
             array_merge($common, $non_xml),
             array('Tidy_Strict', 'Tidy_Proprietary'),
             array(),
@@ -89,7 +91,8 @@ class HTMLPurifier_HTMLModuleManager
         );
 
         $this->doctypes->register(
-            'XHTML 1.0 Transitional', true,
+            'XHTML 1.0 Transitional',
+            true,
             array_merge($common, $transitional, $xml, $non_xml),
             array('Tidy_Transitional', 'Tidy_XHTML', 'Tidy_Proprietary'),
             array(),
@@ -98,7 +101,8 @@ class HTMLPurifier_HTMLModuleManager
         );
 
         $this->doctypes->register(
-            'XHTML 1.0 Strict', true,
+            'XHTML 1.0 Strict',
+            true,
             array_merge($common, $xml, $non_xml),
             array('Tidy_Strict', 'Tidy_XHTML', 'Tidy_Strict', 'Tidy_Proprietary'),
             array(),
@@ -107,7 +111,8 @@ class HTMLPurifier_HTMLModuleManager
         );
 
         $this->doctypes->register(
-            'XHTML 1.1', true,
+            'XHTML 1.1',
+            true,
             array_merge($common, $xml, array('Ruby')),
             array('Tidy_Strict', 'Tidy_XHTML', 'Tidy_Proprietary', 'Tidy_Strict'), // Tidy_XHTML1_1
             array(),
@@ -153,8 +158,10 @@ class HTMLPurifier_HTMLModuleManager
             if (!$ok) {
                 $module = $original_module;
                 if (!class_exists($module)) {
-                    trigger_error($original_module . ' module does not exist',
-                        E_USER_ERROR);
+                    trigger_error(
+                        $original_module . ' module does not exist',
+                        E_USER_ERROR
+                    );
                     return;
                 }
             }

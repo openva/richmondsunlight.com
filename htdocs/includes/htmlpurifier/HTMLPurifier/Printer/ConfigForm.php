@@ -34,7 +34,9 @@ class HTMLPurifier_Printer_ConfigForm extends HTMLPurifier_Printer
      * @param $compress Integer max length before compressing a directive name, set to false to turn off
      */
     public function __construct(
-        $name, $doc_url = null, $compress = false
+        $name,
+        $doc_url = null,
+        $compress = false
     ) {
         parent::__construct();
         $this->docURL = $doc_url;
@@ -185,7 +187,8 @@ class HTMLPurifier_Printer_ConfigForm extends HTMLPurifier_Printer
 /**
  * Printer decorator for directives that accept null
  */
-class HTMLPurifier_Printer_ConfigForm_NullDecorator extends HTMLPurifier_Printer {
+class HTMLPurifier_Printer_ConfigForm_NullDecorator extends HTMLPurifier_Printer
+{
     /**
      * Printer being decorated
      */
@@ -235,7 +238,8 @@ class HTMLPurifier_Printer_ConfigForm_NullDecorator extends HTMLPurifier_Printer
 /**
  * Swiss-army knife configuration form field printer
  */
-class HTMLPurifier_Printer_ConfigForm_default extends HTMLPurifier_Printer {
+class HTMLPurifier_Printer_ConfigForm_default extends HTMLPurifier_Printer
+{
     public $cols = 18;
     public $rows = 5;
     public function render($ns, $directive, $value, $name, $config) {
@@ -262,6 +266,7 @@ class HTMLPurifier_Printer_ConfigForm_default extends HTMLPurifier_Printer {
                     foreach ($array as $val => $b) {
                         $value[] = $val;
                     }
+                    // no break
                 case HTMLPurifier_VarParser::ALIST:
                     $value = implode(PHP_EOL, $value);
                     break;
@@ -317,7 +322,8 @@ class HTMLPurifier_Printer_ConfigForm_default extends HTMLPurifier_Printer {
 /**
  * Bool form field printer
  */
-class HTMLPurifier_Printer_ConfigForm_bool extends HTMLPurifier_Printer {
+class HTMLPurifier_Printer_ConfigForm_bool extends HTMLPurifier_Printer
+{
     public function render($ns, $directive, $value, $name, $config) {
         if (is_array($config) && isset($config[0])) {
             $gen_config = $config[0];

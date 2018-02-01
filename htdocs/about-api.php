@@ -1,32 +1,32 @@
 <?php
 
-	###
-	# About the API
-	#
-	# PURPOSE
-	# Describes the APIs that are available
-	#
-	# NOTES
-	# None.
-	#
-	# TODO
-	# None.
-	#
-	###
+    ###
+    # About the API
+    #
+    # PURPOSE
+    # Describes the APIs that are available
+    #
+    # NOTES
+    # None.
+    #
+    # TODO
+    # None.
+    #
+    ###
 
-	# INCLUDES
-	# Include any files or libraries that are necessary for this specific
-	# page to function.
-	include_once('settings.inc.php');
-	include_once('functions.inc.php');
-	include_once('vendor/autoload.php');
+    # INCLUDES
+    # Include any files or libraries that are necessary for this specific
+    # page to function.
+    include_once 'settings.inc.php';
+    include_once 'functions.inc.php';
+    include_once 'vendor/autoload.php';
 
-	# PAGE METADATA
-	$page_title = 'API v1.0';
-	$site_section = 'about';
+    # PAGE METADATA
+    $page_title = 'API v1.0';
+    $site_section = 'about';
 
-	# SIDEBAR CONTENT
-	$page_sidebar = <<<EOD
+    # SIDEBAR CONTENT
+    $page_sidebar = <<<EOD
 
 	<h3>What is “JSON”?</h3>
 	<div class="box">
@@ -64,8 +64,8 @@
 
 EOD;
 
-	# PAGE CONTENT
-	$page_body = <<<EOD
+    # PAGE CONTENT
+    $page_body = <<<EOD
 
 				<p>The v1.0 release of Richmond Sunlight’s API provides a series of JSON-based web
 				services. (It also supports JSONP and its associated callback function.) The
@@ -211,13 +211,13 @@ EOD;
 
 EOD;
 
-	# OUTPUT THE PAGE
-	/*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
-		'&site_section='.urlencode($site_section));*/
+    # OUTPUT THE PAGE
+    /*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
+        '&site_section='.urlencode($site_section));*/
 
-	$page = new Page;
-	$page->page_title = $page_title;
-	$page->page_body = $page_body;
-	$page->page_sidebar = $page_sidebar;
-	$page->site_section = $site_section;
-	$page->process();
+    $page = new Page;
+    $page->page_title = $page_title;
+    $page->page_body = $page_body;
+    $page->page_sidebar = $page_sidebar;
+    $page->site_section = $site_section;
+    $page->process();

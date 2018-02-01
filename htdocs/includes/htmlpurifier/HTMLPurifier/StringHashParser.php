@@ -79,7 +79,8 @@ class HTMLPurifier_StringHashParser
                 // Multiline declaration
                 $state = trim($line, '- ');
                 continue;
-            } elseif (!$state) {
+            }
+            if (!$state) {
                 $single = true;
                 if (strpos($line, ':') !== false) {
                     // Single-line declaration

@@ -17,9 +17,9 @@
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('settings.inc.php');
-include_once('includes/functions.inc.php');
-include_once('vendor/autoload.php');
+include_once 'settings.inc.php';
+include_once 'includes/functions.inc.php';
+include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -53,12 +53,12 @@ $sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber,
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-	$bill = mysql_fetch_array($result);
-	$bill = array_map('stripslashes', $bill);
-	$bill['word_count'] = str_word_count($bill['full_text']);
-	$bill['patron_suffix'] = '('.$bill['patron_party'].'-'.$bill['patron_district'].')';
-	if ($bill['patron_chamber'] == 'house') $bill['patron_prefix'] = 'Rep.';
-	elseif ($bill['patron_chamber'] == 'senate') $bill['patron_prefix'] = 'Sen.';
+    $bill = mysql_fetch_array($result);
+    $bill = array_map('stripslashes', $bill);
+    $bill['word_count'] = str_word_count($bill['full_text']);
+    $bill['patron_suffix'] = '('.$bill['patron_party'].'-'.$bill['patron_district'].')';
+    if ($bill['patron_chamber'] == 'house') $bill['patron_prefix'] = 'Rep.';
+    elseif ($bill['patron_chamber'] == 'senate') $bill['patron_prefix'] = 'Sen.';
 }
 
 # PAGE METADATA
@@ -85,13 +85,13 @@ $result = mysql_query($sql);
 $page_body .= '<ul>';
 while ($history = mysql_fetch_array($result))
 {
-	$page_body .= '<li>'.$history['date'].' '.$history['status'].'</li>';
+    $page_body .= '<li>'.$history['date'].' '.$history['status'].'</li>';
 }
 $page_body .= '</ul>';
 
 # OUTPUT THE PAGE
 /*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
-	'&site_section='.urlencode($site_section));*/
+    '&site_section='.urlencode($site_section));*/
 
 $page = new Page;
 $page->page_title = $page_title;

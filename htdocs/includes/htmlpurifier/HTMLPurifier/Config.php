@@ -121,14 +121,18 @@ class HTMLPurifier_Config
         if (!$this->finalized && $this->autoFinalize) $this->finalize();
         if (!isset($this->def->info[$namespace][$key])) {
             // can't add % due to SimpleTest bug
-            trigger_error('Cannot retrieve value of undefined directive ' . htmlspecialchars("$namespace.$key"),
-                E_USER_WARNING);
+            trigger_error(
+                'Cannot retrieve value of undefined directive ' . htmlspecialchars("$namespace.$key"),
+                E_USER_WARNING
+            );
             return;
         }
         if (isset($this->def->info[$namespace][$key]->isAlias)) {
             $d = $this->def->info[$namespace][$key];
-            trigger_error('Cannot get value from aliased directive, use real name ' . $d->namespace . '.' . $d->name,
-                E_USER_ERROR);
+            trigger_error(
+                'Cannot get value from aliased directive, use real name ' . $d->namespace . '.' . $d->name,
+                E_USER_ERROR
+            );
             return;
         }
         return $this->conf[$namespace][$key];
@@ -141,8 +145,10 @@ class HTMLPurifier_Config
     public function getBatch($namespace) {
         if (!$this->finalized && $this->autoFinalize) $this->finalize();
         if (!isset($this->def->info[$namespace])) {
-            trigger_error('Cannot retrieve undefined namespace ' . htmlspecialchars($namespace),
-                E_USER_WARNING);
+            trigger_error(
+                'Cannot retrieve undefined namespace ' . htmlspecialchars($namespace),
+                E_USER_WARNING
+            );
             return;
         }
         return $this->conf[$namespace];
@@ -192,8 +198,10 @@ class HTMLPurifier_Config
     public function set($namespace, $key, $value, $from_alias = false) {
         if ($this->isFinalized('Cannot set directive after finalization')) return;
         if (!isset($this->def->info[$namespace][$key])) {
-            trigger_error('Cannot set undefined directive ' . htmlspecialchars("$namespace.$key") . ' to value',
-                E_USER_WARNING);
+            trigger_error(
+                'Cannot set undefined directive ' . htmlspecialchars("$namespace.$key") . ' to value',
+                E_USER_WARNING
+            );
             return;
         }
         $def = $this->def->info[$namespace][$key];
@@ -204,9 +212,12 @@ class HTMLPurifier_Config
                     'ConfigSchema bug with' . "$namespace.$key", E_USER_ERROR);
                 return;
             }
-            $this->set($new_ns  = $def->namespace,
+            $this->set(
+                $new_ns  = $def->namespace,
                        $new_dir = $def->name,
-                       $value, true);
+                       $value,
+                true
+            );
             trigger_error("$namespace.$key is an alias, preferred directive name is $new_ns.$new_dir", E_USER_NOTICE);
             return;
         }

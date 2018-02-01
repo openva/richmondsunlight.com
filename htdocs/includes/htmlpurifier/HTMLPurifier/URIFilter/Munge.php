@@ -4,7 +4,10 @@ class HTMLPurifier_URIFilter_Munge extends HTMLPurifier_URIFilter
 {
     public $name = 'Munge';
     public $post = true;
-    private $target, $parser, $doEmbed, $secretKey;
+    private $target;
+    private $parser;
+    private $doEmbed;
+    private $secretKey;
 
     protected $replace = array();
 

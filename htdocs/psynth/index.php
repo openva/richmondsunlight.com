@@ -128,24 +128,28 @@
 		</div>
 
 <?php
-	if (!empty($_POST['email']))
-	{
+    if (!empty($_POST['email']))
+    {
 
-		mail('waldo@jaquith.org', 'Photosynthesis Beta Registrant', $_POST['email'].' '
-			.$_SERVER['REMOTE_ADDR'],
-			'From: Richmond Sunlight <do_not_reply@richmondsunlight.com>');
+        mail(
+            'waldo@jaquith.org',
+            'Photosynthesis Beta Registrant',
+            $_POST['email'].' '
+            .$_SERVER['REMOTE_ADDR'],
+            'From: Richmond Sunlight <do_not_reply@richmondsunlight.com>'
+        );
 
-		?>
+        ?>
 		<div id="confirmation">
 			<h2>You&rsquo;re Registered!</h2>
 			<p>Thank you for registering for the beta test. You will be contacted
 			within a few days with your access information.</p>
 		</div>
 		<?php
-	}
+    }
 
-	else
-	{
+    else
+    {
 ?>
 
 		<div id="pitch1">
@@ -196,7 +200,7 @@
 			</div>
 		</div>
 <?php
-	}
+    }
 ?>
 		<div id="footer">
 			<p>A program of the <a

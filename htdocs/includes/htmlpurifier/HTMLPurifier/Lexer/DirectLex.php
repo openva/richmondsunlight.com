@@ -32,8 +32,11 @@ class HTMLPurifier_Lexer_DirectLex extends HTMLPurifier_Lexer
         // our "armor" heurstic is a < sign any number of whitespaces after
         // the first script tag
         if ($config->get('HTML', 'Trusted')) {
-            $html = preg_replace_callback('#(<script[^>]*>)(\s*[^<].+?)(</script>)#si',
-                array($this, 'scriptCallback'), $html);
+            $html = preg_replace_callback(
+                '#(<script[^>]*>)(\s*[^<].+?)(</script>)#si',
+                array($this, 'scriptCallback'),
+                $html
+            );
         }
 
         $html = $this->normalize($html, $config, $context);
@@ -94,7 +97,9 @@ class HTMLPurifier_Lexer_DirectLex extends HTMLPurifier_Lexer
                     HTMLPurifier_Token_Text(
                         $this->parseData(
                             substr(
-                                $html, $cursor, $position_next_lt - $cursor
+                                $html,
+                                $cursor,
+                                $position_next_lt - $cursor
                             )
                         )
                     );
@@ -106,7 +111,8 @@ class HTMLPurifier_Lexer_DirectLex extends HTMLPurifier_Lexer
                 $cursor  = $position_next_lt + 1;
                 $inside_tag = true;
                 continue;
-            } elseif (!$inside_tag) {
+            }
+            if (!$inside_tag) {
                 // We are not inside tag but there are no more tags
                 // If we're already at the end, break
                 if ($cursor === strlen($html)) break;
@@ -115,14 +121,16 @@ class HTMLPurifier_Lexer_DirectLex extends HTMLPurifier_Lexer
                     HTMLPurifier_Token_Text(
                         $this->parseData(
                             substr(
-                                $html, $cursor
+                                $html,
+                                $cursor
                             )
                         )
                     );
                 if ($maintain_line_numbers) $token->line = $current_line;
                 $array[] = $token;
                 break;
-            } elseif ($inside_tag && $position_next_gt !== false) {
+            }
+            if ($inside_tag && $position_next_gt !== false) {
                 // We are in tag and it is well formed
                 // Grab the internals of the tag
                 $strlen_segment = $position_next_gt - $cursor;
@@ -163,7 +171,9 @@ class HTMLPurifier_Lexer_DirectLex extends HTMLPurifier_Lexer
                     $token = new
                         HTMLPurifier_Token_Comment(
                             substr(
-                                $segment, 3, $strlen_segment - 3
+                                $segment,
+                                3,
+                                $strlen_segment - 3
                             )
                         );
                     if ($maintain_line_numbers) {
@@ -177,7 +187,7 @@ class HTMLPurifier_Lexer_DirectLex extends HTMLPurifier_Lexer
                 }
 
                 // Check if it's an end tag
-                $is_end_tag = (strpos($segment,'/') === 0);
+                $is_end_tag = (strpos($segment, '/') === 0);
                 if ($is_end_tag) {
                     $type = substr($segment, 1);
                     $token = new HTMLPurifier_Token_End($type);
@@ -219,7 +229,7 @@ class HTMLPurifier_Lexer_DirectLex extends HTMLPurifier_Lexer
                 // trailing slash. Remember, we could have a tag like <br>, so
                 // any later token processing scripts must convert improperly
                 // classified EmptyTags from StartTags.
-                $is_self_closing = (strrpos($segment,'/') === $strlen_segment-1);
+                $is_self_closing = (strrpos($segment, '/') === $strlen_segment-1);
                 if ($is_self_closing) {
                     $strlen_segment--;
                     $segment = substr($segment, 0, $strlen_segment);
@@ -249,13 +259,15 @@ class HTMLPurifier_Lexer_DirectLex extends HTMLPurifier_Lexer
                 $attribute_string =
                     trim(
                         substr(
-                            $segment, $position_first_space
+                            $segment,
+                            $position_first_space
                         )
                     );
                 if ($attribute_string) {
                     $attr = $this->parseAttributeString(
-                                    $attribute_string
-                                  , $config, $context
+                                    $attribute_string,
+                        $config,
+                        $context
                               );
                 } else {
                     $attr = array();
@@ -335,7 +347,8 @@ class HTMLPurifier_Lexer_DirectLex extends HTMLPurifier_Lexer
         if ($num_equal === 0 && !$has_space) {
             // bool attribute
             return array($string => $string);
-        } elseif ($num_equal === 1 && !$has_space) {
+        }
+        if ($num_equal === 1 && !$has_space) {
             // only one attribute
             list($key, $quoted_value) = explode('=', $string);
             $quoted_value = trim($quoted_value);
@@ -350,7 +363,7 @@ class HTMLPurifier_Lexer_DirectLex extends HTMLPurifier_Lexer
             $same_quote = ($first_char == $last_char);
             $open_quote = ($first_char == '"' || $first_char == "'");
 
-            if ( $same_quote && $open_quote) {
+            if ($same_quote && $open_quote) {
                 // well behaved
                 $value = substr($quoted_value, 1, strlen($quoted_value) - 2);
             } else {

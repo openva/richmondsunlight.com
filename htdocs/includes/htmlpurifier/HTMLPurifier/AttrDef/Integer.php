@@ -31,7 +31,9 @@ class HTMLPurifier_AttrDef_Integer extends HTMLPurifier_AttrDef
      * @param $positive Bool indicating whether or not positive values are allowed
      */
     public function __construct(
-        $negative = true, $zero = true, $positive = true
+        $negative = true,
+        $zero = true,
+        $positive = true
     ) {
         $this->negative = $negative;
         $this->zero     = $zero;
@@ -47,10 +49,10 @@ class HTMLPurifier_AttrDef_Integer extends HTMLPurifier_AttrDef
         // certain fringe cases that must not return an integer.
 
         // clip leading sign
-        if ( $this->negative && $integer[0] === '-' ) {
+        if ($this->negative && $integer[0] === '-') {
             $digits = substr($integer, 1);
             if ($digits === '0') $integer = '0'; // rm minus sign for zero
-        } elseif( $this->positive && $integer[0] === '+' ) {
+        } elseif($this->positive && $integer[0] === '+') {
             $digits = $integer = substr($integer, 1); // rm unnecessary plus
         } else {
             $digits = $integer;

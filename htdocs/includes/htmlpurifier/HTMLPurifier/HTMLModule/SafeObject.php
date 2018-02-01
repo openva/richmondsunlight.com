@@ -33,7 +33,11 @@ class HTMLPurifier_HTMLModule_SafeObject extends HTMLPurifier_HTMLModule
         );
         $object->attr_transform_post[] = new HTMLPurifier_AttrTransform_SafeObject();
 
-        $param = $this->addElement('param', false, 'Empty', false,
+        $param = $this->addElement(
+            'param',
+            false,
+            'Empty',
+            false,
             array(
                 'id' => 'ID',
                 'name*' => 'Text',

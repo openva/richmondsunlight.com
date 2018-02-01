@@ -16,7 +16,7 @@
 # page to function.
 require_once 'includes/settings.inc.php';
 require_once 'includes/functions.inc.php';
-include_once('vendor/autoload.php');
+include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -28,7 +28,7 @@ $database->connect_old();
 $section = mysql_escape_string(urldecode($_REQUEST['section']));
 if (isset($_REQUEST['callback']) && !empty($_REQUEST['callback']))
 {
-	$callback = $_REQUEST['callback'];
+    $callback = $_REQUEST['callback'];
 }
 
 # Select the bill data from the database.
@@ -50,9 +50,9 @@ $bill = mysql_fetch_array($result, MYSQL_ASSOC);
 # and indexed arrays.
 while ($bill = mysql_fetch_array($result, MYSQL_ASSOC))
 {
-	$bill['url'] = 'http://www.richmondsunlight.com/bill/'.$bill['year'].'/'.$bill['number'].'/';
-	$bill['number'] = strtoupper($bill['number']);
-	$bills[] = array_map('stripslashes', $bill);
+    $bill['url'] = 'http://www.richmondsunlight.com/bill/'.$bill['year'].'/'.$bill['number'].'/';
+    $bill['number'] = strtoupper($bill['number']);
+    $bills[] = array_map('stripslashes', $bill);
 }
 
 # Send an HTTP header defining the content as JSON.
@@ -62,12 +62,10 @@ header('Content-type: application/json');
 # JSON in parentheses.
 if (isset($callback))
 {
-	echo $callback.' (';
+    echo $callback.' (';
 }
 echo json_encode($bills);
 if (isset($callback))
 {
-	echo ');';
+    echo ');';
 }
-
-?>

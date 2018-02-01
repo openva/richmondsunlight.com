@@ -3,8 +3,9 @@
 /**
  * Abstract base token class that all others inherit from.
  */
-class HTMLPurifier_Token {
-    public $line; /**< Line number node was on in source document. Null if unknown. */
+class HTMLPurifier_Token
+{
+    public $line; /*< Line number node was on in source document. Null if unknown. */
 
     /**
      * Lookup array of processing that this token is exempt from.

@@ -1,26 +1,26 @@
 <?php
 
-	###
-	# 404 Error
-	#
-	# PURPOSE
-	# A straight-up 404 page.
-	#
-	###
+    ###
+    # 404 Error
+    #
+    # PURPOSE
+    # A straight-up 404 page.
+    #
+    ###
 
-	# INCLUDES
-	# Include any files or libraries that are necessary for this specific
-	# page to function.
-	include_once('settings.inc.php');
-	include_once('functions.inc.php');
-	include_once('vendor/autoload.php');
+    # INCLUDES
+    # Include any files or libraries that are necessary for this specific
+    # page to function.
+    include_once 'settings.inc.php';
+    include_once 'functions.inc.php';
+    include_once 'vendor/autoload.php';
 
-	# PAGE METADATA
-	$page_title = 'Page Not Found';
-	$site_section = '';
+    # PAGE METADATA
+    $page_title = 'Page Not Found';
+    $site_section = '';
 
-	# PAGE CONTENT
-	$page_body = <<<EOD
+    # PAGE CONTENT
+    $page_body = <<<EOD
 		<p>We're sorry, the page you've attempted to load cannot be found.</p>
 
 		<h2>Cause</h2>
@@ -45,15 +45,13 @@
 
 EOD;
 
-	# OUTPUT THE PAGE
-	/*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
-		'&site_section='.urlencode($site_section));*/
+    # OUTPUT THE PAGE
+    /*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
+        '&site_section='.urlencode($site_section));*/
 
-	$page = new Page;
-	$page->page_title = $page_title;
-	$page->page_body = $page_body;
-	$page->page_sidebar = $page_sidebar;
-	$page->site_section = $site_section;
-	$page->process();
-
-?>
+    $page = new Page;
+    $page->page_title = $page_title;
+    $page->page_body = $page_body;
+    $page->page_sidebar = $page_sidebar;
+    $page->site_section = $site_section;
+    $page->process();

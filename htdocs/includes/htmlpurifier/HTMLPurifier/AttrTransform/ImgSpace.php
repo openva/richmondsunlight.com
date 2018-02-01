@@ -3,7 +3,8 @@
 /**
  * Pre-transform that changes deprecated hspace and vspace attributes to CSS
  */
-class HTMLPurifier_AttrTransform_ImgSpace extends HTMLPurifier_AttrTransform {
+class HTMLPurifier_AttrTransform_ImgSpace extends HTMLPurifier_AttrTransform
+{
 
     protected $attr;
     protected $css = array(

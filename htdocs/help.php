@@ -1,40 +1,40 @@
 <?php
 
-	###
-	# Help System
-	#
-	# PURPOSE
-	# Display the data that will consistute the "help" system.
-	#
-	# NOTES
-	# This does not use the standard template but, rather, a more stripped-down version.
-	#
-	###
+    ###
+    # Help System
+    #
+    # PURPOSE
+    # Display the data that will consistute the "help" system.
+    #
+    # NOTES
+    # This does not use the standard template but, rather, a more stripped-down version.
+    #
+    ###
 
-	# INCLUDES
-	# Include any files or libraries that are necessary for this specific
-	# page to function.
-	include_once('includes/settings.inc.php');
-	include_once('includes/functions.inc.php');
-	include_once('vendor/autoload.php');
+    # INCLUDES
+    # Include any files or libraries that are necessary for this specific
+    # page to function.
+    include_once 'includes/settings.inc.php';
+    include_once 'includes/functions.inc.php';
+    include_once 'vendor/autoload.php';
 
-	# LOCALIZE VARIABLES
-	$topic = $_REQUEST['topic'];
+    # LOCALIZE VARIABLES
+    $topic = $_REQUEST['topic'];
 
-	# PAGE METADATA
-	$page_title = 'Help with ' . ucwords(str_replace('-', ' ', $topic));
-	$site_section = '';
-	$template = 'help';
+    # PAGE METADATA
+    $page_title = 'Help with ' . ucwords(str_replace('-', ' ', $topic));
+    $site_section = '';
+    $template = 'help';
 
-	# PAGE CONTENT
+    # PAGE CONTENT
 
-	# Use the $topic variable to determine which help information to provide.
-	switch ($topic)
-	{
+    # Use the $topic variable to determine which help information to provide.
+    switch ($topic)
+    {
 
-		# How to use tags.
-		case 'tags':
-			$page_body = <<<EOD
+        # How to use tags.
+        case 'tags':
+            $page_body = <<<EOD
 				<p>Tags are simple, objective words that describe a bill. The purpose of
 				them is to describe bills in a way using plainer, more accessible
 				language than the legalese employed by lawmakers.  It makes it easier
@@ -84,12 +84,12 @@
 				<p>In summary: keep it simple, be objective, and try to follow existing
 				standards.</p>
 EOD;
-			break;
+            break;
 
 
-		# How to interpret a tag cloud.
-		case 'tag-clouds':
-			$page_body = <<<EOD
+        # How to interpret a tag cloud.
+        case 'tag-clouds':
+            $page_body = <<<EOD
 				<p>A “tag cloud” is a visual description of what a group of
 				bills tend to be about, with the size of each word indicating how common
 				each word is.  The tags are entered on each bill’s page, entered
@@ -124,12 +124,12 @@ EOD;
 				by party, by committee, or really any other legislative grouping.</p>
 
 EOD;
-		break;
+        break;
 
 
-		# How to read the status checkboxes.
-		case 'status-checkboxes':
-			$page_body = <<<EOD
+        # How to read the status checkboxes.
+        case 'status-checkboxes':
+            $page_body = <<<EOD
 				<p>The bill status checkboxes provide an at-a-glance indication of
 				where a bill is in its path between being proposed and becoming law.
 				It's very simplified. No bill actually follows such straightforward
@@ -141,12 +141,12 @@ EOD;
 					<li>A blank box indicates that the bill has not reached that step.</li>
 				</ul>
 EOD;
-		break;
+        break;
 
 
-		# How to read the status checkboxes.
-		case 'poll':
-			$page_body = <<<EOD
+        # How to read the status checkboxes.
+        case 'poll':
+            $page_body = <<<EOD
 				<p>The interactive voting system on every bill’s page (“Do you
 				support this bill in its current form?”) is a <em>public</em>
 				vote. That is to say that it has nothing at all to do with the actual vote
@@ -154,12 +154,12 @@ EOD;
 				and measures nothing more than the whims of the people who bothered to
 				click a little button.</p>
 EOD;
-		break;
+        break;
 
 
-		# How to read the status checkboxes.
-		case 'aggregated-poll':
-			$page_body = <<<EOD
+        # How to read the status checkboxes.
+        case 'aggregated-poll':
+            $page_body = <<<EOD
 				<p>This is the collective result of the per-bill polls offered on
 				each bill’s page.</p>
 
@@ -177,9 +177,10 @@ EOD;
 EOD;
 
 
-		# How to read the partisanship graph.
-		case 'partisanship':
-			$page_body = <<<EOD
+        # How to read the partisanship graph.
+        // no break
+        case 'partisanship':
+            $page_body = <<<EOD
 				<p>This is a measure of where a legislator is on the left-to-right political
 				spectrum.</p>
 
@@ -197,7 +198,7 @@ EOD;
 				graphically.</p>
 EOD;
 
-	}
+    }
 
 $page = new Page;
 $page->page_title = $page_title;
@@ -206,5 +207,3 @@ $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
 $page->template = $template;
 $page->process();
-
-?>

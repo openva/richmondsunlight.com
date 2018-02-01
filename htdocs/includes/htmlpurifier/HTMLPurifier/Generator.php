@@ -96,23 +96,33 @@ class HTMLPurifier_Generator
             trigger_error('Cannot generate HTML from non-HTMLPurifier_Token object', E_USER_WARNING);
             return '';
 
-        } elseif ($token instanceof HTMLPurifier_Token_Start) {
+        }
+
+        if ($token instanceof HTMLPurifier_Token_Start) {
             $attr = $this->generateAttributes($token->attr, $token->name);
             return '<' . $token->name . ($attr ? ' ' : '') . $attr . '>';
 
-        } elseif ($token instanceof HTMLPurifier_Token_End) {
+        }
+
+        if ($token instanceof HTMLPurifier_Token_End) {
             return '</' . $token->name . '>';
 
-        } elseif ($token instanceof HTMLPurifier_Token_Empty) {
+        }
+
+        if ($token instanceof HTMLPurifier_Token_Empty) {
             $attr = $this->generateAttributes($token->attr, $token->name);
              return '<' . $token->name . ($attr ? ' ' : '') . $attr .
-                ( $this->_xhtml ? ' /': '' ) // <br /> v. <br>
+                ($this->_xhtml ? ' /' : '') // <br /> v. <br>
                 . '>';
 
-        } elseif ($token instanceof HTMLPurifier_Token_Text) {
+        }
+
+        if ($token instanceof HTMLPurifier_Token_Text) {
             return $this->escape($token->data, ENT_NOQUOTES);
 
-        } elseif ($token instanceof HTMLPurifier_Token_Comment) {
+        }
+
+        if ($token instanceof HTMLPurifier_Token_Comment) {
             return '<!--' . $token->data . '-->';
         } else {
             return '';

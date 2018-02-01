@@ -137,7 +137,9 @@ class HTMLPurifier_HTMLModule
         if ($type) $this->addElementToContentSet($element, $type);
         // create element
         $this->info[$element] = HTMLPurifier_ElementDef::create(
-            $content_model, $content_model_type, $attr
+            $content_model,
+            $content_model_type,
+            $attr
         );
         // literal object $contents means direct child manipulation
         if (!is_string($contents)) $this->info[$element]->child = $contents;

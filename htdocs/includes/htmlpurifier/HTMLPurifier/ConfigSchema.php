@@ -3,7 +3,8 @@
 /**
  * Configuration definition, defines directives and their defaults.
  */
-class HTMLPurifier_ConfigSchema {
+class HTMLPurifier_ConfigSchema
+{
 
     /**
      * Defaults of the directives and namespaces.
@@ -45,7 +46,7 @@ class HTMLPurifier_ConfigSchema {
     /**
      * Application-wide singleton
      */
-    static protected $singleton;
+    protected static $singleton;
 
     /**
      * Unserializes the default ConfigSchema.

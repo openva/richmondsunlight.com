@@ -11,9 +11,9 @@
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('includes/settings.inc.php');
-include_once('includes/functions.inc.php');
-include_once('vendor/autoload.php');
+include_once 'includes/settings.inc.php';
+include_once 'includes/functions.inc.php';
+include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -71,22 +71,22 @@ $sql = 'SELECT id, shortname, name, chamber, meeting_time,
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-		$page_body .= '
+        $page_body .= '
 					<div class="right_side">
 						<h2>Senate</h2>
 						<ul>';
-	while ($committee = mysql_fetch_array($result))
-	{
-		$committee = array_map('stripslashes', $committee);
-		$page_body .= '<li><a href="/committee/senate/'.$committee['shortname'].'/">'.$committee['name'].'</a>';
-		if ($committee['count'] > 0)
-		{
-			$page_body .= ' (<a href="/bills/committee/'.$committee['chamber'].'/'.$committee['shortname'].'/"
+    while ($committee = mysql_fetch_array($result))
+    {
+        $committee = array_map('stripslashes', $committee);
+        $page_body .= '<li><a href="/committee/senate/'.$committee['shortname'].'/">'.$committee['name'].'</a>';
+        if ($committee['count'] > 0)
+        {
+            $page_body .= ' (<a href="/bills/committee/'.$committee['chamber'].'/'.$committee['shortname'].'/"
 			title="Bills before this committee">'.$committee['count'].'</a>)';
-		}
-		$page_body .= '</li>';
-	}
-	$page_body .= '
+        }
+        $page_body .= '</li>';
+    }
+    $page_body .= '
 						</ul>
 					</div>';
 }
@@ -107,29 +107,29 @@ $sql = 'SELECT id, shortname, name, chamber, meeting_time,
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-		$page_body .= '
+        $page_body .= '
 					<div class="left_side">
 						<h2>House</h2>
 						<ul>';
-	while ($committee = mysql_fetch_array($result))
-	{
-		$committee = array_map('stripslashes', $committee);
-		$page_body .= '<li><a href="/committee/house/'.$committee['shortname'].'/">'.$committee['name'].'</a>';
-		if ($committee['count'] > 0)
-		{
-			$page_body .= ' (<a href="/bills/committee/'.$committee['chamber'].'/'.$committee['shortname'].'/"
+    while ($committee = mysql_fetch_array($result))
+    {
+        $committee = array_map('stripslashes', $committee);
+        $page_body .= '<li><a href="/committee/house/'.$committee['shortname'].'/">'.$committee['name'].'</a>';
+        if ($committee['count'] > 0)
+        {
+            $page_body .= ' (<a href="/bills/committee/'.$committee['chamber'].'/'.$committee['shortname'].'/"
 			title="Bills before this committee">'.$committee['count'].'</a>)';
-		}
-		$page_body .= '</li>';
-	}
-	$page_body .= '
+        }
+        $page_body .= '</li>';
+    }
+    $page_body .= '
 						</ul>
 					</div>';
 }
 
 # OUTPUT THE PAGE
 /*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
-	'&site_section='.urlencode($site_section));*/
+    '&site_section='.urlencode($site_section));*/
 
 $page = new Page;
 $page->page_title = $page_title;
@@ -137,5 +137,3 @@ $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
 $page->process();
-
-?>

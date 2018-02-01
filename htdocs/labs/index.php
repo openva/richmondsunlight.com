@@ -1,33 +1,33 @@
 <?php
 
-	###
-	# Labs
-	#
-	# PURPOSE
-	# Information about the API, experimental work, etc.
-	#
-	# NOTES
-	# None.
-	#
-	# TODO
-	# * Provide a ZIP file (generated on the fly?) of the images of every member of the house and
-	#   senate.
-	# * Add the bill XML, though not until first making sure that it's using a standard DOCTYPE.
-	#
-	###
+    ###
+    # Labs
+    #
+    # PURPOSE
+    # Information about the API, experimental work, etc.
+    #
+    # NOTES
+    # None.
+    #
+    # TODO
+    # * Provide a ZIP file (generated on the fly?) of the images of every member of the house and
+    #   senate.
+    # * Add the bill XML, though not until first making sure that it's using a standard DOCTYPE.
+    #
+    ###
 
-	# INCLUDES
-	# Include any files or libraries that are necessary for this specific
-	# page to function.
-	include_once('../includes/settings.inc.php');
-	include_once('../includes/functions.inc.php');
+    # INCLUDES
+    # Include any files or libraries that are necessary for this specific
+    # page to function.
+    include_once '../includes/settings.inc.php';
+    include_once '../includes/functions.inc.php';
 
-	# PAGE METADATA
-	$page_title = 'Labs';
-	$site_section = 'labs';
+    # PAGE METADATA
+    $page_title = 'Labs';
+    $site_section = 'labs';
 
-	# PAGE CONTENT
-	$page_body = <<<EOD
+    # PAGE CONTENT
+    $page_body = <<<EOD
 
 		<h2>Vote CSV</h2>
 		<p>Each legislator’s voting record is available, by year, as a CSV file. (No XML yet.)
@@ -61,7 +61,7 @@
 
 EOD;
 
-	$page_sidebar = <<<EOD
+    $page_sidebar = <<<EOD
 
 		<h3>About</h3>
 		<div class="box">
@@ -82,15 +82,13 @@ EOD;
 		<script type="text/javascript" src="http://twitter.com/statuses/user_timeline/richmond_sun.json?callback=twitterCallback2&amp;count=5"></script>
 EOD;
 
-	# OUTPUT THE PAGE
-	/*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
-		'&site_section='.urlencode($site_section));*/
+    # OUTPUT THE PAGE
+    /*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
+        '&site_section='.urlencode($site_section));*/
 
-	$page = new Page;
-	$page->page_title = $page_title;
-	$page->page_body = $page_body;
-	$page->page_sidebar = $page_sidebar;
-	$page->site_section = $site_section;
-	$page->process();
-
-?>
+    $page = new Page;
+    $page->page_title = $page_title;
+    $page->page_body = $page_body;
+    $page->page_sidebar = $page_sidebar;
+    $page->site_section = $site_section;
+    $page->process();

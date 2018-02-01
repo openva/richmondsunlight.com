@@ -19,7 +19,11 @@ class HTMLPurifier_TokenFactory
      * @private
      */
     // p stands for prototype
-    private $p_start, $p_end, $p_empty, $p_text, $p_comment;
+    private $p_start;
+    private $p_end;
+    private $p_empty;
+    private $p_text;
+    private $p_comment;
 
     /**
      * Generates blank prototypes for cloning.

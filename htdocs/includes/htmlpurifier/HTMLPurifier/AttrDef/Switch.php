@@ -7,7 +7,8 @@ class HTMLPurifier_AttrDef_Switch
 {
 
     protected $tag;
-    protected $withTag, $withoutTag;
+    protected $withTag;
+    protected $withoutTag;
 
     /**
      * @param string $tag Tag name to switch upon

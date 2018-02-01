@@ -13,7 +13,11 @@ class HTMLPurifier_HTMLModule_Object extends HTMLPurifier_HTMLModule
 
     public function setup($config) {
 
-        $this->addElement('object', 'Inline', 'Optional: #PCDATA | Flow | param', 'Common',
+        $this->addElement(
+            'object',
+            'Inline',
+            'Optional: #PCDATA | Flow | param',
+            'Common',
             array(
                 'archive' => 'URI',
                 'classid' => 'URI',
@@ -30,7 +34,11 @@ class HTMLPurifier_HTMLModule_Object extends HTMLPurifier_HTMLModule
             )
         );
 
-        $this->addElement('param', false, 'Empty', false,
+        $this->addElement(
+            'param',
+            false,
+            'Empty',
+            false,
             array(
                 'id' => 'ID',
                 'name*' => 'Text',
@@ -43,4 +51,3 @@ class HTMLPurifier_HTMLModule_Object extends HTMLPurifier_HTMLModule
     }
 
 }
-

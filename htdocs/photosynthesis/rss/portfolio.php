@@ -18,15 +18,15 @@
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once($_SERVER['DOCUMENT_ROOT'].'/includes/settings.inc.php');
-include_once($_SERVER['DOCUMENT_ROOT'].'/includes/functions.inc.php');
-include_once($_SERVER['DOCUMENT_ROOT'].'/includes/photosynthesis.inc.php');
+include_once $_SERVER['DOCUMENT_ROOT'].'/includes/settings.inc.php';
+include_once $_SERVER['DOCUMENT_ROOT'].'/includes/functions.inc.php';
+include_once $_SERVER['DOCUMENT_ROOT'].'/includes/photosynthesis.inc.php';
 
 # LOCALIZE VARIABLES
 $hash = urldecode($_REQUEST['hash']);
 if (empty($hash))
 {
-	die('No hash found.');
+    die('No hash found.');
 }
 
 # PAGE CONTENT
@@ -35,11 +35,11 @@ if (empty($hash))
 # three minutes old.
 if ((file_exists('cache/portfolio-'.$hash.'.xml')) && ((filemtime('cache/portfolio-'.$hash.'.xml') + 180) > time()))
 {
-	header('Content-Type: application/rss+xml');
-	header('Last-Modified: '.date('r', filemtime('cache/portfolio-'.$hash.'.xml')));
-	header('ETag: '.md5_file('cache/portfolio-'.$hash.'.xml'));
-	readfile('cache/portfolio-'.$hash.'.xml');
-	exit();
+    header('Content-Type: application/rss+xml');
+    header('Last-Modified: '.date('r', filemtime('cache/portfolio-'.$hash.'.xml')));
+    header('ETag: '.md5_file('cache/portfolio-'.$hash.'.xml'));
+    readfile('cache/portfolio-'.$hash.'.xml');
+    exit();
 }
 
 # Open a database connection.
@@ -80,24 +80,24 @@ $rss_content = '';
 while ($bill = mysql_fetch_array($result))
 {
 
-	# Aggregate the variables into their RSS components.
-	$title = '<![CDATA['.$bill['catch_line'].' ('.strtoupper($bill['number']).')]]>';
-	$link = 'https://www.richmondsunlight.com/bill/'.SESSION_YEAR.'/'.$bill['number'].'/';
-	$description = '<![CDATA[<p>'.$bill['summary'].'</p><p><strong>Status: '.$bill['status'].'</strong></p>]]>';
+    # Aggregate the variables into their RSS components.
+    $title = '<![CDATA['.$bill['catch_line'].' ('.strtoupper($bill['number']).')]]>';
+    $link = 'https://www.richmondsunlight.com/bill/'.SESSION_YEAR.'/'.$bill['number'].'/';
+    $description = '<![CDATA[<p>'.$bill['summary'].'</p><p><strong>Status: '.$bill['status'].'</strong></p>]]>';
 
-	# Now assemble those RSS components into an XML fragment.
-	$rss_content .= '
+    # Now assemble those RSS components into an XML fragment.
+    $rss_content .= '
 	<item>
 		<title>'.$title.'</title>
 		<link>'.$link.'</link>
 		<description>'.$description.'</description>
 	</item>';
 
-	# Unset those variables for reuse.
-	unset($item_completed);
-	unset($title);
-	unset($link);
-	unset($description);
+    # Unset those variables for reuse.
+    unset($item_completed, $title, $link, $description);
+
+
+
 
 }
 

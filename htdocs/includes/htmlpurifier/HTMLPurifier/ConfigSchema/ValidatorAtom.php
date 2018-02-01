@@ -9,7 +9,10 @@
 class HTMLPurifier_ConfigSchema_ValidatorAtom
 {
 
-    protected $context, $obj, $member, $contents;
+    protected $context;
+    protected $obj;
+    protected $member;
+    protected $contents;
 
     public function __construct($context, $obj, $member) {
         $this->context     = $context;

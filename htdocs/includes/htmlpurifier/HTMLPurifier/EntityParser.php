@@ -110,7 +110,8 @@ class HTMLPurifier_EntityParser
         return preg_replace_callback(
             $this->_substituteEntitiesRegex,
             array($this, 'specialEntityCallback'),
-            $string);
+            $string
+        );
     }
 
     /**

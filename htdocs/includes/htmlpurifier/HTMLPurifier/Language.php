@@ -43,7 +43,8 @@ class HTMLPurifier_Language
     /**
      * Instances of HTMLPurifier_Config and HTMLPurifier_Context
      */
-    protected $config, $context;
+    protected $config;
+    protected $context;
 
     public function __construct($config, $context) {
         $this->config  = $config;
@@ -140,7 +141,8 @@ class HTMLPurifier_Language
                     $subst['$'.$i.'.Line'] = $value->line ? $value->line : 'unknown';
                 }
                 continue;
-            } elseif (is_array($value)) {
+            }
+            if (is_array($value)) {
                 $keys = array_keys($value);
                 if (array_keys($keys) === $keys) {
                     // list

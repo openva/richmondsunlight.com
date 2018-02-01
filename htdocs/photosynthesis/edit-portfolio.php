@@ -11,9 +11,9 @@
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('../includes/functions.inc.php');
-include_once('../includes/settings.inc.php');
-include_once('../includes/photosynthesis.inc.php');
+include_once '../includes/functions.inc.php';
+include_once '../includes/settings.inc.php';
+include_once '../includes/photosynthesis.inc.php';
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -37,59 +37,59 @@ if ($user === FALSE) exit();
 
 if (!isset($_GET['hash']))
 {
-	header('Location: '.$_SERVER['HTTP_REFERER']);
-	exit;
+    header('Location: '.$_SERVER['HTTP_REFERER']);
+    exit;
 }
 else
 {
-	# Clean up and localize the portfolio hash.
-	$portfolio['hash'] = mysql_real_escape_string($_GET['hash']);
+    # Clean up and localize the portfolio hash.
+    $portfolio['hash'] = mysql_real_escape_string($_GET['hash']);
 }
 
 if (isset($_POST['submit']))
 {
 
-	// When editing a smart portfolio, make sure to run populate_smart_portfolio() afterwards.
+    // When editing a smart portfolio, make sure to run populate_smart_portfolio() afterwards.
 
-	$form_data = array_map('stripslashes', $_POST['form_data']);
-	if (empty($form_data['name'])) $errors[] = 'the name of this portfolio';
-	if (empty($form_data['public'])) $form_data['public'] = 'n';
-	if (empty($form_data['notify'])) $form_data['notify'] = 'none';
+    $form_data = array_map('stripslashes', $_POST['form_data']);
+    if (empty($form_data['name'])) $errors[] = 'the name of this portfolio';
+    if (empty($form_data['public'])) $form_data['public'] = 'n';
+    if (empty($form_data['notify'])) $form_data['notify'] = 'none';
 
-	if (isset($errors))
-	{
-		$error_text = implode('</li><li>', $errors);
-		$message = '<div id="messages" class="errors">
+    if (isset($errors))
+    {
+        $error_text = implode('</li><li>', $errors);
+        $message = '<div id="messages" class="errors">
 				<ul>
 					<li>'.$error_text.'</li>
 				</ul>
 			</div>';
-	}
-	else
-	{
-		$form_data = array_map('mysql_real_escape_string', $_POST['form_data']);
-		$sql = 'UPDATE dashboard_portfolios
+    }
+    else
+    {
+        $form_data = array_map('mysql_real_escape_string', $_POST['form_data']);
+        $sql = 'UPDATE dashboard_portfolios
 				SET name = "'.$form_data['name'].'", notify = "'.$form_data['notify'].'",
 				public = "'.$form_data['public'].'",
 				notes = '.(empty($form_data['notes']) ? 'NULL' : '"'.$form_data['notes'].'"').'
 				WHERE id="'.$form_data['id'].'" AND user_id = '.$user['id'];
-		$result = mysql_query($sql);
+        $result = mysql_query($sql);
 
-		# If the update to the portfolio didn't work, say so.
-		if (!$result) $message = '<div id="messages" class="errors">Sorry: This portfolio could not be edited.</div>';
+        # If the update to the portfolio didn't work, say so.
+        if (!$result) $message = '<div id="messages" class="errors">Sorry: This portfolio could not be edited.</div>';
 
-		# Else if the update worked, proceed.
-		else
-		{
+        # Else if the update worked, proceed.
+        else
+        {
 
-			// It would be substantially more efficient to store the existing watch list criteria
-			// in a hidden form field, and only update the watch list row and repopulate the list
-			// if that watch list has changed.
+            // It would be substantially more efficient to store the existing watch list criteria
+            // in a hidden form field, and only update the watch list row and repopulate the list
+            // if that watch list has changed.
 
-			# If it's a smart portfolio, we need to update the watchlist.
-			if ($form_data['type'] == 'smart')
-			{
-				$sql = 'UPDATE dashboard_watch_lists
+            # If it's a smart portfolio, we need to update the watchlist.
+            if ($form_data['type'] == 'smart')
+            {
+                $sql = 'UPDATE dashboard_watch_lists
 						SET tag = '.(empty($form_data['tag']) ? 'NULL' : '"'.$form_data['tag'].'"').',
 						patron_id = '.(empty($form_data['patron_id']) ? 'NULL' : $form_data['patron_id']).',
 						committee_id = '.(empty($form_data['committee_id']) ? 'NULL' : $form_data['committee_id']).',
@@ -101,24 +101,24 @@ if (isset($_POST['submit']))
 							FROM dashboard_portfolios
 							WHERE id='.$form_data['id'].') = dashboard_watch_lists.id
 						AND user_id = '.$user['id'];
-				$result = mysql_query($sql);
-				# If the update to the portfolio didn't work, say so.
-				if (!$result) $message = '<div id="messages" class="errors">Sorry: This portfolio could not be edited.</div>';
-				else
-				{
-					# Now we have to repopulate the portfolio
-					populate_smart_portfolio($form_data['id']);
-				}
-			}
+                $result = mysql_query($sql);
+                # If the update to the portfolio didn't work, say so.
+                if (!$result) $message = '<div id="messages" class="errors">Sorry: This portfolio could not be edited.</div>';
+                else
+                {
+                    # Now we have to repopulate the portfolio
+                    populate_smart_portfolio($form_data['id']);
+                }
+            }
 
-			# If we haven't encountered an error, present a "edit finished" message.
-			if (!isset($message))
-			{
-				header('Location: https://www.richmondsunlight.com/photosynthesis/#'.$portfolio['hash']);
-				exit;
-			}
-		}
-	}
+            # If we haven't encountered an error, present a "edit finished" message.
+            if (!isset($message))
+            {
+                header('Location: https://www.richmondsunlight.com/photosynthesis/#'.$portfolio['hash']);
+                exit;
+            }
+        }
+    }
 
 }
 
@@ -129,8 +129,8 @@ $sql = 'SELECT id, name, notes, notify, public, hash, watch_list_id
 $result = mysql_query($sql);
 if (mysql_num_rows($result) == 0)
 {
-	header('Location: '.$_SERVER['HTTP_REFERER']);
-	exit;
+    header('Location: '.$_SERVER['HTTP_REFERER']);
+    exit;
 }
 $portfolio = mysql_fetch_array($result);
 $portfolio = array_map('stripslashes', $portfolio);
@@ -147,21 +147,21 @@ else $portfolio['type'] = 'normal';
 # If it's a smart portfolio, get its watch list data.
 if ($portfolio['type'] == 'smart')
 {
-	$sql = 'SELECT id, user_id, tag, patron_id, committee_id, keyword, status,
+    $sql = 'SELECT id, user_id, tag, patron_id, committee_id, keyword, status,
 			current_chamber
 			FROM dashboard_watch_lists
 			WHERE id = '.$portfolio['watch_list_id'];
-	$result = mysql_query($sql);
-	$watch_list = mysql_fetch_array($result);
+    $result = mysql_query($sql);
+    $watch_list = mysql_fetch_array($result);
 
-	# Clean it up.
-	$watch_list = array_map('stripslashes', $watch_list);
+    # Clean it up.
+    $watch_list = array_map('stripslashes', $watch_list);
 
-	# Merge it into $portfolio.
-	$tmp = array_merge($watch_list, $portfolio);
-	$portfolio = $tmp;
-	unset($watch_list);
-	unset($tmp);
+    # Merge it into $portfolio.
+    $tmp = array_merge($watch_list, $portfolio);
+    $portfolio = $tmp;
+    unset($watch_list, $tmp);
+
 }
 
 // DISPLAY THE APPROPRIATE FORM

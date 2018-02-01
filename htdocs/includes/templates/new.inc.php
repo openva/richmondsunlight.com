@@ -30,14 +30,14 @@
 <script src="/js/functions.js"></script>
 <script src="/js/jquery.qtip.min.js"></script>
 <?php
-	# Include the below JavaScript, but only if the browser is IE. We do an Opera check because
-	# Opera can include the text "MSIE" in its user agent string.
-	if (
-			strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE')
-			&&
-			!strpos($_SERVER['HTTP_USER_AGENT'], 'Opera')
-		)
-	{
+    # Include the below JavaScript, but only if the browser is IE. We do an Opera check because
+    # Opera can include the text "MSIE" in its user agent string.
+    if (
+            strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE')
+            &&
+            !strpos($_SERVER['HTTP_USER_AGENT'], 'Opera')
+        )
+    {
 ?>
 <script pagespeed_no_defer="">
 	<!--//--><![CDATA[//><!--
@@ -71,8 +71,8 @@
 	//--><!]]>
 </script>
 <?php
-	/* End the menu JavaScript conditional */
-	}
+    /* End the menu JavaScript conditional */
+    }
 ?>
 
 %html_head%

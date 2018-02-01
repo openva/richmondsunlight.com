@@ -99,7 +99,9 @@ class HTMLPurifier_ErrorCollector
                 // have javascript link generation that causes
                 // textarea to skip to the specified line
                 $string .= $this->locale->formatMessage(
-                    'ErrorCollector: At line', array('line' => $line));
+                    'ErrorCollector: At line',
+                    array('line' => $line)
+                );
             }
             $ret[] = $string;
         }

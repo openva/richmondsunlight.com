@@ -9,8 +9,12 @@ class HTMLPurifier_Strategy_MakeWellFormed extends HTMLPurifier_Strategy
     /**
      * Locally shared variable references
      */
-    protected $inputTokens, $inputIndex, $outputTokens, $currentNesting,
-        $currentInjector, $injectors;
+    protected $inputTokens;
+    protected $inputIndex;
+    protected $outputTokens;
+    protected $currentNesting;
+    protected $currentInjector;
+    protected $injectors;
 
     public function execute($tokens, $config, $context) {
 
@@ -30,8 +34,8 @@ class HTMLPurifier_Strategy_MakeWellFormed extends HTMLPurifier_Strategy
 
         // context variables
         $context->register('CurrentNesting', $this->currentNesting);
-        $context->register('InputIndex',     $this->inputIndex);
-        $context->register('InputTokens',    $tokens);
+        $context->register('InputIndex', $this->inputIndex);
+        $context->register('InputTokens', $tokens);
 
         // -- begin INJECTOR --
 
@@ -95,7 +99,7 @@ class HTMLPurifier_Strategy_MakeWellFormed extends HTMLPurifier_Strategy
             }
 
             // quick-check: if it's not a tag, no need to process
-            if (empty( $token->is_tag )) {
+            if (empty($token->is_tag)) {
                 if ($token instanceof HTMLPurifier_Token_Text) {
                      // injector handler code; duplicated for performance reasons
                      foreach ($this->injectors as $i => $injector) {
@@ -265,7 +269,7 @@ class HTMLPurifier_Strategy_MakeWellFormed extends HTMLPurifier_Strategy
         return $result;
     }
 
-    function processToken($token, $config, $context) {
+    public function processToken($token, $config, $context) {
         if (is_array($token)) {
             // the original token was overloaded by an injector, time
             // to some fancy acrobatics

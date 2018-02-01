@@ -69,7 +69,8 @@ class HTMLPurifier
     /** Single instance of HTML Purifier */
     private static $instance;
 
-    protected $strategy, $generator;
+    protected $strategy;
+    protected $generator;
 
     /**
      * Resultant HTMLPurifier_Context of last run purification. Is an array
@@ -174,9 +175,12 @@ class HTMLPurifier
                     // list of un-purified tokens
                     $lexer->tokenizeHTML(
                         // un-purified HTML
-                        $html, $config, $context
+                        $html,
+                        $config,
+                        $context
                     ),
-                    $config, $context
+                    $config,
+                    $context
                 )
             );
 

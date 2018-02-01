@@ -34,6 +34,7 @@ class HTMLPurifier_AttrDef_CSS_Number extends HTMLPurifier_AttrDef
             case '-':
                 if ($this->non_negative) return false;
                 $sign = '-';
+                // no break
             case '+':
                 $number = substr($number, 1);
         }
@@ -51,12 +52,13 @@ class HTMLPurifier_AttrDef_CSS_Number extends HTMLPurifier_AttrDef
         if ($left === '' && $right === '') return false;
         if ($left !== '' && !ctype_digit($left)) return false;
 
-        $left  = ltrim($left,  '0');
+        $left  = ltrim($left, '0');
         $right = rtrim($right, '0');
 
         if ($right === '') {
             return $left ? $sign . $left : '0';
-        } elseif (!ctype_digit($right)) {
+        }
+        if (!ctype_digit($right)) {
             return false;
         }
 

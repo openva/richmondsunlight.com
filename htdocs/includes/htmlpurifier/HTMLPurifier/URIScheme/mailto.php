@@ -9,7 +9,8 @@
  * @todo Filter allowed query parameters
  */
 
-class HTMLPurifier_URIScheme_mailto extends HTMLPurifier_URIScheme {
+class HTMLPurifier_URIScheme_mailto extends HTMLPurifier_URIScheme
+{
 
     public $browsable = false;
 

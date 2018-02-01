@@ -1,48 +1,48 @@
 <?php
 
-	###
-	# Bills' Activity by Tag
-	#
-	# PURPOSE
-	# Lists the last 20 bill actions of those patroned by a given legislator.
-	#
-	# NOTES
-	# None.
-	#
-	# TODO
-	# * Have die() provide an error that will appear in an RSS reader.
-	# * Support If-Modified-Since and If-None-Match headers to reduce bandwidth.
-	#
-	###
+    ###
+    # Bills' Activity by Tag
+    #
+    # PURPOSE
+    # Lists the last 20 bill actions of those patroned by a given legislator.
+    #
+    # NOTES
+    # None.
+    #
+    # TODO
+    # * Have die() provide an error that will appear in an RSS reader.
+    # * Support If-Modified-Since and If-None-Match headers to reduce bandwidth.
+    #
+    ###
 
-	# INCLUDES
-	# Include any files or libraries that are necessary for this specific
-	# page to function.
-	include_once($_SERVER['DOCUMENT_ROOT'].'/includes/settings.inc.php');
-	include_once($_SERVER['DOCUMENT_ROOT'].'/includes/functions.inc.php');
+    # INCLUDES
+    # Include any files or libraries that are necessary for this specific
+    # page to function.
+    include_once $_SERVER['DOCUMENT_ROOT'].'/includes/settings.inc.php';
+    include_once $_SERVER['DOCUMENT_ROOT'].'/includes/functions.inc.php';
 
-	# LOCALIZE VARIABLES
-	$tag = urldecode($_REQUEST['tag']);
+    # LOCALIZE VARIABLES
+    $tag = urldecode($_REQUEST['tag']);
 
-	# PAGE CONTENT
+    # PAGE CONTENT
 
-	# Check to see if there's any need to regenerate this RSS feed -- only do so
-	# if it's more than a half hour old.
-	if ((file_exists('cache/tag-'.$tag.'.xml')) && ((filemtime('cache/tag-'.$tag.'.xml') + 1800) > time()))
-	{
-		header('Content-Type: application/rss+xml');
-		header('Last-Modified: '.date('r', filemtime('cache/tag-'.$tag.'.xml')));
-		header('ETag: '.md5_file('cache/tag-'.$tag.'.xml'));
-		readfile('cache/tag-'.$tag.'.xml');
-		exit();
-	}
+    # Check to see if there's any need to regenerate this RSS feed -- only do so
+    # if it's more than a half hour old.
+    if ((file_exists('cache/tag-'.$tag.'.xml')) && ((filemtime('cache/tag-'.$tag.'.xml') + 1800) > time()))
+    {
+        header('Content-Type: application/rss+xml');
+        header('Last-Modified: '.date('r', filemtime('cache/tag-'.$tag.'.xml')));
+        header('ETag: '.md5_file('cache/tag-'.$tag.'.xml'));
+        readfile('cache/tag-'.$tag.'.xml');
+        exit();
+    }
 
-	# Open a database connection.
-	$database = new Database;
-	$database->connect_old();
+    # Open a database connection.
+    $database = new Database;
+    $database->connect_old();
 
-	# Query the database for all bills by that tag.
-	$sql = 'SELECT bills.number, bills.catch_line, bills.summary,
+    # Query the database for all bills by that tag.
+    $sql = 'SELECT bills.number, bills.catch_line, bills.summary,
 				(SELECT status
 				FROM bills_status
 				WHERE bills.id=bills_status.bill_id
@@ -53,41 +53,41 @@
 			ON tags.bill_id=bills.id
 			WHERE bills.session_id = '.SESSION_ID.'
 			AND tags.tag="'.mysql_real_escape_string($tag).'"';
-	$result = mysql_query($sql);
+    $result = mysql_query($sql);
 
-	// Don't check to make sure the query was successful -- we want to make sure that people can
-	// even subscribe to feeds for tags that have nothing introduced yet.
+    // Don't check to make sure the query was successful -- we want to make sure that people can
+    // even subscribe to feeds for tags that have nothing introduced yet.
 
-	$rss_content = '';
+    $rss_content = '';
 
-	# Generate the RSS.
-	while ($bill = mysql_fetch_array($result))
-	{
+    # Generate the RSS.
+    while ($bill = mysql_fetch_array($result))
+    {
 
-		# Aggregate the variables into their RSS components.
-		$title = '<![CDATA['.$bill['catch_line'].' ('.strtoupper($bill['number']).')]]>';
-		$link = 'http://www.richmondsunlight.com/bill/'.SESSION_YEAR.'/'.$bill['number'].'/';
-		$description = '<![CDATA[<p>'.$bill['summary'].'</p><p><strong>Status: '.$bill['status'].'</strong></p>]]>';
+        # Aggregate the variables into their RSS components.
+        $title = '<![CDATA['.$bill['catch_line'].' ('.strtoupper($bill['number']).')]]>';
+        $link = 'http://www.richmondsunlight.com/bill/'.SESSION_YEAR.'/'.$bill['number'].'/';
+        $description = '<![CDATA[<p>'.$bill['summary'].'</p><p><strong>Status: '.$bill['status'].'</strong></p>]]>';
 
-		# Now assemble those RSS components into an XML fragment.
-		$rss_content .= '
+        # Now assemble those RSS components into an XML fragment.
+        $rss_content .= '
 		<item>
 			<title>'.$title.'</title>
 			<link>'.$link.'</link>
 			<description>'.$description.'</description>
 		</item>';
 
-		# Unset those variables for reuse.
-		unset($item_completed);
-		unset($title);
-		unset($link);
-		unset($description);
-
-	}
+        # Unset those variables for reuse.
+        unset($item_completed, $title, $link, $description);
 
 
 
-	$rss = '<?xml version="1.0" encoding=\'utf-8\'?>
+
+    }
+
+
+
+    $rss = '<?xml version="1.0" encoding=\'utf-8\'?>
 <!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN" "http://www.rssboard.org/rss-0.91.dtd">
 <rss version="0.91">
 	<channel>
@@ -100,12 +100,10 @@
 </rss>';
 
 
-	# Cache the RSS file.
-	$fp = @file_put_contents('cache/tag-'.$tag.'.xml', $rss);
+    # Cache the RSS file.
+    $fp = @file_put_contents('cache/tag-'.$tag.'.xml', $rss);
 
-	header('Content-Type: application/xml');
-	header('Last-Modified: '.date('r', filemtime('cache/tag-'.$tag.'.xml')));
-	header('ETag: '.md5_file('cache/tag-'.$tag.'.xml'));
-	echo $rss;
-
-?>
+    header('Content-Type: application/xml');
+    header('Last-Modified: '.date('r', filemtime('cache/tag-'.$tag.'.xml')));
+    header('ETag: '.md5_file('cache/tag-'.$tag.'.xml'));
+    echo $rss;

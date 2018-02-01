@@ -112,11 +112,14 @@ class HTMLPurifier_DefinitionCache_Serializer extends
         if (!is_dir($directory)) {
             $base = $this->generateBaseDirectoryPath($config);
             if (!is_dir($base)) {
-                trigger_error('Base directory '.$base.' does not exist,
+                trigger_error(
+                    'Base directory '.$base.' does not exist,
                     please create or change using %Cache.SerializerPath',
-                    E_USER_ERROR);
+                    E_USER_ERROR
+                );
                 return false;
-            } elseif (!$this->_testPermissions($base)) {
+            }
+            if (!$this->_testPermissions($base)) {
                 return false;
             }
             $old = umask(0022); // disable group and world writes
@@ -138,8 +141,10 @@ class HTMLPurifier_DefinitionCache_Serializer extends
         if (!is_dir($dir)) {
             // generally, you'll want to handle this beforehand
             // so a more specific error message can be given
-            trigger_error('Directory '.$dir.' does not exist',
-                E_USER_ERROR);
+            trigger_error(
+                'Directory '.$dir.' does not exist',
+                E_USER_ERROR
+            );
             return false;
         }
         if (function_exists('posix_getuid')) {
@@ -148,21 +153,26 @@ class HTMLPurifier_DefinitionCache_Serializer extends
                 // we can chmod it ourselves
                 chmod($dir, 0755);
                 return true;
-            } elseif (filegroup($dir) === posix_getgid()) {
+            }
+            if (filegroup($dir) === posix_getgid()) {
                 $chmod = '775';
             } else {
                 // PHP's probably running as nobody, so we'll
                 // need to give global permissions
                 $chmod = '777';
             }
-            trigger_error('Directory '.$dir.' not writable, '.
+            trigger_error(
+                'Directory '.$dir.' not writable, '.
                 'please chmod to ' . $chmod,
-                E_USER_ERROR);
+                E_USER_ERROR
+            );
         } else {
             // generic error message
-            trigger_error('Directory '.$dir.' not writable, '.
+            trigger_error(
+                'Directory '.$dir.' not writable, '.
                 'please alter file permissions',
-                E_USER_ERROR);
+                E_USER_ERROR
+            );
         }
         return false;
     }
