@@ -21,22 +21,51 @@ if (isset($_SESSION['portfolios']))
     $page_body .= '</script>';
 
     $page_body .= <<<EOD
-    <div id="portfolio-sidebar" style="display: none;">
+    <div id="portfolio-sidebar">
         <h1>Your Bill Portfolio</h1>
         <div id="portfolio-list">
-
+            <div class="bill changed">
+                <a href="/bill/hb1052/" class="balloon">HB1052</a>: Catchline that says a lot.
+                <span class="last-updated">today</span>
+            </div>
+            <div class="bill changed">
+                <a href="/bill/hb12/" class="balloon">HB12</a>: Catchline that says something else.
+                <span class="last-updated">yesterday</span>
+            </div>
+            <div class="bill">
+                <a href="/bill/sb670/" class="balloon">SB670</a>: Catchline that says something else entirely.
+            </div>
+            <div class="bill">
+                <a href="/bill/sj6/" class="balloon">SJ6</a>: Catching that says something great about a person.
+            </div>
         </div>
     <div>
 
     <style>
         #portfolio-sidebar {
             width: 250px;
-            height: 600px;
+            min-height: 300px;
+            max-height: 600px;
+            padding: 5px;
             right: 0px;
             z-index: 100;
             background-color: white;
             border: 5px solid black;
         }
+            #portfolio-sidebar .bill {
+                padding: 2px;
+            }
+                #portfolio-sidebar .bill+.bill {
+                    margin-top: 1em;
+                }
+                #portfolio-sidebar .bill.changed {
+                    background-color: yellow;
+                }
+                #portfolio-sidebar .bill .last-updated {
+                    text-transform: uppercase;
+                    font-size: .8em;
+                    color: red;
+                }
 
     </style>
 
