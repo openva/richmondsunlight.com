@@ -79,11 +79,14 @@ Disallow: /
 User-agent: SemrushBot
 Disallow: /
 
+User-agent: SemrushBot-SA
+Disallow: /
+
 User-agent: AhrefsBot
 Disallow: /
 
 User-agent: msnbot
-Crawl-delay: 1
+Crawl-delay: 5
 
 User-agent: bingbot
-Crawl-delay: 1
+Crawl-delay: 5
