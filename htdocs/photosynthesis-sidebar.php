@@ -86,7 +86,14 @@ if (isset($_SESSION['portfolios']))
             // append to portfolio element
             // if bill has been changed since localstorage time, class="changed"
 
-        // function to populate localstorage
+        // See whether localstorage differs from the API.
+        function check_for_updates() {
+
+
+
+        }
+
+        // Populate localstorage with the contents of this portfolio.
         function portfolio_store() {
 
             var store = {};
@@ -100,7 +107,10 @@ if (isset($_SESSION['portfolios']))
                 });
             });
 
+            store.updated = + new Date();
+
             console.log(store);
+            console.log(JSON.stringify(store));
 
             // store built-up object in localstorage
             localStorage.setItem('portfolio', JSON.stringify(store));
