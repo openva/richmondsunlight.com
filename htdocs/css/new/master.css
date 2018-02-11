@@ -600,7 +600,7 @@ a.balloon div {
 	}
 
 
-/* Responsive layout */
+/* Responsive layout: extra-wide display */
 @media screen and (min-width: 1100px) {
 	#page {
 		width: 86.947em;
@@ -615,6 +615,8 @@ a.balloon div {
 		margin-left: 66.78em;
 	}
 }
+
+/* Responsive layout: phones */
 @media only screen and (max-device-width: 480px), only screen and (min-device-width: 640px) and (max-device-width: 1136px) and (-webkit-min-device-pixel-ratio: 2) {
 	body {
 		background-color: #243a51;
@@ -627,8 +629,8 @@ a.balloon div {
 		width: 99%;
 	}
 	#content {
-		padding: 0;
-		width: 100%;
+		padding: 2%;
+		width: 96%;
 		font-size: 133.33%; /* ~16px */
 		line-height: 1.666em;
 		overflow: hidden;
