@@ -14,6 +14,6 @@
         "files": ["htdocs/includes/functions.inc.php"]
     },
     "require-dev": {
-        "phpunit/phpunit": "^5"
+        "sebastianbergmann/phpunit": "^5"
     }
 }
