@@ -12,8 +12,5 @@
             "htdocs/includes/vendor/"
         ],
         "files": ["htdocs/includes/functions.inc.php"]
-    },
-    "require-dev": {
-        "sebastianbergmann/phpunit": "^5"
     }
 }
