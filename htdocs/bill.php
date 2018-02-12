@@ -220,7 +220,8 @@ if ($bill['session_id'] == SESSION_ID)
             # Or, if there's multiple portfolios.
             else
             {
-                $ps_status .= '<select name="portfolio">';
+                $ps_status .= '<label for="portfolio-selector">Select a Portfolio</label>
+                <select name="portfolio" id="portfolio-selector">';
                 foreach ($_SESSION['portfolios'] as $portfolio)
                 {
                     $ps_status .= '<option value="'.$portfolio['hash'].'">'.$portfolio['name'].'</option>';
