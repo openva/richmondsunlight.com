@@ -10,3 +10,6 @@ See also: [rs-machine](https://github.com/openva/rs-machine), the collection of 
 
 * [`master`](https://github.com/openva/richmondsunlight.com/tree/master): The staging site.
 * [`deploy`](https://github.com/openva/richmondsunlight.com/tree/deploy): The live site.
+
+## Architecture
+![Network diagram](https://gist.githubusercontent.com/waldoj/b86e65bd8a14609849badefb85984ebf/raw/58012252ed5564fe6cf4b479df3fe8e2599786b9/rs_architecture.svg?sanitize=true)
