@@ -298,7 +298,8 @@ $sql = 'SELECT DISTINCT bills_status.status, bills_status.translation,
 		FROM bills_status
 		LEFT JOIN votes
 			ON bills_status.lis_vote_id = votes.lis_id
-		WHERE bills_status.bill_id = '.$bill['id'].'
+		WHERE bills_status.bill_id = ' . $bill['id'] . '
+        AND (votes.session_id=bills_status.session_id OR votes.session_id IS NULL)
 		ORDER BY date_raw DESC, bills_status.id DESC';
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
