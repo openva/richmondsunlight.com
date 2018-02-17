@@ -85,7 +85,9 @@ if (mysql_num_rows($result) > 0)
  * Create a new instance of the Vote class, and get aggregate data about the outcome.
  */
 $vote_info = new Vote;
-$vote = $vote_info->get_aggregate($lis_id, $bill['session_id']);
+$vote_info->lis_id = $lis_id;
+$vote_info->session_id = $bill['session_id'];
+$vote = $vote_info->get_aggregate();
 
 $page_title = strtoupper($bill['number']) . ': ' . $bill['catch_line'];
 $page_body = '<p>';
@@ -105,7 +107,7 @@ $page_body .= 'This vote '.$vote['outcome'].'ed '.$vote['tally'].'.</p>';
 /*
  * Get detailed information about the vote -- who voted how.
  */
-$legislators = $vote_info->get_detailed($lis_id, $bill['session_id']);
+$legislators = $vote_info->get_detailed();
 
 # Step through the legislators data to establish which party voted which way, building up
 # an array of data.

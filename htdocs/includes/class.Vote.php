@@ -4,28 +4,53 @@ class Vote
 {
 	
 	# Take an LIS ID, return a vote tally.
-	function get_aggregate($lis_id, $session_id)
+	function get_aggregate()
 	{
 		
 		# Make sure we've got the information that we need.
-		if (!isset($lis_id) || empty($lis_id))
+		if (empty($this->lis_id))
 		{
 			return FALSE;
 		}
 
-		if (!isset($session_id) || empty($session_id))
+		if ( empty($this->session_id) && empty($this->session_year) )
 		{
 			return FALSE;
 		}
 		
 		# Check that the data is clean.
-		if (strlen($lis_id) > 12)
+		if (strlen($this->lis_id) > 12)
 		{
 			return FALSE;
 		}
-		if (strlen($session_id) > 3)
+		if (strlen($this->session_id) > 4)
 		{
 			return FALSE;
+		}
+		if (strlen($this->session_year) <> 4)
+		{
+			return FALSE;
+		}
+
+		$database = new Database;
+		$database->connect_old();
+
+		# If we have a session year, but not a session ID, look up the session ID.
+		if ( empty($this->session_id) && !empty($this->session_year) )
+		{
+
+			$sql = 'SELECT id
+					FROM sessions
+					WHERE year="' . $this->session_year . '"
+					AND suffix IS NULL';
+			$result = mysql_query($sql);
+			if (mysql_num_rows($result) == 0)
+			{
+				die('No such vote found.');
+			}
+			$session_info = mysql_fetch_assoc($result);
+			$this->session_id = $session_info['id'];
+
 		}
 		
 		/*
@@ -33,8 +58,8 @@ class Vote
 		 */
 		$sql = 'SELECT chamber, outcome, tally
 				FROM votes
-				WHERE lis_id="' . $lis_id . '"
-				AND session_id = ' . $session_id;
+				WHERE lis_id="' . $this->lis_id . '"
+				AND session_id = ' . $this->session_id;
 		$result = mysql_query($sql);
 		if (mysql_num_rows($result) == 0)
 		{
@@ -47,29 +72,35 @@ class Vote
 		
 	}
 
-	function get_detailed($lis_id, $session_id)
+	/*
+	 * Get detailed information about how individual legislators voted.
+	 */
+	function get_detailed()
 	{
 		
 		# Make sure we've got the information that we need.
-		if (!isset($lis_id) || empty($lis_id))
+		if (!isset($this->lis_id) || empty($this->lis_id))
 		{
 			return FALSE;
 		}
 
-		if (!isset($session_id) || empty($session_id))
+		if (!isset($this->session_id) || empty($this->session_id))
 		{
 			return FALSE;
 		}
 		
 		# Check that the data is clean.
-		if (strlen($lis_id) > 12)
+		if (strlen($this->lis_id) > 12)
 		{
 			return FALSE;
 		}
-		if (strlen($session_id) > 3)
+		if (strlen($this->session_id) > 3)
 		{
 			return FALSE;
 		}
+
+		$database = new Database;
+		$database->connect_old();
 
 		// The following bit was commented out of the WHERE portion of this query:
 		//
@@ -90,7 +121,7 @@ class Vote
 					ON representatives_votes.representative_id = representatives.id
 				LEFT JOIN districts
 					ON representatives.district_id=districts.id
-				WHERE votes.lis_id="'.$lis_id.'" AND votes.session_id="' . $session_id . '"
+				WHERE votes.lis_id="'.$this->lis_id.'" AND votes.session_id="' . $this->session_id . '"
 				ORDER BY vote ASC, name ASC';
 		$result = mysql_query($sql);
 		if (mysql_num_rows($result) < 1)
