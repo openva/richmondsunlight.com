@@ -12,19 +12,18 @@
  */
 class HTMLPurifier_HTMLModule_Presentation extends HTMLPurifier_HTMLModule
 {
-    
-    public $name = 'Presentation';
-    
-    public function setup($config) {
-        $this->addElement('b',      'Inline', 'Inline', 'Common');
-        $this->addElement('big',    'Inline', 'Inline', 'Common');
-        $this->addElement('hr',     'Block',  'Empty',  'Common');
-        $this->addElement('i',      'Inline', 'Inline', 'Common');
-        $this->addElement('small',  'Inline', 'Inline', 'Common');
-        $this->addElement('sub',    'Inline', 'Inline', 'Common');
-        $this->addElement('sup',    'Inline', 'Inline', 'Common');
-        $this->addElement('tt',     'Inline', 'Inline', 'Common');
-    }
-    
-}
 
+    public $name = 'Presentation';
+
+    public function setup($config) {
+        $this->addElement('b', 'Inline', 'Inline', 'Common');
+        $this->addElement('big', 'Inline', 'Inline', 'Common');
+        $this->addElement('hr', 'Block', 'Empty', 'Common');
+        $this->addElement('i', 'Inline', 'Inline', 'Common');
+        $this->addElement('small', 'Inline', 'Inline', 'Common');
+        $this->addElement('sub', 'Inline', 'Inline', 'Common');
+        $this->addElement('sup', 'Inline', 'Inline', 'Common');
+        $this->addElement('tt', 'Inline', 'Inline', 'Common');
+    }
+
+}

@@ -5,10 +5,10 @@
  */
 class HTMLPurifier_Token_Comment extends HTMLPurifier_Token
 {
-    public $data; /**< Character data within comment. */
+    public $data; /*< Character data within comment. */
     /**
      * Transparent constructor.
-     * 
+     *
      * @param $data String comment data.
      */
     public function __construct($data, $line = null) {
@@ -16,4 +16,3 @@ class HTMLPurifier_Token_Comment extends HTMLPurifier_Token
         $this->line = $line;
     }
 }
-

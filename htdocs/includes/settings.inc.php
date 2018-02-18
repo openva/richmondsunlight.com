@@ -2,10 +2,10 @@
 
 ###
 # Site Settings
-# 
+#
 # PURPOSE
 # All the constants intended to be accessible throughout the site.
-# 
+#
 ###
 
 # THE CURRENT SESSION
@@ -45,10 +45,10 @@ define('MEMCACHED_PORT', '11211');
 # Kirk Cox.
 define('HOUSE_SPEAKER_LIS_ID', 'H0021');
 define('HOUSE_SPEAKER_ID', '24');
-	
+
 # Set the directory to look to for cache data.
 define('CACHE_DIR', '/vol/www/richmondsunlight.com/html/cache/');
-	
+
 # ESTABLISH API KEYS
 
 # Google Maps
@@ -84,12 +84,12 @@ define('AWS_SECRET_KEY', '');
 
 # The list of words that, when used, will lead to instant blacklisting. They're rot 13ed here.
 $GLOBALS['banned_words'] = array('fuvg','shpx','nffubyr','chffl','phag','shpxre','zbgureshpxre',
-	'shpxvat','pbpxfhpxre','gjng','qvpxurnq');
+    'shpxvat','pbpxfhpxre','gjng','qvpxurnq');
 foreach ($GLOBALS['banned_words'] as &$word)
 {
-	$word = str_rot13($word);
+    $word = str_rot13($word);
 }
-	
+
 # Format money for the U.S.
 setlocale(LC_MONETARY, 'en_US');
 

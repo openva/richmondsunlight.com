@@ -1,8 +1,8 @@
 <?php
 
 ###
-# AJAX Handler for Bill Notes 
-# 
+# AJAX Handler for Bill Notes
+#
 # PURPOSE
 # Accepts AJAX callbacks for the creation and editing of public notes for individual bills.
 #
@@ -17,9 +17,9 @@
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('../includes/functions.inc.php');
-include_once('../includes/settings.inc.php');
-include_once('../includes/photosynthesis.inc.php');
+include_once '../includes/functions.inc.php';
+include_once '../includes/settings.inc.php';
+include_once '../includes/photosynthesis.inc.php';
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -28,11 +28,11 @@ $database = new Database;
 $database->connect_old();
 
 # Make sure we have all of the appropriate data.
-if ( !isset($_POST['user_hash']) || !isset($_POST['id']) || !isset($_POST['value']) )
+if (!isset($_POST['user_hash']) || !isset($_POST['id']) || !isset($_POST['value']))
 {
-	die(' ');
+    die(' ');
 }
-	
+
 # Strip out all tags other than the following.
 $notes = trim(strip_tags($_POST['value'], '<a><em><strong><i><b><s><blockquote><embed><ol><ul><li>'));
 $hash = mysql_real_escape_string($_POST['user_hash']);
@@ -49,27 +49,25 @@ $sql = 'UPDATE dashboard_bills
 $result = mysql_query($sql);
 if ($result === FALSE)
 {
-	die(' ');
+    die(' ');
 }
 
 # If the query was successful, send the data back to the browser for display.
 else
 {
-			
-	/*
-	 * Clear the Memcached cache of comments on this bill, since Photosyntheis comments are
-	 * among them.
-	 */
-	$sql = 'SELECT bill_id AS id
+
+    /*
+     * Clear the Memcached cache of comments on this bill, since Photosyntheis comments are
+     * among them.
+     */
+    $sql = 'SELECT bill_id AS id
 			FROM dashboard_bills
 			WHERE id=' . $_POST['id'];
-	$result = mysql_query($sql);
-	$bill = mysql_fetch_array($result);
-	$mc = new Memcached();
-	$mc->addServer("127.0.0.1", 11211);
-	$mc->delete('comments-' . $bill['id']);
-	
-	echo $notes;
-}
+    $result = mysql_query($sql);
+    $bill = mysql_fetch_array($result);
+    $mc = new Memcached();
+    $mc->addServer("127.0.0.1", 11211);
+    $mc->delete('comments-' . $bill['id']);
 
-?>
+    echo $notes;
+}

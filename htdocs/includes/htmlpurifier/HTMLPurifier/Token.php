@@ -3,16 +3,17 @@
 /**
  * Abstract base token class that all others inherit from.
  */
-class HTMLPurifier_Token {
-    public $line; /**< Line number node was on in source document. Null if unknown. */
-    
+class HTMLPurifier_Token
+{
+    public $line; /*< Line number node was on in source document. Null if unknown. */
+
     /**
      * Lookup array of processing that this token is exempt from.
      * Currently, valid values are "ValidateAttributes" and
      * "MakeWellFormed_TagClosedError"
      */
     public $armor = array();
-    
+
     public function __get($n) {
       if ($n === 'type') {
         trigger_error('Deprecated type property called; use instanceof', E_USER_NOTICE);

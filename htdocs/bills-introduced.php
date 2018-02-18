@@ -2,7 +2,7 @@
 
 ###
 # Bill Introduction Activity
-# 
+#
 # PURPOSE
 # Lists the bills introduced in the past X days.
 #
@@ -11,9 +11,9 @@
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('includes/settings.inc.php');
-include_once('includes/functions.inc.php');
-include_once('vendor/autoload.php');
+include_once 'includes/settings.inc.php';
+include_once 'includes/functions.inc.php';
+include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -27,18 +27,18 @@ session_start();
 # Grab the user data.
 if (logged_in() === TRUE)
 {
-	$user = get_user();
+    $user = get_user();
 }
 
 # LOCALIZE VARIABLES
 $days = mysql_real_escape_string($_REQUEST['days']);
 if (empty($days))
 {
-	$days = 7;
+    $days = 7;
 }
 elseif (!is_numeric($days))
 {
-	$days = 7;
+    $days = 7;
 }
 
 # PAGE METADATA
@@ -70,25 +70,25 @@ $result = mysql_query($sql);
 $num_results = mysql_num_rows($result);
 if ($num_results > 0)
 {
-	$page_body .= '<p>'.$num_results.' bill'.($num_results > 1 ? 's': '').' found.</p>';
-	$date = '';
-	$i=0;
-	while ($bill = mysql_fetch_assoc($result))
-	{
-		$bill = array_map('stripslashes', $bill);
-		if ($bill['date_introduced'] != $date)
-		{
-			if ($i > 0) $page_body .= '</ul>';
-			$date = $bill['date_introduced'];
-			$page_body .= '<h2>'.$date.'</h2>
+    $page_body .= '<p>'.$num_results.' bill'.($num_results > 1 ? 's' : '').' found.</p>';
+    $date = '';
+    $i=0;
+    while ($bill = mysql_fetch_assoc($result))
+    {
+        $bill = array_map('stripslashes', $bill);
+        if ($bill['date_introduced'] != $date)
+        {
+            if ($i > 0) $page_body .= '</ul>';
+            $date = $bill['date_introduced'];
+            $page_body .= '<h2>'.$date.'</h2>
 				<ul>';
-		}
-		$page_body .= '
+        }
+        $page_body .= '
 				<li><a href="/bill/'.$bill['year'].'/'.$bill['number'].'/" class="balloon">'.strtoupper($bill['number']).balloon($bill, 'bill').'</a>: '.
-			 $bill['catch_line'].'</li>';
-		$i++;
-	}
-	$page_body .= '</ul>';
+             $bill['catch_line'].'</li>';
+        $i++;
+    }
+    $page_body .= '</ul>';
 }
 
 # PAGE SIDEBAR
@@ -105,7 +105,7 @@ $page_sidebar = '
 			<li><a href="/bills/introduced/60/">60 Days</a></li>
 		</ul>
 	</div>
-	
+
 	<div class="box">
 		<h3>Explanation</h3>
 		<p>There are many steps between the introduction of a bill and when (if) it becomes law.

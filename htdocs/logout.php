@@ -2,15 +2,15 @@
 
 ###
 # Log Out
-# 
+#
 # PURPOSE
 # Destroys a session's cookies.
 #
 ###
 
 # INCLUDES
-include_once('includes/settings.inc.php');
-include_once('vendor/autoload.php');
+include_once 'includes/settings.inc.php';
+include_once 'vendor/autoload.php';
 
 # Start the session.
 session_start();
@@ -33,10 +33,10 @@ session_destroy();
 # Redirect the user back to the prior page or the homepage.
 if (!empty($_SERVER['HTTP_REFERER']))
 {
-	header('Location: ' . $_SERVER['HTTP_REFERER']);
+    header('Location: ' . $_SERVER['HTTP_REFERER']);
 }
 else
 {
-	header('Location: http://www.richmondsunlight.com/');
+    header('Location: http://www.richmondsunlight.com/');
 }
 exit;

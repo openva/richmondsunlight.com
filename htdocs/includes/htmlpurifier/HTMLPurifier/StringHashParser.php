@@ -2,7 +2,7 @@
 
 /**
  * Parses string hash files. File format is as such:
- * 
+ *
  *      DefaultKeyValue
  *      KEY: Value
  *      KEY2: Value2
@@ -27,9 +27,9 @@
  */
 class HTMLPurifier_StringHashParser
 {
-    
+
     public $default = 'ID';
-    
+
     /**
      * Parses a file that contains a single string-hash.
      */
@@ -41,7 +41,7 @@ class HTMLPurifier_StringHashParser
         fclose($fh);
         return $ret;
     }
-    
+
     /**
      * Parses a file that contains multiple string-hashes delimited by '----'
      */
@@ -56,7 +56,7 @@ class HTMLPurifier_StringHashParser
         fclose($fh);
         return $ret;
     }
-    
+
     /**
      * Internal parser that acepts a file handle.
      * @note While it's possible to simulate in-memory parsing by using
@@ -79,7 +79,8 @@ class HTMLPurifier_StringHashParser
                 // Multiline declaration
                 $state = trim($line, '- ');
                 continue;
-            } elseif (!$state) {
+            }
+            if (!$state) {
                 $single = true;
                 if (strpos($line, ':') !== false) {
                     // Single-line declaration
@@ -100,5 +101,5 @@ class HTMLPurifier_StringHashParser
         } while (!feof($fh));
         return $ret;
     }
-    
+
 }

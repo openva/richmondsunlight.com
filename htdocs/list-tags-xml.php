@@ -2,14 +2,14 @@
 
 ###
 # Tag Listing XML
-# 
+#
 # PURPOSE
 # Accepts a year and displays a listing of every tag applied to bills during that year, provided as
 # XML.
-# 
+#
 # NOTES
 # This is not intended to be viewed. It just spits out an XML file and that's that.
-# 
+#
 ###
 
 # INCLUDES
@@ -30,10 +30,10 @@ $database->connect_old();
 $year = mysql_escape_string($_REQUEST['year']);
 
 # Set some options for XML_Serializer.
-$serializer_options = array ( 
-	'addDecl' => TRUE, 
-	'encoding' => 'ISO-8859-1', 
-	'indent' => "\t", 
+$serializer_options = array (
+	'addDecl' => TRUE,
+	'encoding' => 'ISO-8859-1',
+	'indent' => "\t",
 	'rootName' => 'tags',
 	'defaultTagName' => 'tag',
 );
@@ -60,7 +60,7 @@ $tags = array();
 while ($tag = mysql_fetch_array($result, MYSQL_ASSOC))
 {
 	$tag = array_map('stripslashes', $tag);
-	
+
 	# Assign the bill to the element that contains all of them.
 	$tags[] = $tag;
 }
@@ -85,6 +85,6 @@ if (PEAR::isError($status))
 header('Content-type: text/xml');
 
 # Send the XML.
-echo $Serializer->getSerializedData(); 
+echo $Serializer->getSerializedData();
 
 ?>

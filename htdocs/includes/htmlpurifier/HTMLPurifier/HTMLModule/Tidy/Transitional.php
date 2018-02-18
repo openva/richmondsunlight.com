@@ -5,4 +5,3 @@ class HTMLPurifier_HTMLModule_Tidy_Transitional extends HTMLPurifier_HTMLModule_
     public $name = 'Tidy_Transitional';
     public $defaultLevel = 'heavy';
 }
-

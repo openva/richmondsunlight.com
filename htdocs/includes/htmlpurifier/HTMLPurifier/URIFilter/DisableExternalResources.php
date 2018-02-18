@@ -8,4 +8,3 @@ class HTMLPurifier_URIFilter_DisableExternalResources extends HTMLPurifier_URIFi
         return parent::filter($uri, $config, $context);
     }
 }
-

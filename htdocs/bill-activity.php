@@ -2,7 +2,7 @@
 
 ###
 # Bills' Activity
-# 
+#
 # PURPOSE
 # Lists the bill activity in the past X days.
 #
@@ -11,9 +11,9 @@
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('includes/settings.inc.php');
-include_once('includes/functions.inc.php');
-include_once('vendor/autoload.php');
+include_once 'includes/settings.inc.php';
+include_once 'includes/functions.inc.php';
+include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -59,28 +59,28 @@ $result = mysql_query($sql);
 $num_results = mysql_num_rows($result);
 if ($num_results > 0)
 {
-	$page_body .= '<p>'.number_format($num_results).' action'.($num_results > 1 ? 's': '').' found.</p>';
-	$date = '';
-	$i=0;
-	while ($bill = mysql_fetch_array($result))
-	{
-		$bill = array_map('stripslashes', $bill);
-		if ($bill['date'] != $date)
-		{
-			$date = $bill['date'];
-			if ($i > 0) $page_body .= '</ul>';
-			$page_body .= '<h2>'.$date.'</h2>
+    $page_body .= '<p>'.number_format($num_results).' action'.($num_results > 1 ? 's' : '').' found.</p>';
+    $date = '';
+    $i=0;
+    while ($bill = mysql_fetch_array($result))
+    {
+        $bill = array_map('stripslashes', $bill);
+        if ($bill['date'] != $date)
+        {
+            $date = $bill['date'];
+            if ($i > 0) $page_body .= '</ul>';
+            $page_body .= '<h2>'.$date.'</h2>
 			<ul>';
-		}
-		$page_body .= '
+        }
+        $page_body .= '
 				<li><a href="/bill/'.$bill['year'].'/'.$bill['number'].'/" class="balloon">'.strtoupper($bill['number']).balloon($bill, 'bill').'</a>: '.
-			 $bill['catch_line'].'</li>
+             $bill['catch_line'].'</li>
 				<ul>
 					<li>'.((!empty($bill['lis_vote_id']) && ($bill['vote_count'] > 0)) ? '<a href="/bill/'.$bill['year'].'/'.$bill['number'].'/'.strtolower($bill['lis_vote_id']).'/">' : '').$bill['status'].((!empty($bill['lis_vote_id']) && ($bill['vote_count'] > 0)) ? '</a>' : '').'</li>
 				</ul>';
-		$i++;
-	}
-	$page_body .= '</ul>';
+        $i++;
+    }
+    $page_body .= '</ul>';
 }
 
 # PAGE SIDEBAR
@@ -97,7 +97,7 @@ $page_sidebar = '
 			<li><a href="/bills/activity/60/">60 Days</a></li>
 		</ul>
 	</div>
-	
+
 	<div class="box">
 		<h3>Explanation</h3>
 		<p>There are many steps between the introduction of a bill and when (if) it becomes law.
@@ -109,7 +109,7 @@ $page_sidebar = '
 
 # OUTPUT THE PAGE
 /*display_page('page_title='.urlencode($page_title).'&page_body='.urlencode($page_body).
-	'&page_sidebar='.urlencode($page_sidebar).'&site_section='.urlencode($site_section));*/
+    '&page_sidebar='.urlencode($page_sidebar).'&site_section='.urlencode($site_section));*/
 
 $page = new Page;
 $page->page_title = $page_title;
@@ -117,5 +117,3 @@ $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
 $page->process();
-
-?>

@@ -16,13 +16,13 @@ $(document).ready(function() {
     {
         var val = password.value;
         var result = zxcvbn(val);
-        
+
         // Update the password strength meter
         meter.value = result.score;
-       
+
         // Update the text indicator
         if(val !== "") {
-            text.innerHTML = "Strength: " + "<strong>" + strength[result.score] + "</strong>" + "<span class='feedback'>" + result.feedback.warning + " " + result.feedback.suggestions + "</span"; 
+            text.innerHTML = "Strength: " + "<strong>" + strength[result.score] + "</strong>" + "<span class='feedback'>" + result.feedback.warning + " " + result.feedback.suggestions + "</span";
         }
         else {
             text.innerHTML = "";

@@ -6,50 +6,51 @@
  */
 class HTMLPurifier_Language
 {
-    
+
     /**
      * ISO 639 language code of language. Prefers shortest possible version
      */
     public $code = 'en';
-    
+
     /**
      * Fallback language code
      */
     public $fallback = false;
-    
+
     /**
      * Array of localizable messages
      */
     public $messages = array();
-    
+
     /**
      * Array of localizable error codes
      */
     public $errorNames = array();
-    
+
     /**
      * True if no message file was found for this language, so English
      * is being used instead. Check this if you'd like to notify the
      * user that they've used a non-supported language.
      */
     public $error = false;
-    
+
     /**
      * Has the language object been loaded yet?
      * @todo Make it private, fix usage in HTMLPurifier_LanguageTest
      */
     public $_loaded = false;
-    
+
     /**
      * Instances of HTMLPurifier_Config and HTMLPurifier_Context
      */
-    protected $config, $context;
-    
+    protected $config;
+    protected $context;
+
     public function __construct($config, $context) {
         $this->config  = $config;
         $this->context = $context;
     }
-    
+
     /**
      * Loads language object with necessary info from factory cache
      * @note This is a lazy loader
@@ -63,7 +64,7 @@ class HTMLPurifier_Language
         }
         $this->_loaded = true;
     }
-    
+
     /**
      * Retrieves a localised message.
      * @param $key string identifier of message
@@ -74,7 +75,7 @@ class HTMLPurifier_Language
         if (!isset($this->messages[$key])) return "[$key]";
         return $this->messages[$key];
     }
-    
+
     /**
      * Retrieves a localised error name.
      * @param $int integer error number, corresponding to PHP's error
@@ -86,7 +87,7 @@ class HTMLPurifier_Language
         if (!isset($this->errorNames[$int])) return "[Error: $int]";
         return $this->errorNames[$int];
     }
-    
+
     /**
      * Converts an array list into a string readable representation
      */
@@ -105,7 +106,7 @@ class HTMLPurifier_Language
         }
         return $ret;
     }
-    
+
     /**
      * Formats a localised message with passed parameters
      * @param $key string identifier of message
@@ -127,7 +128,7 @@ class HTMLPurifier_Language
                     if (!$generator) $generator = $this->context->get('Generator');
                     if (isset($value->name)) $subst['$'.$i.'.Name'] = $value->name;
                     if (isset($value->data)) $subst['$'.$i.'.Data'] = $value->data;
-                    $subst['$'.$i.'.Compact'] = 
+                    $subst['$'.$i.'.Compact'] =
                     $subst['$'.$i.'.Serialized'] = $generator->generateFromToken($value);
                     // a more complex algorithm for compact representation
                     // could be introduced for all types of tokens. This
@@ -140,7 +141,8 @@ class HTMLPurifier_Language
                     $subst['$'.$i.'.Line'] = $value->line ? $value->line : 'unknown';
                 }
                 continue;
-            } elseif (is_array($value)) {
+            }
+            if (is_array($value)) {
                 $keys = array_keys($value);
                 if (array_keys($keys) === $keys) {
                     // list
@@ -157,6 +159,5 @@ class HTMLPurifier_Language
         }
         return strtr($raw, $subst);
     }
-    
-}
 
+}

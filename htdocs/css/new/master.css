@@ -139,43 +139,43 @@ div#content ul {
 	#header div, #header ul {
 		padding: 0 0.8333em;
 	}
-	
+
 	#header #logo {
 		float: left;
 	}
-	
+
 	#header #from-and-search {
 		float: right;
 		text-align: right;
 		margin-top: 0.667em;
 	}
-	
+
 	#header #recommendations {
 		width: 320px;
 		height: 45px;
 		line-height: 1.3em;
 	}
-	
+
 	#header label img {
 		vertical-align: -20%;
 		margin-right: -0.333em;
 		width: 4.667em;
 	}
-	
+
 	#header #search-box {
 		width: 17.5em;
 	}
-	
+
 	#header #search input[type="image"] {
 		vertical-align: bottom;
 		width: 2.833em;
 	}
-	
+
 	#header #logo img {
 		width: 274px;
 		height: 88px;
 	}
-	
+
 	#header #date-status {
 		color: white;
 		clear: both;
@@ -199,7 +199,7 @@ div#content ul {
 			color: white;
 			text-decoration: none;
 		}
-	
+
 	#header strong {
 		font-weight: bold;
 		padding-right: 0.667em;
@@ -261,7 +261,7 @@ div#content ul {
 		padding: .5em;
 		font-size: .9em;
 		line-height: 1.5em;
-	}	
+	}
 		#sidebar div.box p {
 			padding: 0 0.909em;
 			margin-bottom: .5em;
@@ -269,7 +269,7 @@ div#content ul {
 	#sidebar ul, #sidebar ol {
 		margin-bottom: 0;
 	}
-		
+
 #footer {
 	clear: both;
 	font-size: 85%;
@@ -331,7 +331,7 @@ div#content ul {
 	visibility: hidden;
 }
 
-#page:after, 
+#page:after,
 #column:after {
 	display: inline-block;
 }
@@ -339,13 +339,13 @@ div#content ul {
 /* Hides from IE-mac \*/
 * html #page,
 * html #column {height: 1%;}
-#page, 
+#page,
 #column {
 	display: block;
 }
 /* End hide from IE-mac */
 
-	
+
 /* Tables using sortable.js */
 table.sortable span.sortarrow {
 		color: black;
@@ -354,7 +354,7 @@ table.sortable span.sortarrow {
 
 /* Bill Metadata */
 #bill-metadata h2 {
-	margin: 0;	
+	margin: 0;
 }
 
 /* Bill Progress Table */
@@ -587,7 +587,7 @@ a.balloon div {
 	  float:left;
 	  width:140px;
 	  text-align: right;
-	  clear:both; 
+	  clear:both;
 	  padding:3px 20px 4px 0;
 	  margin-right:-1px;
 	  position:relative;
@@ -600,7 +600,7 @@ a.balloon div {
 	}
 
 
-/* Responsive layout */
+/* Responsive layout: extra-wide display */
 @media screen and (min-width: 1100px) {
 	#page {
 		width: 86.947em;
@@ -615,6 +615,8 @@ a.balloon div {
 		margin-left: 66.78em;
 	}
 }
+
+/* Responsive layout: phones */
 @media only screen and (max-device-width: 480px), only screen and (min-device-width: 640px) and (max-device-width: 1136px) and (-webkit-min-device-pixel-ratio: 2) {
 	body {
 		background-color: #243a51;
@@ -627,8 +629,8 @@ a.balloon div {
 		width: 99%;
 	}
 	#content {
-		padding: 0;
-		width: 100%;
+		padding: 2%;
+		width: 96%;
 		font-size: 133.33%; /* ~16px */
 		line-height: 1.666em;
 		overflow: hidden;

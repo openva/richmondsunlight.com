@@ -2,18 +2,18 @@
 
 ###
 # About
-# 
+#
 # PURPOSE
 # About the General Assembly.
-# 
+#
 ###
 
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('settings.inc.php');
-include_once('includes/functions.inc.php');
-include_once('vendor/autoload.php');
+include_once 'settings.inc.php';
+include_once 'includes/functions.inc.php';
+include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -27,12 +27,12 @@ session_start();
 # Grab the user data.
 if (logged_in() === TRUE)
 {
-	$user = get_user();
+    $user = get_user();
 }
 
 # PAGE METADATA
 $page_title = 'About the General Assembly';
-$site_section = 'about';	
+$site_section = 'about';
 
 # PAGE CONTENT
 $page_sidebar = '
@@ -90,14 +90,14 @@ $page_body = <<<EOD
 	<p>In the 2007 election, the Democratic Party reclaimed the majority in the Senate for the
 	first time since 1999, when the Republican Party took control of the Senate for the first
 	time in history.</p>
-	
+
 	<h3>Salary and qualifiations</h3>
 	<p>The annual salary for senators is $18,000 per year. To qualify for office, senators must
 	be at least 21 years of age at the time of the election, residents of the district they
 	represent, and qualified to vote for General Assembly legislators. The regular session of
 	the General Assembly is 60 days long during even numbered years and 30 days long during odd
 	numbered years, unless extended by a two-thirds vote of both houses.</p>
-	
+
 	<h2>House</h2>
 	<p>The Virginia House of Delegates is the lower house of the Virginia General Assembly. It
 	has 100 members elected for terms of two years; unlike most states, these elections take
@@ -122,7 +122,7 @@ $page_body = <<<EOD
 	comeback under the leadership of Governors Mark Warner and Tim Kaine, gaining six seats
 	during Warner’s term in office (2002–2006), and one in a special election at the beginning
 	of Kaine’s term.</p>
-	
+
 	<h3>Salary and qualifications</h3>
 	<p>The annual salary for delegates is $17,640 per year. Each delegate represents roughly
 	71,000 people. Candidates for office must be at least 21 years of age at the time of the

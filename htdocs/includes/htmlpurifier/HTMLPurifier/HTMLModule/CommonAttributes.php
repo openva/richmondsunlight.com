@@ -3,7 +3,7 @@
 class HTMLPurifier_HTMLModule_CommonAttributes extends HTMLPurifier_HTMLModule
 {
     public $name = 'CommonAttributes';
-    
+
     public $attr_collections = array(
         'Core' => array(
             0 => array('Style'),
@@ -21,4 +21,3 @@ class HTMLPurifier_HTMLModule_CommonAttributes extends HTMLPurifier_HTMLModule
         )
     );
 }
-

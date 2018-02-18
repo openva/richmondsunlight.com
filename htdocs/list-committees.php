@@ -2,18 +2,18 @@
 
 ###
 # List Committees
-# 
+#
 # PURPOSE
 # List all committees.
-# 
+#
 ###
 
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('includes/settings.inc.php');
-include_once('includes/functions.inc.php');
-include_once('vendor/autoload.php');
+include_once 'includes/settings.inc.php';
+include_once 'includes/functions.inc.php';
+include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -30,7 +30,7 @@ $site_section = 'committees';
 
 # PAGE SIDEBAR
 $page_sidebar = '
-		
+
 		<div class="box">
 			<h3>Explanation</h3>
 			<p>The House of Delegates and the Senate can’t possibly consider every bill that’s
@@ -38,9 +38,9 @@ $page_sidebar = '
 			committees most appropriate to them, and those committees act as a filter, weeding
 			out the bad bills and sending the good bills on to be considered by the entire body.
 			 (At least, that’s the theory.)</p>
-			
+
 			<p>The House has 14 committees, and the Senate has 11.</p>
-			
+
 			<p>Committees are where much of the real work of the General Assembly gets done.
 			Committee meetings are where people can testify about bills, where deals are made,
 			and legislators speak more freely than they tend to before their entire body.
@@ -71,22 +71,22 @@ $sql = 'SELECT id, shortname, name, chamber, meeting_time,
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-		$page_body .= '
+        $page_body .= '
 					<div class="right_side">
 						<h2>Senate</h2>
 						<ul>';
-	while ($committee = mysql_fetch_array($result))
-	{
-		$committee = array_map('stripslashes', $committee);
-		$page_body .= '<li><a href="/committee/senate/'.$committee['shortname'].'/">'.$committee['name'].'</a>';
-		if ($committee['count'] > 0)
-		{
-			$page_body .= ' (<a href="/bills/committee/'.$committee['chamber'].'/'.$committee['shortname'].'/"
+    while ($committee = mysql_fetch_array($result))
+    {
+        $committee = array_map('stripslashes', $committee);
+        $page_body .= '<li><a href="/committee/senate/'.$committee['shortname'].'/">'.$committee['name'].'</a>';
+        if ($committee['count'] > 0)
+        {
+            $page_body .= ' (<a href="/bills/committee/'.$committee['chamber'].'/'.$committee['shortname'].'/"
 			title="Bills before this committee">'.$committee['count'].'</a>)';
-		}
-		$page_body .= '</li>';
-	}
-	$page_body .= '
+        }
+        $page_body .= '</li>';
+    }
+    $page_body .= '
 						</ul>
 					</div>';
 }
@@ -107,29 +107,29 @@ $sql = 'SELECT id, shortname, name, chamber, meeting_time,
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-		$page_body .= '
+        $page_body .= '
 					<div class="left_side">
 						<h2>House</h2>
 						<ul>';
-	while ($committee = mysql_fetch_array($result))
-	{
-		$committee = array_map('stripslashes', $committee);
-		$page_body .= '<li><a href="/committee/house/'.$committee['shortname'].'/">'.$committee['name'].'</a>';
-		if ($committee['count'] > 0)
-		{
-			$page_body .= ' (<a href="/bills/committee/'.$committee['chamber'].'/'.$committee['shortname'].'/"
+    while ($committee = mysql_fetch_array($result))
+    {
+        $committee = array_map('stripslashes', $committee);
+        $page_body .= '<li><a href="/committee/house/'.$committee['shortname'].'/">'.$committee['name'].'</a>';
+        if ($committee['count'] > 0)
+        {
+            $page_body .= ' (<a href="/bills/committee/'.$committee['chamber'].'/'.$committee['shortname'].'/"
 			title="Bills before this committee">'.$committee['count'].'</a>)';
-		}
-		$page_body .= '</li>';
-	}
-	$page_body .= '
+        }
+        $page_body .= '</li>';
+    }
+    $page_body .= '
 						</ul>
 					</div>';
 }
 
 # OUTPUT THE PAGE
 /*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
-	'&site_section='.urlencode($site_section));*/
+    '&site_section='.urlencode($site_section));*/
 
 $page = new Page;
 $page->page_title = $page_title;
@@ -137,5 +137,3 @@ $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
 $page->process();
-
-?>

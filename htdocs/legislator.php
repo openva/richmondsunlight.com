@@ -2,10 +2,10 @@
 
 ###
 # Legislator Page
-# 
+#
 # PURPOSE
 # Information about each legislator.
-# 
+#
 ###
 
 # INCLUDES
@@ -342,7 +342,7 @@ else
 }
 $sql = 'SELECT COUNT(*) AS passed,
 		(
-			SELECT COUNT(*) 
+			SELECT COUNT(*)
 			FROM bills LEFT JOIN sessions ON bills.session_id = sessions.id
 			WHERE sessions.year = ' . $batting_year . '
 			AND chief_patron_id = ' . $legislator['id'] . '
@@ -394,7 +394,7 @@ else
 	$page_body .= '
 		<dt>Next Election</dt>
 		<dd>' . $next_election . '</dd>';
-}		
+}
 if ( is_array($legislator['committees']) && (count($legislator['committees']) > 0) )
 {
 	$page_body .= '
@@ -472,11 +472,11 @@ $total = array_sum($tmp);
 if ($total > 0)
 {
 	arsort($tmp);
-	
+
 	# Create the text that we'll use below in the copatroning stats.
 	$introduced = round((current($tmp)/$total)*100).'% of bills '.$legislator['pronoun']
 	.' copatroned were introduced by '.( (key($tmp)=='R') ? 'Republicans' : 'Democrats' ) .'. ';
-	
+
 	# Populate an array that we use to determine overall partisanship. 0 = Democratic and 100 =
 	# Republican. Because our number is based on the majority support, we need to rescale it.
 	if (key($tmp)=='D')
@@ -517,12 +517,12 @@ $total = array_sum($tmp);
 if ($total > 0)
 {
 	arsort($tmp);
-	
+
 	# Create the text that we'll use below in the copatroning stats.
 	$supporters = 'Of all of the copatrons of '.( ($legislator['sex'] == 'male') ? 'his' : 'her' )
 		.' bills, '.round((current($tmp)/$total)*100).'% of them are '
 	.( (key($tmp)=='R') ? 'Republicans' : 'Democrats' ) .'. ';
-	
+
 	# Populate an array that we use to determine overall partisanship. 0 = Democratic and 100 =
 	# Republican. Because our number is based on the majority support, we need to rescale it.
 	if (key($tmp)=='D')
@@ -570,7 +570,7 @@ if ($total > 0)
 		.( ($legislator['sex'] == 'male') ? 'he' : 'she' ).' also copatroned, '
 		.round((current($tmp)/$total)*100).'% of them are '
 	.( (key($tmp)=='R') ? 'Republicans' : 'Democrats' ) .'. ';
-	
+
 	# Populate an array that we use to determine overall partisanship. 0 = Democratic and 100 =
 	# Republican. Because our number is based on the majority support, we need to rescale it.
 	if (key($tmp)=='D')
@@ -642,24 +642,24 @@ if ($tag_count > 0)
 	$page_body .= '
 		<dt>Tag Cloud <a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-f4eee5.gif" class="help-icon" alt="?" /></a></dt>
 		<dd>
-			<div class="tags">';		
+			<div class="tags">';
 	# Build up an array of tags, with the key being the tag and the value being the count.
 	while ($tag = mysql_fetch_array($result))
 	{
 		$tag = array_map('stripslashes', $tag);
 		$tags[$tag{tag}] = $tag['count'];
 	}
-	
+
 	# Sort the tags in reverse order by key (their count), shave off the top 30, and then
 	# resort alphabetically.
 	arsort($tags);
 	$tags = array_slice($tags, 0, 30, TRUE);
 	ksort($tags);
-		
+
 	# Establish a scale -- the average size in this list should be 1.25em, with the scale
 	# moving up and down from there.
 	$multiple = 1.25 / (array_sum($tags) / count($tags));
-	
+
 	foreach ($tags AS $tag => $count)
 	{
 		$size = round( ($count * $multiple), 1);
@@ -671,7 +671,7 @@ if ($tag_count > 0)
 		{
 			$size = .75;
 		}
-		
+
 		$page_body .= '<span style="font-size: '.$size.'em;"><a href="/bills/tags/'.urlencode($tag).'/">'.$tag.'</a></span> ';
 	}
 	$page_body .= '</div>
@@ -702,10 +702,10 @@ if (!empty($legislator['bio']))
 		<dd>'.nl2p($legislator['bio']).'</dd>';
 }
 
-# Close the table and this tab's DIV.		
+# Close the table and this tab's DIV.
 $page_body .= '</dl>
 	</div>';
-	
+
 # Start a new DIV for top contributions.
 if (isset($legislator['contributions']['List']))
 {
@@ -724,7 +724,7 @@ if (isset($legislator['contributions']['List']))
 		<table style="width: 100%;">
 			<caption>Top 10 Donors</caption>
 			<tbody>';
-			
+
 	foreach ($contributions as $contribution)
 	{
 		$page_body .= '
@@ -735,7 +735,7 @@ if (isset($legislator['contributions']['List']))
 					<td>$' . number_format(round($contribution->cumulative_amount)) . '</td>
 				</tr>';
 	}
-	
+
 	$page_body .= '
 			</tbody>
 		</table>
@@ -744,7 +744,7 @@ if (isset($legislator['contributions']['List']))
 			.'CSV</a> or <a href="http://openva.com/campaign-finance/contributions/'
 			. $legislator['contributions']['CommitteeCode'] . '.json">JSON</a>.</p>
 		</div>';
-	
+
 }
 
 # Start a new DIV for news mentions.
@@ -813,7 +813,7 @@ else
 
 # News from the legislator's website.
 if (!empty($legislator['rss_url']))
-{	
+{
 	# Start a new DIV for legislator's blogs, etc.
 	$page_body .= '
 	<div id="news">
@@ -850,7 +850,7 @@ if ($legislator['videos'] !== FALSE)
 	$video = new Video;
 	$video->legislator_id = $legislator['id'];
 	$video->by_legislator();
-	
+
 	# Start a new DIV for this legislator's highlights reel.
 	/*
 	 * Add the Flowplayer code.
@@ -864,7 +864,7 @@ if ($legislator['videos'] !== FALSE)
 		<p>These are all of the video clips of '.$legislator['name'].'’s remarks on the floor of the
 		'.ucfirst($legislator['chamber']).' since '.substr($video->clips->{0}->date, 0, 4).'.
 		There are '.count((array) $video->clips).' video clips in all.</p>
-		
+
 		<div class="flowplayer" style="display:block; width:450px; height:337px;" id="player"></div>
 
 		<script>
@@ -888,7 +888,7 @@ if ($legislator['videos'] !== FALSE)
 	}
 
 	$page_body .= "];
-		
+
 			flowplayer(function (api, root) {
 					api.on('ready', function() {
 						firstplayer.seek(api.video.start);
@@ -912,7 +912,7 @@ if ($legislator['videos'] !== FALSE)
 			});
 		</script>
 	</div>";
-	
+
 }
 
 # Close the DIV that contains these tabs.
@@ -952,11 +952,11 @@ if (mysql_num_rows($result) > 0)
 		$bill = array_map('stripslashes', $bill);
 		$bills[$bill{year}][] = $bill;
 	}
-	
+
 	# Start the tab header code
 	$page_body .= '
 		<ul>';
-	
+
 	# Step through each year and generate a tab.
 	foreach ($bills as $year => $bill)
 	{
@@ -971,29 +971,29 @@ if (mysql_num_rows($result) > 0)
 				<li><a href="#'.$year.'">'.$year.'</a></li>';
 		}
 	}
-	
+
 	# End the tab header code.
 	$page_body .= '
 		</ul>';
-	
+
 	# Now step through each year, and each bill within each year, and generate the tab's data.
 	foreach ($bills as $year => $year_bills)
 	{
 		$page_body .= '
 			<div id="'.$year.'" class="bills">
 				<ul>';
-		
+
 		foreach ($year_bills as $bill)
 		{
 			$page_body .= '
 					<li><a href="/bill/'.$bill['year'].'/'.$bill['number'].'/" class="balloon">'.strtoupper($bill['number']).balloon($bill, 'bill-noleg').'</a>: '.$bill['catch_line'].'</li>';
 		}
-		
+
 		$page_body .= '
 				</ul>
 			</div>';
 	}
-	
+
 	# Close the Bills DIV
 	$page_body .= '</div>';
 }

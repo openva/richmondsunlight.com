@@ -16,7 +16,7 @@ table.sortable span.sortarrow {
 div#bio {
 	background-color: #f4eee5;
 }
-	div#bio dl {		
+	div#bio dl {
 		background-color: #f4eee5;
 	}
 	div#bio dt, div#bio dd {
@@ -34,7 +34,7 @@ div#bio {
 		max-width: 350px;
 		overflow: hidden;
 	}
-	
+
 #body-legislators div.bills {
 	background-color: #f4eee5;
 	padding: 1em;
@@ -113,7 +113,7 @@ a img {
 		text-transform: uppercase;
 		margin: -.75em -.5em .5em .5em;
 	}
-	
+
 .fineprint {
 	font-size: .85em;
 }
@@ -121,7 +121,7 @@ a img {
 .highlight {
 	background-color: #ff0;
 }
-	
+
 
 /* TAGS */
 ul.tags {
@@ -281,7 +281,7 @@ img.help-icon {
 			vertical-align: top;
 			padding-right: .25em;
 		}
-		
+
 		#registration td small {
 			font-size: .9em;
 			color: #666;
@@ -307,7 +307,7 @@ div#public-portfolio .bill {
 	div#public-portfolio .comments {
 		font-size: .8em;
 	}
-	
+
 /* Subsection Tabs
 --------------------*/
 .tabs > ul {
@@ -369,7 +369,7 @@ div.docket {
 		font-size: 1.2em;
 		font-weight: bold;
 	}
-	
+
 /* For displaying embedded video */
 div.video {
 	float: left;
@@ -389,7 +389,7 @@ div.video {
 		float: left;
 		width: 350px;
 	}
-	
+
 	div.video div.index {
 		width: 140px;
 		float: right;
@@ -410,7 +410,7 @@ div.video {
 			padding-left: 0 !important;
 			font-size: .85em;
 		}
-	
+
 
 /* The bill progress checkboxes */
 div.checkbox {
@@ -529,7 +529,7 @@ div#partisanship-graph {
 		margin: 10px;
 		font-weight: bold !important;
 	}
-	
+
 		#slidebox h2 span {
 			font-size: 125%;
 			font-weight: normal !important;
@@ -539,7 +539,7 @@ div#partisanship-graph {
 		margin: 0;
 		padding: 0;
 	}
-	
+
 		#slidebox li {
 			margin: 0 10px 3px 10px;
 			padding: 2px;

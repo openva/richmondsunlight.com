@@ -3,6 +3,7 @@
 htdocs/admin/phpmyadmin/
 .users
 htdocs/vendor/
+htdocs/includes/vendor/
 htdocs/includes/settings.inc.php
 htdocs/downloads/
 *.srt
@@ -25,3 +26,5 @@ process-audio
 process-video
 lobbyist.php
 petition.php
+
+*.cache

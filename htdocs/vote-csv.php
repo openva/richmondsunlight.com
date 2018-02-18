@@ -2,22 +2,22 @@
 
 ###
 # Create Vote CSV
-# 
+#
 # PURPOSE
 # Accepts the shortname of a given legislator and a year, and spits out a CSV file
 # of that legislator's voting record in that period.
-# 
+#
 # NOTES
 # This is not intended to be viewed. It just spits out a CSV file and that's that.
-# 
+#
 ###
 
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('includes/settings.inc.php');
-include_once('includes/functions.inc.php');
-include_once('vendor/autoload.php');
+include_once 'includes/settings.inc.php';
+include_once 'includes/functions.inc.php';
+include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -46,19 +46,19 @@ $sql = 'SELECT bills.number AS bill_number, bills.catch_line, representatives_vo
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-	
-	# Send the headers to have the data downloaded as a CSV file.
-	header('Content-Type: application/octet-stream');
-	header('Content-Disposition: attachment; filename='.$shortname.'-'.$year.'.csv');
-	header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-	echo 'Please note that votes are not necessarily for or against a bill. Many are'."\n".
-		'procedural votes. Verify the context of votes at richmondsunlight.com'."\n".
-		'when in doubt.'."\n\n".'Bill #, Title, Vote, Outcome, Committee, Date'."\n";
-	while ($vote = mysql_fetch_array($result))
-	{
-		$vote = array_map('stripslashes', $vote);
-		$vote['catch_line'] = str_replace('"', '""', $vote['catch_line']);
-		echo strtoupper($vote['bill_number']).',"'.$vote['catch_line'].'",'.$vote['vote'].','.
-		$vote['outcome'].',"'.$vote['committee'].'",'.$vote['date']."\n";
-	}
+
+    # Send the headers to have the data downloaded as a CSV file.
+    header('Content-Type: application/octet-stream');
+    header('Content-Disposition: attachment; filename='.$shortname.'-'.$year.'.csv');
+    header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+    echo 'Please note that votes are not necessarily for or against a bill. Many are'."\n".
+        'procedural votes. Verify the context of votes at richmondsunlight.com'."\n".
+        'when in doubt.'."\n\n".'Bill #, Title, Vote, Outcome, Committee, Date'."\n";
+    while ($vote = mysql_fetch_array($result))
+    {
+        $vote = array_map('stripslashes', $vote);
+        $vote['catch_line'] = str_replace('"', '""', $vote['catch_line']);
+        echo strtoupper($vote['bill_number']).',"'.$vote['catch_line'].'",'.$vote['vote'].','.
+        $vote['outcome'].',"'.$vote['committee'].'",'.$vote['date']."\n";
+    }
 }

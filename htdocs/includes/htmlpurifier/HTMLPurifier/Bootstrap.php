@@ -29,7 +29,7 @@ if (!defined('PHP_EOL')) {
  */
 class HTMLPurifier_Bootstrap
 {
-    
+
     /**
      * Autoload function for HTML Purifier
      * @param $class Class to load
@@ -40,7 +40,7 @@ class HTMLPurifier_Bootstrap
         require HTMLPURIFIER_PREFIX . '/' . $file;
         return true;
     }
-    
+
     /**
      * Returns the path for a specific class.
      */
@@ -56,13 +56,13 @@ class HTMLPurifier_Bootstrap
         if (!file_exists(HTMLPURIFIER_PREFIX . '/' . $file)) return false;
         return $file;
     }
-    
+
     /**
      * "Pre-registers" our autoloader on the SPL stack.
      */
     public static function registerAutoload() {
         $autoload = array('HTMLPurifier_Bootstrap', 'autoload');
-        if ( ($funcs = spl_autoload_functions()) === false ) {
+        if (($funcs = spl_autoload_functions()) === false) {
             spl_autoload_register($autoload);
         } elseif (function_exists('spl_autoload_unregister')) {
             $compat = version_compare(PHP_VERSION, '5.1.2', '<=') &&
@@ -92,5 +92,5 @@ class HTMLPurifier_Bootstrap
             foreach ($funcs as $func) spl_autoload_register($func);
         }
     }
-    
+
 }

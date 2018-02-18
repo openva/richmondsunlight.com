@@ -78,7 +78,7 @@ sub PUT_FILE {
 	my $blocksize = $st[11] || 4096; # just in case it's zero...
 	push(@headers, 'content-length', $size);
 	# should we set content-type as well? probably CMS doesn't care.
-	
+
 	my $fh;
 	my $sent = 0;
 	my $content = sub {
@@ -257,7 +257,7 @@ sub getKeysFromWeb {
 	return ();
     }
 }
-    
+
 sub readConfig {
     my $name = shift;
     open(CF, $name) || return;
@@ -465,7 +465,7 @@ while (<MT>) {
     }
     my $item = ($task->{items}{$itemName}
 		||= { name=>$itemName, metadata=>{}, files=>[] });
-    
+
     $item->{collections} = \@collections;
 
     # allow for a row without "file" (i.e. empty), which just specifies
@@ -525,7 +525,7 @@ while (<MT>) {
 	push(@{$item->{metadata}{$fn}}, $fields[$i])
 	    if $fields[$i] ne '';
     }
-		
+
     # use item identifier as title if unspecified
     $item->{'title'} ||= $item->{name};
 
@@ -538,8 +538,8 @@ close(MT);
 # calculate total upload size for each item, for size-hint
 foreach my $file (@{$task->{files}}) {
     $file->{item}{size} += $file->{size};
-}    
-    
+}
+
 # now start actual upload tasks, doing some optimization.
 # - items with no file to upload are not created
 # - item creation is always combined with the first file upload
@@ -595,7 +595,7 @@ while (@uploadQueue) {
 
     my $uri = IAS3URLBASE . $item->{name} . "/" . $file->{filename};
     my $content = $file->{path};
-    
+
     if ($verbose) {
 	print STDERR "PUT $uri\n";
 	for (my $i = 0; $i < $#headers; $i += 2) {
@@ -625,6 +625,6 @@ while (@uploadQueue) {
 	    next;
 	}
     }
-    
+
     $item->{created} = 1;
 }

@@ -3,7 +3,7 @@
 class Log
 {
 
-    function __construct()
+    public function __construct()
     {
 
         /*
@@ -32,8 +32,8 @@ class Log
         }
 
     }
-    
-    function put($message, $level)
+
+    public function put($message, $level)
     {
 
         if (!isset($message))
@@ -48,10 +48,10 @@ class Log
         /*
          * If this is being invoked at the CLI, display all messages.
          */
-	if (PHP_SAPI === 'cli')
-	{
-	    echo $message . "\n";
-	}
+    if (PHP_SAPI === 'cli')
+    {
+        echo $message . "\n";
+    }
 
         /*
          * If the level of this message is below our verbosity level, ignore it.
@@ -93,7 +93,7 @@ class Log
 
     }
 
-    function slack($message, $room = 'rs', $icon = ':longbox:')
+    public function slack($message, $room = 'rs', $icon = ':longbox:')
     {
 
         $room = ($room) ? $room : 'general';
@@ -110,7 +110,7 @@ class Log
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $result = curl_exec($ch);
         curl_close($ch);
-        
+
         return $result;
 
     }
@@ -118,14 +118,14 @@ class Log
     /**
      * Log an error to a text file.
      */
-    function filesystem($message)
+    public function filesystem($message)
     {
 
-	/*
-	 * Prepend the message with a timestamp.
-	 */
-       	$message = date('Y-m-d H:i:s') . ' ' . $message;
-	 
+    /*
+     * Prepend the message with a timestamp.
+     */
+           $message = date('Y-m-d H:i:s') . ' ' . $message;
+
         /*
          * Keep logs in different locations, depending on how this has been invoked.
          */
@@ -149,24 +149,24 @@ class Log
     /**
      * Send an alert to the Pushover iOS app.
      */
-    function pushover($title, $message)
+    public function pushover($title, $message)
     {
-        
-        if ( !defined('PUSHOVER_KEY') || !isset($title) || !isset($message) )
+
+        if (!defined('PUSHOVER_KEY') || !isset($title) || !isset($message))
         {
             return FALSE;
         }
-        
+
         if (strlen($title) > 100)
         {
             $title = substr($title, 0, 100);
         }
-        
+
         if (strlen($message) > 412)
         {
             $message = substr($message, 0, 412);
         }
-        
+
         curl_setopt_array($ch = curl_init(), array(
             CURLOPT_URL => "https://api.pushover.net/1/messages.json",
             CURLOPT_RETURNTRANSFER => TRUE,
@@ -180,10 +180,10 @@ class Log
         ));
         curl_exec($ch);
         curl_close($ch);
-        
+
         return TRUE;
-        
+
     }
 
-    
+
 }

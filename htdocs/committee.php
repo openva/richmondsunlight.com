@@ -2,15 +2,15 @@
 
 ###
 # Committees
-# 
+#
 # PURPOSE
 # Individual committees.
-# 
+#
 ###
 
-include_once('includes/settings.inc.php');
-include_once('includes/functions.inc.php');
-include_once('vendor/autoload.php');
+include_once 'includes/settings.inc.php';
+include_once 'includes/functions.inc.php';
+include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -41,7 +41,7 @@ $site_section = 'committees';
 # PAGE SIDEBAR
 if (!empty($committee->url))
 {
-	$page_sidebar .= '
+    $page_sidebar .= '
 		<div class="box">
 			<h3>About This Committee</h3>
 			More information about the ' . $committee->name . ' Committee can be found at
@@ -69,36 +69,36 @@ $sql = 'SELECT date AS date_raw, DATE_FORMAT(date, "%W, %m/%d/%Y") AS date,
 $result = mysql_query($sql);
 if (mysql_num_rows($result) == 1)
 {
-	$tmp = mysql_fetch_array($result);
-	$committee->meeting = new stdClass;
-	$committee->meeting->next = $tmp['date'];
-	$committee->meeting->year = $tmp['year'];
-	$committee->meeting->month = $tmp['month'];
-	$committee->meeting->day = $tmp['day'];
-	$committee->meeting->bill_count = $tmp['bill_count'];
-	if (!empty($tmp['time']))
-	{
-		$committee->meeting->next .= ' at ' . $tmp['time'];
-	}
-	$committee->meeting->time = $committee->meeting_time;
+    $tmp = mysql_fetch_array($result);
+    $committee->meeting = new stdClass;
+    $committee->meeting->next = $tmp['date'];
+    $committee->meeting->year = $tmp['year'];
+    $committee->meeting->month = $tmp['month'];
+    $committee->meeting->day = $tmp['day'];
+    $committee->meeting->bill_count = $tmp['bill_count'];
+    if (!empty($tmp['time']))
+    {
+        $committee->meeting->next .= ' at ' . $tmp['time'];
+    }
+    $committee->meeting->time = $committee->meeting_time;
 }
 
 $page_sidebar = '
 		<div class="box">
 			<h3>Meeting Schedule</h3>
 			<p>The ' . $committee->name . ' committee meets when the ' . $committee->chamber . ' is '
-			. 'in session, ' . $committee->meeting->time . '.</p>';
+            . 'in session, ' . $committee->meeting->time . '.</p>';
 if (isset($committee->meeting->next))
 {
-	$page_sidebar .= '<p>The next scheduled meeting is on ' . $committee->meeting->next . '. '
-		. number_format($committee->meeting->bill_count) . ' bills are on the agenda.
+    $page_sidebar .= '<p>The next scheduled meeting is on ' . $committee->meeting->next . '. '
+        . number_format($committee->meeting->bill_count) . ' bills are on the agenda.
 		<a href="/schedule/' . $committee->meeting->year . '/' . $committee->meeting->month
-		. '/' . $committee->meeting->day . '/#' . $committee->chamber . '-' . $committee->shortname
-		. '">Details »</a></p>';
+        . '/' . $committee->meeting->day . '/#' . $committee->chamber . '-' . $committee->shortname
+        . '">Details »</a></p>';
 }
 $page_sidebar .= '</div>';
-		
-		
+
+
 # Overall batting average.
 $sql = 'SELECT COUNT(*) AS failed,
 			(SELECT COUNT(*)
@@ -112,21 +112,21 @@ $sql = 'SELECT COUNT(*) AS failed,
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-	$stats = mysql_fetch_array($result);
-	
-	# "We'll have no dividing by zero in this house, young man."
-	if (($stats['failed'] > 0) && ($stats['total'] > 0))
-	{
-		$page_sidebar .= '
+    $stats = mysql_fetch_array($result);
+
+    # "We'll have no dividing by zero in this house, young man."
+    if (($stats['failed'] > 0) && ($stats['total'] > 0))
+    {
+        $page_sidebar .= '
 	<div class="box">
 		<h3>Stats</h3>
 		<p>' . (100 - round(($stats['failed'] / $stats['total'] * 100), 0)) . '% of the
 		' . $stats['total'] . ' bills considered by the ' . $committee->name . ' Committee
 		this year have passed.</p>';
-	}
+    }
 }
-		
-		
+
+
 # Partisan batting average.
 $sql = 'SELECT representatives.party, representatives.party AS party1,
 		COUNT(*) AS failed,
@@ -147,24 +147,24 @@ $sql = 'SELECT representatives.party, representatives.party AS party1,
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-	$page_sidebar .= '<p>';
-	
-	while ($stats = mysql_fetch_array($result))
-	{
-		
-		if ($stats['party'] == 'R') $stats['party'] = 'Republican';
-		elseif ($stats['party'] == 'D') $stats['party'] = 'Democrat';
-		elseif ($stats['party'] == 'I') $stats['party'] = 'Independent';
-	
-		# "We'll have no dividing by zero in this house, young man."
-		if (($stats['failed'] > 0) && ($stats['total'] > 0))
-		{
-			$page_sidebar .= (100 - round(($stats['failed'] / $stats['total'] * 100), 0)) . '% of
+    $page_sidebar .= '<p>';
+
+    while ($stats = mysql_fetch_array($result))
+    {
+
+        if ($stats['party'] == 'R') $stats['party'] = 'Republican';
+        elseif ($stats['party'] == 'D') $stats['party'] = 'Democrat';
+        elseif ($stats['party'] == 'I') $stats['party'] = 'Independent';
+
+        # "We'll have no dividing by zero in this house, young man."
+        if (($stats['failed'] > 0) && ($stats['total'] > 0))
+        {
+            $page_sidebar .= (100 - round(($stats['failed'] / $stats['total'] * 100), 0)) . '% of
 			the ' . $stats['total'].' bills introduced by ' . $stats['party'].'s have passed.  ';
-		}
-	}
-		
-	$page_sidebar .= '</p>';
+        }
+    }
+
+    $page_sidebar .= '</p>';
 }
 
 
@@ -179,48 +179,48 @@ $sql = 'SELECT chamber, number, catch_line
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-	
-	$total_bills = mysql_num_rows($result);
-	
-	# List only the last five.
-	if ($total_bills < 5)
-	{
-		$listed_bills = $total_bills - 1;
-	}
-	else
-	{
-		$listed_bills = 4;
-	}
-	
-	$page_sidebar .= '
+
+    $total_bills = mysql_num_rows($result);
+
+    # List only the last five.
+    if ($total_bills < 5)
+    {
+        $listed_bills = $total_bills - 1;
+    }
+    else
+    {
+        $listed_bills = 4;
+    }
+
+    $page_sidebar .= '
 	<div class="box">
 		<h3>Bills in this Committee</h3>
 		<p>There are currently <a href="/bills/committee/'.$committee->chamber.'/'.$committee->shortname.'/">'
-			.$total_bills.' bills</a> awaiting review by this committee.';
-	if ($total_bills > ($listed_bills + 1))
-	{
-		$page_sidebar .= ' Of those bills, here are the five that have generated the most
+            .$total_bills.' bills</a> awaiting review by this committee.';
+    if ($total_bills > ($listed_bills + 1))
+    {
+        $page_sidebar .= ' Of those bills, here are the five that have generated the most
 			interest:';
-	}
-	else
-	{
-		$page_sidebar .= ' Those are:';
-	}
-	$page_sidebar .= '</p>
+    }
+    else
+    {
+        $page_sidebar .= ' Those are:';
+    }
+    $page_sidebar .= '</p>
 		<ul>';
-	$i=0;
-	while ($bill = mysql_fetch_array($result))
-	{
-		$bill = array_map('stripslashes', $bill);
-		$page_sidebar .= '<li><a href="/bill/'.SESSION_YEAR.'/'.$bill['number'].'/" class="bill">'
-			.strtoupper($bill['number']).'</a>: '.$bill['catch_line'].'</li>';
-		if ($i >= $listed_bills)
-		{
-			break;
-		}
-		$i++;
-	}
-	$page_sidebar .= '
+    $i=0;
+    while ($bill = mysql_fetch_array($result))
+    {
+        $bill = array_map('stripslashes', $bill);
+        $page_sidebar .= '<li><a href="/bill/'.SESSION_YEAR.'/'.$bill['number'].'/" class="bill">'
+            .strtoupper($bill['number']).'</a>: '.$bill['catch_line'].'</li>';
+        if ($i >= $listed_bills)
+        {
+            break;
+        }
+        $i++;
+    }
+    $page_sidebar .= '
 		</ul>
 	</div>';
 }
@@ -239,27 +239,27 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-	$page_sidebar .= '
+    $page_sidebar .= '
 	<div class="box">
 		<h3>Tag Cloud</h3>
 		<div class="tags">';
-	$top_tag = 1;
-	$top_tag_size = 3;
-	while ($tag = mysql_fetch_array($result))
-	{
-		$tags[] = array_map('stripslashes', $tag);
-		if ($tag['count'] > $top_tag) $top_tag = $tag['count'];
-	}
-	if ($top_tag == 1) $top_tag_size = 1;
-	for ($i=0; $i<count($tags); $i++)
-	{
-		$font_size = round(($tags[$i]['count'] / $top_tag * $top_tag_size), 2);
-		if ($font_size < '.75') $font_size = '.75';
-		$page_sidebar .= '<span style="font-size: '.$font_size.'em;">
+    $top_tag = 1;
+    $top_tag_size = 3;
+    while ($tag = mysql_fetch_array($result))
+    {
+        $tags[] = array_map('stripslashes', $tag);
+        if ($tag['count'] > $top_tag) $top_tag = $tag['count'];
+    }
+    if ($top_tag == 1) $top_tag_size = 1;
+    for ($i=0; $i<count($tags); $i++)
+    {
+        $font_size = round(($tags[$i]['count'] / $top_tag * $top_tag_size), 2);
+        if ($font_size < '.75') $font_size = '.75';
+        $page_sidebar .= '<span style="font-size: '.$font_size.'em;">
 				<a href="/bills/tags/' . urlencode($tags[$i]['tag']) . '/">' . $tags[$i]['tag'] . '</a>
 			</span>';
-	}
-	$page_sidebar .= '
+    }
+    $page_sidebar .= '
 		</div>
 	</div>
 	</div>';
@@ -270,19 +270,19 @@ if (mysql_num_rows($result) > 0)
 # Member Listing
 if (is_array($committee->members))
 {
-	$page_body = '
+    $page_body = '
 			<h2>Members</h2>
 			<ul>';
-	foreach ($committee->members AS $member)
-	{
-		$page_body .= '<li><a href="/legislator/' . $member['shortname'] . '/" class="legislator">' . $member['name']
-			.'</a>';
-		if (!empty($member['position']))
-		{
-			$page_body .= ' <strong>' . ucwords($member['position']) . '</strong>';
-		}
-	}
-	$page_body .= '
+    foreach ($committee->members as $member)
+    {
+        $page_body .= '<li><a href="/legislator/' . $member['shortname'] . '/" class="legislator">' . $member['name']
+            .'</a>';
+        if (!empty($member['position']))
+        {
+            $page_body .= ' <strong>' . ucwords($member['position']) . '</strong>';
+        }
+    }
+    $page_body .= '
 			</ul>';
 }
 
@@ -301,49 +301,49 @@ $result = mysql_query($sql);
 # If there are no subcommittees.
 if (mysql_num_rows($result) == 0)
 {
-	$page_body .= '<p>This committee has no subcommittees.</p>';
+    $page_body .= '<p>This committee has no subcommittees.</p>';
 }
 
 # If there are subcommittees.
 else
 {
-	$page_body .= '<ul>';
-	while ($subcommittee = mysql_fetch_array($result))
-	{
-		$subcommittee = array_map('stripslashes', $subcommittee);
-		$page_body .= '<li>'.$subcommittee['name'];
-		if (!empty($subcommittee['meeting_time']))
-		{
-			$page_body .= '<br /><small>'.$subcommittee['meeting_time'].'</small>';
-		}
-		$page_body .= '</li>';
-	}
-	$page_body .= '</ul>';
+    $page_body .= '<ul>';
+    while ($subcommittee = mysql_fetch_array($result))
+    {
+        $subcommittee = array_map('stripslashes', $subcommittee);
+        $page_body .= '<li>'.$subcommittee['name'];
+        if (!empty($subcommittee['meeting_time']))
+        {
+            $page_body .= '<br /><small>'.$subcommittee['meeting_time'].'</small>';
+        }
+        $page_body .= '</li>';
+    }
+    $page_body .= '</ul>';
 }
 
 if (is_array($committee->members))
 {
-	# Generate a list of all e-mail addresses for the members of this committee.
-	$page_body .= '
+    # Generate a list of all e-mail addresses for the members of this committee.
+    $page_body .= '
 			<h2>Email Contact List</h2>
 			<p>Copy the below into your e-mail client’s “To” field to e-mail every member
 			of this committee.</p>
 			<textarea style="width: 100%; height: 12em; font-size: .85em;">';
-	$num_members = count($committee->members);
-	$i=0;
-	foreach ($committee->members as $member)
-	{
-		if (!empty($member['email']))
-		{
-			$page_body .= '&quot;' . $member['name_simple'] . '&quot; &lt;' . $member['email'] . '&gt;';
-			if ($i+1 < $num_members)
-			{
-				$page_body .= ', ';
-			}
-		}
-		$i++;
-	}
-	$page_body .= '</textarea>';
+    $num_members = count($committee->members);
+    $i=0;
+    foreach ($committee->members as $member)
+    {
+        if (!empty($member['email']))
+        {
+            $page_body .= '&quot;' . $member['name_simple'] . '&quot; &lt;' . $member['email'] . '&gt;';
+            if ($i+1 < $num_members)
+            {
+                $page_body .= ', ';
+            }
+        }
+        $i++;
+    }
+    $page_body .= '</textarea>';
 }
 
 $page = new Page;

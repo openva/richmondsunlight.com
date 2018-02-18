@@ -5,7 +5,7 @@
  */
 class SQS
 {
-        
+
     use Aws\Sqs\SqsClient;
 
     public function __construct()
@@ -18,35 +18,35 @@ class SQS
             'key'		=> AWS_ACCESS_KEY,
             'secret'	=> AWS_SECRET_KEY
         ]);
-        
+
     }
 
-	/**
+    /**
      * Send a message via SQS.
      */
-    function send()
-	{
+    public function send()
+    {
 
         if (!isset($this->message))
         {
             return FALSE;
         }
-		
-		$this->sqs_client->sendMessage([
-			'MessageGroupId'			=> '1',
-			'MessageDeduplicationId'	=> mt_rand(),
-		    'QueueUrl'    				=> SQS_VIDEO_URL,
-		    'MessageBody' 				=> json_encode($this->message)
-		]);
+
+        $this->sqs_client->sendMessage([
+            'MessageGroupId'			=> '1',
+            'MessageDeduplicationId'	=> mt_rand(),
+            'QueueUrl'    				=> SQS_VIDEO_URL,
+            'MessageBody' 				=> json_encode($this->message)
+        ]);
 
         return TRUE;
 
-	}
+    }
 
     /**
      * Get a message via SQS.
      */
-    function get()
+    public function get()
     {
 
         $result = $this->sqs_client->ReceiveMessage([
@@ -60,7 +60,7 @@ class SQS
     /**
      * Delete a message from SQS.
      */
-    function delete()
+    public function delete()
     {
 
         $this->sqs_client->DeleteMessage([

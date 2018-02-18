@@ -2,19 +2,19 @@
 
 ###
 # Create Bill XML
-# 
+#
 # PURPOSE
 # Accepts a year and a bill number and spits out an XML file providing the basic specs on that
 # bill.
-# 
+#
 # NOTES
 # This is not intended to be viewed. It just spits out an XML file and that's that.
-# 
+#
 # TODO
 # * Cache the output.
 # * Add a listing of identical bills.
 # * Add the full status history, with each date and status update as individual items.
-# 
+#
 ###
 
 # INCLUDES
@@ -37,11 +37,11 @@ $year = mysql_escape_string($_REQUEST['year']);
 $bill = mysql_escape_string($_REQUEST['bill']);
 
 # Set some options for XML_Serializer.
-$serializer_options = array ( 
-	'addDecl' => TRUE, 
-	'encoding' => 'UTF-8', 
-	'indent' => "\t", 
-	'rootName' => 'bill', 
+$serializer_options = array (
+	'addDecl' => TRUE,
+	'encoding' => 'UTF-8',
+	'indent' => "\t",
+	'rootName' => 'bill',
 );
 
 # Select the bill data from the database.
@@ -95,6 +95,6 @@ if (PEAR::isError($status))
 header('Content-type: text/xml');
 
 # Send the XML.
-echo $Serializer->getSerializedData(); 
+echo $Serializer->getSerializedData();
 
 ?>

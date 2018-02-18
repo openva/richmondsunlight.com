@@ -13,7 +13,7 @@ Disallow: /
 User-agent: Twiceler
 Disallow: /
 
-User-agent: BecomeBot 
+User-agent: BecomeBot
 Disallow: /
 
 User-agent: dotbot
@@ -52,7 +52,7 @@ Disallow: /
 User-agent: Snapbot
 Disallow: /
 
-User-agent: dotbot 
+User-agent: dotbot
 Disallow: /
 
 User-agent: Yandex
@@ -79,12 +79,14 @@ Disallow: /
 User-agent: SemrushBot
 Disallow: /
 
+User-agent: SemrushBot-SA
+Disallow: /
+
 User-agent: AhrefsBot
 Disallow: /
 
-User-agent: msnbot 
-Crawl-delay: 1
+User-agent: msnbot
+Crawl-delay: 5
 
-User-agent: bingbot 
-Crawl-delay: 1
-
+User-agent: bingbot
+Crawl-delay: 5

@@ -222,8 +222,8 @@ when it automatically loads the controls plugin.
 -----
 - canvas, controlbar and the content plugin backgound color and border color can be now given with rgb() and rgba() CSS style syntax
 - Added onMouseOver() and onMouseOut() listener registration methods to the Flowplayer API
-- enhancements to RSS playlist. Converted parsing to E4X, yahoo media and flowplayer namespace support. 
-- added feature to obtain bitrate and dimension information to a new clip custom property "bitrates" for future support for bitrate choosing. 
+- enhancements to RSS playlist. Converted parsing to E4X, yahoo media and flowplayer namespace support.
+- added feature to obtain bitrate and dimension information to a new clip custom property "bitrates" for future support for bitrate choosing.
 - added getter for playerSwfName config
 - if clip.url has the string "mp3:" in it, the clip.type will report 'audio'
 - added setKeyboardShortcutsEnabled(), addKeyListener(), removeKeyListener() to FlowplayerBase
@@ -336,7 +336,7 @@ Bug fixes:
   because the server does not send metadata if replaying the same stream.
 - the scrubber is disabled if the clip is not seekable in the first frame: http://flowplayer.org/forum/8/16526
   By default if the clip has one of following extensions (the typical flash video extensions) it is seekable
-  in the first frame: 'f4b', 'f4p', 'f4v', 'flv'. Added new clip property seekableOnBegin that can be used to override the default.  
+  in the first frame: 'f4b', 'f4p', 'f4v', 'flv'. Added new clip property seekableOnBegin that can be used to override the default.
 
 3.0.6
 -----
@@ -356,7 +356,7 @@ Fixes:
   // disable the play button and the buffering animation
   play: null
   // disable the buffering animation
-  buffering: null 
+  buffering: null
 - Added possibility to seek when in the buffering state: http://flowplayer.org/forum/3/13896
 - Added copyright notices and other GPL required entries to the user interface
 
@@ -396,7 +396,7 @@ Fixes:
 - now displays a live feed even when the RTMP server does not send any metadata and the onStart method is not therefore dispatched
 - added onMetaData clip event
 - fixed 'orig' scaling: the player went to 'fit' scaling after coming back from fullscreen. This is now fixed and the original dimensions are preserved in non-fullscreen mode.
-- cuepoint times are now given in milliseconds, the firing precision is 100 ms. All cuepoint times are rounded to the nearest 100 ms value (for example 1120 rounds to 1100) 
+- cuepoint times are now given in milliseconds, the firing precision is 100 ms. All cuepoint times are rounded to the nearest 100 ms value (for example 1120 rounds to 1100)
 - backgroundGradient was drawn over the background image in the canvas and in the content and controlbar plugins. Now it's drawn below the image.
 - added cuepointMultiplier property to clips. This can be used to multiply the time values read from cuepoint metadata embedded into video files.
 - the player's framerate was increased to 24 FPS, makes all animations smoother
@@ -443,7 +443,7 @@ RC4
 - Should not stop playback too early before the clip is really completed
 - The START event is now delayed so that the metadata is available when the event is fired, METADATA event was removed,
   new event BEGIN that is dispatched when the playback has been successfully started. Metadata is not normally
-  available when BEGIN is fired. 
+  available when BEGIN is fired.
 
 RC3
 ---

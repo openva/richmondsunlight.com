@@ -1,32 +1,32 @@
 <?php
 
-	###
-	# Downloads
-	# 
-	# PURPOSE
-	# A list of files available for download.
-	# 
-	# NOTES
-	# None.
-	# 
-	# TODO
-	# None.
-	# 
-	###
-	
-	# INCLUDES
-	# Include any files or libraries that are necessary for this specific
-	# page to function.
-	include_once('includes/settings.inc.php');
-	include_once('includes/functions.inc.php');
-	include_once('vendor/autoload.php');
-	
-	# PAGE METADATA
-	$page_title = 'Downloads';
-	$site_section = '';	
-	
-	# PAGE CONTENT
-	$page_body = <<<EOD
+    ###
+    # Downloads
+    #
+    # PURPOSE
+    # A list of files available for download.
+    #
+    # NOTES
+    # None.
+    #
+    # TODO
+    # None.
+    #
+    ###
+
+    # INCLUDES
+    # Include any files or libraries that are necessary for this specific
+    # page to function.
+    include_once 'includes/settings.inc.php';
+    include_once 'includes/functions.inc.php';
+    include_once 'vendor/autoload.php';
+
+    # PAGE METADATA
+    $page_title = 'Downloads';
+    $site_section = '';
+
+    # PAGE CONTENT
+    $page_body = <<<EOD
 
 		<p>In addition to <a href="https://www.richmondsunlight.com/about/api/">our API</a>, we
 		offer bulk downloads of bills, bill metadata, committee data, and other datasets intended
@@ -211,11 +211,11 @@
 		</ul>
 
 EOD;
-	
-	# OUTPUT THE PAGE
-	$page = new Page;
-	$page->page_title = $page_title;
-	$page->page_body = $page_body;
-	$page->page_sidebar = $page_sidebar;
-	$page->site_section = $site_section;
-	$page->process();
+
+    # OUTPUT THE PAGE
+    $page = new Page;
+    $page->page_title = $page_title;
+    $page->page_body = $page_body;
+    $page->page_sidebar = $page_sidebar;
+    $page->site_section = $site_section;
+    $page->process();

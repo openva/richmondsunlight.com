@@ -7,26 +7,26 @@
  */
 class HTMLPurifier_VarParser_Flexible extends HTMLPurifier_VarParser
 {
-    
+
     protected function parseImplementation($var, $type, $allow_null) {
         if ($allow_null && $var === null) return null;
         switch ($type) {
             // Note: if code "breaks" from the switch, it triggers a generic
             // exception to be thrown. Specific errors can be specifically
             // done here.
-            case self::MIXED :
-            case self::ISTRING :
-            case self::STRING :
-            case self::TEXT :
-            case self::ITEXT :
+            case self::MIXED:
+            case self::ISTRING:
+            case self::STRING:
+            case self::TEXT:
+            case self::ITEXT:
                 return $var;
-            case self::INT :
+            case self::INT:
                 if (is_string($var) && ctype_digit($var)) $var = (int) $var;
                 return $var;
-            case self::FLOAT :
+            case self::FLOAT:
                 if ((is_string($var) && is_numeric($var)) || is_int($var)) $var = (float) $var;
                 return $var;
-            case self::BOOL :
+            case self::BOOL:
                 if (is_int($var) && ($var === 0 || $var === 1)) {
                     $var = (bool) $var;
                 } elseif (is_string($var)) {
@@ -39,9 +39,9 @@ class HTMLPurifier_VarParser_Flexible extends HTMLPurifier_VarParser
                     }
                 }
                 return $var;
-            case self::ALIST :
-            case self::HASH :
-            case self::LOOKUP :
+            case self::ALIST:
+            case self::HASH:
+            case self::LOOKUP:
                 if (is_string($var)) {
                     // special case: technically, this is an array with
                     // a single empty string item, but having an empty
@@ -50,7 +50,7 @@ class HTMLPurifier_VarParser_Flexible extends HTMLPurifier_VarParser
                     if (strpos($var, "\n") === false && strpos($var, "\r") === false) {
                         // simplistic string to array method that only works
                         // for simple lists of tag names or alphanumeric characters
-                        $var = explode(',',$var);
+                        $var = explode(',', $var);
                     } else {
                         $var = preg_split('/(,|[\n\r]+)/', $var);
                     }
@@ -71,7 +71,7 @@ class HTMLPurifier_VarParser_Flexible extends HTMLPurifier_VarParser
                 $keys = array_keys($var);
                 if ($keys === array_keys($keys)) {
                     if ($type == self::ALIST) return $var;
-                    elseif ($type == self::LOOKUP) {
+                    if ($type == self::LOOKUP) {
                         $new = array();
                         foreach ($var as $key) {
                             $new[$key] = true;
@@ -90,5 +90,5 @@ class HTMLPurifier_VarParser_Flexible extends HTMLPurifier_VarParser
         }
         $this->errorGeneric($var, $type);
     }
-    
+
 }

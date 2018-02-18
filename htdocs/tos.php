@@ -2,18 +2,18 @@
 
 ###
 # ToS
-# 
+#
 # PURPOSE
 # The Terms of Service page.
-# 
+#
 ###
 
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once('settings.inc.php');
-include_once('functions.inc.php');
-include_once('vendor/autoload.php');
+include_once 'settings.inc.php';
+include_once 'functions.inc.php';
+include_once 'vendor/autoload.php';
 
 # LOCALIZE AND CLEAN UP VARIABLES
 
@@ -32,18 +32,18 @@ $page_body = <<<EOD
 		any third party due to or arising out of Content you submit, post to or transmit
 		through the Service, your use of the Service, your connection to the Service,
 		your violation of the TOS, or your violation of any rights of another.</p>
-		
+
 		<p>NO RESALE OF SERVICE<br />
 		You agree not to reproduce, duplicate, copy, sell, resell or exploit for any
 		commercial purposes, any portion of the Service, use of the Service, or access
 		to the Service.</p>
-		
-		<p>MODIFICATIONS TO SERVICE<br /> 
+
+		<p>MODIFICATIONS TO SERVICE<br />
 		Richmond Sunlight reserves the right at any time and from time to time to modify or
 		discontinue, temporarily or permanently, the Service (or any part thereof)
 		with or without notice. You agree that Richmond Sunlight shall not be liable to you or to
 		any third party for any modification, suspension or discontinuance of the Service.</p>
-		
+
 		<p>LINKS<br />
 		The Service may provide, or third parties may provide, links to other World Wide
 		Web sites or resources. Because Richmond Sunlight has no control over such sites
@@ -55,16 +55,16 @@ $page_body = <<<EOD
 		liable, directly or indirectly, for any damage or loss caused or alleged to be
 		caused by or in connection with use of or reliance on any such Content, goods or
 		services available on or through any such site or resource.</p>
-		
+
 		<p>DISCLAIMER OF WARRANTIES<br />
 		YOU EXPRESSLY UNDERSTAND AND AGREE THAT:</p>
-		
+
 		<p>a. YOUR USE OF THE SERVICE IS AT YOUR SOLE RISK. THE SERVICE IS PROVIDED ON AN
 		&quot;AS IS&quot; AND &quot;AS AVAILABLE&quot; BASIS. RICHMOND SUNLIGHT
 		EXPRESSLY DISCLAIMS ALL WARRANTIES OF ANY KIND, WHETHER EXPRESS OR IMPLIED,
 		INCLUDING, BUT NOT LIMITED TO THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
 		FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.</p>
-		
+
 		<p>b. RICHMOND SUNLIGHT MAKES NO WARRANTY THAT (i) THE SERVICE WILL MEET YOUR
 		REQUIREMENTS, (ii) THE SERVICE WILL BE UNINTERRUPTED, TIMELY, SECURE, OR
 		ERROR-FREE, (iii) THE RESULTS THAT MAY BE OBTAINED FROM THE USE OF THE SERVICE
@@ -72,16 +72,16 @@ $page_body = <<<EOD
 		INFORMATION, OR OTHER MATERIAL PURCHASED OR OBTAINED BY YOU THROUGH THE SERVICE
 		WILL MEET YOUR EXPECTATIONS, AND (V) ANY ERRORS IN THE SOFTWARE WILL BE
 		CORRECTED.</p>
-		
+
 		<p>c. ANY MATERIAL DOWNLOADED OR OTHERWISE OBTAINED THROUGH THE USE OF THE SERVICE
 		IS DONE AT YOUR OWN DISCRETION AND RISK AND THAT YOU WILL BE SOLELY RESPONSIBLE
 		FOR ANY DAMAGE TO YOUR COMPUTER SYSTEM OR LOSS OF DATA THAT RESULTS FROM THE
 		DOWNLOAD OF ANY SUCH MATERIAL.</p>
-		
+
 		<p>d. NO ADVICE OR INFORMATION, WHETHER ORAL OR WRITTEN, OBTAINED BY YOU FROM
 		RICHMOND SUNLIGHT OR THROUGH OR FROM THE SERVICE SHALL CREATE ANY WARRANTY NOT
 		EXPRESSLY STATED IN THE TOS.</p>
-		
+
 		<p>LIMITATION OF LIABILITY<br />
 		YOU EXPRESSLY UNDERSTAND AND AGREE THAT RICHMOND SUNLIGHT SHALL NOT BE LIABLE
 		FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL OR EXEMPLARY
@@ -94,24 +94,24 @@ $page_body = <<<EOD
 		THE SERVICE; (iii) UNAUTHORIZED ACCESS TO OR ALTERATION OF YOUR TRANSMISSIONS OR
 		DATA; (iv) STATEMENTS OR CONDUCT OF ANY THIRD PARTY ON THE SERVICE; OR (v) ANY
 		OTHER MATTER RELATING TO THE SERVICE.</p>
-		
+
 		<p>EXCLUSIONS AND LIMITATIONS<br />
 		SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OF CERTAIN WARRANTIES OR THE
 		LIMITATION OR EXCLUSION OF LIABILITY FOR INCIDENTAL OR CONSEQUENTIAL DAMAGES.
 		ACCORDINGLY, SOME OF THE ABOVE LIMITATIONS MAY NOT APPLY TO YOU.</p>
-		
+
 		<p>TRADEMARK INFORMATION<br />
 		Richmond Sunlight, the Richmond Sunlight logo, and other Richmond Sunlight logos and
 		product and service names are trademarks of Waldo Jaquith (the “Richmond Sunlight
 		Marks”). Without Waldo Jaquith’s prior permission, you agree not to display or use in
 		any manner, the Richmond Sunlight Marks.</p>
-		
+
 		<p>COPYRIGHTS and COPYRIGHT AGENTS<br />
 		Richmond Sunlight respects the intellectual property of others, and we ask our users to
 		do the same. If you believe that your work has been copied in a way that constitutes
 		copyright infringement, please provide Richmond Sunlight's Copyright Agent the following
 		information:</p>
-		
+
 		<ol>
 		<li>an electronic or physical signature of the person
 		authorized to act on behalf of the owner of the copyright
@@ -129,7 +129,7 @@ $page_body = <<<EOD
 		that you are the copyright owner or authorized to act on the
 		copyright owner's behalf.</li>
 		</ol>
-		
+
 		<p>With respect to text or data entered into and stored by publicly-accessible
 		site features, such as forums and comments, the submitting user retains
 		ownership of such content.  However, the submitting user grants Richmond
@@ -139,17 +139,17 @@ $page_body = <<<EOD
 		worldwide, and/or to incorporate it in any form, media, or technology now known
 		or later developed, all subject to the terms and conditions of any applicable
 		license.</p>
-		
+
 		<p>Richmond Sunlight's Copyright Agent for Notice of claims of copyright
 		infringement on its site is Waldo Jaquith, who can be reached as follows:</p>
-		
+
 		<p>By mail:<br />
 		P.O. Box 1142<br />
 		Charlottesville, VA 22902</p>
-		
+
 		<p>By e-mail:<br />
 		<a href="/contact/">Contact Form</a></p>
-		
+
 		<p>GENERAL INFORMATION<br />
 		The TOS constitute the entire agreement between you and Richmond Sunlight and
 		govern your use of the Service, superceding any prior agreements between you and
@@ -169,7 +169,7 @@ $page_body = <<<EOD
 		claim or cause of action arising out of or related to use of the Service or the
 		TOS must be filed within one (1) year after such claim or cause of action arose
 		or be forever barred.</p>
-		
+
 		<p>The section titles in the TOS are for convenience only and have no legal or
 		contractual effect.</p>
 EOD;

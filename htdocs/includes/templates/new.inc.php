@@ -30,14 +30,14 @@
 <script src="/js/functions.js"></script>
 <script src="/js/jquery.qtip.min.js"></script>
 <?php
-	# Include the below JavaScript, but only if the browser is IE. We do an Opera check because
-	# Opera can include the text "MSIE" in its user agent string.
-	if (
-			strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE')
-			&& 
-			!strpos($_SERVER['HTTP_USER_AGENT'], 'Opera')
-		)
-	{
+    # Include the below JavaScript, but only if the browser is IE. We do an Opera check because
+    # Opera can include the text "MSIE" in its user agent string.
+    if (
+            strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE')
+            &&
+            !strpos($_SERVER['HTTP_USER_AGENT'], 'Opera')
+        )
+    {
 ?>
 <script pagespeed_no_defer="">
 	<!--//--><![CDATA[//><!--
@@ -45,7 +45,7 @@
 		if(document.all && document.getElementById(nav).currentStyle){
 			// only MSIE supports document.all
 			var navroot = document.getElementById(nav);
-	
+
 			/* Get all the list items within the menu */
 			var lis=navroot.getElementsByTagName("LI");
 			for(i=0;i<lis.length;i++){
@@ -71,14 +71,14 @@
 	//--><!]]>
 </script>
 <?php
-	/* End the menu JavaScript conditional */
-	}
+    /* End the menu JavaScript conditional */
+    }
 ?>
 
 %html_head%
 </head>
 <body%body_tag%>
-	<div id="page-wrap">	
+	<div id="page-wrap">
 		<div id="page">
 			<header>
 			<div id="header">
@@ -87,7 +87,7 @@
 						alt="Richmond Sunlight Logo" title="Richmond Sunlight" width="274" height="88"
 						pagespeed_no_transform /></a>
 				</div>
-			
+
 				<div id="from-and-search">
 					<div id="recommendations">
 						%recommended_bills%
@@ -99,7 +99,7 @@
 						<input type="image" src="/images/templates/new/go-search.gif" alt="Go" />
 					</form>
 				</div>
-			
+
 				<div id="date-status">
 					<div id="date">
 						<strong><script>document.write($.datepicker.formatDate('DD, MM dd, yy', new Date()));</script></strong>
@@ -109,7 +109,7 @@
 					</div>
 					<div id="account">%account%</div>
 				</div>
-				
+
 				<nav>
 				<ul id="nav">
 					<li id="t-home"><a href="/" accesskey="h">Home</a></li>
@@ -135,7 +135,7 @@
 							</li>
 						</ul>
 					</li>
-					
+
 					<li id="t-legislators"><a href="/legislators/" accesskey="l">Legislators</a>
 						<ul>
 						<li>House »
@@ -359,7 +359,7 @@
 				%page_body%
 			</div>
 			</main>
-		
+
 			<aside>
 			<div id="sidebar">
 				%page_sidebar%
@@ -388,7 +388,7 @@
 				Brandeis, 1914</p>
 
 			</div>
-			</footer>	
+			</footer>
 		</div>
 	</div>
 	<script>
@@ -408,7 +408,7 @@
 		$(document).ready(function() {
 			$(".tabs").tabs();
 		});
-		
+
 		/* Truncate text at 500 characters of length. Written by "c_harm" and posted to Stack Overflow
 		at http://stackoverflow.com/a/1199627/955342 */
 		String.prototype.truncate = function(){
@@ -419,17 +419,17 @@
 				re = re + "&nbsp;.&thinsp;.&thinsp;.&thinsp;";
 			return re;
 		}
-		
+
 		$(document).ready(function() {
 			/* Mentions of bill numbers. */
 			$("a.balloon").each(function() {
-		
+
 				/* Use the URL to determine the bill year and number. */
 				var url = $(this).attr("href");
 				var url_components = url.match(/bill\/(\d{4})\/(\w+)\//);
 				var year = url_components[1];
 				var bill_number = url_components[2];
-			
+
 				$(this).qtip({
 					tip: true,
 					hide: {
@@ -459,15 +459,15 @@
 					}
 				})
 			});
-		
+
 			/* Mentions of legislators. */
 			$("a.legislator").each(function() {
-		
+
 				/* Use the URL to determine the bill year and number. */
 				var url = $(this).attr("href");
 				var url_components = url.match(/legislator\/(\w+)\//);
 				var legislator = url_components[1];
-			
+
 				$(this).qtip({
 					tip: true,
 					hide: {
@@ -500,15 +500,15 @@
 					}
 				})
 			});
-		
+
 			/* Mentions of sections of the Code of Virginia. */
 			$("a.code").each(function() {
-			
+
 				/* Use the URL to determine the section number. */
 				var url = $(this).attr("href");
 				var url_components = url.match(/https:\/\/vacode.org\/(.*)\//);
 				var section_number = url_components[1];
-			
+
 				$(this).qtip({
 					tip: true,
 					hide: {
@@ -545,10 +545,10 @@
 					}
 				})
 			});
-		
+
 			/* Words for which we have dictionary terms. */
 			$("span.dictionary").each(function() {
-			
+
 				var term = $(this).text();
 				$(this).qtip({
 					tip: true,
@@ -587,7 +587,7 @@
 				})
 			});
 		});
-		
+
 		/* Allow the sliding-down display of poll results. */
 		$("#show-poll-results").click(function() {
 			$("#poll-results").toggle('slow', function() {

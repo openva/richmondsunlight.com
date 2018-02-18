@@ -3,7 +3,7 @@
 class HTMLPurifier_DefinitionCache_Serializer extends
       HTMLPurifier_DefinitionCache
 {
-    
+
     public function add($def, $config) {
         if (!$this->checkDefType($def)) return;
         $file = $this->generateFilePath($config);
@@ -11,14 +11,14 @@ class HTMLPurifier_DefinitionCache_Serializer extends
         if (!$this->_prepareDir($config)) return false;
         return $this->_write($file, serialize($def));
     }
-    
+
     public function set($def, $config) {
         if (!$this->checkDefType($def)) return;
         $file = $this->generateFilePath($config);
         if (!$this->_prepareDir($config)) return false;
         return $this->_write($file, serialize($def));
     }
-    
+
     public function replace($def, $config) {
         if (!$this->checkDefType($def)) return;
         $file = $this->generateFilePath($config);
@@ -26,19 +26,19 @@ class HTMLPurifier_DefinitionCache_Serializer extends
         if (!$this->_prepareDir($config)) return false;
         return $this->_write($file, serialize($def));
     }
-    
+
     public function get($config) {
         $file = $this->generateFilePath($config);
         if (!file_exists($file)) return false;
         return unserialize(file_get_contents($file));
     }
-    
+
     public function remove($config) {
         $file = $this->generateFilePath($config);
         if (!file_exists($file)) return false;
         return unlink($file);
     }
-    
+
     public function flush($config) {
         if (!$this->_prepareDir($config)) return false;
         $dir = $this->generateDirectoryPath($config);
@@ -49,7 +49,7 @@ class HTMLPurifier_DefinitionCache_Serializer extends
             unlink($dir . '/' . $filename);
         }
     }
-    
+
     public function cleanup($config) {
         if (!$this->_prepareDir($config)) return false;
         $dir = $this->generateDirectoryPath($config);
@@ -61,7 +61,7 @@ class HTMLPurifier_DefinitionCache_Serializer extends
             if ($this->isOld($key, $config)) unlink($dir . '/' . $filename);
         }
     }
-    
+
     /**
      * Generates the file path to the serial file corresponding to
      * the configuration and definition name
@@ -71,7 +71,7 @@ class HTMLPurifier_DefinitionCache_Serializer extends
         $key = $this->generateKey($config);
         return $this->generateDirectoryPath($config) . '/' . $key . '.ser';
     }
-    
+
     /**
      * Generates the path to the directory contain this cache's serial files
      * @note No trailing slash
@@ -81,7 +81,7 @@ class HTMLPurifier_DefinitionCache_Serializer extends
         $base = $this->generateBaseDirectoryPath($config);
         return $base . '/' . $this->type;
     }
-    
+
     /**
      * Generates path to base directory that contains all definition type
      * serials
@@ -92,7 +92,7 @@ class HTMLPurifier_DefinitionCache_Serializer extends
         $base = is_null($base) ? HTMLPURIFIER_PREFIX . '/HTMLPurifier/DefinitionCache/Serializer' : $base;
         return $base;
     }
-    
+
     /**
      * Convenience wrapper function for file_put_contents
      * @param $file File name to write to
@@ -102,7 +102,7 @@ class HTMLPurifier_DefinitionCache_Serializer extends
     private function _write($file, $data) {
         return file_put_contents($file, $data);
     }
-    
+
     /**
      * Prepares the directory that this type stores the serials in
      * @return True if successful
@@ -112,11 +112,14 @@ class HTMLPurifier_DefinitionCache_Serializer extends
         if (!is_dir($directory)) {
             $base = $this->generateBaseDirectoryPath($config);
             if (!is_dir($base)) {
-                trigger_error('Base directory '.$base.' does not exist,
+                trigger_error(
+                    'Base directory '.$base.' does not exist,
                     please create or change using %Cache.SerializerPath',
-                    E_USER_ERROR);
+                    E_USER_ERROR
+                );
                 return false;
-            } elseif (!$this->_testPermissions($base)) {
+            }
+            if (!$this->_testPermissions($base)) {
                 return false;
             }
             $old = umask(0022); // disable group and world writes
@@ -127,7 +130,7 @@ class HTMLPurifier_DefinitionCache_Serializer extends
         }
         return true;
     }
-    
+
     /**
      * Tests permissions on a directory and throws out friendly
      * error messages and attempts to chmod it itself if possible
@@ -138,8 +141,10 @@ class HTMLPurifier_DefinitionCache_Serializer extends
         if (!is_dir($dir)) {
             // generally, you'll want to handle this beforehand
             // so a more specific error message can be given
-            trigger_error('Directory '.$dir.' does not exist',
-                E_USER_ERROR);
+            trigger_error(
+                'Directory '.$dir.' does not exist',
+                E_USER_ERROR
+            );
             return false;
         }
         if (function_exists('posix_getuid')) {
@@ -148,24 +153,28 @@ class HTMLPurifier_DefinitionCache_Serializer extends
                 // we can chmod it ourselves
                 chmod($dir, 0755);
                 return true;
-            } elseif (filegroup($dir) === posix_getgid()) {
+            }
+            if (filegroup($dir) === posix_getgid()) {
                 $chmod = '775';
             } else {
                 // PHP's probably running as nobody, so we'll
                 // need to give global permissions
                 $chmod = '777';
             }
-            trigger_error('Directory '.$dir.' not writable, '.
+            trigger_error(
+                'Directory '.$dir.' not writable, '.
                 'please chmod to ' . $chmod,
-                E_USER_ERROR);
+                E_USER_ERROR
+            );
         } else {
             // generic error message
-            trigger_error('Directory '.$dir.' not writable, '.
+            trigger_error(
+                'Directory '.$dir.' not writable, '.
                 'please alter file permissions',
-                E_USER_ERROR);
+                E_USER_ERROR
+            );
         }
         return false;
     }
-    
-}
 
+}

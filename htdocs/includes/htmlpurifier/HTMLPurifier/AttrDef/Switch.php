@@ -5,10 +5,11 @@
  */
 class HTMLPurifier_AttrDef_Switch
 {
-    
+
     protected $tag;
-    protected $withTag, $withoutTag;
-    
+    protected $withTag;
+    protected $withoutTag;
+
     /**
      * @param string $tag Tag name to switch upon
      * @param HTMLPurifier_AttrDef $with_tag Call if token matches tag
@@ -19,7 +20,7 @@ class HTMLPurifier_AttrDef_Switch
         $this->withTag = $with_tag;
         $this->withoutTag = $without_tag;
     }
-    
+
     public function validate($string, $config, $context) {
         $token = $context->get('CurrentToken', true);
         if (!$token || $token->name !== $this->tag) {
@@ -28,5 +29,5 @@ class HTMLPurifier_AttrDef_Switch
             return $this->withTag->validate($string, $config, $context);
         }
     }
-    
+
 }

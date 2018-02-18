@@ -6,18 +6,18 @@
  * @url http://livepipe.net/core
  * @require prototype.js
  */
- 
+
 if(typeof(Control) == 'undefined')
   Control = {};
-  
+
 var $proc = function(proc){
   return typeof(proc) == 'function' ? proc : function(){return proc};
 };
- 
+
 var $value = function(value){
   return typeof(value) == 'function' ? value() : value;
 };
- 
+
 Object.Event = {
   extend: function(object){
     object._objectEventSetup = function(event_name){
@@ -96,9 +96,9 @@ Object.Event = {
     }
   }
 };
- 
+
 /* Begin Core Extensions */
- 
+
 //Element.observeOnce
 Element.addMethods({
   observeOnce: function(element,event_name,outer_callback){
@@ -109,18 +109,18 @@ Element.addMethods({
     Element.observe(element,event_name,inner_callback);
   }
 });
- 
+
 //mouseenter, mouseleave
 //from http://dev.rubyonrails.org/attachment/ticket/8354/event_mouseenter_106rc1.patch
 Object.extend(Event, (function() {
   var cache = Event.cache;
- 
+
   function getEventID(element) {
     if (element._prototypeEventID) return element._prototypeEventID[0];
     arguments.callee.id = arguments.callee.id || 1;
     return element._prototypeEventID = [++arguments.callee.id];
   }
- 
+
   function getDOMEventName(eventName) {
     if (eventName && eventName.include(':')) return "dataavailable";
     //begin extension
@@ -133,122 +133,122 @@ Object.extend(Event, (function() {
     //end extension
     return eventName;
   }
- 
+
   function getCacheForID(id) {
     return cache[id] = cache[id] || { };
   }
- 
+
   function getWrappersForEventName(id, eventName) {
     var c = getCacheForID(id);
     return c[eventName] = c[eventName] || [];
   }
- 
+
   function createWrapper(element, eventName, handler) {
     var id = getEventID(element);
     var c = getWrappersForEventName(id, eventName);
     if (c.pluck("handler").include(handler)) return false;
- 
+
     var wrapper = function(event) {
       if (!Event || !Event.extend ||
         (event.eventName && event.eventName != eventName))
           return false;
- 
+
       Event.extend(event);
       handler.call(element, event);
     };
-    
+
     //begin extension
     if(!(Prototype.Browser.IE) && ['mouseenter','mouseleave'].include(eventName)){
-      wrapper = wrapper.wrap(function(proceed,event) {  
+      wrapper = wrapper.wrap(function(proceed,event) {
         var rel = event.relatedTarget;
-        var cur = event.currentTarget;       
+        var cur = event.currentTarget;
         if(rel && rel.nodeType == Node.TEXT_NODE)
-          rel = rel.parentNode;    
-        if(rel && rel != cur && !rel.descendantOf(cur))    
-          return proceed(event);   
-      });   
+          rel = rel.parentNode;
+        if(rel && rel != cur && !rel.descendantOf(cur))
+          return proceed(event);
+      });
     }
     //end extension
- 
+
     wrapper.handler = handler;
     c.push(wrapper);
     return wrapper;
   }
- 
+
   function findWrapper(id, eventName, handler) {
     var c = getWrappersForEventName(id, eventName);
     return c.find(function(wrapper) { return wrapper.handler == handler });
   }
- 
+
   function destroyWrapper(id, eventName, handler) {
     var c = getCacheForID(id);
     if (!c[eventName]) return false;
     c[eventName] = c[eventName].without(findWrapper(id, eventName, handler));
   }
- 
+
   function destroyCache() {
     for (var id in cache)
       for (var eventName in cache[id])
         cache[id][eventName] = null;
   }
- 
+
   if (window.attachEvent) {
     window.attachEvent("onunload", destroyCache);
   }
- 
+
   return {
     observe: function(element, eventName, handler) {
       element = $(element);
       var name = getDOMEventName(eventName);
- 
+
       var wrapper = createWrapper(element, eventName, handler);
       if (!wrapper) return element;
- 
+
       if (element.addEventListener) {
         element.addEventListener(name, wrapper, false);
       } else {
         element.attachEvent("on" + name, wrapper);
       }
- 
+
       return element;
     },
- 
+
     stopObserving: function(element, eventName, handler) {
       element = $(element);
       var id = getEventID(element), name = getDOMEventName(eventName);
- 
+
       if (!handler && eventName) {
         getWrappersForEventName(id, eventName).each(function(wrapper) {
           element.stopObserving(eventName, wrapper.handler);
         });
         return element;
- 
+
       } else if (!eventName) {
         Object.keys(getCacheForID(id)).each(function(eventName) {
           element.stopObserving(eventName);
         });
         return element;
       }
- 
+
       var wrapper = findWrapper(id, eventName, handler);
       if (!wrapper) return element;
- 
+
       if (element.removeEventListener) {
         element.removeEventListener(name, wrapper, false);
       } else {
         element.detachEvent("on" + name, wrapper);
       }
- 
+
       destroyWrapper(id, eventName, handler);
- 
+
       return element;
     },
- 
+
     fire: function(element, eventName, memo) {
       element = $(element);
       if (element == document && document.createEvent && !element.dispatchEvent)
         element = document.documentElement;
- 
+
       var event;
       if (document.createEvent) {
         event = document.createEvent("HTMLEvents");
@@ -257,35 +257,35 @@ Object.extend(Event, (function() {
         event = document.createEventObject();
         event.eventType = "ondataavailable";
       }
- 
+
       event.eventName = eventName;
       event.memo = memo || { };
- 
+
       if (document.createEvent) {
         element.dispatchEvent(event);
       } else {
         element.fireEvent(event.eventType, event);
       }
- 
+
       return Event.extend(event);
     }
   };
 })());
- 
+
 Object.extend(Event, Event.Methods);
- 
+
 Element.addMethods({
   fire:      Event.fire,
   observe:    Event.observe,
   stopObserving:  Event.stopObserving
 });
- 
+
 Object.extend(document, {
   fire:      Element.Methods.fire.methodize(),
   observe:    Element.Methods.observe.methodize(),
   stopObserving:  Element.Methods.stopObserving.methodize()
 });
- 
+
 //mouse:wheel
 (function(){
   function wheel(event){
@@ -308,16 +308,16 @@ Object.extend(document, {
   document.observe('mousewheel',wheel);
   document.observe('DOMMouseScroll',wheel);
 })();
- 
+
 /* End Core Extensions */
- 
+
 //from PrototypeUI
 var IframeShim = Class.create({
   initialize: function() {
     this.element = new Element('iframe',{
       style: 'position:absolute;filter:progid:DXImageTransform.Microsoft.Alpha(opacity=0);display:none',
       src: 'javascript:void(0);',
-      frameborder: 0 
+      frameborder: 0
     });
     $(document.body).insert(this.element);
   },
@@ -363,12 +363,12 @@ var IframeShim = Class.create({
  * @url http://livepipe.net/control/tabs
  * @require prototype.js, livepipe.js
  */
- 
+
 if(typeof(Prototype) == "undefined")
   throw "Control.Tabs requires Prototype to be loaded.";
 if(typeof(Object.Event) == "undefined")
   throw "Control.Tabs requires Object.Event to be loaded.";
- 
+
 Control.Tabs = Class.create({
   initialize: function(tab_list_container,options){
     if(!$(tab_list_container))

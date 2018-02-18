@@ -1,17 +1,17 @@
 /* project: internet services template
    author: luka cvrk (www.solucija.com) */
 
-   
+
 /* default styles
    -------------- */
-   
-body { 
-	padding: 0; 
-	margin: 0; 
-	font: 0.8em Tahoma, sans-serif; 
+
+body {
+	padding: 0;
+	margin: 0;
+	font: 0.8em Tahoma, sans-serif;
 	line-height: 1.35em;
-	background: #fff; 
-	color: #333; 
+	background: #fff;
+	color: #333;
 }
 
 a {	color: #0095eb;	background: inherit; }
@@ -49,18 +49,18 @@ ul {
 
 form { 	margin: 0; }
 
-input.search { 
-	width: 100px; 
+input.search {
+	width: 100px;
 	border: 0;
 	background: #fff url(/images/templates/default/input.gif) no-repeat;
 	padding: 4px;
 	font-weight: bold;
 }
 
-input.login { 
+input.login {
 	width: 150px;
-	border: none; 
-	padding: 4px; 
+	border: none;
+	padding: 4px;
 }
 
 small {
@@ -70,13 +70,13 @@ small {
 /* layout
    ------ */
 
-.content { 
+.content {
 	margin: 0 auto;
 	width: 780px;
-	padding: 10px; 
+	padding: 10px;
 }
 
-.header { 
+.header {
 	height: 55px;
 	background: #eee;
 	color: #808080;
@@ -123,42 +123,42 @@ small {
 	background: inherit;
 }
 
-.bar { 
+.bar {
 	clear: both;
 	font-size: 1em;
-	height: 30px; 
+	height: 30px;
 	color: #000;
 	background: #fc0;
 }
 
-	.bar li { 
-		margin: 0; 
+	.bar li {
+		margin: 0;
 		padding: 7px 12px 5px 12px;
 		color: #666;
 		background: #fc0;
-		float: left; 
+		float: left;
 	}
-	
+
 	.bar li.active {
 		background: #66bcee url(/images/templates/default/bar.gif) no-repeat center top;
-		font-weight: bold; 
+		font-weight: bold;
 		padding: 7px 10px 6px 10px;
 		margin: 0;
 	}
-	
-	.bar li a { 
+
+	.bar li a {
 		font-weight: bold;
-		color: #333; 
+		color: #333;
 		background: inherit;
 		text-decoration: none;
-	} 
-	
-	.bar li a:hover { 
-		color: #000; 
-		background: inherit;
-	} 
+	}
 
-.search_field { 
+	.bar li a:hover {
+		color: #000;
+		background: inherit;
+	}
+
+.search_field {
 	background: #f0f0f0;
 	color: #808080;
 	clear: both;
@@ -223,9 +223,9 @@ small {
 		padding: 0 0 0 10px;
 		margin: 0;
 	}
-		
+
 	.left_side a, .right_side a { color: #414141; background: #FFF; }
-		
+
 	.right_side {
 		float: right;
 		width: 220px;
@@ -234,13 +234,13 @@ small {
 		padding: 0 0 0 40px;
 		margin: 0;
 	}
-		
+
 	.left_box { margin: 0 0 10px 0; color: #000; background: #FFF; padding: 3px 0; }
-	
-		
+
+
 /* right side
    ---------- */
-		
+
 div.right {
 	float: right;
 	width: 34.6%;
@@ -268,10 +268,10 @@ div.right {
 	div.right div.box {
 		background: #f5f5f5;
 		color: #333;
-		padding: 8px;	
+		padding: 8px;
 		margin: 0 0 3px 0;
 	}
-	
+
 .image {
 	float: left;
 	margin: 0 9px 3px 0;
@@ -280,7 +280,7 @@ div.right {
 /* footer
    ------ */
 
-.footer { 
+.footer {
 	clear: both;
 	text-align: center;
 	padding: 10px 0 10px 0;
@@ -333,7 +333,7 @@ table.legislator {
 		padding: .25em;
 		vertical-align: top;
 	}
-	
+
 /* Bill Progress Table */
 div#bill-progress {
 	width: 125px;
@@ -396,7 +396,7 @@ a img {
 		border: 2px solid #c00;
 		padding: .5em;
 	}
-	
+
 .fineprint {
 	font-size: .85em;
 }
@@ -404,7 +404,7 @@ a img {
 .highlight {
 	background-color: #ff0;
 }
-	
+
 
 /* TAGS */
 ul.tags {
@@ -562,7 +562,7 @@ img.help-icon {
 			vertical-align: top;
 			padding-right: .25em;
 		}
-		
+
 		#registration td small {
 			font-size: .9em;
 			color: #666;
@@ -577,7 +577,7 @@ div#public-portfolio div.bill {
 		background-color: #eee;
 		padding: .5em;
 	}
-	
+
 /* Subsection Tabs
 --------------------*/
 ul.tabs {
@@ -635,7 +635,7 @@ div.docket {
 		font-size: 1.2em;
 		font-weight: bold;
 	}
-	
+
 div.video {
 	background-color: #eee;
 	margin: auto 0;

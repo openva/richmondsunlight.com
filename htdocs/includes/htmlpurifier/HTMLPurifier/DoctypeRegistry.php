@@ -2,17 +2,17 @@
 
 class HTMLPurifier_DoctypeRegistry
 {
-    
+
     /**
      * Hash of doctype names to doctype objects
      */
     protected $doctypes;
-    
+
     /**
      * Lookup table of aliases to real doctype names
      */
     protected $aliases;
-    
+
     /**
      * Registers a doctype to the registry
      * @note Accepts a fully-formed doctype object, or the
@@ -23,15 +23,27 @@ class HTMLPurifier_DoctypeRegistry
      * @param $aliases Alias names for doctype
      * @return Editable registered doctype
      */
-    public function register($doctype, $xml = true, $modules = array(),
-        $tidy_modules = array(), $aliases = array(), $dtd_public = null, $dtd_system = null
+    public function register(
+        $doctype,
+        $xml = true,
+        $modules = array(),
+        $tidy_modules = array(),
+        $aliases = array(),
+        $dtd_public = null,
+        $dtd_system = null
     ) {
         if (!is_array($modules)) $modules = array($modules);
         if (!is_array($tidy_modules)) $tidy_modules = array($tidy_modules);
         if (!is_array($aliases)) $aliases = array($aliases);
         if (!is_object($doctype)) {
             $doctype = new HTMLPurifier_Doctype(
-                $doctype, $xml, $modules, $tidy_modules, $aliases, $dtd_public, $dtd_system
+                $doctype,
+                $xml,
+                $modules,
+                $tidy_modules,
+                $aliases,
+                $dtd_public,
+                $dtd_system
             );
         }
         $this->doctypes[$doctype->name] = $doctype;
@@ -45,7 +57,7 @@ class HTMLPurifier_DoctypeRegistry
         if (isset($this->aliases[$name])) unset($this->aliases[$name]);
         return $doctype;
     }
-    
+
     /**
      * Retrieves reference to a doctype of a certain name
      * @note This function resolves aliases
@@ -62,7 +74,7 @@ class HTMLPurifier_DoctypeRegistry
         }
         return $this->doctypes[$doctype];
     }
-    
+
     /**
      * Creates a doctype based on a configuration object,
      * will perform initialization on the doctype
@@ -74,7 +86,7 @@ class HTMLPurifier_DoctypeRegistry
     public function make($config) {
         return clone $this->get($this->getDoctypeFromConfig($config));
     }
-    
+
     /**
      * Retrieves the doctype from the configuration object
      */
@@ -97,6 +109,5 @@ class HTMLPurifier_DoctypeRegistry
         }
         return $doctype;
     }
-    
-}
 
+}

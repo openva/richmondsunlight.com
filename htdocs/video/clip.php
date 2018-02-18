@@ -2,18 +2,18 @@
 
 ###
 # Video Clips
-# 
+#
 # PURPOSE
 # Displays a given video clip.
-# 
+#
 ###
 
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
 # INCLUDES
-include_once('settings.inc.php');
-include_once('functions.inc.php');
+include_once 'settings.inc.php';
+include_once 'functions.inc.php';
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -25,9 +25,9 @@ $database->connect_old();
 session_start();
 
 # LOCALIZE AND CLEAN UP VARIABLES
-if ( isset($_GET['hash']) && strlen($_GET['hash']) == 6 )
+if (isset($_GET['hash']) && strlen($_GET['hash']) == 6)
 {
-	$clip_hash = $_GET['hash'];
+    $clip_hash = $_GET['hash'];
 }
 
 # PAGE METADATA
@@ -39,8 +39,8 @@ $site_section = 'minutes';
  */
 if (!isset($clip_hash))
 {
-	
-	$sql = 'SELECT DISTINCT SUBSTRING(MD5(video_clips.id), 1, 6) AS hash, files.path, files.date,
+
+    $sql = 'SELECT DISTINCT SUBSTRING(MD5(video_clips.id), 1, 6) AS hash, files.path, files.date,
 			DATE_FORMAT(files.date, "%b %e, %Y") AS date_formatted,
 			representatives.name_formatted AS legislator_name, bills.number AS bill_number
 			FROM video_clips
@@ -51,42 +51,42 @@ if (!isset($clip_hash))
 			LEFT JOIN bills
 				ON video_clips.bill_id = bills.id
 			ORDER BY files.date ASC, video_clips.time_start ASC';
-	
-	$result = mysql_query($sql);
-	if (mysql_num_rows($result) > 0)
-	{
-		
-		$page_body = '<ul>';
-		while ($clip = mysql_fetch_assoc($result))
-		{
-			
-			$page_body .= '<li><a href="/video/clip/' . $clip['hash'] . '/">';
-			if (!empty($clip['legislator_name']))
-			{
-				$page_body .= $clip['legislator_name'] . ' Speaks';
-			}
-			else
-			{
-				$page_body .= 'Legislators Speak';
-			}
-			
-			if (!empty($clip['bill_number']))
-			{
-				$page_body .= ' about ' . strtoupper($clip['bill_number']);
-			}
-			
-			if (!empty($clip['date_formatted']))
-			{
-				$page_body .= ' on ' . $clip['date_formatted'];
-			}
-			
-			$page_body .= '</a></li>';
-			
-		}
-		$page_body .= '</ul>';
-	
-	}
-	
+
+    $result = mysql_query($sql);
+    if (mysql_num_rows($result) > 0)
+    {
+
+        $page_body = '<ul>';
+        while ($clip = mysql_fetch_assoc($result))
+        {
+
+            $page_body .= '<li><a href="/video/clip/' . $clip['hash'] . '/">';
+            if (!empty($clip['legislator_name']))
+            {
+                $page_body .= $clip['legislator_name'] . ' Speaks';
+            }
+            else
+            {
+                $page_body .= 'Legislators Speak';
+            }
+
+            if (!empty($clip['bill_number']))
+            {
+                $page_body .= ' about ' . strtoupper($clip['bill_number']);
+            }
+
+            if (!empty($clip['date_formatted']))
+            {
+                $page_body .= ' on ' . $clip['date_formatted'];
+            }
+
+            $page_body .= '</a></li>';
+
+        }
+        $page_body .= '</ul>';
+
+    }
+
 }
 
 /*
@@ -95,28 +95,28 @@ if (!isset($clip_hash))
 else
 {
 
-	$video = new Video;
-	$video->hash = $clip_hash;
-	if ($video->get_clip() == TRUE)
-	{
-		
-		$page_title = ' » ' . $video->clip->title;
-		
-		
-		$html_head = '
+    $video = new Video;
+    $video->hash = $clip_hash;
+    if ($video->get_clip() == TRUE)
+    {
+
+        $page_title = ' » ' . $video->clip->title;
+
+
+        $html_head = '
 			<script src="/js/flowplayer-3.2.18/flowplayer-3.2.13.min.js"></script>
 			<script src="/js/flowplayer/flowplayer.playlist-3.2.11.min.js"></script>';
-		
-		$page_body .= '
+
+        $page_body .= '
 		<style>
 			#video object { width: 720px; height:491px; }
 			#player { width: 720px; height: 491px; }
 		</style>
 		<div id="video">
-			
-			
+
+
 			<a href="' . $video->clip->path.'" style="background-image: url(' . $video->clip->screenshot
-				. ');" id="player">
+                . ');" id="player">
 			<script>
 				flowplayer("video", "/js/flowplayer-3.2.18/flowplayer-3.2.18.swf", {
 					clip: {
@@ -150,17 +150,16 @@ else
 				});
 			</script>
 			</a>
-			
+
 		</div>';
-		
-		
-	}
-	else
-	{
-		header("Status: 404 Not Found\n\r");
-		include('../404.php');
-		exit();
-	}
+
+
+    }
+    else
+    {
+        header("Status: 404 Not Found\n\r"); include('../404.php');
+        exit();
+    }
 
 }
 
