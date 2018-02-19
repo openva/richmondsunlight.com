@@ -5,12 +5,16 @@
     "require": {
         "kellan/magpierss": "dev-master",
         "PHPMailer/PHPMailer": "~5.2",
-        "ezyang/htmlpurifier":"~4.9"
+        "ezyang/htmlpurifier":"~4.9",
+        "doctrine/instantiator":"1.0.5"
     },
     "autoload": {
         "classmap": [
             "htdocs/includes/vendor/"
         ],
         "files": ["htdocs/includes/functions.inc.php"]
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5"
     }
 }
