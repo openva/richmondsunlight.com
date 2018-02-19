@@ -16,6 +16,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^5",
+        "phpunit/php-token-stream": "~1",
         "phpdocumentor/reflection-docblock": "~3"
+
     }
 }
