@@ -5,7 +5,8 @@
 # while the settings file is stored on GitHub.
 #==================================================================================
 
-# Define the list of environmental variables that we need to populate during deployment.
+# Define the list of environment variables that we may want to populate during
+# deployment.
 variables=(
 	LIS_FTP_USERNAME
 	LIS_FTP_PASSWORD
@@ -25,23 +26,23 @@ variables=(
 	SLACK_WEBHOOK
 )
 
-# Iterate over the variables and make sure that they're all populated.
+# Iterate over the variables and warn if any aren't populated.
 for i in "${variables[@]}"
 do
 	if [ -z "${!i}" ]; then
-		echo "Travis CI has no value set for $i -- aborting"
-		exit 1
+		echo "No value set for $i"
 	fi
 done
 
 # If this is our staging site, then set the PDO_DSN value to that of our staging database.
-if [ "$TRAVIS_BRANCH" = "master" ]
+if [ "$TRAVIS" = true ]&& [ "$TRAVIS_BRANCH" = "master" ]
 then
 	sed -i -e "s|define('PDO_DSN', '')|define('PDO_DSN', '${PDO_DSN_STAGING}')|g" htdocs/includes/settings.inc.php
 	sed -i -e "s|define('MYSQL_DATABASE', '')|define('MYSQL_DATABASE', '${MYSQL_DATABASE_STAGING}')|g" htdocs/includes/settings.inc.php
 fi
 
 # Now iterate over again and perform the replacement.
+cp htdocs/includes/settings-default.inc.php htdocs/includes/settings.inc.php
 for i in "${variables[@]}"
 do
 	sed -i -e "s|define('$i', '')|define('$i', '${!i}')|g" htdocs/includes/settings.inc.php
