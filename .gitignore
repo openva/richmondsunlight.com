@@ -27,4 +27,5 @@ process-video
 lobbyist.php
 petition.php
 
+composer.phar
 *.cache
