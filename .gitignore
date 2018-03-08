@@ -1,7 +1,7 @@
 */.htpasswd
 htdocs/admin/phpmyadmin/
 .users
-htdocs/vendor/
+htdocs/js/vendor/
 htdocs/includes/vendor/
 htdocs/includes/settings.inc.php
 htdocs/downloads/

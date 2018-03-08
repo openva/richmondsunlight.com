@@ -1,0 +1,9 @@
+{
+    "config": {
+    	"vendor-dir": "vendor/"
+    },
+    "require": {
+        "components/jquery": "~1.7",
+        "components/jqueryui": "~1.8"
+    }
+}
