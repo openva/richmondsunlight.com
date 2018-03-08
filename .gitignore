@@ -18,6 +18,7 @@ htdocs/api/1.0/finance
 htdocs/mirror/
 htdocs/blog/
 htdocs/cron/hashes/
+htdocs/includes/settings.inc.php
 backups/
 logs/
 html
