@@ -1,5 +1,4 @@
 */.htpasswd
-*/.htaccess
 htdocs/admin/phpmyadmin/
 .users
 htdocs/vendor/
