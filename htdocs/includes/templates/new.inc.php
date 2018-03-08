@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name=viewport content="width=device-width, initial-scale=1">
 <title>%browser_title%</title>
+<link rel="manifest" href="/manifest.json">
 <link rel="stylesheet" href="/css/new/screen.css" type="text/css" media="screen" />
 <link rel="stylesheet" href="/css/new/print.css" type="text/css" media="print" />
 <link rel="stylesheet" href="/css/page-elements.css" type="text/css" media="screen" />
