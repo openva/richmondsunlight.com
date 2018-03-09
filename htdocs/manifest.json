@@ -1,0 +1,10 @@
+{
+    "name": "Richmond Sunlight",
+    "short_name": "Richmond Sun",
+    "start_url": ".",
+    "description": "Tracking Virginia’s General Assembly since 2007.",
+    "background_color": "#243a51",
+    "dir": "ltr",
+    "lang": "en-us",
+    "display": "standalone"
+}

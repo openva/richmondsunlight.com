@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name=viewport content="width=device-width, initial-scale=1">
 <title>%browser_title%</title>
+<link rel="manifest" href="/manifest.json">
 <link rel="stylesheet" href="/css/new/screen.css" type="text/css" media="screen" />
 <link rel="stylesheet" href="/css/new/print.css" type="text/css" media="print" />
 <link rel="stylesheet" href="/css/page-elements.css" type="text/css" media="screen" />
@@ -21,14 +22,10 @@
 <![endif]-->
 <!--<link media="only screen and (max-device-width: 480px), only screen and (min-device-width: 560px) and (max-device-width: 1136px) and (-webkit-min-device-pixel-ratio: 2)"
 	href="/css/iphone.css" type="text/css" rel="stylesheet" />-->
-<script src="//www.google.com/jsapi?key=ABQIAAAAn01L8sl4uwWn5vTPpoEoXhS0gyL4OV3haSzsE_slDr_NsupiLRSOvHSKmqYYxuXboyr-TTQzL6K8gg"></script>
-<script>
-	// Load jQuery and jQuery UI.
-	google.load("jquery", "1.7.1");
-	google.load("jqueryui", "1.8.11");
-</script>
+<script src="/js/vendor/jquery-1.7.1.min.js"></script>
+<script src="/js/jquery-ui-1.8.11.min.js"></script>
 <script src="/js/functions.js"></script>
-<script src="/js/jquery.qtip.min.js"></script>
+<script src="/js/vendor/jquery.qtip.min.js"></script>
 <?php
     # Include the below JavaScript, but only if the browser is IE. We do an Opera check because
     # Opera can include the text "MSIE" in its user agent string.

@@ -1,8 +1,7 @@
 */.htpasswd
-*/.htaccess
 htdocs/admin/phpmyadmin/
 .users
-htdocs/vendor/
+htdocs/js/vendor/
 htdocs/includes/vendor/
 htdocs/includes/settings.inc.php
 htdocs/downloads/
@@ -18,6 +17,7 @@ htdocs/api/1.0/finance
 htdocs/mirror/
 htdocs/blog/
 htdocs/cron/hashes/
+htdocs/includes/settings.inc.php
 backups/
 logs/
 html
@@ -27,4 +27,5 @@ process-video
 lobbyist.php
 petition.php
 
+composer.phar
 *.cache

@@ -632,7 +632,7 @@ if (isset($bill['status_history']))
                 .'see vote tally</a>)';
             $status['status'] = $tmp;
         }
-        $bill['history'] = '<li>'.$status['date'].' '.$status['status'].'</li>'.$bill['history'];
+        $bill['history'] = '<tr><td>'.$status['date'].'</td><td>'.$status['status'].'</td></tr>' . $bill['history'];
 
         # Build up an array of status translations to use to create our checkbox list.
         if (!empty($status['translation']))
@@ -649,7 +649,10 @@ if (isset($bill['status_history']))
         }
     }
 
-    $bill['history'] = '<ul>'.$bill['history'].'</ul>';
+    $bill['history'] = '<table>
+                            <thead><th>Date</th><th>Action</th></thead>
+                            <tbody>' . $bill['history'] . '</tbody>
+                        </table>';
 
     $passed = '<div class="checkbox passed">✓</div>';
     $failed = '<div class="checkbox failed">✗</div>';
@@ -821,7 +824,8 @@ if (!empty($bill['outcome']))
 }
 
 # If this bill remains alive.
-else {
+else
+{
 
     $page_body .= '<h2>Status</h2>
 	<p>';
