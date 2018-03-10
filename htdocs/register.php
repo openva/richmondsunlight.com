@@ -30,7 +30,7 @@ $site_section = '';
 # INITIALIZE SESSION
 session_start();
 
-$html_head = '<script src="/js/zxcvbn.js"></script>
+$html_head = '<script src="/js/vendor/zxcvbn/dist/zxcvbn.js"></script>
 			<script src="/js/password-test.js"></script>';
 
 # CUSTOM FUNCTIONS

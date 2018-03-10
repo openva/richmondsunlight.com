@@ -32,8 +32,8 @@ session_start();
 $html_head = '<script src="/js/scriptaculous/control-tabs.js"></script>';
 
 # Include the password-strength-meter code.
-$html_head .= '<script src="/js/zxcvbn.js"></script>
-				<script src="/js/password-test.js"></script>';
+$html_head = '<script src="/js/vendor/zxcvbn/dist/zxcvbn.js"></script>
+			<script src="/js/password-test.js"></script>';
 
 # See if the user is logged in.
 if (@logged_in() === false)

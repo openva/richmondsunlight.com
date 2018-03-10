@@ -47,7 +47,7 @@ $user = @get_user();
 # ADDITIONAL HTML HEADERS
 $html_head = '
 	<link rel="stylesheet" href="/css/photosynthesis.css" type="text/css" />
-	<script src="/js/jquery.jeditable.min.js"></script>
+	<script src="/js/vendor/jquery-jeditable/dist/jquery.jeditable.min.js"></script>
 	<script>
 		$(document).ready(function() {
 			$(".edit").editable("https://www.richmondsunlight.com/photosynthesis/ajax-bill-notes.php", {

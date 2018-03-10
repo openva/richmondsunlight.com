@@ -437,8 +437,8 @@ else
 }
 # Allow people to add tags.
 $html_head .= '
-		<script src="/js/jquery.tagsinput.js"></script>
-		<link rel="stylesheet" href="/css/jquery.tagsinput.css"/>';
+		<script src="/js/vendor/jQuery-Tags-Input/dist/jquery.tagsinput.min.js"></script>
+		<link rel="stylesheet" href="/js/vendor/jQuery-Tags-Input/dist/jquery.tagsinput.css"/>';
 $page_sidebar .= '
 			<form method="post" action="/process-tags.php">
 				<div class="ui-widget">
