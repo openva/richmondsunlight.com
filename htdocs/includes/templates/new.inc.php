@@ -94,9 +94,7 @@
 				</div>
 
 				<div id="date-status">
-					<div id="date">
-						<strong><script>document.write($.datepicker.formatDate('DD, MM dd, yy', new Date()));</script></strong>
-					</div>
+					<div id="date"></div>
 					<div id="status">
 						The General Assembly is now in session.
 					</div>
