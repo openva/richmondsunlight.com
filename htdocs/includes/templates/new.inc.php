@@ -9,7 +9,7 @@
 <link rel="stylesheet" href="/css/new/screen.css" type="text/css" media="screen" />
 <link rel="stylesheet" href="/css/new/print.css" type="text/css" media="print" />
 <link rel="stylesheet" href="/css/page-elements.css" type="text/css" media="screen" />
-<link rel="stylesheet" href="/js/vendor/jquery-ui/jquery-ui.min.css" type="text/css" media="screen">
+<link rel="stylesheet" href="/css/jquery-ui.theme.min.css" type="text/css" media="screen">
 <link rel="stylesheet" href="/js/vendor/qtip2/dist/jquery.qtip.min.css" type="text/css" media="screen">
 <!--[if lte IE 6]>
 <link rel="stylesheet" href="/css/new/ie6.css" type="text/css" media="screen" />
