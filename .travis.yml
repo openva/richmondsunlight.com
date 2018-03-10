@@ -21,6 +21,7 @@ addons:
       - awscli
 install:
 - composer install
+- cd htdocs/js/vendor; npm run build
 script:
 - find htdocs/*.php -print0 |xargs -0 -n1 -P8 php -l
   && ./deploy/branch_deploy.sh
