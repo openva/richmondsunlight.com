@@ -6,8 +6,10 @@ function openpopup(popurl) {
 	window.open(popurl,"","width=300,height=300,scrollbars,resizable");
 }
 
+// Set the date in the menu bar
 $( document ).ready(function(){
-    ($"#date").val($.datepicker.formatDate('DD, MM dd, yy', new Date()));
+    date = $.datepicker.formatDate('DD, MM dd, yy', new Date());
+    $("#date").text(date);
 });
 
 //////
