@@ -156,10 +156,15 @@ class Legislator
         $result = mysql_query($sql);
         if (mysql_num_rows($result) > 0)
         {
-            while ($committee = mysql_fetch_array($result))
+            while ($committee = mysql_fetch_assoc($result))
             {
                 # Clean it up.
                 $committee = array_map('stripslashes', $committee);
+
+                if (empty($committee['position']))
+                {
+                    $committee['position'] = 'member';
+                }
 
                 # Append the committee membership data to the legislator array.
                 $legislator['committees'][] = $committee;
