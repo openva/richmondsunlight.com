@@ -1004,5 +1004,4 @@ $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
 $page->html_head = $html_head;
-$page->body_tag = $body_tag;
 $page->process();
