@@ -308,10 +308,10 @@ $page_body = '
 <div class="tabs">
 <ul class="tabs">
 	<li><a href="#bio">Bio</a></li>';
-if (!empty($legislator['contributions']))
+/*if (!empty($legislator['contributions']))
 {
 	$page_body .= '<li><a href="#donors">Donors</a></li>';
-}
+}*/
 $page_body .= '
 	<li><a href="#media">Media</a></li>';
 if (!empty($legislator['rss_url']))
@@ -684,7 +684,7 @@ if (!empty($legislator['batting']))
 		in '.$batting_year.'</dd>';
 }
 
-if (!empty($legislator['contributions']))
+/*if (!empty($legislator['contributions']))
 {
 	$legislator['contributions'] = (array) $legislator['contributions'];
 	$page_body .= '<dt>Campaign Contributions</dt>
@@ -692,7 +692,7 @@ if (!empty($legislator['contributions']))
 		. '(<a href="' . $legislator['contributions']['Reports']->{0}->Url . '">'
 		. date('F Y', strtotime($legislator['contributions']['Reports']->{0}->PeriodEnd))
 		. ' report)</a></dd>';
-}
+}*/
 
 if (!empty($legislator['bio']))
 {
@@ -706,7 +706,7 @@ $page_body .= '</dl>
 	</div>';
 
 # Start a new DIV for top contributions.
-if (isset($legislator['contributions']['List']))
+/*if (isset($legislator['contributions']['List']))
 {
 
 	# Sort the list by total cumulative contributions, and keep only the top 10.
@@ -744,7 +744,7 @@ if (isset($legislator['contributions']['List']))
 			. $legislator['contributions']['CommitteeCode'] . '.json">JSON</a>.</p>
 		</div>';
 
-}
+}*/
 
 # Start a new DIV for news mentions.
 $page_body .= '
