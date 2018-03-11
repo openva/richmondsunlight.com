@@ -13,7 +13,6 @@
 # page to function.
 include_once('settings.inc.php');
 include_once('functions.inc.php');
-include_once('charts.php');
 include_once('magpierss/rss_fetch.inc');
 include_once('simplepie.inc.php');
 include_once('vendor/autoload.php');
