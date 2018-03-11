@@ -443,11 +443,11 @@
 					content: {
 						text: 'Loading .&thinsp;.&thinsp;.',
 						ajax: {
-							url: 'https://api.richmondsunlight.com/1.0/bill/'+year+'/'+bill_number+'.json',
+							url: 'https://api.richmondsunlight.com/1.1/bill/'+year+'/'+bill_number+'.json',
 							type: 'GET',
 							dataType: 'jsonp',
 							success: function(data, status) {
-								var content = '<a href="/legislator/' + data.patron.id + '/">' + data.patron.name + '</a>: ' + data.summary.truncate();
+								var content = '<a href="/legislator/' + data.chief_patron_id + '/">' + data.patron_name_formatted + '</a>: ' + data.summary.truncate();
 								this.set('content.text', content);
 							}
 						}

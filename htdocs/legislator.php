@@ -29,20 +29,28 @@ session_start();
 # LOCALIZE AND CLEAN UP VARIABLES
 $shortname = mysql_escape_string($_REQUEST['shortname']);
 
-# Create a new legislator object.
-$leg = new Legislator();
+# Get the legislator's info. from the API.
+# We append a query string, containing the current time, to avoid getting a cached copy.
+$json_url = 'https://api.richmondsunlight.com/1.1/legislator/' . $shortname . '.json?' . time();
+$json = get_content($json_url);
 
-# Get the ID for this shortname.
-$leg_id = $leg->getid($shortname);
-if ($leg_id === FALSE)
+$debug_timing['JSON retrieved'] = microtime(TRUE);
+
+if ($json === FALSE)
 {
-	header("Status: 404 Not Found\n\r");
-	include('404.php');
-	exit();
+    header( "Status: 404 Not Found\n\r");
+    include('404.php');
+    exit();
 }
 
-# Return the legislator's data as an array.
-$legislator = $leg->info($leg_id);
+$legislator = json_decode($json);
+
+# Cast this bill as an array, rather than an object, in which the array is wrapped as a result of
+# being stored in JSON.
+$legislator = (array) $legislator;
+
+# Externally, we call the shortname the "id," so rename that so it'll make sense here.
+$legislator['id'] = $legislator['rs_id'];
 
 # Create a new video object.
 $video = new Video();
@@ -402,13 +410,13 @@ if ( is_array($legislator['committees']) && (count($legislator['committees']) > 
 	$i=0;
 	foreach ($legislator['committees'] as $committee)
 	{
-		$page_body .= '<a href="/committee/'.$legislator['chamber'].'/'
-			.$committee['shortname'].'/">'.$committee['name'].'</a>';
-		if ($committee['position'] == 'chair')
+		$page_body .= '<a href="/committee/' . $legislator['chamber'] . '/'
+			. $committee->shortname . '/">' . $committee->name . '</a>';
+		if ($committee->position == 'chair')
 		{
 			$page_body .= ' (Chair)';
 		}
-		elseif ($committee['position'] == 'vice chair')
+		elseif ($committee->position == 'vice chair')
 		{
 			$page_body .= ' (Vice Chair)';
 		}
@@ -461,6 +469,7 @@ $sql = 'SELECT representatives.party, COUNT(*) AS number
 			ON bills.chief_patron_id=representatives.id
 		WHERE bills_copatrons.legislator_id='.$legislator['id'].'
 		GROUP BY representatives.party';
+
 $result = mysql_query($sql);
 $tmp = array();
 while ($copatron = mysql_fetch_array($result))
@@ -917,28 +926,8 @@ if ($legislator['videos'] !== FALSE)
 # Close the DIV that contains these tabs.
 $page_body .= '</div>';
 
-# RETRIEVE THE LEGISLATOR'S RECENT BILLS
-$sql = 'SELECT bills.id, bills.number, bills.catch_line,
-		DATE_FORMAT(bills.date_introduced, "%M %d, %Y") AS date_introduced,
-		committees.name, sessions.year,
-		(
-			SELECT status
-			FROM bills_status
-			WHERE bill_id=bills.id
-			ORDER BY date DESC, id DESC
-			LIMIT 1
-		) AS status
-		FROM bills
-		LEFT JOIN sessions
-			ON bills.session_id=sessions.id
-		LEFT JOIN committees
-			ON bills.last_committee_id = committees.id
-		WHERE bills.chief_patron_id="'.$legislator['id'].'"
-		ORDER BY sessions.year DESC,
-		SUBSTRING(bills.number FROM 1 FOR 2) ASC,
-		CAST(LPAD(SUBSTRING(bills.number FROM 3), 4, "0") AS unsigned) ASC';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+# List the legislator's bills
+if (count($legislator['bills']) > 0)
 {
 
 	$page_body .= '<div style="clear: both;" id="bills" class="tabs">
@@ -946,9 +935,9 @@ if (mysql_num_rows($result) > 0)
 
 	$year = 0;
 	$i=0;
-	while ($bill = mysql_fetch_array($result))
+	foreach ($legislator['bills'] as $bill)
 	{
-		$bill = array_map('stripslashes', $bill);
+		$bill = (array) $bill;
 		$bills[$bill{'year'}][] = $bill;
 	}
 
