@@ -646,7 +646,7 @@ if ($tag_count > 0)
 	while ($tag = mysql_fetch_array($result))
 	{
 		$tag = array_map('stripslashes', $tag);
-		$tags[$tag{tag}] = $tag['count'];
+		$tags[$tag{'tag'}] = $tag['count'];
 	}
 
 	# Sort the tags in reverse order by key (their count), shave off the top 30, and then
@@ -949,7 +949,7 @@ if (mysql_num_rows($result) > 0)
 	while ($bill = mysql_fetch_array($result))
 	{
 		$bill = array_map('stripslashes', $bill);
-		$bills[$bill{year}][] = $bill;
+		$bills[$bill{'year'}][] = $bill;
 	}
 
 	# Start the tab header code
