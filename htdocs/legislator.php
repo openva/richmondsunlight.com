@@ -71,7 +71,7 @@ $html_head .= '<meta name="twitter:card" content="summary" />
 	<meta name="twitter:site" content="@richmond_sun" />
 	<meta property="twitter:description" content="Representing Virginia ' . ucfirst($legislator['chamber'])
 		. ' District ' . $legislator['district'] . ', including ' . $legislator['district_description'] . ', '
-		. 'since ' . date(strtotime($legislator['date_started']), 'Y') . '." />';
+		. 'since ' . date('Y', strtotime($legislator['date_started'])) . '." />';
 
 # PAGE SIDEBAR
 $page_sidebar = '';
