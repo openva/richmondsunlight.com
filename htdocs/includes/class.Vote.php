@@ -2,11 +2,11 @@
 
 class Vote
 {
-	
+
 	# Take an LIS ID, return a vote tally.
 	function get_aggregate()
 	{
-		
+
 		# Make sure we've got the information that we need.
 		if (empty($this->lis_id))
 		{
@@ -17,7 +17,7 @@ class Vote
 		{
 			return FALSE;
 		}
-		
+
 		# Check that the data is clean.
 		if (strlen($this->lis_id) > 12)
 		{
@@ -52,7 +52,7 @@ class Vote
 			$this->session_id = $session_info['id'];
 
 		}
-		
+
 		/*
 		 * Query the DB.
 		 */
@@ -69,7 +69,7 @@ class Vote
 		$vote = mysql_fetch_assoc($result);
 		$vote = array_map('stripslashes', $vote);
 		return $vote;
-		
+
 	}
 
 	/*
@@ -77,7 +77,7 @@ class Vote
 	 */
 	function get_detailed()
 	{
-		
+
 		# Make sure we've got the information that we need.
 		if (!isset($this->lis_id) || empty($this->lis_id))
 		{
@@ -88,7 +88,7 @@ class Vote
 		{
 			return FALSE;
 		}
-		
+
 		# Check that the data is clean.
 		if (strlen($this->lis_id) > 12)
 		{
@@ -139,5 +139,5 @@ class Vote
 		return $legislators;
 
 	}
-	
+
 }

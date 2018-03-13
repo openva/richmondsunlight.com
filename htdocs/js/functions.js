@@ -205,4 +205,3 @@ function addEvent(elm, evType, fn, useCapture)
     alert("Handler could not be removed");
   }
 }
-
