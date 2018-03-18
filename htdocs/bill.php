@@ -55,7 +55,7 @@ $debug_timing['JSON retrieved'] = microtime(TRUE);
 
 if ($json === FALSE)
 {
-    header( "Status: 404 Not Found\n\r");
+    header("Status: 404 Not Found\n\r");
     include('404.php');
     exit();
 }
