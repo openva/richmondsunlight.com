@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "8cdf5bc7ec3fb0baf3001c0c599497ce",
+    "content-hash": "f210b5ded15a5d112141e19def64cf79",
     "packages": [
         {
             "name": "components/jquery",
@@ -235,28 +235,6 @@
             "time": "2018-02-23T01:58:20+00:00"
         },
         {
-            "name": "kellan/magpierss",
-            "version": "dev-master",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/satishsuggala/magpierss.git",
-                "reference": "669025871611100b269dce5dedc17ade0005c5cc"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/satishsuggala/magpierss/zipball/669025871611100b269dce5dedc17ade0005c5cc",
-                "reference": "669025871611100b269dce5dedc17ade0005c5cc",
-                "shasum": ""
-            },
-            "require": {
-                "php": ">=5.3.0"
-            },
-            "type": "library",
-            "notification-url": "https://packagist.org/downloads/",
-            "description": "A simple RSS integration tool",
-            "time": "2014-06-26T08:59:34+00:00"
-        },
-        {
             "name": "phpmailer/phpmailer",
             "version": "v5.2.26",
             "source": {
@@ -397,9 +375,7 @@
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "kellan/magpierss": 20
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": [],
