@@ -69,7 +69,7 @@ class Comments
                     $comment['comment'] = nl2p($comment['comment']);
 
                     # Add this comment to the comments array.
-                    $comments[$comment{timestamp}] = $comment;
+                    $comments[$comment{'timestamp'}] = $comment;
 
                 }
 

@@ -89,7 +89,7 @@ class Poll
             }
 
             $this->results = mysql_fetch_array($result);
-            $mc->set('poll-' . $bill['id'], serialize($this->results), (60 * 60 * 24));
+            $mc->set('poll-' . $this->bill_id, serialize($this->results), (60 * 60 * 24));
             return TRUE;
 
         }

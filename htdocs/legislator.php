@@ -60,7 +60,7 @@ $video->legislator_id = $legislator['id'];
 $legislator['videos'] = $video->legislator_sample();
 
 # Gin up a meta description for search engines.
-$html_head .= '
+$html_head = '
 <meta name="description" content="Information about ' . $legislator['name_formatted']
     .', including a list of ' . $legislator['possessive'] . ' bills, ' . $legislator['possessive']
     .' full voting record, contact information, donors, recent media coverage, and more." />';
@@ -519,7 +519,7 @@ $result = mysql_query($sql);
 $tmp = array();
 while ($copatron = mysql_fetch_array($result))
 {
-    $tmp[$copatron{party}] = $copatron['number'];
+    $tmp[$copatron{'party'}] = $copatron['number'];
 }
 $total = array_sum($tmp);
 if ($total > 0)

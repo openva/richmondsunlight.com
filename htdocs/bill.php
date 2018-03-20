@@ -17,7 +17,6 @@ $debug_timing['start'] = microtime(TRUE);
 # page to function.
 include_once 'settings.inc.php';
 include_once 'functions.inc.php';
-include_once 'charts.php';
 include_once 'simplepie.inc.php';
 include_once 'vendor/autoload.php';
 
@@ -99,13 +98,13 @@ foreach ($bots as $bot)
 {
     if (stripos($_SERVER['HTTP_USER_AGENT'], $bot) !== FALSE)
     {
-        $is_bot = true;
+        $is_bot = TRUE;
         break;
     }
 }
 # Update bills_views to reflect this view, provided that this visitor hasn't been defined
 # as a bot.
-if ($is_bot != TRUE)
+if (!isset($is_bot))
 {
     # Increment the view counter for this bill.
     $sql = 'INSERT DELAYED INTO bills_views
@@ -194,12 +193,12 @@ if ($bill['session_id'] == SESSION_ID)
             $portfolio = array_map('stripslashes', $portfolio);
             if (count($_SESSION['portfolios'] == 1))
             {
-                $ps_status .= '
+                $ps_status = '
 				<p><a href="/photosynthesis/">You are tracking this bill</a>.</p>';
             }
             else
             {
-                $ps_status .= '<p>You are tracking this bill in in
+                $ps_status = '<p>You are tracking this bill in in
 				<a href="/photosynthesis/#'.$portfolio['hash'].'">'.$portfolio['name'].'</a>.</p>';
             }
             # Set a tracked flag so we don't double-count this later.
@@ -210,7 +209,7 @@ if ($bill['session_id'] == SESSION_ID)
         # could be added.
         elseif (isset($_SESSION['portfolios']))
         {
-            $ps_status .= '<form method="post" action="/photosynthesis/process-actions.php">';
+            $ps_status = '<form method="post" action="/photosynthesis/process-actions.php">';
             # If there's just one portfolio.
             if (count($_SESSION['portfolios'] == 1))
             {
@@ -260,7 +259,7 @@ if ($bill['session_id'] == SESSION_ID)
     # If we've found anything, list them.
     if ($portfolio_count > 0)
     {
-        $ps_portfolios .= '<p>This bill is being tracked by ';
+        $ps_portfolios = '<p>This bill is being tracked by ';
         if ($portfolio_count == 1)
         {
             $ps_portfolios .= 'one member, ';
