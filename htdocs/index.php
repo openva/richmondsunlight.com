@@ -76,7 +76,7 @@ if ($tag_count > 0)
     while ($tag = mysql_fetch_array($result))
     {
         $tag = array_map('stripslashes', $tag);
-        $tags[$tag{tag}] = $tag['count'];
+        $tags[$tag{'tag'}] = $tag['count'];
     }
 
     # Sort the tags in reverse order by key (their count), shave off the top 30, and then
