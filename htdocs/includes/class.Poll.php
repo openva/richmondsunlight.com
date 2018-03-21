@@ -8,7 +8,6 @@ class Poll
      */
     public function has_voted()
     {
-
         if (empty($this->bill_id))
         {
             return FALSE;
@@ -36,7 +35,6 @@ class Poll
         }
 
         return TRUE;
-
     } // end has_voted()
 
     /*
@@ -44,7 +42,6 @@ class Poll
      */
     public function get_results()
     {
-
         if (empty($this->bill_id))
         {
             return FALSE;
@@ -71,7 +68,6 @@ class Poll
          */
         else
         {
-
             $database = new Database;
             $database->connect_old();
 
@@ -91,9 +87,6 @@ class Poll
             $this->results = mysql_fetch_array($result);
             $mc->set('poll-' . $this->bill_id, serialize($this->results), (60 * 60 * 24));
             return TRUE;
-
         }
-
     } // end get_results()
-
 }

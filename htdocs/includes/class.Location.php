@@ -12,7 +12,7 @@ class Location
         # If we've got a full address, join its components into a single string.
         if (isset($this->street, $this->city, $this->zip))
         {
-            $q = $this->street.', '.$this->city.', VA '.$this->zip;
+            $q = $this->street . ', ' . $this->city . ', VA ' . $this->zip;
         }
         elseif (isset($this->zip))
         {
@@ -47,13 +47,11 @@ class Location
         $this->latitude = $coordinates['results'][0]['geometry']['location']['lat'];
         $this->longitude = $coordinates['results'][0]['geometry']['location']['lng'];
         return $coordinates['results'][0]['geometry']['location'];
-
     }
 
     # Convert coordinates into district IDs.
     public function coords_to_districts()
     {
-
         if (!isset($this->latitude) || !isset($this->longitude))
         {
             return FALSE;

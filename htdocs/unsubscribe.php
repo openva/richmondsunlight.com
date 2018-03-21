@@ -30,7 +30,7 @@ $database = new Database;
 $database->connect_old();
 
 # LOCALIZE VARIABLES
-if (isset($_GET['hash']) && (strlen($_GET['hash']) == 8))
+if (isset($_GET['hash']) && (mb_strlen($_GET['hash']) == 8))
 {
     $hash = $_GET['hash'];
 }
@@ -47,7 +47,7 @@ $site_section = '';
 
 # Terminate the subscription.
 $sql = 'DELETE FROM comments_subscriptions
-		WHERE hash="'.mysql_real_escape_string($hash).'"
+		WHERE hash="' . mysql_real_escape_string($hash) . '"
 		LIMIT 1';
 mysql_query($sql);
 
@@ -60,7 +60,7 @@ if (isset($_SERVER['HTTP_REFERER']))
 # If we have a local referer, return the person to that URL
 if ($url['host'] == $_SERVER['SERVER_NAME'])
 {
-    header('Location: '.$_SERVER['HTTP_REFERER']);
+    header('Location: ' . $_SERVER['HTTP_REFERER']);
     exit();
 }
 

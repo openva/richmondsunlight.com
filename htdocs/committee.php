@@ -151,16 +151,24 @@ if (mysql_num_rows($result) > 0)
 
     while ($stats = mysql_fetch_array($result))
     {
-
-        if ($stats['party'] == 'R') $stats['party'] = 'Republican';
-        elseif ($stats['party'] == 'D') $stats['party'] = 'Democrat';
-        elseif ($stats['party'] == 'I') $stats['party'] = 'Independent';
+        if ($stats['party'] == 'R')
+        {
+            $stats['party'] = 'Republican';
+        }
+        elseif ($stats['party'] == 'D')
+        {
+            $stats['party'] = 'Democrat';
+        }
+        elseif ($stats['party'] == 'I')
+        {
+            $stats['party'] = 'Independent';
+        }
 
         # "We'll have no dividing by zero in this house, young man."
         if (($stats['failed'] > 0) && ($stats['total'] > 0))
         {
             $page_sidebar .= (100 - round(($stats['failed'] / $stats['total'] * 100), 0)) . '% of
-			the ' . $stats['total'].' bills introduced by ' . $stats['party'].'s have passed.  ';
+			the ' . $stats['total'] . ' bills introduced by ' . $stats['party'] . 's have passed.  ';
         }
     }
 
@@ -179,7 +187,6 @@ $sql = 'SELECT chamber, number, catch_line
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-
     $total_bills = mysql_num_rows($result);
 
     # List only the last five.
@@ -195,8 +202,8 @@ if (mysql_num_rows($result) > 0)
     $page_sidebar .= '
 	<div class="box">
 		<h3>Bills in this Committee</h3>
-		<p>There are currently <a href="/bills/committee/'.$committee->chamber.'/'.$committee->shortname.'/">'
-            .$total_bills.' bills</a> awaiting review by this committee.';
+		<p>There are currently <a href="/bills/committee/' . $committee->chamber . '/' . $committee->shortname . '/">'
+            . $total_bills . ' bills</a> awaiting review by this committee.';
     if ($total_bills > ($listed_bills + 1))
     {
         $page_sidebar .= ' Of those bills, here are the five that have generated the most
@@ -212,8 +219,8 @@ if (mysql_num_rows($result) > 0)
     while ($bill = mysql_fetch_array($result))
     {
         $bill = array_map('stripslashes', $bill);
-        $page_sidebar .= '<li><a href="/bill/'.SESSION_YEAR.'/'.$bill['number'].'/" class="bill">'
-            .strtoupper($bill['number']).'</a>: '.$bill['catch_line'].'</li>';
+        $page_sidebar .= '<li><a href="/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/" class="bill">'
+            . mb_strtoupper($bill['number']) . '</a>: ' . $bill['catch_line'] . '</li>';
         if ($i >= $listed_bills)
         {
             break;
@@ -248,14 +255,23 @@ if (mysql_num_rows($result) > 0)
     while ($tag = mysql_fetch_array($result))
     {
         $tags[] = array_map('stripslashes', $tag);
-        if ($tag['count'] > $top_tag) $top_tag = $tag['count'];
+        if ($tag['count'] > $top_tag)
+        {
+            $top_tag = $tag['count'];
+        }
     }
-    if ($top_tag == 1) $top_tag_size = 1;
+    if ($top_tag == 1)
+    {
+        $top_tag_size = 1;
+    }
     for ($i=0; $i<count($tags); $i++)
     {
         $font_size = round(($tags[$i]['count'] / $top_tag * $top_tag_size), 2);
-        if ($font_size < '.75') $font_size = '.75';
-        $page_sidebar .= '<span style="font-size: '.$font_size.'em;">
+        if ($font_size < '.75')
+        {
+            $font_size = '.75';
+        }
+        $page_sidebar .= '<span style="font-size: ' . $font_size . 'em;">
 				<a href="/bills/tags/' . urlencode($tags[$i]['tag']) . '/">' . $tags[$i]['tag'] . '</a>
 			</span>';
     }
@@ -276,7 +292,7 @@ if (is_array($committee->members))
     foreach ($committee->members as $member)
     {
         $page_body .= '<li><a href="/legislator/' . $member['shortname'] . '/" class="legislator">' . $member['name']
-            .'</a>';
+            . '</a>';
         if (!empty($member['position']))
         {
             $page_body .= ' <strong>' . ucwords($member['position']) . '</strong>';
@@ -311,10 +327,10 @@ else
     while ($subcommittee = mysql_fetch_array($result))
     {
         $subcommittee = array_map('stripslashes', $subcommittee);
-        $page_body .= '<li>'.$subcommittee['name'];
+        $page_body .= '<li>' . $subcommittee['name'];
         if (!empty($subcommittee['meeting_time']))
         {
-            $page_body .= '<br /><small>'.$subcommittee['meeting_time'].'</small>';
+            $page_body .= '<br /><small>' . $subcommittee['meeting_time'] . '</small>';
         }
         $page_body .= '</li>';
     }

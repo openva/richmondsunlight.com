@@ -15,7 +15,6 @@ class Statistics
      */
     public function daily_activity()
     {
-
         $database = new Database;
         $database->connect();
 
@@ -33,7 +32,6 @@ class Statistics
         }
 
         return $result;
-
     }
 
     /*
@@ -47,7 +45,6 @@ class Statistics
      */
     public function bills_filed_daily()
     {
-
         $database = new Database;
         $database->connect();
 
@@ -65,7 +62,6 @@ class Statistics
         }
 
         return $result;
-
     }
 
     /*
@@ -80,7 +76,6 @@ class Statistics
      */
     public function bill_views()
     {
-
         if (empty($bill->id))
         {
             return FALSE;
@@ -103,7 +98,5 @@ class Statistics
         }
 
         return $result;
-
     }
-
 }

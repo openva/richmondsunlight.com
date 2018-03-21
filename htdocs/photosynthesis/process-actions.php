@@ -36,7 +36,7 @@
     # SEE IF HE'S LOGGED IN AND DEAL WITH HIM ACCORDINGLY
     if (@logged_in() === FALSE)
     {
-        header('Location: '.$_SERVER['HTTP_REFERER']);
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
         exit;
     }
     $user = @get_user();
@@ -58,16 +58,16 @@
 				SET bill_id =
 					(SELECT id
 					FROM bills
-					WHERE number="'.$bill_number.'" AND session_id = '.SESSION_ID.'),
-				user_id='.$user['id'].', portfolio_id=
+					WHERE number="' . $bill_number . '" AND session_id = ' . SESSION_ID . '),
+				user_id=' . $user['id'] . ', portfolio_id=
 					(SELECT id
 					FROM dashboard_portfolios
-					WHERE hash="'.$portfolio_hash.'"),
+					WHERE hash="' . $portfolio_hash . '"),
 				date_created=now()';
         mysql_query($sql);
 
         # Return the user back to his dashboard listing.
-        header('Location: '.$_SERVER['HTTP_REFERER']);
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
         exit;
     }
 
@@ -84,10 +84,10 @@
 
         # Delete the bill record.
         $sql = 'DELETE FROM dashboard_bills
-				WHERE id='.$record_id.' AND user_id='.$user['id'].'
+				WHERE id=' . $record_id . ' AND user_id=' . $user['id'] . '
 				AND portfolio_id = (SELECT id
 					FROM dashboard_portfolios
-					WHERE hash="'.$portfolio_hash.'")';
+					WHERE hash="' . $portfolio_hash . '")';
         mysql_query($sql);
 
         /*
@@ -104,7 +104,7 @@
         $mc->delete('comments-' . $bill['id']);
 
         # Return the user to the dashboard.
-        header('Location: '.$_SERVER['HTTP_REFERER']);
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
         exit;
     }
 
@@ -122,30 +122,33 @@
         # ID, we'll use it below to delete the watch list.
         $sql = 'SELECT id, hash, watch_list_id
 				FROM dashboard_portfolios
-				WHERE hash="'.$portfolio_hash.'"';
+				WHERE hash="' . $portfolio_hash . '"';
         $result = mysql_query($sql);
-        if (mysql_num_rows($result) == 0) die('Error: No portfolio found. Could not delete it.');
+        if (mysql_num_rows($result) == 0)
+        {
+            die('Error: No portfolio found. Could not delete it.');
+        }
         $portfolio = mysql_fetch_array($result);
 
         # Remove all of the bills associated with this portfolio.
         $sql = 'DELETE FROM dashboard_bills
-				WHERE portfolio_id='.$portfolio['id'].' AND user_id='.$user['id'];
+				WHERE portfolio_id=' . $portfolio['id'] . ' AND user_id=' . $user['id'];
         mysql_query($sql);
 
         # Delete the portfolio.
         $sql = 'DELETE FROM dashboard_portfolios
-				WHERE id='.$portfolio['id'].' AND user_id='.$user['id'];
+				WHERE id=' . $portfolio['id'] . ' AND user_id=' . $user['id'];
         mysql_query($sql);
 
         # Finally, if this is a smart portfolio, remove the watch list entry.
         if (!empty($portfolio['watch_list_id']))
         {
             $sql = 'DELETE FROM dashboard_watch_lists
-					WHERE id = '.$portfolio['watch_list_id'];
+					WHERE id = ' . $portfolio['watch_list_id'];
             mysql_query($sql);
         }
 
-        header('Location: '.$_SERVER['HTTP_REFERER']);
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
         exit;
     }
 
@@ -155,13 +158,16 @@
     {
 
         # Localize $form_data and clean it up.
-        if (!array($_POST['form_data'])) return FALSE;
+        if (!array($_POST['form_data']))
+        {
+            return FALSE;
+        }
         $form_data = array_map('addslashes', $_POST['form_data']);
 
         # Don't allow a nameless portfolio.
         if (empty($form_data['name']))
         {
-            header('Location: '.$_SERVER['HTTP_REFERER']);
+            header('Location: ' . $_SERVER['HTTP_REFERER']);
             exit;
         }
 
@@ -172,16 +178,25 @@
         # Generate a random five-digit hash to ID this portfolio. It's in base 30,
         # allowing for a namespace of 24,300,000.
         $chars = 'bcdfghjklmnpqrstvxyz0123456789';
-        $hash = substr(str_shuffle($chars), 0, 5);
+        $hash = mb_substr(str_shuffle($chars), 0, 5);
 
         $sql = 'INSERT INTO dashboard_portfolios
-				SET name = "'.$_POST['form_data']['name'].'", hash = "'.$hash.'",
-				user_id='.$user['id'].', date_created=now()';
-        if (!empty($form_data['notes'])) $sql .= ', notes="'.$form_data['notes'].'"';
-        if (!empty($form_data['public'])) $sql .= ', public="'.$form_data['public'].'"';
-        if (!empty($form_data['notify'])) $sql .= ', notify="'.$form_data['notify'].'"';
+				SET name = "' . $_POST['form_data']['name'] . '", hash = "' . $hash . '",
+				user_id=' . $user['id'] . ', date_created=now()';
+        if (!empty($form_data['notes']))
+        {
+            $sql .= ', notes="' . $form_data['notes'] . '"';
+        }
+        if (!empty($form_data['public']))
+        {
+            $sql .= ', public="' . $form_data['public'] . '"';
+        }
+        if (!empty($form_data['notify']))
+        {
+            $sql .= ', notify="' . $form_data['notify'] . '"';
+        }
         mysql_query($sql);
-        header('Location: '.$_SERVER['HTTP_REFERER']);
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
         exit;
     }
 
@@ -190,7 +205,10 @@
     {
 
         # Localize $form_data and clean it up.
-        if (!array($_POST['form_data'])) return FALSE;
+        if (!array($_POST['form_data']))
+        {
+            return FALSE;
+        }
         $form_data = array_map('addslashes', $_POST['form_data']);
 
         # Don't allow a watch list with no criteria.
@@ -198,14 +216,14 @@
         && empty($form_data['committee_id']) && empty($form_data['keyword']) && empty($form_data['status'])
         && empty($form_data['current_chamber']))
         {
-            header('Location: '.$_SERVER['HTTP_REFERER']);
+            header('Location: ' . $_SERVER['HTTP_REFERER']);
             exit;
         }
 
         # Don't allow a nameless portfolio.
         if (empty($form_data['name']))
         {
-            header('Location: '.$_SERVER['HTTP_REFERER']);
+            header('Location: ' . $_SERVER['HTTP_REFERER']);
             exit;
         }
 
@@ -218,15 +236,33 @@
 				SET';
 
         # For each watch list field, create the SQL insert stanza.
-        if (!empty($form_data['tag'])) $sql .= ' tag="'.$form_data['tag'].'",';
-        if (!empty($form_data['patron_id'])) $sql .= ' patron_id="'.$form_data['patron_id'].'",';
-        if (!empty($form_data['committee_id'])) $sql .= ' committee_id="'.$form_data['committee_id'].'",';
-        if (!empty($form_data['keyword'])) $sql .= ' keyword="'.$form_data['keyword'].'",';
-        if (!empty($form_data['status'])) $sql .= ' status="'.$form_data['status'].'",';
-        if (!empty($form_data['current_chamber'])) $sql .= ' current_chamber="'.$form_data['current_chamber'].'",';
+        if (!empty($form_data['tag']))
+        {
+            $sql .= ' tag="' . $form_data['tag'] . '",';
+        }
+        if (!empty($form_data['patron_id']))
+        {
+            $sql .= ' patron_id="' . $form_data['patron_id'] . '",';
+        }
+        if (!empty($form_data['committee_id']))
+        {
+            $sql .= ' committee_id="' . $form_data['committee_id'] . '",';
+        }
+        if (!empty($form_data['keyword']))
+        {
+            $sql .= ' keyword="' . $form_data['keyword'] . '",';
+        }
+        if (!empty($form_data['status']))
+        {
+            $sql .= ' status="' . $form_data['status'] . '",';
+        }
+        if (!empty($form_data['current_chamber']))
+        {
+            $sql .= ' current_chamber="' . $form_data['current_chamber'] . '",';
+        }
 
         # Finish it up with the UID and timestamp.
-        $sql .= ' user_id='.$user['id'].', date_created=now()';
+        $sql .= ' user_id=' . $user['id'] . ', date_created=now()';
 
         # Perform the insert and preserve the watch list ID.
         mysql_query($sql);
@@ -235,20 +271,29 @@
         # Generate a random five-digit hash to ID this portfolio. It's in base 30,
         # allowing for a namespace of 24,300,000.
         $chars = 'bcdfghjklmnpqrstvxyz0123456789';
-        $hash = substr(str_shuffle($chars), 0, 5);
+        $hash = mb_substr(str_shuffle($chars), 0, 5);
 
         $sql = 'INSERT INTO dashboard_portfolios
-				SET name = "'.$form_data['name'].'", watch_list_id = '.$watch_list_id.',
-				user_id='.$user['id'].', hash="'.$hash.'", date_created=now()';
-        if (!empty($form_data['notes'])) $sql .= ', notes="'.$form_data['notes'].'"';
-        if (!empty($form_data['public'])) $sql .= ', public="'.$form_data['public'].'"';
-        if (!empty($form_data['notify'])) $sql .= ', notify="'.$form_data['notify'].'"';
+				SET name = "' . $form_data['name'] . '", watch_list_id = ' . $watch_list_id . ',
+				user_id=' . $user['id'] . ', hash="' . $hash . '", date_created=now()';
+        if (!empty($form_data['notes']))
+        {
+            $sql .= ', notes="' . $form_data['notes'] . '"';
+        }
+        if (!empty($form_data['public']))
+        {
+            $sql .= ', public="' . $form_data['public'] . '"';
+        }
+        if (!empty($form_data['notify']))
+        {
+            $sql .= ', notify="' . $form_data['notify'] . '"';
+        }
         $result = mysql_query($sql);
         $portfolio_id = mysql_insert_id();
 
         populate_smart_portfolio($portfolio_id);
 
-        header('Location: '.$_SERVER['HTTP_REFERER']);
+        header('Location: ' . $_SERVER['HTTP_REFERER']);
         exit;
     }
 

@@ -37,7 +37,6 @@ if ($mc->getResultCode() === 0)
     echo $cached_html;
     echo '<!-- Generated from cache -->';
     exit();
-
 }
 
 # DECLARATIVE FUNCTIONS
@@ -101,7 +100,7 @@ if ($tag_count > 0)
             $size = .75;
         }
 
-        $page_body .= '<span style="font-size: '.$size.'em;"><a href="/bills/tags/'.urlencode($tag).'/">'.$tag.'</a></span> ';
+        $page_body .= '<span style="font-size: ' . $size . 'em;"><a href="/bills/tags/' . urlencode($tag) . '/">' . $tag . '</a></span> ';
     }
     $page_body .= '
 	</div>';
@@ -132,11 +131,11 @@ if (mysql_num_rows($result) > 0)
 					<table>';
     while ($bill = mysql_fetch_array($result))
     {
-        $bill['url'] = '/bill/'.SESSION_YEAR.'/'.$bill['number'].'/';
+        $bill['url'] = '/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/';
         $page_body .= '<tr>
-						<td><a href="'.$bill['url'].'" class="balloon">'.strtoupper($bill['number']).'</td>
-						<td>'.$bill['catch_line'].'</td>
-						<td>'.$bill['status_translation'].'</td>
+						<td><a href="' . $bill['url'] . '" class="balloon">' . mb_strtoupper($bill['number']) . '</td>
+						<td>' . $bill['catch_line'] . '</td>
+						<td>' . $bill['status_translation'] . '</td>
 					</tr>';
     }
     $page_body .= '</table></div>';
@@ -147,7 +146,6 @@ $blog_entries = $mc->get('homepage_blog');
 
 if (!$blog_entries)
 {
-
     $rss = fetch_rss('https://www.richmondsunlight.com/blog/feed/');
     $items = array_slice($rss->items, 0, 5);
 
@@ -155,19 +153,16 @@ if (!$blog_entries)
     $blog_entries = '';
     foreach ($items as $item)
     {
-
         $blog_entries .= '
 			<div class="entry">
 			<h3><a href="' . $item['guid'] . '">' . $item['title'] . '</a></h3>
 			<div class="date">' . date('F j, Y', strtotime($item['pubdate'])) . ' by ' . $item['dc']['creator'] . '</div>
 			' . $item['summary'] . '
 			</div>';
-
     }
 
     # Store these in APC.
     $mc->set('homepage_blog', $blog_entries, (60 * 15));
-
 }
 
 $page_body .= '
@@ -181,7 +176,7 @@ $page_sidebar = '';
 # Session Stats
 $sql = 'SELECT chamber, COUNT(*) AS count
 		FROM bills
-		WHERE session_id='.SESSION_ID.'
+		WHERE session_id=' . SESSION_ID . '
 		GROUP BY chamber';
 $result = mysql_query($sql);
 while ($stats = mysql_fetch_array($result))
@@ -201,13 +196,13 @@ $page_sidebar .= '
 	<div class="box stats" id="bills-left">
 		<p id="house-bill-count">
 			<a href="/bills/#house" style="text-decoration: none;">
-			<span class="stat-number">'.number_format($session['house_count']).'</span>
+			<span class="stat-number">' . number_format($session['house_count']) . '</span>
 			</a>
 		</p>
 
 		<p id="senate-bill-count">
 			<a href="/bills/#senate" style="text-decoration: none;">
-			<span class="stat-number">'.number_format($session['senate_count']).'</span>
+			<span class="stat-number">' . number_format($session['senate_count']) . '</span>
 			</a>
 		</p>
 	</div>';
@@ -219,7 +214,7 @@ $sql = 'SELECT bills.number, bills.catch_line,
 		FROM bills
 		LEFT JOIN representatives
 			ON bills.chief_patron_id = representatives.id
-		WHERE bills.session_id = '.SESSION_ID.'
+		WHERE bills.session_id = ' . SESSION_ID . '
 		ORDER BY bills.hotness DESC
 		LIMIT 5';
 $result = mysql_query($sql);
@@ -232,9 +227,9 @@ if (mysql_num_rows($result) > 0)
     while ($bill = mysql_fetch_array($result))
     {
         $bill = array_map('stripslashes', $bill);
-        $bill['summary'] = substr($bill['summary'], 0, 175).' .&thinsp;.&thinsp;.';
+        $bill['summary'] = mb_substr($bill['summary'], 0, 175) . ' .&thinsp;.&thinsp;.';
         $page_sidebar .= '
-			<li><a href="/bill/'.SESSION_YEAR.'/'.$bill['number'].'/" class="balloon">'.strtoupper($bill['number']).balloon($bill, 'bill').'</a>: '.$bill['catch_line'].'</li>
+			<li><a href="/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/" class="balloon">' . mb_strtoupper($bill['number']) . balloon($bill, 'bill') . '</a>: ' . $bill['catch_line'] . '</li>
 		';
     }
     $page_sidebar .= '
@@ -272,9 +267,9 @@ if (IN_SESSION == 'y')
         while ($bill = mysql_fetch_array($result))
         {
             $bill = array_map('stripslashes', $bill);
-            $bill['summary'] = substr($bill['summary'], 0, 175).'...';
+            $bill['summary'] = mb_substr($bill['summary'], 0, 175) . '...';
             $page_sidebar .= '
-				<li><a href="/bill/'.$bill['year'].'/'.strtolower($bill['number']).'/" class="balloon">'.$bill['number'].balloon($bill, 'bill').'</a>: '.$bill['catch_line'].'</li>
+				<li><a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number']) . '/" class="balloon">' . $bill['number'] . balloon($bill, 'bill') . '</a>: ' . $bill['catch_line'] . '</li>
 			';
         }
         $page_sidebar .= '
@@ -312,19 +307,19 @@ if (mysql_num_rows($result) > 0)
     while ($comment = mysql_fetch_array($result))
     {
         $comment = array_map('stripslashes', $comment);
-        if (strlen($comment['comment']) > 175)
+        if (mb_strlen($comment['comment']) > 175)
         {
             $comment['comment'] = preg_replace('#<blockquote>(.*)</blockquote>#D', '', $comment['comment']);
             $comment['comment'] = strip_tags($comment['comment']);
-            if (strlen($comment['comment']) > 120)
+            if (mb_strlen($comment['comment']) > 120)
             {
-                $comment['comment'] = substr($comment['comment'], 0, 120).'&thinsp;.&thinsp;.&thinsp;.';
+                $comment['comment'] = mb_substr($comment['comment'], 0, 120) . '&thinsp;.&thinsp;.&thinsp;.';
             }
         }
         $page_sidebar .= '
-				<li style="margin-bottom: .75em;"><strong>'.strtoupper($comment['bill_number']).': '.$comment['bill_catch_line'].'</strong><br />
-				<a href="/bill/'.$comment['year'].'/'.$comment['bill_number'].'/#comment-'.$comment['number'].'">'.$comment['name'].' writes:</a>
-				'.$comment['comment'].'</li>';
+				<li style="margin-bottom: .75em;"><strong>' . mb_strtoupper($comment['bill_number']) . ': ' . $comment['bill_catch_line'] . '</strong><br />
+				<a href="/bill/' . $comment['year'] . '/' . $comment['bill_number'] . '/#comment-' . $comment['number'] . '">' . $comment['name'] . ' writes:</a>
+				' . $comment['comment'] . '</li>';
     }
     $page_sidebar .= '
 			</ul>

@@ -19,15 +19,15 @@ class Vote
         }
 
         # Check that the data is clean.
-        if (strlen($this->lis_id) > 12)
+        if (mb_strlen($this->lis_id) > 12)
         {
             return FALSE;
         }
-        if (strlen($this->session_id) > 4)
+        if (mb_strlen($this->session_id) > 4)
         {
             return FALSE;
         }
-        if (strlen($this->session_year) <> 4)
+        if (mb_strlen($this->session_year) <> 4)
         {
             return FALSE;
         }
@@ -38,7 +38,6 @@ class Vote
         # If we have a session year, but not a session ID, look up the session ID.
         if (empty($this->session_id) && !empty($this->session_year))
         {
-
             $sql = 'SELECT id
 					FROM sessions
 					WHERE year="' . $this->session_year . '"
@@ -50,7 +49,6 @@ class Vote
             }
             $session_info = mysql_fetch_assoc($result);
             $this->session_id = $session_info['id'];
-
         }
 
         /*
@@ -69,7 +67,6 @@ class Vote
         $vote = mysql_fetch_assoc($result);
         $vote = array_map('stripslashes', $vote);
         return $vote;
-
     }
 
     /*
@@ -90,11 +87,11 @@ class Vote
         }
 
         # Check that the data is clean.
-        if (strlen($this->lis_id) > 12)
+        if (mb_strlen($this->lis_id) > 12)
         {
             return FALSE;
         }
-        if (strlen($this->session_id) > 3)
+        if (mb_strlen($this->session_id) > 3)
         {
             return FALSE;
         }
@@ -121,7 +118,7 @@ class Vote
 					ON representatives_votes.representative_id = representatives.id
 				LEFT JOIN districts
 					ON representatives.district_id=districts.id
-				WHERE votes.lis_id="'.$this->lis_id.'" AND votes.session_id="' . $this->session_id . '"
+				WHERE votes.lis_id="' . $this->lis_id . '" AND votes.session_id="' . $this->session_id . '"
 				ORDER BY vote ASC, name ASC';
         $result = mysql_query($sql);
         if (mysql_num_rows($result) < 1)
@@ -137,7 +134,5 @@ class Vote
         }
 
         return $legislators;
-
     }
-
 }

@@ -61,11 +61,11 @@ $page_sidebar = '
 				<legend name="year">Year</legend>';
 for ($i=2006; $i<=SESSION_YEAR; $i++)
 {
-    $page_sidebar .= '<input type="radio" name="year" id="year-'. $i . ' " value="'. $i . ' "' . ($year == $i ? ' checked="checked"' : '') . ' /><label for="year-'. $i . ' ">'. $i . ' </label><br />';
+    $page_sidebar .= '<input type="radio" name="year" id="year-' . $i . ' " value="' . $i . ' "' . ($year == $i ? ' checked="checked"' : '') . ' /><label for="year-' . $i . ' ">' . $i . ' </label><br />';
 }
 
 $page_sidebar .= '
-				<input type="radio" name="year" id="all" value=""'.($year == '' ? ' checked="checked"' : '').' /><label for="all">All</label>
+				<input type="radio" name="year" id="all" value=""' . ($year == '' ? ' checked="checked"' : '') . ' /><label for="all">All</label>
 			</fieldset>
 			<input type="submit" name="submit" value="Go" />
 		</form>
@@ -83,7 +83,7 @@ if (!empty($q))
     if (preg_match('/([hs]{1})([bjr]{1})([[:space:]]?)([0-9]+)/Di', $q))
     {
         $q = str_replace(' ', '', $q);
-        header('Location: http://www.richmondsunlight.com/bill/'.SESSION_YEAR.'/'.strtolower($q).'/');
+        header('Location: http://www.richmondsunlight.com/bill/' . SESSION_YEAR . '/' . mb_strtolower($q) . '/');
         exit;
     }
 
@@ -120,7 +120,7 @@ if (!empty($q))
     # If everything is A-OK, then list the results.
     else
     {
-        $page_body .= '<p>'.number_format($result['total_found']).' results found.</p>
+        $page_body .= '<p>' . number_format($result['total_found']) . ' results found.</p>
 		<div class="results">';
 
         # Iterate through the results and build up a list of IDs.
@@ -159,52 +159,49 @@ if (!empty($q))
         $i=0;
         foreach ($bill_list as $search_result)
         {
-            $page_body .= '<h2><a href="'.$search_result['url'].'">'.$search_result['catch_line']
-                .' ('.strtoupper($search_result['number']).')</a></h2>
-				<p class="excerpt">'.$excerpts[$i].'</p>
+            $page_body .= '<h2><a href="' . $search_result['url'] . '">' . $search_result['catch_line']
+                . ' (' . mb_strtoupper($search_result['number']) . ')</a></h2>
+				<p class="excerpt">' . $excerpts[$i] . '</p>
 				<p class="url"><a href="'
-                    .$search_result['url'].'">'.htmlspecialchars($search_result['url']).'</a></p>';
+                    . $search_result['url'] . '">' . htmlspecialchars($search_result['url']) . '</a></p>';
             $i++;
         }
 
         # List the page numbers.
         if ($result['total_found'] > $per_page)
         {
-
             $page_body .= '<ul class="paging">';
 
             for ($i=1; ($i * $per_page) <= (ceil($result['total_found']/10)*10); $i++)
             {
 
                 # Assemble the URL for this page link.
-                $url = '/search/?q='.urlencode($q).'&amp;p='.$i;
+                $url = '/search/?q=' . urlencode($q) . '&amp;p=' . $i;
                 if (isset($year))
                 {
-                    $url .= '&amp;year='.urlencode($year);
+                    $url .= '&amp;year=' . urlencode($year);
                 }
                 if (isset($sort))
                 {
-                    $url .= '&amp;sort='.urlencode($sort);
+                    $url .= '&amp;sort=' . urlencode($sort);
                 }
                 if (isset($per_page))
                 {
-                    $url .= '&amp;per_page='.urlencode($per_page);
+                    $url .= '&amp;per_page=' . urlencode($per_page);
                 }
-                $page_body .= '<li><a href="'.$url.'"';
+                $page_body .= '<li><a href="' . $url . '"';
                 if ($i == $p)
                 {
                     $page_body .= ' class="current"';
                 }
-                $page_body .= '>'.$i.'</a></li>';
+                $page_body .= '>' . $i . '</a></li>';
             }
 
             $page_body .= '</ul>';
-
         }
 
         # Close the results DIV.
         $page_body .= '</div>';
-
     }
 }
 

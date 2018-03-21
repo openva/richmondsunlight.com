@@ -34,7 +34,7 @@ $json = get_content($json_url);
 if ($json === FALSE)
 {
     header("Status: 404 Not Found\n\r") ;
-    include('404.php');
+    include '404.php';
     exit();
 }
 $bill = json_decode($json);
@@ -44,15 +44,14 @@ $bill = json_decode($json);
 $bill = (array) $bill;
 
 if (
-    strpos($bill['number'], 'hr') !== FALSE
+    mb_strpos($bill['number'], 'hr') !== FALSE
     ||
-    strpos($bill['number'], 'hjr') !== FALSE
+    mb_strpos($bill['number'], 'hjr') !== FALSE
     ||
-    strpos($bill['number'], 'sr') !== FALSE
+    mb_strpos($bill['number'], 'sr') !== FALSE
     ||
-    strpos($bill['number'], 'sjr') !== FALSE
-)
-{
+    mb_strpos($bill['number'], 'sjr') !== FALSE
+) {
     $bill['type'] = 'resolution';
 }
 else
@@ -80,10 +79,8 @@ $sql = 'SELECT number, date_introduced, text
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-
     while ($version = mysql_fetch_array($result, MYSQL_ASSOC))
     {
-
         $version = array_map('stripslashes', $version);
 
         # The HTML for amended versions of bills is beastly. Clean it up.
@@ -137,13 +134,11 @@ if (mysql_num_rows($result) > 0)
 
         # Save all of this to an array.
         $versions[] = $version;
-
     }
-
 }
 
 # PAGE METADATA
-$page_title = strtoupper($bill['number']) . ': ' . $bill['catch_line'];
+$page_title = mb_strtoupper($bill['number']) . ': ' . $bill['catch_line'];
 $site_section = 'bills';
 
 # PAGE SIDEBAR
@@ -152,7 +147,7 @@ $page_sidebar = '
 		<h3>Explanation</h3>
 		<p>For a plain English description of this bill, comments, voting, tagging, etc.,
 		<a href="/bill/' . $bill['year'] . '/' . $bill['number'] . '/">return to the main page for
-		' . strtoupper($bill['number']) . '</a>.</p>
+		' . mb_strtoupper($bill['number']) . '</a>.</p>
 
 		<p>This is the actual text of the bill—the legislation itself. Generally this is
 		amending existing law, proposing the addition or removal of words from laws that are
@@ -179,7 +174,7 @@ $page_body = '
 # Iterate through to create the tabs.
 foreach ($versions as $version)
 {
-    $page_body .= '<li><a href="#' . $version['number'] . '">' . strtoupper($version['number']) . '</a></li>';
+    $page_body .= '<li><a href="#' . $version['number'] . '">' . mb_strtoupper($version['number']) . '</a></li>';
 }
 $page_body .= '
 	</ul>';

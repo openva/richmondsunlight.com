@@ -47,11 +47,11 @@ if (preg_match("#([0-9]{2})/([0-9]{2})#D", $comment['name']))
 {
     die();
 }
-if ((strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})/D", $comment['email'])))
+if ((mb_strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})/D", $comment['email'])))
 {
     die();
 }
-if ((strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})-([0-9]{4})/D", $comment['email'])))
+if ((mb_strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})-([0-9]{4})/D", $comment['email'])))
 {
     die();
 }
@@ -63,15 +63,15 @@ if (!empty($comment['state']))
 {
     die();
 }
-if (strlen($_SERVER['HTTP_USER_AGENT']) <= 1)
+if (mb_strlen($_SERVER['HTTP_USER_AGENT']) <= 1)
 {
     die('Thank you for your comment.');
 }
-if (stristr($_SERVER['HTTP_USER_AGENT'], 'curl') === TRUE)
+if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'curl') === TRUE)
 {
     die('Thank you for your comment.');
 }
-if (stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === TRUE)
+if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === TRUE)
 {
     die('Thank you for your comment.');
 }
@@ -88,11 +88,11 @@ $comment['comment'] = strip_tags($comment['comment'], '<a><em><strong><i><b><s><
 if (!empty($comment['url']))
 {
     # If we've got content, but no schema, prepend that.
-    if (!stristr($comment['url'], 'http://'))
+    if (!mb_stristr($comment['url'], 'http://'))
     {
         # If there's an at sign in there, then somebody has entered their e-mail address as
         # their URL.
-        if (strstr($comment['url'], '@'))
+        if (mb_strstr($comment['url'], '@'))
         {
             $comment['email'] = $comment['url'];
             unset($comment['url']);
@@ -101,7 +101,7 @@ if (!empty($comment['url']))
         # Otherwise, just figure somebody neglected the prefix.
         else
         {
-            $comment['url'] = 'http://'.$comment['url'];
+            $comment['url'] = 'http://' . $comment['url'];
         }
     }
 
@@ -137,11 +137,11 @@ if (!validate_email($comment['email']))
 # SEE IF HE'S LOGGED IN AND DEAL WITH HIM ACCORDINGLY
 if (logged_in() === TRUE)
 {
-    update_user('name='.$comment['name'].'&email='.$comment['email'].'&url='.$comment['url']);
+    update_user('name=' . $comment['name'] . '&email=' . $comment['email'] . '&url=' . $comment['url']);
 }
 else
 {
-    create_user('name='.$comment['name'].'&email='.$comment['email'].'&url='.$comment['url']);
+    create_user('name=' . $comment['name'] . '&email=' . $comment['email'] . '&url=' . $comment['url']);
     $user = @get_user();
 }
 
@@ -167,7 +167,7 @@ foreach ($comment_words AS $word)
 # Make sure that this person hasn't posted in the past 5 seconds.
 $sql = 'SELECT id
 		FROM comments
-		WHERE (name="'.$comment['email'].'" OR ip="'.$_SERVER['REMOTE_ADDR'].'")
+		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(SECOND, date_created, now()) < 5)';
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
@@ -178,7 +178,7 @@ if (mysql_num_rows($result) > 0)
 # Make sure that this person hasn't posted too many times recently.
 $sql = 'SELECT *
 		FROM comments
-		WHERE (name="'.$comment['email'].'" OR ip="'.$_SERVER['REMOTE_ADDR'].'")
+		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 5)';
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 10)
@@ -189,9 +189,9 @@ if (mysql_num_rows($result) > 10)
 # Make sure that this person hasn't posted this precise same comment within the past hour.
 $sql = 'SELECT id
 		FROM comments
-		WHERE (name="'.$comment['email'].'" OR ip="'.$_SERVER['REMOTE_ADDR'].'")
+		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 60)
-		AND comment="'.$comment['comment'].'"';
+		AND comment="' . $comment['comment'] . '"';
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
@@ -208,17 +208,17 @@ if (!isset($errors))
 
     # ASSEMBLE THE INSERTION SQL
     $sql = 'INSERT INTO comments
-			SET bill_id='.$comment['bill_id'].', name="'.$comment['name'].'",
-			email="'.$comment['email'].'", ip="'.$_SERVER['REMOTE_ADDR'].'",
-			comment="'.$comment['comment'].'", status="published",
+			SET bill_id=' . $comment['bill_id'] . ', name="' . $comment['name'] . '",
+			email="' . $comment['email'] . '", ip="' . $_SERVER['REMOTE_ADDR'] . '",
+			comment="' . $comment['comment'] . '", status="published",
 			date_created=now()';
     if (!empty($comment['url']))
     {
-        $sql .= ', url="'.$comment['url'].'"';
+        $sql .= ', url="' . $comment['url'] . '"';
     }
     if (!empty($user['id']))
     {
-        $sql .= ', user_id='.$user['id'];
+        $sql .= ', user_id=' . $user['id'];
     }
     $result = mysql_query($sql);
     if (!$result)
@@ -230,8 +230,8 @@ if (!isset($errors))
             'waldo@jaquith.org',
             'RS: Comment Submission Failed',
             'A comment submission failed in a way that left the user with an ugly error '
-            .'message. These are the contents of the comment array:'."\n\n"
-            .print_r($comment, true)
+            . 'message. These are the contents of the comment array:' . "\n\n"
+            . print_r($comment, true)
         );
     }
 
@@ -260,7 +260,6 @@ if (!isset($errors))
 
         # Finally, send out the e-mails.
         $subscription->send_email();
-
     }
 
     # If the user has asked to be subscribed to this bill's comments, do so.
@@ -287,7 +286,7 @@ if (!isset($errors))
     $log = new Log;
     $log->put('New comment posted, by ' . stripslashes($comment['name']) . ':'
         . "\n\n" . str_replace("\r\n", ' ¶ ', stripslashes($comment['comment']))
-        . ' https://' . $_SERVER['SERVER_NAME'] . $comment['return_to']. '#comments', 3);
+        . ' https://' . $_SERVER['SERVER_NAME'] . $comment['return_to'] . '#comments', 3);
 
     # Redirect the user back to the page of origin.
     if (!empty($comment['return_to']))
@@ -300,9 +299,7 @@ if (!isset($errors))
         header('Location: https://' . $_SERVER['SERVER_NAME']);
         exit;
     }
-
 }
-
 else
 {
 
@@ -312,7 +309,7 @@ else
     $page_body = '<div class="error">
 		<p>You must provide:</p>
 		<ul>
-			<li>'.implode('</li><li>', $errors).'</li>
+			<li>' . implode('</li><li>', $errors) . '</li>
 		</ul>
 	</div>';
 
@@ -322,5 +319,4 @@ else
     $page->page_body = $page_body;
     $page->page_sidebar = $page_sidebar;
     $page->process();
-
 }

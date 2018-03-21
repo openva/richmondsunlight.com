@@ -36,7 +36,6 @@ ini_set('display_errors', 1);
 
 class TextStatistics
 {
-
     protected $strEncoding = ''; // Used to hold character encoding to be used by object, if set
 
     /**
@@ -45,8 +44,10 @@ class TextStatistics
      * @param string  $strEncoding    Optional character encoding.
      * @return void
      */
-    public function __construct($strEncoding = '') {
-        if ($strEncoding <> '') {
+    public function __construct($strEncoding = '')
+    {
+        if ($strEncoding <> '')
+        {
             // Encoding is given. Use it!
             $this->strEncoding = $strEncoding;
         }
@@ -56,7 +57,8 @@ class TextStatistics
      * Gives the Flesch-Kincaid Reading Ease of text entered rounded to one digit
      * @param   strText         Text to be checked
      */
-    public function flesch_kincaid_reading_ease($strText) {
+    public function flesch_kincaid_reading_ease($strText)
+    {
         $strText = $this->clean_text($strText);
         return round((206.835 - (1.015 * $this->average_words_per_sentence($strText)) - (84.6 * $this->average_syllables_per_word($strText))), 1);
     }
@@ -65,7 +67,8 @@ class TextStatistics
      * Gives the Flesch-Kincaid Grade level of text entered rounded to one digit
      * @param   strText         Text to be checked
      */
-    public function flesch_kincaid_grade_level($strText) {
+    public function flesch_kincaid_grade_level($strText)
+    {
         $strText = $this->clean_text($strText);
         return round(((0.39 * $this->average_words_per_sentence($strText)) + (11.8 * $this->average_syllables_per_word($strText)) - 15.59), 1);
     }
@@ -74,7 +77,8 @@ class TextStatistics
      * Gives the Gunning-Fog score of text entered rounded to one digit
      * @param   strText         Text to be checked
      */
-    public function gunning_fog_score($strText) {
+    public function gunning_fog_score($strText)
+    {
         $strText = $this->clean_text($strText);
         return round((($this->average_words_per_sentence($strText) + $this->percentage_words_with_three_syllables($strText, false)) * 0.4), 1);
     }
@@ -83,7 +87,8 @@ class TextStatistics
      * Gives the Coleman-Liau Index of text entered rounded to one digit
      * @param   strText         Text to be checked
      */
-    public function coleman_liau_index($strText) {
+    public function coleman_liau_index($strText)
+    {
         $strText = $this->clean_text($strText);
         return round(((5.89 * ($this->letter_count($strText) / $this->word_count($strText))) - (0.3 * ($this->sentence_count($strText) / $this->word_count($strText))) - 15.8), 1);
     }
@@ -92,7 +97,8 @@ class TextStatistics
      * Gives the SMOG Index of text entered rounded to one digit
      * @param   strText         Text to be checked
      */
-    public function smog_index($strText) {
+    public function smog_index($strText)
+    {
         $strText = $this->clean_text($strText);
         return round(1.043 * sqrt(($this->words_with_three_syllables($strText) * (30 / $this->sentence_count($strText))) + 3.1291), 1);
     }
@@ -101,7 +107,8 @@ class TextStatistics
      * Gives the Automated Readability Index of text entered rounded to one digit
      * @param   strText         Text to be checked
      */
-    public function automated_readability_index($strText) {
+    public function automated_readability_index($strText)
+    {
         $strText = $this->clean_text($strText);
         return round(((4.71 * ($this->letter_count($strText) / $this->word_count($strText))) + (0.5 * ($this->word_count($strText) / $this->sentence_count($strText))) - 21.43), 1);
     }
@@ -110,16 +117,23 @@ class TextStatistics
      * Gives string length. Tries mb_strlen and if that fails uses regular strlen.
      * @param   strText      Text to be measured
      */
-    public function text_length($strText) {
+    public function text_length($strText)
+    {
         $intTextLength = 0;
 
-        try {
-            if ($this->strEncoding == '') {
-                $intTextLength = strlen($strText);
-            } else {
+        try
+        {
+            if ($this->strEncoding == '')
+            {
+                $intTextLength = mb_strlen($strText);
+            }
+            else
+            {
                 $intTextLength = strlen($strText, $this->strEncoding);
             }
-        } catch (Exception $e) {
+        }
+        catch (Exception $e)
+        {
             $intTextLength = strlen($strText);
         }
         return $intTextLength;
@@ -129,17 +143,24 @@ class TextStatistics
      * Gives letter count (ignores all non-letters). Tries mb_strlen and if that fails uses regular strlen.
      * @param   strText      Text to be measured
      */
-    public function letter_count($strText) {
+    public function letter_count($strText)
+    {
         $strText = $this->clean_text($strText); // To clear out newlines etc
         $intTextLength = 0;
         $strText = preg_replace('/[^A-Za-z]+/', '', $strText);
-        try {
-            if ($this->strEncoding == '') {
+        try
+        {
+            if ($this->strEncoding == '')
+            {
                 $intTextLength = strlen($strText);
-            } else {
+            }
+            else
+            {
                 $intTextLength = strlen($strText, $this->strEncoding);
             }
-        } catch (Exception $e) {
+        }
+        catch (Exception $e)
+        {
             $intTextLength = strlen($strText);
         }
         return $intTextLength;
@@ -149,11 +170,13 @@ class TextStatistics
      * Trims, removes line breaks, multiple spaces and generally cleans text before processing.
      * @param   strText      Text to be transformed
      */
-    protected function clean_text($strText) {
+    protected function clean_text($strText)
+    {
         // all these tags should be preceeded by a full stop.
         $fullStopTags = array('li', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'dd');
-        foreach ($fullStopTags as $tag) {
-            $strText = str_ireplace('</'.$tag.'>', '.', $strText);
+        foreach ($fullStopTags as $tag)
+        {
+            $strText = str_ireplace('</' . $tag . '>', '.', $strText);
         }
         $strText = strip_tags($strText);
         $strText = preg_replace('/[,:;()-]/', ' ', $strText); // Replace commans, hyphens etc (count them as spaces)
@@ -171,15 +194,22 @@ class TextStatistics
      * Converts string to lower case. Tries mb_strtolower and if that fails uses regular strtolower.
      * @param   strText      Text to be transformed
      */
-    protected function lower_case($strText) {
+    protected function lower_case($strText)
+    {
         $strLowerCaseText = '';
-        try {
-            if ($this->strEncoding == '') {
-                $strLowerCaseText = strtolower($strText);
-            } else {
+        try
+        {
+            if ($this->strEncoding == '')
+            {
+                $strLowerCaseText = mb_strtolower($strText);
+            }
+            else
+            {
                 $strLowerCaseText = strtolower($strText, $this->strEncoding);
             }
-        } catch (Exception $e) {
+        }
+        catch (Exception $e)
+        {
             $strLowerCaseText = strtolower($strText);
         }
         return $strLowerCaseText;
@@ -189,15 +219,22 @@ class TextStatistics
      * Converts string to upper case. Tries mb_strtoupper and if that fails uses regular strtoupper.
      * @param   strText      Text to be transformed
      */
-    protected function upper_case($strText) {
+    protected function upper_case($strText)
+    {
         $strUpperCaseText = '';
-        try {
-            if ($this->strEncoding == '') {
-                $strUpperCaseText = strtoupper($strText);
-            } else {
+        try
+        {
+            if ($this->strEncoding == '')
+            {
+                $strUpperCaseText = mb_strtoupper($strText);
+            }
+            else
+            {
                 $strUpperCaseText = strtoupper($strText, $this->strEncoding);
             }
-        } catch (Exception $e) {
+        }
+        catch (Exception $e)
+        {
             $strUpperCaseText = strtoupper($strText);
         }
         return $strUpperCaseText;
@@ -209,15 +246,22 @@ class TextStatistics
      * @param   intStart     Start character
      * @param   intLenght    Length
      */
-    protected function substring($strText, $intStart, $intLength) {
+    protected function substring($strText, $intStart, $intLength)
+    {
         $strSubstring = '';
-        try {
-            if ($this->strEncoding == '') {
-                $strSubstring = substr($strText, $intStart, $intLength);
-            } else {
+        try
+        {
+            if ($this->strEncoding == '')
+            {
+                $strSubstring = mb_substr($strText, $intStart, $intLength);
+            }
+            else
+            {
                 $strSubstring = substr($strText, $intStart, $intLength, $this->strEncoding);
             }
-        } catch (Exception $e) {
+        }
+        catch (Exception $e)
+        {
             $strSubstring = substr($strText, $intStart, $intLength);
         }
         return $strSubstring;
@@ -227,7 +271,8 @@ class TextStatistics
      * Returns sentence count for text.
      * @param   strText      Text to be measured
      */
-    public function sentence_count($strText) {
+    public function sentence_count($strText)
+    {
         $strText = $this->clean_text($strText);
         // Will be tripped up by "Mr." or "U.K.". Not a major concern at this point.
         $intSentences = max(1, $this->text_length(preg_replace('/[^\.!?]/', '', $strText)));
@@ -238,7 +283,8 @@ class TextStatistics
      * Returns word count for text.
      * @param   strText      Text to be measured
      */
-    public function word_count($strText) {
+    public function word_count($strText)
+    {
         $strText = $this->clean_text($strText);
         // Will be tripped by by em dashes with spaces either side, among other similar characters
         $intWords = 1 + $this->text_length(preg_replace('/[^ ]/', '', $strText)); // Space count + 1 is word count
@@ -249,7 +295,8 @@ class TextStatistics
      * Returns average words per sentence for text.
      * @param   strText      Text to be measured
      */
-    public function average_words_per_sentence($strText) {
+    public function average_words_per_sentence($strText)
+    {
         $strText = $this->clean_text($strText);
         $intSentenceCount = $this->sentence_count($strText);
         $intWordCount = $this->word_count($strText);
@@ -260,12 +307,14 @@ class TextStatistics
      * Returns average syllables per word for text.
      * @param   strText      Text to be measured
      */
-    public function average_syllables_per_word($strText) {
+    public function average_syllables_per_word($strText)
+    {
         $strText = $this->clean_text($strText);
         $intSyllableCount = 0;
         $intWordCount = $this->word_count($strText);
         $arrWords = explode(' ', $strText);
-        for ($i = 0; $i < $intWordCount; $i++) {
+        for ($i = 0; $i < $intWordCount; $i++)
+        {
             $intSyllableCount += $this->syllable_count($arrWords[$i]);
         }
         return ($intSyllableCount / $intWordCount);
@@ -276,18 +325,25 @@ class TextStatistics
      * @param   strText                  Text to be measured
      * @param   blnCountProperNouns      Boolean - should proper nouns be included in words count
      */
-    public function words_with_three_syllables($strText, $blnCountProperNouns = true) {
+    public function words_with_three_syllables($strText, $blnCountProperNouns = true)
+    {
         $strText = $this->clean_text($strText);
         $intLongWordCount = 0;
         $intWordCount = $this->word_count($strText);
         $arrWords = explode(' ', $strText);
-        for ($i = 0; $i < $intWordCount; $i++) {
-            if ($this->syllable_count($arrWords[$i]) > 2) {
-                if ($blnCountProperNouns) {
+        for ($i = 0; $i < $intWordCount; $i++)
+        {
+            if ($this->syllable_count($arrWords[$i]) > 2)
+            {
+                if ($blnCountProperNouns)
+                {
                     $intLongWordCount++;
-                } else {
+                }
+                else
+                {
                     $strFirstLetter = $this->substring($arrWords[$i], 0, 1);
-                    if ($strFirstLetter !== $this->upper_case($strFirstLetter)) {
+                    if ($strFirstLetter !== $this->upper_case($strFirstLetter))
+                    {
                         // First letter is lower case. Count it.
                         $intLongWordCount++;
                     }
@@ -302,7 +358,8 @@ class TextStatistics
      * @param   strText      Text to be measured
      * @param   blnCountProperNouns      Boolean - should proper nouns be included in words count
      */
-    public function percentage_words_with_three_syllables($strText, $blnCountProperNouns = true) {
+    public function percentage_words_with_three_syllables($strText, $blnCountProperNouns = true)
+    {
         $strText = $this->clean_text($strText);
         $intWordCount = $this->word_count($strText);
         $intLongWordCount = $this->words_with_three_syllables($strText, $blnCountProperNouns);
@@ -315,8 +372,8 @@ class TextStatistics
      * Based in part on Greg Fast's Perl module Lingua::EN::Syllables
      * @param   strWord      Word to be measured
      */
-    public function syllable_count($strWord) {
-
+    public function syllable_count($strWord)
+    {
         $intSyllableCount = 0;
         $strWord = $this->lower_case($strWord);
 
@@ -327,10 +384,12 @@ class TextStatistics
             ,'forever' => 3
             ,'shoreline' => 2
         );
-        if (isset($arrProblemWords[$strWord])) {
+        if (isset($arrProblemWords[$strWord]))
+        {
             $intSyllableCount = $arrProblemWords[$strWord];
         }
-        if ($intSyllableCount > 0) {
+        if ($intSyllableCount > 0)
+        {
             return $intSyllableCount;
         }
 
@@ -393,8 +452,10 @@ class TextStatistics
         $strWord = preg_replace('/[^a-z]/is', '', $strWord);
         $arrWordParts = preg_split('/[^aeiouy]+/', $strWord);
         $intWordPartCount = 0;
-        foreach ($arrWordParts as $strWordPart) {
-            if ($strWordPart <> '') {
+        foreach ($arrWordParts as $strWordPart)
+        {
+            if ($strWordPart <> '')
+            {
                 $intWordPartCount++;
             }
         }
@@ -402,14 +463,15 @@ class TextStatistics
         // Some syllables do not follow normal rules - check for them
         // Thanks to Joe Kovar for correcting a bug in the following lines
         $intSyllableCount = $intWordPartCount + $intPrefixSuffixCount;
-        foreach ($arrSubSyllables as $strSyllable) {
+        foreach ($arrSubSyllables as $strSyllable)
+        {
             $intSyllableCount -= preg_match('~' . $strSyllable . '~', $strWord);
         }
-        foreach ($arrAddSyllables as $strSyllable) {
+        foreach ($arrAddSyllables as $strSyllable)
+        {
             $intSyllableCount += preg_match('~' . $strSyllable . '~', $strWord);
         }
         $intSyllableCount = ($intSyllableCount == 0) ? 1 : $intSyllableCount;
         return $intSyllableCount;
     }
-
 }

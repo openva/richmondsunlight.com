@@ -44,21 +44,21 @@ function display_form($form_data)
 					<tr>
 						<th><label for="name">Name</label></th>
 						<td>
-							<input type="text" id="name" name="form_data[name]" size="30" maxlength="60" value="'.$form_data['name'].'" required /><br />
+							<input type="text" id="name" name="form_data[name]" size="30" maxlength="60" value="' . $form_data['name'] . '" required /><br />
 							<small>Only your first name and last initial will be shown publicly.</small>
 						</td>
 					</tr>
 					<tr>
 						<th><label for="organization">Organization/Company</label></th>
 						<td>
-							<input type="text" id="organization" name="form_data[organization]" size="30" maxlength="128" value="'.$form_data['organization'].'" /><br />
+							<input type="text" id="organization" name="form_data[organization]" size="30" maxlength="128" value="' . $form_data['organization'] . '" /><br />
 							<small>If you do this stuff professionally and want that known publicly.</small>
 						</td>
 					</tr>
 					<tr>
 						<th><label for="email">E-Mail</label></th>
 						<td>
-							<input type="email" id="email" name="form_data[email]" size="30" maxlength="60" value="'.$form_data['email'].'" required /><br />
+							<input type="email" id="email" name="form_data[email]" size="30" maxlength="60" value="' . $form_data['email'] . '" required /><br />
 							<small>It’s our secret. No spam, ever. We promise.</small>
 						</td>
 					</tr>
@@ -80,21 +80,21 @@ function display_form($form_data)
 					<tr>
 						<th><label for="url">Website Address</label></th>
 						<td>
-							<input type="url" id="url" name="form_data[url]" size="30" maxlength="60" value="'.$form_data['url'].'" /><br />
+							<input type="url" id="url" name="form_data[url]" size="30" maxlength="60" value="' . $form_data['url'] . '" /><br />
 							<small>Only, of course, if you have a website.</small>
 						</td>
 					</tr>
 					<tr>
 						<th><label for="zip">ZIP</label></th>
 						<td>
-							<input type="text" id="zip" name="form_data[zip]" size="30" maxlength="5" value="'.$form_data['zip'].'" pattern="[0-9]{5}" /><br />
+							<input type="text" id="zip" name="form_data[zip]" size="30" maxlength="5" value="' . $form_data['zip'] . '" pattern="[0-9]{5}" /><br />
 							<small>So we can ID your legislators, for site customization.</small>
 						</td>
 					</tr>
 					<tr>
 						<th><label for="mailing_list">Mailing List</label></th>
 						<td>
-							<input type="checkbox" id="mailing_list" name="form_data[mailing_list]" value="y" '.(($form_data['mailing_list'] == 'y') ? 'checked="checked"' : '').' />
+							<input type="checkbox" id="mailing_list" name="form_data[mailing_list]" value="y" ' . (($form_data['mailing_list'] == 'y') ? 'checked="checked"' : '') . ' />
 							<small>May we e-mail you (very rarely)?</small>
 						</td>
 					</tr>
@@ -108,7 +108,7 @@ function display_form($form_data)
 				<p>Please leave this blank.</p>
 				<input type="text" name="age" size="3" />
 			</div>
-			<input type="hidden" name="form_data[time]" value="'.time().'" />
+			<input type="hidden" name="form_data[time]" value="' . time() . '" />
 		</form>
 	';
 
@@ -131,7 +131,7 @@ if (isset($_POST['submit']))
 
     # Spammers tend to overload the ZIP field with an extra character, and always
     # specify a URL, so that combination should be enough to just silently bail.
-    if ((strlen($form_data['zip']) == 6) && !empty($form_data['url']))
+    if ((mb_strlen($form_data['zip']) == 6) && !empty($form_data['url']))
     {
         die();
     }
@@ -143,7 +143,7 @@ if (isset($_POST['submit']))
     }
 
     # If the email address ends with ".ru", this is a spammer.
-    if (substr($form_data['email'], -3) == '.ru')
+    if (mb_substr($form_data['email'], -3) == '.ru')
     {
         die();
     }
@@ -151,11 +151,10 @@ if (isset($_POST['submit']))
     # Spammers tend to give URLs that start with "www." and claim to be with one of three tech
     # companies as their organization. Bar anybody registering in this manner.
     if (
-        (substr($form_data['url'], 0, 4) == 'www.')
+        (mb_substr($form_data['url'], 0, 4) == 'www.')
         &&
         in_array($form_data['organization'], array('Apple', 'AT&T', 'microsoft'))
-    )
-    {
+    ) {
         die();
     }
 
@@ -177,7 +176,7 @@ if (isset($_POST['submit']))
     {
         $errors[] = 'the <em>same</em> password twice';
     }
-    elseif (strlen($form_data['password']) < 8)
+    elseif (mb_strlen($form_data['password']) < 8)
     {
         $errors[] = 'a password that’s at least 8 characters long';
     }
@@ -212,7 +211,7 @@ if (isset($_POST['submit']))
 			<div id="messages" class="errors">
 				<p>Please provide:</p>
 				<ul>
-					<li>'.$error_text.'</li>
+					<li>' . $error_text . '</li>
 				</ul>
 			</div>';
 
@@ -221,7 +220,6 @@ if (isset($_POST['submit']))
     }
     else
     {
-
         $form_data['password_hash'] = md5($form_data['password']);
 
         # Validate any provided URL, and silently drop it if it's invalid.
@@ -230,7 +228,7 @@ if (isset($_POST['submit']))
 
             # If there's an at sign in this URL, then it's probably somebody entering an e-mail
             # address, thinking it's a URL.
-            if (strstr($form_data['url'], '@') !== false)
+            if (mb_strstr($form_data['url'], '@') !== false)
             {
                 $form_data['url'] = '';
             }
@@ -238,10 +236,10 @@ if (isset($_POST['submit']))
             {
 
                 # Make URLs lowercase.
-                $form_data['url'] = strtolower($form_data['url']);
+                $form_data['url'] = mb_strtolower($form_data['url']);
 
                 # If we've got content, but no schema, prepend a schema.
-                if (!stristr($form_data['url'], '://'))
+                if (!mb_stristr($form_data['url'], '://'))
                 {
                     $form_data['url'] = 'http://' . $form_data['url'];
                 }
@@ -251,7 +249,6 @@ if (isset($_POST['submit']))
                 {
                     $form_data['url'] = '';
                 }
-
             }
         }
 
@@ -259,32 +256,32 @@ if (isset($_POST['submit']))
 
         # Generate a random eight-digit hash in case this user has to recover his password.
         $chars = 'bcdfghjklmnpqrstvxyz0123456789';
-        $hash = substr(str_shuffle($chars), 0, 8);
+        $hash = mb_substr(str_shuffle($chars), 0, 8);
 
         # Assemble the URL-style account creation/update data.
-        $user_query = 'dashboard=y&type=free&name='.urlencode($form_data['name']).'&email='.$form_data['email'].
-            '&password='.$form_data['password'].'&private_hash='.$hash;
+        $user_query = 'dashboard=y&type=free&name=' . urlencode($form_data['name']) . '&email=' . $form_data['email'] .
+            '&password=' . $form_data['password'] . '&private_hash=' . $hash;
         if (!empty($form_data['organization']))
         {
-            $user_query .= '&organization='.urlencode($form_data['organization']);
+            $user_query .= '&organization=' . urlencode($form_data['organization']);
         }
         if (!empty($form_data['url']))
         {
-            $user_query .= '&url='.$form_data['url'];
+            $user_query .= '&url=' . $form_data['url'];
         }
         if (!empty($form_data['zip']))
         {
-            $user_query .= '&zip='.$form_data['zip'];
+            $user_query .= '&zip=' . $form_data['zip'];
 
             # Get this user's coordinates.
             $location = new Location;
             $location->zip = $form_data['zip'];
             $coordinates = $location->get_coordinates();
-            $user_query .= '&latitude='.$coordinates['lat'].'&longitude='.$coordinates['lng'];
+            $user_query .= '&latitude=' . $coordinates['lat'] . '&longitude=' . $coordinates['lng'];
         }
         if (!empty($form_data['mailing_list']))
         {
-            $user_query .= '&mailing_list='.$form_data['mailing_list'];
+            $user_query .= '&mailing_list=' . $form_data['mailing_list'];
         }
 
         # Create a brand-new account. Though it's tempting to merge this new account with
@@ -299,7 +296,6 @@ if (isset($_POST['submit']))
 				href="/contact/">contact us</a> to report that you got this error. We’ll figure
 				out what went wrong and get you set up with an account in no time.</p>';
         }
-
         else
         {
 
@@ -309,10 +305,10 @@ if (isset($_POST['submit']))
             # Generate a random five-digit hash to ID this portfolio. It's in base 30,
             # allowing for a namespace of 24,300,000.
             $chars = 'bcdfghjklmnpqrstvxyz0123456789';
-            $hash = substr(str_shuffle($chars), 0, 5);
+            $hash = mb_substr(str_shuffle($chars), 0, 5);
             $sql = 'INSERT INTO dashboard_portfolios
-					SET name = "Bills", public="y", user_id = '.$user['id'].',
-					hash = "'.$hash.'", date_created = now()';
+					SET name = "Bills", public="y", user_id = ' . $user['id'] . ',
+					hash = "' . $hash . '", date_created = now()';
             mysql_query($sql);
 
             # Acknowledge the registration.
@@ -328,7 +324,6 @@ if (isset($_POST['submit']))
 				<p>(Or, if you prefer, you can just <a href="/">go back to the home page</a>.)';
 
             $log->put('New user registration: ' . $user['name'], 3);
-
         }
     }
 }

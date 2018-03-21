@@ -26,16 +26,16 @@ session_start();
 
 # LOCALIZE AND CLEAN UP VARIABLES
 $chamber = mysql_escape_string($_REQUEST['chamber']);
-$date = mysql_escape_string($_REQUEST['year']).'-'.mysql_escape_string($_REQUEST['date']);
+$date = mysql_escape_string($_REQUEST['year']) . '-' . mysql_escape_string($_REQUEST['date']);
 
 # PAGE METADATA
-$page_title = date('m/d/Y', strtotime($date)).' '.ucfirst($chamber).' Proceedings';
+$page_title = date('m/d/Y', strtotime($date)) . ' ' . ucfirst($chamber) . ' Proceedings';
 $site_section = 'minutes';
 
 # RETRIEVE THE MINUTES FROM THE DATABASE
 $sql = 'SELECT text
 		FROM minutes
-		WHERE date="'.$date.'" AND chamber="'.$chamber.'"';
+		WHERE date="' . $date . '" AND chamber="' . $chamber . '"';
 $result = mysql_query($sql);
 if (mysql_num_rows($result) == 0)
 {
@@ -43,7 +43,6 @@ if (mysql_num_rows($result) == 0)
 }
 elseif (mysql_num_rows($result) > 0)
 {
-
     $minutes = mysql_fetch_array($result);
     $minutes = stripslashes($minutes['text']);
 
@@ -53,7 +52,7 @@ elseif (mysql_num_rows($result) > 0)
     // links using the existing case (upper), and should be linking in lower, but preg_replace
     // lacks a mechanism by which to make changes mid-replacement.
     // CORRECTION TO ABOVE: It can make changes -- use preg_replace_callback();
-    $minutes = preg_replace('/(HR|HB|SJR|SB) ([0-9A-Z]+)/', '<a href="/bill/'.$_REQUEST['year'].'/$1$2/">$1 $2</a>', $minutes);
+    $minutes = preg_replace('/(HR|HB|SJR|SB) ([0-9A-Z]+)/', '<a href="/bill/' . $_REQUEST['year'] . '/$1$2/">$1 $2</a>', $minutes);
 
     # Retrieve a single video, if it's available.
     $sql = 'SELECT id, author_name, title, html, path, description, license, length, sponsor,
@@ -63,7 +62,7 @@ elseif (mysql_num_rows($result) > 0)
 				WHERE file_id=files.id) AS index_data
 			FROM files
 			WHERE type="video" AND committee_id IS NULL AND date="' . $date . '"
-			AND chamber="'.$chamber.'"
+			AND chamber="' . $chamber . '"
 			LIMIT 1';
     $result = mysql_query($sql);
     if (mysql_num_rows($result) > 0)
@@ -82,7 +81,6 @@ elseif (mysql_num_rows($result) > 0)
      */
     if ($video2->generate_transcript() === TRUE)
     {
-
         $video['transcript'] = '
 		<style>
 			dl.transcript dt {
@@ -103,7 +101,6 @@ elseif (mysql_num_rows($result) > 0)
         $i = 1;
         foreach ($video2->transcript as $line)
         {
-
             if (empty($line['name']))
             {
                 $line['name'] = '[Unknown]';
@@ -122,14 +119,12 @@ elseif (mysql_num_rows($result) > 0)
             $video['transcript'] .= '</dt>
 				<dd data-time-start="' . $line['time_start'] . '" data-time-end="' . $line['time_end'] . '">' . $line['text'] . '</dd>';
             $i++;
-
         }
         $video['transcript'] .= '</dl>';
-
     }
 
     # If we have a path, use that.
-    if (substr($video['path'], -3) == 'mp4')
+    if (mb_substr($video['path'], -3) == 'mp4')
     {
         $html_head = '
 			<script src="//releases.flowplayer.org/5.2.1/flowplayer.min.js"></script>
@@ -161,9 +156,9 @@ elseif (mysql_num_rows($result) > 0)
 
 		<div class="box">
 			<h3>Explanation</h3>
-			<p>These are the official minutes of the '.ucfirst($chamber).', as recorded by the
-			clerk, for '.date('m/d/Y', strtotime($date)).', presented verbatim. They’re
-			pretty dry, but they are the best way to see what the '.ucfirst($chamber).' did on
+			<p>These are the official minutes of the ' . ucfirst($chamber) . ', as recorded by the
+			clerk, for ' . date('m/d/Y', strtotime($date)) . ', presented verbatim. They’re
+			pretty dry, but they are the best way to see what the ' . ucfirst($chamber) . ' did on
 			a given day.</p>';
     if ($video['license'] == 'public domain')
     {
@@ -175,18 +170,18 @@ elseif (mysql_num_rows($result) > 0)
 
     if (!empty($video['sponsor']))
     {
-        if (strpos($video['sponsor'], 'img src') !== false)
+        if (mb_strpos($video['sponsor'], 'img src') !== false)
         {
             $page_sidebar .= '
 			<p>This video appears courtesy of:</p>
-			'.$video['sponsor'].'
+			' . $video['sponsor'] . '
 			<p>They purchased this video from the General Assembly for Richmond Sunlight, so that
 			it may be freely available to everybody.</p>';
         }
         else
         {
             $page_sidebar .= '
-			<p>This video appears courtesy of '.$video['sponsor'].', who purchased this video
+			<p>This video appears courtesy of ' . $video['sponsor'] . ', who purchased this video
 			from the General Assembly for Richmond Sunlight, so that it may be freely available
 			to everybody.</p>';
         }
@@ -201,7 +196,7 @@ elseif (mysql_num_rows($result) > 0)
     {
         $page_sidebar .= '
 			<div class="box">
-				<h3>What The '.ucfirst($chamber).' Dealt with Today</h3>
+				<h3>What The ' . ucfirst($chamber) . ' Dealt with Today</h3>
 				<div class="tags">';
         $page_sidebar .= tag_cloud($tags);
         $page_sidebar .= '
@@ -217,7 +212,7 @@ elseif (mysql_num_rows($result) > 0)
 				FROM bills_status
 				JOIN bills ON bills_status.bill_id=bills.id
 				JOIN tags ON bills_status.bill_id=tags.bill_id
-				WHERE bills_status.date="'.$date.'" AND bills.current_chamber="'.$chamber.'"
+				WHERE bills_status.date="' . $date . '" AND bills.current_chamber="' . $chamber . '"
 				GROUP BY tag
 				ORDER BY count DESC';
         $result = mysql_query($sql);
@@ -267,11 +262,10 @@ elseif (mysql_num_rows($result) > 0)
 
     if (!empty($video['html']) || !empty($video2->path))
     {
-
         $page_body .= '
 			<div id="video">
 				<div class="video" style="width: 100%;">
-					'.$video['html'].'
+					' . $video['html'] . '
 				</div>';
 
         $video2->fuzz = 5;
@@ -292,14 +286,12 @@ elseif (mysql_num_rows($result) > 0)
 
         if (isset($video2->path))
         {
-            $page_body .= '<p><a href="'.$video2->path.'">Download this Video</a></p>';
+            $page_body .= '<p><a href="' . $video2->path . '">Download this Video</a></p>';
         }
 
         if (isset($video['html']) &&
             (count($bill_clips) > 0 || count($legislator_clips) > 0 || count($video2->screenshots) > 0)
-            )
-        {
-
+            ) {
             $page_body .= '<h3>Index</h3>
 				<div id="video-index" class="tabs">
 				<ul>';
@@ -319,16 +311,16 @@ elseif (mysql_num_rows($result) > 0)
 
             foreach ($bill_clips as $clip)
             {
-                $page_body .= '<div class="marker" data-time="'.$clip->start.'" style="background-image: url('.$clip->screenshot.')">
-					<span>'.strtoupper($clip->bill_number).'—'.seconds_to_time($clip->duration).'</span></div>';
+                $page_body .= '<div class="marker" data-time="' . $clip->start . '" style="background-image: url(' . $clip->screenshot . ')">
+					<span>' . mb_strtoupper($clip->bill_number) . '—' . seconds_to_time($clip->duration) . '</span></div>';
             }
             $page_body .= '</div>
 
 				<div id="legislator">';
             foreach ($legislator_clips as $clip)
             {
-                $page_body .= '<div class="marker" data-time="'.$clip->start.'" style="background-image: url('.$clip->screenshot.')">
-				<span>'.$clip->legislator_name.'—'.substr(seconds_to_time($clip->duration), 3).'</span></div>';
+                $page_body .= '<div class="marker" data-time="' . $clip->start . '" style="background-image: url(' . $clip->screenshot . ')">
+				<span>' . $clip->legislator_name . '—' . mb_substr(seconds_to_time($clip->duration), 3) . '</span></div>';
             }
             $page_body .= '</div>';
 
@@ -336,8 +328,8 @@ elseif (mysql_num_rows($result) > 0)
             $page_body .= '<div id="time">';
             foreach ($video2->screenshots as $screenshot)
             {
-                $page_body .= '<div class="marker" data-time="'.$screenshot->seconds.'" style="background-image: url('.$screenshot->filename.')">
-				<span>'.substr(seconds_to_time($screenshot->seconds), 0, 5).'</span></div>';
+                $page_body .= '<div class="marker" data-time="' . $screenshot->seconds . '" style="background-image: url(' . $screenshot->filename . ')">
+				<span>' . mb_substr(seconds_to_time($screenshot->seconds), 0, 5) . '</span></div>';
             }
             $page_body .= '</div>
 				</div>';
@@ -345,7 +337,6 @@ elseif (mysql_num_rows($result) > 0)
 
         # Close the DIV for the video tab.
         $page_body .= '</div>';
-
     }
 
     # Show the minutes.
@@ -358,7 +349,6 @@ elseif (mysql_num_rows($result) > 0)
     # Show the transcript.
     if (!empty($video['transcript']))
     {
-
         $page_body .= '
 
 			<div id="transcript">
@@ -373,12 +363,10 @@ elseif (mysql_num_rows($result) > 0)
 
         # Close the transcript DIV.
         $page_body .= '</div>';
-
     }
 
     # Close the DIV for the tabbed interface.
     $page_body .= '</div>';
-
 }
 
 
