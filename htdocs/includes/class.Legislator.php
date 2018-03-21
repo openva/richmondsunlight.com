@@ -97,7 +97,7 @@ class Legislator
         $legislator['suffix'] = '('.$legislator['party'].'-'.$legislator['place'].')';
         $legislator['name'] = pivot($legislator['name']);
         $legislator['cash_on_hand'] = '$'.number_format($legislator['cash_on_hand']);
-        $legislator['address_district'] = ereg_replace('^(.*),(.*),(.*)$', '\\1<br />\\2, \\3', $legislator['address_district']);
+        $legislator['address_district'] = preg_replace('/^(.*),(.*),(.*)$/D', '\\1<br />\\2, \\3', $legislator['address_district']);
         if ($legislator['chamber'] == 'house')
         {
             $legislator['prefix'] = 'Del.';

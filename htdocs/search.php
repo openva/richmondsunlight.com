@@ -80,7 +80,7 @@ if (!empty($q))
     $q = trim($q);
 
     # If it's a bill, just redirect to the bill page.
-    if (eregi('([hs]{1})([bjr]{1})([[:space:]]?)([0-9]+)', $q))
+    if (preg_match('/([hs]{1})([bjr]{1})([[:space:]]?)([0-9]+)/Di', $q))
     {
         $q = str_replace(' ', '', $q);
         header('Location: http://www.richmondsunlight.com/bill/'.SESSION_YEAR.'/'.strtolower($q).'/');

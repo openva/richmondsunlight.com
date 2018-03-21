@@ -314,7 +314,7 @@ if (mysql_num_rows($result) > 0)
         $comment = array_map('stripslashes', $comment);
         if (strlen($comment['comment']) > 175)
         {
-            $comment['comment'] = ereg_replace('<blockquote>(.*)</blockquote>', '', $comment['comment']);
+            $comment['comment'] = preg_replace('#<blockquote>(.*)</blockquote>#D', '', $comment['comment']);
             $comment['comment'] = strip_tags($comment['comment']);
             if (strlen($comment['comment']) > 120)
             {

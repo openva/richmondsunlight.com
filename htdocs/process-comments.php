@@ -43,19 +43,19 @@ $comment['url'] = $comment['age'];
 # If any of these form fields have obviously been filled out based on the
 # field name, rather than the label, reject them as spam.  If the bait
 # field (state) has been filled out, reject the comment as spam.
-if (ereg("([0-9]{2})/([0-9]{2})", $comment['name']))
+if (preg_match("#([0-9]{2})/([0-9]{2})#D", $comment['name']))
 {
     die();
 }
-if ((strlen($comment['email']) == 5) && (ereg("([0-9]{5})", $comment['email'])))
+if ((strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})/D", $comment['email'])))
 {
     die();
 }
-if ((strlen($comment['email']) == 5) && (ereg("([0-9]{5})-([0-9]{4})", $comment['email'])))
+if ((strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})-([0-9]{4})/D", $comment['email'])))
 {
     die();
 }
-if (ereg("([0-9]{2})", $comment['age']))
+if (preg_match("/([0-9]{2})/D", $comment['age']))
 {
     die();
 }

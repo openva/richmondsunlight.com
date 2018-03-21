@@ -237,7 +237,7 @@ if (mysql_num_rows($result) > 0)
         $comment = array_map('stripslashes', $comment);
         if (strlen($comment['comment']) > 175)
         {
-            $comment['comment'] = ereg_replace('<blockquote>(.*)</blockquote>', '', $comment['comment']);
+            $comment['comment'] = preg_replace('#<blockquote>(.*)</blockquote>#D', '', $comment['comment']);
             $comment['comment'] = strip_tags($comment['comment']);
             $comment['comment'] = substr($comment['comment'], 0, 120) . '...';
         }
@@ -789,11 +789,11 @@ else
         # Don't trail off if we already have a period at the end.
         $item['summary'] = str_replace('. ...', '.', $item['summary']);
         # Hack off the dateline.
-        $item['summary'] = eregi_replace('([a-z]{3}) ([0-9]+), 20([0-9]{2})', '', $item['summary']);
+        $item['summary'] = preg_replace('/([a-z]{3}) ([0-9]+), 20([0-9]{2})/Di', '', $item['summary']);
         # Remove the indication of how many hours ago this news item was written.
-        $item['summary'] = eregi_replace('([0-9]*) hour(s*) ago', '', $item['summary']);
+        $item['summary'] = preg_replace('/([0-9]*) hour(s*) ago/Di', '', $item['summary']);
         # Hack off the state that often leads off the article.
-        $item['summary'] = ereg_replace(',&nbsp;([A-Z]{2})&nbsp;- ', '', $item['summary']);
+        $item['summary'] = preg_replace('/,&nbsp;([A-Z]{2})&nbsp;- /D', '', $item['summary']);
         $page_body .= '
 			<tr>
 			<td>
