@@ -21,4 +21,4 @@ repos:
      args: [-s first]
   -  id: php-cs-fixer
      files: \.(php)$
-     args: ["--rules=@PSR1,@PSR2,-braces,-lowercase_constants,ereg_to_preg --allow-risky=yes"]
+     args: ["--allow-risky=yes --config=.php_cs.dist"]
