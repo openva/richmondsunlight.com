@@ -2,7 +2,6 @@
 
 class Page
 {
-
     public function process()
     {
         Page::assemble();
@@ -35,12 +34,11 @@ class Page
 
             # Get the contents of the template.
             ob_start();
-            include dirname(__FILE__) . '/templates/' . $this->template . '.inc.php';
+            include __DIR__ . '/templates/' . $this->template . '.inc.php';
             $page = ob_get_contents();
 
             # Cache this template, with a 24-hour expiration date.
             $mc->set('template-' . $this->template, serialize($page), (60 * 60 * 24));
-
         }
 
         # Establish the full browser title.
@@ -52,15 +50,15 @@ class Page
         {
             if (isset($this->browser_title))
             {
-                $this->browser_title = 'Richmond Sunlight » '.$this->browser_title;
+                $this->browser_title = 'Richmond Sunlight » ' . $this->browser_title;
             }
             else
             {
-                $this->browser_title = 'Richmond Sunlight » '.$this->page_title;
+                $this->browser_title = 'Richmond Sunlight » ' . $this->page_title;
             }
             # If a right angle quote is used in the title, show only the
             # content to the left of it.
-            $end_bit = stristr($this->page_title, '»');
+            $end_bit = mb_stristr($this->page_title, '»');
             if ($end_bit !== FALSE)
             {
                 $this->page_title = str_replace('» ', '', $end_bit);
@@ -85,7 +83,7 @@ class Page
             {
                 $this->body_tag = '';
             }
-            $this->body_tag .= ' id="body-'.$this->site_section.'"';
+            $this->body_tag .= ' id="body-' . $this->site_section . '"';
         }
 
         # Step through and replace each variable in the template with the
@@ -99,9 +97,9 @@ class Page
             {
                 $this->html_head = '';
             }
-            $this->html_head .= "\r\t".'<style type="text/css">'."\r\t\t".'#sidebar { display: none; }'
-                ."\r\t\t".'#content { width: 62em; }'
-                ."\r\t".'</style>';
+            $this->html_head .= "\r\t" . '<style type="text/css">' . "\r\t\t" . '#sidebar { display: none; }'
+                . "\r\t\t" . '#content { width: 62em; }'
+                . "\r\t" . '</style>';
             $page = str_replace('%page_sidebar%', '', $page);
         }
         else
@@ -121,11 +119,10 @@ class Page
         $bills = $user->recommended_bills();
         if ($bills != FALSE)
         {
-            $recommended_bills = 'We have <a href="/recommended-bills/">'.count($bills).' bill recommendations</a> for you.';
+            $recommended_bills = 'We have <a href="/recommended-bills/">' . count($bills) . ' bill recommendations</a> for you.';
         }
         else
         {
-
             $user->get();
             if (empty($user->data['house_district_id']) || empty($user->data['senate_district_id']))
             {
@@ -135,7 +132,6 @@ class Page
             {
                 $recommended_Bills = '';
             }
-
         }
         $page = str_replace('%recommended_bills%', $recommended_bills, $page);
 
@@ -144,7 +140,6 @@ class Page
         unset($page);
 
         return TRUE;
-
     }
 
     # Send the contents of the page to the browser.
@@ -158,6 +153,5 @@ class Page
         echo $this->output;
 
         return TRUE;
-
     }
 }

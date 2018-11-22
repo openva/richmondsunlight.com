@@ -34,7 +34,7 @@ class Database
         /*
          * If this is isn't a request to the API, send the browser to an error page.
          */
-        if (stristr($_GET['REQUEST_URI'], 'api.richmondsunlight.com') === FALSE)
+        if (mb_stristr($_GET['REQUEST_URI'], 'api.richmondsunlight.com') === FALSE)
         {
             header('Location: https://www.richmondsunlight.com/site-down/');
             exit;
@@ -47,7 +47,6 @@ class Database
         {
             return FALSE;
         }
-
     }
 
     /*
@@ -71,18 +70,16 @@ class Database
          */
         if ($this->db !== FALSE)
         {
-
             mysql_select_db(MYSQL_DATABASE, $this->db);
             mysql_query('SET NAMES "utf8"');
             $GLOBALS['db'] = $this->db;
             return TRUE;
-
         }
 
         /*
          * If this is isn't a request to the API, send the browser to an error page.
          */
-        if (stristr($_GET['REQUEST_URI'], 'api.richmondsunlight.com') === FALSE)
+        if (mb_stristr($_GET['REQUEST_URI'], 'api.richmondsunlight.com') === FALSE)
         {
             header('Location: https://www.richmondsunlight.com/site-down/');
             exit;
@@ -95,7 +92,5 @@ class Database
         {
             return FALSE;
         }
-
     }
-
 }

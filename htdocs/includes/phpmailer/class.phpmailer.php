@@ -456,7 +456,7 @@ class PHPMailer
       $to .= $this->AddrFormat($this->to[$i]);
     }
 
-    $toArr = split(',', $to);
+    $toArr = preg_split('/,/D', $to);
 
     if ($this->Sender != '' && strlen(ini_get('safe_mode'))< 1) {
       $old_from = ini_get('sendmail_from');
@@ -578,7 +578,7 @@ class PHPMailer
     /* Retry while there is no connection */
     while($index < count($hosts) && $connection == false) {
       $hostinfo = array();
-      if(eregi('^(.+):([0-9]+)$', $hosts[$index], $hostinfo)) {
+      if(preg_match('/^(.+):([0-9]+)$/Di', $hosts[$index], $hostinfo)) {
         $host = $hostinfo[1];
         $port = $hostinfo[2];
       } else {
@@ -1500,7 +1500,7 @@ class PHPMailer
         $filename  = basename($url);
         $directory = dirname($url);
         $cid       = 'cid:' . md5($filename);
-        $fileParts = split("\.", $filename);
+        $fileParts = preg_split("/\./D", $filename);
         $ext       = $fileParts[1];
         $mimeType  = $this->_mime_types($ext);
         $message = preg_replace("/".$images[1][$i]."=\"".preg_quote($url, '/')."\"/Ui", $images[1][$i]."=\"".$cid."\"", $message);

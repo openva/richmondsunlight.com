@@ -34,10 +34,9 @@ if (
         (@logged_in() === FALSE)
         ||
         ((@logged_in() === TRUE) && empty($user['type']))
-    )
-{
+    ) {
     # If the user isn't logged in, have the user create an account (or log in).
-    header('Location: https://www.richmondsunlight.com/account/login/?return_uri='.urlencode($_SERVER['REQUEST_URI']));
+    header('Location: https://www.richmondsunlight.com/account/login/?return_uri=' . urlencode($_SERVER['REQUEST_URI']));
     exit;
 }
 
@@ -47,7 +46,7 @@ $user = @get_user();
 # ADDITIONAL HTML HEADERS
 $html_head = '
 	<link rel="stylesheet" href="/css/photosynthesis.css" type="text/css" />
-	<script src="/js/jquery.jeditable.min.js"></script>
+	<script src="/js/vendor/jquery-jeditable/dist/jquery.jeditable.min.js"></script>
 	<script>
 		$(document).ready(function() {
 			$(".edit").editable("https://www.richmondsunlight.com/photosynthesis/ajax-bill-notes.php", {
@@ -56,7 +55,7 @@ $html_head = '
 				submit: "OK",
 				indicator: "Saving...",
 				tooltip: "Click to edit.",
-				submitdata: {user_hash: "'.$user['private_hash'].'"}
+				submitdata: {user_hash: "' . $user['private_hash'] . '"}
 			});
 		});
 	</script>';
@@ -67,7 +66,7 @@ $page_body = '';
 # Generate a list of this user's portfolios.
 $sql = 'SELECT id, hash, name, watch_list_id
 		FROM dashboard_portfolios
-		WHERE watch_list_id IS NULL AND user_id='.$user['id'].'
+		WHERE watch_list_id IS NULL AND user_id=' . $user['id'] . '
 		ORDER BY name ASC';
 $result = mysql_query($sql);
 
@@ -76,7 +75,7 @@ if (mysql_num_rows($result) == 0)
 {
     # We want a portfolio to exist at all times. Create one.
     $sql = 'INSERT INTO dashboard_portfolios
-			SET name = "Bills", public="y", user_id = '.$user['id'].',
+			SET name = "Bills", public="y", user_id = ' . $user['id'] . ',
 			date_created = now()';
     mysql_query($sql);
     $bypass = 1;
@@ -98,7 +97,7 @@ if ((mysql_num_rows($result) > 0) || ($bypass == 1))
     {
         $portfolio = mysql_fetch_array($result);
         $portfolio = array_map('stripslashes', $portfolio);
-        $page_body .= '<input type="hidden" name="portfolio" value="'.$portfolio['hash'].'" />';
+        $page_body .= '<input type="hidden" name="portfolio" value="' . $portfolio['hash'] . '" />';
 
         # Store the name and ID of this portfolio in the session, for use on the
         # rest of the site.
@@ -115,7 +114,7 @@ if ((mysql_num_rows($result) > 0) || ($bypass == 1))
         {
             $portfolio = array_map('stripslashes', $portfolio);
             $page_body .= '
-						<option value="'.$portfolio['hash'].'">'.$portfolio['name'].'</option>';
+						<option value="' . $portfolio['hash'] . '">' . $portfolio['name'] . '</option>';
 
             # Store the name and ID of each portfolio in the session, for use on the
             # rest of the site.
@@ -135,7 +134,7 @@ if ((mysql_num_rows($result) > 0) || ($bypass == 1))
 # Select the user's list of portfolios.
 $sql = 'SELECT id, name, hash, notes, watch_list_id
 		FROM dashboard_portfolios
-		WHERE user_id='.$user['id'].'
+		WHERE user_id=' . $user['id'] . '
 		ORDER BY name ASC';
 $result = mysql_query($sql);
 
@@ -145,26 +144,32 @@ if (mysql_num_rows($result) > 0)
     {
         $portfolio = array_map('stripslashes', $portfolio);
 
-        if (!empty($portfolio['watch_list_id'])) $portfolio['type'] = 'smart';
-        else $portfolio['type'] = 'normal';
+        if (!empty($portfolio['watch_list_id']))
+        {
+            $portfolio['type'] = 'smart';
+        }
+        else
+        {
+            $portfolio['type'] = 'normal';
+        }
 
         $page_body .= '
 		<div class="portfolio">
-			<a name="'.$portfolio['hash'].'"></a>
+			<a name="' . $portfolio['hash'] . '"></a>
 			<div class="name">';
 
         # Only show the portfolio editing options to paid users.
         if ($user['type'] == 'paid')
         {
             $page_body .= '
-				<a href="/photosynthesis/'.$portfolio['hash'].'/" title="View the public portfolio"><h1>'.$portfolio['name'].'</a></h1>
-				<div class="type">'.(($portfolio['type'] == 'smart') ? 'Smart ' : '').'Portfolio</div>
-				<div class="rss"><a href="/photosynthesis/rss/portfolio/'.$portfolio['hash'].'/" title="Subscribe to this portfolio via RSS"><img src="/images/rss-icon.png" alt="RSS" /></a></div>';
+				<a href="/photosynthesis/' . $portfolio['hash'] . '/" title="View the public portfolio"><h1>' . $portfolio['name'] . '</a></h1>
+				<div class="type">' . (($portfolio['type'] == 'smart') ? 'Smart ' : '') . 'Portfolio</div>
+				<div class="rss"><a href="/photosynthesis/rss/portfolio/' . $portfolio['hash'] . '/" title="Subscribe to this portfolio via RSS"><img src="/images/rss-icon.png" alt="RSS" /></a></div>';
         }
         else
         {
-            $page_body .= '<h1>'.$portfolio['name'].'</h1>
-				<div class="rss"><a href="/photosynthesis/rss/portfolio/'.$portfolio['hash'].'/" title="Subscribe to this portfolio via RSS"><img src="/images/rss-icon.png" alt="RSS" /></a></div>';
+            $page_body .= '<h1>' . $portfolio['name'] . '</h1>
+				<div class="rss"><a href="/photosynthesis/rss/portfolio/' . $portfolio['hash'] . '/" title="Subscribe to this portfolio via RSS"><img src="/images/rss-icon.png" alt="RSS" /></a></div>';
         }
 
         $page_body .= '</div>';
@@ -177,20 +182,19 @@ if (mysql_num_rows($result) > 0)
         {
             $page_body .= '
 			<div class="modify">
-				<a href="/photosynthesis/portfolios/delete/'.$portfolio['hash'].'/" title="Stop tracking these bills"
-					onclick="return confirm(\'Are you sure you want to remove '.addslashes($portfolio['name']).'?\')">delete</a>
-				<a href="/photosynthesis/portfolios/edit/'.$portfolio['hash'].'/" title="Modify this portfolio">edit</a> &nbsp;
+				<a href="/photosynthesis/portfolios/delete/' . $portfolio['hash'] . '/" title="Stop tracking these bills"
+					onclick="return confirm(\'Are you sure you want to remove ' . addslashes($portfolio['name']) . '?\')">delete</a>
+				<a href="/photosynthesis/portfolios/edit/' . $portfolio['hash'] . '/" title="Modify this portfolio">edit</a> &nbsp;
 			</div>';
         }
 
         $page_body .= '
-			<div>'.$portfolio['notes'].'</div>
+			<div>' . $portfolio['notes'] . '</div>
 		</div>';
 
         # Preserve the portfolio hash to use below, when presenting the user with the public URL
         # for his portfolio.
         $portfolio_hash = $portfolio['hash'];
-
     }
 }
 
@@ -206,11 +210,11 @@ if ($user['type'] == 'paid')
 		</ul>
 
 		<div id="create-portfolio">
-			'.@portfolio_form().'
+			' . @portfolio_form() . '
 		</div>
 
 		<div id="create-smart-portfolio">
-			'.@smart_portfolio_form().'
+			' . @smart_portfolio_form() . '
 		</div>
 	</div>';
 }
@@ -222,8 +226,8 @@ if ($user['type'] == 'free')
     $page_body .= '
 		<p>Share your Photosynthesis portfolio with others! Anybody can see the bills that
 		you’re tracking at <code><a href="https://www.richmondsunlight.com/photosynthesis/'
-        .$portfolio_hash.'/">https://www.richmondsunlight.com/photosynthesis/'.$portfolio_hash
-        .'/</a></code>.</p>';
+        . $portfolio_hash . '/">https://www.richmondsunlight.com/photosynthesis/' . $portfolio_hash
+        . '/</a></code>.</p>';
 }
 
 # The last thing that we do is up the last access date in the session data.

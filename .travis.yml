@@ -21,7 +21,9 @@ addons:
       - awscli
 install:
 - composer install
+- cd htdocs/js/vendor; npm run build
 script:
+- cd ../../..
 - find htdocs/*.php -print0 |xargs -0 -n1 -P8 php -l
   && ./deploy/branch_deploy.sh
   && ./deploy/config_variables.sh
@@ -30,6 +32,7 @@ script:
   && mkdir -p upload
   && mv latest.zip upload/latest.zip
 - if [ "$TRAVIS_BRANCH" = "master" ]; then mv upload/latest.zip upload/staging.zip; fi
+- if [ "$TRAVIS_BRANCH" = "master" ]; then ./deploy/increase_verbosity.sh; fi
 deploy:
 - provider: s3
   access_key_id: $AWS_ACCESS_KEY

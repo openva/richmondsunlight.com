@@ -39,7 +39,7 @@ $hash = mysql_real_escape_string($_POST['user_hash']);
 
 # Update the database.
 $sql = 'UPDATE dashboard_bills
-		SET notes = ' .(empty($notes) ? 'NULL' : '"' . mysql_real_escape_string($notes).'"') . '
+		SET notes = ' . (empty($notes) ? 'NULL' : '"' . mysql_real_escape_string($notes) . '"') . '
 		WHERE id=' . mysql_real_escape_string($_POST['id']) . '
 		AND user_id = (
 			SELECT id

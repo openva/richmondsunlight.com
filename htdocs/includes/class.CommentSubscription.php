@@ -16,8 +16,8 @@ class CommentSubscription
         $database->connect_old();
 
         $sql = 'INSERT INTO comments_subscriptions
-				SET user_id='.$this->user_id.', bill_id='.$this->bill_id.',
-				hash="'.generate_hash(8).'", date_created=now()';
+				SET user_id=' . $this->user_id . ', bill_id=' . $this->bill_id . ',
+				hash="' . generate_hash(8) . '", date_created=now()';
         $result = mysql_query($sql);
         if ($result === FALSE)
         {
@@ -25,13 +25,11 @@ class CommentSubscription
         }
 
         return true;
-
     }
 
     # Terminate an existing subscription. Requires the unique hash.
     public function delete()
     {
-
         if (!isset($this->hash))
         {
             return FALSE;
@@ -41,7 +39,7 @@ class CommentSubscription
         $database->connect_old();
 
         $sql = 'DELETE FROM comments_subscriptions
-				WHERE hash="'.$hash.'"';
+				WHERE hash="' . $hash . '"';
         $result = mysql_query($sql);
         if ($result === FALSE)
         {
@@ -66,7 +64,7 @@ class CommentSubscription
         $sql = 'SELECT users.name, users.email, comments_subscriptions.hash
 				FROM comments_subscriptions LEFT JOIN users
 				ON comments_subscriptions.user_id=users.id
-				WHERE comments_subscriptions.bill_id='.$this->bill_id;
+				WHERE comments_subscriptions.bill_id=' . $this->bill_id;
         $result = mysql_query($sql);
         if (($result === FALSE) || (mysql_num_rows($result) < 1))
         {
@@ -90,7 +88,6 @@ class CommentSubscription
     # if so, returns the subscription hash.
     public function is_subscribed()
     {
-
         if (!isset($this->user_id) || !isset($this->bill_id))
         {
             return FALSE;
@@ -101,7 +98,7 @@ class CommentSubscription
 
         $sql = 'SELECT hash
 				FROM comments_subscriptions
-				WHERE user_id='.$this->user_id.' AND bill_id='.$this->bill_id;
+				WHERE user_id=' . $this->user_id . ' AND bill_id=' . $this->bill_id;
         $result = mysql_query($sql);
         if (mysql_num_rows($result) < 1)
         {
@@ -110,7 +107,6 @@ class CommentSubscription
         $subscription = mysql_fetch_array($result);
 
         return $subscription['hash'];
-
     }
 
     # Send out an e-mail notifying a list of subscribers that a new comment has been posted to a
@@ -134,7 +130,7 @@ class CommentSubscription
         $bill = $tmp->info();
 
         // This is quite likely not the right place to include this, but what the heck?
-// THIS INCLUDE IS FAILING. THE FILE CAN'T BE FOUND.
+        // THIS INCLUDE IS FAILING. THE FILE CAN'T BE FOUND.
         include 'Mail.php';
 
         # Iterate through every subscriber and e-mail them.
@@ -147,8 +143,8 @@ class CommentSubscription
             $headers['Content-Type'] = "text/plain; charset=\"UTF-8\"";
             $headers['Content-Transfer-Encoding'] = "8bit";
             $headers['From'] = '"Richmond Sunlight" <do_not_reply@richmondsunlight.com>';
-            $headers['Subject'] = 'Comment on: '.$bill['catch_line'].' ('
-                .strtoupper($bill['number']).')';
+            $headers['Subject'] = 'Comment on: ' . $bill['catch_line'] . ' ('
+                . mb_strtoupper($bill['number']) . ')';
             //$headers['To'] = '"'.$subscriber['name'].'" <'.$subscriber['email'].'>';
             $headers['To'] = '"Waldo Jaquith" <waldo@jaquith.org>';
 
@@ -156,10 +152,10 @@ class CommentSubscription
             $recipient = $headers['To'];
 
             # Assemble the body of the e-mail.
-            $body = 'In response to "'.$bill['catch_line'].'" ('.strtoupper($bill['number']).'), '
-                .$this->comment['name'].' wrote:'."\r\r".$this->comment['comment']."\r\r"
-                .$bill['url']."\r\rUnsubscribe from this Discussion \r"
-                .'http://www.richmondsunlight.com/unsubscribe/'.$subscriber['hash'].'/';
+            $body = 'In response to "' . $bill['catch_line'] . '" (' . mb_strtoupper($bill['number']) . '), '
+                . $this->comment['name'] . ' wrote:' . "\r\r" . $this->comment['comment'] . "\r\r"
+                . $bill['url'] . "\r\rUnsubscribe from this Discussion \r"
+                . 'http://www.richmondsunlight.com/unsubscribe/' . $subscriber['hash'] . '/';
 
             # Send the e-mail.
             // THIS SHOULD REALLY BE DONE AS A BASE-64 E-MAIL. 7-bit e-mails are limited to 998
@@ -170,11 +166,8 @@ class CommentSubscription
              * $mail_object =& Mail::factory( 'mail' );
              * $mail_object->send($recipient, $headers, $body);
              */
-
         } // end foreach
 
         return TRUE;
-
     } // end send_email
-
 }

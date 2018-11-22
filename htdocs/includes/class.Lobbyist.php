@@ -37,7 +37,6 @@ class Lobbyist
          */
         $lobbyist->sc_url = 'https://solutions.virginia.gov/Lobbyist/Reports/LobbyistSearch/Detail?contactId='
             . $lobbyist->sc_id;
-
     }
 
 
@@ -84,7 +83,6 @@ class Lobbyist
         }
 
         return TRUE;
-
     }
 
     /**
@@ -92,7 +90,6 @@ class Lobbyist
      */
     public function get_principal()
     {
-
         if (!isset($this->principal_hash))
         {
             return FALSE;
@@ -162,7 +159,6 @@ class Lobbyist
         $sql = 'SELECT DISTINCT principal
 				FROM lobbyists
 				WHERE year = "' . $this->year . '"';
-
     }
 
     /**
@@ -170,7 +166,6 @@ class Lobbyist
      */
     public function list_year()
     {
-
         if (!isset($this->year))
         {
             return FALSE;
@@ -197,6 +192,5 @@ class Lobbyist
         }
 
         return TRUE;
-
     }
 }

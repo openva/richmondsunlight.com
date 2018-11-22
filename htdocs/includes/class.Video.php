@@ -7,7 +7,6 @@ class Video
     # Retrieve a single video.
     public function get_video()
     {
-
         if (!isset($this->id))
         {
             return FALSE;
@@ -23,7 +22,7 @@ class Video
 					FROM video_index
 					WHERE file_id=files.id) AS index_data
 				FROM files
-				WHERE id='.$this->id;
+				WHERE id=' . $this->id;
         $result = mysql_query($sql);
         if (mysql_num_rows($result) > 0)
         {
@@ -39,7 +38,6 @@ class Video
     # Add (or edit) a video.
     public function submit()
     {
-
         if (!isset($this->video))
         {
             return FALSE;
@@ -88,15 +86,15 @@ class Video
 				length="' . $this->video['length'] . '"';
         if (!empty($this->video['committee_id']))
         {
-            $sql .= ', committee_id='.$this->video['committee_id'];
+            $sql .= ', committee_id=' . $this->video['committee_id'];
         }
         if (!empty($this->video['author_name']))
         {
-            $sql .= ', author_name='.$this->video['author_name'].'"';
+            $sql .= ', author_name=' . $this->video['author_name'] . '"';
         }
         if (!empty($this->video['html']))
         {
-            $sql .= ', html="'.$this->video['html'].'"';
+            $sql .= ', html="' . $this->video['html'] . '"';
         }
         else
         {
@@ -104,43 +102,43 @@ class Video
         }
         if (!empty($this->video['path']))
         {
-            $sql .= ', path="'.$this->video['path'].'"';
+            $sql .= ', path="' . $this->video['path'] . '"';
         }
         if (!empty($this->video['fps']))
         {
-            $sql .= ', fps="'.$this->video['fps'].'"';
+            $sql .= ', fps="' . $this->video['fps'] . '"';
         }
         if (!empty($this->video['capture_rate']))
         {
-            $sql .= ', capture_rate="'.$this->video['capture_rate'].'"';
+            $sql .= ', capture_rate="' . $this->video['capture_rate'] . '"';
         }
         if (!empty($this->video['capture_directory']))
         {
-            $sql .= ', capture_directory="'.$this->video['capture_directory'].'"';
+            $sql .= ', capture_directory="' . $this->video['capture_directory'] . '"';
         }
         if (!empty($this->video['width']))
         {
-            $sql .= ', width="'.$this->video['width'].'"';
+            $sql .= ', width="' . $this->video['width'] . '"';
         }
         if (!empty($this->video['height']))
         {
-            $sql .= ', height="'.$this->video['height'].'"';
+            $sql .= ', height="' . $this->video['height'] . '"';
         }
         if (!empty($this->video['description']))
         {
-            $sql .= ', description="'.$this->video['description'].'"';
+            $sql .= ', description="' . $this->video['description'] . '"';
         }
         if (!empty($this->video['license']))
         {
-            $sql .= ', license="'.$this->video['license'].'"';
+            $sql .= ', license="' . $this->video['license'] . '"';
         }
         if (!empty($this->video['sponsor']))
         {
-            $sql .= ', sponsor="'.$this->video['sponsor'].'"';
+            $sql .= ', sponsor="' . $this->video['sponsor'] . '"';
         }
         if (isset($this->video['id']))
         {
-            $sql .= ' WHERE id='.$this->video['id'];
+            $sql .= ' WHERE id=' . $this->video['id'];
         }
         else
         {
@@ -167,22 +165,20 @@ class Video
         }
 
         return TRUE;
-
     }
 
 
     # Get vital stats about this video via MPlayer and the filesystem.
     public function extract_file_data()
     {
-
         exec('/usr/bin/mplayer -ao dummy -vo dummy -identify ' . $_SERVER['DOCUMENT_ROOT'] . $this->path, $mplayer);
 
         foreach ($mplayer as $option)
         {
-            if (strpos($option, '=') !== FALSE)
+            if (mb_strpos($option, '=') !== FALSE)
             {
                 $tmp = explode('=', $option);
-                $tmp[0] = strtolower($tmp[0]);
+                $tmp[0] = mb_strtolower($tmp[0]);
                 $newoptions[$tmp[0]] = $tmp[1];
             }
         }
@@ -203,7 +199,6 @@ class Video
         }
 
         return TRUE;
-
     }
 
 
@@ -268,7 +263,6 @@ class Video
 
     public function by_legislator()
     {
-
         if (!isset($this->legislator_id))
         {
             return FALSE;
@@ -283,7 +277,7 @@ class Video
 				FROM video_clips
 				LEFT JOIN files
 					ON video_clips.file_id=files.id
-				WHERE legislator_id = '.$this->legislator_id.'
+				WHERE legislator_id = ' . $this->legislator_id . '
 				ORDER BY files.date ASC, video_clips.time_start ASC';
 
         $result = mysql_query($sql);
@@ -333,7 +327,6 @@ class Video
         }
         else
         {
-
             while ($moment = mysql_fetch_array($result, MYSQL_ASSOC))
             {
                 $index[] = $moment;
@@ -355,8 +348,7 @@ class Video
                         ($index[$i]['date'] != $index[$i-1]['date'])
                         ||
                         ((time_to_seconds($index[$i]['time']) - time_to_seconds($index[$i-1]['time'])) > 30)
-                    )
-                {
+                    ) {
                     $index2[] = $index[$i-1];
                     $index2[] = $index[$i];
                 }
@@ -367,7 +359,6 @@ class Video
                 {
                     $index2[] = $index[$i];
                 }
-
             }
 
             # In the unlikely event that we have nothing left.
@@ -402,25 +393,22 @@ class Video
                             '/video/',
                             'https://s3.amazonaws.com/video.richmondsunlight.com/',
                             $index2[$i]['capture_directory']
-                        ) . $index2[$i]['screenshot'].'.jpg',
+                        ) . $index2[$i]['screenshot'] . '.jpg',
                         'start' => time_to_seconds($index2[$i-1]['time']) - 10,
                         'end' => time_to_seconds($index2[$i]['time']) + 10,
                         'duration' => time_to_seconds($index2[$i]['time']) - time_to_seconds($index2[$i-1]['time']) + 20
                     );
                 }
-
             }
 
             return $clips;
         }
-
     }
 
     # Get return an array of tag data for a given video file, scaled on the basis of the amount of
     # time that is spent discussing each topic.
     public function file_tags()
     {
-
         if (!isset($this->id))
         {
             return FALSE;
@@ -437,7 +425,7 @@ class Video
 				LEFT JOIN bills ON video_index.linked_id = bills.id
 				LEFT JOIN tags ON bills.id = tags.bill_id
 				WHERE video_index.type = "bill"
-				AND video_index.file_id = '.$this->id.'
+				AND video_index.file_id = ' . $this->id . '
 				AND video_index.linked_id IS NOT NULL
 				AND tags.tag IS NOT NULL
 				GROUP BY tag
@@ -466,13 +454,11 @@ class Video
         ksort($tags);
 
         return $tags;
-
     }
 
     # Get a list of screenshots, one for each X seconds of video. (Default is 60.)
     public function screenshots()
     {
-
         if (!isset($this->id))
         {
             return FALSE;
@@ -511,12 +497,10 @@ class Video
             $this->screenshots->{$j}->number = $j;
             $this->screenshots->{$j}->seconds = round($j * $this->frequency);
             $this->screenshots->{$j}->filename = str_replace('/video/', 'https://s3.amazonaws.com/video.richmondsunlight.com/', $this->capture_directory)
-                . str_pad($i, 8, '0', STR_PAD_LEFT).'.jpg';
+                . str_pad($i, 8, '0', STR_PAD_LEFT) . '.jpg';
             $j++;
             $i=$i+$increment;
         }
-
-
     } // end method file_tags()
 
 
@@ -580,7 +564,7 @@ class Video
 				WHERE video_index.type="legislator"';
         }
 
-        $sql .= ' AND files.id='.$this->id.'
+        $sql .= ' AND files.id=' . $this->id . '
 				AND video_index.linked_id IS NOT NULL
 				ORDER BY video_index.time ASC';
 
@@ -667,8 +651,7 @@ class Video
                     (time_to_seconds($index[$i-1]['time']) === time_to_seconds($index[$i]['time']))
                     &&
                     ($this->fuzz === 0)
-                   )
-                {
+                   ) {
                     $this->fuzz = 15;
                 }
 
@@ -687,7 +670,7 @@ class Video
                     'end' => time_to_seconds($index[$i]['time']) + $this->fuzz,
                     'duration' => time_to_seconds($index[$i]['time']) - time_to_seconds($index[$i-1]['time']) + ($this->fuzz * 2),
                     'linked_id' => $index[$i]['linked_id'],
-                    'bill_number' => strtoupper($index[$i]['bill_number']),
+                    'bill_number' => mb_strtoupper($index[$i]['bill_number']),
                     'legislator_name' => $index[$i]['legislator_name']
                 );
 
@@ -718,7 +701,7 @@ class Video
 
         # First, remove every clip already stored for this file.
         $sql = 'DELETE FROM video_clips
-				WHERE file_id = '.$this->id;
+				WHERE file_id = ' . $this->id;
         mysql_query($sql);
 
         # Get a list of all bill clips.
@@ -737,11 +720,11 @@ class Video
         foreach ($this->clips as $clip)
         {
             $sql = 'INSERT INTO video_clips
-					SET bill_id = '.$clip->linked_id.',
-					file_id = '.$this->id.',
-					time_start = "'.seconds_to_time($clip->start, true).'",
-					time_end = "'.seconds_to_time($clip->end, true).'",
-					screenshot = "'.$clip->screenshot.'",
+					SET bill_id = ' . $clip->linked_id . ',
+					file_id = ' . $this->id . ',
+					time_start = "' . seconds_to_time($clip->start, true) . '",
+					time_end = "' . seconds_to_time($clip->end, true) . '",
+					screenshot = "' . $clip->screenshot . '",
 					date_created = now()';
             mysql_query($sql);
         }
@@ -762,9 +745,9 @@ class Video
             # that was discussed the most.
             $sql = 'SELECT linked_id AS id, COUNT(*) AS number
 					FROM video_index
-					WHERE file_id ='.$this->id.' AND type="bill"
-					AND TIME >= "'.seconds_to_time($clip->start, true).'"
-					AND TIME <= "'.seconds_to_time($clip->end, true).'"
+					WHERE file_id =' . $this->id . ' AND type="bill"
+					AND TIME >= "' . seconds_to_time($clip->start, true) . '"
+					AND TIME <= "' . seconds_to_time($clip->end, true) . '"
 					GROUP BY linked_id
 					ORDER BY number DESC
 					LIMIT 1';
@@ -776,16 +759,16 @@ class Video
             }
 
             $sql = 'INSERT INTO video_clips
-					SET legislator_id = '.$clip->linked_id.',
-					file_id = '.$this->id.',
-					time_start = "'.seconds_to_time($clip->start, true).'",
-					time_end = "'.seconds_to_time($clip->end, true).'",
-					screenshot = "'.$clip->screenshot.'",
+					SET legislator_id = ' . $clip->linked_id . ',
+					file_id = ' . $this->id . ',
+					time_start = "' . seconds_to_time($clip->start, true) . '",
+					time_end = "' . seconds_to_time($clip->end, true) . '",
+					screenshot = "' . $clip->screenshot . '",
 					date_created = now()';
 
             if (isset($clip->bill_id))
             {
-                $sql .= ', bill_id = '.$clip->bill_id;
+                $sql .= ', bill_id = ' . $clip->bill_id;
             }
 
             mysql_query($sql);
@@ -843,21 +826,19 @@ class Video
         $this->clip->time_end_seconds = time_to_seconds($this->clip->time_end);
         $this->clip->duration_seconds = $this->clip->time_end_seconds - $this->clip->time_start_seconds;
         $this->clip->title = $this->clip->legislator_name . ' Speaking about '
-            . strtoupper($this->clip->bill_number) . ' on ' . $this->clip->date_formatted;
-        if (substr($this->clip->screenshot, 0, 2) == '//')
+            . mb_strtoupper($this->clip->bill_number) . ' on ' . $this->clip->date_formatted;
+        if (mb_substr($this->clip->screenshot, 0, 2) == '//')
         {
             $this->clip->screenshot = 'https:' . $this->clip->screenshot;
         }
 
         return TRUE;
-
     }
 
 
     # Get all clips for a given file ID.
     public function get_clips()
     {
-
         if (!isset($this->id) || !isset($this->clip_type))
         {
             return FALSE;
@@ -881,7 +862,6 @@ class Video
 						ON video_clips.legislator_id = representatives.id
 					WHERE legislator_id IS NOT NULL AND video_clips.file_id=' . $this->id;
         }
-
         elseif ($this->clip_type == 'bills')
         {
             $sql = 'SELECT bills.number AS bill_number, video_clips.time_start, video_clips.time_end,
@@ -892,7 +872,6 @@ class Video
 					WHERE bill_id IS NOT NULL AND legislator_id IS NULL
 					AND video_clips.file_id=' . $this->id;
         }
-
         else
         {
             $sql = 'SELECT representatives.name_formatted AS legislator_name,
@@ -904,7 +883,7 @@ class Video
 						ON video_clips.legislator_id = representatives.id
 					LEFT JOIN bills
 						ON video_clips.bill_id = bills.id
-					WHERE video_clips.file_id='.$this->id;
+					WHERE video_clips.file_id=' . $this->id;
         }
 
         $result = mysql_query($sql);
@@ -929,7 +908,6 @@ class Video
         }
 
         return TRUE;
-
     }
 
 
@@ -937,7 +915,6 @@ class Video
     # path.
     public function parse_sbv()
     {
-
         if (!isset($this->sbv) || empty($this->sbv))
         {
             return FALSE;
@@ -970,7 +947,7 @@ class Video
             $this->moments->$i->text = implode(' ', array_slice($moment, 1));
 
             # Append the text to our master transcript of text.
-            $this->transcript .= $this->moments->$i->text.' ';
+            $this->transcript .= $this->moments->$i->text . ' ';
 
             $i++;
         }
@@ -980,7 +957,6 @@ class Video
         unset($this->sbv_raw);
 
         return TRUE;
-
     }
 
 
@@ -990,7 +966,6 @@ class Video
      */
     public function parse_webvtt()
     {
-
         if (empty($this->webvtt))
         {
             return FALSE;
@@ -1017,7 +992,7 @@ class Video
             /*
              * If there's no time range, skip this one.
              */
-            if (strpos($caption, '-->') === FALSE)
+            if (mb_strpos($caption, '-->') === FALSE)
             {
                 continue;
             }
@@ -1034,7 +1009,6 @@ class Video
         }
 
         return TRUE;
-
     }
 
 
@@ -1043,7 +1017,6 @@ class Video
      */
     public function store_webvtt()
     {
-
         if (!isset($this->file_id) || !isset($this->webvtt))
         {
             return FALSE;
@@ -1062,7 +1035,6 @@ class Video
         }
 
         return TRUE;
-
     }
 
     # Generate a merged array of transcript text and clips.
@@ -1070,7 +1042,6 @@ class Video
     // before being put into production.
     public function transcript_indexed()
     {
-
         if (!isset($this->id))
         {
             return FALSE;
@@ -1084,7 +1055,7 @@ class Video
         # SELECT A LIST OF EVERY TRANSCRIPT ITEM, BY TIME.
         $sql = 'SELECT time_start, time_end, text
 				FROM video_transcript
-				WHERE file_id = '.$this->id.'
+				WHERE file_id = ' . $this->id . '
 				ORDER BY time_start ASC, time_end ASC';
         $result = mysql_query($sql);
         while ($caption = mysql_fetch_object($result))
@@ -1104,7 +1075,7 @@ class Video
 					ON video_clips.legislator_id = representatives.id
 				LEFT JOIN bills
 					ON video_clips.bill_id = bills.id
-				WHERE video_clips.file_id = '.$this->id.'
+				WHERE video_clips.file_id = ' . $this->id . '
 				ORDER BY time_start ASC, time_end ASC';
         $result = mysql_query($sql);
         while ($clip = mysql_fetch_object($result))
@@ -1120,18 +1091,17 @@ class Video
         $this->transcript = (object) $this->transcript;
 
         return TRUE;
-
     }
 
 
-////////////////////////////////////////////////////////////////////////
-/*
- * All of the below was created separately, and has not been merged into
- * the rest of the class methods. They probably replace some of the above
- * methods, because the above methods were created for YouTube transcripts,
- * while the below were created for DVD captions.
- */
-////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////////////////////
+    /*
+     * All of the below was created separately, and has not been merged into
+     * the rest of the class methods. They probably replace some of the above
+     * methods, because the above methods were created for YouTube transcripts,
+     * while the below were created for DVD captions.
+     */
+    ////////////////////////////////////////////////////////////////////////
 
     /**
      * Normalize a WebVTT file's carriage returns.
@@ -1154,7 +1124,6 @@ class Video
         $this->webvtt = preg_replace('~\R~u', "\n", $this->webvtt);
 
         return TRUE;
-
     }
 
     /**
@@ -1215,13 +1184,10 @@ class Video
                  * Format the seconds as HH:MM:SS again.
                  */
                 $caption->{$time} = gmdate("H:i:s", $caption->{$time}) . '.' . $microseconds;
-
             }
-
         }
 
         return TRUE;
-
     }
 
     /**
@@ -1284,17 +1250,17 @@ class Video
              * ">>>" prefix. Sometimes we have captions that consist entirely of these markers. We
              * ignore these.
              */
-            if (strlen($caption->text) > 3)
+            if (mb_strlen($caption->text) > 3)
             {
-                if (substr($caption->text, 0, 3) == '>> ')
+                if (mb_substr($caption->text, 0, 3) == '>> ')
                 {
                     $caption->new_speaker = TRUE;
-                    $caption->text = substr($caption->text, 3);
+                    $caption->text = mb_substr($caption->text, 3);
                 }
-                elseif (substr($caption->text, 0, 4) == '>>> ')
+                elseif (mb_substr($caption->text, 0, 4) == '>>> ')
                 {
                     $caption->new_speaker = TRUE;
-                    $caption->text = substr($caption->text, 4);
+                    $caption->text = mb_substr($caption->text, 4);
                 }
             }
 
@@ -1325,12 +1291,9 @@ class Video
             {
                 return FALSE;
             }
-
         }
 
         return TRUE;
-
-
     }
 
     /**
@@ -1377,7 +1340,6 @@ class Video
         $i=0;
         while ($caption = mysql_fetch_assoc($result))
         {
-
             if ($caption['new_speaker'] == 'y')
             {
                 $i++;
@@ -1389,7 +1351,6 @@ class Video
             $caption['timestamp_duration'] = round(($caption['timestamp_end'] - $caption['timestamp_start']), 2);
 
             $captions[$i][] = $caption;
-
         }
 
         /*
@@ -1402,17 +1363,13 @@ class Video
         $result = mysql_query($sql);
         if (mysql_num_rows($result) > 0)
         {
-
             $clips = array();
             while ($clip = mysql_fetch_assoc($result))
             {
-
                 $clip['timestamp_start'] = time_to_seconds($clip['time_start']);
                 $clip['timestamp_end'] = time_to_seconds($clip['time_end']);
                 $clips[] = $clip;
-
             }
-
         }
 
         /*
@@ -1506,12 +1463,11 @@ class Video
              * If this contains phrases that allow us to identify the identify as the
              * Speaker of the House, ID it as such.
              */
-            if (strlen($transcript) < 400)
+            if (mb_strlen($transcript) < 400)
             {
                 foreach ($phrases['speaker'] as $phrase)
                 {
-
-                    if (stripos($transcript, $phrase) !== FALSE)
+                    if (mb_stripos($transcript, $phrase) !== FALSE)
                     {
                         foreach ($caption as &$line)
                         {
@@ -1519,9 +1475,7 @@ class Video
                         }
                         continue;
                     }
-
                 }
-
             }
 
             // if this contains phrases that allow us to ID it as the lt. gov or the
@@ -1538,8 +1492,7 @@ class Video
                     abs($time['start'] - $clip['timestamp_start']) < 20
                     &&
                     abs($time['end'] - $clip['timestamp_end']) < 10
-                   )
-                {
+                   ) {
                     foreach ($caption as &$line)
                     {
                         $line['legislator_id'] = $clip['legislator_id'];
@@ -1588,7 +1541,6 @@ class Video
                     }
                 }
                 preg_match($regex, $prior_text, $matches);
-
             }
 
             if (count($matches) > 0)
@@ -1599,13 +1551,19 @@ class Video
                  */
                 foreach ($matches as &$match)
                 {
-                    $match = strtolower($match);
+                    $match = mb_strtolower($match);
                 }
                 $place = str_replace('county', '', $matches[1]);
                 $place = str_replace('city', '', $place);
                 $place = str_replace(',', '', $place);
-                if ($matches[2] == 'miss') $sex = 'female';
-                elseif ($matches[2] == 'mr.') $sex = 'male';
+                if ($matches[2] == 'miss')
+                {
+                    $sex = 'female';
+                }
+                elseif ($matches[2] == 'mr.')
+                {
+                    $sex = 'male';
+                }
                 $name = $matches[3];
 
                 /*
@@ -1617,12 +1575,12 @@ class Video
 						WHERE name LIKE "' . $name . '%" ';
                 if (!empty($sex))
                 {
-                        $sql .= 'AND sex = "' . $sex . '" ';
+                    $sql .= 'AND sex = "' . $sex . '" ';
                 }
                 $sql .= 'AND chamber =
 							(SELECT chamber
 							FROM files
-							WHERE id=' . $this->file_id .')';
+							WHERE id=' . $this->file_id . ')';
                 $result = mysql_query($sql);
 
                 /*
@@ -1631,27 +1589,25 @@ class Video
                  */
                 if (mysql_num_rows($result) > 1)
                 {
-
                     $sql = 'SELECT representatives.id
 							FROM representatives
 							LEFT JOIN districts
 								ON representatives.district_id = districts.id
 							WHERE representatives.name LIKE "' . $name . '%" ';
-                if (!empty($sex))
-                {
+                    if (!empty($sex))
+                    {
                         $sql .= 'AND representatives.sex = "' . $sex . '" ';
-                }
-                $sql .= '
+                    }
+                    $sql .= '
 							AND representatives.chamber =
 								(SELECT chamber
 								FROM files
-								WHERE files.id=' . $this->file_id .')
+								WHERE files.id=' . $this->file_id . ')
 							AND
 								(representatives.place LIKE "' . $place . '%"
 								OR
 								districts.description LIKE "%' . $place . '%")';
                     $result = mysql_query($sql);
-
                 }
 
                 /*
@@ -1660,7 +1616,6 @@ class Video
                  */
                 if (mysql_num_rows($result) == 1)
                 {
-
                     $legislator = mysql_fetch_array($result);
 
                     /*
@@ -1671,11 +1626,8 @@ class Video
                         $line['legislator_id'] = $legislator['id'];
                     }
                     continue;
-
                 }
-
             }
-
         }
 
         /*
@@ -1683,7 +1635,6 @@ class Video
          */
         foreach ($captions as $segment)
         {
-
             foreach ($segment as $caption)
             {
 
@@ -1694,20 +1645,15 @@ class Video
                  */
                 if (is_array($caption) && !empty($caption['legislator_id']))
                 {
-
                     $sql = 'UPDATE video_transcript
 							SET legislator_id = ' . $caption['legislator_id'] . '
 							WHERE id = ' . $caption['id'];
                     mysql_query($sql);
-
                 }
-
             }
-
         }
 
         return TRUE;
-
     }
 
     /**
@@ -1756,25 +1702,23 @@ class Video
         $i=0;
         while ($line = mysql_fetch_assoc($result))
         {
-
             if ($line['new_speaker'] == 'y')
             {
-
-                if (count($this->transcript) > 0) $i++;
+                if (count($this->transcript) > 0)
+                {
+                    $i++;
+                }
                 $this->transcript[$i]['text'] = $line['text'];
                 $this->transcript[$i]['id'] = $line['legislator_id'];
                 $this->transcript[$i]['shortname'] = $line['shortname'];
                 $this->transcript[$i]['name'] = stripslashes(pivot($line['name']));
                 $this->transcript[$i]['time_start'] = $line['time_start'];
                 $this->transcript[$i]['time_end'] = $line['time_end'];
-
             }
-
             elseif ($line['new_speaker'] == 'n')
             {
                 $this->transcript[$i]['text'] .= ' ' . $line['text'];
             }
-
         }
 
         /*
@@ -1782,11 +1726,10 @@ class Video
          */
         foreach ($this->transcript as &$line)
         {
-            $line['text'] = $this->sentence_case(strtolower($line['text']));
+            $line['text'] = $this->sentence_case(mb_strtolower($line['text']));
         }
 
         return TRUE;
-
     }
 
     /*
@@ -1794,7 +1737,7 @@ class Video
      */
     public function upper($matches)
     {
-        return strtoupper($matches[0]);
+        return mb_strtoupper($matches[0]);
     }
 
     /*
@@ -1802,14 +1745,12 @@ class Video
      */
     public function sentence_case($str)
     {
-
         $cap = TRUE;
         $return = '';
 
-        for ($x = 0; $x < strlen($str); $x++)
+        for ($x = 0; $x < mb_strlen($str); $x++)
         {
-
-            $letter = substr($str, $x, 1);
+            $letter = mb_substr($str, $x, 1);
 
             if ($letter == '.' || $letter == '!' || $letter == '?')
             {
@@ -1817,12 +1758,11 @@ class Video
             }
             elseif ($letter != ' ' && $cap == TRUE)
             {
-                $letter = strtoupper($letter);
+                $letter = mb_strtoupper($letter);
                 $cap = FALSE;
             }
 
             $return .= $letter;
-
         }
 
         /*
@@ -1936,7 +1876,7 @@ class Video
         foreach ($words as $word)
         {
             $word = str_replace('.', '\.', $word);
-            $find = '/(\b)' . strtolower($word) . '(\b)/';
+            $find = '/(\b)' . mb_strtolower($word) . '(\b)/';
             $replace = '\1' . $word . ' \1';
             $return = preg_replace($find, $replace, $return);
         }
@@ -1952,56 +1892,54 @@ class Video
         $return = str_replace(' , ', ', ', $return);
 
         return $return;
-
     }
 
-/*
-///////
-// MOVE ALL VIDEOS TO HAVE A NAME BASED ON THEIR ID
-///////
-# Select a list of every video path & ID.
-$sql = 'SELECT id, CONCAT('/video/', chamber, path) AS path
-        FROM files
-        WHERE type="video" AND path IS NOT NULL
-        ORDER BY path ASC';
-$result = mysql_query($sql);
-while ($video = mysql_fetch_array($result))
-{
-    $videos[$video{path}] = $video['id'];
-}
-
-// Iterate through the file listing
-$container_directory = '/video/floor/senate/';
-$new_container_directory = '/video/';
-$files = scandir($container_directory);
-
-# Iterate through this list of files and move each of them.
-foreach ($files as $file)
-{
-
-    # If this isn't an MP4, we're not going to be doing anything with it.
-    if (substr($file, -4, 4) != '.mp4')
+    /*
+    ///////
+    // MOVE ALL VIDEOS TO HAVE A NAME BASED ON THEIR ID
+    ///////
+    # Select a list of every video path & ID.
+    $sql = 'SELECT id, CONCAT('/video/', chamber, path) AS path
+            FROM files
+            WHERE type="video" AND path IS NOT NULL
+            ORDER BY path ASC';
+    $result = mysql_query($sql);
+    while ($video = mysql_fetch_array($result))
     {
-        continue;
+        $videos[$video{path}] = $video['id'];
     }
 
-    # Figure out the name of the directory containing the screenshots.
-    $screenshot_directory = str_replace($file, '.mp4', '');
+    // Iterate through the file listing
+    $container_directory = '/video/floor/senate/';
+    $new_container_directory = '/video/';
+    $files = scandir($container_directory);
 
-    # Rename the video file, making it the ID
-    rename($container_directory.$file, $new_container_directory.$video[$file]);
-
-    # Rename the video directory (if it exists), making it the ID.
-    if (file_exists($screenshot_directory) !== FALSE)
+    # Iterate through this list of files and move each of them.
+    foreach ($files as $file)
     {
-        rename($screenshot_directory, $new_container_directory.$video[$file]);
+
+        # If this isn't an MP4, we're not going to be doing anything with it.
+        if (substr($file, -4, 4) != '.mp4')
+        {
+            continue;
+        }
+
+        # Figure out the name of the directory containing the screenshots.
+        $screenshot_directory = str_replace($file, '.mp4', '');
+
+        # Rename the video file, making it the ID
+        rename($container_directory.$file, $new_container_directory.$video[$file]);
+
+        # Rename the video directory (if it exists), making it the ID.
+        if (file_exists($screenshot_directory) !== FALSE)
+        {
+            rename($screenshot_directory, $new_container_directory.$video[$file]);
+        }
+
+        # Update every files record to use the new path
+        $sql = 'UPDATE video_index
+                SET path="'.$.'", cache
+                WHERE path="'.$.'"';
     }
-
-    # Update every files record to use the new path
-    $sql = 'UPDATE video_index
-            SET path="'.$.'", cache
-            WHERE path="'.$.'"';
-}
-*/
-
+    */
 }

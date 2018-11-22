@@ -88,10 +88,10 @@ class Petition
         }
 
         $sql = 'INSERT INTO petitions
-				SET slug = "'.$this->generate_slug().'"
-				title = "'.mysql_real_escape_string($this->title).'",
-				text = "'.mysql_real_escape_string($this->text).'",
-				user_id = '.mysql_real_escape_string($this->user_id).'
+				SET slug = "' . $this->generate_slug() . '"
+				title = "' . mysql_real_escape_string($this->title) . '",
+				text = "' . mysql_real_escape_string($this->text) . '",
+				user_id = ' . mysql_real_escape_string($this->user_id) . '
 				date_created=now()';
         $result = mysql_query($sql);
 
@@ -114,7 +114,7 @@ class Petition
         $id = '';
         for ($i=0; $i<3; $i++)
         {
-            $id .= substr(str_shuffle($chars), 0, 1);
+            $id .= mb_substr(str_shuffle($chars), 0, 1);
         }
     }
 
@@ -132,7 +132,7 @@ class Petition
 				FROM petition
 				LEFT JOIN users
 					ON petitions.user_id=users.id
-				WHERE petitions.id='.mysql_real_escape_string($this->id);
+				WHERE petitions.id=' . mysql_real_escape_string($this->id);
         $result = mysql_query($sql);
 
         // If the query fails.
@@ -153,7 +153,7 @@ class Petition
         Petition::get_signers();
 
         # Establish the petition URL and save that.
-        $petition->url = '/petition/'.$petition->id;
+        $petition->url = '/petition/' . $petition->id;
 
         return true;
     }  // end get()
@@ -169,7 +169,7 @@ class Petition
 
         $sql = 'SELECT users.name, petition_signers.date_created
 				FROM petition_signers
-				WHERE petition_signers.petition_id='.mysql_real_escape_string($this->petition_id).'
+				WHERE petition_signers.petition_id=' . mysql_real_escape_string($this->petition_id) . '
 				ORDER BY date_created DESC';
         $result = mysql_query($sql);
 
@@ -194,16 +194,15 @@ class Petition
     // within the object.
     public function sign()
     {
-
         if (!isset($this->user_id) || !isset($this->petition_id))
         {
             return FALSE;
         }
 
         $sql = 'INSERT DELAYED into petition_signers
-				SET petition_id='.mysql_real_escape_string($this->petition_id).',
-				user_id='.mysql_real_escape_string($this->user_id).',
-				ip_address=INET_ATON("'.$_SERVER['REMOTE_ADDR'].'"),
+				SET petition_id=' . mysql_real_escape_string($this->petition_id) . ',
+				user_id=' . mysql_real_escape_string($this->user_id) . ',
+				ip_address=INET_ATON("' . $_SERVER['REMOTE_ADDR'] . '"),
 				date_created=now()';
         $result = mysql_query($sql);
 
@@ -215,5 +214,4 @@ class Petition
 
         return true;
     } // end sign()
-
 }

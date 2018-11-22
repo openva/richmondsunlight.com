@@ -61,8 +61,8 @@
         while ($portfolio = mysql_fetch_array($result))
         {
             $portfolio = array_map('stripslashes', $portfolio);
-            $page_body .= '<li><a href="/photosynthesis/'.$portfolio['hash'].'/">'
-                .$portfolio['organization'].'</a></li>';
+            $page_body .= '<li><a href="/photosynthesis/' . $portfolio['hash'] . '/">'
+                . $portfolio['organization'] . '</a></li>';
         }
         $page_body .= '</ul>';
     }
