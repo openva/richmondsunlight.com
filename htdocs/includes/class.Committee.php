@@ -8,7 +8,6 @@ class Committee
      */
     public function info()
     {
-
         if (empty($this->shortname) || empty($this->chamber))
         {
             return FALSE;
@@ -38,7 +37,6 @@ class Committee
         }
 
         return TRUE;
-
     }
 
     /*
@@ -46,7 +44,6 @@ class Committee
      */
     public function members()
     {
-
         if (empty($this->id))
         {
             return FALSE;
@@ -83,7 +80,6 @@ class Committee
         $this->members = array_map_multi('stripslashes', $this->members);
 
         return TRUE;
-
     }
 
     /**
@@ -91,7 +87,6 @@ class Committee
      */
     public function get_id()
     {
-
         if (!isset($this->chamber) || !isset($this->name))
         {
             return FALSE;
@@ -119,7 +114,6 @@ class Committee
         $shortest = -1;
         foreach ($committees as $id => $name)
         {
-
             $distance = levenshtein($this->name, $name);
             if ($distance === 0)
             {
@@ -133,12 +127,9 @@ class Committee
                 $closest = $id;
                 $shortest = $distance;
             }
-
         }
 
         $this->id = $closest;
         return $this->id;
-
     } // end get_id()
-
 }

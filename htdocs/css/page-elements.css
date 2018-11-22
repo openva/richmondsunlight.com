@@ -651,6 +651,11 @@ body#body-bills div#options ul {
 			left: 0;
 		}
 
+/* In the menu bar */
+#date {
+	font-weight: bold;
+}
+
 /*
  * Sample data, used on the data downloads page.
  */

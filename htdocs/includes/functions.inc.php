@@ -12,10 +12,9 @@
 # Any function that isn't included here will be included if it is requested.
 function __autoload_libraries($name)
 {
-
     if (php_sapi_name() == 'cli')
     {
-        $includes_dir = dirname(__FILE__) . '/';
+        $includes_dir = __DIR__ . '/';
     }
     else
     {
@@ -27,9 +26,6 @@ function __autoload_libraries($name)
         include 'class.' . $name . '.php';
         return TRUE;
     }
-
-
-
 }
 
 spl_autoload_register('__autoload_libraries');
@@ -57,7 +53,6 @@ function cache_save($data, $key)
     $mc->set('page-' . $key, $data, 3600);
 
     return TRUE;
-
 }
 
 # Retrieve data from the cache
@@ -88,7 +83,6 @@ function cache_open($key)
     {
         return FALSE;
     }
-
 }
 
 # Delete data from the cache
@@ -107,7 +101,6 @@ function cache_delete($key)
     $result = mysql_query($sql);
 
     return true;
-
 }
 
 # Return the age of a specific cache record.
@@ -132,7 +125,6 @@ function cache_age($key)
     $cache = mysql_fetch_array($result);
 
     return $cache['age'];
-
 }
 
 # Determine whether a cache file exists.
@@ -153,13 +145,11 @@ function cache_exists($key)
 
     # We can return the result directly.
     return $result;
-
 }
 
 # Connect to the database
 function connect_to_db($type = 'old')
 {
-
     if ($type == 'old')
     {
         $db = mysql_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
@@ -171,10 +161,8 @@ function connect_to_db($type = 'old')
         mysql_select_db(MYSQL_DATABASE, $db);
         mysql_query('SET NAMES "utf8"');
     }
-
     elseif ($type == 'pdo')
     {
-
         $db = new PDO(PDO_DSN, PDO_USERNAME, PDO_PASSWORD);
         if ($db === FALSE)
         {
@@ -182,11 +170,9 @@ function connect_to_db($type = 'old')
             exit;
         }
         return $db;
-
     }
 
     return TRUE;
-
 }
 
 
@@ -194,7 +180,6 @@ function connect_to_db($type = 'old')
 # Makes sure that an e-mail address has a valid format.
 function validate_email($email)
 {
-
     if (empty($email))
     {
         return FALSE;
@@ -205,7 +190,6 @@ function validate_email($email)
         return true;
     }
     return FALSE;
-
 }
 
 
@@ -215,19 +199,17 @@ function validate_email($email)
 # as can be.  If there's no text, then it returns false.
 function pivot($text)
 {
-
     if (empty($text))
     {
         return FALSE;
     }
-    if (strpos($text, ', ') !== false)
+    if (mb_strpos($text, ', ') !== false)
     {
         $str = explode(",", $text);
-        $text = $str[1].' '.$str[0];
+        $text = $str[1] . ' ' . $str[0];
         return trim($text);
     }
     return $text;
-
 }
 
 function array_map_multi($func, $arr)
@@ -250,7 +232,7 @@ function search_form($q)
     if (!empty($q))
     {
         $q = htmlspecialchars($q);
-        $returned_data .= 'value="'.$q.'" ';
+        $returned_data .= 'value="' . $q . '" ';
     }
     $returned_data .= '/> <input type="submit" value="Search" class="submit" />';
     return $returned_data;
@@ -279,26 +261,26 @@ function seconds_to_units($seconds)
     {
         if ($seconds < 60)
         {
-            $returned_data = $seconds.' second';
+            $returned_data = $seconds . ' second';
         }
         elseif ($seconds < 3600)
         {
-            $returned_data = round($seconds / 60).' minute';
+            $returned_data = round($seconds / 60) . ' minute';
         }
         elseif ($seconds < 86400)
         {
-            $returned_data = round($seconds / 60 / 60).' hour';
+            $returned_data = round($seconds / 60 / 60) . ' hour';
         }
         elseif ($seconds < 2592000)
         {
-            $returned_data = round($seconds / 60 / 60 / 24).' day';
+            $returned_data = round($seconds / 60 / 60 / 24) . ' day';
         }
         elseif ($seconds >= 2592000)
         {
-            $returned_data = round($seconds / 60 / 60 / 24 / 30).' month';
+            $returned_data = round($seconds / 60 / 60 / 24 / 30) . ' month';
         }
 
-        if (substr($returned_data, 0, 2) != '1 ')
+        if (mb_substr($returned_data, 0, 2) != '1 ')
         {
             $returned_data .= 's';
         }
@@ -318,9 +300,7 @@ function time_to_seconds($time = '00:00:00')
 # Convert a number of seconds to a HH:MM:SS timestamp.
 function seconds_to_time($seconds, $lpad = false)
 {
-
     return gmdate('H:i:s', $seconds);
-
 }
 
 
@@ -329,7 +309,6 @@ function seconds_to_time($seconds, $lpad = false)
 # working. So here's the solution. We don't need create_user() on the blog, anyway.
 if (!function_exists('create_user'))
 {
-
     function create_user($options)
     {
         # Turn the URL-style options into an array.
@@ -348,11 +327,11 @@ if (!function_exists('create_user'))
                     $value = mysql_real_escape_string($value);
                     if (empty($value))
                     {
-                        $sql_inserts .= ', '.$key.' = NULL';
+                        $sql_inserts .= ', ' . $key . ' = NULL';
                     }
                     else
                     {
-                        $sql_inserts .= ', '.$key.' = "'.$value.'"';
+                        $sql_inserts .= ', ' . $key . ' = "' . $value . '"';
                     }
                 }
             }
@@ -373,7 +352,7 @@ if (!function_exists('create_user'))
                     # Determine which SQL string this data should be appended to.
                     if (($key == 'organization') || ($key == 'type') || ($key == 'expires'))
                     {
-                        $dashboard_inserts .= ', '.$key.' = "'.$value.'"';
+                        $dashboard_inserts .= ', ' . $key . ' = "' . $value . '"';
                     }
                     elseif ($key == 'dashboard')
                     {
@@ -393,16 +372,15 @@ if (!function_exists('create_user'))
                              */
                             if (trim($value) != '')
                             {
-                                $users_inserts .= ', '.$key.' = MD5("'.$value.'")';
+                                $users_inserts .= ', ' . $key . ' = MD5("' . $value . '")';
                             }
                         }
                         else
                         {
-                            $users_inserts .= ', '.$key.' = "'.$value.'"';
+                            $users_inserts .= ', ' . $key . ' = "' . $value . '"';
                         }
                     }
                 }
-
             }
         }
 
@@ -411,8 +389,8 @@ if (!function_exists('create_user'))
 
         # Insert the user data.
         $sql = 'INSERT INTO users
-				SET cookie_hash="'.$_SESSION['id'].'",
-				ip="'.$_SERVER['REMOTE_ADDR'].'", date_created=now()';
+				SET cookie_hash="' . $_SESSION['id'] . '",
+				ip="' . $_SERVER['REMOTE_ADDR'] . '", date_created=now()';
         if (!empty($users_inserts))
         {
             $sql .= $users_inserts;
@@ -435,13 +413,16 @@ if (!function_exists('create_user'))
             # Generate a random eight-digit hash to send out in e-mails for unsubscribing
             # instantly.
             $chars = 'bcdfghjklmnpqrstvxyz0123456789';
-            $hash = substr(str_shuffle($chars), 0, 8);
+            $hash = mb_substr(str_shuffle($chars), 0, 8);
 
             # Insert the Dashboard user data.
             $sql = 'INSERT INTO dashboard_user_data
-					SET user_id = '.$user_id.', email_active="y", last_access=now(),
-					date_created=now(), unsub_hash="'.$hash.'"';
-            if (!empty($dashboard_inserts)) $sql .= $dashboard_inserts;
+					SET user_id = ' . $user_id . ', email_active="y", last_access=now(),
+					date_created=now(), unsub_hash="' . $hash . '"';
+            if (!empty($dashboard_inserts))
+            {
+                $sql .= $dashboard_inserts;
+            }
             mysql_query($sql);
         }
     }
@@ -450,7 +431,6 @@ if (!function_exists('create_user'))
 # Retrieve a user's data, returning an array.
 function get_user()
 {
-
     if (!isset($_SESSION['id']))
     {
         return FALSE;
@@ -476,7 +456,7 @@ function get_user()
 			FROM users
 			LEFT JOIN dashboard_user_data
 				ON users.id=dashboard_user_data.user_id
-			WHERE users.cookie_hash="'.mysql_real_escape_string($_SESSION['id']).'"';
+			WHERE users.cookie_hash="' . mysql_real_escape_string($_SESSION['id']) . '"';
     $result = mysql_query($sql);
     if (mysql_num_rows($result) == 0)
     {
@@ -489,7 +469,6 @@ function get_user()
     $mc->set('user-' . $_SESSION['id'], $user, (60 * 60));
 
     return $user;
-
 }
 
 # Update a user's data.
@@ -506,9 +485,9 @@ function update_user($options)
     }
 
     # If this user's data is cached in APC, delete it, since it's now out of date.
-    if (apc_exists('user-'.$_SESSION['id']) !== false)
+    if (apc_exists('user-' . $_SESSION['id']) !== false)
     {
-        apc_delete('user-'.$_SESSION['id']);
+        apc_delete('user-' . $_SESSION['id']);
     }
 
     # Assemble the SQL string.
@@ -525,9 +504,9 @@ function update_user($options)
         {
             unset($first);
         }
-        $sql .= $key.' = "'.$value.'"';
+        $sql .= $key . ' = "' . $value . '"';
     }
-    $sql .= ' WHERE cookie_hash="'.mysql_real_escape_string($_SESSION['id']).'"';
+    $sql .= ' WHERE cookie_hash="' . mysql_real_escape_string($_SESSION['id']) . '"';
     $result = mysql_query($sql);
     if (!$result)
     {
@@ -615,7 +594,6 @@ function logged_in($registered = '')
     }
 
     return FALSE;
-
 }
 
 # Determine whether the current user is blacklisted from participating, by looking at his cumulative
@@ -624,10 +602,10 @@ function blacklisted()
 {
     $sql = 'SELECT SUM(score) AS score
 			FROM blacklist
-			WHERE ip="'.$_SERVER['REMOTE_ADDR'].'" OR user_id =
+			WHERE ip="' . $_SERVER['REMOTE_ADDR'] . '" OR user_id =
 				(SELECT id
 				FROM users
-				WHERE cookie_hash = "'.$_SESSION['id'].'")';
+				WHERE cookie_hash = "' . $_SESSION['id'] . '")';
     $result = mysql_query($sql);
     $data = mysql_fetch_array($result);
     $score = $data['score'];
@@ -644,12 +622,11 @@ function blacklisted()
 # Add the current user to the blacklist.
 function blacklist($word)
 {
-
     $sql = 'INSERT INTO blacklist
 			SET ip="' . $_SERVER['REMOTE_ADDR'] . '", user_id =
 				(SELECT id
 				FROM users
-				WHERE cookie_hash = "'.$_SESSION['id'].'"),
+				WHERE cookie_hash = "' . $_SESSION['id'] . '"),
 			date_created=now(),
 			score=20';
     if (isset($word))
@@ -658,7 +635,6 @@ function blacklist($word)
     }
 
     mysql_query($sql);
-
 }
 
 # Display the CSS balloon providing a tooltip-type interface for bills and legislators.
@@ -674,23 +650,74 @@ function balloon($bill, $type)
 # status into meaningful description.
 function explain_status($status)
 {
-    if (empty($status)) return FALSE;
-    if ($status == 'continued') return 'Continued to Next Session';
-    if ($status == 'introduced') return 'Introduced';
-    if ($status == 'committee') return 'In Committee';
-    if ($status == 'in committee') return 'In Committee';
-    if ($status == 'in subcommittee') return 'In Subcommittee';
-    if ($status == 'failed subcommittee') return 'Subcommittee Recommends Killing the Bill';
-    if ($status == 'passed subcommittee') return 'Subcommittee Recommends Passing the Bill';
-    if ($status == 'failed committee') return 'Failed to Pass in Committee';
-    if ($status == 'stricken') return 'Bill Killed at Sponsor’s Request';
-    if ($status == 'passed house') return 'Passed the House';
-    if ($status == 'passed senate') return 'Passed the Senate';
-    if ($status == 'passed') return 'Passed the General Assembly';
-    if ($status == 'failed') return 'Failed to Advance';
-    if ($status == 'approved') return 'Signed into Law';
-    if ($status == 'incorporated') return 'Incorporated into Another Bill';
-    else return $status;
+    if (empty($status))
+    {
+        return FALSE;
+    }
+    if ($status == 'continued')
+    {
+        return 'Continued to Next Session';
+    }
+    if ($status == 'introduced')
+    {
+        return 'Introduced';
+    }
+    if ($status == 'committee')
+    {
+        return 'In Committee';
+    }
+    if ($status == 'in committee')
+    {
+        return 'In Committee';
+    }
+    if ($status == 'in subcommittee')
+    {
+        return 'In Subcommittee';
+    }
+    if ($status == 'failed subcommittee')
+    {
+        return 'Subcommittee Recommends Killing the Bill';
+    }
+    if ($status == 'passed subcommittee')
+    {
+        return 'Subcommittee Recommends Passing the Bill';
+    }
+    if ($status == 'failed committee')
+    {
+        return 'Failed to Pass in Committee';
+    }
+    if ($status == 'stricken')
+    {
+        return 'Bill Killed at Sponsor’s Request';
+    }
+    if ($status == 'passed house')
+    {
+        return 'Passed the House';
+    }
+    if ($status == 'passed senate')
+    {
+        return 'Passed the Senate';
+    }
+    if ($status == 'passed')
+    {
+        return 'Passed the General Assembly';
+    }
+    if ($status == 'failed')
+    {
+        return 'Failed to Advance';
+    }
+    if ($status == 'approved')
+    {
+        return 'Signed into Law';
+    }
+    if ($status == 'incorporated')
+    {
+        return 'Incorporated into Another Bill';
+    }
+    else
+    {
+        return $status;
+    }
 }
 
 # A simple wrapper for CURL.
@@ -729,7 +756,7 @@ function district_to_id($number, $chamber)
     # Select the information from the database.
     $sql = 'SELECT id
 			FROM districts
-			WHERE number = '.$number.' AND chamber = "'.$chamber.'"
+			WHERE number = ' . $number . ' AND chamber = "' . $chamber . '"
 			AND date_ended IS NULL';
     $result = mysql_query($sql);
 
@@ -774,7 +801,7 @@ function nl2p($pee, $br = 1)
     }
     $pee = preg_replace('!(</?' . $allblocks . '[^>]*>)\s*<br />!', "$1", $pee);
     $pee = preg_replace('!<br />(\s*</?(?:p|li|div|dl|dd|dt|th|pre|td|ul|ol)[^>]*>)!', '$1', $pee);
-    if (strstr($pee, '<pre'))
+    if (mb_strstr($pee, '<pre'))
     {
         $pee = preg_replace('!(<pre.*?>)(.*?)</pre>!ise', " stripslashes('$1') .  stripslashes(clean_pre('$2'))  . '</pre>' ", $pee);
     }
@@ -785,9 +812,14 @@ function nl2p($pee, $br = 1)
 
 function login_form()
 {
-
-    if (isset($_GET['return_uri'])) $return_uri = $_GET['return_uri'];
-    elseif (isset($form_data['return_uri'])) $return_uri = $_GET['return_uri'];
+    if (isset($_GET['return_uri']))
+    {
+        $return_uri = $_GET['return_uri'];
+    }
+    elseif (isset($form_data['return_uri']))
+    {
+        $return_uri = $_GET['return_uri'];
+    }
     $returned_data = '
 		<form method="post" action="/account/login/">
 
@@ -798,18 +830,20 @@ function login_form()
 				<tr><td><input type="password" size="20" maxlength="255" id="password" name="form_data[password]" /></td></tr>
 				<tr><td><input type="submit" name="submit" value="Log In" /></td></tr>
 			</table>';
-    if (isset($return_uri)) $returned_data .= '
-			<input type="hidden" name="form_data[return_uri]" value="'.$return_uri.'" />';
+    if (isset($return_uri))
+    {
+        $returned_data .= '
+			<input type="hidden" name="form_data[return_uri]" value="' . $return_uri . '" />';
+    }
     $returned_data .= '
 		</form>';
     return $returned_data;
-
 }
 
 
 function login_redirect()
 {
-    header('Location: http://www.richmondsunlight.com/login/?return_uri='.$_SERVER['REQUEST_URI']);
+    header('Location: http://www.richmondsunlight.com/login/?return_uri=' . $_SERVER['REQUEST_URI']);
     exit();
 }
 
@@ -828,7 +862,7 @@ function generate_hash($length)
     for ($i=0; $i<$length; $i++)
     {
         $corpus = str_shuffle($corpus);
-        $hash .= substr($corpus, 0, 1);
+        $hash .= mb_substr($corpus, 0, 1);
     }
     return $hash;
 }
@@ -836,7 +870,6 @@ function generate_hash($length)
 # Create a tag cloud.
 function tag_cloud($tags)
 {
-
     if (!isset($tags) || !is_array($tags))
     {
         return FALSE;
@@ -862,7 +895,6 @@ function tag_cloud($tags)
     # Step through every tag and adjust the size downward, normalizing at 1em.
     foreach ($tags as $tag => &$count)
     {
-
         $size = round(($count * $multiple), 1);
         if ($size > 4)
         {
@@ -873,8 +905,7 @@ function tag_cloud($tags)
             $size = .75;
         }
 
-        $html .= '<span style="font-size: '.$size.'em;"><a href="/bills/tags/'.urlencode($tag).'/">'.$tag.'</a></span> ';
-
+        $html .= '<span style="font-size: ' . $size . 'em;"><a href="/bills/tags/' . urlencode($tag) . '/">' . $tag . '</a></span> ';
     }
 
     return $html;
@@ -890,14 +921,26 @@ if (!function_exists('json_decode'))
         $comment = false;
         $out = '$x=';
 
-        for ($i=0; $i<strlen($json); $i++)
+        for ($i=0; $i<mb_strlen($json); $i++)
         {
             if (!$comment)
             {
-                if (($json[$i] == '{') || ($json[$i] == '[')) $out .= ' array(';
-                elseif (($json[$i] == '}') || ($json[$i] == ']')) $out .= ')';
-                elseif ($json[$i] == ':') $out .= '=>';
-                else $out .= $json[$i];
+                if (($json[$i] == '{') || ($json[$i] == '['))
+                {
+                    $out .= ' array(';
+                }
+                elseif (($json[$i] == '}') || ($json[$i] == ']'))
+                {
+                    $out .= ')';
+                }
+                elseif ($json[$i] == ':')
+                {
+                    $out .= '=>';
+                }
+                else
+                {
+                    $out .= $json[$i];
+                }
             }
             else
             {
@@ -918,7 +961,6 @@ if (!function_exists('json_decode'))
 # question.
 function bill_sections($bill_id)
 {
-
     if (!isset($bill_id))
     {
         return FALSE;
@@ -941,7 +983,7 @@ function bill_sections($bill_id)
     {
         while ($section = mysql_fetch_array($result))
         {
-            $section['url'] = 'https://vacode.org/'.$section['section_number'].'/';
+            $section['url'] = 'https://vacode.org/' . $section['section_number'] . '/';
             $sections[] = $section;
         }
     }
@@ -968,13 +1010,12 @@ function varnish_purge($url)
 # This is relied on by usort() in bill-full-text.php.
 function sort_by_length($a, $b)
 {
-    return strlen($b) - strlen($a);
+    return mb_strlen($b) - mb_strlen($a);
 }
 
 # This is used as the preg_replace_callback function that inserts dictionary links into text.
 function replace_terms($term)
 {
-
     if (!isset($term))
     {
         return FALSE;
@@ -994,7 +1035,7 @@ function replace_terms($term)
      * If we have already marked this term as blacklisted -- that is, as a word that is a subset
      * of a longer term -- then just return the term without marking it as a dictionary term.
      */
-    if (isset($term_blacklist) && (in_array(strtolower($term), $term_blacklist)))
+    if (isset($term_blacklist) && (in_array(mb_strtolower($term), $term_blacklist)))
     {
         return $term;
     }
@@ -1005,7 +1046,7 @@ function replace_terms($term)
      * term. That is, if this term is "person or people," and "person" is another term in our
      * array, then we want to drop "person," to avoid display overlapping terms.
      */
-    $num_spaces = substr_count($term, ' ');
+    $num_spaces = mb_substr_count($term, ' ');
 
     if ($num_spaces > 0)
     {
@@ -1021,7 +1062,7 @@ function replace_terms($term)
          */
         foreach ($term_components as $word)
         {
-            $term_blacklist[] = strtolower($word);
+            $term_blacklist[] = mb_strtolower($word);
         }
 
         /*
@@ -1032,13 +1073,12 @@ function replace_terms($term)
         {
             for ($i=0; $i<$num_spaces; $i++)
             {
-                $term_blacklist[] = strtolower($term_components[$i].' '.$term_components[$i+1]);
+                $term_blacklist[] = mb_strtolower($term_components[$i] . ' ' . $term_components[$i+1]);
             }
         }
     }
 
     return '<span class="dictionary">' . $term . '</span>';
-
 }
 
 /**
@@ -1046,7 +1086,6 @@ function replace_terms($term)
  */
 function json_error($text, $status_code='400 OK')
 {
-
     if (!isset($text))
     {
         return FALSE;
@@ -1071,7 +1110,6 @@ function json_error($text, $status_code='400 OK')
      */
     header('Content-type: application/json');
     echo $error;
-
 }
 
 /**
@@ -1079,20 +1117,19 @@ function json_error($text, $status_code='400 OK')
  */
 function pushover_alert($title, $message)
 {
-
     if (!defined('PUSHOVER_KEY') || !isset($title) || !isset($message))
     {
         return FALSE;
     }
 
-    if (strlen($title) > 100)
+    if (mb_strlen($title) > 100)
     {
-        $title = substr($title, 0, 100);
+        $title = mb_substr($title, 0, 100);
     }
 
-    if (strlen($message) > 412)
+    if (mb_strlen($message) > 412)
     {
-        $message = substr($message, 0, 412);
+        $message = mb_substr($message, 0, 412);
     }
 
     curl_setopt_array($ch = curl_init(), array(
@@ -1110,5 +1147,4 @@ function pushover_alert($title, $message)
     curl_close($ch);
 
     return TRUE;
-
 }

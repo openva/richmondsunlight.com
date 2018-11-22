@@ -51,16 +51,18 @@ if (!empty($_GET['hash']))
 if (!empty($_POST['email']))
 {
     $email = $_POST['email'];
-    if (!validate_email($email)) $error = 'That’s not a valid e-mail address.';
+    if (!validate_email($email))
+    {
+        $error = 'That’s not a valid e-mail address.';
+    }
 
     # If there are no errors so far, check the database.
     if (!isset($error))
     {
-
         $sql = 'SELECT name, email, private_hash
 				FROM users
 				WHERE private_hash IS NOT NULL AND password IS NOT NULL
-				AND email = "'.mysql_real_escape_string($email).'"';
+				AND email = "' . mysql_real_escape_string($email) . '"';
         $result = mysql_query($sql);
 
         # If we find nothing.
@@ -70,14 +72,13 @@ if (!empty($_POST['email']))
         }
         else
         {
-
             $user_data = mysql_fetch_array($result);
 
             $user_data = array_map('stripslashes', $user_data);
 
             # Assemble the e-mail body.
             $email_body = $user_data['name'] . ",\n\n" .
-                'As you requested, here is a link to a page where you can reset your password '.
+                'As you requested, here is a link to a page where you can reset your password ' .
                 "on Richmond Sunlight.\n\n" .
                 'http://www.richmondsunlight.com/account/reset-password/' . $user_data['private_hash'] . "\n\n" .
                 'If you didn\'t request that your password be reset, don\'t worry -- you can just ' .
@@ -99,7 +100,6 @@ if (!empty($_POST['email']))
 					<p>An e-mail has been sent to you at that address. Check your e-mail and click
 					on the link provided and you’ll be in business.</p>
 				</div>';
-
         }
     }
 

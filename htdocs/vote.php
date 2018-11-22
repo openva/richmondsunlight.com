@@ -27,7 +27,7 @@ session_start();
 # LOCALIZE AND CLEAN UP VARIABLES
 if (isset($_GET['lis_id']))
 {
-    $lis_id = strtoupper($_GET['lis_id']);
+    $lis_id = mb_strtoupper($_GET['lis_id']);
 }
 else
 {
@@ -72,7 +72,7 @@ $sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber, bills.ca
 			ON bills_status.lis_vote_id=votes.lis_id
 		LEFT JOIN committees
 			ON votes.committee_id=committees.id
-		WHERE bills.number="'.$bill.'" AND sessions.year='.$year;
+		WHERE bills.number="' . $bill . '" AND sessions.year=' . $year;
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
@@ -89,20 +89,20 @@ $vote_info->lis_id = $lis_id;
 $vote_info->session_id = $bill['session_id'];
 $vote = $vote_info->get_aggregate();
 
-$page_title = strtoupper($bill['number']) . ': ' . $bill['catch_line'];
+$page_title = mb_strtoupper($bill['number']) . ': ' . $bill['catch_line'];
 $page_body = '<p>';
 if (!empty($bill['committee_name']))
 {
-    $page_body .= 'This vote on <a href="/bill/'.$year.'/'.$bill['number'].'/">'.strtoupper($bill['number']).'</a>
-	was held in the <a href="/committee/'.$vote['chamber'].'/'.$bill['committee_shortname'].'/">'.ucfirst($vote['chamber']).'
-	'.$bill['committee_name'].'</a> committee.  ';
+    $page_body .= 'This vote on <a href="/bill/' . $year . '/' . $bill['number'] . '/">' . mb_strtoupper($bill['number']) . '</a>
+	was held in the <a href="/committee/' . $vote['chamber'] . '/' . $bill['committee_shortname'] . '/">' . ucfirst($vote['chamber']) . '
+	' . $bill['committee_name'] . '</a> committee.  ';
 }
 else
 {
-    $page_body .= 'This vote on <a href="/bill/'.$year.'/'.$bill['number'].'/">'
-        .strtoupper($bill['number']).'</a> was held in the '.ucfirst($vote['chamber']).'.  ';
+    $page_body .= 'This vote on <a href="/bill/' . $year . '/' . $bill['number'] . '/">'
+        . mb_strtoupper($bill['number']) . '</a> was held in the ' . ucfirst($vote['chamber']) . '.  ';
 }
-$page_body .= 'This vote '.$vote['outcome'].'ed '.$vote['tally'].'.</p>';
+$page_body .= 'This vote ' . $vote['outcome'] . 'ed ' . $vote['tally'] . '.</p>';
 
 /*
  * Get detailed information about the vote -- who voted how.
@@ -113,8 +113,8 @@ $legislators = $vote_info->get_detailed();
 # an array of data.
 foreach ($legislators as $legislator)
 {
-    $legislator['vote'] = strtolower($legislator['vote']);
-    $legislator['party'] = strtolower($legislator['party']);
+    $legislator['vote'] = mb_strtolower($legislator['vote']);
+    $legislator['party'] = mb_strtolower($legislator['party']);
     $graph[$legislator{'vote'}][$legislator{'party'}]++;
     $parties[$legislator{'party'}] = 1;
 }
@@ -166,21 +166,29 @@ if (count($graph) > 1)
 		function drawChart() {
 			var data = new google.visualization.DataTable();
 			data.addColumn("string", "Vote");';
-    foreach($parties as $party => $blargh)
+    foreach ($parties as $party => $blargh)
     {
-        if ($party == 'r') $party = 'Rep.';
-        elseif ($party == 'd') $party = 'Dem.';
-        elseif ($party == 'i') $party = 'Ind.';
+        if ($party == 'r')
+        {
+            $party = 'Rep.';
+        }
+        elseif ($party == 'd')
+        {
+            $party = 'Dem.';
+        }
+        elseif ($party == 'i')
+        {
+            $party = 'Ind.';
+        }
         $html_head .= '
-			data.addColumn("number", "'.$party.'");';
+			data.addColumn("number", "' . $party . '");';
     }
     $html_head .= '
-			data.addRows('.count($graph).');';
+			data.addRows(' . count($graph) . ');';
     $i=0;
 
-    foreach($graph as $outcome => $tally)
+    foreach ($graph as $outcome => $tally)
     {
-
         if ($outcome == 'y')
         {
             $outcome = 'Voted Yes';
@@ -199,13 +207,13 @@ if (count($graph) > 1)
         }
 
         $html_head .= '
-				data.setValue('.$i.', 0, "'.$outcome.'");';
+				data.setValue(' . $i . ', 0, "' . $outcome . '");';
         $j=1;
 
         foreach ($tally as $party => $count)
         {
             $html_head .= '
-				data.setValue('.$i.', '.$j.', '.$count.');';
+				data.setValue(' . $i . ', ' . $j . ', ' . $count . ');';
             $j++;
         }
         $i++;
@@ -241,36 +249,60 @@ foreach ($legislators as $legislator)
     if (!isset($vote))
     {
         $vote = $legislator['vote'];
-        if ($vote == 'Y') $display_vote = 'Yes';
-        elseif ($vote == 'N') $display_vote = 'No';
-        elseif ($vote == 'X') $display_vote = 'Didn’t Vote';
-        elseif ($vote == 'A') $display_vote = 'Abstain';
-        $page_body .= '<h2>'.$display_vote.'</h2>
+        if ($vote == 'Y')
+        {
+            $display_vote = 'Yes';
+        }
+        elseif ($vote == 'N')
+        {
+            $display_vote = 'No';
+        }
+        elseif ($vote == 'X')
+        {
+            $display_vote = 'Didn’t Vote';
+        }
+        elseif ($vote == 'A')
+        {
+            $display_vote = 'Abstain';
+        }
+        $page_body .= '<h2>' . $display_vote . '</h2>
 		<ul>';
     }
     elseif ($vote != $legislator['vote'])
     {
         $vote = $legislator['vote'];
-        if ($vote == 'Y') $display_vote = 'Yes';
-        elseif ($vote == 'N') $display_vote = 'No';
-        elseif ($vote == 'X') $display_vote = 'Didn’t Vote';
-        elseif ($vote == 'A') $display_vote = 'Abstain';
+        if ($vote == 'Y')
+        {
+            $display_vote = 'Yes';
+        }
+        elseif ($vote == 'N')
+        {
+            $display_vote = 'No';
+        }
+        elseif ($vote == 'X')
+        {
+            $display_vote = 'Didn’t Vote';
+        }
+        elseif ($vote == 'A')
+        {
+            $display_vote = 'Abstain';
+        }
         $page_body .= '
 		</ul>
-			<h2>'.$display_vote.'</h2>
+			<h2>' . $display_vote . '</h2>
 		<ul>';
     }
     $legislator = array_map('stripslashes', $legislator);
     $legislator['patron'] = $legislator['name'];
-    $legislator['patron_suffix'] = '('.$legislator['party'].'-'.$legislator['district'].')';
+    $legislator['patron_suffix'] = '(' . $legislator['party'] . '-' . $legislator['district'] . ')';
     $legislator['patron_chamber'] = $legislator['chamber'];
     $legislator['patron_started'] = $legislator['started'];
     $legislator['patron_address'] = $legislator['address'];
     $legislator['patron_shortname'] = $legislator['shortname'];
 
     $page_body .= '
-			<li><a href="/legislator/'.$legislator['shortname'].'/" class="balloon">'.pivot($legislator['name']).
-             balloon($legislator, 'legislator').' '.$legislator['patron_suffix'].'</a></li>';
+			<li><a href="/legislator/' . $legislator['shortname'] . '/" class="balloon">' . pivot($legislator['name']) .
+             balloon($legislator, 'legislator') . ' ' . $legislator['patron_suffix'] . '</a></li>';
 }
 $page_body .= '
 		</ul>
@@ -314,18 +346,17 @@ if (mysql_num_rows($result) > 0)
         # viewing.
         if (!empty($status['lis_vote_id']) && ($status['vote_count'] > 0) && ($status['lis_vote_id'] != $lis_id))
         {
-            $tmp = '<a href="/bill/'.$bill['year'].'/'.strtolower($bill['number']).'/'.strtolower($status['lis_vote_id']).'/">'.$status['status'].'</a>';
+            $tmp = '<a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number']) . '/' . mb_strtolower($status['lis_vote_id']) . '/">' . $status['status'] . '</a>';
             $status['status'] = $tmp;
         }
-        $bill['status_history'] = '<li'.($status['lis_vote_id'] == $lis_id ? ' class="highlight"' : '').'>'.$status['date'].' '.$status['status'].'</li>'.$bill['status_history'];
+        $bill['status_history'] = '<li' . ($status['lis_vote_id'] == $lis_id ? ' class="highlight"' : '') . '>' . $status['date'] . ' ' . $status['status'] . '</li>' . $bill['status_history'];
     }
     $page_sidebar .= '
 
 		<div class="box">
 			<h3>Progress History</h3>
-			'.$bill['status_history'].'
+			' . $bill['status_history'] . '
 		</div>';
-
 }
 
 # OUTPUT THE PAGE

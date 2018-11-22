@@ -22,22 +22,21 @@ class Bill2
         }
 
         # Check that the data is clean.
-        if (strlen($year) != 4)
+        if (mb_strlen($year) != 4)
         {
             return false;
         }
-        if (strlen($number) > 7)
+        if (mb_strlen($number) > 7)
         {
             return false;
         }
-        $number = strtolower($number);
+        $number = mb_strtolower($number);
 
         /*
          * If this bill is from the present year, try to retrieve the bill ID from Memcached.
          */
         if ($year == SESSION_YEAR)
         {
-
             $mc = new Memcached();
             $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
             $result = $mc->get('bill-' . $number);
@@ -45,7 +44,6 @@ class Bill2
             {
                 return $result;
             }
-
         }
 
         $database = new Database;
@@ -58,8 +56,8 @@ class Bill2
 				FROM bills
 				LEFT JOIN sessions
 					ON bills.session_id=sessions.id
-				WHERE bills.number="'.mysql_real_escape_string($number).'"
-				AND sessions.year='.mysql_real_escape_string($year);
+				WHERE bills.number="' . mysql_real_escape_string($number) . '"
+				AND sessions.year=' . mysql_real_escape_string($year);
         $result = mysql_query($sql);
         if (mysql_num_rows($result) < 1)
         {
@@ -67,7 +65,6 @@ class Bill2
         }
         $bill = mysql_fetch_array($result);
         return $bill['id'];
-
     }
 
     public function info()
@@ -160,7 +157,7 @@ class Bill2
 
         # Data conversions
         $bill['word_count'] = str_word_count($bill['full_text']);
-        $bill['patron_suffix'] = '('.$bill['patron_party'].'-'.$bill['patron_place'].')';
+        $bill['patron_suffix'] = '(' . $bill['patron_party'] . '-' . $bill['patron_place'] . ')';
         if ($bill['patron_chamber'] == 'house')
         {
             $bill['patron_prefix'] = 'Del.';
@@ -169,8 +166,8 @@ class Bill2
         {
             $bill['patron_prefix'] = 'Sen.';
         }
-        $bill['url'] = 'http://www.richmondsunlight.com/bill/'.$bill['year'].'/'
-            .strtolower($bill['number']).'/';
+        $bill['url'] = 'http://www.richmondsunlight.com/bill/' . $bill['year'] . '/'
+            . mb_strtolower($bill['number']) . '/';
 
         # If this bill has any copatrons, we want to gather up all of them and include them in the bill
         # array.
@@ -181,7 +178,7 @@ class Bill2
 					FROM bills_copatrons
 					LEFT JOIN representatives
 						ON bills_copatrons.legislator_id=representatives.id
-					WHERE bills_copatrons.bill_id='.$bill['id'].'
+					WHERE bills_copatrons.bill_id=' . $bill['id'] . '
 					ORDER BY representatives.chamber ASC, representatives.name ASC';
             $bill_result = @mysql_query($sql);
             while ($copatron = mysql_fetch_array($bill_result))
@@ -237,7 +234,7 @@ class Bill2
         # Place names mentioned.
         $sql = 'SELECT placename AS name, latitude, longitude
 				FROM bills_places
-				WHERE bill_id='.$bill['id'].'';
+				WHERE bill_id=' . $bill['id'] . '';
         $result = mysql_query($sql);
         if (mysql_num_rows($result) > 0)
         {
@@ -263,7 +260,6 @@ class Bill2
         $result = mysql_query($sql);
         if (mysql_num_rows($result) > 0)
         {
-
             $bill['duplicates'] = array();
 
             # Build up an array of duplicates.
@@ -353,7 +349,6 @@ class Bill2
         }
 
         return $bill;
-
     } // function "info"
 
     /**
@@ -441,7 +436,7 @@ class Bill2
                     /*
                      * Step through each character in this word.
                      */
-                    for ($i=0; $i<strlen($term); $i++)
+                    for ($i=0; $i<mb_strlen($term); $i++)
                     {
                         /*
                          * If there are any uppercase characters, then make this PCRE string case
@@ -449,7 +444,7 @@ class Bill2
                          */
                         if ((ord($term{$i}) >= 65) && (ord($term{$i}) <= 90))
                         {
-                            $term_pcres[] = '/\b'.$term.'(s?)\b(?![^<]*>)/';
+                            $term_pcres[] = '/\b' . $term . '(s?)\b(?![^<]*>)/';
                             $caps = TRUE;
                             break;
                         }
@@ -461,7 +456,7 @@ class Bill2
                      */
                     if (!isset($caps))
                     {
-                        $term_pcres[] = '/\b'.$term.'(s?)\b(?![^<]*>)/i';
+                        $term_pcres[] = '/\b' . $term . '(s?)\b(?![^<]*>)/i';
                     }
 
                     /*
@@ -485,11 +480,9 @@ class Bill2
             $mc->set('definitions-' . $this->bill_id, $this->term_pcres);
 
             return TRUE;
-
         }
 
         return FALSE;
-
     } // end method get_Terms
 
 
@@ -535,7 +528,7 @@ class Bill2
          * If the phrase "A BILL to amend and reenact" is found in the first 500 characters of this
          * bill, then it's amending an existing law.
          */
-        if (strpos(substr($this->text, 0, 500), 'A BILL to amend and reenact') === FALSE)
+        if (mb_strpos(mb_substr($this->text, 0, 500), 'A BILL to amend and reenact') === FALSE)
         {
             return FALSE;
         }
@@ -548,14 +541,14 @@ class Bill2
         {
             return FALSE;
         }
-        $start = strlen($parts[0]);
+        $start = mb_strlen($parts[0]);
 
         /*
          * Hack off everything prior to the start of the proposed modifications.
          */
-        $this->text = substr($this->text, ($start + 10));
-        $start = strpos($this->text, "\n");
-        $this->text = substr($this->text, ($start + 1));
+        $this->text = mb_substr($this->text, ($start + 10));
+        $start = mb_strpos($this->text, "\n");
+        $this->text = mb_substr($this->text, ($start + 1));
 
         /*
          * Rewrap the lines.
@@ -640,10 +633,9 @@ class Bill2
              * Indicate at what point we are in the text, which is useful as only an approximate
              * measure, to help provide guidance as to where this patch should be applied.
              */
-            $this->changes[$i]['position'] = strpos($this->text, $this->changes[$i]['diff']);
+            $this->changes[$i]['position'] = mb_strpos($this->text, $this->changes[$i]['diff']);
 
             $i++;
-
         }
 
         /*
@@ -660,7 +652,5 @@ class Bill2
         $mc->set('bill-changes-' . $this->text_hash, $this->changes, (60 * 60 * 24 * 3));
 
         return $this->changes;
-
     }
-
 } // end class "Bill2"

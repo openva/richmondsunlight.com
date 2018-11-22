@@ -32,8 +32,8 @@ session_start();
 $html_head = '<script src="/js/scriptaculous/control-tabs.js"></script>';
 
 # Include the password-strength-meter code.
-$html_head .= '<script src="/js/zxcvbn.js"></script>
-				<script src="/js/password-test.js"></script>';
+$html_head = '<script src="/js/vendor/zxcvbn/dist/zxcvbn.js"></script>
+			<script src="/js/password-test.js"></script>';
 
 # See if the user is logged in.
 if (@logged_in() === false)
@@ -60,20 +60,20 @@ function display_form($form_data)
 					<tr>
 						<th>Name</th>
 						<td>
-							<input type="text" name="form_data[name]" size="30" maxlength="60" value="'.$form_data['name'].'" />
+							<input type="text" name="form_data[name]" size="30" maxlength="60" value="' . $form_data['name'] . '" />
 						</td>
 					</tr>
 					<tr>
 						<th>Group/Company</th>
 						<td>
-							<input type="text" name="form_data[organization]" size="30" maxlength="128" value="'.$form_data['organization'].'" /><br />
+							<input type="text" name="form_data[organization]" size="30" maxlength="128" value="' . $form_data['organization'] . '" /><br />
 							<small>If you do this stuff professionally.</small>
 						</td>
 					</tr>
 					<tr>
 						<th>E-Mail</th>
 						<td>
-							<input type="text" name="form_data[email]" size="30" maxlength="60" value="'.$form_data['email'].'" /><br />
+							<input type="text" name="form_data[email]" size="30" maxlength="60" value="' . $form_data['email'] . '" /><br />
 							<small>It’s our secret. No spam, ever.</small>
 						</td>
 					</tr>
@@ -95,21 +95,21 @@ function display_form($form_data)
 					<tr>
 						<th>Website Address</th>
 						<td>
-							<input type="text" name="form_data[url]" size="30" maxlength="60" value="'.$form_data['url'].'" /><br />
+							<input type="text" name="form_data[url]" size="30" maxlength="60" value="' . $form_data['url'] . '" /><br />
 							<small>Only, of course, if you have one.</small>
 						</td>
 					</tr>
 					<tr>
 						<th>ZIP</th>
 						<td>
-							<input type="text" name="form_data[zip]" size="30" maxlength="5" value="'.$form_data['zip'].'" /><br />
+							<input type="text" name="form_data[zip]" size="30" maxlength="5" value="' . $form_data['zip'] . '" /><br />
 							<small>For site customization.</small>
 						</td>
 					</tr>
 					<tr>
 						<th>Mailing List</th>
 						<td>
-							<input type="checkbox" name="form_data[mailing_list]" value="y" '.(($form_data['mailing_list'] == 'y') ? 'checked="checked"' : '').' />
+							<input type="checkbox" name="form_data[mailing_list]" value="y" ' . (($form_data['mailing_list'] == 'y') ? 'checked="checked"' : '') . ' />
 							<small>May we e-mail you occasionally?</small>
 						</td>
 					</tr>
@@ -131,12 +131,24 @@ if (isset($_POST['submit']))
     $form_data = array_map('trim', $_POST['form_data']);
 
     # Alert users to mistakes.
-    if (empty($form_data['email'])) $errors[] = 'your e-mail address';
-    elseif (!validate_email($form_data['email'])) $errors[] = 'a valid e-mail address';
+    if (empty($form_data['email']))
+    {
+        $errors[] = 'your e-mail address';
+    }
+    elseif (!validate_email($form_data['email']))
+    {
+        $errors[] = 'a valid e-mail address';
+    }
     if (!empty($form_data['password']) || !empty($form_data['password_2']))
     {
-        if ($form_data['password'] != $form_data['password_2']) $errors[] = 'the <em>same</em> password twice';
-        elseif (strlen($form_data['password']) < 7) $errors[] = 'a password that\'s at least seven characters long';
+        if ($form_data['password'] != $form_data['password_2'])
+        {
+            $errors[] = 'the <em>same</em> password twice';
+        }
+        elseif (mb_strlen($form_data['password']) < 7)
+        {
+            $errors[] = 'a password that\'s at least seven characters long';
+        }
     }
 
     # If we find any mistakes, stop the account update process and alert the user.
@@ -147,7 +159,7 @@ if (isset($_POST['submit']))
 			<div id="messages" class="errors">
 				<p>Please provide:</p>
 				<ul>
-					<li>'.$error_text.'</li>
+					<li>' . $error_text . '</li>
 				</ul>
 			</div>';
     }
@@ -158,44 +170,72 @@ if (isset($_POST['submit']))
         $form_data = array_map('mysql_real_escape_string', $_POST['form_data']);
 
         # A blank mailing list variable is a "no."
-        if (empty($form_data['mailing_list'])) $form_data['mailing_list'] = 'n';
+        if (empty($form_data['mailing_list']))
+        {
+            $form_data['mailing_list'] = 'n';
+        }
 
         # MD5 the password.
-        if (!empty($form_data['password'])) $form_data['password'] = md5($form_data['password']);
+        if (!empty($form_data['password']))
+        {
+            $form_data['password'] = md5($form_data['password']);
+        }
 
         # Assembly the SQL string.
         $sql = 'UPDATE users
-				SET name="'.$form_data['name'].'", email="'.$form_data['email'].'"';
+				SET name="' . $form_data['name'] . '", email="' . $form_data['email'] . '"';
         $sql .= ', url=';
-        if (empty($form_data['url'])) $sql .= 'NULL';
-        else $sql .= '"'.$form_data['url'].'"';
+        if (empty($form_data['url']))
+        {
+            $sql .= 'NULL';
+        }
+        else
+        {
+            $sql .= '"' . $form_data['url'] . '"';
+        }
         $sql .= ', zip=';
-        if (empty($form_data['zip'])) $sql .= 'NULL';
-        else $sql .= '"'.$form_data['zip'].'"';
+        if (empty($form_data['zip']))
+        {
+            $sql .= 'NULL';
+        }
+        else
+        {
+            $sql .= '"' . $form_data['zip'] . '"';
+        }
         $sql .= ', mailing_list=';
-        if (empty($form_data['mailing_list'])) $sql .= 'NULL';
-        else $sql .= '"'.$form_data['mailing_list'].'"';
-        if (!empty($form_data['password'])) $sql .= ', password="'.$form_data['password'].'"';
-        $sql .= ' WHERE id='.$user['id'];
+        if (empty($form_data['mailing_list']))
+        {
+            $sql .= 'NULL';
+        }
+        else
+        {
+            $sql .= '"' . $form_data['mailing_list'] . '"';
+        }
+        if (!empty($form_data['password']))
+        {
+            $sql .= ', password="' . $form_data['password'] . '"';
+        }
+        $sql .= ' WHERE id=' . $user['id'];
         $result = mysql_query($sql);
-        if ($result === FALSE) die('Your account could not be updated.');
+        if ($result === FALSE)
+        {
+            die('Your account could not be updated.');
+        }
 
         # Update the organization data.
         $sql = 'UPDATE dashboard_user_data
-				SET organization='.(empty($form_data['organization']) ? 'NULL' : '"'.$form_data['organization'].'"').'
-				WHERE user_id='.$user['id'];
+				SET organization=' . (empty($form_data['organization']) ? 'NULL' : '"' . $form_data['organization'] . '"') . '
+				WHERE user_id=' . $user['id'];
         $result = mysql_query($sql);
 
         header('Location: http://www.richmondsunlight.com/account/?updated');
         exit();
     }
-
 }
 
 
 if (!isset($_POST['submit']))
 {
-
     $page_body .= '
 	<div class="tabs">
 	<ul>
@@ -230,7 +270,7 @@ if (!isset($_POST['submit']))
 			dashboard_user_data.organization
 			FROM users LEFT JOIN dashboard_user_data
 			ON users.id=dashboard_user_data.user_id
-			WHERE id='.$user['id'];
+			WHERE id=' . $user['id'];
     $result = mysql_query($sql);
     if (mysql_num_rows($result) == 0)
     {
@@ -262,8 +302,8 @@ if (!isset($_POST['submit']))
         }
         $page_body .= '
 			<h2>Bills Tagged</h2>
-			<p>You have provided '.number_format($stats->tags).' tags for '
-            .number_format($stats->bills).' bills. Thank you!</p>';
+			<p>You have provided ' . number_format($stats->tags) . ' tags for '
+            . number_format($stats->bills) . ' bills. Thank you!</p>';
     }
 
     $page_body .= '
@@ -279,16 +319,15 @@ if (!isset($_POST['submit']))
         $page_body .= '<p>The following are the ten comments that you have made most recently.</p>';
         foreach ($comments as $comment)
         {
-            $page_body .= '<h3><a href="/bill/'.$comment['bill_year'].'/'.$comment['bill_number'].'/">'
-                .strtoupper($comment['bill_number']).'</a>: '.$comment['catch_line']
-                .' ('.$comment['date'].')</h3>
-				'.nl2p($comment['comment']);
+            $page_body .= '<h3><a href="/bill/' . $comment['bill_year'] . '/' . $comment['bill_number'] . '/">'
+                . mb_strtoupper($comment['bill_number']) . '</a>: ' . $comment['catch_line']
+                . ' (' . $comment['date'] . ')</h3>
+				' . nl2p($comment['comment']);
         }
     }
     $page_body .= '
 		</div>
 	</div>';
-
 }
 
 # OUTPUT THE PAGE

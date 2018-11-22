@@ -31,7 +31,6 @@ if (!empty($_GET['street']) && !empty($_GET['city']) && !empty($_GET['zip']))
 
     if ($coordinates != FALSE)
     {
-
         $districts = $location->coords_to_districts();
         if ($districts != FALSE)
         {
@@ -40,8 +39,8 @@ if (!empty($_GET['street']) && !empty($_GET['city']) && !empty($_GET['zip']))
 					FROM representatives
 					LEFT JOIN districts
 						ON representatives.district_id=districts.id
-					WHERE representatives.district_id='.current($districts).'
-						OR representatives.district_id='.next($districts);
+					WHERE representatives.district_id=' . current($districts) . '
+						OR representatives.district_id=' . next($districts);
             $result = mysql_query($sql);
             if (mysql_num_rows($result) > 0)
             {
@@ -51,8 +50,8 @@ if (!empty($_GET['street']) && !empty($_GET['city']) && !empty($_GET['zip']))
                 while ($legislator = mysql_fetch_array($result))
                 {
                     $legislator = array_map('stripslashes', $legislator);
-                    $page_body .= '<li><a href="/legislator/'.$legislator['shortname'].'/">'
-                        .$legislator['name'].'</a></li>';
+                    $page_body .= '<li><a href="/legislator/' . $legislator['shortname'] . '/">'
+                        . $legislator['name'] . '</a></li>';
 
                     # Save this for updating the user's account.
                     if ($legislator['chamber'] == 'house')
@@ -70,12 +69,12 @@ if (!empty($_GET['street']) && !empty($_GET['city']) && !empty($_GET['zip']))
                 # districts.
                 if (logged_in() === TRUE)
                 {
-                    update_user('zip='.$_GET['zip'].
-                        '&city='.$_GET['city'].
-                        '&latitude='.$coordinates['latitude'].
-                        '&longitude='.$coordinates['longitude'].
-                        '&house_district_id='.$house_district_id.
-                        '&senate_district_id='.$senate_district_id);
+                    update_user('zip=' . $_GET['zip'] .
+                        '&city=' . $_GET['city'] .
+                        '&latitude=' . $coordinates['latitude'] .
+                        '&longitude=' . $coordinates['longitude'] .
+                        '&house_district_id=' . $house_district_id .
+                        '&senate_district_id=' . $senate_district_id);
                 }
             }
         }
@@ -91,7 +90,6 @@ if (!empty($_GET['street']) && !empty($_GET['city']) && !empty($_GET['zip']))
 			correctly?</p>';
     }
 }
-
 else
 {
     $page_body = '

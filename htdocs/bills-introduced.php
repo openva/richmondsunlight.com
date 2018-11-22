@@ -70,7 +70,7 @@ $result = mysql_query($sql);
 $num_results = mysql_num_rows($result);
 if ($num_results > 0)
 {
-    $page_body .= '<p>'.$num_results.' bill'.($num_results > 1 ? 's' : '').' found.</p>';
+    $page_body .= '<p>' . $num_results . ' bill' . ($num_results > 1 ? 's' : '') . ' found.</p>';
     $date = '';
     $i=0;
     while ($bill = mysql_fetch_assoc($result))
@@ -78,14 +78,17 @@ if ($num_results > 0)
         $bill = array_map('stripslashes', $bill);
         if ($bill['date_introduced'] != $date)
         {
-            if ($i > 0) $page_body .= '</ul>';
+            if ($i > 0)
+            {
+                $page_body .= '</ul>';
+            }
             $date = $bill['date_introduced'];
-            $page_body .= '<h2>'.$date.'</h2>
+            $page_body .= '<h2>' . $date . '</h2>
 				<ul>';
         }
         $page_body .= '
-				<li><a href="/bill/'.$bill['year'].'/'.$bill['number'].'/" class="balloon">'.strtoupper($bill['number']).balloon($bill, 'bill').'</a>: '.
-             $bill['catch_line'].'</li>';
+				<li><a href="/bill/' . $bill['year'] . '/' . $bill['number'] . '/" class="balloon">' . mb_strtoupper($bill['number']) . balloon($bill, 'bill') . '</a>: ' .
+             $bill['catch_line'] . '</li>';
         $i++;
     }
     $page_body .= '</ul>';
@@ -109,7 +112,7 @@ $page_sidebar = '
 	<div class="box">
 		<h3>Explanation</h3>
 		<p>There are many steps between the introduction of a bill and when (if) it becomes law.
-		At left is every individual step taken by all bills in the past '.$days.' days.  This also
+		At left is every individual step taken by all bills in the past ' . $days . ' days.  This also
 		gives an idea of what the General Assembly is up to every day, even when they\'re not in
 		session.  Some days no committees or subcommittees meet, some days there\'s a lot
 		going on.</p>

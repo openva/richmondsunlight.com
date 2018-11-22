@@ -48,7 +48,7 @@ else
 }
 
 # PAGE METADATA
-$page_title = 'Schedule for '.$date_formatted;
+$page_title = 'Schedule for ' . $date_formatted;
 $site_section = 'schedule';
 
 # PAGE CONTENT
@@ -59,7 +59,7 @@ $sql = 'SELECT DISTINCT meetings.time AS time_raw, DATE_FORMAT(meetings.time, "%
 		FROM meetings
 		LEFT JOIN committees
 			ON meetings.committee_id=committees.id
-		WHERE date="'.$date.'"
+		WHERE date="' . $date . '"
 		ORDER BY timedesc DESC, time_raw ASC';
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
@@ -78,7 +78,7 @@ if (mysql_num_rows($result) > 0)
         {
             $page_body .= $meeting['time'];
         }
-        $page_body .= '</strong> '.$meeting['location'].' '.$meeting['description'].'</p>';
+        $page_body .= '</strong> ' . $meeting['location'] . ' ' . $meeting['description'] . '</p>';
     }
 }
 
@@ -96,7 +96,7 @@ $sql = 'SELECT dockets.date, committees.id AS committee_id, committees.chamber,
 			ON committees.parent_id=committees2.id
 		LEFT JOIN meetings
 			ON committees.id = meetings.committee_id
-		WHERE dockets.date = "'.mysql_real_escape_string($date).'"
+		WHERE dockets.date = "' . mysql_real_escape_string($date) . '"
 		GROUP BY dockets.committee_id
 		ORDER BY committees.chamber DESC, committees.name ASC';
 $result = mysql_query($sql);
@@ -127,8 +127,8 @@ else
 					ON bills.chief_patron_id = representatives.id
 				LEFT JOIN sessions
 					ON bills.session_id = sessions.id
-				WHERE dockets.date = "'.$meeting['date'].'"
-				AND committee_id='.$meeting['committee_id'].'
+				WHERE dockets.date = "' . $meeting['date'] . '"
+				AND committee_id=' . $meeting['committee_id'] . '
 				ORDER BY bills.chamber DESC,
 				SUBSTRING(bills.number FROM 1 FOR 2) ASC,
 				CAST(LPAD(SUBSTRING(bills.number FROM 3), 4, "0") AS unsigned) ASC';
@@ -164,22 +164,22 @@ else
             $meeting['committee'] = $meeting['parent_committee'];
         }
 
-        $page_body .= '<table id="'.$meeting['chamber'].'-'.$meeting['shortname'].'" '
-                .'class="bill-listing sortable">
+        $page_body .= '<table id="' . $meeting['chamber'] . '-' . $meeting['shortname'] . '" '
+                . 'class="bill-listing sortable">
 				<caption>';
         # Display the committee name, and optionally the subcommittee name.
-        $page_body .= ucfirst($meeting['chamber']).' '.$meeting['committee'];
+        $page_body .= ucfirst($meeting['chamber']) . ' ' . $meeting['committee'];
         if (!empty($meeting['subcommittee']))
         {
-            $page_body .= ' Committee, '.$meeting['subcommittee'].' Subcommittee';
+            $page_body .= ' Committee, ' . $meeting['subcommittee'] . ' Subcommittee';
         }
         if (!empty($meeting['time']))
         {
-            $page_body .= ' ('.$meeting['time'].')';
+            $page_body .= ' (' . $meeting['time'] . ')';
         }
         elseif (!empty($meeting['timedesc']))
         {
-            $page_body .= ' ('.$meeting['timedesc'].')';
+            $page_body .= ' (' . $meeting['timedesc'] . ')';
         }
         $page_body .= '</caption>
 			<thead>
@@ -198,8 +198,8 @@ else
             {
                 $page_body .= '
 						<tr>
-							<td><a href="/bill/'.$bill['year'].'/'.strtolower($bill['number']).'/" class="balloon">'.strtoupper($bill['number']).balloon($bill, 'bill').'</a></td>
-							<td>'.$bill['catch_line'].'</td>
+							<td><a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number']) . '/" class="balloon">' . mb_strtoupper($bill['number']) . balloon($bill, 'bill') . '</a></td>
+							<td>' . $bill['catch_line'] . '</td>
 						</tr>';
             }
             $page_body .= '</p>';
@@ -226,9 +226,9 @@ if (mysql_num_rows($result) > 0)
     while ($upcoming = mysql_fetch_array($result))
     {
         # Create the URL for this day's link.
-        $upcoming['url'] = '/schedule/'.str_replace('-', '/', $upcoming['date']).'/';
+        $upcoming['url'] = '/schedule/' . str_replace('-', '/', $upcoming['date']) . '/';
         $page_sidebar .= '
-			<li><a href="'.$upcoming['url'].'">'.$upcoming['date_formatted'].'</a></li>';
+			<li><a href="' . $upcoming['url'] . '">' . $upcoming['date_formatted'] . '</a></li>';
     }
     $page_sidebar .= '
 		</ul>

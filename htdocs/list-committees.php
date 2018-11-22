@@ -59,11 +59,11 @@ $page_content = '';
 $sql = 'SELECT id, shortname, name, chamber, meeting_time,
 			(SELECT COUNT(*)
 			 FROM bills
-			 WHERE session_id='.SESSION_ID.'
+			 WHERE session_id=' . SESSION_ID . '
 			 AND last_committee_id=committees.id
 			 AND current_chamber=committees.chamber
 			 AND status != "failed" AND status != "continued" AND status != "approved"
-			 AND status != "passed '.$committee['chamber'].'" AND status != "passed"
+			 AND status != "passed ' . $committee['chamber'] . '" AND status != "passed"
 			 AND status != "vetoed") AS count
 		FROM committees
 		WHERE chamber="senate" AND parent_id IS NULL
@@ -71,18 +71,18 @@ $sql = 'SELECT id, shortname, name, chamber, meeting_time,
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-        $page_body .= '
+    $page_body .= '
 					<div class="right_side">
 						<h2>Senate</h2>
 						<ul>';
     while ($committee = mysql_fetch_array($result))
     {
         $committee = array_map('stripslashes', $committee);
-        $page_body .= '<li><a href="/committee/senate/'.$committee['shortname'].'/">'.$committee['name'].'</a>';
+        $page_body .= '<li><a href="/committee/senate/' . $committee['shortname'] . '/">' . $committee['name'] . '</a>';
         if ($committee['count'] > 0)
         {
-            $page_body .= ' (<a href="/bills/committee/'.$committee['chamber'].'/'.$committee['shortname'].'/"
-			title="Bills before this committee">'.$committee['count'].'</a>)';
+            $page_body .= ' (<a href="/bills/committee/' . $committee['chamber'] . '/' . $committee['shortname'] . '/"
+			title="Bills before this committee">' . $committee['count'] . '</a>)';
         }
         $page_body .= '</li>';
     }
@@ -95,11 +95,11 @@ if (mysql_num_rows($result) > 0)
 $sql = 'SELECT id, shortname, name, chamber, meeting_time,
 			(SELECT COUNT(*)
 			 FROM bills
-			 WHERE session_id='.SESSION_ID.'
+			 WHERE session_id=' . SESSION_ID . '
 			 AND last_committee_id=committees.id
 			 AND current_chamber=committees.chamber
 			 AND status != "failed" AND status != "continued" AND status != "approved"
-			 AND status != "passed '.$committee['chamber'].'" AND status != "passed"
+			 AND status != "passed ' . $committee['chamber'] . '" AND status != "passed"
 			 AND status != "vetoed") AS count
 		FROM committees
 		WHERE chamber="house" AND parent_id IS NULL
@@ -107,18 +107,18 @@ $sql = 'SELECT id, shortname, name, chamber, meeting_time,
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-        $page_body .= '
+    $page_body .= '
 					<div class="left_side">
 						<h2>House</h2>
 						<ul>';
     while ($committee = mysql_fetch_array($result))
     {
         $committee = array_map('stripslashes', $committee);
-        $page_body .= '<li><a href="/committee/house/'.$committee['shortname'].'/">'.$committee['name'].'</a>';
+        $page_body .= '<li><a href="/committee/house/' . $committee['shortname'] . '/">' . $committee['name'] . '</a>';
         if ($committee['count'] > 0)
         {
-            $page_body .= ' (<a href="/bills/committee/'.$committee['chamber'].'/'.$committee['shortname'].'/"
-			title="Bills before this committee">'.$committee['count'].'</a>)';
+            $page_body .= ' (<a href="/bills/committee/' . $committee['chamber'] . '/' . $committee['shortname'] . '/"
+			title="Bills before this committee">' . $committee['count'] . '</a>)';
         }
         $page_body .= '</li>';
     }

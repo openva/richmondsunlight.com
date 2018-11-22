@@ -6,6 +6,12 @@ function openpopup(popurl) {
 	window.open(popurl,"","width=300,height=300,scrollbars,resizable");
 }
 
+// Set the date in the menu bar
+$( document ).ready(function(){
+    date = $.datepicker.formatDate('DD, MM dd, yy', new Date());
+    $("#date").text(date);
+});
+
 //////
 // SORTTABLE.JS
 // http://kryogenix.org/code/browser/sorttable/
@@ -199,43 +205,3 @@ function addEvent(elm, evType, fn, useCapture)
     alert("Handler could not be removed");
   }
 }
-
-// A pair of functions that allow Prototype's Ajax editor to handle HTML.
-/*Object.extend(Ajax.InPlaceEditor.prototype, {
-	onLoadedExternalText: function(transport) {
-		Element.removeClassName(this.form, this.options.loadingClassName);
-		this.editField.disabled = false;
-		this.editField.value = transport.responseText;
-		Field.scrollFreeActivate(this.editField);
-	}
-});
-Object.extend(Ajax.InPlaceEditor.prototype, {
-	getText: function() {
-		return this.element.childNodes[0] ? this.element.childNodes[0].nodeValue : '';
-	}
-});*/
-
-
-/* Some basic session functionality, written by Scott Andrew.
-   <http://www.quirksmode.org/js/cookies.html> */
-
-/*function createCookie(name,value,hours) {
-	if (days) {
-		var date = new Date();
-		date.setTime(date.getTime()+(hours*60*60*1000));
-		var expires = "; expires="+date.toGMTString();
-	}
-	else var expires = "";
-	document.cookie = name+"="+value+expires+"; path=/";
-}
-
-function readCookie(name) {
-	var nameEQ = name + "=";
-	var ca = document.cookie.split(';');
-	for(var i=0;i < ca.length;i++) {
-		var c = ca[i];
-		while (c.charAt(0)==' ') c = c.substring(1,c.length);
-		if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length,c.length);
-	}
-	return null;
-}*/

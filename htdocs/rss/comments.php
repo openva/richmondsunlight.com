@@ -27,7 +27,7 @@
     if (isset($_REQUEST['bill'])) $bill = $_REQUEST['bill'];
 
     # Make sure that the year and bill number are valid-looking.
-    if ((!ereg('([0-9]{4})', $year)) || (!ereg('([b-s]{2})([0-9]+)', $year)))
+    if ((!preg_match('/([0-9]{4})/D', $year)) || (!preg_match('/([b-s]{2})([0-9]+)/D', $year)))
     {
         unset($bill, $year);
 

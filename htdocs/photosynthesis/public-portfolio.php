@@ -35,7 +35,7 @@ $site_section = 'photosynthesis';
 $hash = $_GET['hash'];
 
 # ADDITIONAL HTML HEADERS
-$html_head = '<link rel="alternate" type="application/rss+xml" title="RSS 0.92" href="/photosynthesis/rss/portfolio/'.$hash.'/" />';
+$html_head = '<link rel="alternate" type="application/rss+xml" title="RSS 0.92" href="/photosynthesis/rss/portfolio/' . $hash . '/" />';
 
 # INITIALIZE SESSION
 session_start();
@@ -76,14 +76,14 @@ else
     # Increment the view count.
     $sql = 'UPDATE dashboard_portfolios
 			SET view_count = view_count + 1
-			WHERE id = '.$portfolio['id'];
+			WHERE id = ' . $portfolio['id'];
     mysql_query($sql);
 
     # Make the user closer to anonymous.
     $tmp = explode(' ', $portfolio['user_name']);
     if (count($tmp) > 1)
     {
-        $portfolio['user_name'] = $tmp[0].' '.$tmp[1]{0}.'.';
+        $portfolio['user_name'] = $tmp[0] . ' ' . $tmp[1]{0} . '.';
     }
     else
     {
@@ -93,11 +93,11 @@ else
     # Set the page title to the user's name.
     if (!empty($portfolio['organization']))
     {
-        $page_title .= ' &raquo; '.$portfolio['organization'];
+        $page_title .= ' &raquo; ' . $portfolio['organization'];
     }
     else
     {
-        $page_title .= ' &raquo; '.$portfolio['user_name'];
+        $page_title .= ' &raquo; ' . $portfolio['user_name'];
     }
     $page_title .= '’s Portfolio';
 
@@ -111,23 +111,23 @@ else
     # be on that.
     if (empty($portfolio['url']))
     {
-        $page_sidebar .= $portfolio['user_name'].' ';
+        $page_sidebar .= $portfolio['user_name'] . ' ';
     }
     elseif (empty($portfolio['organization']))
     {
-        $page_sidebar .= '<a href="'.$portfolio['url'].'">'.$portfolio['user_name'].'</a>';
+        $page_sidebar .= '<a href="' . $portfolio['url'] . '">' . $portfolio['user_name'] . '</a>';
     }
     else
     {
-        $page_sidebar .= $portfolio['user_name'].' ';
+        $page_sidebar .= $portfolio['user_name'] . ' ';
     }
     if (!empty($portfolio['url']) && !empty($portfolio['organization']))
     {
-        $page_sidebar .= ' for <a href="'.$portfolio['url'].'">'.$portfolio['organization'].'</a>';
+        $page_sidebar .= ' for <a href="' . $portfolio['url'] . '">' . $portfolio['organization'] . '</a>';
     }
     elseif (!empty($portfolio['organization']))
     {
-        $page_sidebar .= ' for '.$portfolio['organization'];
+        $page_sidebar .= ' for ' . $portfolio['organization'];
     }
     $page_sidebar .= ' using the Photosynthesis bill-tracking tool.</p>
 
@@ -148,7 +148,7 @@ else
 				ON dashboard_bills.bill_id=bills.id
 			LEFT JOIN sessions
 				ON bills.session_id = sessions.id
-			WHERE dashboard_bills.portfolio_id = '.$portfolio['id'].'
+			WHERE dashboard_bills.portfolio_id = ' . $portfolio['id'] . '
 			AND sessions.year=' . SESSION_YEAR . '
 			GROUP BY tags.tag
 			ORDER BY tags.tag ASC';
@@ -165,7 +165,10 @@ else
         while ($tag = mysql_fetch_array($result))
         {
             $tags[] = array_map('stripslashes', $tag);
-            if ($tag['count'] > $top_tag) $top_tag = $tag['count'];
+            if ($tag['count'] > $top_tag)
+            {
+                $top_tag = $tag['count'];
+            }
         }
         if ($top_tag == 1)
         {
@@ -176,8 +179,8 @@ else
             $font_size = round(($tags[$i]['count'] / $top_tag * $top_tag_size), 2);
             if ($font_size >= '.75')
             {
-                $page_sidebar .= '<span style="font-size: '.$font_size.'em;">
-					<a href="/bills/tags/'.urlencode($tags[$i]['tag']).'/">'.$tags[$i]['tag'].'</a>
+                $page_sidebar .= '<span style="font-size: ' . $font_size . 'em;">
+					<a href="/bills/tags/' . urlencode($tags[$i]['tag']) . '/">' . $tags[$i]['tag'] . '</a>
 				</span>';
             }
         }
@@ -202,7 +205,7 @@ else
 				ON bills.chief_patron_id = representatives.id
 			LEFT JOIN dashboard_bills
 				ON dashboard_bills.bill_id = bills.id
-			WHERE dashboard_bills.portfolio_id = '.$portfolio['id'].'
+			WHERE dashboard_bills.portfolio_id = ' . $portfolio['id'] . '
 			AND sessions.year=' . SESSION_YEAR . '
 			ORDER BY bills.chamber DESC,
 			SUBSTRING(bills.number FROM 1 FOR 2) ASC,
@@ -224,7 +227,7 @@ else
         }
         else
         {
-            $page_body .= '<p><em>'.$bill_count.' bills are being tracked.</em></p>';
+            $page_body .= '<p><em>' . $bill_count . ' bills are being tracked.</em></p>';
         }
 
         while ($bill = mysql_fetch_array($result))
@@ -246,19 +249,19 @@ else
             }
 
             $page_body .= '
-			<div class="bill'.$bill['status_class'].'">
-				<h4><a href="/bill/'.$bill['year'].'/'.$bill['number'].'/">'.$bill['catch_line']
-                .' ('.strtoupper($bill['number']).')</a></h4>
-				<p>Patron: <a href="/legislator/'.$bill['patron_shortname'].'/">'
-                    .$bill['patron'].'</a><br />
-				Status: '.$bill['status'].'</p>';
+			<div class="bill' . $bill['status_class'] . '">
+				<h4><a href="/bill/' . $bill['year'] . '/' . $bill['number'] . '/">' . $bill['catch_line']
+                . ' (' . mb_strtoupper($bill['number']) . ')</a></h4>
+				<p>Patron: <a href="/legislator/' . $bill['patron_shortname'] . '/">'
+                    . $bill['patron'] . '</a><br />
+				Status: ' . $bill['status'] . '</p>';
 
             # If the portfolio creator has provided notes on this bill.
             if (!empty($bill['notes']))
             {
                 $page_body .= '
 				<div class="notes">
-					'.nl2p($bill['notes']).'
+					' . nl2p($bill['notes']) . '
 				</div>';
             }
             $page_body .= '<p class="comments">';
@@ -274,11 +277,11 @@ else
                 }
                 else
                 {
-                    $page_body .= 'There are '.$bill['comments'].' comments about this bill';
+                    $page_body .= 'There are ' . $bill['comments'] . ' comments about this bill';
                 }
             }
-            $page_body .= ' <a href="/bill/'.$bill['year'].'/'.strtolower($bill['number'])
-                .'/#comments">&raquo;</a></p>
+            $page_body .= ' <a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number'])
+                . '/#comments">&raquo;</a></p>
 			</div>';
         }
 

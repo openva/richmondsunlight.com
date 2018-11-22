@@ -8,7 +8,6 @@ class User
      */
     public function get()
     {
-
         $this->data = get_user();
 
         if ($this->data == FALSE)
@@ -17,7 +16,6 @@ class User
         }
 
         return TRUE;
-
     }
 
     /*
@@ -54,7 +52,6 @@ class User
              * Report that this is a user.
              */
             return TRUE;
-
         }
 
         $database = new Database;
@@ -67,7 +64,6 @@ class User
 
         if (mysql_num_rows($result) == 1)
         {
-
             $registered = mysql_fetch_assoc($result);
 
             /*
@@ -87,11 +83,9 @@ class User
              */
             $mc->set('user-session-' . $_SESSION['id'], $this->registered, (60 * 30));
             return TRUE;
-
         }
 
         return FALSE;
-
     }
 
     public function views_cloud()
@@ -115,7 +109,7 @@ class User
 				FROM bills_views
 				LEFT JOIN tags
 					ON bills_views.bill_id = tags.bill_id
-				WHERE bills_views.user_id = '.$user['id'].' AND tag IS NOT NULL
+				WHERE bills_views.user_id = ' . $user['id'] . ' AND tag IS NOT NULL
 				GROUP BY tags.tag
 				ORDER BY count DESC
 				LIMIT 100';
@@ -143,7 +137,6 @@ class User
         ksort($tags);
 
         return $tags;
-
     }
 
     # Provide a listing of bills that this bill has not seen, but would probably be interested
@@ -188,7 +181,7 @@ class User
 				FROM bills_views
 				LEFT JOIN bills
 					ON bills_views.bill_id = bills.id
-				WHERE bills.session_id = '.SESSION_ID.' AND user_id = '.$user['id'];
+				WHERE bills.session_id = ' . SESSION_ID . ' AND user_id = ' . $user['id'];
         $result = mysql_query($sql);
         if (mysql_num_rows($result) > 0)
         {
@@ -224,10 +217,10 @@ class User
         $tags_sql = '';
         foreach ($tags as $tag=>$tmp)
         {
-            $tags_sql .= 'tags2.tag = "'.$tag.'" OR ';
+            $tags_sql .= 'tags2.tag = "' . $tag . '" OR ';
         }
         # Hack off the final " OR "
-        $tags_sql = substr($tags_sql, 0, -4);
+        $tags_sql = mb_substr($tags_sql, 0, -4);
         $sql .= $tags_sql;
         $tags_sql = str_replace('tags2', 'tags', $tags_sql);
         $sql .= ')
@@ -241,8 +234,8 @@ class User
 					ON bills.session_id=sessions.id
 				LEFT JOIN committees
 					ON bills.last_committee_id = committees.id
-				WHERE ('.$tags_sql.')
-				AND bills.session_id = '.SESSION_ID.'
+				WHERE (' . $tags_sql . ')
+				AND bills.session_id = ' . SESSION_ID . '
 				HAVING count > 2
 				ORDER BY count DESC
 				LIMIT 100';
@@ -274,7 +267,6 @@ class User
         $mc->set('recommendations-' . $user['id'], serialize($bills), (60 * 30));
 
         return $bills;
-
     }
 
     # List legislation in the current session that cite places physically near to the user. This is
@@ -298,18 +290,18 @@ class User
 
         $sql = 'SELECT bills.id, bills.number, bills.catch_line, sessions.year,
 				bills_places.placename, bills_places.latitude, bills_places.longitude,
-				('.$user['latitude'].' - bills_places.latitude) AS lat_diff,
-				('.$user['longitude'].' - bills_places.longitude) AS lon_diff
+				(' . $user['latitude'] . ' - bills_places.latitude) AS lat_diff,
+				(' . $user['longitude'] . ' - bills_places.longitude) AS lon_diff
 				FROM bills_places
 				LEFT JOIN bills
 					ON bills_places.bill_id = bills.id
 				LEFT JOIN sessions
 					ON bills.session_id=sessions.id
-				WHERE (latitude >= '.(round($user['latitude'], 1)-.25).'
-				AND latitude <='.(round($user['latitude'], 1)+.25).')
-				AND (longitude <= '.(round($user['longitude'], 1)+.25).'
-				AND longitude >= '.(round($user['longitude'], 1)-.25).')
-				AND bills.session_id = '.SESSION_ID.'
+				WHERE (latitude >= ' . (round($user['latitude'], 1)-.25) . '
+				AND latitude <=' . (round($user['latitude'], 1)+.25) . ')
+				AND (longitude <= ' . (round($user['longitude'], 1)+.25) . '
+				AND longitude >= ' . (round($user['longitude'], 1)-.25) . ')
+				AND bills.session_id = ' . SESSION_ID . '
 				ORDER BY ( lat_diff + lon_diff ) DESC';
         $result = mysql_query($sql);
         if (mysql_num_rows($result) == 0)
@@ -346,11 +338,11 @@ class User
         $sql = 'SELECT
 					(SELECT COUNT(*)
 					FROM tags
-					WHERE user_id='.$user['id'].') AS tags,
+					WHERE user_id=' . $user['id'] . ') AS tags,
 
 					(SELECT COUNT(DISTINCT(bill_id))
 					FROM tags
-					WHERE user_id='.$user['id'].') AS bills';
+					WHERE user_id=' . $user['id'] . ') AS bills';
 
         $result = mysql_query($sql);
         if (mysql_num_rows($result) == 0)
@@ -385,7 +377,7 @@ class User
 					ON comments.bill_id = bills.id
 				LEFT JOIN sessions
 					ON bills.session_id = sessions.id
-				WHERE comments.user_id ='.$user['id'].'
+				WHERE comments.user_id =' . $user['id'] . '
 				AND comments.status = "published"
 				ORDER BY comments.date_created DESC
 				LIMIT 10';

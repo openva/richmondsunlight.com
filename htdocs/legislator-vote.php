@@ -52,14 +52,14 @@ $leg_id = $leg->getid($shortname);
 if ($leg_id === false)
 {
     header("Status: 404 Not Found\n\r") ;
-    include('404.php');
+    include '404.php';
     exit();
 }
 # Return the legislator's data as an array.
 $legislator = $leg->info($leg_id);
 
 # Establish a more descriptive page title.
-$page_title = $legislator['prefix'].' '.$legislator['name'].'’s '.$year.' Voting Record';
+$page_title = $legislator['prefix'] . ' ' . $legislator['name'] . '’s ' . $year . ' Voting Record';
 
 # Select the vote data from the database.
 $sql = 'SELECT bills.number AS bill_number, bills.catch_line, representatives_votes.vote,
@@ -72,16 +72,16 @@ $sql = 'SELECT bills.number AS bill_number, bills.catch_line, representatives_vo
 		LEFT JOIN committees ON votes.committee_id = committees.id
 		LEFT JOIN representatives ON representatives_votes.representative_id=representatives.id
 		LEFT JOIN sessions ON bills.session_id = sessions.id
-		WHERE representatives.shortname = "'.mysql_real_escape_string($shortname).'"
-		AND sessions.year = '.mysql_real_escape_string($year).'
+		WHERE representatives.shortname = "' . mysql_real_escape_string($shortname) . '"
+		AND sessions.year = ' . mysql_real_escape_string($year) . '
 		AND bills_status.date IS NOT NULL AND votes.session_id=sessions.id
 		ORDER BY date ASC, committee ASC';
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
     $page_body = '
-		<p><a href="/legislator/'.$shortname.'/votes/'.$year.'.csv">Download List as a
-			Spreadsheet</a> <code>('.$shortname.'-'.$year.'.csv)</code></p>
+		<p><a href="/legislator/' . $shortname . '/votes/' . $year . '.csv">Download List as a
+			Spreadsheet</a> <code>(' . $shortname . '-' . $year . '.csv)</code></p>
 		<p>Y = “yes” N = “no” X = “did not vote” A = “abstained from voting”</p>
 		<table class="sorttable">
 			<thead>
@@ -100,24 +100,24 @@ if (mysql_num_rows($result) > 0)
         $vote = array_map('stripslashes', $vote);
         $page_body .= '
 			<tr>
-				<td><a href="/bill/'.$year.'/'.$vote['bill_number'].'/">'
-                    .strtoupper($vote['bill_number']).'</a></td>
-				<td>'.$vote['catch_line'].'</td>
-				<td>'.$vote['vote'].'</td>
-				<td><a href="/bill/'.$year.'/'.$vote['bill_number'].'/'
-                    .strtolower($vote['lis_id']).'/">'.$vote['outcome'].'</td>
+				<td><a href="/bill/' . $year . '/' . $vote['bill_number'] . '/">'
+                    . mb_strtoupper($vote['bill_number']) . '</a></td>
+				<td>' . $vote['catch_line'] . '</td>
+				<td>' . $vote['vote'] . '</td>
+				<td><a href="/bill/' . $year . '/' . $vote['bill_number'] . '/'
+                    . mb_strtolower($vote['lis_id']) . '/">' . $vote['outcome'] . '</td>
 				<td>';
         if (empty($vote['committee']))
         {
-            $page_body .= ucfirst($legislator['chamber']).' Floor';
+            $page_body .= ucfirst($legislator['chamber']) . ' Floor';
         }
         else
         {
-            $page_body .= '<a href="/committee/'.$legislator['chamber'].'/'
-                .$vote['committee_shortname'].'/">'.$vote['committee'].'</a>';
+            $page_body .= '<a href="/committee/' . $legislator['chamber'] . '/'
+                . $vote['committee_shortname'] . '/">' . $vote['committee'] . '</a>';
         }
         $page_body .= '</td>
-				<td>'.$vote['date'].'</td>
+				<td>' . $vote['date'] . '</td>
 			</tr>';
     }
     $page_body .= '

@@ -1,0 +1,15 @@
+{
+	"name": "RichmondSunlight",
+	"version": "1.0.0",
+	"dependencies": {
+		"jquery": "2.x",
+		"jquery-ui-dist": "1.x",
+		"qtip2": "3.x",
+		"jquery-tags-input": "xoxco/jQuery-Tags-Input",
+		"jeditable": "NicolasCARPi/jquery_jeditable#1.8.0",
+		"zxcvbn": "dropbox/zxcvbn"
+	},
+	"scripts": {
+		"build": "npm install; mv node_modules/* .; rmdir node_modules; mv jquery-ui-dist jquery-ui"
+	}
+}
