@@ -1,0 +1,31 @@
+<?php
+
+return PhpCsFixer\Config::create()
+    ->setRules(array(
+        '@PSR1' => true,
+        '@PSR2' => true,
+        'concat_space' => array(
+            'spacing' => 'one'
+        ),
+        'declare_equal_normalize' => array(
+            'space' => 'single'
+        ),
+        'braces' => array(
+            'position_after_control_structures' => 'next',
+            'position_after_functions_and_oop_constructs' => 'next'
+        ),
+        'combine_consecutive_issets' => true,
+        'combine_consecutive_unsets' => true,
+        'dir_constant' => true,
+        'elseif' => true,
+        'ereg_to_preg' => true,
+        'include' => true,
+        'linebreak_after_opening_tag' => true,
+        'mb_str_functions' => true,
+        'multiline_comment_opening_closing' => true,
+        'no_closing_tag' => true,
+        'no_whitespace_in_blank_line' => true,
+        'single_blank_line_at_eof' => true,
+        'lowercase_constants' => false
+    ))
+;
