@@ -11,15 +11,6 @@
 <link rel="stylesheet" href="/css/page-elements.css" type="text/css" media="screen" />
 <link rel="stylesheet" href="/css/jquery-ui.theme.min.css" type="text/css" media="screen">
 <link rel="stylesheet" href="/css/jquery.qtip.css" type="text/css" media="screen">
-<!--[if lte IE 6]>
-<link rel="stylesheet" href="/css/new/ie6.css" type="text/css" media="screen" />
-<![endif]-->
-<!--[if IE 7]>
-<link rel="stylesheet" href="/css/new/ie7.css" type="text/css" media="screen" />
-<![endif]-->
-<!--[if IE 8]>
-<link rel="stylesheet" href="/css/new/ie8.css" type="text/css" media="screen" />
-<![endif]-->
 <!--<link media="only screen and (max-device-width: 480px), only screen and (min-device-width: 560px) and (max-device-width: 1136px) and (-webkit-min-device-pixel-ratio: 2)"
 	href="/css/iphone.css" type="text/css" rel="stylesheet" />-->
 <script src="/js/vendor/jquery-1.7.1.min.js"></script>
@@ -30,12 +21,11 @@
     # Include the below JavaScript, but only if the browser is IE. We do an Opera check because
     # Opera can include the text "MSIE" in its user agent string.
     if (
-            strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE')
+            mb_strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE')
             &&
-            !strpos($_SERVER['HTTP_USER_AGENT'], 'Opera')
-        )
-    {
-?>
+            !mb_strpos($_SERVER['HTTP_USER_AGENT'], 'Opera')
+        ) {
+        ?>
 <script pagespeed_no_defer="">
 	<!--//--><![CDATA[//><!--
 	activateMenu = function(nav) {
