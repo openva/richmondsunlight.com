@@ -1,7 +1,8 @@
 */.htpasswd
 htdocs/admin/phpmyadmin/
 .users
-htdocs/js/vendor/
+htdocs/js/vendor/*
+!htdocs/js/vendor/package.json
 htdocs/includes/vendor/
 htdocs/includes/settings.inc.php
 htdocs/downloads/
@@ -29,3 +30,6 @@ petition.php
 
 composer.phar
 *.cache
+
+.php_cs.dist
+.php_cs.cache

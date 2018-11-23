@@ -30,10 +30,22 @@ $poll = $_REQUEST['poll'];
 
 # CHECK FOR SPAMMERS
 # If the third, DIV-hidden poll option is selected, we know it's a spammer, so just bail.
-if ($poll['vote'] == 'x') die();
-if (strlen($_SERVER['HTTP_USER_AGENT']) <= 1) die();
-if (stristr($_SERVER['HTTP_USER_AGENT'], 'curl') === TRUE) die();
-if (stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === TRUE) die();
+if ($poll['vote'] == 'x')
+{
+    die();
+}
+if (mb_strlen($_SERVER['HTTP_USER_AGENT']) <= 1)
+{
+    die();
+}
+if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'curl') === TRUE)
+{
+    die();
+}
+if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === TRUE)
+{
+    die();
+}
 
 # REJECT MISSING POLL VOTES
 if (empty($poll['vote']))
@@ -51,11 +63,11 @@ if (!empty($_SESSION['id']))
 
     # ASSEMBLE THE INSERTION SQL
     $sql = 'INSERT INTO polls
-			SET bill_id='.$poll['bill_id'].', vote="'.$poll['vote'].'",
-			ip="'.$_SERVER['REMOTE_ADDR'].'", user_id=
+			SET bill_id=' . $poll['bill_id'] . ', vote="' . $poll['vote'] . '",
+			ip="' . $_SERVER['REMOTE_ADDR'] . '", user_id=
 				(SELECT id
 				FROM users
-				WHERE cookie_hash = "'.$_SESSION['id'].'"),
+				WHERE cookie_hash = "' . $_SESSION['id'] . '"),
 			date_created=now()';
     $result = mysql_query($sql);
     if (!$result)

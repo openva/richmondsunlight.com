@@ -83,8 +83,8 @@ if (mysql_num_rows($result) > 0)
     while ($legislator = mysql_fetch_array($result))
     {
         $legislator = array_map('stripslashes', $legislator);
-        $page_body .= '<li><a href="/legislator/'.$legislator['shortname'].'/">'.$legislator['name'].
-            ' ('.$legislator['party'].'-'.$legislator['place'].')</a></li>';
+        $page_body .= '<li><a href="/legislator/' . $legislator['shortname'] . '/">' . $legislator['name'] .
+            ' (' . $legislator['party'] . '-' . $legislator['place'] . ')</a></li>';
     }
     $page_body .= '</ul>
 		</div>';
@@ -104,8 +104,8 @@ if (mysql_num_rows($result) > 0)
 		<ul>';
     while ($legislator = mysql_fetch_array($result))
     {
-        $page_body .= '<li><a href="/legislator/'.$legislator['shortname'].'/">'.$legislator['name'].
-            ' ('.$legislator['party'].'-'.$legislator['place'].')</a></li>';
+        $page_body .= '<li><a href="/legislator/' . $legislator['shortname'] . '/">' . $legislator['name'] .
+            ' (' . $legislator['party'] . '-' . $legislator['place'] . ')</a></li>';
     }
     $page_body .= '</ul>
 	</div>';

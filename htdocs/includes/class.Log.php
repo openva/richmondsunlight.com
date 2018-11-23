@@ -2,7 +2,6 @@
 
 class Log
 {
-
     public function __construct()
     {
 
@@ -30,12 +29,10 @@ class Log
         {
             $this->output = 'slack';
         }
-
     }
 
     public function put($message, $level)
     {
-
         if (!isset($message))
         {
             return FALSE;
@@ -48,10 +45,10 @@ class Log
         /*
          * If this is being invoked at the CLI, display all messages.
          */
-    if (PHP_SAPI === 'cli')
-    {
-        echo $message . "\n";
-    }
+        if (PHP_SAPI === 'cli')
+        {
+            echo $message . "\n";
+        }
 
         /*
          * If the level of this message is below our verbosity level, ignore it.
@@ -66,7 +63,6 @@ class Log
          */
         if ($this->output == 'slack')
         {
-
             $emoji = array(
                 1 => ':white_large_square:',
                 2 => ':white_large_square:',
@@ -78,7 +74,6 @@ class Log
                 8 => ':skull:'
                 );
             $this->slack($message, 'rs', $emoji[$level]);
-
         }
 
         /*
@@ -90,12 +85,10 @@ class Log
         }
 
         return TRUE;
-
     }
 
     public function slack($message, $room = 'rs', $icon = ':longbox:')
     {
-
         $room = ($room) ? $room : 'general';
         $data = 'payload=' . json_encode(array(
                 'channel'       =>  '#' . $room,
@@ -112,7 +105,6 @@ class Log
         curl_close($ch);
 
         return $result;
-
     }
 
     /**
@@ -124,7 +116,7 @@ class Log
     /*
      * Prepend the message with a timestamp.
      */
-           $message = date('Y-m-d H:i:s') . ' ' . $message;
+        $message = date('Y-m-d H:i:s') . ' ' . $message;
 
         /*
          * Keep logs in different locations, depending on how this has been invoked.
@@ -143,7 +135,6 @@ class Log
             return FALSE;
         }
         return TRUE;
-
     }
 
     /**
@@ -151,20 +142,19 @@ class Log
      */
     public function pushover($title, $message)
     {
-
         if (!defined('PUSHOVER_KEY') || !isset($title) || !isset($message))
         {
             return FALSE;
         }
 
-        if (strlen($title) > 100)
+        if (mb_strlen($title) > 100)
         {
-            $title = substr($title, 0, 100);
+            $title = mb_substr($title, 0, 100);
         }
 
-        if (strlen($message) > 412)
+        if (mb_strlen($message) > 412)
         {
-            $message = substr($message, 0, 412);
+            $message = mb_substr($message, 0, 412);
         }
 
         curl_setopt_array($ch = curl_init(), array(
@@ -182,8 +172,5 @@ class Log
         curl_close($ch);
 
         return TRUE;
-
     }
-
-
 }

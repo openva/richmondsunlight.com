@@ -2,10 +2,8 @@
 
 class Legislator
 {
-
     public function getid($shortname)
     {
-
         if (!isset($shortname) || empty($shortname))
         {
             return FALSE;
@@ -16,7 +14,7 @@ class Legislator
 
         $sql = 'SELECT id
 				FROM representatives
-				WHERE shortname="'.mysql_real_escape_string($shortname).'"';
+				WHERE shortname="' . mysql_real_escape_string($shortname) . '"';
         $result = mysql_query($sql);
         if (mysql_num_rows($result) == 0)
         {
@@ -24,12 +22,10 @@ class Legislator
         }
         $legislator = mysql_fetch_array($result);
         return $legislator['id'];
-
     } // end function "getid"
 
     public function info($id)
     {
-
         if (!isset($id))
         {
             return FALSE;
@@ -94,10 +90,10 @@ class Legislator
         $legislator = array_map('stripslashes', $legislator);
 
         # Convert some data.
-        $legislator['suffix'] = '('.$legislator['party'].'-'.$legislator['place'].')';
+        $legislator['suffix'] = '(' . $legislator['party'] . '-' . $legislator['place'] . ')';
         $legislator['name'] = pivot($legislator['name']);
-        $legislator['cash_on_hand'] = '$'.number_format($legislator['cash_on_hand']);
-        $legislator['address_district'] = ereg_replace('^(.*),(.*),(.*)$', '\\1<br />\\2, \\3', $legislator['address_district']);
+        $legislator['cash_on_hand'] = '$' . number_format($legislator['cash_on_hand']);
+        $legislator['address_district'] = preg_replace('/^(.*),(.*),(.*)$/D', '\\1<br />\\2, \\3', $legislator['address_district']);
         if ($legislator['chamber'] == 'house')
         {
             $legislator['prefix'] = 'Del.';
@@ -150,16 +146,21 @@ class Legislator
 				FROM committees
 				LEFT JOIN committee_members
 					ON committees.id = committee_members.committee_id
-				WHERE committee_members.representative_id = '.$legislator['id'].'
+				WHERE committee_members.representative_id = ' . $legislator['id'] . '
 				AND (committee_members.date_ended IS NULL OR
 					committee_members.date_ended > now())';
         $result = mysql_query($sql);
         if (mysql_num_rows($result) > 0)
         {
-            while ($committee = mysql_fetch_array($result))
+            while ($committee = mysql_fetch_assoc($result))
             {
                 # Clean it up.
                 $committee = array_map('stripslashes', $committee);
+
+                if (empty($committee['position']))
+                {
+                    $committee['position'] = 'member';
+                }
 
                 # Append the committee membership data to the legislator array.
                 $legislator['committees'][] = $committee;
@@ -172,7 +173,5 @@ class Legislator
         $mc->set('legislator-' . $id, serialize($legislator), (60 * 60 * 24));
 
         return $legislator;
-
     } // end class "info"
-
 } // end class "legislator"

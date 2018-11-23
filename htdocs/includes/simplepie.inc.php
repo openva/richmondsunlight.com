@@ -1286,7 +1286,8 @@ class SimplePie
             {
                 return true;
             }
-            if ($fetched === false) {
+            if ($fetched === false)
+            {
                 return false;
             }
 
@@ -1308,16 +1309,16 @@ class SimplePie
         // RFC 3023 (only applies to sniffed content)
         if (isset($sniffed))
         {
-            if (in_array($sniffed, $application_types) || substr($sniffed, 0, 12) === 'application/' && substr($sniffed, -4) === '+xml')
+            if (in_array($sniffed, $application_types) || mb_substr($sniffed, 0, 12) === 'application/' && mb_substr($sniffed, -4) === '+xml')
             {
                 if (isset($headers['content-type']) && preg_match('/;\x20?charset=([^;]*)/i', $headers['content-type'], $charset))
                 {
-                    $encodings[] = strtoupper($charset[1]);
+                    $encodings[] = mb_strtoupper($charset[1]);
                 }
                 $encodings = array_merge($encodings, $this->registry->call('Misc', 'xml_encoding', array($this->raw_data, &$this->registry)));
                 $encodings[] = 'UTF-8';
             }
-            elseif (in_array($sniffed, $text_types) || substr($sniffed, 0, 5) === 'text/' && substr($sniffed, -4) === '+xml')
+            elseif (in_array($sniffed, $text_types) || mb_substr($sniffed, 0, 5) === 'text/' && mb_substr($sniffed, -4) === '+xml')
             {
                 if (isset($headers['content-type']) && preg_match('/;\x20?charset=([^;]*)/i', $headers['content-type'], $charset))
                 {
@@ -1326,7 +1327,7 @@ class SimplePie
                 $encodings[] = 'US-ASCII';
             }
             // Text MIME-type default
-            elseif (substr($sniffed, 0, 5) === 'text/')
+            elseif (mb_substr($sniffed, 0, 5) === 'text/')
             {
                 $encodings[] = 'US-ASCII';
             }
@@ -2352,7 +2353,6 @@ class SimplePie
                     {
                         $link_rel = (isset($link['attribs']['']['rel'])) ? $link['attribs']['']['rel'] : 'alternate';
                         $this->data['links'][$link_rel][] = $this->sanitize($link['attribs']['']['href'], SIMPLEPIE_CONSTRUCT_IRI, $this->get_base($link));
-
                     }
                 }
             }
@@ -2384,9 +2384,9 @@ class SimplePie
                         $this->data['links'][SIMPLEPIE_IANA_LINK_RELATIONS_REGISTRY . $key] =& $this->data['links'][$key];
                     }
                 }
-                elseif (substr($key, 0, 41) === SIMPLEPIE_IANA_LINK_RELATIONS_REGISTRY)
+                elseif (mb_substr($key, 0, 41) === SIMPLEPIE_IANA_LINK_RELATIONS_REGISTRY)
                 {
-                    $this->data['links'][substr($key, 41)] =& $this->data['links'][$key];
+                    $this->data['links'][mb_substr($key, 41)] =& $this->data['links'][$key];
                 }
                 $this->data['links'][$key] = array_unique($this->data['links'][$key]);
             }
@@ -2554,7 +2554,6 @@ class SimplePie
      */
     public function get_latitude()
     {
-
         if ($return = $this->get_channel_tags(SIMPLEPIE_NAMESPACE_W3C_BASIC_GEO, 'lat'))
         {
             return (float) $return[0]['data'];
@@ -2964,7 +2963,7 @@ class SimplePie
      */
     public function __call($method, $args)
     {
-        if (strpos($method, 'subscribe_') === 0)
+        if (mb_strpos($method, 'subscribe_') === 0)
         {
             $level = defined('E_USER_DEPRECATED') ? E_USER_DEPRECATED : E_USER_WARNING;
             trigger_error('subscribe_*() has been deprecated, implement the callback yourself', $level);
@@ -3664,7 +3663,7 @@ class SimplePie_Cache_MySQL extends SimplePie_Cache_DB
         $this->options = array_merge_recursive($this->options, SimplePie_Cache::parse_URL($location));
 
         // Path is prefixed with a "/"
-        $this->options['dbname'] = substr($this->options['path'], 1);
+        $this->options['dbname'] = mb_substr($this->options['path'], 1);
 
         try
         {
@@ -4029,7 +4028,9 @@ class SimplePie_Cache
     /**
      * Don't call the constructor. Please.
      */
-    private function __construct() { }
+    private function __construct()
+    {
+    }
 
     /**
      * Create a new SimplePie_Cache object
@@ -4421,28 +4422,28 @@ class SimplePie_Content_Type_Sniffer
                 return $this->text_or_binary();
             }
 
-            if (($pos = strpos($this->file->headers['content-type'], ';')) !== false)
+            if (($pos = mb_strpos($this->file->headers['content-type'], ';')) !== false)
             {
-                $official = substr($this->file->headers['content-type'], 0, $pos);
+                $official = mb_substr($this->file->headers['content-type'], 0, $pos);
             }
             else
             {
                 $official = $this->file->headers['content-type'];
             }
-            $official = trim(strtolower($official));
+            $official = trim(mb_strtolower($official));
 
             if ($official === 'unknown/unknown'
                 || $official === 'application/unknown')
             {
                 return $this->unknown();
             }
-            if (substr($official, -4) === '+xml'
+            if (mb_substr($official, -4) === '+xml'
                 || $official === 'text/xml'
                 || $official === 'application/xml')
             {
                 return $official;
             }
-            if (substr($official, 0, 6) === 'image/')
+            if (mb_substr($official, 0, 6) === 'image/')
             {
                 if ($return = $this->image())
                 {
@@ -4475,10 +4476,10 @@ class SimplePie_Content_Type_Sniffer
      */
     public function text_or_binary()
     {
-        if (substr($this->file->body, 0, 2) === "\xFE\xFF"
-            || substr($this->file->body, 0, 2) === "\xFF\xFE"
-            || substr($this->file->body, 0, 4) === "\x00\x00\xFE\xFF"
-            || substr($this->file->body, 0, 3) === "\xEF\xBB\xBF")
+        if (mb_substr($this->file->body, 0, 2) === "\xFE\xFF"
+            || mb_substr($this->file->body, 0, 2) === "\xFF\xFE"
+            || mb_substr($this->file->body, 0, 4) === "\x00\x00\xFE\xFF"
+            || mb_substr($this->file->body, 0, 3) === "\xEF\xBB\xBF")
         {
             return 'text/plain';
         }
@@ -4500,38 +4501,38 @@ class SimplePie_Content_Type_Sniffer
     public function unknown()
     {
         $ws = strspn($this->file->body, "\x09\x0A\x0B\x0C\x0D\x20");
-        if (strtolower(substr($this->file->body, $ws, 14)) === '<!doctype html'
-            || strtolower(substr($this->file->body, $ws, 5)) === '<html'
-            || strtolower(substr($this->file->body, $ws, 7)) === '<script')
+        if (mb_strtolower(mb_substr($this->file->body, $ws, 14)) === '<!doctype html'
+            || mb_strtolower(mb_substr($this->file->body, $ws, 5)) === '<html'
+            || mb_strtolower(mb_substr($this->file->body, $ws, 7)) === '<script')
         {
             return 'text/html';
         }
-        if (substr($this->file->body, 0, 5) === '%PDF-')
+        if (mb_substr($this->file->body, 0, 5) === '%PDF-')
         {
             return 'application/pdf';
         }
-        if (substr($this->file->body, 0, 11) === '%!PS-Adobe-')
+        if (mb_substr($this->file->body, 0, 11) === '%!PS-Adobe-')
         {
             return 'application/postscript';
         }
-        if (substr($this->file->body, 0, 6) === 'GIF87a'
-            || substr($this->file->body, 0, 6) === 'GIF89a')
+        if (mb_substr($this->file->body, 0, 6) === 'GIF87a'
+            || mb_substr($this->file->body, 0, 6) === 'GIF89a')
         {
             return 'image/gif';
         }
-        if (substr($this->file->body, 0, 8) === "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A")
+        if (mb_substr($this->file->body, 0, 8) === "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A")
         {
             return 'image/png';
         }
-        if (substr($this->file->body, 0, 3) === "\xFF\xD8\xFF")
+        if (mb_substr($this->file->body, 0, 3) === "\xFF\xD8\xFF")
         {
             return 'image/jpeg';
         }
-        if (substr($this->file->body, 0, 2) === "\x42\x4D")
+        if (mb_substr($this->file->body, 0, 2) === "\x42\x4D")
         {
             return 'image/bmp';
         }
-        if (substr($this->file->body, 0, 4) === "\x00\x00\x01\x00")
+        if (mb_substr($this->file->body, 0, 4) === "\x00\x00\x01\x00")
         {
             return 'image/vnd.microsoft.icon';
         }
@@ -4548,24 +4549,24 @@ class SimplePie_Content_Type_Sniffer
      */
     public function image()
     {
-        if (substr($this->file->body, 0, 6) === 'GIF87a'
-            || substr($this->file->body, 0, 6) === 'GIF89a')
+        if (mb_substr($this->file->body, 0, 6) === 'GIF87a'
+            || mb_substr($this->file->body, 0, 6) === 'GIF89a')
         {
             return 'image/gif';
         }
-        if (substr($this->file->body, 0, 8) === "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A")
+        if (mb_substr($this->file->body, 0, 8) === "\x89\x50\x4E\x47\x0D\x0A\x1A\x0A")
         {
             return 'image/png';
         }
-        if (substr($this->file->body, 0, 3) === "\xFF\xD8\xFF")
+        if (mb_substr($this->file->body, 0, 3) === "\xFF\xD8\xFF")
         {
             return 'image/jpeg';
         }
-        if (substr($this->file->body, 0, 2) === "\x42\x4D")
+        if (mb_substr($this->file->body, 0, 2) === "\x42\x4D")
         {
             return 'image/bmp';
         }
-        if (substr($this->file->body, 0, 4) === "\x00\x00\x01\x00")
+        if (mb_substr($this->file->body, 0, 4) === "\x00\x00\x01\x00")
         {
             return 'image/vnd.microsoft.icon';
         }
@@ -4582,7 +4583,7 @@ class SimplePie_Content_Type_Sniffer
      */
     public function feed_or_html()
     {
-        $len = strlen($this->file->body);
+        $len = mb_strlen($this->file->body);
         $pos = strspn($this->file->body, "\x09\x0A\x0D\x20");
 
         while ($pos < $len)
@@ -4604,10 +4605,10 @@ class SimplePie_Content_Type_Sniffer
                     return 'text/html';
             }
 
-            if (substr($this->file->body, $pos, 3) === '!--')
+            if (mb_substr($this->file->body, $pos, 3) === '!--')
             {
                 $pos += 3;
-                if ($pos < $len && ($pos = strpos($this->file->body, '-->', $pos)) !== false)
+                if ($pos < $len && ($pos = mb_strpos($this->file->body, '-->', $pos)) !== false)
                 {
                     $pos += 3;
                 }
@@ -4616,9 +4617,9 @@ class SimplePie_Content_Type_Sniffer
                     return 'text/html';
                 }
             }
-            elseif (substr($this->file->body, $pos, 1) === '!')
+            elseif (mb_substr($this->file->body, $pos, 1) === '!')
             {
-                if ($pos < $len && ($pos = strpos($this->file->body, '>', $pos)) !== false)
+                if ($pos < $len && ($pos = mb_strpos($this->file->body, '>', $pos)) !== false)
                 {
                     $pos++;
                 }
@@ -4627,9 +4628,9 @@ class SimplePie_Content_Type_Sniffer
                     return 'text/html';
                 }
             }
-            elseif (substr($this->file->body, $pos, 1) === '?')
+            elseif (mb_substr($this->file->body, $pos, 1) === '?')
             {
-                if ($pos < $len && ($pos = strpos($this->file->body, '?>', $pos)) !== false)
+                if ($pos < $len && ($pos = mb_strpos($this->file->body, '?>', $pos)) !== false)
                 {
                     $pos += 2;
                 }
@@ -4638,12 +4639,12 @@ class SimplePie_Content_Type_Sniffer
                     return 'text/html';
                 }
             }
-            elseif (substr($this->file->body, $pos, 3) === 'rss'
-                || substr($this->file->body, $pos, 7) === 'rdf:RDF')
+            elseif (mb_substr($this->file->body, $pos, 3) === 'rss'
+                || mb_substr($this->file->body, $pos, 7) === 'rdf:RDF')
             {
                 return 'application/rss+xml';
             }
-            elseif (substr($this->file->body, $pos, 4) === 'feed')
+            elseif (mb_substr($this->file->body, $pos, 4) === 'feed')
             {
                 return 'application/atom+xml';
             }
@@ -4754,7 +4755,6 @@ class SimplePie_Copyright
  */
 class SimplePie_Core extends SimplePie
 {
-
 }
 
 /**
@@ -4922,7 +4922,7 @@ class SimplePie_Decode_HTML_Entities
      */
     public function parse()
     {
-        while (($this->position = strpos($this->data, '&', $this->position)) !== false)
+        while (($this->position = mb_strpos($this->data, '&', $this->position)) !== false)
         {
             $this->consume();
             $this->entity();
@@ -4961,7 +4961,7 @@ class SimplePie_Decode_HTML_Entities
     {
         if ($len = strspn($this->data, $chars, $this->position))
         {
-            $data = substr($this->data, $this->position, $len);
+            $data = mb_substr($this->data, $this->position, $len);
             $this->consumed .= $data;
             $this->position += $len;
             return $data;
@@ -4979,7 +4979,7 @@ class SimplePie_Decode_HTML_Entities
      */
     public function unconsume()
     {
-        $this->consumed = substr($this->consumed, 0, -1);
+        $this->consumed = mb_substr($this->consumed, 0, -1);
         $this->position--;
     }
 
@@ -5046,9 +5046,9 @@ class SimplePie_Decode_HTML_Entities
                         $this->unconsume();
                     }
 
-                    $consumed_length = strlen($this->consumed);
+                    $consumed_length = mb_strlen($this->consumed);
                     $this->data = substr_replace($this->data, $replacement, $this->position - $consumed_length, $consumed_length);
-                    $this->position += strlen($replacement) - $consumed_length;
+                    $this->position += mb_strlen($replacement) - $consumed_length;
                 }
                 break;
 
@@ -5424,7 +5424,7 @@ class SimplePie_Decode_HTML_Entities
 
                 for ($i = 0, $match = null; $i < 9 && $this->consume() !== false; $i++)
                 {
-                    $consumed = substr($this->consumed, 1);
+                    $consumed = mb_substr($this->consumed, 1);
                     if (isset($entities[$consumed]))
                     {
                         $match = $consumed;
@@ -5433,8 +5433,8 @@ class SimplePie_Decode_HTML_Entities
 
                 if ($match !== null)
                 {
-                    $this->data = substr_replace($this->data, $entities[$match], $this->position - strlen($consumed) - 1, strlen($match) + 1);
-                    $this->position += strlen($entities[$match]) - strlen($consumed) - 1;
+                    $this->data = substr_replace($this->data, $entities[$match], $this->position - mb_strlen($consumed) - 1, mb_strlen($match) + 1);
+                    $this->position += mb_strlen($entities[$match]) - mb_strlen($consumed) - 1;
                 }
                 break;
         }
@@ -6390,7 +6390,7 @@ class SimplePie_Enclosure
         else
         {
             $options = explode(',', $options);
-            foreach($options as $option)
+            foreach ($options as $option)
             {
                 $opt = explode(':', $option, 2);
                 if (isset($opt[0], $opt[1]))
@@ -6540,11 +6540,11 @@ class SimplePie_Enclosure
             $height += 20;
             if ($native)
             {
-                $embed .= "<embed src=\"$mediaplayer\" pluginspage=\"http://adobe.com/go/getflashplayer\" type=\"application/x-shockwave-flash\" quality=\"high\" width=\"$width\" height=\"$height\" wmode=\"transparent\" flashvars=\"file=" . rawurlencode($this->get_link().'?file_extension=.'.$this->get_extension()) . "&autostart=false&repeat=$loop&showdigits=true&showfsbutton=false\"></embed>";
+                $embed .= "<embed src=\"$mediaplayer\" pluginspage=\"http://adobe.com/go/getflashplayer\" type=\"application/x-shockwave-flash\" quality=\"high\" width=\"$width\" height=\"$height\" wmode=\"transparent\" flashvars=\"file=" . rawurlencode($this->get_link() . '?file_extension=.' . $this->get_extension()) . "&autostart=false&repeat=$loop&showdigits=true&showfsbutton=false\"></embed>";
             }
             else
             {
-                $embed .= "<script type='text/javascript'>embed_flv('$width', '$height', '" . rawurlencode($this->get_link().'?file_extension=.'.$this->get_extension()) . "', '$placeholder', '$loop', '$mediaplayer');</script>";
+                $embed .= "<script type='text/javascript'>embed_flv('$width', '$height', '" . rawurlencode($this->get_link() . '?file_extension=.' . $this->get_extension()) . "', '$placeholder', '$loop', '$mediaplayer');</script>";
             }
         }
 
@@ -6585,7 +6585,10 @@ class SimplePie_Enclosure
         }
 
         // Everything else
-        else $embed .= '<a href="' . $this->get_link() . '" class="' . $altclass . '">' . $alt . '</a>';
+        else
+        {
+            $embed .= '<a href="' . $this->get_link() . '" class="' . $altclass . '">' . $alt . '</a>';
+        }
 
         return $embed;
     }
@@ -6612,7 +6615,7 @@ class SimplePie_Enclosure
 
         if ($this->get_type() !== null)
         {
-            $type = strtolower($this->type);
+            $type = mb_strtolower($this->type);
         }
         else
         {
@@ -6622,7 +6625,7 @@ class SimplePie_Enclosure
         // If we encounter an unsupported mime-type, check the file extension and guess intelligently.
         if (!in_array($type, array_merge($types_flash, $types_fmedia, $types_quicktime, $types_wmedia, $types_mp3)))
         {
-            switch (strtolower($this->get_extension()))
+            switch (mb_strtolower($this->get_extension()))
             {
                 // Audio mime-types
                 case 'aac':
@@ -6894,7 +6897,7 @@ class SimplePie_File
                 $this->method = SIMPLEPIE_FILE_SOURCE_REMOTE | SIMPLEPIE_FILE_SOURCE_FSOCKOPEN;
                 $url_parts = parse_url($url);
                 $socket_host = $url_parts['host'];
-                if (isset($url_parts['scheme']) && strtolower($url_parts['scheme']) === 'https')
+                if (isset($url_parts['scheme']) && mb_strtolower($url_parts['scheme']) === 'https')
                 {
                     $socket_host = "ssl://$url_parts[host]";
                     $url_parts['port'] = 443;
@@ -6971,7 +6974,7 @@ class SimplePie_File
                             if (isset($this->headers['content-encoding']))
                             {
                                 // Hey, we act dumb elsewhere, so let's do that here too
-                                switch (strtolower(trim($this->headers['content-encoding'], "\x09\x0A\x0D\x20")))
+                                switch (mb_strtolower(trim($this->headers['content-encoding'], "\x09\x0A\x0D\x20")))
                                 {
                                     case 'gzip':
                                     case 'x-gzip':
@@ -7183,7 +7186,7 @@ class SimplePie_gzdecode
     public function __construct($data)
     {
         $this->compressed_data = $data;
-        $this->compressed_size = strlen($data);
+        $this->compressed_size = mb_strlen($data);
     }
 
     /**
@@ -7196,7 +7199,7 @@ class SimplePie_gzdecode
         if ($this->compressed_size >= $this->min_compressed_size)
         {
             // Check ID1, ID2, and CM
-            if (substr($this->compressed_data, 0, 3) !== "\x1F\x8B\x08")
+            if (mb_substr($this->compressed_data, 0, 3) !== "\x1F\x8B\x08")
             {
                 return false;
             }
@@ -7214,7 +7217,7 @@ class SimplePie_gzdecode
             $this->position += 4;
 
             // MTIME
-            $mtime = substr($this->compressed_data, $this->position, 4);
+            $mtime = mb_substr($this->compressed_data, $this->position, 4);
             // Reverse the string if we're on a big-endian arch because l is the only signed long and is machine endianness
             if (current(unpack('S', "\x00\x01")) === 1)
             {
@@ -7243,7 +7246,7 @@ class SimplePie_gzdecode
                 }
 
                 // Get the length of the extra field
-                $len = current(unpack('v', substr($this->compressed_data, $this->position, 2)));
+                $len = current(unpack('v', mb_substr($this->compressed_data, $this->position, 2)));
                 $this->position += 2;
 
                 // Check the length of the string is still valid
@@ -7251,7 +7254,7 @@ class SimplePie_gzdecode
                 if ($this->compressed_size >= $this->min_compressed_size)
                 {
                     // Set the extra field to the given data
-                    $this->extra_field = substr($this->compressed_data, $this->position, $len);
+                    $this->extra_field = mb_substr($this->compressed_data, $this->position, $len);
                     $this->position += $len;
                 }
                 else
@@ -7271,7 +7274,7 @@ class SimplePie_gzdecode
                 if ($this->compressed_size >= $this->min_compressed_size)
                 {
                     // Set the original filename to the given string
-                    $this->filename = substr($this->compressed_data, $this->position, $len);
+                    $this->filename = mb_substr($this->compressed_data, $this->position, $len);
                     $this->position += $len + 1;
                 }
                 else
@@ -7291,7 +7294,7 @@ class SimplePie_gzdecode
                 if ($this->compressed_size >= $this->min_compressed_size)
                 {
                     // Set the original comment to the given string
-                    $this->comment = substr($this->compressed_data, $this->position, $len);
+                    $this->comment = mb_substr($this->compressed_data, $this->position, $len);
                     $this->position += $len + 1;
                 }
                 else
@@ -7308,10 +7311,10 @@ class SimplePie_gzdecode
                 if ($this->compressed_size >= $this->min_compressed_size)
                 {
                     // Read the CRC
-                    $crc = current(unpack('v', substr($this->compressed_data, $this->position, 2)));
+                    $crc = current(unpack('v', mb_substr($this->compressed_data, $this->position, 2)));
 
                     // Check the CRC matches
-                    if ((crc32(substr($this->compressed_data, 0, $this->position)) & 0xFFFF) === $crc)
+                    if ((crc32(mb_substr($this->compressed_data, 0, $this->position)) & 0xFFFF) === $crc)
                     {
                         $this->position += 2;
                     }
@@ -7327,7 +7330,7 @@ class SimplePie_gzdecode
             }
 
             // Decompress the actual data
-            if (($this->data = gzinflate(substr($this->compressed_data, $this->position, -8))) === false)
+            if (($this->data = gzinflate(mb_substr($this->compressed_data, $this->position, -8))) === false)
             {
                 return false;
             }
@@ -7337,7 +7340,7 @@ class SimplePie_gzdecode
             }
 
             // Check CRC of data
-            $crc = current(unpack('V', substr($this->compressed_data, $this->position, 4)));
+            $crc = current(unpack('V', mb_substr($this->compressed_data, $this->position, 4)));
             $this->position += 4;
             /*if (extension_loaded('hash') && sprintf('%u', current(unpack('V', hash('crc32b', $this->data)))) !== sprintf('%u', $crc))
             {
@@ -7345,9 +7348,9 @@ class SimplePie_gzdecode
             }*/
 
             // Check ISIZE of data
-            $isize = current(unpack('V', substr($this->compressed_data, $this->position, 4)));
+            $isize = current(unpack('V', mb_substr($this->compressed_data, $this->position, 4)));
             $this->position += 4;
-            if (sprintf('%u', strlen($this->data) & 0xFFFFFFFF) !== sprintf('%u', $isize))
+            if (sprintf('%u', mb_strlen($this->data) & 0xFFFFFFFF) !== sprintf('%u', $isize))
             {
                 return false;
             }
@@ -7455,7 +7458,7 @@ class SimplePie_HTTP_Parser
     public function __construct($data)
     {
         $this->data = $data;
-        $this->data_length = strlen($this->data);
+        $this->data_length = mb_strlen($this->data);
     }
 
     /**
@@ -7515,12 +7518,12 @@ class SimplePie_HTTP_Parser
      */
     protected function http_version()
     {
-        if (strpos($this->data, "\x0A") !== false && strtoupper(substr($this->data, 0, 5)) === 'HTTP/')
+        if (mb_strpos($this->data, "\x0A") !== false && mb_strtoupper(mb_substr($this->data, 0, 5)) === 'HTTP/')
         {
             $len = strspn($this->data, '0123456789.', 5);
-            $this->http_version = substr($this->data, 5, $len);
+            $this->http_version = mb_substr($this->data, 5, $len);
             $this->position += 5 + $len;
-            if (substr_count($this->http_version, '.') <= 1)
+            if (mb_substr_count($this->http_version, '.') <= 1)
             {
                 $this->http_version = (float) $this->http_version;
                 $this->position += strspn($this->data, "\x09\x20", $this->position);
@@ -7544,7 +7547,7 @@ class SimplePie_HTTP_Parser
     {
         if ($len = strspn($this->data, '0123456789', $this->position))
         {
-            $this->status_code = (int) substr($this->data, $this->position, $len);
+            $this->status_code = (int) mb_substr($this->data, $this->position, $len);
             $this->position += $len;
             $this->state = 'reason';
         }
@@ -7560,7 +7563,7 @@ class SimplePie_HTTP_Parser
     protected function reason()
     {
         $len = strcspn($this->data, "\x0A", $this->position);
-        $this->reason = trim(substr($this->data, $this->position, $len), "\x09\x0D\x20");
+        $this->reason = trim(mb_substr($this->data, $this->position, $len), "\x09\x0D\x20");
         $this->position += $len + 1;
         $this->state = 'new_line';
     }
@@ -7573,7 +7576,7 @@ class SimplePie_HTTP_Parser
         $this->value = trim($this->value, "\x0D\x20");
         if ($this->name !== '' && $this->value !== '')
         {
-            $this->name = strtolower($this->name);
+            $this->name = mb_strtolower($this->name);
             // We should only use the last Content-Type header. c.f. issue #1
             if (isset($this->headers[$this->name]) && $this->name !== 'content-type')
             {
@@ -7586,7 +7589,7 @@ class SimplePie_HTTP_Parser
         }
         $this->name = '';
         $this->value = '';
-        if (substr($this->data[$this->position], 0, 2) === "\x0D\x0A")
+        if (mb_substr($this->data[$this->position], 0, 2) === "\x0D\x0A")
         {
             $this->position += 2;
             $this->state = 'body';
@@ -7617,7 +7620,7 @@ class SimplePie_HTTP_Parser
             }
             else
             {
-                $this->name = substr($this->data, $this->position, $len);
+                $this->name = mb_substr($this->data, $this->position, $len);
                 $this->position += $len + 1;
                 $this->state = 'value';
             }
@@ -7635,7 +7638,7 @@ class SimplePie_HTTP_Parser
     {
         do
         {
-            if (substr($this->data, $this->position, 2) === "\x0D\x0A")
+            if (mb_substr($this->data, $this->position, 2) === "\x0D\x0A")
             {
                 $this->position += 2;
             }
@@ -7664,7 +7667,7 @@ class SimplePie_HTTP_Parser
                 case '"':
                     // Workaround for ETags: we have to include the quotes as
                     // part of the tag.
-                    if (strtolower($this->name) === 'etag')
+                    if (mb_strtolower($this->name) === 'etag')
                     {
                         $this->value .= '"';
                         $this->position++;
@@ -7693,7 +7696,7 @@ class SimplePie_HTTP_Parser
     protected function value_char()
     {
         $len = strcspn($this->data, "\x09\x20\x0A\"", $this->position);
-        $this->value .= substr($this->data, $this->position, $len);
+        $this->value .= mb_substr($this->data, $this->position, $len);
         $this->position += $len;
         $this->state = 'value';
     }
@@ -7739,7 +7742,7 @@ class SimplePie_HTTP_Parser
     protected function quote_char()
     {
         $len = strcspn($this->data, "\x09\x20\x0A\"\\", $this->position);
-        $this->value .= substr($this->data, $this->position, $len);
+        $this->value .= mb_substr($this->data, $this->position, $len);
         $this->position += $len;
         $this->state = 'value';
     }
@@ -7759,7 +7762,7 @@ class SimplePie_HTTP_Parser
      */
     protected function body()
     {
-        $this->body = substr($this->data, $this->position);
+        $this->body = mb_substr($this->data, $this->position);
         if (!empty($this->headers['transfer-encoding']))
         {
             unset($this->headers['transfer-encoding']);
@@ -7804,9 +7807,9 @@ class SimplePie_HTTP_Parser
                 return;
             }
 
-            $chunk_length = strlen($matches[0]);
-            $decoded .= $part = substr($encoded, $chunk_length, $length);
-            $encoded = substr($encoded, $chunk_length + $length + 2);
+            $chunk_length = mb_strlen($matches[0]);
+            $decoded .= $part = mb_substr($encoded, $chunk_length, $length);
+            $encoded = mb_substr($encoded, $chunk_length + $length + 2);
 
             if (trim($encoded) === '0' || empty($encoded))
             {
@@ -7935,9 +7938,8 @@ class SimplePie_IRI
             || $name === 'ipath'
             || $name === 'iquery'
             || $name === 'ifragment'
-        )
-        {
-            call_user_func(array($this, 'set_' . substr($name, 1)), $value);
+        ) {
+            call_user_func(array($this, 'set_' . mb_substr($name, 1)), $value);
         }
     }
 
@@ -7958,8 +7960,7 @@ class SimplePie_IRI
             $name === 'uri' ||
             $name === 'iauthority' ||
             $name === 'authority'
-        )
-        {
+        ) {
             $return = $this->{"get_$name"}();
         }
         elseif (array_key_exists($name, $props))
@@ -7973,7 +7974,7 @@ class SimplePie_IRI
             $return = $this->$prop;
         }
         // ischeme -> scheme
-        elseif (($prop = substr($name, 1)) && array_key_exists($prop, $props))
+        elseif (($prop = mb_substr($name, 1)) && array_key_exists($prop, $props))
         {
             $name = $prop;
             $return = $this->$prop;
@@ -8090,9 +8091,9 @@ class SimplePie_IRI
                             {
                                 $target->ipath = '/' . $relative->ipath;
                             }
-                            elseif (($last_segment = strrpos($base->ipath, '/')) !== false)
+                            elseif (($last_segment = mb_strrpos($base->ipath, '/')) !== false)
                             {
-                                $target->ipath = substr($base->ipath, 0, $last_segment + 1) . $relative->ipath;
+                                $target->ipath = mb_substr($base->ipath, 0, $last_segment + 1) . $relative->ipath;
                             }
                             else
                             {
@@ -8180,36 +8181,36 @@ class SimplePie_IRI
     protected function remove_dot_segments($input)
     {
         $output = '';
-        while (strpos($input, './') !== false || strpos($input, '/.') !== false || $input === '.' || $input === '..')
+        while (mb_strpos($input, './') !== false || mb_strpos($input, '/.') !== false || $input === '.' || $input === '..')
         {
             // A: If the input buffer begins with a prefix of "../" or "./", then remove that prefix from the input buffer; otherwise,
-            if (strpos($input, '../') === 0)
+            if (mb_strpos($input, '../') === 0)
             {
-                $input = substr($input, 3);
+                $input = mb_substr($input, 3);
             }
-            elseif (strpos($input, './') === 0)
+            elseif (mb_strpos($input, './') === 0)
             {
-                $input = substr($input, 2);
+                $input = mb_substr($input, 2);
             }
             // B: if the input buffer begins with a prefix of "/./" or "/.", where "." is a complete path segment, then replace that prefix with "/" in the input buffer; otherwise,
-            elseif (strpos($input, '/./') === 0)
+            elseif (mb_strpos($input, '/./') === 0)
             {
-                $input = substr($input, 2);
+                $input = mb_substr($input, 2);
             }
             elseif ($input === '/.')
             {
                 $input = '/';
             }
             // C: if the input buffer begins with a prefix of "/../" or "/..", where ".." is a complete path segment, then replace that prefix with "/" in the input buffer and remove the last segment and its preceding "/" (if any) from the output buffer; otherwise,
-            elseif (strpos($input, '/../') === 0)
+            elseif (mb_strpos($input, '/../') === 0)
             {
-                $input = substr($input, 3);
-                $output = substr_replace($output, '', strrpos($output, '/'));
+                $input = mb_substr($input, 3);
+                $output = substr_replace($output, '', mb_strrpos($output, '/'));
             }
             elseif ($input === '/..')
             {
                 $input = '/';
-                $output = substr_replace($output, '', strrpos($output, '/'));
+                $output = substr_replace($output, '', mb_strrpos($output, '/'));
             }
             // D: if the input buffer consists only of "." or "..", then remove that from the input buffer; otherwise,
             elseif ($input === '.' || $input === '..')
@@ -8217,9 +8218,9 @@ class SimplePie_IRI
                 $input = '';
             }
             // E: move the first path segment in the input buffer to the end of the output buffer, including the initial "/" character (if any) and any subsequent characters up to, but not including, the next "/" character or the end of the input buffer
-            elseif (($pos = strpos($input, '/', 1)) !== false)
+            elseif (($pos = mb_strpos($input, '/', 1)) !== false)
             {
-                $output .= substr($input, 0, $pos);
+                $output .= mb_substr($input, 0, $pos);
                 $input = substr_replace($input, '', 0, $pos);
             }
             else
@@ -8254,7 +8255,7 @@ class SimplePie_IRI
 
         // Now replace any bytes that aren't allowed with their pct-encoded versions
         $position = 0;
-        $strlen = strlen($string);
+        $strlen = mb_strlen($string);
         while (($position += strspn($string, $extra_chars, $position)) < $strlen)
         {
             $value = ord($string[$position]);
@@ -8348,11 +8349,12 @@ class SimplePie_IRI
                     || $character < 0xE000
                     || $character > 0x10FFFD
                 )
-            )
-            {
+            ) {
                 // If we were a character, pretend we weren't, but rather an error.
                 if ($valid)
+                {
                     $position--;
+                }
 
                 for ($j = $start; $j <= $position; $j++)
                 {
@@ -8478,11 +8480,10 @@ class SimplePie_IRI
                     || $character > 0x7A && $character < 0x7E
                     || $character > 0x7E && $character < 0xA0
                     || $character > 0xD7FF && $character < 0xF900
-                )
-                {
+                ) {
                     for ($j = $start; $j <= $i; $j++)
                     {
-                        $string .= '%' . strtoupper($bytes[$j]);
+                        $string .= '%' . mb_strtoupper($bytes[$j]);
                     }
                 }
                 else
@@ -8501,7 +8502,7 @@ class SimplePie_IRI
         {
             for ($j = $start; $j < $len; $j++)
             {
-                $string .= '%' . strtoupper($bytes[$j]);
+                $string .= '%' . mb_strtoupper($bytes[$j]);
             }
         }
 
@@ -8549,17 +8550,16 @@ class SimplePie_IRI
             (
                 $isauthority && (
                     $this->ipath[0] !== '/' ||
-                    substr($this->ipath, 0, 2) === '//'
+                    mb_substr($this->ipath, 0, 2) === '//'
                 ) ||
                 (
                     $this->scheme === null &&
                     !$isauthority &&
-                    strpos($this->ipath, ':') !== false &&
-                    (strpos($this->ipath, '/') === false ? true : strpos($this->ipath, ':') < strpos($this->ipath, '/'))
+                    mb_strpos($this->ipath, ':') !== false &&
+                    (mb_strpos($this->ipath, '/') === false ? true : mb_strpos($this->ipath, ':') < mb_strpos($this->ipath, '/'))
                 )
             )
-        )
-        {
+        ) {
             return false;
         }
 
@@ -8643,7 +8643,7 @@ class SimplePie_IRI
         }
         else
         {
-            $this->scheme = strtolower($scheme);
+            $this->scheme = mb_strtolower($scheme);
         }
         return true;
     }
@@ -8659,7 +8659,9 @@ class SimplePie_IRI
     {
         static $cache;
         if (!$cache)
+        {
             $cache = array();
+        }
 
         if ($authority === null)
         {
@@ -8680,22 +8682,22 @@ class SimplePie_IRI
         else
         {
             $remaining = $authority;
-            if (($iuserinfo_end = strrpos($remaining, '@')) !== false)
+            if (($iuserinfo_end = mb_strrpos($remaining, '@')) !== false)
             {
-                $iuserinfo = substr($remaining, 0, $iuserinfo_end);
-                $remaining = substr($remaining, $iuserinfo_end + 1);
+                $iuserinfo = mb_substr($remaining, 0, $iuserinfo_end);
+                $remaining = mb_substr($remaining, $iuserinfo_end + 1);
             }
             else
             {
                 $iuserinfo = null;
             }
-            if (($port_start = strpos($remaining, ':', strpos($remaining, ']'))) !== false)
+            if (($port_start = mb_strpos($remaining, ':', mb_strpos($remaining, ']'))) !== false)
             {
-                if (($port = substr($remaining, $port_start + 1)) === false)
+                if (($port = mb_substr($remaining, $port_start + 1)) === false)
                 {
                     $port = null;
                 }
-                $remaining = substr($remaining, 0, $port_start);
+                $remaining = mb_substr($remaining, 0, $port_start);
             }
             else
             {
@@ -8750,11 +8752,11 @@ class SimplePie_IRI
             $this->ihost = null;
             return true;
         }
-        if (substr($ihost, 0, 1) === '[' && substr($ihost, -1) === ']')
+        if (mb_substr($ihost, 0, 1) === '[' && mb_substr($ihost, -1) === ']')
         {
-            if (SimplePie_Net_IPv6::check_ipv6(substr($ihost, 1, -1)))
+            if (SimplePie_Net_IPv6::check_ipv6(mb_substr($ihost, 1, -1)))
             {
-                $this->ihost = '[' . SimplePie_Net_IPv6::compress(substr($ihost, 1, -1)) . ']';
+                $this->ihost = '[' . SimplePie_Net_IPv6::compress(mb_substr($ihost, 1, -1)) . ']';
             }
             else
             {
@@ -8770,7 +8772,7 @@ class SimplePie_IRI
             // remain uppercase). This must be done after the previous step
             // as that can add unescaped characters.
             $position = 0;
-            $strlen = strlen($ihost);
+            $strlen = mb_strlen($ihost);
             while (($position += strcspn($ihost, 'ABCDEFGHIJKLMNOPQRSTUVWXYZ%', $position)) < $strlen)
             {
                 if ($ihost[$position] === '%')
@@ -8779,7 +8781,7 @@ class SimplePie_IRI
                 }
                 else
                 {
-                    $ihost[$position] = strtolower($ihost[$position]);
+                    $ihost[$position] = mb_strtolower($ihost[$position]);
                     $position++;
                 }
             }
@@ -8806,7 +8808,7 @@ class SimplePie_IRI
             $this->port = null;
             return true;
         }
-        if (strspn($port, '0123456789') === strlen($port))
+        if (strspn($port, '0123456789') === mb_strlen($port))
         {
             $this->port = (int) $port;
             $this->scheme_normalization();
@@ -8906,7 +8908,7 @@ class SimplePie_IRI
         }
 
         $position = 0;
-        $strlen = strlen($string);
+        $strlen = mb_strlen($string);
         while (($position += strcspn($string, $non_ascii, $position)) < $strlen)
         {
             $string = substr_replace($string, sprintf('%%%02X', ord($string[$position])), $position, 1);
@@ -9007,9 +9009,13 @@ class SimplePie_IRI
     {
         $iauthority = $this->get_iauthority();
         if (is_string($iauthority))
+        {
             return $this->to_uri($iauthority);
+        }
         else
+        {
             return $iauthority;
+        }
     }
 }
 
@@ -9953,7 +9959,6 @@ class SimplePie_Item
                 {
                     $link_rel = (isset($link['attribs']['']['rel'])) ? $link['attribs']['']['rel'] : 'alternate';
                     $this->data['links'][$link_rel][] = $this->sanitize($link['attribs']['']['href'], SIMPLEPIE_CONSTRUCT_IRI, $this->get_base($link));
-
                 }
             }
             foreach ((array) $this->get_item_tags(SIMPLEPIE_NAMESPACE_ATOM_03, 'link') as $link)
@@ -9978,7 +9983,7 @@ class SimplePie_Item
             }
             if ($links = $this->get_item_tags(SIMPLEPIE_NAMESPACE_RSS_20, 'guid'))
             {
-                if (!isset($links[0]['attribs']['']['isPermaLink']) || strtolower(trim($links[0]['attribs']['']['isPermaLink'])) === 'true')
+                if (!isset($links[0]['attribs']['']['isPermaLink']) || mb_strtolower(trim($links[0]['attribs']['']['isPermaLink'])) === 'true')
                 {
                     $this->data['links']['alternate'][] = $this->sanitize($links[0]['data'], SIMPLEPIE_CONSTRUCT_IRI, $this->get_base($links[0]));
                 }
@@ -9999,9 +10004,9 @@ class SimplePie_Item
                         $this->data['links'][SIMPLEPIE_IANA_LINK_RELATIONS_REGISTRY . $key] =& $this->data['links'][$key];
                     }
                 }
-                elseif (substr($key, 0, 41) === SIMPLEPIE_IANA_LINK_RELATIONS_REGISTRY)
+                elseif (mb_substr($key, 0, 41) === SIMPLEPIE_IANA_LINK_RELATIONS_REGISTRY)
                 {
-                    $this->data['links'][substr($key, 41)] =& $this->data['links'][$key];
+                    $this->data['links'][mb_substr($key, 41)] =& $this->data['links'][$key];
                 }
                 $this->data['links'][$key] = array_unique($this->data['links'][$key]);
             }
@@ -10373,7 +10378,7 @@ class SimplePie_Item
                     {
                         $algo = 'md5';
                     }
-                    $hashes_parent[] = $algo.':'.$value;
+                    $hashes_parent[] = $algo . ':' . $value;
                 }
             }
             elseif ($hashes_iterator = $parent->get_channel_tags(SIMPLEPIE_NAMESPACE_MEDIARSS, 'hash'))
@@ -10394,7 +10399,7 @@ class SimplePie_Item
                     {
                         $algo = 'md5';
                     }
-                    $hashes_parent[] = $algo.':'.$value;
+                    $hashes_parent[] = $algo . ':' . $value;
                 }
             }
             if (is_array($hashes_parent))
@@ -10576,7 +10581,7 @@ class SimplePie_Item
                     $restriction_relationship = 'allow';
                     $restriction_type = null;
                     $restriction_value = 'itunes';
-                    if (isset($restriction['data']) && strtolower($restriction['data']) === 'yes')
+                    if (isset($restriction['data']) && mb_strtolower($restriction['data']) === 'yes')
                     {
                         $restriction_relationship = 'deny';
                     }
@@ -10612,7 +10617,7 @@ class SimplePie_Item
                     $restriction_relationship = 'allow';
                     $restriction_type = null;
                     $restriction_value = 'itunes';
-                    if (isset($restriction['data']) && strtolower($restriction['data']) === 'yes')
+                    if (isset($restriction['data']) && mb_strtolower($restriction['data']) === 'yes')
                     {
                         $restriction_relationship = 'deny';
                     }
@@ -10702,7 +10707,7 @@ class SimplePie_Item
             // If we have media:group tags, loop through them.
             foreach ((array) $this->get_item_tags(SIMPLEPIE_NAMESPACE_MEDIARSS, 'group') as $group)
             {
-                if(isset($group['child'], $group['child'][SIMPLEPIE_NAMESPACE_MEDIARSS]['content']))
+                if (isset($group['child'], $group['child'][SIMPLEPIE_NAMESPACE_MEDIARSS]['content']))
                 {
                     // If we have media:content tags, loop through them.
                     foreach ((array) $group['child'][SIMPLEPIE_NAMESPACE_MEDIARSS]['content'] as $content)
@@ -11073,7 +11078,7 @@ class SimplePie_Item
                                     {
                                         $algo = 'md5';
                                     }
-                                    $hashes[] = $algo.':'.$value;
+                                    $hashes[] = $algo . ':' . $value;
                                 }
                                 if (is_array($hashes))
                                 {
@@ -11098,7 +11103,7 @@ class SimplePie_Item
                                     {
                                         $algo = 'md5';
                                     }
-                                    $hashes[] = $algo.':'.$value;
+                                    $hashes[] = $algo . ':' . $value;
                                 }
                                 if (is_array($hashes))
                                 {
@@ -11591,7 +11596,7 @@ class SimplePie_Item
                                 {
                                     $algo = 'md5';
                                 }
-                                $hashes[] = $algo.':'.$value;
+                                $hashes[] = $algo . ':' . $value;
                             }
                             if (is_array($hashes))
                             {
@@ -12116,7 +12121,7 @@ class SimplePie_Locator
             }
             if ($link->hasAttribute('href') && $link->hasAttribute('rel'))
             {
-                $rel = array_unique($this->registry->call('Misc', 'space_seperated_tokens', array(strtolower($link->getAttribute('rel')))));
+                $rel = array_unique($this->registry->call('Misc', 'space_seperated_tokens', array(mb_strtolower($link->getAttribute('rel')))));
                 $line = method_exists($link, 'getLineNo') ? $link->getLineNo() : 1;
 
                 if ($this->base_location < $line)
@@ -12132,7 +12137,7 @@ class SimplePie_Locator
                     continue;
                 }
 
-                if (!in_array($href, $done) && in_array('feed', $rel) || (in_array('alternate', $rel) && !in_array('stylesheet', $rel) && $link->hasAttribute('type') && in_array(strtolower($this->registry->call('Misc', 'parse_mime', array($link->getAttribute('type')))), array('application/rss+xml', 'application/atom+xml'))) && !isset($feeds[$href]))
+                if (!in_array($href, $done) && in_array('feed', $rel) || (in_array('alternate', $rel) && !in_array('stylesheet', $rel) && $link->hasAttribute('type') && in_array(mb_strtolower($this->registry->call('Misc', 'parse_mime', array($link->getAttribute('type')))), array('application/rss+xml', 'application/atom+xml'))) && !isset($feeds[$href]))
                 {
                     $this->checked_feeds++;
                     $headers = array(
@@ -12210,7 +12215,7 @@ class SimplePie_Locator
             {
                 break;
             }
-            if (in_array(strtolower(strrchr($value, '.')), array('.rss', '.rdf', '.atom', '.xml')))
+            if (in_array(mb_strtolower(mb_strrchr($value, '.')), array('.rss', '.rdf', '.atom', '.xml')))
             {
                 $this->checked_feeds++;
 
@@ -12275,7 +12280,7 @@ class SimplePie_Misc
         $remainder = $seconds % 3600;
         if ($hours > 0)
         {
-            $time .= $hours.':';
+            $time .= $hours . ':';
         }
 
         $minutes = floor($remainder / 60);
@@ -12289,7 +12294,7 @@ class SimplePie_Misc
             $seconds = '0' . $seconds;
         }
 
-        $time .= $minutes.':';
+        $time .= $minutes . ':';
         $time .= $seconds;
 
         return $time;
@@ -12324,7 +12329,7 @@ class SimplePie_Misc
                 $return[$i]['tag'] = $realname;
                 $return[$i]['full'] = $matches[$i][0][0];
                 $return[$i]['offset'] = $matches[$i][0][1];
-                if (strlen($matches[$i][3][0]) <= 2)
+                if (mb_strlen($matches[$i][3][0]) <= 2)
                 {
                     $return[$i]['self_closing'] = true;
                 }
@@ -12342,7 +12347,7 @@ class SimplePie_Misc
                         {
                             $attribs[$j][2] = $attribs[$j][1];
                         }
-                        $return[$i]['attribs'][strtolower($attribs[$j][1])]['data'] = SimplePie_Misc::entities_decode(end($attribs[$j]), 'UTF-8');
+                        $return[$i]['attribs'][mb_strtolower($attribs[$j][1])]['data'] = SimplePie_Misc::entities_decode(end($attribs[$j]), 'UTF-8');
                     }
                 }
             }
@@ -12355,7 +12360,7 @@ class SimplePie_Misc
         $full = "<$element[tag]";
         foreach ($element['attribs'] as $key => $value)
         {
-            $key = strtolower($key);
+            $key = mb_strtolower($key);
             $full .= " $key=\"" . htmlspecialchars($value['data']) . '"';
         }
         if ($element['self_closing'])
@@ -12428,11 +12433,11 @@ class SimplePie_Misc
         {
             return "feed:$url";
         }
-        if ($http === 3 && strtolower($parsed['scheme']) === 'http')
+        if ($http === 3 && mb_strtolower($parsed['scheme']) === 'http')
         {
             return substr_replace($url, 'podcast', 0, 4);
         }
-        if ($http === 4 && strtolower($parsed['scheme']) === 'http')
+        if ($http === 4 && mb_strtolower($parsed['scheme']) === 'http')
         {
             return substr_replace($url, 'itpc', 0, 4);
         }
@@ -12480,7 +12485,7 @@ class SimplePie_Misc
         }
         else
         {
-            return strtoupper($match[0]);
+            return mb_strtoupper($match[0]);
         }
     }
 
@@ -12522,7 +12527,7 @@ class SimplePie_Misc
                     $non_ascii_octects .= chr($i);
                 }
             }
-            $data = substr($data, 0, strcspn($data, $non_ascii_octects));
+            $data = mb_substr($data, 0, strcspn($data, $non_ascii_octects));
         }
 
         // This is first, as behaviour of this is completely predictable
@@ -12604,7 +12609,7 @@ class SimplePie_Misc
     public static function encoding($charset)
     {
         // Normalization from UTS #22
-        switch (strtolower(preg_replace('/(?:[^a-zA-Z0-9]+|([^0-9])0+)/', '\1', $charset)))
+        switch (mb_strtolower(preg_replace('/(?:[^a-zA-Z0-9]+|([^0-9])0+)/', '\1', $charset)))
         {
             case 'adobestandardencoding':
             case 'csadobestandardencoding':
@@ -13920,13 +13925,13 @@ class SimplePie_Misc
         {
             $curl = $curl['version'];
         }
-        elseif (substr($curl, 0, 5) === 'curl/')
+        elseif (mb_substr($curl, 0, 5) === 'curl/')
         {
-            $curl = substr($curl, 5, strcspn($curl, "\x09\x0A\x0B\x0C\x0D", 5));
+            $curl = mb_substr($curl, 5, strcspn($curl, "\x09\x0A\x0B\x0C\x0D", 5));
         }
-        elseif (substr($curl, 0, 8) === 'libcurl/')
+        elseif (mb_substr($curl, 0, 8) === 'libcurl/')
         {
-            $curl = substr($curl, 8, strcspn($curl, "\x09\x0A\x0B\x0C\x0D", 8));
+            $curl = mb_substr($curl, 8, strcspn($curl, "\x09\x0A\x0B\x0C\x0D", 8));
         }
         else
         {
@@ -13944,10 +13949,10 @@ class SimplePie_Misc
     public static function strip_comments($data)
     {
         $output = '';
-        while (($start = strpos($data, '<!--')) !== false)
+        while (($start = mb_strpos($data, '<!--')) !== false)
         {
-            $output .= substr($data, 0, $start);
-            if (($end = strpos($data, '-->', $start)) !== false)
+            $output .= mb_substr($data, 0, $start);
+            if (($end = mb_strpos($data, '-->', $start)) !== false)
             {
                 $data = substr_replace($data, '', 0, $end + 3);
             }
@@ -13988,14 +13993,14 @@ class SimplePie_Misc
     {
         $string = (string) $string;
         $position = 0;
-        $length = strlen($string);
+        $length = mb_strlen($string);
         $depth = 0;
 
         $output = '';
 
-        while ($position < $length && ($pos = strpos($string, '(', $position)) !== false)
+        while ($position < $length && ($pos = mb_strpos($string, '(', $position)) !== false)
         {
-            $output .= substr($string, $position, $pos - $position);
+            $output .= mb_substr($string, $position, $pos - $position);
             $position = $pos + 1;
             if ($string[$pos - 1] !== '\\')
             {
@@ -14033,26 +14038,26 @@ class SimplePie_Misc
                 $output .= '(';
             }
         }
-        $output .= substr($string, $position);
+        $output .= mb_substr($string, $position);
 
         return $output;
     }
 
     public static function parse_mime($mime)
     {
-        if (($pos = strpos($mime, ';')) === false)
+        if (($pos = mb_strpos($mime, ';')) === false)
         {
             return trim($mime);
         }
         else
         {
-            return trim(substr($mime, 0, $pos));
+            return trim(mb_substr($mime, 0, $pos));
         }
     }
 
     public static function atom_03_construct_type($attribs)
     {
-        if (isset($attribs['']['mode']) && strtolower(trim($attribs['']['mode']) === 'base64'))
+        if (isset($attribs['']['mode']) && mb_strtolower(trim($attribs['']['mode']) === 'base64'))
         {
             $mode = SIMPLEPIE_CONSTRUCT_BASE64;
         }
@@ -14062,7 +14067,7 @@ class SimplePie_Misc
         }
         if (isset($attribs['']['type']))
         {
-            switch (strtolower(trim($attribs['']['type'])))
+            switch (mb_strtolower(trim($attribs['']['type'])))
             {
                 case 'text':
                 case 'text/plain':
@@ -14090,7 +14095,7 @@ class SimplePie_Misc
     {
         if (isset($attribs['']['type']))
         {
-            switch (strtolower(trim($attribs['']['type'])))
+            switch (mb_strtolower(trim($attribs['']['type'])))
             {
                 case 'text':
                     return SIMPLEPIE_CONSTRUCT_TEXT;
@@ -14112,7 +14117,7 @@ class SimplePie_Misc
     {
         if (isset($attribs['']['type']))
         {
-            $type = strtolower(trim($attribs['']['type']));
+            $type = mb_strtolower(trim($attribs['']['type']));
             switch ($type)
             {
                 case 'text':
@@ -14124,7 +14129,7 @@ class SimplePie_Misc
                 case 'xhtml':
                     return SIMPLEPIE_CONSTRUCT_XHTML;
             }
-            if (in_array(substr($type, -4), array('+xml', '/xml')) || substr($type, 0, 5) === 'text/')
+            if (in_array(mb_substr($type, -4), array('+xml', '/xml')) || mb_substr($type, 0, 5) === 'text/')
             {
                 return SIMPLEPIE_CONSTRUCT_NONE;
             }
@@ -14147,7 +14152,7 @@ class SimplePie_Misc
     public static function space_seperated_tokens($string)
     {
         $space_characters = "\x20\x09\x0A\x0B\x0C\x0D";
-        $string_length = strlen($string);
+        $string_length = mb_strlen($string);
 
         $position = strspn($string, $space_characters);
         $tokens = array();
@@ -14155,7 +14160,7 @@ class SimplePie_Misc
         while ($position < $string_length)
         {
             $len = strcspn($string, $space_characters, $position);
-            $tokens[] = substr($string, $position, $len);
+            $tokens[] = mb_substr($string, $position, $len);
             $position += $len;
             $position += strspn($string, $space_characters, $position);
         }
@@ -14177,19 +14182,19 @@ class SimplePie_Misc
         {
             return false;
         }
-         if ($codepoint <= 0x7f)
+        if ($codepoint <= 0x7f)
         {
             return chr($codepoint);
         }
-         if ($codepoint <= 0x7ff)
+        if ($codepoint <= 0x7ff)
         {
             return chr(0xc0 | ($codepoint >> 6)) . chr(0x80 | ($codepoint & 0x3f));
         }
-         if ($codepoint <= 0xffff)
+        if ($codepoint <= 0xffff)
         {
             return chr(0xe0 | ($codepoint >> 12)) . chr(0x80 | (($codepoint >> 6) & 0x3f)) . chr(0x80 | ($codepoint & 0x3f));
         }
-         if ($codepoint <= 0x10ffff)
+        if ($codepoint <= 0x10ffff)
         {
             return chr(0xf0 | ($codepoint >> 18)) . chr(0x80 | (($codepoint >> 12) & 0x3f)) . chr(0x80 | (($codepoint >> 6) & 0x3f)) . chr(0x80 | ($codepoint & 0x3f));
         }
@@ -14217,7 +14222,7 @@ class SimplePie_Misc
 
         foreach ($str as $section)
         {
-            if (strpos($section, '=') !== false)
+            if (mb_strpos($section, '=') !== false)
             {
                 list($name, $value) = explode('=', $section, 2);
                 $return[urldecode($name)][] = urldecode($value);
@@ -14242,36 +14247,36 @@ class SimplePie_Misc
     public static function xml_encoding($data, $registry)
     {
         // UTF-32 Big Endian BOM
-        if (substr($data, 0, 4) === "\x00\x00\xFE\xFF")
+        if (mb_substr($data, 0, 4) === "\x00\x00\xFE\xFF")
         {
             $encoding[] = 'UTF-32BE';
         }
         // UTF-32 Little Endian BOM
-        elseif (substr($data, 0, 4) === "\xFF\xFE\x00\x00")
+        elseif (mb_substr($data, 0, 4) === "\xFF\xFE\x00\x00")
         {
             $encoding[] = 'UTF-32LE';
         }
         // UTF-16 Big Endian BOM
-        elseif (substr($data, 0, 2) === "\xFE\xFF")
+        elseif (mb_substr($data, 0, 2) === "\xFE\xFF")
         {
             $encoding[] = 'UTF-16BE';
         }
         // UTF-16 Little Endian BOM
-        elseif (substr($data, 0, 2) === "\xFF\xFE")
+        elseif (mb_substr($data, 0, 2) === "\xFF\xFE")
         {
             $encoding[] = 'UTF-16LE';
         }
         // UTF-8 BOM
-        elseif (substr($data, 0, 3) === "\xEF\xBB\xBF")
+        elseif (mb_substr($data, 0, 3) === "\xEF\xBB\xBF")
         {
             $encoding[] = 'UTF-8';
         }
         // UTF-32 Big Endian Without BOM
-        elseif (substr($data, 0, 20) === "\x00\x00\x00\x3C\x00\x00\x00\x3F\x00\x00\x00\x78\x00\x00\x00\x6D\x00\x00\x00\x6C")
+        elseif (mb_substr($data, 0, 20) === "\x00\x00\x00\x3C\x00\x00\x00\x3F\x00\x00\x00\x78\x00\x00\x00\x6D\x00\x00\x00\x6C")
         {
-            if ($pos = strpos($data, "\x00\x00\x00\x3F\x00\x00\x00\x3E"))
+            if ($pos = mb_strpos($data, "\x00\x00\x00\x3F\x00\x00\x00\x3E"))
             {
-                $parser = $registry->create('XML_Declaration_Parser', array(SimplePie_Misc::change_encoding(substr($data, 20, $pos - 20), 'UTF-32BE', 'UTF-8')));
+                $parser = $registry->create('XML_Declaration_Parser', array(SimplePie_Misc::change_encoding(mb_substr($data, 20, $pos - 20), 'UTF-32BE', 'UTF-8')));
                 if ($parser->parse())
                 {
                     $encoding[] = $parser->encoding;
@@ -14280,11 +14285,11 @@ class SimplePie_Misc
             $encoding[] = 'UTF-32BE';
         }
         // UTF-32 Little Endian Without BOM
-        elseif (substr($data, 0, 20) === "\x3C\x00\x00\x00\x3F\x00\x00\x00\x78\x00\x00\x00\x6D\x00\x00\x00\x6C\x00\x00\x00")
+        elseif (mb_substr($data, 0, 20) === "\x3C\x00\x00\x00\x3F\x00\x00\x00\x78\x00\x00\x00\x6D\x00\x00\x00\x6C\x00\x00\x00")
         {
-            if ($pos = strpos($data, "\x3F\x00\x00\x00\x3E\x00\x00\x00"))
+            if ($pos = mb_strpos($data, "\x3F\x00\x00\x00\x3E\x00\x00\x00"))
             {
-                $parser = $registry->create('XML_Declaration_Parser', array(SimplePie_Misc::change_encoding(substr($data, 20, $pos - 20), 'UTF-32LE', 'UTF-8')));
+                $parser = $registry->create('XML_Declaration_Parser', array(SimplePie_Misc::change_encoding(mb_substr($data, 20, $pos - 20), 'UTF-32LE', 'UTF-8')));
                 if ($parser->parse())
                 {
                     $encoding[] = $parser->encoding;
@@ -14293,11 +14298,11 @@ class SimplePie_Misc
             $encoding[] = 'UTF-32LE';
         }
         // UTF-16 Big Endian Without BOM
-        elseif (substr($data, 0, 10) === "\x00\x3C\x00\x3F\x00\x78\x00\x6D\x00\x6C")
+        elseif (mb_substr($data, 0, 10) === "\x00\x3C\x00\x3F\x00\x78\x00\x6D\x00\x6C")
         {
-            if ($pos = strpos($data, "\x00\x3F\x00\x3E"))
+            if ($pos = mb_strpos($data, "\x00\x3F\x00\x3E"))
             {
-                $parser = $registry->create('XML_Declaration_Parser', array(SimplePie_Misc::change_encoding(substr($data, 20, $pos - 10), 'UTF-16BE', 'UTF-8')));
+                $parser = $registry->create('XML_Declaration_Parser', array(SimplePie_Misc::change_encoding(mb_substr($data, 20, $pos - 10), 'UTF-16BE', 'UTF-8')));
                 if ($parser->parse())
                 {
                     $encoding[] = $parser->encoding;
@@ -14306,11 +14311,11 @@ class SimplePie_Misc
             $encoding[] = 'UTF-16BE';
         }
         // UTF-16 Little Endian Without BOM
-        elseif (substr($data, 0, 10) === "\x3C\x00\x3F\x00\x78\x00\x6D\x00\x6C\x00")
+        elseif (mb_substr($data, 0, 10) === "\x3C\x00\x3F\x00\x78\x00\x6D\x00\x6C\x00")
         {
-            if ($pos = strpos($data, "\x3F\x00\x3E\x00"))
+            if ($pos = mb_strpos($data, "\x3F\x00\x3E\x00"))
             {
-                $parser = $registry->create('XML_Declaration_Parser', array(SimplePie_Misc::change_encoding(substr($data, 20, $pos - 10), 'UTF-16LE', 'UTF-8')));
+                $parser = $registry->create('XML_Declaration_Parser', array(SimplePie_Misc::change_encoding(mb_substr($data, 20, $pos - 10), 'UTF-16LE', 'UTF-8')));
                 if ($parser->parse())
                 {
                     $encoding[] = $parser->encoding;
@@ -14319,11 +14324,11 @@ class SimplePie_Misc
             $encoding[] = 'UTF-16LE';
         }
         // US-ASCII (or superset)
-        elseif (substr($data, 0, 5) === "\x3C\x3F\x78\x6D\x6C")
+        elseif (mb_substr($data, 0, 5) === "\x3C\x3F\x78\x6D\x6C")
         {
-            if ($pos = strpos($data, "\x3F\x3E"))
+            if ($pos = mb_strpos($data, "\x3F\x3E"))
             {
-                $parser = $registry->create('XML_Declaration_Parser', array(substr($data, 5, $pos - 5)));
+                $parser = $registry->create('XML_Declaration_Parser', array(mb_substr($data, 5, $pos - 5)));
                 if ($parser->parse())
                 {
                     $encoding[] = $parser->encoding;
@@ -14380,7 +14385,7 @@ function embed_wmedia(width, height, link) {
      */
     public static function get_build()
     {
-        $root = dirname(dirname(__FILE__));
+        $root = dirname(__DIR__);
         if (file_exists($root . '/.git/index'))
         {
             return filemtime($root . '/.git/index');
@@ -14397,9 +14402,9 @@ function embed_wmedia(width, height, link) {
             }
             return $time;
         }
-        if (file_exists(dirname(__FILE__) . '/Core.php'))
+        if (file_exists(__DIR__ . '/Core.php'))
         {
-            return filemtime(dirname(__FILE__) . '/Core.php');
+            return filemtime(__DIR__ . '/Core.php');
         }
         else
         {
@@ -14500,7 +14505,7 @@ class SimplePie_Net_IPv6
     {
         $c1 = -1;
         $c2 = -1;
-        if (substr_count($ip, '::') === 1)
+        if (mb_substr_count($ip, '::') === 1)
         {
             list($ip1, $ip2) = explode('::', $ip);
             if ($ip1 === '')
@@ -14509,7 +14514,7 @@ class SimplePie_Net_IPv6
             }
             else
             {
-                $c1 = substr_count($ip1, ':');
+                $c1 = mb_substr_count($ip1, ':');
             }
             if ($ip2 === '')
             {
@@ -14517,9 +14522,9 @@ class SimplePie_Net_IPv6
             }
             else
             {
-                $c2 = substr_count($ip2, ':');
+                $c2 = mb_substr_count($ip2, ':');
             }
-            if (strpos($ip2, '.') !== false)
+            if (mb_strpos($ip2, '.') !== false)
             {
                 $c2++;
             }
@@ -14580,9 +14585,9 @@ class SimplePie_Net_IPv6
             $pos = null;
             foreach ($matches[0] as $match)
             {
-                if (strlen($match[0]) > $max)
+                if (mb_strlen($match[0]) > $max)
                 {
-                    $max = strlen($match[0]);
+                    $max = mb_strlen($match[0]);
                     $pos = $match[1];
                 }
             }
@@ -14614,11 +14619,11 @@ class SimplePie_Net_IPv6
      */
     private static function split_v6_v4($ip)
     {
-        if (strpos($ip, '.') !== false)
+        if (mb_strpos($ip, '.') !== false)
         {
-            $pos = strrpos($ip, ':');
-            $ipv6_part = substr($ip, 0, $pos);
-            $ipv4_part = substr($ip, $pos + 1);
+            $pos = mb_strrpos($ip, ':');
+            $ipv6_part = mb_substr($ip, 0, $pos);
+            $ipv4_part = mb_substr($ip, $pos + 1);
             return array($ipv6_part, $ipv4_part);
         }
         else
@@ -14647,21 +14652,29 @@ class SimplePie_Net_IPv6
             {
                 // The section can't be empty
                 if ($ipv6_part === '')
+                {
                     return false;
+                }
 
                 // Nor can it be over four characters
-                if (strlen($ipv6_part) > 4)
+                if (mb_strlen($ipv6_part) > 4)
+                {
                     return false;
+                }
 
                 // Remove leading zeros (this is safe because of the above)
                 $ipv6_part = ltrim($ipv6_part, '0');
                 if ($ipv6_part === '')
+                {
                     $ipv6_part = '0';
+                }
 
                 // Check the value is valid
                 $value = hexdec($ipv6_part);
-                if (dechex($value) !== strtolower($ipv6_part) || $value < 0 || $value > 0xFFFF)
+                if (dechex($value) !== mb_strtolower($ipv6_part) || $value < 0 || $value > 0xFFFF)
+                {
                     return false;
+                }
             }
             if (count($ipv4) === 4)
             {
@@ -14669,7 +14682,9 @@ class SimplePie_Net_IPv6
                 {
                     $value = (int) $ipv4_part;
                     if ((string) $value !== $ipv4_part || $value < 0 || $value > 0xFF)
+                    {
                         return false;
+                    }
                 }
             }
             return true;
@@ -15203,7 +15218,7 @@ class SimplePie_Parse_Date
 
             foreach ($all_methods as $method)
             {
-                if (strtolower(substr($method, 0, 5)) === 'date_')
+                if (mb_strtolower(mb_substr($method, 0, 5)) === 'date_')
                 {
                     $cache[get_class($this)][] = $method;
                 }
@@ -15342,7 +15357,7 @@ class SimplePie_Parse_Date
             }
 
             // Convert the number of seconds to an integer, taking decimals into account
-            $second = round($match[6] + $match[7] / pow(10, strlen($match[7])));
+            $second = round($match[6] + $match[7] / pow(10, mb_strlen($match[7])));
 
             return gmmktime($match[4], $match[5], $second, $match[2], $match[3], $match[1]) - $timezone;
         }
@@ -15363,14 +15378,14 @@ class SimplePie_Parse_Date
     {
         $string = (string) $string;
         $position = 0;
-        $length = strlen($string);
+        $length = mb_strlen($string);
         $depth = 0;
 
         $output = '';
 
-        while ($position < $length && ($pos = strpos($string, '(', $position)) !== false)
+        while ($position < $length && ($pos = mb_strpos($string, '(', $position)) !== false)
         {
-            $output .= substr($string, $position, $pos - $position);
+            $output .= mb_substr($string, $position, $pos - $position);
             $position = $pos + 1;
             if ($string[$pos - 1] !== '\\')
             {
@@ -15408,7 +15423,7 @@ class SimplePie_Parse_Date
                 $output .= '(';
             }
         }
-        $output .= substr($string, $position);
+        $output .= mb_substr($string, $position);
 
         return $output;
     }
@@ -15455,7 +15470,7 @@ class SimplePie_Parse_Date
             */
 
             // Find the month number
-            $month = $this->month[strtolower($match[3])];
+            $month = $this->month[mb_strtolower($match[3])];
 
             // Numeric timezone
             if ($match[8] !== '')
@@ -15468,9 +15483,9 @@ class SimplePie_Parse_Date
                 }
             }
             // Character timezone
-            elseif (isset($this->timezone[strtoupper($match[11])]))
+            elseif (isset($this->timezone[mb_strtoupper($match[11])]))
             {
-                $timezone = $this->timezone[strtoupper($match[11])];
+                $timezone = $this->timezone[mb_strtoupper($match[11])];
             }
             // Assume everything else to be -0000
             else
@@ -15540,12 +15555,12 @@ class SimplePie_Parse_Date
             */
 
             // Month
-            $month = $this->month[strtolower($match[3])];
+            $month = $this->month[mb_strtolower($match[3])];
 
             // Character timezone
-            if (isset($this->timezone[strtoupper($match[8])]))
+            if (isset($this->timezone[mb_strtoupper($match[8])]))
             {
-                $timezone = $this->timezone[strtoupper($match[8])];
+                $timezone = $this->timezone[mb_strtoupper($match[8])];
             }
             // Assume everything else to be -0000
             else
@@ -15604,7 +15619,7 @@ class SimplePie_Parse_Date
             7: Year
             */
 
-            $month = $this->month[strtolower($match[2])];
+            $month = $this->month[mb_strtolower($match[2])];
             return gmmktime($match[4], $match[5], $match[6], $month, $match[3], $match[7]);
         }
         else
@@ -15669,7 +15684,7 @@ class SimplePie_Parser
     public function parse(&$data, $encoding)
     {
         // Use UTF-8 if we get passed US-ASCII, as every US-ASCII character is a UTF-8 character
-        if (strtoupper($encoding) === 'US-ASCII')
+        if (mb_strtoupper($encoding) === 'US-ASCII')
         {
             $this->encoding = 'UTF-8';
         }
@@ -15680,37 +15695,37 @@ class SimplePie_Parser
 
         // Strip BOM:
         // UTF-32 Big Endian BOM
-        if (substr($data, 0, 4) === "\x00\x00\xFE\xFF")
+        if (mb_substr($data, 0, 4) === "\x00\x00\xFE\xFF")
         {
-            $data = substr($data, 4);
+            $data = mb_substr($data, 4);
         }
         // UTF-32 Little Endian BOM
-        elseif (substr($data, 0, 4) === "\xFF\xFE\x00\x00")
+        elseif (mb_substr($data, 0, 4) === "\xFF\xFE\x00\x00")
         {
-            $data = substr($data, 4);
+            $data = mb_substr($data, 4);
         }
         // UTF-16 Big Endian BOM
-        elseif (substr($data, 0, 2) === "\xFE\xFF")
+        elseif (mb_substr($data, 0, 2) === "\xFE\xFF")
         {
-            $data = substr($data, 2);
+            $data = mb_substr($data, 2);
         }
         // UTF-16 Little Endian BOM
-        elseif (substr($data, 0, 2) === "\xFF\xFE")
+        elseif (mb_substr($data, 0, 2) === "\xFF\xFE")
         {
-            $data = substr($data, 2);
+            $data = mb_substr($data, 2);
         }
         // UTF-8 BOM
-        elseif (substr($data, 0, 3) === "\xEF\xBB\xBF")
+        elseif (mb_substr($data, 0, 3) === "\xEF\xBB\xBF")
         {
-            $data = substr($data, 3);
+            $data = mb_substr($data, 3);
         }
 
-        if (substr($data, 0, 5) === '<?xml' && strspn(substr($data, 5, 1), "\x09\x0A\x0D\x20") && ($pos = strpos($data, '?>')) !== false)
+        if (mb_substr($data, 0, 5) === '<?xml' && strspn(mb_substr($data, 5, 1), "\x09\x0A\x0D\x20") && ($pos = mb_strpos($data, '?>')) !== false)
         {
-            $declaration = $this->registry->create('XML_Declaration_Parser', array(substr($data, 5, $pos - 5)));
+            $declaration = $this->registry->create('XML_Declaration_Parser', array(mb_substr($data, 5, $pos - 5)));
             if ($declaration->parse())
             {
-                $data = substr($data, $pos + 2);
+                $data = mb_substr($data, $pos + 2);
                 $data = '<?xml version="' . $declaration->version . '" encoding="' . $encoding . '" standalone="' . (($declaration->standalone) ? 'yes' : 'no') . '"?>' . $data;
             }
             else
@@ -15963,16 +15978,16 @@ class SimplePie_Parser
         static $cache = array();
         if (!isset($cache[$string]))
         {
-            if ($pos = strpos($string, $this->separator))
+            if ($pos = mb_strpos($string, $this->separator))
             {
                 static $separator_length;
                 if (!$separator_length)
                 {
-                    $separator_length = strlen($this->separator);
+                    $separator_length = mb_strlen($this->separator);
                 }
-                $namespace = substr($string, 0, $pos);
-                $local_name = substr($string, $pos + $separator_length);
-                if (strtolower($namespace) === SIMPLEPIE_NAMESPACE_ITUNES)
+                $namespace = mb_substr($string, 0, $pos);
+                $local_name = mb_substr($string, $pos + $separator_length);
+                if (mb_strtolower($namespace) === SIMPLEPIE_NAMESPACE_ITUNES)
                 {
                     $namespace = SIMPLEPIE_NAMESPACE_ITUNES;
                 }
@@ -16142,7 +16157,9 @@ class SimplePie_Registry
      *
      * No-op
      */
-    public function __construct() { }
+    public function __construct()
+    {
+    }
 
     /**
      * Register a class
@@ -16581,7 +16598,6 @@ class SimplePie_Sanitize
 
             if ($type & (SIMPLEPIE_CONSTRUCT_HTML | SIMPLEPIE_CONSTRUCT_XHTML))
             {
-
                 $document = new DOMDocument();
                 $document->encoding = 'UTF-8';
                 $data = $this->preprocess($data, $type);
@@ -16765,7 +16781,7 @@ class SimplePie_Sanitize
     {
         if ($this->encode_instead_of_strip)
         {
-            if (isset($match[4]) && !in_array(strtolower($match[1]), array('script', 'style')))
+            if (isset($match[4]) && !in_array(mb_strtolower($match[1]), array('script', 'style')))
             {
                 $match[1] = htmlspecialchars($match[1], ENT_COMPAT, 'UTF-8');
                 $match[2] = htmlspecialchars($match[2], ENT_COMPAT, 'UTF-8');
@@ -16776,7 +16792,7 @@ class SimplePie_Sanitize
                 return htmlspecialchars($match[0], ENT_COMPAT, 'UTF-8');
             }
         }
-        elseif (isset($match[4]) && !in_array(strtolower($match[1]), array('script', 'style')))
+        elseif (isset($match[4]) && !in_array(mb_strtolower($match[1]), array('script', 'style')))
         {
             return $match[4];
         }
@@ -17247,7 +17263,6 @@ class SimplePie_Source
                     {
                         $link_rel = (isset($link['attribs']['']['rel'])) ? $link['attribs']['']['rel'] : 'alternate';
                         $this->data['links'][$link_rel][] = $this->sanitize($link['attribs']['']['href'], SIMPLEPIE_CONSTRUCT_IRI, $this->get_base($link));
-
                     }
                 }
             }
@@ -17279,9 +17294,9 @@ class SimplePie_Source
                         $this->data['links'][SIMPLEPIE_IANA_LINK_RELATIONS_REGISTRY . $key] =& $this->data['links'][$key];
                     }
                 }
-                elseif (substr($key, 0, 41) === SIMPLEPIE_IANA_LINK_RELATIONS_REGISTRY)
+                elseif (mb_substr($key, 0, 41) === SIMPLEPIE_IANA_LINK_RELATIONS_REGISTRY)
                 {
-                    $this->data['links'][substr($key, 41)] =& $this->data['links'][$key];
+                    $this->data['links'][mb_substr($key, 41)] =& $this->data['links'][$key];
                 }
                 $this->data['links'][$key] = array_unique($this->data['links'][$key]);
             }
@@ -17523,7 +17538,7 @@ class SimplePie_XML_Declaration_Parser
     public function __construct($data)
     {
         $this->data = $data;
-        $this->data_length = strlen($this->data);
+        $this->data_length = mb_strlen($this->data);
     }
 
     /**
@@ -17581,14 +17596,14 @@ class SimplePie_XML_Declaration_Parser
      */
     public function get_value()
     {
-        $quote = substr($this->data, $this->position, 1);
+        $quote = mb_substr($this->data, $this->position, 1);
         if ($quote === '"' || $quote === "'")
         {
             $this->position++;
             $len = strcspn($this->data, $quote, $this->position);
             if ($this->has_data())
             {
-                $value = substr($this->data, $this->position, $len);
+                $value = mb_substr($this->data, $this->position, $len);
                 $this->position += $len + 1;
                 return $value;
             }
@@ -17610,7 +17625,7 @@ class SimplePie_XML_Declaration_Parser
 
     public function version_name()
     {
-        if (substr($this->data, $this->position, 7) === 'version')
+        if (mb_substr($this->data, $this->position, 7) === 'version')
         {
             $this->position += 7;
             $this->skip_whitespace();
@@ -17624,7 +17639,7 @@ class SimplePie_XML_Declaration_Parser
 
     public function version_equals()
     {
-        if (substr($this->data, $this->position, 1) === '=')
+        if (mb_substr($this->data, $this->position, 1) === '=')
         {
             $this->position++;
             $this->skip_whitespace();
@@ -17658,7 +17673,7 @@ class SimplePie_XML_Declaration_Parser
 
     public function encoding_name()
     {
-        if (substr($this->data, $this->position, 8) === 'encoding')
+        if (mb_substr($this->data, $this->position, 8) === 'encoding')
         {
             $this->position += 8;
             $this->skip_whitespace();
@@ -17672,7 +17687,7 @@ class SimplePie_XML_Declaration_Parser
 
     public function encoding_equals()
     {
-        if (substr($this->data, $this->position, 1) === '=')
+        if (mb_substr($this->data, $this->position, 1) === '=')
         {
             $this->position++;
             $this->skip_whitespace();
@@ -17706,7 +17721,7 @@ class SimplePie_XML_Declaration_Parser
 
     public function standalone_name()
     {
-        if (substr($this->data, $this->position, 10) === 'standalone')
+        if (mb_substr($this->data, $this->position, 10) === 'standalone')
         {
             $this->position += 10;
             $this->skip_whitespace();
@@ -17720,7 +17735,7 @@ class SimplePie_XML_Declaration_Parser
 
     public function standalone_equals()
     {
-        if (substr($this->data, $this->position, 1) === '=')
+        if (mb_substr($this->data, $this->position, 1) === '=')
         {
             $this->position++;
             $this->skip_whitespace();

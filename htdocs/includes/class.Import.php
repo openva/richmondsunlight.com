@@ -6,15 +6,14 @@ class Import
     # Retrieve a bill's text from the legislature's website.
     public function get_bill_text()
     {
-
         if (!isset($this->bill_number) || !isset($this->lis_session_id))
         {
             return FALSE;
         }
 
         # Retrieve the full text.
-        $ch = curl_init('http://leg1.state.va.us/cgi-bin/legp504.exe?'.$this->lis_session_id.'+ful+'
-            .strtoupper($this->bill_number));
+        $ch = curl_init('http://leg1.state.va.us/cgi-bin/legp504.exe?' . $this->lis_session_id . '+ful+'
+            . mb_strtoupper($this->bill_number));
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         $text = curl_exec($ch);
@@ -40,7 +39,7 @@ class Import
                     'HOUSE RESOLUTION NO. ');
                 foreach ($preambles as $preamble)
                 {
-                    if (stristr($text[$i], $preamble))
+                    if (mb_stristr($text[$i], $preamble))
                     {
                         $start = TRUE;
                         break;
@@ -52,7 +51,7 @@ class Import
             if (isset($start))
             {
                 # This is the end of the text.
-                if (stristr($text[$i], '</body></html>'))
+                if (mb_stristr($text[$i], '</body></html>'))
                 {
                     break;
                 }
@@ -62,7 +61,7 @@ class Import
                 {
 
                     # Determine where the header text ends and the actual law begins.
-                    if (stristr($text[$i], 'Be it enacted by'))
+                    if (mb_stristr($text[$i], 'Be it enacted by'))
                     {
                         $law_start = TRUE;
                     }
@@ -74,7 +73,7 @@ class Import
                     }
 
                     # Finally, append this line to our cleaned-up, stripped-down text.
-                    $text_clean .= $text[$i].' ';
+                    $text_clean .= $text[$i] . ' ';
                 }
             }
         }
@@ -101,7 +100,6 @@ class Import
     # Take the legislature's HTML and make it less bad.
     public function clean_bill_text()
     {
-
         if (!isset($this->text))
         {
             return FALSE;

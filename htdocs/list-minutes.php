@@ -107,14 +107,14 @@ elseif (mysql_num_rows($result) > 0)
             $page_body .= '
 				</ul>
 			</div>
-			<div id="'.$chamber.'">
+			<div id="' . $chamber . '">
 				<ul id="minutes-listing">';
         }
-        $page_body .= '<li><a href="/minutes/'.$minutes['chamber'].'/'.
-            date('Y', strtotime($minutes['date'])).'/'.date('m', strtotime($minutes['date'])).'/'.
-            date('d', strtotime($minutes['date'])).'/">'.date('m/d/Y', strtotime($minutes['date'])).
-            '</a>'.
-            (!empty($minutes['video']) ? ' with ' . $minutes['video'] . ' of video' : '').
+        $page_body .= '<li><a href="/minutes/' . $minutes['chamber'] . '/' .
+            date('Y', strtotime($minutes['date'])) . '/' . date('m', strtotime($minutes['date'])) . '/' .
+            date('d', strtotime($minutes['date'])) . '/">' . date('m/d/Y', strtotime($minutes['date'])) .
+            '</a>' .
+            (!empty($minutes['video']) ? ' with ' . $minutes['video'] . ' of video' : '') .
             '</li>';
     }
     $page_body .= '

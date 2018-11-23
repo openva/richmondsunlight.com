@@ -1,6 +1,6 @@
 #!/bin/bash
 
-if [ -b "~/.aws/credentials" ]
+if [ -b "$HOME/.aws/credentials" ]
 then
 	exit
 fi

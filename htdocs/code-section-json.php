@@ -38,7 +38,7 @@ $sql = 'SELECT sessions.year, bills.number, bills.catch_line
 			ON bills.id = bills_section_numbers.bill_id
 		LEFT JOIN sessions
 			ON bills.session_id = sessions.id
-		WHERE bills_section_numbers.section_number =  "'.$section.'"
+		WHERE bills_section_numbers.section_number =  "' . $section . '"
 		ORDER BY year ASC';
 $result = mysql_query($sql);
 # The MYSQL_ASSOC variable indicates that we want just the associated array, not both associated
@@ -50,8 +50,8 @@ $bill = mysql_fetch_array($result, MYSQL_ASSOC);
 # and indexed arrays.
 while ($bill = mysql_fetch_array($result, MYSQL_ASSOC))
 {
-    $bill['url'] = 'http://www.richmondsunlight.com/bill/'.$bill['year'].'/'.$bill['number'].'/';
-    $bill['number'] = strtoupper($bill['number']);
+    $bill['url'] = 'http://www.richmondsunlight.com/bill/' . $bill['year'] . '/' . $bill['number'] . '/';
+    $bill['number'] = mb_strtoupper($bill['number']);
     $bills[] = array_map('stripslashes', $bill);
 }
 
@@ -62,7 +62,7 @@ header('Content-type: application/json');
 # JSON in parentheses.
 if (isset($callback))
 {
-    echo $callback.' (';
+    echo $callback . ' (';
 }
 echo json_encode($bills);
 if (isset($callback))

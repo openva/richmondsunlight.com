@@ -59,14 +59,14 @@ if (!empty($_GET['tagless']))
 # PAGE METADATA
 if (!empty($tag))
 {
-    $page_title = SESSION_YEAR.' Bills Tagged with “'.ucwords($tag).'”';
+    $page_title = SESSION_YEAR . ' Bills Tagged with “' . ucwords($tag) . '”';
 }
 else
 {
-    $page_title = $year.' Bills';
+    $page_title = $year . ' Bills';
     if (!empty($status))
     {
-        $page_title .= ' That '.ucfirst($status);
+        $page_title .= ' That ' . ucfirst($status);
     }
 }
 $site_section = 'bills';
@@ -98,7 +98,7 @@ if (!empty($tag))
         $sql .= ' AND tags.tag = "' . $tag . '"';
     }
     $sql .= '
-			AND sessions.id = '.SESSION_ID.'
+			AND sessions.id = ' . SESSION_ID . '
 			ORDER BY bills.chamber DESC,
 			SUBSTRING(bills.number FROM 1 FOR 2) ASC,
 			CAST(LPAD(SUBSTRING(bills.number FROM 3), 4, "0") AS unsigned) ASC';
@@ -120,10 +120,10 @@ elseif (!empty($committee))
 			LEFT JOIN committees
 				ON bills.last_committee_id = committees.id
 			WHERE sessions.id = bills.session_id
-			AND committees.shortname = "'.$committee.'"
-			AND committees.chamber = "'.$chamber.'"
-			AND sessions.year = '.SESSION_YEAR.'
-			AND bills.status != "failed" AND bills.status != "passed '.$chamber.'" AND
+			AND committees.shortname = "' . $committee . '"
+			AND committees.chamber = "' . $chamber . '"
+			AND sessions.year = ' . SESSION_YEAR . '
+			AND bills.status != "failed" AND bills.status != "passed ' . $chamber . '" AND
 			bills.status != "passed committee" AND bills.status != "failed committee"
 			AND bills.outcome IS NULL
 			ORDER BY bills.chamber DESC,
@@ -162,7 +162,7 @@ else
     # If we're also searching by session ID suffix.
     if (!empty($session_suffix))
     {
-        $where_sql = 'AND sessions.suffix="'.$session_suffix.'"';
+        $where_sql = 'AND sessions.suffix="' . $session_suffix . '"';
     }
 
     # Select all bills from the database.
@@ -173,7 +173,7 @@ else
 				ON bills.chief_patron_id = representatives.id
 			LEFT JOIN sessions
 				ON bills.session_id = sessions.id
-			WHERE sessions.year = '.$year.' '.(!empty($where_sql) ? $where_sql : '').'
+			WHERE sessions.year = ' . $year . ' ' . (!empty($where_sql) ? $where_sql : '') . '
 			ORDER BY bills.chamber DESC,
 			SUBSTRING(bills.number FROM 1 FOR 2) ASC,
 			CAST(LPAD(SUBSTRING(bills.number FROM 3), 4, "0") AS unsigned) ASC';
@@ -183,13 +183,13 @@ $result = mysql_query($sql);
 $num_results = mysql_num_rows($result);
 if ($num_results > 0)
 {
-    $page_body .= '<p>'.number_format($num_results).' bill'.($num_results > 1 ? 's' : '').' found.</p>';
+    $page_body .= '<p>' . number_format($num_results) . ' bill' . ($num_results > 1 ? 's' : '') . ' found.</p>';
 
     # If this is a listing of bills currently in a given committee.
     if (!empty($committee) && !empty($chamber))
     {
         $page_body .= '
-			<table id="'.$committee.'" class="bill-listing sortable">
+			<table id="' . $committee . '" class="bill-listing sortable">
 				<thead>
 					<tr>
 						<th>#</th>
@@ -203,11 +203,10 @@ if ($num_results > 0)
     # Loop through the bill results.
     while ($bill = mysql_fetch_array($result))
     {
-
         $bill = array_map('stripslashes', $bill);
 
         # Simplify the status text.
-        if (stristr($bill['status'], 'failed') !== FALSE)
+        if (mb_stristr($bill['status'], 'failed') !== FALSE)
         {
             $bill['status'] = 'dead';
         }
@@ -240,8 +239,8 @@ if ($num_results > 0)
             $page_body .= '</tbody>
 				</table>
 			</div>
-			<div id="'.$chamber.'">
-				<table id="'.$chamber.'" class="bill-listing sortable">
+			<div id="' . $chamber . '">
+				<table id="' . $chamber . '" class="bill-listing sortable">
 					<thead>
 						<tr>
 							<th>#</th>
@@ -253,15 +252,14 @@ if ($num_results > 0)
         }
         $page_body .= '<tr>
 						<td><a href="/bill/' . $bill['year'] . '/' . $bill['number'] .
-                            '/" class="balloon">' . strtoupper($bill['number']) .
-                            balloon($bill, 'bill').'</a></td>
+                            '/" class="balloon">' . mb_strtoupper($bill['number']) .
+                            balloon($bill, 'bill') . '</a></td>
 						<td>' . $bill['catch_line'] . '</td>
 						<td>' . $bill['status'] . '</td>
 					</tr>';
     }
     $page_body .= '</tbody></table></div></div>';
 }
-
 else
 {
     $page_body = '<p>No bills have yet been filed for the ' . $year . ' session.</p>';
@@ -324,7 +322,7 @@ if (!empty($year))
     $page_sidebar .= '
 	<div class="box">
 		<h3>Explanation</h3>
-		<p>These are all of the bills proposed for '.$year;
+		<p>These are all of the bills proposed for ' . $year;
 
     if (isset($status))
     {
@@ -368,10 +366,10 @@ if (!empty($year))
 				ON tags.bill_id = bills.id
 			LEFT JOIN sessions
 				ON sessions.id=bills.session_id
-			WHERE sessions.year='.$year;
+			WHERE sessions.year=' . $year;
     if (!empty($session_suffix))
     {
-        $sql .= ' AND sessions.suffix="'.$session_suffix.'"';
+        $sql .= ' AND sessions.suffix="' . $session_suffix . '"';
     }
     $sql .= '
 		GROUP BY tags.tag';
@@ -394,16 +392,25 @@ if (!empty($year))
         while ($tag = mysql_fetch_array($result))
         {
             $tags[] = array_map('stripslashes', $tag);
-            if (($tag['count'] > $top_tag) && ($tag['tag'] != 'commendation')) $top_tag = $tag['count'];
+            if (($tag['count'] > $top_tag) && ($tag['tag'] != 'commendation'))
+            {
+                $top_tag = $tag['count'];
+            }
         }
 
         for ($i=0; $i<count($tags); $i++)
         {
             $font_size = $tags[$i]['count'] / $top_tag * $top_tag_size;
-            if ($font_size < '.75') $font_size = '.75';
-            elseif ($font_size > $top_tag_size) $font_size = $top_tag_size;
-            $page_sidebar .= '<span style="font-size: '.$font_size.'em;">
-				<a href="/bills/tags/'.urlencode($tags[$i]['tag']).'/">'.$tags[$i]['tag'].'</a>
+            if ($font_size < '.75')
+            {
+                $font_size = '.75';
+            }
+            elseif ($font_size > $top_tag_size)
+            {
+                $font_size = $top_tag_size;
+            }
+            $page_sidebar .= '<span style="font-size: ' . $font_size . 'em;">
+				<a href="/bills/tags/' . urlencode($tags[$i]['tag']) . '/">' . $tags[$i]['tag'] . '</a>
 			</span>';
         }
         $page_sidebar .= '
@@ -423,8 +430,8 @@ if (!empty($tag))
 				ON tags.bill_id=tags2.bill_id
 			LEFT JOIN bills
 				ON tags2.bill_id = bills.id
-			WHERE tags.tag="'.$tag.'" AND tags2.tag != "'.$tag.'"
-			AND bills.session_id = '.SESSION_ID.'
+			WHERE tags.tag="' . $tag . '" AND tags2.tag != "' . $tag . '"
+			AND bills.session_id = ' . SESSION_ID . '
 			GROUP BY tags2.tag
 			ORDER BY tag ASC';
     $result = mysql_query($sql);
@@ -443,9 +450,12 @@ if (!empty($tag))
         for ($i=0; $i<count($tags); $i++)
         {
             $font_size = round(sqrt($tags[$i]['count']), 2);
-            if ($font_size < '.75') $font_size = '.75';
-            $page_sidebar .= '<span style="font-size: '.$font_size.'em;">
-				<a href="/bills/tags/'.urlencode($tags[$i]['tag']).'/">'.$tags[$i]['tag'].'</a>
+            if ($font_size < '.75')
+            {
+                $font_size = '.75';
+            }
+            $page_sidebar .= '<span style="font-size: ' . $font_size . 'em;">
+				<a href="/bills/tags/' . urlencode($tags[$i]['tag']) . '/">' . $tags[$i]['tag'] . '</a>
 			</span>';
         }
         $page_sidebar .= '
@@ -457,16 +467,15 @@ if (!empty($tag))
     $page_sidebar .= '
 	<div class="box">
 		<h3>Subscribe</h3>
-		<p><a href="/rss/tag/'.urlencode($tag).'/"><img src="/images/rss-icon.png"
+		<p><a href="/rss/tag/' . urlencode($tag) . '/"><img src="/images/rss-icon.png"
 		width="14" height="14" alt="RSS Feed" /></a>
-		Keep track of all bills tagged with &ldquo;'.$tag.'&rdquo; &mdash;
-		<a href="/rss/tag/'.urlencode($tag).'/">subscribe via RSS</a>.</p>
+		Keep track of all bills tagged with &ldquo;' . $tag . '&rdquo; &mdash;
+		<a href="/rss/tag/' . urlencode($tag) . '/">subscribe via RSS</a>.</p>
 	</div>';
 
     # Insert the RSS header.
     $html_head .= '
-<link rel="alternate" type="application/rss+xml" title="RSS 0.92" href="/rss/tag/'.urlencode($tag).'/" />';
-
+<link rel="alternate" type="application/rss+xml" title="RSS 0.92" href="/rss/tag/' . urlencode($tag) . '/" />';
 }
 
 if (!empty($committee) && !empty($chamber))
@@ -474,13 +483,13 @@ if (!empty($committee) && !empty($chamber))
     # Get the committee's name and chamber.
     $sql = 'SELECT name, chamber
 			FROM committees
-			WHERE shortname="'.$committee.'"
-			AND chamber="'.$chamber.'"';
+			WHERE shortname="' . $committee . '"
+			AND chamber="' . $chamber . '"';
     $result = mysql_query($sql);
     if (mysql_num_rows($result) > 0)
     {
         $committee = mysql_fetch_array($result);
-        $page_title = ucfirst($committee['chamber']).' '.$committee['name'].' Bills';
+        $page_title = ucfirst($committee['chamber']) . ' ' . $committee['name'] . ' Bills';
     }
 }
 

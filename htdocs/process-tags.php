@@ -59,7 +59,7 @@ if (empty($tags['tags']))
         $tmp = parse_url($_SERVER['HTTP_REFERER']);
         $return_to = $tmp['path'];
 
-        header('Location: '.$return_to);
+        header('Location: ' . $return_to);
         exit;
     }
 
@@ -68,15 +68,15 @@ if (empty($tags['tags']))
 }
 
 # BAR SPAMMERS
-if (strlen($_SERVER['HTTP_USER_AGENT']) <= 1)
+if (mb_strlen($_SERVER['HTTP_USER_AGENT']) <= 1)
 {
     die('Thank you for your comment.');
 }
-if (stristr($_SERVER['HTTP_USER_AGENT'], 'curl') === TRUE)
+if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'curl') === TRUE)
 {
     die('Thank you for your comment.');
 }
-if (stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === TRUE)
+if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === TRUE)
 {
     die('Thank you for your comment.');
 }
@@ -87,16 +87,14 @@ if (!logged_in())
     create_user();
 }
 
-if ((!empty($_SESSION['id'])))// && !blacklisted())
-{
-
+if ((!empty($_SESSION['id'])))
+{// && !blacklisted())
     # Explode the tags into an array to be inserted individually.
     $tag = explode(',', $tags['tags']);
 
     for ($i=0; $i<count($tag); $i++)
     {
-
-        $tag[$i] = strtolower(trim($tag[$i]));
+        $tag[$i] = mb_strtolower(trim($tag[$i]));
 
         # Check the tag against the dirty words.
         /*if (in_array($tag[$i], $GLOBALS['banned_words']))
@@ -116,7 +114,7 @@ if ((!empty($_SESSION['id'])))// && !blacklisted())
         {
 
             # Make sure it's safe.
-            $tag[$i] = ereg_replace("[[:punct:]]", '', $tag[$i]);
+            $tag[$i] = preg_replace("/[[:punct:]]/D", '', $tag[$i]);
             $tag[$i] = trim(mysql_real_escape_string($tag[$i]));
 
             # Check one more time to make sure it's not empty.
@@ -132,7 +130,6 @@ if ((!empty($_SESSION['id'])))// && !blacklisted())
 						date_created=now()';
                 $result = mysql_query($sql);
             }
-
         }
     }
 
@@ -152,7 +149,6 @@ if ((!empty($_SESSION['id'])))// && !blacklisted())
         # Redirect the user back to the page of origin.
         header('Location: https://' . $_SERVER['SERVER_NAME'] . $tags['return_to']);
         exit;
-
     }
 }
 

@@ -78,8 +78,8 @@ else
     foreach ($bills as $bill)
     {
         $page_body .= '
-			<li><a href="/bill/'.$bill['year'].'/'.$bill['number'].'/">'
-            .strtoupper($bill['number']).'</a>: '.$bill['catch_line'].'</li>';
+			<li><a href="/bill/' . $bill['year'] . '/' . $bill['number'] . '/">'
+            . mb_strtoupper($bill['number']) . '</a>: ' . $bill['catch_line'] . '</li>';
     }
     $page_body .= '
 		</ul>';
@@ -98,11 +98,11 @@ if ($bills !== false)
 		<ul>';
     foreach ($bills as $bill)
     {
-        if (strstr($bill['placename'], ' City'))
+        if (mb_strstr($bill['placename'], ' City'))
         {
             $bill['placename'] = str_replace(' City', '', $bill['placename']);
         }
-        if (strstr($bill['placename'], ','))
+        if (mb_strstr($bill['placename'], ','))
         {
             $tmp = explode(',', $bill['placename']);
             $bill['placename'] = trim($tmp[1]);
@@ -113,12 +113,12 @@ if ($bills !== false)
     ksort($place);
     foreach ($place as $name => $bills)
     {
-        $page_body .= '</ul><h3>'.$name.'</h3><ul>';
+        $page_body .= '</ul><h3>' . $name . '</h3><ul>';
         foreach ($bills as $bill)
         {
             $page_body .= '
-			<li><a href="/bill/'.$bill['year'].'/'.$bill['number'].'/">'
-            .strtoupper($bill['number']).'</a>: '.$bill['catch_line'].'</li>';
+			<li><a href="/bill/' . $bill['year'] . '/' . $bill['number'] . '/">'
+            . mb_strtoupper($bill['number']) . '</a>: ' . $bill['catch_line'] . '</li>';
         }
     }
     $page_body .= '

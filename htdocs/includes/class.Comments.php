@@ -7,7 +7,6 @@ class Comments
     # Get all of this bill's comments, whether posted directly or as Photosynthesis comments.
     public function get()
     {
-
         if (empty($this->bill_id))
         {
             return FALSE;
@@ -58,7 +57,6 @@ class Comments
             $result = mysql_query($sql);
             if (mysql_num_rows($result) > 0)
             {
-
                 while ($comment = mysql_fetch_array($result))
                 {
 
@@ -69,10 +67,8 @@ class Comments
                     $comment['comment'] = nl2p($comment['comment']);
 
                     # Add this comment to the comments array.
-                    $comments[$comment{timestamp}] = $comment;
-
+                    $comments[$comment{'timestamp'}] = $comment;
                 }
-
             }
         }
 
@@ -93,12 +89,11 @@ class Comments
 						ON dashboard_bills.portfolio_id = dashboard_portfolios.id
 					LEFT JOIN dashboard_user_data
 						ON dashboard_user_data.user_id = users.id
-					WHERE dashboard_bills.bill_id='.$bill_info['id'].' AND dashboard_bills.notes IS NOT NULL
+					WHERE dashboard_bills.bill_id=' . $bill_info['id'] . ' AND dashboard_bills.notes IS NOT NULL
 					ORDER BY date_modified ASC';
             $result = mysql_query($sql);
             if (mysql_num_rows($result) > 0)
             {
-
                 while ($comment = mysql_fetch_array($result))
                 {
 
@@ -121,7 +116,7 @@ class Comments
                         $tmp = explode(' ', $comment['name']);
                         if (count($tmp) > 1)
                         {
-                            $comment['name'] = $tmp[0].' '.$tmp[1]{0}.'.';
+                            $comment['name'] = $tmp[0] . ' ' . $tmp[1]{0} . '.';
                         }
                         else
                         {
@@ -136,7 +131,6 @@ class Comments
                     $comments[$comment{timestamp}] = $comment;
                 }
             }
-
         }
 
         # If any comments have been found, return them.
@@ -146,7 +140,5 @@ class Comments
         }
 
         return FALSE;
-
     } // end method "get"
-
 } // end class "comments"

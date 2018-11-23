@@ -49,20 +49,26 @@ $sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber,
 		ON representatives.id=bills.chief_patron_id
 		LEFT JOIN districts
 		ON representatives.district_id=districts.id
-		WHERE bills.number="'.$bill.'" AND sessions.year='.$year;
+		WHERE bills.number="' . $bill . '" AND sessions.year=' . $year;
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
     $bill = mysql_fetch_array($result);
     $bill = array_map('stripslashes', $bill);
     $bill['word_count'] = str_word_count($bill['full_text']);
-    $bill['patron_suffix'] = '('.$bill['patron_party'].'-'.$bill['patron_district'].')';
-    if ($bill['patron_chamber'] == 'house') $bill['patron_prefix'] = 'Rep.';
-    elseif ($bill['patron_chamber'] == 'senate') $bill['patron_prefix'] = 'Sen.';
+    $bill['patron_suffix'] = '(' . $bill['patron_party'] . '-' . $bill['patron_district'] . ')';
+    if ($bill['patron_chamber'] == 'house')
+    {
+        $bill['patron_prefix'] = 'Rep.';
+    }
+    elseif ($bill['patron_chamber'] == 'senate')
+    {
+        $bill['patron_prefix'] = 'Sen.';
+    }
 }
 
 # PAGE METADATA
-$page_title = $bill['number'].': '.$bill['catch_line'];
+$page_title = $bill['number'] . ': ' . $bill['catch_line'];
 $site_section = 'bills';
 
 # PAGE SIDEBAR
@@ -70,8 +76,8 @@ $page_sidebar = '
 	<div class="box">
 		<h3>Additional Data</h3>
 		<ul>
-			<li><a href="/bill/'.$bill['year'].'/'.strtolower($bill['number']).'/">Main Page for '.$bill['number'].'</a></li>
-			<li><a href="/bill/'.$bill['year'].'/'.strtolower($bill['number']).'/fulltext/">Full Text of '.$bill['number'].'</a></li>
+			<li><a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number']) . '/">Main Page for ' . $bill['number'] . '</a></li>
+			<li><a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number']) . '/fulltext/">Full Text of ' . $bill['number'] . '</a></li>
 		</ul>
 	</div>';
 
@@ -79,13 +85,13 @@ $page_sidebar = '
 $page_body = '<h2>Status History</h2>';
 $sql = 'SELECT DATE_FORMAT(date, "%m/%d/%Y") AS date, date AS date_raw, status
 		FROM bills_status
-		WHERE bill_id='.$bill['id'].' AND session_id='.$bill['session_id'].'
+		WHERE bill_id=' . $bill['id'] . ' AND session_id=' . $bill['session_id'] . '
 		ORDER BY date_raw ASC, id ASC';
 $result = mysql_query($sql);
 $page_body .= '<ul>';
 while ($history = mysql_fetch_array($result))
 {
-    $page_body .= '<li>'.$history['date'].' '.$history['status'].'</li>';
+    $page_body .= '<li>' . $history['date'] . ' ' . $history['status'] . '</li>';
 }
 $page_body .= '</ul>';
 

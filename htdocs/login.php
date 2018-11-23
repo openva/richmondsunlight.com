@@ -28,7 +28,6 @@ session_start();
 
 if (isset($_POST['submit']))
 {
-
     $form_data = array_map('stripslashes', $_POST['form_data']);
     if (empty($form_data['password']))
     {
@@ -54,10 +53,8 @@ if (isset($_POST['submit']))
 				</ul>
 			</div>';
     }
-
     else
     {
-
         $form_data = array_map('mysql_real_escape_string', $_POST['form_data']);
         $form_data['password_hash'] = md5($form_data['password']);
         $sql = 'SELECT id, name, cookie_hash
@@ -71,7 +68,6 @@ if (isset($_POST['submit']))
         }
         else
         {
-
             $user = mysql_fetch_array($result);
             $_SESSION['id'] = $user['cookie_hash'];
 
@@ -115,7 +111,6 @@ if (isset($_POST['submit']))
             exit();
         }
     }
-
 }
 
 

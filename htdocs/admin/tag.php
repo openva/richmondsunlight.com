@@ -77,7 +77,7 @@ if (!empty($_POST))
             {
 
                 # Make sure it's safe.
-                $tag[$i] = ereg_replace("[[:punct:]]", '', $tag[$i]);
+                $tag[$i] = preg_replace("/[[:punct:]]/D", '', $tag[$i]);
                 $tag[$i] = trim(mysql_real_escape_string($tag[$i]));
 
                 # Check one more time to make sure it's not empty.

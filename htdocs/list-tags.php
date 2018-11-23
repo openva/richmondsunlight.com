@@ -36,10 +36,10 @@ else
 }
 
 # PAGE METADATA
-$page_title = $year.' Bills by Topic';
+$page_title = $year . ' Bills by Topic';
 if (!empty($party))
 {
-    $page_title .= ', Introduced by '.ucfirst($party);
+    $page_title .= ', Introduced by ' . ucfirst($party);
 }
 $site_section = 'bills';
 
@@ -49,7 +49,7 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 		ON tags.bill_id = bills.id
 		LEFT JOIN sessions
 		ON bills.session_id=sessions.id
-		WHERE sessions.year='.$year.'
+		WHERE sessions.year=' . $year . '
 		GROUP BY tags.tag
 		HAVING count > 1
 		ORDER BY tag ASC';
@@ -77,15 +77,14 @@ if ($tag_count > 0)
         {
             $font_size = 1;
         }
-        $page_body .= '<span style="font-size: '.$font_size.'em;"><a href="/bills/tags/'.urlencode($tag).'/">'.$tag.'</a></span> ';
+        $page_body .= '<span style="font-size: ' . $font_size . 'em;"><a href="/bills/tags/' . urlencode($tag) . '/">' . $tag . '</a></span> ';
     }
     $page_body .= '
 	</div>';
 }
-
 else
 {
-    $page_body = '<p>No bills have yet been filed for the '.$year.' session.</p>';
+    $page_body = '<p>No bills have yet been filed for the ' . $year . ' session.</p>';
 }
 
 # SIDEBAR

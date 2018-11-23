@@ -1,5 +1,6 @@
+repos:
 - repo: git://github.com/pre-commit/pre-commit-hooks
-  sha: v1.2.0
+  sha: v1.2.3
   hooks:
   -  id: check-executables-have-shebangs
   -  id: check-json
@@ -9,3 +10,15 @@
   -  id: detect-aws-credentials
   -  id: end-of-file-fixer
   -  id: trailing-whitespace
+- repo: git://github.com/detailyang/pre-commit-shell
+  sha: 1.0.2
+  hooks:
+  -  id: shell-lint
+- repo: https://github.com/digitalpulp/pre-commit-php
+  sha: 1.3.0
+  hooks:
+  -  id: php-lint-all
+     args: [-s first]
+  -  id: php-cs-fixer
+     files: \.(php)$
+     args: ["--allow-risky=yes --config=.php_cs.dist"]
