@@ -533,11 +533,6 @@ if (isset($bill['related']) && ($bill['related'] > 0))
 # PAGE CONTENT
 $page_body .= '
 
-<div id="facebook">
-	<script src="//connect.facebook.net/en_US/all.js#xfbml=1"></script>
-	<fb:like layout="button_count" show_faces="false" width="100" action="recommend"></fb:like>
-</div>
-
 <div id="bill-metadata">
 <h2>Introduced By</h2>
 <p><a href="/legislator/' . $bill['patron_shortname'] . '/" class="legislator">' .
