@@ -161,6 +161,15 @@ div.poll-number {
 
 /*	INFO BALLOONS */
 
+.qtip {
+	background-color: #dccbaf;
+	text-align: left;
+}
+	.qtip .ui-tooltip-content {
+		padding: .5em;
+		font-size: .9em;
+	}
+
 .balloon {
 	position: relative;
 	z-index: 0;
