@@ -19,6 +19,8 @@ addons:
       - php5.6-memcached
       - zip
       - awscli
+  sonarcloud:
+    organization: "openva"
 install:
 - composer install
 - cd htdocs/js/vendor; npm install; npm run build
@@ -27,6 +29,7 @@ script:
 - find htdocs/*.php -print0 |xargs -0 -n1 -P8 php -l
   && ./deploy/branch_deploy.sh
   && ./deploy/config_variables.sh
+  && sonar-scanner
   && ./deploy/aws_credentials.sh
   && zip -qr latest .
   && mkdir -p upload
