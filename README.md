@@ -1,6 +1,6 @@
 # Richmond Sunlight
 
-[![Code Climate](https://codeclimate.com/github/openva/richmondsunlight.com/badges/gpa.svg)](https://codeclimate.com/github/openva/richmondsunlight.com) [![Build Status](https://travis-ci.org/openva/richmondsunlight.com.svg?branch=deploy)](https://travis-ci.org/openva/richmondsunlight.com)
+[![SonarCloud](https://sonarcloud.io/api/project_badges/measure?project=openva_richmondsunlight.com&metric=sqale_rating)](https://sonarcloud.io/dashboard?id=openva_richmondsunlight.com) [![Build Status](https://travis-ci.org/openva/richmondsunlight.com.svg?branch=deploy)](https://travis-ci.org/openva/richmondsunlight.com)
 
 This is the front-end of the website.  See also: [rs-machine](https://github.com/openva/rs-machine), the collection of scrapers and parsers that provide the site's third-party data, [rs-api](https://github.com/openva/rs-api), the API that powers (some of) the website, and [rs-video-processor](https://github.com/openva/rs-video-processor), the on-demand legislative-video-processing system.
 
