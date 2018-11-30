@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"dependencies": {
 		"jquery": "2.x",
-		"jquery-ui-dist": "1.x",
+		"jquery-ui": "1.12.x",
 		"qtip2": "3.x",
 		"jquery-tags-input": "xoxco/jQuery-Tags-Input#",
 		"jeditable": "NicolasCARPi/jquery_jeditable#1.8.0",
