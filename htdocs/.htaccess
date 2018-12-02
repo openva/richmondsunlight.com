@@ -1,7 +1,7 @@
 #php_value apc.enabled 1
 #php_value error_reporting 2039
 
-#php_value include_path ".:/vol/www/richmondsunlight.com/html/includes/"
+php_value include_path ".:includes/"
 #php_value session.gc_maxlifetime 31449600
 #php_value session_cache_expire 31449600
 #php_value display_errors Off
@@ -14,6 +14,24 @@
 #php_value session.cache_limiter private
 #php_value session.cache_limiter 525600
 #php_value session.gc_maxlifetime 525600
+
+<IfModule mod_deflate.c>
+	AddOutputFilterByType DEFLATE text/text text/html text/plain text/xml text/css application/x-javascript application/javascript
+</IfModule>
+
+<IfModule mod_expires.c>
+	ExpiresActive On
+	ExpiresDefault "access plus 10 days"
+	ExpiresByType image/jpg "access 1 month"
+	ExpiresByType image/jpeg "access 1 month"
+	ExpiresByType image/gif "access 1 month"
+	ExpiresByType image/png "access 1 month"
+	ExpiresByType text/css "access 1 month"
+	ExpiresByType text/html "access 1 month"
+	ExpiresByType text/x-javascript "access 1 month"
+	ExpiresByType image/x-icon "access 1 year"
+	ExpiresDefault "access 1 month"
+</IfModule>
 
 # Customize Errors
 ErrorDocument 404 /404.php

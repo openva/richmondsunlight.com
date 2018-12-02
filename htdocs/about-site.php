@@ -6,12 +6,6 @@
     # PURPOSE
     # Basic information about this website.
     #
-    # NOTES
-    # None.
-    #
-    # TODO
-    # None.
-    #
     ###
 
     # INCLUDES
