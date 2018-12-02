@@ -90,7 +90,7 @@
 				<div id="date-status">
 					<div id="date"></div>
 					<div id="status">
-						The General Assembly is now in session.
+						The General Assembly is not in session.
 					</div>
 					<div id="account">%account%</div>
 				</div>
