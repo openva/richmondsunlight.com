@@ -90,7 +90,7 @@
 				<div id="date-status">
 					<div id="date"></div>
 					<div id="status">
-						The General Assembly is now in session.
+						The General Assembly is not in session.
 					</div>
 					<div id="account">%account%</div>
 				</div>
@@ -321,7 +321,7 @@
 						</ul>
 					</li>
 					<li id="t-schedule"><a href="/schedule/" accesskey="s">Schedule</a></li>
-					<li id="t-blog"><a href="/blog/" accesskey="b">Blog</a></li>
+					<li id="t-blog"><a href="/blog/" accesskey="g">Blog</a></li>
 					<li id="t-about"><a href="/about/" accesskey="a">About</a>
 					<ul>
 						<li><a href="/about/">The General Assembly »</a>

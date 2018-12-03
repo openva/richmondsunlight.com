@@ -397,7 +397,7 @@ if ($poll->get_results() !== FALSE)
         }
     }
 }
-$page_sidebar .= '</div>';
+$page_sidebar .= '</div></div>';
 
 # Tags
 $page_sidebar .= '
