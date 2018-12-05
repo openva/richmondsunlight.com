@@ -1223,7 +1223,7 @@ $debug_timing['comments retrieved'] = microtime(TRUE);
  */
 if (isset($comments) && is_array($comments))
 {
-    $page_body .= '<h2>Comments</h2>';
+    $page_body .= '<div id="comment-list"><h2>Comments</h2>';
     $i=1;
 
     # Our two comments array keys are timestamps. Resort them and then reindex them.
@@ -1300,6 +1300,7 @@ if (isset($comments) && is_array($comments))
 		</div>';
         $i++;
     }
+    $page_body .= '</div>';
 }
 
 
@@ -1309,12 +1310,12 @@ if (($bill['session_id'] == SESSION_ID))
 {
     $page_body .= '
 	<h2>Post a Public Comment About this Bill</h2>
-	<form method="post" action="/process-comments.php">
-		<input type="text" size="30" maxlength="50" name="comment[expiration_date]" id="expiration_date" value="' . $user['name'] . '" /> <label for="expiration_date"><strong>Name</strong> <small>required</small></label><br />
-		<input type="email" size="30" maxlength="50" name="comment[zip]" id="zip" value="' . $user['email'] . '" /> <label for="zip"><strong>Mail</strong> <small>won\'t be published, required</small></label><br />
+	<form method="post" action="/process-comments.php" id="comment-form">
+		<input type="text" size="30" maxlength="50" name="comment[expiration_date]" id="expiration_date" value="' . $user['name'] . '" required /> <label for="expiration_date"><strong>Name</strong> <small>required</small></label><br />
+		<input type="email" size="30" maxlength="50" name="comment[zip]" id="zip" value="' . $user['email'] . '" required /> <label for="zip"><strong>Mail</strong> <small>won’t be published, required</small></label><br />
 		<input type="url" size="30" maxlength="50" name="comment[age]" id="age" value="' . $user['url'] . '" /> <label for="age"><strong>Website</strong></label> <small>if you have one</small><br />
 		<div style="display: none;"><input type="text" size="2" maxlength="2" name="comment[state]" id="state" /> <label for="state">Leave this field empty</label><br /></div>
-		<textarea rows="16" cols="60" name="comment[comment]"></textarea><br />
+		<textarea rows="16" cols="60" name="comment[comment]" id="comment" required></textarea><br />
 		<small>(Limited HTML is OK: &lt;a&gt;, &lt;em&gt;, &lt;strong&gt;, &lt;s&gt, &lt;embed&gt;)</small><br />';
 
     # Create a new instance of the comments-subscription class
@@ -1343,10 +1344,63 @@ if (($bill['session_id'] == SESSION_ID))
     }
 
     $page_body .= '
-		<input type="hidden" name="comment[bill_id]" value="' . $bill['id'] . '" />
-		<input type="hidden" name="comment[return_to]" value="' . $_SERVER['REQUEST_URI'] . '" />
-		<input type="submit" name="submit" value="Submit" />
-	</form>';
+            <input type="hidden" name="comment[bill_id]" id="bill_id" value="' . $bill['id'] . '" />
+            <input type="submit" name="submit" id="comment-submit" value="Submit" />
+            <div id="comment-error" style="background-color: pink; border: 3px solid black; padding: 1em; display: none; margin: 2em 0;"></div>
+        </form>
+        <script>
+            $(document).ready(function() {
+                $("#comment-submit").click(function( event ) {
+
+                    // Stop the form from submitting normally.
+                    event.preventDefault();
+
+                    // Get the form values.
+                    var expiration_date = $("#expiration_date").val(),
+                        zip = $("#zip").val(),
+                        age = $("#age").val(),
+                        comment = $("#comment").val(),
+                        bill_id = $("#bill_id").val(),
+                        subscribe = $("#subscribe").val();
+
+                    var posting = $.post( "/process-comments-ajax.php", { expiration_date: expiration_date, zip: zip, age: age, bill_id: bill_id, subscribe: subscribe, comment: comment } );
+                    console.log(posting);
+                    // If the posting was successful.
+                    posting.done(function( data ) {
+
+                        var response = $.parseJSON( data );
+
+                        // Append the comment to the list
+                        $( "#comment-list" ).append(
+                            "<a name=comment-new></a><div class=comment id=newcomment><cite><a href=" + age + ">" + expiration_date + "</a></cite> <strong>writes</strong>:<br /><p>" + comment + "</p><div class=metadata><span class=date>Posted 1 second ago.</span></div></div>"
+                        );
+
+                        // Clear out the comment field
+                        $("#comment").val("");
+
+                        // Scroll to the new comment
+                        var commentAnchor = $("a[name=\'comment-new\']");
+                        $("html,body").animate({scrollTop: commentAnchor.offset().top},"slow");
+
+                        // Flash and fade the comment
+                        $("#newcomment").fadeIn(200).fadeOut(200).fadeIn(200).fadeOut(200).fadeIn(200);
+
+                    });
+
+                    // If the posting failed.
+                    posting.fail(function( data ) {
+
+                        var response = $.parseJSON( data );
+                        console.log(data);
+                        // Display the error in the error field.
+                        $( "#comment-error" ).empty().append( response.error );
+                        $( "#comment-error" ).show();
+
+                    });
+
+                });
+            });
+        </script>';
 }
 
 $page_body .= '
