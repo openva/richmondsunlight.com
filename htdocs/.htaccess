@@ -1,7 +1,7 @@
 #php_value apc.enabled 1
 #php_value error_reporting 2039
 
-php_value include_path ".:includes/"
+#php_value include_path ".:includes/"
 #php_value session.gc_maxlifetime 31449600
 #php_value session_cache_expire 31449600
 #php_value display_errors Off
