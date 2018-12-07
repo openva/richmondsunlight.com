@@ -406,7 +406,7 @@ $page_sidebar .= '
 
 if (isset($bill['tags']) && (count($bill['tags']) > 0))
 {
-    $page_sidebar .= '<ul class="tags">';
+    $page_sidebar .= '<ul class="tags" id="tags_list">';
 
     foreach ($bill['tags'] as $tag_id => $tag)
     {
@@ -448,11 +448,54 @@ $html_head .= '
 $page_sidebar .= '
 			<form method="post" action="/process-tags.php">
 				<div class="ui-widget">
-					<input type="text" id="tags" name="tags[tags]" size="25" maxlength="' . $maxlength . '" />
+					<input type="text" id="tags" name="tags[tags]" size="25" maxlength="' . $maxlength . '" required />
 				</div>
-				<input type="hidden" name="tags[bill_id]" value="' . $bill['id'] . '" />
+				<input type="hidden" name="tags[bill_id]" value="' . $bill['id'] . '" id="bill_id" />
 				<input type="hidden" name="tags[return_to]" value="' . $_SERVER['REQUEST_URI'] . '" />
-				<input type="submit" name="submit" value="Save" />
+				<input type="submit" name="submit" value="Save" id="tags_submit" />';
+
+$page_sidebar .=
+<<<EOD
+    <script>
+        $(document).ready(function() {
+            $("#tags_submit").click(function( event ) {
+
+                // Stop the form from submitting normally.
+                event.preventDefault();
+
+                // Get the form values.
+                var tags = $("#tags").val(),
+                    bill_id = $("#bill_id").val();
+
+                var posting = $.post( "/process-tags-ajax.php", { tags: tags, bill_id: bill_id } );
+
+                // If the posting was successful.
+                posting.done(function( data ) {
+
+                    // Clear out the tags input field
+                    $("#tags").importTags('');
+
+                    // Append the tags to the list
+                    var tagList = tags.split(',')
+                    tagList.forEach(function(tag) {
+                        $( "#tags_list" ).append('<li><a href="/bills/tags/' + encodeURIComponent(tag) + '">' + tag + '</a></li>');
+                    });
+
+                });
+
+                // If the posting failed.
+                posting.fail(function( data ) {
+
+                    var response = $.parseJSON( data );
+
+                });
+
+            });
+        });
+    </script>
+EOD;
+
+$page_sidebar .= '
 				<p>Separate each tag with a comma: <em>crime, capital murder, jury</em>.</p>
 			</form>
 			<script>
