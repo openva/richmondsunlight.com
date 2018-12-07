@@ -80,7 +80,7 @@ if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === TRUE)
 $user = @get_user();
 
 # CLEAN UP THE DATA
-$comment = array_map('mysql_escape_string', $comment);
+$comment = array_map('mysqli_escape_string', $comment);
 $comment = array_map('trim', $comment);
 $comment['comment'] = strip_tags($comment['comment'], '<a><em><strong><i><b><s><blockquote><embed>');
 
@@ -169,8 +169,8 @@ $sql = 'SELECT id
 		FROM comments
 		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(SECOND, date_created, now()) < 5)';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($db, $sql);
+if (mysqli_num_rows($result) > 0)
 {
     die('Slow down, cowboy: Only one comment is allowed every five seconds. That’s pretty reasonable.');
 }
@@ -180,8 +180,8 @@ $sql = 'SELECT *
 		FROM comments
 		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 5)';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 10)
+$result = mysqli_query($db, $sql);
+if (mysqli_num_rows($result) > 10)
 {
     die('Slow down, cowboy: You’re posting way too many comments too fast. Relax, think, then write.');
 }
@@ -192,8 +192,8 @@ $sql = 'SELECT id
 		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 60)
 		AND comment="' . $comment['comment'] . '"';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($db, $sql);
+if (mysqli_num_rows($result) > 0)
 {
     die('You’ve already posted that exact comment. You may not post it again. And, no, don’t '
         . 'just change it a little bit and repost it—a moderator will just delete it. If you’re '
@@ -220,7 +220,7 @@ if (!isset($errors))
     {
         $sql .= ', user_id=' . $user['id'];
     }
-    $result = mysql_query($sql);
+    $result = mysqli_query($db, $sql);
     if (!$result)
     {
         die('Your comment could not be added, though for no good reason. Richmond Sunlight has

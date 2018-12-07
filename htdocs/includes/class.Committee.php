@@ -23,13 +23,13 @@ class Committee
 				FROM committees
 				WHERE shortname="' . $this->shortname . '"
 				AND chamber="' . $this->chamber . '"';
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) == 0)
+        $result = mysqli_query($db, $sql);
+        if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
         }
 
-        $info = mysql_fetch_assoc($result);
+        $info = mysqli_fetch_assoc($result);
 
         foreach ($info as $name => $value)
         {
@@ -63,15 +63,15 @@ class Committee
 				AND (committee_members.date_ended > now() OR committee_members.date_ended IS NULL)
 				AND (representatives.date_ended >= now() OR representatives.date_ended IS NULL)
 				ORDER BY committee_members.position DESC, representatives.name ASC';
-        $result = mysql_query($sql);
+        $result = mysqli_query($db, $sql);
 
-        if (mysql_num_rows($result) == 0)
+        if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
         }
 
         $this->members = array();
-        while ($member = mysql_fetch_assoc($result))
+        while ($member = mysqli_fetch_assoc($result))
         {
             $member['name_simple'] = pivot($member['name_simple']);
             $this->members[] = $member;
@@ -99,14 +99,14 @@ class Committee
 				FROM committees
 				WHERE parent_id IS NULL
 				AND chamber = "' . $this->chamber . '"';
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) == 0)
+        $result = mysqli_query($db, $sql);
+        if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
         }
 
         $committees = array();
-        while ($committee = mysql_fetch_array($result))
+        while ($committee = mysqli_fetch_array($result))
         {
             $committees[$committee{'id'}] = $committee['name'];
         }

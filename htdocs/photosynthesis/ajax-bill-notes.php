@@ -35,18 +35,18 @@ if (!isset($_POST['user_hash']) || !isset($_POST['id']) || !isset($_POST['value'
 
 # Strip out all tags other than the following.
 $notes = trim(strip_tags($_POST['value'], '<a><em><strong><i><b><s><blockquote><embed><ol><ul><li>'));
-$hash = mysql_real_escape_string($_POST['user_hash']);
+$hash = mysqli_real_escape_string($_POST['user_hash']);
 
 # Update the database.
 $sql = 'UPDATE dashboard_bills
-		SET notes = ' . (empty($notes) ? 'NULL' : '"' . mysql_real_escape_string($notes) . '"') . '
-		WHERE id=' . mysql_real_escape_string($_POST['id']) . '
+		SET notes = ' . (empty($notes) ? 'NULL' : '"' . mysqli_real_escape_string($notes) . '"') . '
+		WHERE id=' . mysqli_real_escape_string($_POST['id']) . '
 		AND user_id = (
 			SELECT id
 			FROM users
-			WHERE private_hash="' . mysql_real_escape_string($hash) . '"
+			WHERE private_hash="' . mysqli_real_escape_string($hash) . '"
 			LIMIT 1)';
-$result = mysql_query($sql);
+$result = mysqli_query($db, $sql);
 if ($result === FALSE)
 {
     die(' ');
@@ -63,8 +63,8 @@ else
     $sql = 'SELECT bill_id AS id
 			FROM dashboard_bills
 			WHERE id=' . $_POST['id'];
-    $result = mysql_query($sql);
-    $bill = mysql_fetch_array($result);
+    $result = mysqli_query($db, $sql);
+    $bill = mysqli_fetch_array($result);
     $mc = new Memcached();
     $mc->addServer("127.0.0.1", 11211);
     $mc->delete('comments-' . $bill['id']);

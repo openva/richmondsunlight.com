@@ -18,9 +18,9 @@
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once $_SERVER['DOCUMENT_ROOT'].'/includes/settings.inc.php';
-include_once $_SERVER['DOCUMENT_ROOT'].'/includes/functions.inc.php';
-include_once $_SERVER['DOCUMENT_ROOT'].'/includes/photosynthesis.inc.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/settings.inc.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/functions.inc.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/photosynthesis.inc.php';
 
 # LOCALIZE VARIABLES
 $hash = urldecode($_REQUEST['hash']);
@@ -33,12 +33,12 @@ if (empty($hash))
 
 # Check to see if there's any need to regenerate this RSS feed -- only do so if it's more than
 # three minutes old.
-if ((file_exists('cache/portfolio-'.$hash.'.xml')) && ((filemtime('cache/portfolio-'.$hash.'.xml') + 180) > time()))
+if ((file_exists('cache/portfolio-' . $hash . '.xml')) && ((filemtime('cache/portfolio-' . $hash . '.xml') + 180) > time()))
 {
     header('Content-Type: application/rss+xml');
-    header('Last-Modified: '.date('r', filemtime('cache/portfolio-'.$hash.'.xml')));
-    header('ETag: '.md5_file('cache/portfolio-'.$hash.'.xml'));
-    readfile('cache/portfolio-'.$hash.'.xml');
+    header('Last-Modified: ' . date('r', filemtime('cache/portfolio-' . $hash . '.xml')));
+    header('ETag: ' . md5_file('cache/portfolio-' . $hash . '.xml'));
+    readfile('cache/portfolio-' . $hash . '.xml');
     exit();
 }
 
@@ -49,10 +49,13 @@ $database->connect_old();
 # Query the database for information on this portfolio.
 $sql = 'SELECT id, name
 		FROM dashboard_portfolios
-		WHERE hash = "'.mysql_real_escape_string($hash).'"';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) == 0) die();
-$portfolio = mysql_fetch_array($result);
+		WHERE hash = "' . mysqli_real_escape_string($hash) . '"';
+$result = mysqli_query($db, $sql);
+if (mysqli_num_rows($result) == 0)
+{
+    die();
+}
+$portfolio = mysqli_fetch_array($result);
 $portfolio = array_map('stripslashes', $portfolio);
 
 # Query the database for all bills in that portfolio.
@@ -67,9 +70,9 @@ $sql = 'SELECT bills.number, bills.catch_line, bills.summary,
 			ON bills.id=dashboard_bills.bill_id
 		LEFT JOIN dashboard_portfolios
 			ON dashboard_bills.portfolio_id = dashboard_portfolios.id
-		WHERE dashboard_portfolios.id="'.$portfolio['id'].'"
-		AND bills.session_id='.SESSION_ID;
-$result = mysql_query($sql);
+		WHERE dashboard_portfolios.id="' . $portfolio['id'] . '"
+		AND bills.session_id=' . SESSION_ID;
+$result = mysqli_query($db, $sql);
 
 #Don't check to make sure the query was successful -- we want to make sure that people can
 # even subscribe to feeds for tags that have introduced nothing yet.
@@ -77,28 +80,24 @@ $result = mysql_query($sql);
 $rss_content = '';
 
 # Generate the RSS.
-while ($bill = mysql_fetch_array($result))
+while ($bill = mysqli_fetch_array($result))
 {
 
     # Aggregate the variables into their RSS components.
-    $title = '<![CDATA['.$bill['catch_line'].' ('.strtoupper($bill['number']).')]]>';
-    $link = 'https://www.richmondsunlight.com/bill/'.SESSION_YEAR.'/'.$bill['number'].'/';
-    $description = '<![CDATA[<p>'.$bill['summary'].'</p><p><strong>Status: '.$bill['status'].'</strong></p>]]>';
+    $title = '<![CDATA[' . $bill['catch_line'] . ' (' . mb_strtoupper($bill['number']) . ')]]>';
+    $link = 'https://www.richmondsunlight.com/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/';
+    $description = '<![CDATA[<p>' . $bill['summary'] . '</p><p><strong>Status: ' . $bill['status'] . '</strong></p>]]>';
 
     # Now assemble those RSS components into an XML fragment.
     $rss_content .= '
 	<item>
-		<title>'.$title.'</title>
-		<link>'.$link.'</link>
-		<description>'.$description.'</description>
+		<title>' . $title . '</title>
+		<link>' . $link . '</link>
+		<description>' . $description . '</description>
 	</item>';
 
     # Unset those variables for reuse.
     unset($item_completed, $title, $link, $description);
-
-
-
-
 }
 
 
@@ -107,19 +106,19 @@ $rss = '<?xml version="1.0" encoding=\'iso-8859-1\'?>
 <!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN" "https://emacspeak.googlecode.com/svn/tags/release-social-dog/html/rss-0.91.dtd">
 <rss version="0.91">
 <channel>
-	<title>'.$portfolio['name'].'</title>
-	<link>http://www.richmondsunlight.com/photosynthesis/'.$hash.'/</link>
-	<description>Bills you\'re tracking in the "'.$portfolio['name'].'" portfolio.</description>
+	<title>' . $portfolio['name'] . '</title>
+	<link>http://www.richmondsunlight.com/photosynthesis/' . $hash . '/</link>
+	<description>Bills you\'re tracking in the "' . $portfolio['name'] . '" portfolio.</description>
 	<language>en-us</language>
-	'.$rss_content.'
+	' . $rss_content . '
 </channel>
 </rss>';
 
 
 # Cache the RSS file.
-$fp = @file_put_contents('cache/portfolio-'.$hash.'.xml', $rss);
+$fp = @file_put_contents('cache/portfolio-' . $hash . '.xml', $rss);
 
 header('Content-Type: application/rss+xml');
-header('Last-Modified: '.date('r', filemtime('cache/portfolio-'.$hash.'.xml')));
-header('ETag: '.md5_file('cache/portfolio-'.$hash.'.xml'));
+header('Last-Modified: ' . date('r', filemtime('cache/portfolio-' . $hash . '.xml')));
+header('ETag: ' . md5_file('cache/portfolio-' . $hash . '.xml'));
 echo $rss;

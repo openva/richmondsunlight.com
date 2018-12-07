@@ -38,8 +38,8 @@ if (logged_in() === TRUE)
 $debug_timing['logged in'] = microtime(TRUE);
 
 # LOCALIZE AND CLEAN UP VARIABLES
-$year = mysql_escape_string($_REQUEST['year']);
-$bill = mb_strtolower(mysql_escape_string($_REQUEST['bill']));
+$year = mysqli_escape_string($_REQUEST['year']);
+$bill = mb_strtolower(mysqli_escape_string($_REQUEST['bill']));
 
 # Initialize variables.
 $html_head = '';
@@ -113,7 +113,7 @@ if (!isset($is_bot))
     {
         $sql .= ', user_id = ' . $user['id'];
     }
-    mysql_query($sql);
+    mysqli_query($db, $sql);
 }
 
 # PAGE METADATA
@@ -183,12 +183,12 @@ if ($bill['session_id'] == SESSION_ID)
 					ON dashboard_bills.portfolio_id = dashboard_portfolios.id
 				WHERE dashboard_bills.bill_id = ' . $bill['id'] . '
 				AND dashboard_portfolios.user_id= ' . $user['id'];
-        $result = mysql_query($sql);
+        $result = mysqli_query($db, $sql);
 
         # If this bill is being tracked, notify this user.
-        if (mysql_num_rows($result) > 0)
+        if (mysqli_num_rows($result) > 0)
         {
-            $portfolio = mysql_fetch_array($result);
+            $portfolio = mysqli_fetch_array($result);
             $portfolio = array_map('stripslashes', $portfolio);
             if (count($_SESSION['portfolios'] == 1))
             {
@@ -251,8 +251,8 @@ if ($bill['session_id'] == SESSION_ID)
         $sql .= ' AND users.id != ' . $user['id'];
     }
     $sql .= ' ORDER BY RAND()';
-    $result = mysql_query($sql);
-    $portfolio_count = mysql_num_rows($result);
+    $result = mysqli_query($db, $sql);
+    $portfolio_count = mysqli_num_rows($result);
 
     # If we've found anything, list them.
     if ($portfolio_count > 0)
@@ -263,7 +263,7 @@ if ($bill['session_id'] == SESSION_ID)
             $ps_portfolios .= 'one member, ';
         }
         $i=2;
-        while ($portfolio = mysql_fetch_array($result))
+        while ($portfolio = mysqli_fetch_array($result))
         {
             $portfolio = array_map('stripslashes', $portfolio);
 
@@ -890,10 +890,10 @@ $sql = 'SELECT DATE_FORMAT(dockets.date, "%m/%d/%Y") AS date, committees.name AS
 		WHERE dockets.bill_id=' . $bill['id'] . ' AND dockets.date > now()
 		LIMIT 1';
 
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($db, $sql);
+if (mysqli_num_rows($result) > 0)
 {
-    $docket = mysql_fetch_array($result);
+    $docket = mysqli_fetch_array($result);
     $docket = array_map('stripslashes', $docket);
 
     $page_body .= '
@@ -961,12 +961,12 @@ if (($bill['video'] !== FALSE) && (count($bill['video']) > 0))
 					AND time_start >= " ' . seconds_to_time($video->start) . ' "
 					AND time_end <= " ' . seconds_to_time($video->end) . ' "
 				ORDER BY video_transcript.time_start ASC';
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) > 0)
+        $result = mysqli_query($db, $sql);
+        if (mysqli_num_rows($result) > 0)
         {
             $transcript[$video->file_id] = array();
 
-            while ($line = mysql_fetch_assoc($result))
+            while ($line = mysqli_fetch_assoc($result))
             {
                 $transcript[$video->file_id][] = $line;
             }

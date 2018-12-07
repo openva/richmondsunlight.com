@@ -25,7 +25,7 @@ $database = new Database;
 $database->connect_old();
 
 # LOCALIZE VARIABLES
-$section = mysql_escape_string(urldecode($_REQUEST['section']));
+$section = mysqli_escape_string(urldecode($_REQUEST['section']));
 if (isset($_REQUEST['callback']) && !empty($_REQUEST['callback']))
 {
     $callback = $_REQUEST['callback'];
@@ -40,15 +40,15 @@ $sql = 'SELECT sessions.year, bills.number, bills.catch_line
 			ON bills.session_id = sessions.id
 		WHERE bills_section_numbers.section_number =  "' . $section . '"
 		ORDER BY year ASC';
-$result = mysql_query($sql);
+$result = mysqli_query($db, $sql);
 # The MYSQL_ASSOC variable indicates that we want just the associated array, not both associated
 # and indexed arrays.
-$bill = mysql_fetch_array($result, MYSQL_ASSOC);
+$bill = mysqli_fetch_array($result, MYSQL_ASSOC);
 
 # Build up a listing of all bills.
 # The MYSQL_ASSOC variable indicates that we want just the associated array, not both associated
 # and indexed arrays.
-while ($bill = mysql_fetch_array($result, MYSQL_ASSOC))
+while ($bill = mysqli_fetch_array($result, MYSQL_ASSOC))
 {
     $bill['url'] = 'http://www.richmondsunlight.com/bill/' . $bill['year'] . '/' . $bill['number'] . '/';
     $bill['number'] = mb_strtoupper($bill['number']);

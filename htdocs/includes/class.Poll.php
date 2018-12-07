@@ -28,8 +28,8 @@ class Poll
 					FROM users
 					WHERE cookie_hash = "' . $_SESSION['id'] . '")
 				AND bill_id=' . $this->bill_id;
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) === 0)
+        $result = mysqli_query($db, $sql);
+        if (mysqli_num_rows($result) === 0)
         {
             return FALSE;
         }
@@ -78,13 +78,13 @@ class Poll
 						AND vote = "y") AS yes
 					FROM polls
 					WHERE bill_id= ' . $this->bill_id;
-            $result = mysql_query($sql);
-            if (mysql_num_rows($result) == 0)
+            $result = mysqli_query($db, $sql);
+            if (mysqli_num_rows($result) == 0)
             {
                 return FALSE;
             }
 
-            $this->results = mysql_fetch_array($result);
+            $this->results = mysqli_fetch_array($result);
             $mc->set('poll-' . $this->bill_id, serialize($this->results), (60 * 60 * 24));
             return TRUE;
         }

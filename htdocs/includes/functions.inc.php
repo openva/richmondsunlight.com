@@ -98,7 +98,7 @@ function cache_delete($key)
     # Delete the cache file.
     $sql = 'DELETE FROM cache
 			WHERE key="' . $key . '"';
-    $result = mysql_query($sql);
+    $result = mysqli_query($db, $sql);
 
     return true;
 }
@@ -117,12 +117,12 @@ function cache_age($key)
     $sql = 'SELECT now() - date_created AS age
 			FROM cache
 			WHERE key="' . $key . '"';
-    $result = mysql_query($sql);
+    $result = mysqli_query($db, $sql);
     if ($result === false)
     {
         return FALSE;
     }
-    $cache = mysql_fetch_array($result);
+    $cache = mysqli_fetch_array($result);
 
     return $cache['age'];
 }
@@ -141,7 +141,7 @@ function cache_exists($key)
     $sql = 'SELECT *
 			FROM cache
 			WHERE key="' . $key . '"';
-    $result = mysql_query($sql);
+    $result = mysqli_query($db, $sql);
 
     # We can return the result directly.
     return $result;
@@ -152,14 +152,14 @@ function connect_to_db($type = 'old')
 {
     if ($type == 'old')
     {
-        $db = mysql_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
+        $db = mysqli_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
         if ($db === FALSE)
         {
             header('Location: https://www.richmondsunlight.com/site-down/');
             exit;
         }
-        mysql_select_db(MYSQL_DATABASE, $db);
-        mysql_query('SET NAMES "utf8"');
+        mysqli_select_db(MYSQL_DATABASE, $db);
+        mysqli_query($db, 'SET NAMES "utf8"');
     }
     elseif ($type == 'pdo')
     {
@@ -324,7 +324,7 @@ if (!function_exists('create_user'))
                 $sql_inserts = '';
                 foreach ($options as $key => $value)
                 {
-                    $value = mysql_real_escape_string($value);
+                    $value = mysqli_real_escape_string($value);
                     if (empty($value))
                     {
                         $sql_inserts .= ', ' . $key . ' = NULL';
@@ -347,7 +347,7 @@ if (!function_exists('create_user'))
                 foreach ($options as $key => $value)
                 {
                     # Make the data safe for the database.
-                    $value = mysql_real_escape_string($value);
+                    $value = mysqli_real_escape_string($value);
 
                     # Determine which SQL string this data should be appended to.
                     if (($key == 'organization') || ($key == 'type') || ($key == 'expires'))
@@ -399,7 +399,7 @@ if (!function_exists('create_user'))
         {
             $sql .= $sql_inserts;
         }
-        $result = mysql_query($sql);
+        $result = mysqli_query($db, $sql);
         if (!$result)
         {
             return FALSE;
@@ -408,7 +408,7 @@ if (!function_exists('create_user'))
         {
 
             # Get the user's ID.
-            $user_id = mysql_insert_id();
+            $user_id = mysqli_insert_id($db);
 
             # Generate a random eight-digit hash to send out in e-mails for unsubscribing
             # instantly.
@@ -423,7 +423,7 @@ if (!function_exists('create_user'))
             {
                 $sql .= $dashboard_inserts;
             }
-            mysql_query($sql);
+            mysqli_query($db, $sql);
         }
     }
 }
@@ -456,13 +456,13 @@ function get_user()
 			FROM users
 			LEFT JOIN dashboard_user_data
 				ON users.id=dashboard_user_data.user_id
-			WHERE users.cookie_hash="' . mysql_real_escape_string($_SESSION['id']) . '"';
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) == 0)
+			WHERE users.cookie_hash="' . mysqli_real_escape_string($_SESSION['id']) . '"';
+    $result = mysqli_query($db, $sql);
+    if (mysqli_num_rows($result) == 0)
     {
         return FALSE;
     }
-    $user = mysql_fetch_array($result, MYSQL_ASSOC);
+    $user = mysqli_fetch_array($result, MYSQL_ASSOC);
     $user = array_map('stripslashes', $user);
 
     # Cache this user's data, and save it for one hour. (User sessions are unlikely to last longer.)
@@ -495,7 +495,7 @@ function update_user($options)
     $first = 'yes';
     foreach ($options as $key => $value)
     {
-        mysql_real_escape_string($value);
+        mysqli_real_escape_string($value);
         if (!isset($first))
         {
             $sql .= ', ';
@@ -506,8 +506,8 @@ function update_user($options)
         }
         $sql .= $key . ' = "' . $value . '"';
     }
-    $sql .= ' WHERE cookie_hash="' . mysql_real_escape_string($_SESSION['id']) . '"';
-    $result = mysql_query($sql);
+    $sql .= ' WHERE cookie_hash="' . mysqli_real_escape_string($_SESSION['id']) . '"';
+    $result = mysqli_query($db, $sql);
     if (!$result)
     {
         return FALSE;
@@ -558,7 +558,7 @@ function logged_in($registered = '')
     {
         $sql = 'SELECT id
 				FROM users
-				WHERE cookie_hash="' . mysql_real_escape_string($_SESSION['id']) . '"
+				WHERE cookie_hash="' . mysqli_real_escape_string($_SESSION['id']) . '"
 				AND password IS NOT NULL';
     }
 
@@ -569,14 +569,14 @@ function logged_in($registered = '')
     {
         $sql = 'SELECT id
 				FROM users
-				WHERE cookie_hash="' . mysql_real_escape_string($_SESSION['id']) . '"';
+				WHERE cookie_hash="' . mysqli_real_escape_string($_SESSION['id']) . '"';
     }
-    $result = mysql_query($sql);
+    $result = mysqli_query($db, $sql);
 
     /*
      * If one result is returned, then this user does have an account.
      */
-    if (mysql_num_rows($result) == 1)
+    if (mysqli_num_rows($result) == 1)
     {
         if ($registered == 'registered')
         {
@@ -606,8 +606,8 @@ function blacklisted()
 				(SELECT id
 				FROM users
 				WHERE cookie_hash = "' . $_SESSION['id'] . '")';
-    $result = mysql_query($sql);
-    $data = mysql_fetch_array($result);
+    $result = mysqli_query($db, $sql);
+    $data = mysqli_fetch_array($result);
     $score = $data['score'];
     if ($score >= 20)
     {
@@ -634,7 +634,7 @@ function blacklist($word)
         $sql .= ', reason="dirty word - ' . $word . '"';
     }
 
-    mysql_query($sql);
+    mysqli_query($db, $sql);
 }
 
 # Display the CSS balloon providing a tooltip-type interface for bills and legislators.
@@ -758,13 +758,13 @@ function district_to_id($number, $chamber)
 			FROM districts
 			WHERE number = ' . $number . ' AND chamber = "' . $chamber . '"
 			AND date_ended IS NULL';
-    $result = mysql_query($sql);
+    $result = mysqli_query($db, $sql);
 
     # Continue if we've got a match.
-    if (mysql_num_rows($result) > 0)
+    if (mysqli_num_rows($result) > 0)
     {
         # Return the database ID.
-        $district = mysql_fetch_array($result);
+        $district = mysqli_fetch_array($result);
         return $district['id'];
     }
 
@@ -974,14 +974,14 @@ function bill_sections($bill_id)
 			AND vacode.section_number IS NOT NULL
 			ORDER BY vacode.section_number ASC';
 
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) < 1)
+    $result = mysqli_query($db, $sql);
+    if (mysqli_num_rows($result) < 1)
     {
         return FALSE;
     }
     else
     {
-        while ($section = mysql_fetch_array($result))
+        while ($section = mysqli_fetch_array($result))
         {
             $section['url'] = 'https://vacode.org/' . $section['section_number'] . '/';
             $sections[] = $section;
