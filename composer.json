@@ -9,7 +9,7 @@
         "components/jquery": "~1.7",
         "components/jqueryui": "~1.8",
         "simplepie/simplepie": "1.5",
-        "romainneutron/Sphinx-Search-API-PHP-Client": "master"
+        "neutron/sphinxsearch-api": "dev-master"
     },
     "autoload": {
         "classmap": [
