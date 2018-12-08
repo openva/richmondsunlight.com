@@ -13,7 +13,7 @@
 # page to function.
 include_once 'settings.inc.php';
 include_once 'functions.inc.php';
-include_once 'includes/sphinxapi.php';
+//include_once 'includes/sphinxapi.php';
 include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
