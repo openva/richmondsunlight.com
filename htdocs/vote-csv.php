@@ -26,8 +26,8 @@ $database = new Database;
 $database->connect_old();
 
 # LOCALIZE VARIABLES
-$shortname = mysqli_real_escape_string($_GET['shortname']);
-$year = mysqli_real_escape_string($_GET['year']);
+$shortname = mysqli_escape_string($db, $_GET['shortname']);
+$year = mysqli_escape_string($db, $_GET['year']);
 
 # Select the vote data from the database.
 $sql = 'SELECT bills.number AS bill_number, bills.catch_line, representatives_votes.vote,

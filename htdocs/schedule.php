@@ -96,7 +96,7 @@ $sql = 'SELECT dockets.date, committees.id AS committee_id, committees.chamber,
 			ON committees.parent_id=committees2.id
 		LEFT JOIN meetings
 			ON committees.id = meetings.committee_id
-		WHERE dockets.date = "' . mysqli_real_escape_string($date) . '"
+		WHERE dockets.date = "' . mysqli_escape_string($db, $date) . '"
 		GROUP BY dockets.committee_id
 		ORDER BY committees.chamber DESC, committees.name ASC';
 $result = mysqli_query($db, $sql);

@@ -27,7 +27,7 @@ $database->connect_old();
 session_start();
 
 # LOCALIZE AND CLEAN UP VARIABLES
-$shortname = mysqli_escape_string($_REQUEST['shortname']);
+$shortname = mysqli_escape_string($db, $_REQUEST['shortname']);
 
 # Get the legislator's info. from the API.
 # We append a query string, containing the current time, to avoid getting a cached copy.

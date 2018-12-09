@@ -38,8 +38,8 @@ if (logged_in() === TRUE)
 $debug_timing['logged in'] = microtime(TRUE);
 
 # LOCALIZE AND CLEAN UP VARIABLES
-$year = mysqli_escape_string($_REQUEST['year']);
-$bill = mb_strtolower(mysqli_escape_string($_REQUEST['bill']));
+$year = mysqli_escape_string($db, $_REQUEST['year']);
+$bill = mb_strtolower(mysqli_escape_string($db, $_REQUEST['bill']));
 
 # Initialize variables.
 $html_head = '';

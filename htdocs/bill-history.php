@@ -31,8 +31,8 @@ $database->connect_old();
 session_start();
 
 # LOCALIZE AND CLEAN UP VARIABLES
-$year = mysqli_escape_string($_REQUEST['year']);
-$bill = mysqli_escape_string($_REQUEST['bill']);
+$year = mysqli_escape_string($db, $_REQUEST['year']);
+$bill = mysqli_escape_string($db, $_REQUEST['bill']);
 
 # RETRIEVE THE BILL INFO FROM THE DATABASE
 $sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber,

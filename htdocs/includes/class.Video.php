@@ -1026,7 +1026,7 @@ class Video
         $database->connect_old();
 
         $sql = 'UPDATE files
-				SET webvtt = "' . mysqli_real_escape_string($this->webvtt) . '"
+				SET webvtt = "' . mysqli_escape_string($db, $this->webvtt) . '"
 				WHERE id=' . $this->file_id;
         $result = mysqli_query($db, $sql);
         if ($result === FALSE)
@@ -1280,7 +1280,7 @@ class Video
 					SET file_id=' . $this->file_id . ',
 					time_start="' . $caption->time_start . '",
 					time_end="' . $caption->time_end . '",
-					text="' . mysqli_real_escape_string($caption->text) . '"';
+					text="' . mysqli_escape_string($db, $caption->text) . '"';
             if (isset($caption->new_speaker))
             {
                 $sql .= ', new_speaker="y"';

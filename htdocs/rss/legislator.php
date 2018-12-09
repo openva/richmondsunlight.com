@@ -49,7 +49,7 @@
 			FROM representatives
 			LEFT JOIN districts
 				ON representatives.district_id=districts.id
-			WHERE representatives.shortname = "' . mysqli_real_escape_string($legislator['shortname']) . '"';
+			WHERE representatives.shortname = "' . mysqli_escape_string($db, $legislator['shortname']) . '"';
     $result = mysqli_query($db, $sql);
     if (mysqli_num_rows($result) == 0)
     {

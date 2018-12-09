@@ -227,7 +227,7 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'srt'))
     }
 
     $sql = 'UPDATE files
-			SET srt = "' . mysqli_real_escape_string($captions->srt) . '"
+			SET srt = "' . mysqli_escape_string($db, $captions->srt) . '"
 			WHERE id = ' . $_GET['id'];
     $result = mysqli_query($db, $sql);
     if ($result === FALSE)
@@ -269,7 +269,7 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'transcript'))
     }
 
     $sql = 'UPDATE files
-			SET transcript = "' . mysqli_real_escape_string($captions->transcript) . '"
+			SET transcript = "' . mysqli_escape_string($db, $captions->transcript) . '"
 			WHERE id = ' . $_GET['id'];
     $result = mysqli_query($db, $sql);
     if ($result === FALSE)

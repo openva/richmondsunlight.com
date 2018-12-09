@@ -25,8 +25,8 @@ $database->connect_old();
 session_start();
 
 # LOCALIZE AND CLEAN UP VARIABLES
-$chamber = mysqli_escape_string($_REQUEST['chamber']);
-$date = mysqli_escape_string($_REQUEST['year']) . '-' . mysqli_escape_string($_REQUEST['date']);
+$chamber = mysqli_escape_string($db, $_REQUEST['chamber']);
+$date = mysqli_escape_string($db, $_REQUEST['year']) . '-' . mysqli_escape_string($db, $_REQUEST['date']);
 
 # PAGE METADATA
 $page_title = date('m/d/Y', strtotime($date)) . ' ' . ucfirst($chamber) . ' Proceedings';

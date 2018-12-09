@@ -14,7 +14,7 @@ class Legislator
 
         $sql = 'SELECT id
 				FROM representatives
-				WHERE shortname="' . mysqli_real_escape_string($shortname) . '"';
+				WHERE shortname="' . mysqli_escape_string($db, $shortname) . '"';
         $result = mysqli_query($db, $sql);
         if (mysqli_num_rows($result) == 0)
         {
@@ -78,7 +78,7 @@ class Legislator
 				FROM representatives
 				LEFT JOIN districts
 					ON representatives.district_id = districts.id
-				WHERE representatives.id=' . mysqli_real_escape_string($id);
+				WHERE representatives.id=' . mysqli_escape_string($db, $id);
         $result = mysqli_query($db, $sql);
         if (mysqli_num_rows($result) == 0)
         {

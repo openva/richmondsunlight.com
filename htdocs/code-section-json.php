@@ -25,7 +25,7 @@ $database = new Database;
 $database->connect_old();
 
 # LOCALIZE VARIABLES
-$section = mysqli_escape_string(urldecode($_REQUEST['section']));
+$section = mysqli_escape_string($db, urldecode($_REQUEST['section']));
 if (isset($_REQUEST['callback']) && !empty($_REQUEST['callback']))
 {
     $callback = $_REQUEST['callback'];

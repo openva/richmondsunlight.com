@@ -52,7 +52,7 @@
 			LEFT JOIN tags
 			ON tags.bill_id=bills.id
 			WHERE bills.session_id = ' . SESSION_ID . '
-			AND tags.tag="' . mysqli_real_escape_string($tag) . '"';
+			AND tags.tag="' . mysqli_escape_string($db, $tag) . '"';
     $result = mysqli_query($db, $sql);
 
     // Don't check to make sure the query was successful -- we want to make sure that people can

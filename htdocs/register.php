@@ -193,7 +193,7 @@ if (isset($_POST['submit']))
         # Make sure that this isn't a duplicate user account.
         $sql = 'SELECT *
 				FROM users
-				WHERE email = "' . mysqli_real_escape_string($form_data['email']) . '"
+				WHERE email = "' . mysqli_escape_string($db, $form_data['email']) . '"
 				AND password IS NOT NULL';
         $result = mysqli_query($db, $sql);
         if (mysqli_num_rows($result) > 0)

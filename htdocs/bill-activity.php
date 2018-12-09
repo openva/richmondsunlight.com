@@ -22,7 +22,7 @@ $database = new Database;
 $database->connect_old();
 
 # LOCALIZE VARIABLES
-$days = mysqli_real_escape_string($_REQUEST['days']);
+$days = mysqli_escape_string($db, $_REQUEST['days']);
 if (empty($days))
 {
     $days = 3;

@@ -22,8 +22,8 @@ $database->connect_old();
 session_start();
 
 # LOCALIZE AND CLEAN UP VARIABLES
-$chamber = mysqli_escape_string($_REQUEST['chamber']);
-$shortname = mysqli_escape_string($_REQUEST['committee']);
+$chamber = mysqli_escape_string($db, $_REQUEST['chamber']);
+$shortname = mysqli_escape_string($db, $_REQUEST['committee']);
 
 /*
  * Get basic data about this committee.

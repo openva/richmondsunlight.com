@@ -48,8 +48,8 @@
     // is generated. People should be informed why it has failed.
     if (isset($_POST['add-bill']))
     {
-        $bill_number = mysqli_real_escape_string($_POST['add-bill']);
-        $portfolio_hash = mysqli_real_escape_string($_POST['portfolio']);
+        $bill_number = mysqli_escape_string($db, $_POST['add-bill']);
+        $portfolio_hash = mysqli_escape_string($db, $_POST['portfolio']);
 
         # Strip out spaces from bill numbers (i.e. HB 1).
         $bill_number = str_replace(' ', '', $bill_number);
@@ -77,7 +77,7 @@
     # Delete a bill from a portfolio.
     if (isset($_GET['delete-bill']))
     {
-        $tmp = mysqli_real_escape_string($_GET['delete-bill']);
+        $tmp = mysqli_escape_string($db, $_GET['delete-bill']);
         $tmp = explode('-', $tmp);
         $portfolio_hash = $tmp[0];
         $record_id = $tmp[1];
@@ -116,7 +116,7 @@
     {
 
         # Localize and make safe the portfolio hash.
-        $portfolio_hash = mysqli_escape_string($_GET['delete-portfolio']);
+        $portfolio_hash = mysqli_escape_string($db, $_GET['delete-portfolio']);
 
         # Start off by getting the portfolio's ID and its watch list ID. If there is a watch list
         # ID, we'll use it below to delete the watch list.
