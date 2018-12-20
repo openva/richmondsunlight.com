@@ -20,23 +20,23 @@ class Location
         }
 
         # Assemble our URL, instructing Yahoo to return a serialized PHP array.
-        $url = 'http://maps.googleapis.com/maps/api/geocode/json?address=' . urlencode($q) . '&sensor=false';
+        $url = 'https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=' . urlencode($q) . '&benchmark=9&format=json';
 
         # Retrieve the resulting serialized array.
-        $coordinates = get_content($url);
+        $response = get_content($url);
 
         # If the response doesn't come, return false.
-        if ($coordinates === FALSE)
+        if ($response === FALSE)
         {
             return FALSE;
         }
 
         # Turn the JSON into a PHP array.
-        $coordinates = json_decode($coordinates, TRUE);
+        $response = json_decode($response, TRUE);
+        $response = $response['result'];
 
-        # If the array indicates that there was an error, or if the country is anything other than the
-        # U.S., then return false.
-        if ($coordinates['status'] != 'OK')
+        # If ther are no address matches, bail.
+        if (count($response['addressMatches']) == 0)
         {
             return FALSE;
         }
@@ -44,9 +44,12 @@ class Location
         # In theory there could be multiple responses, but we don't have any method of dealing with
         # that outcome, so we simply return the first match and hope it's right. We save them to the
         # object namespace, too, since this function is generally followed by coords_to_districts().
-        $this->latitude = $coordinates['results'][0]['geometry']['location']['lat'];
-        $this->longitude = $coordinates['results'][0]['geometry']['location']['lng'];
-        return $coordinates['results'][0]['geometry']['location'];
+        $this->latitude = $response['addressMatches'][0]['coordinates']['y'];
+        $this->longitude = $response['addressMatches'][0]['coordinates']['x'];
+        $coordinates = array();
+        $coordinates['latitude'] = $this->latitude;
+        $coordinates['longitude'] = $this->longitude;
+        return $coordinates;
     }
 
     # Convert coordinates into district IDs.
@@ -58,10 +61,10 @@ class Location
         }
 
         # Assemble our URL.
-        $url = 'http://openstates.org/api/v1/legislators/geo/?apikey=' . OPENSTATES_KEY . '&lat='
+        $url = 'https://openstates.org/api/v1/legislators/geo/?apikey=' . OPENSTATES_KEY . '&lat='
             . $this->latitude . '&long=' . $this->longitude;
 
-        # Retrieve the resulting XML.
+        # Retrieve the resulting JSON..
         $district = get_content($url);
 
         # If we couldn't retrieve that content, then bail.
@@ -70,8 +73,7 @@ class Location
             return FALSE;
         }
 
-        # Turn the XML into an array.
-        $district = json_decode($district);
+        $district = json_decode($district, TRUE);
 
         # If this isn't an array with two elements (one for each legislator), bail.
         if (count($district) != 2)
@@ -82,6 +84,7 @@ class Location
         $result = new stdClass();
         foreach ($district as $legislator)
         {
+
             # If it's the house.
             if ($legislator->chamber == 'lower')
             {
@@ -92,6 +95,11 @@ class Location
             {
                 $result->senate = district_to_id($legislator->district, 'senate');
             }
+        }
+
+        if (count((array)$result) == 0)
+        {
+            return FALSE;
         }
 
         return $result;

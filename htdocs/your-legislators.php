@@ -32,6 +32,7 @@ if (!empty($_GET['street']) && !empty($_GET['city']) && !empty($_GET['zip']))
     if ($coordinates != FALSE)
     {
         $districts = $location->coords_to_districts();
+
         if ($districts != FALSE)
         {
             $sql = 'SELECT representatives.shortname, representatives.name_formatted AS name,
@@ -42,12 +43,16 @@ if (!empty($_GET['street']) && !empty($_GET['city']) && !empty($_GET['zip']))
 					WHERE representatives.district_id=' . current($districts) . '
 						OR representatives.district_id=' . next($districts);
             $result = mysqli_query($db, $sql);
-            if (mysqli_num_rows($result) > 0)
+            if (mysqli_num_rows($result) == 0)
+            {
+                $page_body .= '<p>Your legislators could not be identified.</p>';
+            }
+            else
             {
                 $page_body .= '
 					<p>Your two legislators have been identified. They are:</p>
 					<ul>';
-                while ($legislator = mysqli_fetch_array($result))
+                while ($legislator = mysqli_fetch_assoc($result))
                 {
                     $legislator = array_map('stripslashes', $legislator);
                     $page_body .= '<li><a href="/legislator/' . $legislator['shortname'] . '/">'
