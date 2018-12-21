@@ -13,5 +13,9 @@ Richmond Sunlight started in 2005 as [a little RSS-based bill tracker](http://wa
 * [`master`](https://github.com/openva/richmondsunlight.com/tree/master): The staging site.
 * [`deploy`](https://github.com/openva/richmondsunlight.com/tree/deploy): The live site.
 
+## Deployment
+
+Changes to `deploy` are automatically built by Travis and, if the build passes, deployed via AWS’s CodeDeploy. Changes to `master` are likewise built, but must be manually deployed (due to a limitation of CodeDeploy) by running `deploy/staging-redeploy.sh` on the EC2 instance.
+
 ## Architecture
 ![Network diagram](https://gist.githubusercontent.com/waldoj/b86e65bd8a14609849badefb85984ebf/raw/58012252ed5564fe6cf4b479df3fe8e2599786b9/rs_architecture.svg?sanitize=true)
