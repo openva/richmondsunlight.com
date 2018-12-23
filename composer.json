@@ -11,6 +11,9 @@
         "simplepie/simplepie": "1.5",
         "neutron/sphinxsearch-api": "dev-master"
     },
+    "require-dev": {
+        "phpunit/phpunit": "^7"
+    },
     "autoload": {
         "classmap": [
             "htdocs/includes/vendor/"

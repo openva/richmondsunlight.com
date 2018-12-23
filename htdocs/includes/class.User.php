@@ -20,7 +20,7 @@ class User
 
     /*
      * A reimplementation logged_in() function, in functions.inc.php, but that returns not just
-     * TRUE or FALSE, but also whether the user is registered.
+     * true or false, but also whether the user is registered.
      */
     public function logged_in($check_if_registered = '')
     {
