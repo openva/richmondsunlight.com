@@ -46,33 +46,13 @@ if (!empty($_POST))
         }
 
         # Explode the tags into an array to be inserted individually.
-        $tag = explode(' ', $tags);
+        $tag = explode(',', $tags);
 
         for ($i=0; $i<count($tag); $i++)
         {
             # Trim it down.
             $tag[$i] = trim($tag[$i]);
             $tag[$i] = mb_strtolower($tag[$i]);
-
-            # If the string contains a quotation mark, build up a multiple-word
-            # tag using everything up until the terminating quotation mark.
-            if (mb_stristr($tag[$i], '"'))
-            {
-                if (!isset($assembled_tag))
-                {
-                    $assembled_tag = $tag[$i];
-                }
-                else
-                {
-                    $tag[$i] = $assembled_tag . ' ' . $tag[$i];
-                    $tag[$i] = str_replace('"', '', $tag[$i]);
-                    unset($assembled_tag);
-                }
-            }
-            elseif (isset($assembled_tag))
-            {
-                $assembled_tag .= ' ' . $tag[$i];
-            }
 
             # Don't proceed if it's blank.
             if ((!empty($tag[$i])) && (!isset($assembled_tag)))
