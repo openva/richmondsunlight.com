@@ -161,10 +161,6 @@ else
 
                     if (($tag['number'] / $first_score) > .5)
                     {
-                        if (mb_stristr($tag['tag'], ' ') !== FALSE)
-                        {
-                            $tag['tag'] = '"' . $tag['tag'] . '"';
-                        }
                         $tags[] = $tag['tag'];
                     }
                 }
