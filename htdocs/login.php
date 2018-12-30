@@ -87,7 +87,7 @@ if (isset($_POST['submit']))
             $result = mysqli_query($db, $sql);
             if (mysqli_num_rows($result) > 0)
             {
-                while ($portfolio = mysqli_fetch_array($result))
+                while ($portfolio = mysqli_fetch_assoc($result))
                 {
                     $portfolio = array_map('stripslashes', $portfolio);
 
