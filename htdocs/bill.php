@@ -1238,7 +1238,8 @@ $debug_timing['blog entries retrieved'] = microtime(TRUE);*/
 
 # BILL COMMENTS
 $page_body .= '
-	<div id="comments">';
+    <div id="comments">
+    <div id="comment-list">';
 
 /*
  * Get any comments on this bill.
@@ -1266,7 +1267,7 @@ $debug_timing['comments retrieved'] = microtime(TRUE);
  */
 if (isset($comments) && is_array($comments))
 {
-    $page_body .= '<div id="comment-list"><h2>Comments</h2>';
+    $page_body .= '<h2>Comments</h2>';
     $i=1;
 
     # Our two comments array keys are timestamps. Resort them and then reindex them.
@@ -1343,8 +1344,12 @@ if (isset($comments) && is_array($comments))
 		</div>';
         $i++;
     }
-    $page_body .= '</div>';
 }
+
+/*
+ * End #comment-list
+ */
+$page_body .= '</div>';
 
 
 # Only let the user add a new comment if this bill is from the current session and, if
@@ -1359,7 +1364,7 @@ if (($bill['session_id'] == SESSION_ID))
 		<input type="url" size="30" maxlength="50" name="comment[age]" id="age" value="' . $user['url'] . '" /> <label for="age"><strong>Website</strong></label> <small>if you have one</small><br />
 		<div style="display: none;"><input type="text" size="2" maxlength="2" name="comment[state]" id="state" /> <label for="state">Leave this field empty</label><br /></div>
 		<textarea rows="16" cols="60" name="comment[comment]" id="comment" required></textarea><br />
-		<small>(Limited HTML is OK: &lt;a&gt;, &lt;em&gt;, &lt;strong&gt;, &lt;s&gt, &lt;embed&gt;)</small><br />';
+		<small>(Limited HTML is OK: &lt;a&gt;, &lt;em&gt;, &lt;strong&gt;, &lt;s&gt)</small><br />';
 
     # Create a new instance of the comments-subscription class
     $subscription = new CommentSubscription;
@@ -1407,7 +1412,7 @@ if (($bill['session_id'] == SESSION_ID))
                         subscribe = $("#subscribe").val();
 
                     var posting = $.post( "/process-comments-ajax.php", { expiration_date: expiration_date, zip: zip, age: age, bill_id: bill_id, subscribe: subscribe, comment: comment } );
-                    console.log(posting);
+
                     // If the posting was successful.
                     posting.done(function( data ) {
 
@@ -1434,7 +1439,7 @@ if (($bill['session_id'] == SESSION_ID))
                     posting.fail(function( data ) {
 
                         var response = $.parseJSON( data );
-                        console.log(data);
+
                         // Display the error in the error field.
                         $( "#comment-error" ).empty().append( response.error );
                         $( "#comment-error" ).show();
