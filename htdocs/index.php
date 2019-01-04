@@ -119,35 +119,11 @@ if (mysql_num_rows($result) > 0)
     $page_body .= '</table></div>';
 }
 
-# Ask Memcached for recent blog entries.
-$blog_entries = $mc->get('homepage_blog');
-
-if (!$blog_entries)
 {
-    $rss = fetch_rss('https://www.richmondsunlight.com/blog/feed/');
-    $items = array_slice($rss->items, 0, 5);
-
-    # Limit the output to eight blog entries.
-    $blog_entries = '';
-    foreach ($items as $item)
     {
-        $blog_entries .= '
-			<div class="entry">
-			<h3><a href="' . $item['guid'] . '">' . $item['title'] . '</a></h3>
-			<div class="date">' . date('F j, Y', strtotime($item['pubdate'])) . ' by ' . $item['dc']['creator'] . '</div>
-			' . $item['summary'] . '
-			</div>';
     }
-
-    # Store these in APC.
-    $mc->set('homepage_blog', $blog_entries, (60 * 15));
 }
 
-$page_body .= '
-		<div id="blog">
-		<h2>Blog</h2>
-		' . $blog_entries . '
-		</div>';
 
 $page_sidebar = '';
 
