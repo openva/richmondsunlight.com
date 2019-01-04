@@ -17,28 +17,6 @@ include_once 'magpierss/rss_fetch.inc';
 # INITIALIZE SESSION
 session_start();
 
-# Retrieve the home page from a cache.
-$mc = new Memcached();
-$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-$cached_html = $mc->get('homepage');
-if ($mc->getResultCode() === 0)
-{
-
-    # If this is a logged-in visitor, replace the cached "Register," "Log In" text with "Profile"
-    # and "Log Out."
-    if ($_SESSION['registered'] == 'y')
-    {
-        $cached_html = str_replace(
-            '<a href="/account/register/">Register</a> | <a href="/account/login/">Log In</a>',
-            '<a href="/account/">Profile</a> | <a href="/account/logout/">Log Out</a>',
-            $cached_html
-        );
-    }
-    echo $cached_html;
-    echo '<!-- Generated from cache -->';
-    exit();
-}
-
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
