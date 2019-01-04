@@ -301,12 +301,4 @@ $page->site_section = $site_section;
 $page->html_head = $html_head;
 $page->browser_title = $browser_title;
 $page->assemble();
-
-# Cache this page for ten minutes, but only if this user isn't logged in. (We don't want to save
-# their customizations.)
-if (!isset($_SESSION['id']))
-{
-    $mc->set('homepage', $page->output, (60 * 10));
-}
-
 $page->display();
