@@ -119,9 +119,46 @@ if (mysql_num_rows($result) > 0)
     $page_body .= '</table></div>';
 }
 
+# Newest Comments
+$sql = 'SELECT comments.id, comments.bill_id, comments.date_created AS date,
+		comments.name, comments.email, comments.url, comments.comment,
+		comments.type, bills.number AS bill_number, bills.catch_line AS bill_catch_line,
+		sessions.year,
+			(
+			SELECT COUNT(*)
+			FROM comments
+			WHERE bill_id=bills.id AND status="published"
+			AND date_created <= date
+			) AS number
+		FROM comments
+		LEFT JOIN bills
+			ON bills.id=comments.bill_id
+		LEFT JOIN sessions
+			ON bills.session_id=sessions.id
+		WHERE comments.status="published"
+		ORDER BY comments.date_created DESC
+		LIMIT 6';
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
+    $page_body .= '
+	<div id="newest-comments">
+		<h2>Newest Comments</h2>';
+    while ($comment = mysql_fetch_array($result))
     {
+        $comment = array_map('stripslashes', $comment);
+        if (mb_strlen($comment['comment']) > 200)
+        {
+            $comment['comment'] = preg_replace('#<blockquote>(.*)</blockquote>#D', '', $comment['comment']);
+            $comment['comment'] = strip_tags($comment['comment']);
+        }
+        $page_body .= '<a href="/bill/' . $comment['year'] . '/' . $comment['bill_number'] . '/#comment-' . $comment['number'] . '">
+				<div><strong>' . $comment['bill_catch_line'] . '</strong><br />
+				' . $comment['name'] . ' writes:
+				' . $comment['comment'] . '</div></a>';
     }
+    $page_body .= '
+		</div>';
 }
 
 
@@ -230,54 +267,6 @@ if (IN_SESSION == 'y')
 				</ul>
 			</div>';
     }
-}
-
-# Newest Comments
-$sql = 'SELECT comments.id, comments.bill_id, comments.date_created AS date,
-		comments.name, comments.email, comments.url, comments.comment,
-		comments.type, bills.number AS bill_number, bills.catch_line AS bill_catch_line,
-		sessions.year,
-			(
-			SELECT COUNT(*)
-			FROM comments
-			WHERE bill_id=bills.id AND status="published"
-			AND date_created <= date
-			) AS number
-		FROM comments
-		LEFT JOIN bills
-			ON bills.id=comments.bill_id
-		LEFT JOIN sessions
-			ON bills.session_id=sessions.id
-		WHERE comments.status="published"
-		ORDER BY comments.date_created DESC
-		LIMIT 5';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
-{
-    $page_sidebar .= '
-		<h3>Newest Comments</h3>
-		<div class="box" id="newest-comments">
-			<ul>';
-    while ($comment = mysql_fetch_array($result))
-    {
-        $comment = array_map('stripslashes', $comment);
-        if (mb_strlen($comment['comment']) > 175)
-        {
-            $comment['comment'] = preg_replace('#<blockquote>(.*)</blockquote>#D', '', $comment['comment']);
-            $comment['comment'] = strip_tags($comment['comment']);
-            if (mb_strlen($comment['comment']) > 120)
-            {
-                $comment['comment'] = mb_substr($comment['comment'], 0, 120) . '&thinsp;.&thinsp;.&thinsp;.';
-            }
-        }
-        $page_sidebar .= '
-				<li style="margin-bottom: .75em;"><strong>' . mb_strtoupper($comment['bill_number']) . ': ' . $comment['bill_catch_line'] . '</strong><br />
-				<a href="/bill/' . $comment['year'] . '/' . $comment['bill_number'] . '/#comment-' . $comment['number'] . '">' . $comment['name'] . ' writes:</a>
-				' . $comment['comment'] . '</li>';
-    }
-    $page_sidebar .= '
-			</ul>
-		</div>';
 }
 
 $page_sidebar .= '

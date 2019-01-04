@@ -251,6 +251,25 @@ div.full-text ins {
 	text-decoration: none;
 }
 
+#body-home #newest-comments div {
+	font-size: .85em;
+	line-height: 120%;
+	width: 12em;
+	height: 11.5em;
+	max-height: 11.5em;
+	min-height: 11.5em;
+	overflow: hidden;
+	float: left;
+	padding: 1em;
+	margin: .5em;
+	border: 1px solid #dccbaf;
+	background: #f4eee5;
+}
+#body-home #newest-comments a {
+	font-weight: normal;
+	color: #333;
+}
+
 img.help-icon {
 	width: 14px;
 	height: 14px;
