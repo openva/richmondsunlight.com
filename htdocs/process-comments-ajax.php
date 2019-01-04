@@ -307,7 +307,7 @@ $comments = $mc->delete('comments-' . $comment['bill_id']);
 $log = new Log;
 $log->put('New comment posted, by ' . stripslashes($comment['name']) . ':'
     . "\n\n" . str_replace("\r\n", ' ¶ ', stripslashes($comment['comment']))
-    . ' https://' . $_SERVER['SERVER_NAME'] . $comment['return_to'] . '#comments', 3);
+    . $_SERVER['HTTP_REFERER'], 3);
 
 /*
  * Send a 201 Created HTTP header, to indicate success.

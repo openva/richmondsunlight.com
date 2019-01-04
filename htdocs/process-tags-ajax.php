@@ -159,7 +159,7 @@ if (!empty($_SESSION['id']))
     $result = $mc->delete('bill-' . $tags['bill_id']);
 
     $log = new Log;
-    $result = $log->put('New tags added: ' . implode(', ', $tag) . $_SERVER['HTTP_REFERER'], 3);
+    $result = $log->put('New tags added: ' . implode(', ', $tag) . ' ' . $_SERVER['HTTP_REFERER'], 3);
 
     /*
      * Send a 201 Created HTTP header, to indicate success.
