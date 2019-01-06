@@ -402,12 +402,11 @@ $page_sidebar .= '</div></div>';
 # Tags
 $page_sidebar .= '
 	<div class="box">
-		<h3>Tags</h3>';
+        <h3>Tags</h3>
+        <ul class="tags" id="tags_list">';
 
 if (isset($bill['tags']) && (count($bill['tags']) > 0))
 {
-    $page_sidebar .= '<ul class="tags" id="tags_list">';
-
     foreach ($bill['tags'] as $tag_id => $tag)
     {
 
@@ -426,8 +425,8 @@ if (isset($bill['tags']) && (count($bill['tags']) > 0))
 }
 else
 {
-    $page_sidebar .= '<p><em>Hey! This bill has no tags! Why not add some so that other people
-	can find it?</em></p>';
+    $page_sidebar .= '</ul><p id="tag_admonition"><em>Hey! This bill has no tags! Why not add some
+    so that other people can find it?</em></p>';
 }
 
 
@@ -479,6 +478,7 @@ $page_sidebar .=
                     var tagList = tags.split(',')
                     tagList.forEach(function(tag) {
                         $( "#tags_list" ).append('<li><a href="/bills/tags/' + encodeURIComponent(tag) + '">' + tag + '</a></li>');
+                        $( "#tag_admonition" ).remove();
                     });
 
                 });
