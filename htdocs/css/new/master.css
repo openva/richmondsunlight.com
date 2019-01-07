@@ -631,7 +631,6 @@ a.balloon div {
 	#content {
 		padding: 2%;
 		width: 96%;
-		font-size: 133.33%; /* ~16px */
 		line-height: 1.666em;
 		overflow: hidden;
 
