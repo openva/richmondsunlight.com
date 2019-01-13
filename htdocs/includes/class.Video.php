@@ -709,7 +709,7 @@ class Video
         $this->index_clips();
 
         # If there no clips were identified by index_clips(), then we're done here.
-        if (count($this->clips) == 0)
+        if (!isset($this->clips) || count($this->clips) == 0)
         {
             return FALSE;
         }
