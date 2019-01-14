@@ -20,9 +20,10 @@ class Committee
          * Select the basic committee information.
          */
         $sql = 'SELECT id, shortname, name, chamber, meeting_time, url
-				FROM committees
-				WHERE shortname="' . $this->shortname . '"
-				AND chamber="' . $this->chamber . '"';
+                FROM committees
+                WHERE shortname="' . $this->shortname . '"
+                AND chamber="' . $this->chamber . '"';
+
         $result = mysql_query($sql);
         if (mysql_num_rows($result) == 0)
         {
@@ -39,7 +40,7 @@ class Committee
         return TRUE;
     }
 
-    /*
+    /**
      * Return the list of members for a single committee.
      */
     public function members()
@@ -92,44 +93,19 @@ class Committee
             return FALSE;
         }
 
-        /*
-         * First, get a list of all committees' names and IDs.
-         */
-        $sql = 'SELECT id, name
-				FROM committees
-				WHERE parent_id IS NULL
-				AND chamber = "' . $this->chamber . '"';
+        $sql = 'SELECT id, shortname, name, chamber, meeting_time, url,
+                LEVENSHTEIN("' . $this->name . '", name) AS distance
+                FROM committees
+                WHERE chamber="' . $this->chamber . '"
+                ORDER BY distance DESC
+                LIMIT 1';
         $result = mysql_query($sql);
         if (mysql_num_rows($result) == 0)
         {
             return FALSE;
         }
-
-        $committees = array();
-        while ($committee = mysql_fetch_array($result))
-        {
-            $committees[$committee{'id'}] = $committee['name'];
-        }
-
-        $shortest = -1;
-        foreach ($committees as $id => $name)
-        {
-            $distance = levenshtein($this->name, $name);
-            if ($distance === 0)
-            {
-                $closest = $id;
-                $shortest = 0;
-                break;
-            }
-
-            if ($distance <= $shortest || $shortest < 0)
-            {
-                $closest = $id;
-                $shortest = $distance;
-            }
-        }
-
-        $this->id = $closest;
+        $committee = mysql_fetch_assoc($result);
+        $this->id = $committee['id'];
         return $this->id;
     } // end get_id()
 }
