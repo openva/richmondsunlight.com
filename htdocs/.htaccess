@@ -27,7 +27,7 @@
 	ExpiresByType image/gif "access 1 month"
 	ExpiresByType image/png "access 1 month"
 	ExpiresByType text/css "access 1 month"
-	ExpiresByType text/html "access 1 month"
+	ExpiresByType text/html "access 1 hour"
 	ExpiresByType text/x-javascript "access 1 month"
 	ExpiresByType image/x-icon "access 1 year"
 	ExpiresDefault "access 1 month"
