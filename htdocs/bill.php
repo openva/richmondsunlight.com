@@ -481,6 +481,10 @@ $page_sidebar .=
                         $( "#tag_admonition" ).remove();
                     });
 
+                    // Return the tagsinput field to normal size.
+                    $("#tags_tagsinput").height("14px");
+                    $("#tags_tagsinput").width("80%");
+
                 });
 
                 // If the posting failed.
