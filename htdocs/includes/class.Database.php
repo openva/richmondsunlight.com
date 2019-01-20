@@ -50,7 +50,7 @@ class Database
     }
 
     /*
-     * Connect via the
+     * Connect via mysql_.
      */
     public function connect_old()
     {
@@ -61,6 +61,51 @@ class Database
         if (isset($GLOBALS['db_old']))
         {
             return $GLOBALS['db_old'];
+        }
+
+        $this->db = mysqli_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
+
+        /*
+         * If the connection succeeded.
+         */
+        if ($this->db !== FALSE)
+        {
+            mysqli_select_db(MYSQL_DATABASE, $this->db);
+            mysqli_query($db, 'SET NAMES "utf8"');
+            $GLOBALS['db'] = $this->db;
+            return TRUE;
+        }
+
+        /*
+         * If this is isn't a request to the API, send the browser to an error page.
+         */
+        if (mb_stristr($_GET['REQUEST_URI'], 'api.richmondsunlight.com') === FALSE)
+        {
+            header('Location: https://www.richmondsunlight.com/site-down/');
+            exit;
+        }
+
+        /*
+         * If this is a request to the API, just return false.
+         */
+        else
+        {
+            return FALSE;
+        }
+    }
+
+    /*
+     * Connect via mysqli_.
+     */
+    public function connect_mysqli()
+    {
+
+        /*
+         * If we already have a database connection, reuse it.
+         */
+        if (isset($GLOBALS['db_mysqli']))
+        {
+            return $GLOBALS['db_mysqli'];
         }
 
         $this->db = mysqli_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
