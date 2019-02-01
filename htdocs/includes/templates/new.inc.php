@@ -423,7 +423,7 @@
 					content: {
 						text: 'Loading .&thinsp;.&thinsp;.',
 						ajax: {
-							url: 'https://api.richmondsunlight.com/1.1/bill/'+year+'/'+bill_number+'.json',
+							url: '<?php echo API_URL; ?>1.1/bill/'+year+'/'+bill_number+'.json',
 							type: 'GET',
 							dataType: 'jsonp',
 							success: function(data, status) {
@@ -461,7 +461,7 @@
 					content: {
 						text: 'Loading .&thinsp;.&thinsp;.',
 						ajax: {
-							url: 'https://api.richmondsunlight.com/1.1/legislator/'+legislator+'.json',
+							url: '<?php echo API_URL; ?>1.1/legislator/'+legislator+'.json',
 							type: 'GET',
 							dataType: 'jsonp',
 							success: function(data, status) {

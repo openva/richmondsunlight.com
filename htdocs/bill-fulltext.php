@@ -29,7 +29,7 @@ $bill = mysql_escape_string($_REQUEST['bill']);
 
 # Get the bill's content from the API.
 # We append a query string, containing the current time, to avoid getting a cached copy.
-$json_url = 'https://api.richmondsunlight.com/1.1/bill/' . $year . '/' . $bill . '.json?' . time();
+$json_url = API_URL . '1.1/bill/' . $year . '/' . $bill . '.json?' . time();
 $json = get_content($json_url);
 if ($json === FALSE)
 {

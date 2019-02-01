@@ -506,7 +506,7 @@ $page_sidebar .= '
 				$( document ).ready(function() {
 
 					$("#tags").tagsInput({
-						autocomplete_url: "https://api.richmondsunlight.com/1.1/tag-suggest/",
+						autocomplete_url: "' . API_URL . '1.1/tag-suggest/",
 						width: "80%",
 						height: "10px",
 						minChars: "3",
@@ -547,7 +547,7 @@ $page_sidebar .= '
 			<li><a href="http://lis.virginia.gov/cgi-bin/legp604.exe?' . $bill['session_lis_id'] . '+ful+' . mb_strtoupper($bill['number']) . '+pdf">View as PDF</a></li>';
 $page_sidebar .= '
 			<li><a href="http://lis.virginia.gov/cgi-bin/legp604.exe?' . $bill['session_lis_id'] . '+sum+' . mb_strtoupper($bill['number']) . '">View on the Legislature’s Site</a></li>
-			<li><a href="https://api.richmondsunlight.com/1.1/bill/' . $bill['year'] . '/' . $bill['number'] . '.json">View as JSON</a></li>';
+			<li><a href="' . API_URL . '1.1/bill/' . $bill['year'] . '/' . $bill['number'] . '.json">View as JSON</a></li>';
 
 if (!empty($bill['impact_statement_id']))
 {
