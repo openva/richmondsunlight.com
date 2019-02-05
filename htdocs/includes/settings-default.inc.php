@@ -36,7 +36,7 @@ define('PDO_PASSWORD', '');
 define('MYSQL_DATABASE', '');
 
 # The API URL.
-define('API_URL', 'https://api.richmondsunlight.com/');
+define('API_URL', '');
 
 # Specify how to connect to Memcached.
 define('MEMCACHED_SERVER', '');
