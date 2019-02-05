@@ -18,7 +18,7 @@ function __autoload_libraries($name)
     }
     else
     {
-        $includes_dir = $_SERVER['DOCUMENT_ROOT'] . 'includes/';
+        $includes_dir = realpath($_SERVER['DOCUMENT_ROOT']) . '/includes/';
     }
 
     if (file_exists($includes_dir . 'class.' . $name . '.php') === TRUE)
