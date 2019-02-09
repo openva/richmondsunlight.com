@@ -1,3 +1,4 @@
+api/
 */.htpasswd
 htdocs/admin/phpmyadmin/
 .users
