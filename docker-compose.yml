@@ -13,6 +13,7 @@ services:
       - type: bind
         source: ./htdocs
         target: /var/www/html
+    container_name: rs_web
   api:
     build:
       context: api/deploy/
@@ -25,6 +26,7 @@ services:
       - type: bind
         source: ./api/htdocs/
         target: /var/www/html/
+    container_name: rs_api
   db:
     build:
       context: api/deploy/
@@ -34,6 +36,7 @@ services:
     restart: always
     ports:
       - "3306:3306"
+    container_name: rs_db
   memcached:
     image: memcached:latest
     entrypoint:
@@ -43,5 +46,6 @@ services:
       - "11211:11211"
     depends_on:
       - api
+    container_name: rs_memcached
 volumes:
     db_data: {}
