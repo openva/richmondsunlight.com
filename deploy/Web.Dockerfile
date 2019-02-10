@@ -16,4 +16,7 @@ WORKDIR /var/www/
 COPY . deploy/
 
 EXPOSE 80
-RUN ["deploy/docker-setup.sh"]
+
+RUN deploy/docker-setup-server.sh 
+
+ENTRYPOINT ["apache2ctl", "-D", "FOREGROUND"]
