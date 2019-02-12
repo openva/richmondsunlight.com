@@ -1,5 +1,5 @@
 FROM php:5.6.39-apache
-RUN docker-php-ext-install mysqli && docker-php-ext-install mysql && a2enmod rewrite && a2enmod expires
+RUN docker-php-ext-install mysqli && docker-php-ext-install mysql && a2enmod rewrite && a2enmod expires && a2enmod headers
 
 # Install our packages
 RUN apt --fix-broken install
