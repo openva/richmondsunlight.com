@@ -8,6 +8,9 @@ if [ -f html ]; then
     ln -s htdocs html
 fi
 
+# Set the include path.
+echo 'php_value include_path ".:includes/"' >> .htaccess
+
 # Install Composer dependencies
 composer install
 
