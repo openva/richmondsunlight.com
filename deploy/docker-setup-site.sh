@@ -11,6 +11,9 @@ fi
 # Set the include path.
 echo 'php_value include_path ".:includes/"' >> .htaccess
 
+# Have PHP report errors.
+echo 'php_value error_reporting 2039' >> .htaccess
+
 # Install Composer dependencies
 composer install
 
