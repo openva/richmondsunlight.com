@@ -35,9 +35,12 @@ define('PDO_USERNAME', 'ricsun');
 define('PDO_PASSWORD', 'password');
 define('MYSQL_DATABASE', 'richmondsunlight');
 
+# The API URL.
+define('API_URL', 'http://localhost:5001/');
+
 # Specify how to connect to Memcached.
-define('MEMCACHED_SERVER', 'localhost');
-define('MEMCACHED_PORT', '5003');
+define('MEMCACHED_SERVER', 'memcached');
+define('MEMCACHED_PORT', '11211');
 
 # The House Speaker's IDs. This is used in update_vote.php to translate votes credited to
 # "H0000," which bizarrely indicates the speaker, to that legislator's ID, and in
