@@ -1,6 +1,51 @@
-web:
-  build: .
-  ports:
-    - "5000:80"
-  volumes:
-    - ./htdocs:/var/www/example.com/public_html/
+version: '3.2'
+services:
+  web:
+    build:
+      context: deploy/
+      dockerfile: Web.Dockerfile
+    links:
+      - api:api
+      - db:db
+    ports:
+      - "5000:80"
+    volumes:
+      - type: bind
+        source: .
+        target: /var/www
+    container_name: rs_web
+  api:
+    build:
+      context: api/deploy/
+      dockerfile: API.Dockerfile
+    links:
+      - db:db
+    ports:
+      - "5001:80"
+    volumes:
+      - type: bind
+        source: ./api/htdocs/
+        target: /var/www/html/
+    container_name: rs_api
+  db:
+    build:
+      context: api/deploy/
+      dockerfile: MySQL.Dockerfile
+    volumes:
+      - db_data:/var/lib/mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    container_name: rs_db
+  memcached:
+    image: memcached:latest
+    entrypoint:
+      - memcached
+      - -m 64
+    ports:
+      - "11211:11211"
+    depends_on:
+      - api
+    container_name: rs_memcached
+volumes:
+    db_data: {}

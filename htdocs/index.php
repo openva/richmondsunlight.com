@@ -6,11 +6,11 @@
 # PURPOSE
 # The front page of the site.
 #
+
 ###
 
 # INCLUDES
 include_once 'settings.inc.php';
-include_once 'functions.inc.php';
 include_once 'vendor/autoload.php';
 include_once 'magpierss/rss_fetch.inc';
 
