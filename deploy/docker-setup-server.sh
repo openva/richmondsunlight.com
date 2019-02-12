@@ -9,7 +9,7 @@ fi
 # Make /var/www/htdocs the webroot
 grep "html" /etc/apache2/apache2.conf
 if [ $? -ne 0 ]; then
-    sed -i 's/html/htdocs/g' 000-default.conf
+    sed -i 's/html/htdocs/g' /etc/apache2/apache2.conf
 fi
 
 # If the php.ini doesn't exist, create it.
