@@ -1,6 +1,0 @@
-web:
-  build: .
-  ports:
-    - "5000:80"
-  volumes:
-    - ./htdocs:/var/www/example.com/public_html/
