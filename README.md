@@ -13,6 +13,17 @@ Richmond Sunlight started in 2005 as [a little RSS-based bill tracker](http://wa
 * [`master`](https://github.com/openva/richmondsunlight.com/tree/master): The staging site.
 * [`deploy`](https://github.com/openva/richmondsunlight.com/tree/deploy): The live site.
 
+## Local development
+
+The site can be run locally, in Docker:
+
+1. [Install Docker](https://www.docker.com/products/docker-desktop).
+1. Clone this repository. Make sure you’re using [the branch that you want](#branches).
+1. Run `./docker-run.sh`.
+1. In your browser, open `http://localhost:5000`.
+
+When you are done, run `./docker-stop.sh` (or quit Docker).
+
 ## Deployment
 
 Changes to `deploy` are automatically built by Travis and, if the build passes, deployed via AWS’s CodeDeploy. Changes to `master` are likewise built, but must be manually deployed (due to a limitation of CodeDeploy) by running `deploy/staging-redeploy.sh` on the EC2 instance.
