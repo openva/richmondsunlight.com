@@ -11,10 +11,6 @@ branches:
 addons:
   apt:
     packages:
-      - php-cli
-      - php-mysql
-      - php-curl
-      - php-memcached
       - zip
       - awscli
   sonarcloud:
