@@ -1,7 +1,7 @@
 dist: trusty
 language: php
 php:
-- '5.6'
+- '7.1'
 notifications:
   slack:
     secure: yLlrDX7C9oF4ESAz86fslJfTusDY7PjQmcdNpVBkMq5Y1+/cOcJQO2kg2do/1Ka6zibo/yBIAC/+egobC9/J6381H4bSkNQfwTYD2e9Z4OhMQ5DvL+SEl3OiQ/usWoNmI7QagbyUE6kQt+61D3xZ70b9XfS19a4Qoku/EzrQHOM7flwqrQQ2iD4OjVxHtS7K76Pr/fmxu1HuLEZBqnENCV4hauCVnVoUNMEsK351+eDo9QXmedS9gyDmdmvUliGw7GaLB79uTsFvDm5YQ2Jqsv4pWAE2inMAy2XMFktop6dWXALOhjAEHhZY/O6DcNKp0Qbhx5HDCBTs9XX7anUWzoaUkgZA84iLAENlA529HvOBodPrOLTI7OfO/7MEX5P9Dg2yorTQGAgFkV5R8TKbNxuf17441wpOE8Q7MwbpXPgGmd8PmLGGinBicZvmJ/sze5vJwcbwwp238OseCcLYiuIBPgrCVsT8jizniQ6IvGoDigrD86uvVe+Bu8E6FhwORhvmXMiu64IfdlVFwLOvQK67aq4kdjMdEg3wbyM23k3aY8CPeSAfOkcJdiJsoivxIw4nlz7q0HUAvR7HD+hJCjwXpyPx7m4b6o3lj/3G7iQ9aCLMmsGOSf8YlChMSa/Zg5jxuTcBdU8IIlfZY+lihKj7tyWZFfKdw8qKwLmbDyo=
@@ -10,13 +10,11 @@ branches:
   - /.*/
 addons:
   apt:
-    sources:
-      - sourceline: 'ppa:ondrej/php'
     packages:
-      - php5.6-cli
-      - php5.6-mysql
-      - php5.6-curl
-      - php5.6-memcached
+      - php-cli
+      - php-mysql
+      - php-curl
+      - php-memcached
       - zip
       - awscli
   sonarcloud:
