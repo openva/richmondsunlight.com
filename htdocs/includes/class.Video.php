@@ -171,7 +171,7 @@ class Video
     # Get vital stats about this video via MPlayer and the filesystem.
     public function extract_file_data()
     {
-        exec('/usr/bin/mplayer -ao dummy -vo dummy -identify ' . $_SERVER['DOCUMENT_ROOT'] . $this->path, $mplayer);
+        exec('/usr/bin/mplayer -ao null -vo null -identify -frames 0 ' . $_SERVER['DOCUMENT_ROOT'] . $this->path, $mplayer);
 
         foreach ($mplayer as $option)
         {
@@ -709,7 +709,7 @@ class Video
         $this->index_clips();
 
         # If there no clips were identified by index_clips(), then we're done here.
-        if (count($this->clips) == 0)
+        if (!isset($this->clips) || count($this->clips) == 0)
         {
             return FALSE;
         }

@@ -24,6 +24,7 @@ variables=(
 	MEMCACHED_SERVER
 	PUSHOVER_KEY
 	SLACK_WEBHOOK
+	API_URL
 )
 
 # Iterate over the variables and warn if any aren't populated.

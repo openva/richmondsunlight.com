@@ -15,7 +15,6 @@
 # Include any files or libraries that are necessary for this specific
 # page to function.
 require_once 'includes/settings.inc.php';
-require_once 'includes/functions.inc.php';
 include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS

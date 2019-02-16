@@ -55,6 +55,7 @@ class Location
     # Convert coordinates into district IDs.
     public function coords_to_districts()
     {
+
         if (!isset($this->latitude) || !isset($this->longitude))
         {
             return FALSE;
@@ -95,6 +96,12 @@ class Location
             {
                 $result->senate = district_to_id($legislator['district'], 'senate');
             }
+
+        }
+
+        if (count((array)$result) == 0)
+        {
+            return FALSE;
         }
 
         if (count((array)$result) == 0)

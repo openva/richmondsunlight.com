@@ -313,8 +313,8 @@ div#content ul {
 	font: bold 240% "Georgia", serif;
 	color: #333333;
 	position: absolute;
-	margin-top: 0.4em;
-	margin-left: 4.25em;
+	margin-top: 0.2em;
+	margin-left: 4em;
 }
 
 /* Page specific elements */
@@ -631,7 +631,6 @@ a.balloon div {
 	#content {
 		padding: 2%;
 		width: 96%;
-		font-size: 133.33%; /* ~16px */
 		line-height: 1.666em;
 		overflow: hidden;
 

@@ -27,11 +27,15 @@
 	ExpiresByType image/gif "access 1 month"
 	ExpiresByType image/png "access 1 month"
 	ExpiresByType text/css "access 1 month"
-	ExpiresByType text/html "access 1 month"
+	ExpiresByType text/html "now"
 	ExpiresByType text/x-javascript "access 1 month"
 	ExpiresByType image/x-icon "access 1 year"
 	ExpiresDefault "access 1 month"
 </IfModule>
+
+<FilesMatch ".(html|php)$">
+	Header set Cache-Control "max-age=0, private"
+</FilesMatch>
 
 # Customize Errors
 ErrorDocument 404 /404.php

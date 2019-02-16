@@ -3,7 +3,7 @@
     	"vendor-dir": "htdocs/includes/vendor"
     },
     "require": {
-        "PHPMailer/PHPMailer": "~5.2",
+        "phpmailer/phpmailer": "~5.2",
         "ezyang/htmlpurifier":"~4.9",
         "doctrine/instantiator":"1.0.5",
         "components/jquery": "~1.7",

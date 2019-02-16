@@ -6,38 +6,16 @@
 # PURPOSE
 # The front page of the site.
 #
+
 ###
 
 # INCLUDES
 include_once 'settings.inc.php';
-include_once 'functions.inc.php';
 include_once 'vendor/autoload.php';
 include_once 'magpierss/rss_fetch.inc';
 
 # INITIALIZE SESSION
 session_start();
-
-# Retrieve the home page from a cache.
-$mc = new Memcached();
-$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-$cached_html = $mc->get('homepage');
-if ($mc->getResultCode() === 0)
-{
-
-    # If this is a logged-in visitor, replace the cached "Register," "Log In" text with "Profile"
-    # and "Log Out."
-    if ($_SESSION['registered'] == 'y')
-    {
-        $cached_html = str_replace(
-            '<a href="/account/register/">Register</a> | <a href="/account/login/">Log In</a>',
-            '<a href="/account/">Profile</a> | <a href="/account/logout/">Log Out</a>',
-            $cached_html
-        );
-    }
-    echo $cached_html;
-    echo '<!-- Generated from cache -->';
-    exit();
-}
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -51,10 +29,9 @@ $browser_title = 'Tracking the Virginia General Assembly';
 $site_section = 'home';
 
 # PAGE CONTENT
-$page_body = '<p>The 2018 Virginia General Assembly session will begin on January 9, 2019, and
-	continue for 45 days. Bills have already started to be introduced. Here you can track
-	<a href="/bills/">the bills that are proposed</a>, voted on, and the few that will ultimately
-	become law.</p>';
+$page_body = '<p>The 2018 Virginia General Assembly session began on January 9, 2019, and will
+			continue for 45 days. Here you can track <a href="/bills/">the bills that are
+			proposed</a>, voted on, and the few that will ultimately become law.</p>';
 
 $sql = 'SELECT COUNT(*) AS count, tags.tag
 		FROM tags
@@ -141,35 +118,48 @@ if (mysqli_num_rows($result) > 0)
     $page_body .= '</table></div>';
 }
 
-# Ask Memcached for recent blog entries.
-$blog_entries = $mc->get('homepage_blog');
-
-if (!$blog_entries)
+# Newest Comments
+$sql = 'SELECT comments.id, comments.bill_id, comments.date_created AS date,
+		comments.name, comments.email, comments.url, comments.comment,
+		comments.type, bills.number AS bill_number, bills.catch_line AS bill_catch_line,
+		sessions.year,
+			(
+			SELECT COUNT(*)
+			FROM comments
+			WHERE bill_id=bills.id AND status="published"
+			AND date_created <= date
+			) AS number
+		FROM comments
+		LEFT JOIN bills
+			ON bills.id=comments.bill_id
+		LEFT JOIN sessions
+			ON bills.session_id=sessions.id
+		WHERE comments.status="published"
+		ORDER BY comments.date_created DESC
+		LIMIT 6';
+$result = mysqli_query($db, $sql);
+if (mysqli_num_rows($result) > 0)
 {
-    $rss = fetch_rss('https://www.richmondsunlight.com/blog/feed/');
-    $items = array_slice($rss->items, 0, 5);
-
-    # Limit the output to eight blog entries.
-    $blog_entries = '';
-    foreach ($items as $item)
+    $page_body .= '
+	<div id="newest-comments">
+		<h2>Newest Comments</h2>';
+    while ($comment = mysqli_fetch_array($result))
     {
-        $blog_entries .= '
-			<div class="entry">
-			<h3><a href="' . $item['guid'] . '">' . $item['title'] . '</a></h3>
-			<div class="date">' . date('F j, Y', strtotime($item['pubdate'])) . ' by ' . $item['dc']['creator'] . '</div>
-			' . $item['summary'] . '
-			</div>';
+        $comment = array_map('stripslashes', $comment);
+        if (mb_strlen($comment['comment']) > 200)
+        {
+            $comment['comment'] = preg_replace('#<blockquote>(.*)</blockquote>#D', '', $comment['comment']);
+            $comment['comment'] = strip_tags($comment['comment']);
+        }
+        $page_body .= '<a href="/bill/' . $comment['year'] . '/' . $comment['bill_number'] . '/#comment-' . $comment['number'] . '">
+				<div><strong>' . $comment['bill_catch_line'] . '</strong><br />
+				' . $comment['name'] . ' writes:
+				' . $comment['comment'] . '</div></a>';
     }
-
-    # Store these in APC.
-    $mc->set('homepage_blog', $blog_entries, (60 * 15));
+    $page_body .= '
+		</div>';
 }
 
-$page_body .= '
-		<div id="blog">
-		<h2>Blog</h2>
-		' . $blog_entries . '
-		</div>';
 
 $page_sidebar = '';
 
@@ -278,54 +268,6 @@ if (IN_SESSION == 'y')
     }
 }
 
-# Newest Comments
-$sql = 'SELECT comments.id, comments.bill_id, comments.date_created AS date,
-		comments.name, comments.email, comments.url, comments.comment,
-		comments.type, bills.number AS bill_number, bills.catch_line AS bill_catch_line,
-		sessions.year,
-			(
-			SELECT COUNT(*)
-			FROM comments
-			WHERE bill_id=bills.id AND status="published"
-			AND date_created <= date
-			) AS number
-		FROM comments
-		LEFT JOIN bills
-			ON bills.id=comments.bill_id
-		LEFT JOIN sessions
-			ON bills.session_id=sessions.id
-		WHERE comments.status="published"
-		ORDER BY comments.date_created DESC
-		LIMIT 5';
-$result = mysqli_query($db, $sql);
-if (mysqli_num_rows($result) > 0)
-{
-    $page_sidebar .= '
-		<h3>Newest Comments</h3>
-		<div class="box" id="newest-comments">
-			<ul>';
-    while ($comment = mysqli_fetch_array($result))
-    {
-        $comment = array_map('stripslashes', $comment);
-        if (mb_strlen($comment['comment']) > 175)
-        {
-            $comment['comment'] = preg_replace('#<blockquote>(.*)</blockquote>#D', '', $comment['comment']);
-            $comment['comment'] = strip_tags($comment['comment']);
-            if (mb_strlen($comment['comment']) > 120)
-            {
-                $comment['comment'] = mb_substr($comment['comment'], 0, 120) . '&thinsp;.&thinsp;.&thinsp;.';
-            }
-        }
-        $page_sidebar .= '
-				<li style="margin-bottom: .75em;"><strong>' . mb_strtoupper($comment['bill_number']) . ': ' . $comment['bill_catch_line'] . '</strong><br />
-				<a href="/bill/' . $comment['year'] . '/' . $comment['bill_number'] . '/#comment-' . $comment['number'] . '">' . $comment['name'] . ' writes:</a>
-				' . $comment['comment'] . '</li>';
-    }
-    $page_sidebar .= '
-			</ul>
-		</div>';
-}
-
 $page_sidebar .= '
 		<h3>Keep Up With Us</h3>
 		<div class="box" id="social-networking" style="text-align: center;">
@@ -358,12 +300,4 @@ $page->site_section = $site_section;
 $page->html_head = $html_head;
 $page->browser_title = $browser_title;
 $page->assemble();
-
-# Cache this page for ten minutes, but only if this user isn't logged in. (We don't want to save
-# their customizations.)
-if (!isset($_SESSION['id']))
-{
-    $mc->set('homepage', $page->output, (60 * 10));
-}
-
 $page->display();

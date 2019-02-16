@@ -13,7 +13,6 @@
 # Include any files or libraries that are necessary for this specific
 # page to function.
 include_once 'settings.inc.php';
-include_once 'functions.inc.php';
 include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
@@ -159,7 +158,7 @@ if (!empty($_SESSION['id']))
     $result = $mc->delete('bill-' . $tags['bill_id']);
 
     $log = new Log;
-    $result = $log->put('New tags added: ' . implode(', ', $tag) . $_SERVER['HTTP_REFERER'], 3);
+    $result = $log->put('New tags added: ' . implode(', ', $tag) . ' ' . $_SERVER['HTTP_REFERER'], 3);
 
     /*
      * Send a 201 Created HTTP header, to indicate success.

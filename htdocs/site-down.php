@@ -13,7 +13,6 @@
 # Include any files or libraries that are necessary for this specific
 # page to function.
 include_once 'settings.inc.php';
-include_once 'includes/functions.inc.php';
 include_once 'vendor/autoload.php';
 
 # PAGE METADATA

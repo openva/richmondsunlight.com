@@ -29,17 +29,17 @@ define('LIS_FTP_USERNAME', '');
 define('LIS_FTP_PASSWORD', '');
 
 # The DSN to connect to MySQL.
-define('PDO_DSN', '');
-define('PDO_SERVER', '');
-define('PDO_USERNAME', '');
-define('PDO_PASSWORD', '');
-define('MYSQL_DATABASE', '');
+define('PDO_DSN', 'mysql:host=db;dbname=richmondsunlight');
+define('PDO_SERVER', 'db');
+define('PDO_USERNAME', 'ricsun');
+define('PDO_PASSWORD', 'password');
+define('MYSQL_DATABASE', 'richmondsunlight');
 
 # The API URL.
-define('API_URL', '');
+define('API_URL', 'http://localhost:5001/');
 
 # Specify how to connect to Memcached.
-define('MEMCACHED_SERVER', '');
+define('MEMCACHED_SERVER', 'memcached');
 define('MEMCACHED_PORT', '11211');
 
 # The House Speaker's IDs. This is used in update_vote.php to translate votes credited to

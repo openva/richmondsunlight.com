@@ -3,7 +3,6 @@
 # INCLUDES
 # Include any files or libraries that are necessary for this specific page to function.
 include_once 'includes/settings.inc.php';
-include_once 'includes/functions.inc.php';
 include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
@@ -142,9 +141,6 @@ else
 }
 
 # OUTPUT THE PAGE
-/*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
-    '&site_section='.urlencode($site_section));*/
-
 $page = new Page;
 $page->page_title = $page_title;
 $page->page_body = $page_body;

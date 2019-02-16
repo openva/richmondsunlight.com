@@ -12,7 +12,6 @@
 # Include any files or libraries that are necessary for this specific
 # page to function.
 include_once 'settings.inc.php';
-include_once 'functions.inc.php';
 include_once 'magpierss/rss_fetch.inc';
 include_once 'simplepie.inc.php';
 include_once 'vendor/autoload.php';
@@ -31,7 +30,7 @@ $shortname = mysqli_escape_string($db, $_REQUEST['shortname']);
 
 # Get the legislator's info. from the API.
 # We append a query string, containing the current time, to avoid getting a cached copy.
-$json_url = 'https://api.richmondsunlight.com/1.1/legislator/' . $shortname . '.json?' . time();
+$json_url = API_URL . '1.1/legislator/' . $shortname . '.json?' . time();
 $json = get_content($json_url);
 
 $debug_timing['JSON retrieved'] = microtime(TRUE);
