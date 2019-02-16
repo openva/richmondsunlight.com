@@ -13,5 +13,16 @@ Richmond Sunlight started in 2005 as [a little RSS-based bill tracker](http://wa
 * [`master`](https://github.com/openva/richmondsunlight.com/tree/master): The staging site.
 * [`deploy`](https://github.com/openva/richmondsunlight.com/tree/deploy): The live site.
 
+## Local development
+
+The site can be run locally, in Docker:
+
+1. [Install Docker](https://www.docker.com/products/docker-desktop).
+1. Clone this repository. Make sure you’re using [the branch that you want](#branches).
+1. Run `./docker-run.sh`.
+1. In your browser, open `http://localhost:5000`.
+
+When you are done, run `./docker-stop.sh` (or quit Docker).
+
 ## Architecture
 ![Network diagram](https://gist.githubusercontent.com/waldoj/b86e65bd8a14609849badefb85984ebf/raw/58012252ed5564fe6cf4b479df3fe8e2599786b9/rs_architecture.svg?sanitize=true)
