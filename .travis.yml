@@ -15,8 +15,6 @@ addons:
       - awscli
   sonarcloud:
     organization: "openva"
-before_install:
-- sonar-scanner
 install:
 - composer install
 - cd htdocs/js/vendor; npm install; npm run build
@@ -25,6 +23,7 @@ script:
 - ./deploy/branch_deploy.sh
   && ./deploy/config_variables.sh
   && ./deploy/aws_credentials.sh
+  && sonar-scanner
   && zip -qr latest .
   && mkdir -p upload
   && mv latest.zip upload/latest.zip
