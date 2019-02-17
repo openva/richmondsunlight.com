@@ -15,7 +15,7 @@ addons:
       - awscli
   sonarcloud:
     organization: "openva"
-script:
+before_install:
 - sonar-scanner
 install:
 - composer install
