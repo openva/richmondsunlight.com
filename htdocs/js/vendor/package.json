@@ -3,13 +3,13 @@
 	"version": "1.0.0",
 	"dependencies": {
 		"jquery": "2.x",
-		"jquery-ui": "1.12.x",
+		"jquery-ui-dist": "1.12.1",
 		"qtip2": "3.x",
 		"jquery-tags-input": "xoxco/jQuery-Tags-Input#",
 		"jeditable": "NicolasCARPi/jquery_jeditable#1.8.0",
 		"zxcvbn": "dropbox/zxcvbn"
 	},
 	"scripts": {
-		"build": "npm install; mv node_modules/* .; rmdir node_modules"
+		"build": "npm install; cp -r node_modules/* .; rm -Rf node_modules/; mv jquery-ui-dist jquery-ui"
 	}
 }
