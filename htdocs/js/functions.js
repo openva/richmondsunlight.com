@@ -201,7 +201,5 @@ function addEvent(elm, evType, fn, useCapture)
   } else if (elm.attachEvent){
     var r = elm.attachEvent("on"+evType, fn);
     return r;
-  } else {
-    alert("Handler could not be removed");
   }
 }

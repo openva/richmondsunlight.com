@@ -1,0 +1,11 @@
+<VirtualHost *:80>
+  Protocols h2 http/1.1
+  ServerName richmondsunlight.com
+  ServerAlias www.richmondsunlight.com
+  DocumentRoot /var/www/richmondsunlight.com/htdocs
+  ErrorLog ${APACHE_LOG_DIR}/error.log
+  CustomLog ${APACHE_LOG_DIR}/access.log combined
+</VirtualHost>
+<Directory "/var/www/richmondsunlight.com">
+	AllowOverride All
+</Directory>
