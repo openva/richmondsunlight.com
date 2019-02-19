@@ -46,9 +46,9 @@ $site_section = '';
 
 # Terminate the subscription.
 $sql = 'DELETE FROM comments_subscriptions
-		WHERE hash="' . mysqli_escape_string($db, $hash) . '"
+		WHERE hash="' . mysql_real_escape_string($hash) . '"
 		LIMIT 1';
-mysqli_query($db, $sql);
+mysql_query($sql);
 
 # If we've got a referer, get the domain for us to figure out where to send this person.
 if (isset($_SERVER['HTTP_REFERER']))

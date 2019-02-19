@@ -104,11 +104,6 @@ class Location
             return FALSE;
         }
 
-        if (count((array)$result) == 0)
-        {
-            return false;
-        }
-
         return $result;
     }
 }

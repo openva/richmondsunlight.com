@@ -68,9 +68,9 @@ EOD;
 				FROM tags
 				LEFT JOIN bills_views
 					ON tags.bill_id=bills_views.bill_id
-				WHERE bills_views.user_id=' . $user['id'];
-        $result = mysqli_query($db, $sql);
-        $tags = mysqli_fetch_array($result);
+				WHERE bills_views.user_id='.$user['id'];
+        $result = mysql_query($sql);
+        $tags = mysql_fetch_array($result);
         if ($tags['count'] <= 10)
         {
             $page_body = '
@@ -78,6 +78,7 @@ EOD;
 			you. Go spend some quality time reading legislation and return for your
 			recommendations.</p>';
         }
+
         else
         {
 
@@ -89,10 +90,10 @@ EOD;
 					FROM bills_views
 					LEFT JOIN tags
 						ON bills_views.bill_id = tags.bill_id
-					WHERE bills_views.user_id = ' . $user['id'] . ' AND tag IS NOT NULL
+					WHERE bills_views.user_id = '.$user['id'].' AND tag IS NOT NULL
 					GROUP BY tags.tag
 					ORDER BY count DESC';
-            $result = mysqli_query($db, $sql);
+            $result = mysql_query($sql);
             $page_sidebar .= '
 				<h3>Your Tag Cloud</h3>
 				<div class="box">
@@ -102,7 +103,7 @@ EOD;
 					<div class="tags">';
 
             # Build up an array of tags, with the key being the tag and the value being the count.
-            while ($tag = mysqli_fetch_array($result))
+            while ($tag = mysql_fetch_array($result))
             {
                 $tag = array_map('stripslashes', $tag);
                 $tags[$tag{'tag'}] = $tag['count'];
@@ -136,8 +137,8 @@ EOD;
                 # Establish the font size of this tag in a round percentage (no decimals).
                 $font_size = round($font['min'] + (($count - $tag_data['smallest']) * $step));
                 $page_sidebar .= '
-						<span style="font-size: ' . $font_size . '%;">
-							<a href="/bills/tags/' . urlencode($tag) . '/">' . $tag . '</a>
+						<span style="font-size: '.$font_size.'%;">
+							<a href="/bills/tags/'.urlencode($tag).'/">'.$tag.'</a>
 						</span>';
             }
             $page_sidebar .= '
@@ -145,7 +146,7 @@ EOD;
 				</div>';
 
             $page_body .= '
-				<p>The following bills from the ' . SESSION_YEAR . ' session, which you have not yet
+				<p>The following bills from the '.SESSION_YEAR.' session, which you have not yet
 				seen on Richmond Sunlight, are likely to be of interest to you, given the bills that
 				you tend to be interested in.</p>';
 
@@ -173,10 +174,10 @@ EOD;
             $tags_sql = '';
             foreach ($tags as $tag=>$tmp)
             {
-                $tags_sql .= 'tags2.tag = "' . $tag . '" OR ';
+                $tags_sql .= 'tags2.tag = "'.$tag.'" OR ';
             }
             # Hack off the final " OR "
-            $tags_sql = mb_substr($tags_sql, 0, -4);
+            $tags_sql = substr($tags_sql, 0, -4);
             $sql .= $tags_sql;
             $tags_sql = str_replace('tags2', 'tags', $tags_sql);
             $sql .= ')
@@ -185,18 +186,18 @@ EOD;
 
 						(SELECT COUNT(*)
 						FROM bills_views
-						WHERE bill_id=bills.id AND user_id=' . $user['id'] . '
+						WHERE bill_id=bills.id AND user_id='.$user['id'].'
 						) = 0
 					FROM bills
 					LEFT JOIN tags ON bills.id=tags.bill_id
 					LEFT JOIN sessions ON bills.session_id=sessions.id
 					LEFT JOIN committees ON bills.last_committee_id = committees.id
-					WHERE (' . $tags_sql . ') AND bills.session_id = ' . SESSION_ID . '
+					WHERE ('.$tags_sql.') AND bills.session_id = '.SESSION_ID.'
 					HAVING count > 0
 					ORDER BY count DESC
 					LIMIT 10';
-            $result = mysqli_query($db, $sql);
-            if (mysqli_num_rows($result) == 0)
+            $result = mysql_query($sql);
+            if (mysql_num_rows($result) == 0)
             {
                 $page_body .= '<p>Sorry, no bills could be found that appear to match your tastes
 				that you haven’t already seen. Most likely, you just need to spend some more time
@@ -208,11 +209,11 @@ EOD;
             else
             {
                 $page_body .= '<ul>';
-                while ($bill = mysqli_fetch_array($result))
+                while ($bill = mysql_fetch_array($result))
                 {
                     $bill = array_map('stripslashes', $bill);
-                    $page_body .= '<li><a href="/bill/' . $bill['year'] . '/' . $bill['number'] . '/">'
-                        . mb_strtoupper($bill['number']) . '</a>: ' . $bill['catch_line'] . '</li>';
+                    $page_body .= '<li><a href="/bill/'.$bill['year'].'/'.$bill['number'].'/">'
+                        .strtoupper($bill['number']).'</a>: '.$bill['catch_line'].'</li>';
                 }
                 $page_body .= '</ul>';
             }
@@ -220,5 +221,5 @@ EOD;
     }
 
     # OUTPUT THE PAGE
-    display_page('page_title=' . $page_title . '&page_body=' . urlencode($page_body) . '&page_sidebar=' . urlencode($page_sidebar) .
-        '&site_section=' . urlencode($site_section));
+    display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
+        '&site_section='.urlencode($site_section));

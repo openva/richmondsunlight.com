@@ -54,20 +54,20 @@ if (isset($_POST['submit']))
     }
     else
     {
-        $form_data = array_map('mysqli_real_escape_string', $_POST['form_data']);
+        $form_data = array_map('mysql_real_escape_string', $_POST['form_data']);
         $form_data['password_hash'] = md5($form_data['password']);
         $sql = 'SELECT id, name, cookie_hash
 				FROM users
 				WHERE email = "' . $form_data['email'] . '" AND password = "' . $form_data['password_hash'] . '"';
-        $result = mysqli_query($db, $sql);
+        $result = mysql_query($sql);
 
-        if (mysqli_num_rows($result) == 0)
+        if (mysql_num_rows($result) == 0)
         {
             $page_body = '<div id="messages" class="errors">That email/password combination didn’t work.</div>';
         }
         else
         {
-            $user = mysqli_fetch_array($result);
+            $user = mysql_fetch_array($result);
             $_SESSION['id'] = $user['cookie_hash'];
 
             # We store the user's name in session data because a) it's a handy shortcut to refer
@@ -83,10 +83,10 @@ if (isset($_POST['submit']))
 					FROM dashboard_portfolios
 					WHERE watch_list_id IS NULL AND user_id=' . $user['id'] . '
 					ORDER BY name ASC';
-            $result = mysqli_query($db, $sql);
-            if (mysqli_num_rows($result) > 0)
+            $result = mysql_query($sql);
+            if (mysql_num_rows($result) > 0)
             {
-                while ($portfolio = mysqli_fetch_assoc($result))
+                while ($portfolio = mysql_fetch_array($result))
                 {
                     $portfolio = array_map('stripslashes', $portfolio);
 

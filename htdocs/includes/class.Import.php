@@ -79,6 +79,8 @@ class Import
         }
         unset($text, $start, $law_start);
 
+
+
         # Strip out unacceptable tags.
         $text = trim(strip_tags($text_clean, '<p><b><i><em><strong><u><a><br><center><s><strike><ins>'));
 

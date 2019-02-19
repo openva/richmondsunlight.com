@@ -35,8 +35,6 @@ do
 	fi
 done
 
-cp htdocs/includes/settings-default.inc.php htdocs/includes/settings.inc.php
-
 # If this is our staging site, then set the PDO_DSN value to that of our staging database.
 if [ "$TRAVIS" = true ]&& [ "$TRAVIS_BRANCH" = "master" ]
 then
@@ -45,6 +43,7 @@ then
 fi
 
 # Now iterate over again and perform the replacement.
+cp htdocs/includes/settings-default.inc.php htdocs/includes/settings.inc.php
 for i in "${variables[@]}"
 do
 	sed -i -e "s|define('$i', '')|define('$i', '${!i}')|g" htdocs/includes/settings.inc.php

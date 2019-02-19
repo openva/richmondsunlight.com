@@ -32,16 +32,16 @@ session_start();
 # link in an e-mail after completing the first half of the process.
 if (!empty($_GET['hash']))
 {
-    $hash = mysqli_escape_string($db, $_GET['hash']);
+    $hash = mysql_real_escape_string($_GET['hash']);
     $sql = 'SELECT cookie_hash
 			FROM users
 			WHERE private_hash = "' . $hash . '"';
-    $result = mysqli_query($db, $sql);
-    if (mysqli_num_rows($result) == 0)
+    $result = mysql_query($sql);
+    if (mysql_num_rows($result) == 0)
     {
         die('Your password reset link has failed mysteriously.');
     }
-    $user_data = mysqli_fetch_array($result);
+    $user_data = mysql_fetch_array($result);
     $_SESSION['id'] = $user_data['cookie_hash'];
     header('Location: https://www.richmondsunlight.com/account/?reset');
     exit();
@@ -61,17 +61,17 @@ if (!empty($_POST['email']))
         $sql = 'SELECT name, email, private_hash
 				FROM users
 				WHERE private_hash IS NOT NULL AND password IS NOT NULL
-				AND email = "' . mysqli_escape_string($db, $email) . '"';
-        $result = mysqli_query($db, $sql);
+				AND email = "' . mysql_real_escape_string($email) . '"';
+        $result = mysql_query($sql);
 
         # If we find nothing.
-        if (mysqli_num_rows($result) == 0)
+        if (mysql_num_rows($result) == 0)
         {
             $error = 'You don’t have an account on Richmond Sunlight under that e-mail address.';
         }
         else
         {
-            $user_data = mysqli_fetch_array($result);
+            $user_data = mysql_fetch_array($result);
 
             $user_data = array_map('stripslashes', $user_data);
 

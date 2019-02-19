@@ -68,7 +68,7 @@ if (!empty($_SESSION['id']))
 				FROM users
 				WHERE cookie_hash = "' . $_SESSION['id'] . '"),
 			date_created=now()';
-    $result = mysqli_query($db, $sql);
+    $result = mysql_query($sql);
     if (!$result)
     {
         die("Poll vote could not be cast.");

@@ -48,8 +48,6 @@ class Bill2
 
         $database = new Database;
         $database->connect_old();
-        global $db;
-        global $db_old;
 
         /*
          * Query the DB.
@@ -58,14 +56,14 @@ class Bill2
 				FROM bills
 				LEFT JOIN sessions
 					ON bills.session_id=sessions.id
-				WHERE bills.number="' . mysqli_escape_string($db, $number) . '"
-				AND sessions.year=' . mysqli_escape_string($db, $year);
-        $result = mysqli_query($db, $sql);
-        if (mysqli_num_rows($result) < 1)
+				WHERE bills.number="' . mysql_real_escape_string($number) . '"
+				AND sessions.year=' . mysql_real_escape_string($year);
+        $result = mysql_query($sql);
+        if (mysql_num_rows($result) < 1)
         {
             return false;
         }
-        $bill = mysqli_fetch_array($result);
+        $bill = mysql_fetch_array($result);
         return $bill['id'];
     }
 
@@ -149,12 +147,12 @@ class Bill2
 				LEFT JOIN bills AS bills2
 					ON bills.incorporated_into=bills2.id
 				WHERE bills.id=' . $id;
-        $result = mysqli_query($db, $sql);
-        if (mysqli_num_rows($result) == 0)
+        $result = mysql_query($sql);
+        if (mysql_num_rows($result) == 0)
         {
             return false;
         }
-        $bill = mysqli_fetch_array($result, MYSQL_ASSOC);
+        $bill = mysql_fetch_array($result, MYSQL_ASSOC);
         $bill = array_map('stripslashes', $bill);
 
         # Data conversions
@@ -182,8 +180,8 @@ class Bill2
 						ON bills_copatrons.legislator_id=representatives.id
 					WHERE bills_copatrons.bill_id=' . $bill['id'] . '
 					ORDER BY representatives.chamber ASC, representatives.name ASC';
-            $bill_result = @mysqli_query($db, $sql);
-            while ($copatron = mysqli_fetch_array($bill_result))
+            $bill_result = @mysql_query($sql);
+            while ($copatron = mysql_fetch_array($bill_result))
             {
                 $copatron = array_map('stripslashes', $copatron);
                 $bill['copatron'][] = $copatron;
@@ -194,12 +192,12 @@ class Bill2
         $sql = 'SELECT id, tag
 				FROM tags
 				WHERE bill_id=' . $bill['id'];
-        $result = mysqli_query($db, $sql);
+        $result = mysql_query($sql);
 
         # If there are any tags, display them.
-        if (mysqli_num_rows($result) > 0)
+        if (mysql_num_rows($result) > 0)
         {
-            while ($tag = mysqli_fetch_array($result))
+            while ($tag = mysql_fetch_array($result))
             {
                 $tag['tag'] = stripslashes($tag['tag']);
                 # Save the tags.
@@ -217,13 +215,13 @@ class Bill2
 				AND bills_status.session_id=votes.session_id
 				WHERE bills_status.bill_id = ' . $bill['id'] . '
 				ORDER BY date_raw DESC, bills_status.id DESC';
-        $result = mysqli_query($db, $sql);
-        if (mysqli_num_rows($result) > 0)
+        $result = mysql_query($sql);
+        if (mysql_num_rows($result) > 0)
         {
             # Initialize this array.
             $bill['status_history'] = array();
             # Iterate through the status history.
-            while ($status = mysqli_fetch_array($result, MYSQL_ASSOC))
+            while ($status = mysql_fetch_array($result, MYSQL_ASSOC))
             {
                 # Clean it up.
                 $status = array_map('stripslashes', $status);
@@ -237,11 +235,11 @@ class Bill2
         $sql = 'SELECT placename AS name, latitude, longitude
 				FROM bills_places
 				WHERE bill_id=' . $bill['id'] . '';
-        $result = mysqli_query($db, $sql);
-        if (mysqli_num_rows($result) > 0)
+        $result = mysql_query($sql);
+        if (mysql_num_rows($result) > 0)
         {
             $bill['places'] = array();
-            while ($place = mysqli_fetch_array($result))
+            while ($place = mysql_fetch_array($result))
             {
                 $bill['places'][] = array_map('stripslashes', $place);
             }
@@ -259,13 +257,13 @@ class Bill2
 				WHERE bills.session_id = ' . $bill['session_id'] . '
 				AND bills.summary_hash = "' . $bill['summary_hash'] . '" AND bills.id != ' . $bill['id'] . '
 				ORDER BY bills.date_introduced ASC, bills.chamber DESC';
-        $result = mysqli_query($db, $sql);
-        if (mysqli_num_rows($result) > 0)
+        $result = mysql_query($sql);
+        if (mysql_num_rows($result) > 0)
         {
             $bill['duplicates'] = array();
 
             # Build up an array of duplicates.
-            while ($duplicate = mysqli_fetch_array($result))
+            while ($duplicate = mysql_fetch_array($result))
             {
                 $duplicate = array_map('stripslashes', $duplicate);
                 $bill['duplicates'][] = $duplicate;
@@ -324,12 +322,12 @@ class Bill2
 					ORDER BY count DESC
 					LIMIT 5';
 
-            $result = mysqli_query($db, $sql);
+            $result = mysql_query($sql);
 
-            if (mysqli_num_rows($result) > 0)
+            if (mysql_num_rows($result) > 0)
             {
                 $bill['related'] = array();
-                while ($related = mysqli_fetch_array($result, MYSQL_ASSOC))
+                while ($related = mysql_fetch_array($result, MYSQL_ASSOC))
                 {
                     $bill['related'][] = $related;
                 }

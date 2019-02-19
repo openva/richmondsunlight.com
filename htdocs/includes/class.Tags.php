@@ -21,13 +21,13 @@ class Tags
         		HAVING number > 5
         		ORDER BY number DESC
         		LIMIT 5';
-        $result = mysqli_query($db, $sql);
-        if (mysqli_num_rows($result) == 0)
+        $result = mysql_query($sql);
+        if (mysql_num_rows($result) == 0)
         {
             return FALSE;
         }
         $tags = array();
-        while ($tag = mysqli_fetch_array($result))
+        while ($tag = mysql_fetch_array($result))
         {
             $tags[] = $tag['text'];
         }
