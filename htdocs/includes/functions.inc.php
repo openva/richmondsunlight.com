@@ -356,7 +356,7 @@ if (!function_exists('create_user'))
                     }
                     elseif ($key == 'dashboard')
                     {
-                        sleep(0);
+                        while (false);
                     }
                     else
                     {
