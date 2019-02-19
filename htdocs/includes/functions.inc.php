@@ -98,7 +98,7 @@ function cache_delete($key)
     # Delete the cache file.
     $sql = 'DELETE FROM cache
 			WHERE key="' . $key . '"';
-    $result = mysql_query($sql);
+    $result = mysqli_query($db, $sql);
 
     return true;
 }
@@ -117,12 +117,12 @@ function cache_age($key)
     $sql = 'SELECT now() - date_created AS age
 			FROM cache
 			WHERE key="' . $key . '"';
-    $result = mysql_query($sql);
+    $result = mysqli_query($db, $sql);
     if ($result === false)
     {
         return FALSE;
     }
-    $cache = mysql_fetch_array($result);
+    $cache = mysqli_fetch_array($result);
 
     return $cache['age'];
 }
@@ -141,7 +141,7 @@ function cache_exists($key)
     $sql = 'SELECT *
 			FROM cache
 			WHERE key="' . $key . '"';
-    $result = mysql_query($sql);
+    $result = mysqli_query($db, $sql);
 
     # We can return the result directly.
     return $result;
@@ -152,14 +152,14 @@ function connect_to_db($type = 'old')
 {
     if ($type == 'old')
     {
-        $db = mysql_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
+        $db = mysqli_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
         if ($db === FALSE)
         {
             header('Location: https://www.richmondsunlight.com/site-down/');
             exit;
         }
-        mysql_select_db(MYSQL_DATABASE, $db);
-        mysql_query('SET NAMES "utf8"');
+        mysqli_select_db(MYSQL_DATABASE, $db);
+        mysqli_query($db, 'SET NAMES "utf8"');
     }
     elseif ($type == 'pdo')
     {
@@ -324,7 +324,7 @@ if (!function_exists('create_user'))
                 $sql_inserts = '';
                 foreach ($options as $key => $value)
                 {
-                    $value = mysql_real_escape_string($value);
+                    $value = mysqli_escape_string($db, $value);
                     if (empty($value))
                     {
                         $sql_inserts .= ', ' . $key . ' = NULL';
@@ -347,7 +347,7 @@ if (!function_exists('create_user'))
                 foreach ($options as $key => $value)
                 {
                     # Make the data safe for the database.
-                    $value = mysql_real_escape_string($value);
+                    $value = mysqli_escape_string($db, $value);
 
                     # Determine which SQL string this data should be appended to.
                     if (($key == 'organization') || ($key == 'type') || ($key == 'expires'))
@@ -399,7 +399,7 @@ if (!function_exists('create_user'))
         {
             $sql .= $sql_inserts;
         }
-        $result = mysql_query($sql);
+        $result = mysqli_query($db, $sql);
         if (!$result)
         {
             return FALSE;
@@ -408,7 +408,7 @@ if (!function_exists('create_user'))
         {
 
             # Get the user's ID.
-            $user_id = mysql_insert_id();
+            $user_id = mysqli_insert_id($db);
 
             # Generate a random eight-digit hash to send out in e-mails for unsubscribing
             # instantly.
@@ -423,7 +423,7 @@ if (!function_exists('create_user'))
             {
                 $sql .= $dashboard_inserts;
             }
-            mysql_query($sql);
+            mysqli_query($db, $sql);
         }
     }
 }
@@ -456,13 +456,13 @@ function get_user()
 			FROM users
 			LEFT JOIN dashboard_user_data
 				ON users.id=dashboard_user_data.user_id
-			WHERE users.cookie_hash="' . mysql_real_escape_string($_SESSION['id']) . '"';
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) == 0)
+			WHERE users.cookie_hash="' . mysqli_escape_string($db, $_SESSION['id']) . '"';
+    $result = mysqli_query($db, $sql);
+    if (mysqli_num_rows($result) == 0)
     {
         return FALSE;
     }
-    $user = mysql_fetch_array($result, MYSQL_ASSOC);
+    $user = mysqli_fetch_array($result, MYSQL_ASSOC);
     $user = array_map('stripslashes', $user);
 
     # Cache this user's data, and save it for one hour. (User sessions are unlikely to last longer.)
@@ -495,7 +495,7 @@ function update_user($options)
     $first = 'yes';
     foreach ($options as $key => $value)
     {
-        mysql_real_escape_string($value);
+        mysqli_escape_string($db, $value);
         if (!isset($first))
         {
             $sql .= ', ';
@@ -506,8 +506,8 @@ function update_user($options)
         }
         $sql .= $key . ' = "' . $value . '"';
     }
-    $sql .= ' WHERE cookie_hash="' . mysql_real_escape_string($_SESSION['id']) . '"';
-    $result = mysql_query($sql);
+    $sql .= ' WHERE cookie_hash="' . mysqli_escape_string($db, $_SESSION['id']) . '"';
+    $result = mysqli_query($db, $sql);
     if (!$result)
     {
         return FALSE;
@@ -558,7 +558,7 @@ function logged_in($registered = '')
     {
         $sql = 'SELECT id
 				FROM users
-				WHERE cookie_hash="' . mysql_real_escape_string($_SESSION['id']) . '"
+				WHERE cookie_hash="' . mysqli_escape_string($db, $_SESSION['id']) . '"
 				AND password IS NOT NULL';
     }
 
@@ -569,14 +569,14 @@ function logged_in($registered = '')
     {
         $sql = 'SELECT id
 				FROM users
-				WHERE cookie_hash="' . mysql_real_escape_string($_SESSION['id']) . '"';
+				WHERE cookie_hash="' . mysqli_escape_string($db, $_SESSION['id']) . '"';
     }
-    $result = mysql_query($sql);
+    $result = mysqli_query($db, $sql);
 
     /*
      * If one result is returned, then this user does have an account.
      */
-    if (mysql_num_rows($result) == 1)
+    if (mysqli_num_rows($result) == 1)
     {
         if ($registered == 'registered')
         {
@@ -606,8 +606,8 @@ function blacklisted()
 				(SELECT id
 				FROM users
 				WHERE cookie_hash = "' . $_SESSION['id'] . '")';
-    $result = mysql_query($sql);
-    $data = mysql_fetch_array($result);
+    $result = mysqli_query($db, $sql);
+    $data = mysqli_fetch_array($result);
     $score = $data['score'];
     if ($score >= 20)
     {
@@ -634,7 +634,7 @@ function blacklist($word)
         $sql .= ', reason="dirty word - ' . $word . '"';
     }
 
-    mysql_query($sql);
+    mysqli_query($db, $sql);
 }
 
 # Display the CSS balloon providing a tooltip-type interface for bills and legislators.
@@ -761,13 +761,13 @@ function district_to_id($number, $chamber)
 			FROM districts
 			WHERE number = ' . $number . ' AND chamber = "' . $chamber . '"
 			AND date_ended IS NULL';
-    $result = mysql_query($sql);
+    $result = mysqli_query($db, $sql);
 
     # Continue if we've got a match.
-    if (mysql_num_rows($result) > 0)
+    if (mysqli_num_rows($result) > 0)
     {
         # Return the database ID.
-        $district = mysql_fetch_array($result);
+        $district = mysqli_fetch_array($result);
         return $district['id'];
     }
 
@@ -775,40 +775,137 @@ function district_to_id($number, $chamber)
 }
 
 # nl2p is WordPress' wpautop(), renamed
-function nl2p($pee, $br = 1)
+function nl2p($pee, $br = true)
 {
-    $pee = $pee . "\n"; // just to make things a little easier, pad the end
-    $pee = preg_replace('|<br />\s*<br />|', "\n\n", $pee);
-    // Space things out a little
-    $allblocks = '(?:table|thead|tfoot|caption|colgroup|tbody|tr|td|th|div|dl|dd|dt|ul|ol|li|pre|select|form|blockquote|address|math|style|script|object|input|param|p|h[1-6])';
-    $pee = preg_replace('!(<' . $allblocks . '[^>]*>)!', "\n$1", $pee);
+    $pre_tags = array();
+
+    if (trim($pee) === '')
+    {
+        return '';
+    }
+
+    // Just to make things a little easier, pad the end.
+    $pee = $pee . "\n";
+
+    /*
+     * Pre tags shouldn't be touched by autop.
+     * Replace pre tags with placeholders and bring them back after autop.
+     */
+    if (mb_strpos($pee, '<pre') !== false)
+    {
+        $pee_parts = explode('</pre>', $pee);
+        $last_pee = array_pop($pee_parts);
+        $pee = '';
+        $i = 0;
+
+        foreach ($pee_parts as $pee_part)
+        {
+            $start = mb_strpos($pee_part, '<pre');
+
+            // Malformed html?
+            if ($start === false)
+            {
+                $pee .= $pee_part;
+                continue;
+            }
+
+            $name = "<pre wp-pre-tag-$i></pre>";
+            $pre_tags[$name] = mb_substr($pee_part, $start) . '</pre>';
+
+            $pee .= mb_substr($pee_part, 0, $start) . $name;
+            $i++;
+        }
+
+        $pee .= $last_pee;
+    }
+    // Change multiple <br>s into two line breaks, which will turn into paragraphs.
+    $pee = preg_replace('|<br\s*/?>\s*<br\s*/?>|', "\n\n", $pee);
+
+    $allblocks = '(?:table|thead|tfoot|caption|col|colgroup|tbody|tr|td|th|div|dl|dd|dt|ul|ol|li|pre|form|map|area|blockquote|address|math|style|p|h[1-6]|hr|fieldset|legend|section|article|aside|hgroup|header|footer|nav|figure|figcaption|details|menu|summary)';
+
+    // Add a double line break above block-level opening tags.
+    $pee = preg_replace('!(<' . $allblocks . '[\s/>])!', "\n\n$1", $pee);
+
+    // Add a double line break below block-level closing tags.
     $pee = preg_replace('!(</' . $allblocks . '>)!', "$1\n\n", $pee);
-    $pee = str_replace(array("\r\n", "\r"), "\n", $pee); // cross-platform newlines
-    $pee = preg_replace("/\n\n+/", "\n\n", $pee); // take care of duplicates
-    $pee = preg_replace('/\n?(.+?)(?:\n\s*\n|\z)/s', "<p>$1</p>\n", $pee); // make paragraphs, including one at the end
-    $pee = preg_replace('|<p>\s*?</p>|', '', $pee); // under certain strange conditions it could create a P of entirely whitespace
-    $pee = preg_replace('|<p>(<div[^>]*>\s*)|', "$1<p>", $pee);
-    $pee = preg_replace('!<p>([^<]+)\s*?(</(?:div|address|form)[^>]*>)!', "<p>$1</p>$2", $pee);
-    $pee = preg_replace('|<p>|', "$1<p>", $pee);
-    $pee = preg_replace('!<p>\s*(</?' . $allblocks . '[^>]*>)\s*</p>!', "$1", $pee); // don't pee all over a tag
-    $pee = preg_replace("|<p>(<li.+?)</p>|", "$1", $pee); // problem with nested lists
+
+    // Standardize newline characters to "\n".
+    $pee = str_replace(array("\r\n", "\r"), "\n", $pee);
+
+    // Find newlines in all elements and add placeholders.
+    $pee = wp_replace_in_html_tags($pee, array( "\n" => " <!-- wpnl --> " ));
+
+    // Remove more than two contiguous line breaks.
+    $pee = preg_replace("/\n\n+/", "\n\n", $pee);
+
+    // Split up the contents into an array of strings, separated by double line breaks.
+    $pees = preg_split('/\n\s*\n/', $pee, -1, PREG_SPLIT_NO_EMPTY);
+
+    // Reset $pee prior to rebuilding.
+    $pee = '';
+
+    // Rebuild the content as a string, wrapping every bit with a <p>.
+    foreach ($pees as $tinkle)
+    {
+        $pee .= '<p>' . trim($tinkle, "\n") . "</p>\n";
+    }
+
+    // Under certain strange conditions it could create a P of entirely whitespace.
+    $pee = preg_replace('|<p>\s*</p>|', '', $pee);
+
+    // Add a closing <p> inside <div>, <address>, or <form> tag if missing.
+    $pee = preg_replace('!<p>([^<]+)</(div|address|form)>!', "<p>$1</p></$2>", $pee);
+
+    // If an opening or closing block element tag is wrapped in a <p>, unwrap it.
+    $pee = preg_replace('!<p>\s*(</?' . $allblocks . '[^>]*>)\s*</p>!', "$1", $pee);
+
+    // In some cases <li> may get wrapped in <p>, fix them.
+    $pee = preg_replace("|<p>(<li.+?)</p>|", "$1", $pee);
+
+    // If a <blockquote> is wrapped with a <p>, move it inside the <blockquote>.
     $pee = preg_replace('|<p><blockquote([^>]*)>|i', "<blockquote$1><p>", $pee);
     $pee = str_replace('</blockquote></p>', '</p></blockquote>', $pee);
+
+    // If an opening or closing block element tag is preceded by an opening <p> tag, remove it.
     $pee = preg_replace('!<p>\s*(</?' . $allblocks . '[^>]*>)!', "$1", $pee);
+
+    // If an opening or closing block element tag is followed by a closing <p> tag, remove it.
     $pee = preg_replace('!(</?' . $allblocks . '[^>]*>)\s*</p>!', "$1", $pee);
+
+    // Optionally insert line breaks.
     if ($br)
     {
-        $pee = preg_replace('/<(script|style).*?<\/\\1>/se', 'str_replace("\n", "<WPPreserveNewline />", "\\0")', $pee);
-        $pee = preg_replace('|(?<!<br />)\s*\n|', "<br />\n", $pee); // optionally make line breaks
+        // Replace newlines that shouldn't be touched with a placeholder.
+        $pee = preg_replace_callback('/<(script|style).*?<\/\\1>/s', '_autop_newline_preservation_helper', $pee);
+
+        // Normalize <br>
+        $pee = str_replace(array( '<br>', '<br/>' ), '<br />', $pee);
+
+        // Replace any new line characters that aren't preceded by a <br /> with a <br />.
+        $pee = preg_replace('|(?<!<br />)\s*\n|', "<br />\n", $pee);
+
+        // Replace newline placeholders with newlines.
         $pee = str_replace('<WPPreserveNewline />', "\n", $pee);
     }
+
+    // If a <br /> tag is after an opening or closing block tag, remove it.
     $pee = preg_replace('!(</?' . $allblocks . '[^>]*>)\s*<br />!', "$1", $pee);
+
+    // If a <br /> tag is before a subset of opening or closing block tags, remove it.
     $pee = preg_replace('!<br />(\s*</?(?:p|li|div|dl|dd|dt|th|pre|td|ul|ol)[^>]*>)!', '$1', $pee);
-    if (mb_strstr($pee, '<pre'))
-    {
-        $pee = preg_replace('!(<pre.*?>)(.*?)</pre>!ise', " stripslashes('$1') .  stripslashes(clean_pre('$2'))  . '</pre>' ", $pee);
-    }
     $pee = preg_replace("|\n</p>$|", '</p>', $pee);
+
+    // Replace placeholder <pre> tags with their original content.
+    if (!empty($pre_tags))
+    {
+        $pee = str_replace(array_keys($pre_tags), array_values($pre_tags), $pee);
+    }
+
+    // Restore newlines in all elements.
+    if (false !== mb_strpos($pee, '<!-- wpnl -->'))
+    {
+        $pee = str_replace(array( ' <!-- wpnl --> ', '<!-- wpnl -->' ), "\n", $pee);
+    }
 
     return $pee;
 }
@@ -977,14 +1074,14 @@ function bill_sections($bill_id)
 			AND vacode.section_number IS NOT NULL
 			ORDER BY vacode.section_number ASC';
 
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) < 1)
+    $result = mysqli_query($db, $sql);
+    if (mysqli_num_rows($result) < 1)
     {
         return FALSE;
     }
     else
     {
-        while ($section = mysql_fetch_array($result))
+        while ($section = mysqli_fetch_array($result))
         {
             $section['url'] = 'https://vacode.org/' . $section['section_number'] . '/';
             $sections[] = $section;

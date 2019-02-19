@@ -26,7 +26,7 @@ $database->connect_old();
 session_start();
 
 # LOCALIZE AND CLEAN UP VARIABLES
-$shortname = mysql_escape_string($_REQUEST['shortname']);
+$shortname = mysqli_escape_string($db, $_REQUEST['shortname']);
 
 # Get the legislator's info. from the API.
 # We append a query string, containing the current time, to avoid getting a cached copy.
@@ -233,14 +233,14 @@ $sql = 'SELECT comments.id, comments.bill_id, comments.date_created AS date,
 		WHERE comments.status="published" AND bills.chief_patron_id=' . $legislator['id'] . '
 		ORDER BY comments.date_created DESC
 		LIMIT 5';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($db, $sql);
+if (mysqli_num_rows($result) > 0)
 {
     $page_sidebar .= '
 		<div class="box" id="newest-comments">
 			<h3>Newest Comments</h3>
 			<ul>';
-    while ($comment = mysql_fetch_array($result))
+    while ($comment = mysqli_fetch_array($result))
     {
         $comment = array_map('stripslashes', $comment);
         if (mb_strlen($comment['comment']) > 175)
@@ -367,8 +367,8 @@ $sql = 'SELECT COUNT(*) AS passed,
 		LEFT JOIN sessions ON bills.session_id = sessions.id
 		WHERE sessions.year = ' . $batting_year . ' AND chief_patron_id = ' . $legislator['id'] . '
 		AND (bills.outcome = "passed")';
-$result = mysql_query($sql);
-$legislator['batting'] = mysql_fetch_array($result);
+$result = mysqli_query($db, $sql);
+$legislator['batting'] = mysqli_fetch_array($result);
 if ($legislator['batting']['total'] == 0)
 {
     unset($legislator['batting']);
@@ -478,9 +478,9 @@ $sql = 'SELECT representatives.party, COUNT(*) AS number
 		WHERE bills_copatrons.legislator_id=' . $legislator['id'] . '
 		GROUP BY representatives.party';
 
-$result = mysql_query($sql);
+$result = mysqli_query($db, $sql);
 $tmp = array();
-while ($copatron = mysql_fetch_array($result))
+while ($copatron = mysqli_fetch_array($result))
 {
     $tmp[$copatron{party}] = $copatron['number'];
 }
@@ -523,9 +523,9 @@ $sql = 'SELECT representatives.party, COUNT(*) AS number
 			FROM bills
 			WHERE chief_patron_id = ' . $legislator['id'] . ')
 		GROUP BY representatives.party';
-$result = mysql_query($sql);
+$result = mysqli_query($db, $sql);
 $tmp = array();
-while ($copatron = mysql_fetch_array($result))
+while ($copatron = mysqli_fetch_array($result))
 {
     $tmp[$copatron{'party'}] = $copatron['number'];
 }
@@ -571,9 +571,9 @@ $sql = 'SELECT representatives.party, COUNT(*) AS number
 				FROM bills_copatrons
 				WHERE legislator_id=' . $legislator['id'] . ')
 		GROUP BY representatives.party';
-$result = mysql_query($sql);
+$result = mysqli_query($db, $sql);
 $tmp = array();
-while ($copatron = mysql_fetch_array($result))
+while ($copatron = mysqli_fetch_array($result))
 {
     $tmp[$copatron{party}] = $copatron['number'];
 }
@@ -651,8 +651,8 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 		WHERE representatives.id = ' . $legislator['id'] . '
 		GROUP BY tags.tag
 		ORDER BY count DESC';
-$result = mysql_query($sql);
-$tag_count = mysql_num_rows($result);
+$result = mysqli_query($db, $sql);
+$tag_count = mysqli_num_rows($result);
 if ($tag_count > 0)
 {
     $page_body .= '
@@ -660,7 +660,7 @@ if ($tag_count > 0)
 		<dd>
 			<div class="tags">';
     # Build up an array of tags, with the key being the tag and the value being the count.
-    while ($tag = mysql_fetch_array($result))
+    while ($tag = mysqli_fetch_array($result))
     {
         $tag = array_map('stripslashes', $tag);
         $tags[$tag{'tag'}] = $tag['count'];

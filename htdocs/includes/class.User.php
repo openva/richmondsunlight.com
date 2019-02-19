@@ -20,7 +20,7 @@ class User
 
     /*
      * A reimplementation logged_in() function, in functions.inc.php, but that returns not just
-     * TRUE or FALSE, but also whether the user is registered.
+     * true or false, but also whether the user is registered.
      */
     public function logged_in($check_if_registered = '')
     {
@@ -59,12 +59,12 @@ class User
 
         $sql = 'SELECT id, password
 				FROM users
-				WHERE cookie_hash="' . mysql_real_escape_string($_SESSION['id']) . '"';
-        $result = mysql_query($sql);
+				WHERE cookie_hash="' . mysqli_escape_string($db, $_SESSION['id']) . '"';
+        $result = mysqli_query($db, $sql);
 
-        if (mysql_num_rows($result) == 1)
+        if (mysqli_num_rows($result) == 1)
         {
-            $registered = mysql_fetch_assoc($result);
+            $registered = mysqli_fetch_assoc($result);
 
             /*
              * The presence of a password indicates that it's a user who has created an account.
@@ -113,16 +113,16 @@ class User
 				GROUP BY tags.tag
 				ORDER BY count DESC
 				LIMIT 100';
-        $result = mysql_query($sql);
+        $result = mysqli_query($db, $sql);
 
         # Unless we have ten tags, we just don't have enough data to continue.
-        if (mysql_num_rows($result) < 10)
+        if (mysqli_num_rows($result) < 10)
         {
             return FALSE;
         }
 
         # Build up an array of tags, with the key being the tag and the value being the count.
-        while ($tag = mysql_fetch_array($result))
+        while ($tag = mysqli_fetch_array($result))
         {
             $tag = array_map('stripslashes', $tag);
             $tags[$tag{'tag'}] = $tag['count'];
@@ -182,11 +182,11 @@ class User
 				LEFT JOIN bills
 					ON bills_views.bill_id = bills.id
 				WHERE bills.session_id = ' . SESSION_ID . ' AND user_id = ' . $user['id'];
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) > 0)
+        $result = mysqli_query($db, $sql);
+        if (mysqli_num_rows($result) > 0)
         {
             $bills_seen = array();
-            while ($bill = mysql_fetch_assoc($result))
+            while ($bill = mysqli_fetch_assoc($result))
             {
                 $bills_seen[$bill{'id'}] = true;
             }
@@ -240,14 +240,14 @@ class User
 				ORDER BY count DESC
 				LIMIT 100';
 
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) == 0)
+        $result = mysqli_query($db, $sql);
+        if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
         }
         else
         {
-            while ($bill = mysql_fetch_assoc($result))
+            while ($bill = mysqli_fetch_assoc($result))
             {
                 $bill = array_map('stripslashes', $bill);
                 if (!isset($bills_seen[$bill{'id'}]))
@@ -303,15 +303,15 @@ class User
 				AND longitude >= ' . (round($user['longitude'], 1)-.25) . ')
 				AND bills.session_id = ' . SESSION_ID . '
 				ORDER BY ( lat_diff + lon_diff ) DESC';
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) == 0)
+        $result = mysqli_query($db, $sql);
+        if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
         }
 
         $bills = array();
 
-        while ($bill = mysql_fetch_array($result))
+        while ($bill = mysqli_fetch_array($result))
         {
             $bills[] = array_map('stripslashes', $bill);
         }
@@ -344,12 +344,12 @@ class User
 					FROM tags
 					WHERE user_id=' . $user['id'] . ') AS bills';
 
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) == 0)
+        $result = mysqli_query($db, $sql);
+        if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
         }
-        $stats = mysql_fetch_object($result);
+        $stats = mysqli_fetch_object($result);
         return $stats;
     }
 
@@ -381,12 +381,12 @@ class User
 				AND comments.status = "published"
 				ORDER BY comments.date_created DESC
 				LIMIT 10';
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) == 0)
+        $result = mysqli_query($db, $sql);
+        if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
         }
-        while ($comment = mysql_fetch_assoc($result))
+        while ($comment = mysqli_fetch_assoc($result))
         {
             $comments[] = $comment;
         }

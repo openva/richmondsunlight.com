@@ -29,7 +29,6 @@ $site_section = 'admin';
 # PAGE CONTENT
 if (!empty($_POST))
 {
-
     $bills = $_POST['bill'];
 
     # Connect to Memcached.
@@ -47,30 +46,13 @@ if (!empty($_POST))
         }
 
         # Explode the tags into an array to be inserted individually.
-        $tag = explode(' ', $tags);
+        $tag = explode(',', $tags);
 
         for ($i=0; $i<count($tag); $i++)
         {
             # Trim it down.
             $tag[$i] = trim($tag[$i]);
-            $tag[$i] = strtolower($tag[$i]);
-
-            # If the string contains a quotation mark, build up a multiple-word
-            # tag using everything up until the terminating quotation mark.
-            if (stristr($tag[$i], '"'))
-            {
-                if (!isset($assembled_tag)) $assembled_tag = $tag[$i];
-                else {
-                    $tag[$i] = $assembled_tag.' '.$tag[$i];
-                    $tag[$i] = str_replace('"', '', $tag[$i]);
-                    unset($assembled_tag);
-                }
-            }
-
-            elseif (isset($assembled_tag))
-            {
-                $assembled_tag .= ' '.$tag[$i];
-            }
+            $tag[$i] = mb_strtolower($tag[$i]);
 
             # Don't proceed if it's blank.
             if ((!empty($tag[$i])) && (!isset($assembled_tag)))
@@ -78,7 +60,7 @@ if (!empty($_POST))
 
                 # Make sure it's safe.
                 $tag[$i] = preg_replace("/[[:punct:]]/D", '', $tag[$i]);
-                $tag[$i] = trim(mysql_real_escape_string($tag[$i]));
+                $tag[$i] = trim(mysqli_escape_string($db, $tag[$i]));
 
                 # Check one more time to make sure it's not empty.
                 if (!empty($tag[$i]))
@@ -93,20 +75,17 @@ if (!empty($_POST))
 								WHERE cookie_hash = "' . $_SESSION['id'] . '"),
 							date_created=now()';
                     $page_body .= '.';
-                    mysql_query($sql);
+                    mysqli_query($db, $sql);
 
                     # Delete this from the cache.
                     $mc->delete('bill-' . $bill_id);
-
                 }
             }
         }
     }
 }
-
 else
 {
-
     if (empty($_SESSION['id']))
     {
         die('Please log in before using this.');
@@ -120,8 +99,8 @@ else
 			LEFT JOIN tags ON bills.id = tags.bill_id
 			WHERE bills.session_id = ' . SESSION_ID . '
 			AND tags.bill_id IS NULL';
-    $result = mysql_query($sql);
-    $remaining = mysql_fetch_array($result);
+    $result = mysqli_query($db, $sql);
+    $remaining = mysqli_fetch_array($result);
     $page_body .= '<p>There are ' . number_format($remaining['number']) . ' bills that don’t have
 		any tags.</p>';
 
@@ -138,8 +117,8 @@ else
 				WHERE bill_id = bills.id) = 0
 			ORDER BY sessions.year DESC, RAND()
 			LIMIT 20';
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) == 0)
+    $result = mysqli_query($db, $sql);
+    if (mysqli_num_rows($result) == 0)
     {
         die('Huzzah! There are no untagged bills!');
     }
@@ -148,7 +127,7 @@ else
 	<div id="bills">
 		<form method="post" action="/admin/tag.php">';
 
-    while ($bill = mysql_fetch_array($result))
+    while ($bill = mysqli_fetch_array($result))
     {
 
         # If this bill doesn't have any tags (as, indeed, it should not), then generate some
@@ -169,13 +148,12 @@ else
 					GROUP BY tag
 					HAVING number > 2
 					ORDER BY number DESC';
-            $tag_result = mysql_query($sql);
-            if (mysql_num_rows($result) > 0)
+            $tag_result = mysqli_query($db, $sql);
+            if (mysqli_num_rows($result) > 0)
             {
                 $tags = array();
-                while ($tag = mysql_fetch_array($tag_result))
+                while ($tag = mysqli_fetch_array($tag_result))
                 {
-
                     if (!isset($first_score))
                     {
                         $first_score = $tag['number'];
@@ -183,15 +161,8 @@ else
 
                     if (($tag['number'] / $first_score) > .5)
                     {
-
-                        if (stristr($tag['tag'], ' ') !== FALSE)
-                        {
-                            $tag['tag'] = '"' . $tag['tag'] . '"';
-                        }
                         $tags[] = $tag['tag'];
-
                     }
-
                 }
                 $bill['tags'] = implode(', ', $tags);
                 unset($first_score);
@@ -202,15 +173,14 @@ else
 			<div class="bill">
 				<div class="summary">
 					<h2><a href="/bill/' . $bill['year'] . '/' . $bill['number'] . '/">'
-                        . strtoupper($bill['number']) . '</a>: ' . $bill['catch_line'] . '</h2>
-					'.nl2p($bill['summary']).'
+                        . mb_strtoupper($bill['number']) . '</a>: ' . $bill['catch_line'] . '</h2>
+					' . nl2p($bill['summary']) . '
 				</div>
 				<div class="tags">
-					<textarea name="bill['.$bill['id'].']" style="width: 20em;">' . $bill['tags']
+					<textarea name="bill[' . $bill['id'] . ']" style="width: 20em;">' . $bill['tags']
                         . '</textarea>
 				</div>
 			</div>';
-
     }
 
     $page_body .= '
