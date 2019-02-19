@@ -17,35 +17,35 @@ function populate_smart_portfolio($portfolio_id)
     $sql = 'SELECT watch_list_id AS id
 			FROM dashboard_portfolios
 			WHERE id = ' . $portfolio_id;
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) == 0)
+    $result = mysqli_query($db, $sql);
+    if (mysqli_num_rows($result) == 0)
     {
         return FALSE;
     }
-    $watch_list = mysql_fetch_array($result);
+    $watch_list = mysqli_fetch_array($result);
 
     # Get the ID of the user who owns this portfolio.
     $sql = 'SELECT user_id AS id
 			FROM dashboard_portfolios
 			WHERE id = ' . $portfolio_id;
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) == 0)
+    $result = mysqli_query($db, $sql);
+    if (mysqli_num_rows($result) == 0)
     {
         return FALSE;
     }
-    $user = mysql_fetch_array($result);
+    $user = mysqli_fetch_array($result);
     $user_id = $user['id'];
 
     # Get the smart portfolio criteria.
     $sql = 'SELECT tag, patron_id, committee_id, keyword, status, current_chamber
 			FROM dashboard_watch_lists
 			WHERE id =' . $watch_list['id'];
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) == 0)
+    $result = mysqli_query($db, $sql);
+    if (mysqli_num_rows($result) == 0)
     {
         return FALSE;
     }
-    $portfolio = mysql_fetch_array($result);
+    $portfolio = mysqli_fetch_array($result);
 
     # Remove any criterion that's not being used in this smart portfolio.
     foreach ($portfolio as $key => $criterion)
@@ -89,22 +89,22 @@ function populate_smart_portfolio($portfolio_id)
     }
 
     # Run the actual query;
-    $result = mysql_query($sql);
+    $result = mysqli_query($db, $sql);
 
     # We don't want to fail when no bills are found. It's totally reasonable for somebody to
     # have a smart portfoilo that starts out blank. But we do want to erase any bills in the
     # portfolio in question before we wrap up. Specifying the user ID isn't strictly necessary,
     # but it's better to be cautious.
-    if (mysql_num_rows($result) == 0)
+    if (mysqli_num_rows($result) == 0)
     {
         $sql = 'DELETE FROM dashboard_bills
 				WHERE portfolio_id = ' . $portfolio_id . ' AND user_id=' . $user_id;
-        mysql_query($sql);
+        mysqli_query($db, $sql);
         return true;
     }
 
     # When bills *are* found, build them up into an ID listing.
-    while ($bill = mysql_fetch_array($result))
+    while ($bill = mysqli_fetch_array($result))
     {
         $new_bills[] = $bill['id'];
     }
@@ -113,10 +113,10 @@ function populate_smart_portfolio($portfolio_id)
     $sql = 'SELECT bill_id AS id
 			FROM dashboard_bills
 			WHERE portfolio_id = ' . $portfolio_id;
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) > 0)
+    $result = mysqli_query($db, $sql);
+    if (mysqli_num_rows($result) > 0)
     {
-        while ($bill = mysql_fetch_array($result))
+        while ($bill = mysqli_fetch_array($result))
         {
             $old_bills[] = $bill['id'];
         }
@@ -168,7 +168,7 @@ function populate_smart_portfolio($portfolio_id)
             $sql = 'DELETE FROM dashboard_bills
 					WHERE portfolio_id = ' . $portfolio_id . ' AND bill_id = ' . $bill_id . '
 					AND user_id=' . $user_id;
-            mysql_query($sql);
+            mysqli_query($db, $sql);
         }
     }
 
@@ -182,7 +182,7 @@ function populate_smart_portfolio($portfolio_id)
 					SET user_id = ' . $user_id . ', bill_id = ' . $bill_id . ',
 					portfolio_id = ' . $portfolio_id . ', date_created = now()
 					ON DUPLICATE KEY UPDATE bill_id=bill_id';
-            $result = mysql_query($sql);
+            $result = mysqli_query($db, $sql);
         }
     }
 }
@@ -573,8 +573,8 @@ function show_portfolio($portfolio, $user_id)
 			AND dashboard_bills.portfolio_id = ' . $portfolio['id'] . '
 			AND bills.session_id = ' . SESSION_ID . '
 			ORDER BY last_date DESC';
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) > 0)
+    $result = mysqli_query($db, $sql);
+    if (mysqli_num_rows($result) > 0)
     {
         $content = '
 		<table style="clear: both;" class="sortable" id="listing-' . $portfolio['hash'] . '">
@@ -593,7 +593,7 @@ function show_portfolio($portfolio, $user_id)
 				</tr>
 			</thead>
 			<tbody>';
-        while ($bill = mysql_fetch_array($result))
+        while ($bill = mysqli_fetch_array($result))
         {
             $bill = array_map('stripslashes', $bill);
             $bill['timestamp'] = strtotime($bill['last_date']);

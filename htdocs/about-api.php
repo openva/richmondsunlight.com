@@ -80,7 +80,7 @@ EOD;
 				<h2 id="bills">Retrieve a list of bills.</h2>
 
 				<h3>Example URI</h3>
-				<p>http://api.richmondsunlight.com/1.0/bills/2011.json</p>
+				<p>https://api.richmondsunlight.com/1.0/bills/2011.json</p>
 
 				<h3>Instructions</h3>
 				<p>Replace the year (“2011”) with the year for which you want a listing of all
@@ -99,7 +99,7 @@ EOD;
 				<h2 id="bill">Retrieve a given bill.</h2>
 
 				<h3>Example URI</h3>
-				<p>http://api.richmondsunlight.com/1.0/bill/2010/hb1.json</p>
+				<p>https://api.richmondsunlight.com/1.0/bill/2010/hb1.json</p>
 
 				<h3>Instructions</h3>
 				<p>Replace the year (“2010”) and bill number (“hb1”) with the bill number and year
@@ -122,7 +122,7 @@ EOD;
 				<h2 id="legislator">Retrieve a given legislator.</h2>
 
 				<h3>Example URI</h3>
-				<p>http://api.richmondsunlight.com/1.0/legislator/rbbell.json</p>
+				<p>https://api.richmondsunlight.com/1.0/legislator/rbbell.json</p>
 
 				<h3>Instructions</h3>
 				<p>Replace the legislator (“rbbell”) with the Richmond Sunlight ID for that
@@ -164,7 +164,7 @@ EOD;
 				code.</h2>
 
 				<h3>Example URI</h3>
-				<p>http://api.richmondsunlight.com/1.0/bysection/20-107.3.json</p>
+				<p>https://api.richmondsunlight.com/1.0/bysection/20-107.3.json</p>
 
 				<h3>Instructions</h3>
 				<p>Replace the section number with the section that you’re interested in. It will return
@@ -189,7 +189,7 @@ EOD;
 				given Photosynthesis portfolio.</h2>
 
 				<h3>Example URI</h3>
-				<p>http://api.richmondsunlight.com/1.0/photosynthesis/7l0x3.json</p>
+				<p>https://api.richmondsunlight.com/1.0/photosynthesis/7l0x3.json</p>
 
 				<h3>Instructions</h3>
 				<p>Replace the portfolio number (“7l0x3”) with the number of the portfolio that

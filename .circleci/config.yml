@@ -31,11 +31,42 @@ jobs:
           - v1-dependencies-
 
       - run: composer install -n --prefer-dist
+      - run: cd htdocs/js/vendor; npm install; npm run build
 
       - save_cache:
           paths:
             - ./vendor
           key: v1-dependencies-{{ checksum "composer.json" }}
 
-      # run tests!
-      - run: phpunit
+      # Run tests
+      - run: cd ../../.. && find htdocs/*.php -print0 |xargs -0 -n1 -P8 php -l
+
+      # Populate variables, ZIP files.
+      - run: ./deploy/branch_deploy.sh && ./deploy/config_variables.sh && ./deploy/aws_credentials.sh && zip -qr latest . && mkdir -p upload && mv latest.zip upload/latest.zip
+
+      # Master functions as staging.
+      - if [ "$CIRCLE_BRANCH" = 'master' ]; then mv upload/latest.zip upload/staging.zip; fi
+      - if [ "$CIRCLE_BRANCH" = 'master' ]; then ./deploy/increase_verbosity.sh; fi
+
+  deploy:
+    docker:
+      - image: circleci/python:2.7-jessie
+    working_directory: ~/circleci-docs
+    steps:
+      - run:
+          name: Install awscli
+          command: sudo pip install awscli
+      - run:
+          name: Deploy to S3
+          command: aws s3 cp upload/*.zip s3://deploy.richmondsunlight.com
+
+workflows:
+  version: 2
+  build-deploy:
+    - build
+    - deploy:
+      requires:
+        - build
+      filters:
+        branches:
+          only:

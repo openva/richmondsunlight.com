@@ -21,7 +21,7 @@ $database = new Database;
 $database->connect_old();
 
 # LOCALIZE VARIABLES
-$days = mysql_real_escape_string($_REQUEST['days']);
+$days = mysqli_escape_string($db, $_REQUEST['days']);
 if (empty($days))
 {
     $days = 3;
@@ -60,14 +60,14 @@ $sql = 'SELECT bills.number, sessions.year, bills.catch_line, bills_status.statu
 		WHERE DATE_SUB(CURDATE(), INTERVAL ' . $days . ' DAY) <= bills_status.date
 		ORDER BY bills_status.date DESC';
 
-$result = mysql_query($sql);
-$num_results = mysql_num_rows($result);
+$result = mysqli_query($db, $sql);
+$num_results = mysqli_num_rows($result);
 if ($num_results > 0)
 {
     $page_body .= '<p>' . number_format($num_results) . ' action' . ($num_results > 1 ? 's' : '') . ' found.</p>';
     $date = '';
     $i=0;
-    while ($bill = mysql_fetch_array($result))
+    while ($bill = mysqli_fetch_array($result))
     {
         $bill = array_map('stripslashes', $bill);
         if ($bill['date'] != $date)

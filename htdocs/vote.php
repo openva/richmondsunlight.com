@@ -72,10 +72,10 @@ $sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber, bills.ca
 		LEFT JOIN committees
 			ON votes.committee_id=committees.id
 		WHERE bills.number="' . $bill . '" AND sessions.year=' . $year;
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($db, $sql);
+if (mysqli_num_rows($result) > 0)
 {
-    $bill = mysql_fetch_assoc($result);
+    $bill = mysqli_fetch_assoc($result);
     $bill = array_map('stripslashes', $bill);
     $bill = array_map('trim', $bill);
 }
@@ -334,11 +334,11 @@ $sql = 'SELECT DISTINCT bills_status.status, bills_status.translation,
 		WHERE bills_status.bill_id = ' . $bill['id'] . '
         AND (votes.session_id=bills_status.session_id OR votes.session_id IS NULL)
 		ORDER BY date_raw DESC, bills_status.id DESC';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($db, $sql);
+if (mysqli_num_rows($result) > 0)
 {
     $bill['status_history'] = '';
-    while ($status = mysql_fetch_array($result))
+    while ($status = mysqli_fetch_array($result))
     {
 
         # Provide a link to view this vote, but only if it's not the vote that we're currently

@@ -32,12 +32,12 @@ function show_form($form_data)
 
 			<fieldset>
 			<legend>Committee ID</legend>
-			<input type="text" name="form_data[committee_id]" id="committee_id" size="3" value="'.$form_data['committee_id'].'" />
+			<input type="text" name="form_data[committee_id]" id="committee_id" size="3" value="' . $form_data['committee_id'] . '" />
 			</fieldset>
 
 			<fieldset>
 			<legend>Author Credit</legend>
-			<input type="text" name="form_data[author_name]" id="author_name" value="'.$form_data['author_name'].'" />
+			<input type="text" name="form_data[author_name]" id="author_name" value="' . $form_data['author_name'] . '" />
 			</fieldset>
 
 			<fieldset>
@@ -50,75 +50,75 @@ function show_form($form_data)
 
 			<fieldset>
 			<legend class="required">Title</legend>
-			<input type="text" name="form_data[title]" id="title" value="'.$form_data['title'].'" />
+			<input type="text" name="form_data[title]" id="title" value="' . $form_data['title'] . '" />
 			</fieldset>
 
 			<fieldset>
 			<legend class="required">Path (prepend with a slash, e.g. <code>/video/house/floor/20190204.mp4</code>))</legend>
-			<input type="text" name="form_data[path]" id="path" size="60" value="'.$form_data['path'].'" />
+			<input type="text" name="form_data[path]" id="path" size="60" value="' . $form_data['path'] . '" />
 			</fieldset>
 
 			<fieldset>
 			<legend>License</legend>
-			<input type="text" name="form_data[license]" id="license" value="'.$form_data['license'].'" />
+			<input type="text" name="form_data[license]" id="license" value="' . $form_data['license'] . '" />
 			</fieldset>
 
 			<fieldset>
 			<legend>Length (HH:MM:SS)</legend>
-			<input type="text" name="form_data[length]" id="length" size="8" value="'.$form_data['length'].'" />
+			<input type="text" name="form_data[length]" id="length" size="8" value="' . $form_data['length'] . '" />
 			</fieldset>
 
 			<fieldset>
 			<legend>FPS</legend>
-			<input type="text" name="form_data[fps]" id="length" size="5" value="'.$form_data['fps'].'" />
+			<input type="text" name="form_data[fps]" id="length" size="5" value="' . $form_data['fps'] . '" />
 			</fieldset>
 
 			<fieldset>
 			<legend>Capture Rate in Frame Frequency (i.e. 60, 150)</legend>
-			<input type="text" name="form_data[capture_rate]" id="length" size="3" value="'.$form_data['capture_rate'].'" />
+			<input type="text" name="form_data[capture_rate]" id="length" size="3" value="' . $form_data['capture_rate'] . '" />
 			</fieldset>
 
 			<fieldset>
 			<legend>Width</legend>
-			<input type="text" name="form_data[width]" id="length" size="4" value="'.$form_data['width'].'" />
+			<input type="text" name="form_data[width]" id="length" size="4" value="' . $form_data['width'] . '" />
 			</fieldset>
 
 			<fieldset>
 			<legend>Height</legend>
-			<input type="text" name="form_data[height]" id="length" size="4" value="'.$form_data['height'].'" />
+			<input type="text" name="form_data[height]" id="length" size="4" value="' . $form_data['height'] . '" />
 			</fieldset>
 
 			<fieldset>
 			<legend>Description</legend>
-			<textarea name="form_data[description]" id="description" rows="5" cols="60">'.$form_data['description'].'</textarea>
+			<textarea name="form_data[description]" id="description" rows="5" cols="60">' . $form_data['description'] . '</textarea>
 			</fieldset>
 
 			<fieldset>
 			<legend>Embed HTML</legend>
-			<textarea name="form_data[html]" id="html" rows="10" cols="60">'.$form_data['html'].'</textarea>
+			<textarea name="form_data[html]" id="html" rows="10" cols="60">' . $form_data['html'] . '</textarea>
 			</fieldset>
 
 			<fieldset>
 			<legend>Media Type</legend>
 			<select name="form_data[type]" id="type">
-				<option value="video"'.(($form_data['type'] == 'video') ? ' selected="selected"' : '').'>Video</option>
-				<option value="audio"'.(($form_data['type'] == 'audio') ? ' selected="selected"' : '').'>Audio</option>
+				<option value="video"' . (($form_data['type'] == 'video') ? ' selected="selected"' : '') . '>Video</option>
+				<option value="audio"' . (($form_data['type'] == 'audio') ? ' selected="selected"' : '') . '>Audio</option>
 			</select>
 			</fieldset>
 
 			<fieldset>
 			<legend class="required">Date Recorded (YYYY-MM-DD)</legend>
-			<input type="text" name="form_data[date]" id="date" size="10" value="'.$form_data['date'].'" />
+			<input type="text" name="form_data[date]" id="date" size="10" value="' . $form_data['date'] . '" />
 			</fieldset>
 
 			<fieldset>
 			<legend>Sponsor</legend>
-			<textarea rows="4" cols="50" name="form_data[sponsor]" id="sponsor">'.$form_data['sponsor'].'</textarea>
+			<textarea rows="4" cols="50" name="form_data[sponsor]" id="sponsor">' . $form_data['sponsor'] . '</textarea>
 			</fieldset>';
     if (isset($form_data['id']))
     {
         $returned_data .= '
-			<input type="hidden" name="form_data[id]" id="id" value="'.$form_data['id'].'" />';
+			<input type="hidden" name="form_data[id]" id="id" value="' . $form_data['id'] . '" />';
     }
     $returned_data .= '
 			<input type="submit" name="submit" value="Save" />
@@ -139,7 +139,6 @@ $html_head = '
 # If a form is being submitted, we're saving new data or updating existing data, so go for it.
 if (isset($_POST['form_data']))
 {
-
     $video = new Video;
     $video->video = $_POST['form_data'];
     if ($video->submit() === FALSE)
@@ -150,7 +149,6 @@ if (isset($_POST['form_data']))
     # Redirect the browser to edit this video.
     header('Location: https://www.richmondsunlight.com/admin/video/?id=' . $video->id);
     exit();
-
 }
 
 /*
@@ -158,24 +156,23 @@ if (isset($_POST['form_data']))
  */
 if (isset($_GET['id']) && !isset($_GET['op']))
 {
-
     $id = $_GET['id'];
     $sql = 'SELECT id, chamber, committee_id, author_name, title, html, path, description,
 			license, type, length, date, fps, capture_rate, width, height, sponsor
 			FROM files
-			WHERE id='.$id;
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) == 0)
+			WHERE id=' . $id;
+    $result = mysqli_query($db, $sql);
+    if (mysqli_num_rows($result) == 0)
     {
         die('No such file available.');
     }
-    $video = mysql_fetch_array($result);
+    $video = mysqli_fetch_array($result);
 
     $sql = 'SELECT *
 			FROM video_index
-			WHERE file_id='.$_GET['id'];
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) == 0)
+			WHERE file_id=' . $_GET['id'];
+    $result = mysqli_query($db, $sql);
+    if (mysqli_num_rows($result) == 0)
     {
         $page_body .= '<p style="font-size: 1.5em; text-align: center;">
 			<a href="/utilities/parse_video.php?id=' . $id . '">Parse Video</a></p>';
@@ -192,7 +189,6 @@ if (isset($_GET['id']) && !isset($_GET['op']))
 		</div>
 	';
     $page_body .= show_form($video);
-
 }
 
 /*
@@ -200,16 +196,15 @@ if (isset($_GET['id']) && !isset($_GET['op']))
  */
 elseif (isset($_GET['id']) && ($_GET['op'] == 'srt'))
 {
-
     $sql = 'SELECT chamber, date
 			FROM files
 			WHERE id = ' . $_GET['id'];
-    $result = mysql_query($sql);
+    $result = mysqli_query($db, $sql);
     if (!$result)
     {
         die('No file of that ID is found.');
     }
-    $file = mysql_fetch_array($result);
+    $file = mysqli_fetch_array($result);
     $filename = $_SERVER['DOCUMENT_ROOT'] . 'video/' . $file['chamber'] . '/floor/' . str_replace('-', '', $file['date']) . '.srt';
     if (file_exists($filename) == FALSE)
     {
@@ -226,15 +221,15 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'srt'))
     $captions->offset = -18;
     $captions->time_shift_srt();
 
-    if (strlen($captions->srt) < 200)
+    if (mb_strlen($captions->srt) < 200)
     {
         die('Captions file is implausibly short.');
     }
 
     $sql = 'UPDATE files
-			SET srt = "' . mysql_real_escape_string($captions->srt) . '"
+			SET srt = "' . mysqli_escape_string($db, $captions->srt) . '"
 			WHERE id = ' . $_GET['id'];
-    $result = mysql_query($sql);
+    $result = mysqli_query($db, $sql);
     if ($result === FALSE)
     {
         die('Captions could not be inserted');
@@ -244,7 +239,6 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'srt'))
         header('Location: https://www.richmondsunlight.com/admin/video/');
         exit();
     }
-
 }
 
 /*
@@ -252,16 +246,15 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'srt'))
  */
 elseif (isset($_GET['id']) && ($_GET['op'] == 'transcript'))
 {
-
     $sql = 'SELECT srt
 			FROM files
 			WHERE id = ' . $_GET['id'];
-    $result = mysql_query($sql);
+    $result = mysqli_query($db, $sql);
     if (!$result)
     {
         die('No file of that ID is found.');
     }
-    $file = mysql_fetch_array($result);
+    $file = mysqli_fetch_array($result);
     $file['srt'] = stripslashes($file['srt']);
 
     $captions = new Video;
@@ -276,9 +269,9 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'transcript'))
     }
 
     $sql = 'UPDATE files
-			SET transcript = "' . mysql_real_escape_string($captions->transcript) . '"
+			SET transcript = "' . mysqli_escape_string($db, $captions->transcript) . '"
 			WHERE id = ' . $_GET['id'];
-    $result = mysql_query($sql);
+    $result = mysqli_query($db, $sql);
     if ($result === FALSE)
     {
         die('Transcript could not be inserted.');
@@ -286,7 +279,6 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'transcript'))
 
     header('Location: https://www.richmondsunlight.com/admin/video/');
     exit();
-
 }
 
 /*
@@ -294,16 +286,15 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'transcript'))
  */
 elseif (isset($_GET['id']) && ($_GET['op'] == 'atomize'))
 {
-
     $sql = 'SELECT srt
 			FROM files
 			WHERE id = ' . $_GET['id'];
-    $result = mysql_query($sql);
+    $result = mysqli_query($db, $sql);
     if (!$result)
     {
         die('No file of that ID is found.');
     }
-    $file = mysql_fetch_array($result);
+    $file = mysqli_fetch_array($result);
     $file['srt'] = stripslashes($file['srt']);
 
     $captions = new Video;
@@ -316,7 +307,6 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'atomize'))
 
     header('Location: https://www.richmondsunlight.com/admin/video/');
     exit();
-
 }
 
 /*
@@ -324,7 +314,6 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'atomize'))
  */
 elseif (isset($_GET['id']) && ($_GET['op'] == 'identify'))
 {
-
     $captions = new Video;
     $captions->file_id = $_GET['id'];
     if ($captions->identify_speakers() === FALSE)
@@ -333,7 +322,6 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'identify'))
     }
     header('Location: https://www.richmondsunlight.com/admin/video/');
     exit();
-
 }
 
 /*
@@ -341,13 +329,11 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'identify'))
  */
 elseif (isset($_GET['id']) && ($_GET['op'] == 'clips'))
 {
-
     $video = new Video;
     $video->id = $_GET['id'];
     $video->store_clips();
     header('Location: https://www.richmondsunlight.com/admin/video/');
     exit();
-
 }
 
 /*
@@ -371,8 +357,8 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'metadata') && isset($_GET['path']
 			license, type, length, date, fps, capture_rate, width, height, sponsor
 			FROM files
 			WHERE id=' . $_GET['id'];
-    $result = mysql_query($sql);
-    $video_data = mysql_fetch_array($result);
+    $result = mysqli_query($db, $sql);
+    $video_data = mysqli_fetch_array($result);
 
     /*
      * Switch the fields in question to our updated values.
@@ -384,7 +370,6 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'metadata') && isset($_GET['path']
     }
 
     $page_body .= show_form($video_data);
-
 }
 
 # Allow the entry of a new video.
@@ -404,33 +389,29 @@ else
 			(SELECT COUNT(*) FROM video_transcript WHERE file_id=files.id AND legislator_id IS NOT NULL) AS identified_count
 			FROM files
 			ORDER BY date DESC';
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) == 0)
+    $result = mysqli_query($db, $sql);
+    if (mysqli_num_rows($result) == 0)
     {
         die('No videos found.');
     }
     $videos = array();
     $video_paths = array();
-    while ($video = mysql_fetch_array($result))
+    while ($video = mysqli_fetch_array($result))
     {
-
         $videos[] = array_map('stripslashes', $video);
         # We save this to a separate array, which we use to detect newly uploaded files.
         if ($video['capture_directory'] != '')
         {
             $video_paths[] = $video['capture_directory'];
         }
-
     }
 
     # Get a list of all video files.
     foreach (array('house','senate') as $chamber)
     {
-
         $directory = '/video/' . $chamber . '/floor/';
         if ($fp = opendir($_SERVER['DOCUMENT_ROOT'] . $directory))
         {
-
             while (($filename = readdir($fp)) !== FALSE)
             {
                 if (($filename == '.') || ($filename == '..'))
@@ -443,47 +424,39 @@ else
                 }
             }
             closedir($fp);
-
         }
 
         sort($files[$chamber]);
-
     }
 
     # Iterate through our file list to look for capture directories that have not yet been added
     # to the database.
     foreach ($files as $chamber)
     {
-
         foreach ($chamber as $file)
         {
-
             if (!in_array($file, $video_paths))
             {
-
                 $tmp = explode('/', $file);
                 $chamber = $tmp[2];
                 $date = $tmp[4];
-                $date = $date{0}.$date{1}.$date{2}.$date{3}.'-'.$date{4}.$date{5}.'-'.$date{6}.$date{7};
-                $path = substr($file, 0, -1);
+                $date = $date{0} . $date{1} . $date{2} . $date{3} . '-' . $date{4} . $date{5} . '-' . $date{6} . $date{7};
+                $path = mb_substr($file, 0, -1);
                 $page_body .= '<a href="/admin/video/?new=&amp;';
-                $page_body .= 'form_data[path]='.$path.'.mp4'
-                .'&amp;form_data[chamber]='.$chamber.'&amp;form_data[date]='.$date;
-                if (strstr($file, 'house') !== false)
+                $page_body .= 'form_data[path]=' . $path . '.mp4'
+                . '&amp;form_data[chamber]=' . $chamber . '&amp;form_data[date]=' . $date;
+                if (mb_strstr($file, 'house') !== false)
                 {
                     $page_body .= '&amp;form_data[title]=House+Session';
                 }
-                elseif (strstr($file, 'senate') !== false)
+                elseif (mb_strstr($file, 'senate') !== false)
                 {
                     $page_body .= '&amp;form_data[title]=Senate+Session';
                 }
-                $page_body .= '">'.$file
-                .'</a> ';
-
+                $page_body .= '">' . $file
+                . '</a> ';
             }
-
         }
-
     }
 
     # List all of the videos that we have in the database.
@@ -510,7 +483,6 @@ else
 
     foreach ($videos as $video)
     {
-
         $page_body .= '
 			<tr>
 				<td>' . $video['date'] . '</td>
@@ -526,7 +498,6 @@ else
         }
         else
         {
-
             if ($video['atomized_count'] == 0)
             {
                 $page_body .= '<a href="?op=atomize&id=' . $video['id'] . '" title="Break transcript into lines">atomize</a> ';
@@ -542,17 +513,14 @@ else
 
             $page_body .= '
 				<a href="?op=clips&id=' . $video['id'] . '" title="Rebuild clips">re-clip</a>';
-
         }
 
         $page_body .= '</td>
 				<td>[<a href="/admin/video/?id=' . $video['id'] . '">edit</a>]</td>
 			</tr>';
-
     }
 
     $page_body .= '</tbody></table>';
-
 }
 
 # OUTPUT THE PAGE
