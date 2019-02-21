@@ -75,6 +75,21 @@ if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === TRUE)
     die('Thank you for your comment.');
 }
 
+# If there are spammy strings in the body, and any links, then it's spam.
+$spam_strings = array('ciprofloxacin', 'viagra', 'cialis', ' topiramate', 'generic propecia',
+    'levitra', 'priligy', 'clomid', 'zithromax', 'azithromycin', 'kamagra', 'celebrex',
+    'prednizome', ' sildenafil', 'tadalafil', 'accutane', 'tadalafil');
+foreach ($spam_strings as $spam_string)
+{
+    if (mb_stristr($comment['comment'], $spam_string) !== FALSE)
+    {
+        if (mb_stripos($comment['comment'], 'href') !== FALSE)
+        {
+            exit();
+        }
+    }
+}
+
 # See if the user is logged in and, if so, save his user data.
 $user = @get_user();
 
