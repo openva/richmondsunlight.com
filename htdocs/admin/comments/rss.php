@@ -16,8 +16,8 @@
     # INCLUDES
     # Include any files or libraries that are necessary for this specific
     # page to function.
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/settings.inc.php';
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/functions.inc.php';
+    include_once $_SERVER['DOCUMENT_ROOT'].'/includes/settings.inc.php';
+    include_once $_SERVER['DOCUMENT_ROOT'].'/includes/functions.inc.php';
 
     # PAGE CONTENT
 
@@ -42,36 +42,40 @@
 			ON bills.session_id=sessions.id
 			ORDER BY comments.date_created DESC
 			LIMIT 40';
-    $result = mysqli_query($db, $sql);
+    $result = mysql_query($sql);
 
     $rss_content = '';
 
     # Generate the RSS.
-    while ($comment = mysqli_fetch_array($result))
+    while ($comment = mysql_fetch_array($result))
     {
 
         # Aggregate the variables into their RSS components.
-        $title = '<![CDATA[' . $comment['name'] . ' ' . mb_strtoupper($comment['bill_number']) . ']]>';
-        $link = 'http://www.richmondsunlight.com/bill/' . $comment['year'] . '/' . $comment['bill_number'] . '/#comment-' . $comment['number'];
+        $title = '<![CDATA['.$comment['name'].' '.strtoupper($comment['bill_number']).']]>';
+        $link = 'http://www.richmondsunlight.com/bill/'.$comment['year'].'/'.$comment['bill_number'].'/#comment-'.$comment['number'];
         $description = '<![CDATA[
-			<p>' . nl2br($comment['comment']) . '</p>
+			<p>'.nl2br($comment['comment']).'</p>
 			<ul>
-				<li><a href="http://www.richmondsunlight.com/admin/comments/?op=spam&amp;id=' . $comment['id'] . '">Mark as Spam</a></li>
-				<li><a href="http://www.richmondsunlight.com/admin/comments/?op=delete&amp;id=' . $comment['id'] . '">Delete</a></li>
-				<li><a href="http://www.richmondsunlight.com/admin/comments/?op=edit&amp;id=' . $comment['id'] . '">Edit</a></li>
+				<li><a href="http://www.richmondsunlight.com/admin/comments/?op=spam&amp;id='.$comment['id'].'">Mark as Spam</a></li>
+				<li><a href="http://www.richmondsunlight.com/admin/comments/?op=delete&amp;id='.$comment['id'].'">Delete</a></li>
+				<li><a href="http://www.richmondsunlight.com/admin/comments/?op=edit&amp;id='.$comment['id'].'">Edit</a></li>
 			</ul>
 			]]>';
 
         # Now assemble those RSS components into an XML fragment.
         $rss_content .= '
 		<item>
-			<title>' . $title . '</title>
-			<link>' . $link . '</link>
-			<description>' . $description . '</description>
+			<title>'.$title.'</title>
+			<link>'.$link.'</link>
+			<description>'.$description.'</description>
 		</item>';
 
         # Unset those variables for reuse.
         unset($item_completed, $title, $link, $description);
+
+
+
+
     }
 
 
@@ -84,7 +88,7 @@
 		<link>http://www.richmondsunlight.com/admin/comments/</link>
 		<description>The admin comments-monitoring feed.</description>
 		<language>en-us</language>
-		' . $rss_content . '
+		'.$rss_content.'
 	</channel>
 </rss>';
 

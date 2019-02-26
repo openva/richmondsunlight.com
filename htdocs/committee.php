@@ -21,8 +21,8 @@ $database->connect_old();
 session_start();
 
 # LOCALIZE AND CLEAN UP VARIABLES
-$chamber = mysqli_escape_string($db, $_REQUEST['chamber']);
-$shortname = mysqli_escape_string($db, $_REQUEST['committee']);
+$chamber = mysql_escape_string($_REQUEST['chamber']);
+$shortname = mysql_escape_string($_REQUEST['committee']);
 
 /*
  * Get basic data about this committee.
@@ -65,10 +65,10 @@ $sql = 'SELECT date AS date_raw, DATE_FORMAT(date, "%W, %m/%d/%Y") AS date,
 		WHERE committee_id=' . $committee->id . ' AND date >= now()
 		ORDER BY date_raw ASC
 		LIMIT 1';
-$result = mysqli_query($db, $sql);
-if (mysqli_num_rows($result) == 1)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) == 1)
 {
-    $tmp = mysqli_fetch_array($result);
+    $tmp = mysql_fetch_array($result);
     $committee->meeting = new stdClass;
     $committee->meeting->next = $tmp['date'];
     $committee->meeting->year = $tmp['year'];
@@ -108,10 +108,10 @@ $sql = 'SELECT COUNT(*) AS failed,
 		WHERE status = "failed" AND last_committee_id = ' . $committee->id . '
 		AND session_id=' . SESSION_ID;
 
-$result = mysqli_query($db, $sql);
-if (mysqli_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
-    $stats = mysqli_fetch_array($result);
+    $stats = mysql_fetch_array($result);
 
     # "We'll have no dividing by zero in this house, young man."
     if (($stats['failed'] > 0) && ($stats['total'] > 0))
@@ -143,12 +143,12 @@ $sql = 'SELECT representatives.party, representatives.party AS party1,
 		AND session_id=' . SESSION_ID . '
 		GROUP BY party
 		ORDER BY party DESC';
-$result = mysqli_query($db, $sql);
-if (mysqli_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
     $page_sidebar .= '<p>';
 
-    while ($stats = mysqli_fetch_array($result))
+    while ($stats = mysql_fetch_array($result))
     {
         if ($stats['party'] == 'R')
         {
@@ -183,10 +183,10 @@ $sql = 'SELECT chamber, number, catch_line
 		AND status != "passed ' . $committee->chamber . '" AND status != "passed"
 		AND status != "vetoed" AND status != "passed committee" AND status != "failed committee"
 		ORDER BY hotness';
-$result = mysqli_query($db, $sql);
-if (mysqli_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
-    $total_bills = mysqli_num_rows($result);
+    $total_bills = mysql_num_rows($result);
 
     # List only the last five.
     if ($total_bills < 5)
@@ -215,7 +215,7 @@ if (mysqli_num_rows($result) > 0)
     $page_sidebar .= '</p>
 		<ul>';
     $i=0;
-    while ($bill = mysqli_fetch_array($result))
+    while ($bill = mysql_fetch_array($result))
     {
         $bill = array_map('stripslashes', $bill);
         $page_sidebar .= '<li><a href="/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/" class="bill">'
@@ -242,8 +242,8 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 		WHERE committees.id=' . $committee->id . ' AND bills.session_id = ' . SESSION_ID . '
 		GROUP BY tags.tag
 		ORDER BY tags.tag ASC';
-$result = mysqli_query($db, $sql);
-if (mysqli_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
     $page_sidebar .= '
 	<div class="box">
@@ -251,7 +251,7 @@ if (mysqli_num_rows($result) > 0)
 		<div class="tags">';
     $top_tag = 1;
     $top_tag_size = 3;
-    while ($tag = mysqli_fetch_array($result))
+    while ($tag = mysql_fetch_array($result))
     {
         $tags[] = array_map('stripslashes', $tag);
         if ($tag['count'] > $top_tag)
@@ -311,10 +311,10 @@ $sql = 'SELECT name, meeting_time
 		FROM committees
 		WHERE parent_id=' . $committee->id . '
 		ORDER BY name ASC';
-$result = mysqli_query($db, $sql);
+$result = mysql_query($sql);
 
 # If there are no subcommittees.
-if (mysqli_num_rows($result) == 0)
+if (mysql_num_rows($result) == 0)
 {
     $page_body .= '<p>This committee has no subcommittees.</p>';
 }
@@ -323,7 +323,7 @@ if (mysqli_num_rows($result) == 0)
 else
 {
     $page_body .= '<ul>';
-    while ($subcommittee = mysqli_fetch_array($result))
+    while ($subcommittee = mysql_fetch_array($result))
     {
         $subcommittee = array_map('stripslashes', $subcommittee);
         $page_body .= '<li>' . $subcommittee['name'];

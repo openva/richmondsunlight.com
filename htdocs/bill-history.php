@@ -30,8 +30,8 @@ $database->connect_old();
 session_start();
 
 # LOCALIZE AND CLEAN UP VARIABLES
-$year = mysqli_escape_string($db, $_REQUEST['year']);
-$bill = mysqli_escape_string($db, $_REQUEST['bill']);
+$year = mysql_escape_string($_REQUEST['year']);
+$bill = mysql_escape_string($_REQUEST['bill']);
 
 # RETRIEVE THE BILL INFO FROM THE DATABASE
 $sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber,
@@ -49,10 +49,10 @@ $sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber,
 		LEFT JOIN districts
 		ON representatives.district_id=districts.id
 		WHERE bills.number="' . $bill . '" AND sessions.year=' . $year;
-$result = mysqli_query($db, $sql);
-if (mysqli_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
-    $bill = mysqli_fetch_array($result);
+    $bill = mysql_fetch_array($result);
     $bill = array_map('stripslashes', $bill);
     $bill['word_count'] = str_word_count($bill['full_text']);
     $bill['patron_suffix'] = '(' . $bill['patron_party'] . '-' . $bill['patron_district'] . ')';
@@ -86,9 +86,9 @@ $sql = 'SELECT DATE_FORMAT(date, "%m/%d/%Y") AS date, date AS date_raw, status
 		FROM bills_status
 		WHERE bill_id=' . $bill['id'] . ' AND session_id=' . $bill['session_id'] . '
 		ORDER BY date_raw ASC, id ASC';
-$result = mysqli_query($db, $sql);
+$result = mysql_query($sql);
 $page_body .= '<ul>';
-while ($history = mysqli_fetch_array($result))
+while ($history = mysql_fetch_array($result))
 {
     $page_body .= '<li>' . $history['date'] . ' ' . $history['status'] . '</li>';
 }

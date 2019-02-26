@@ -77,11 +77,33 @@ if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === TRUE)
     exit();
 }
 
+# If there are spammy strings in the body, and any links, then it's spam.
+$spam_strings = array('ciprofloxacin', 'viagra', 'cialis', ' topiramate', 'generic propecia',
+    'levitra', 'priligy', 'clomid', 'zithromax', 'azithromycin', 'kamagra', 'celebrex',
+    'prednizome', ' sildenafil', 'tadalafil', 'accutane', 'tadalafil');
+foreach ($spam_strings as $spam_string)
+{
+    if (mb_stristr($comment['comment'], $spam_string) !== FALSE)
+    {
+        if (mb_stripos($comment['comment'], 'href') !== FALSE)
+        {
+            exit();
+        }
+    }
+}
+
+# We don't allow comments from Fairfax County Public Schools, because 99% of the comments from
+# there are garbage, and 75% of garbage comments come from there.
+if ($_SERVER['REMOTE_ADDR'] == '151.188.97.205')
+{
+    exit();
+}
+
 # See if the user is logged in and, if so, save his user data.
 $user = @get_user();
 
 # CLEAN UP THE DATA
-$comment = array_map('mysqli_escape_string', $comment);
+$comment = array_map('mysql_escape_string', $comment);
 $comment = array_map('trim', $comment);
 $comment['comment'] = strip_tags($comment['comment'], '<a><em><strong><i><b><s><blockquote><embed>');
 
@@ -178,8 +200,8 @@ $sql = 'SELECT id
 		FROM comments
 		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(SECOND, date_created, now()) < 5)';
-$result = mysqli_query($db, $sql);
-if (mysqli_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
     header('HTTP/1.0 409 Conflict');
     $message = array('error' => 'Slow down, cowboy: Only one comment is allowed every five seconds. That’s pretty reasonable.');
@@ -192,8 +214,8 @@ $sql = 'SELECT *
 		FROM comments
 		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 5)';
-$result = mysqli_query($db, $sql);
-if (mysqli_num_rows($result) > 10)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 10)
 {
     header('HTTP/1.0 409 Conflict');
     $message = array('error' => 'Slow down, cowboy: You’re posting way too many comments too fast. Relax, think, then write.');
@@ -207,8 +229,8 @@ $sql = 'SELECT id
 		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 60)
 		AND comment="' . $comment['comment'] . '"';
-$result = mysqli_query($db, $sql);
-if (mysqli_num_rows($result) > 0)
+$result = mysql_query($sql);
+if (mysql_num_rows($result) > 0)
 {
     header('HTTP/1.0 409 Conflict');
     $message = array('error' => 'You’ve already posted that exact comment. You may not post it again. And, no, don’t '
@@ -235,7 +257,7 @@ if (!empty($user['id']))
 {
     $sql .= ', user_id=' . $user['id'];
 }
-$result = mysqli_query($db, $sql);
+$result = mysql_query($sql);
 if (!$result)
 {
     header('HTTP/1.0 500 Internal Server Error');

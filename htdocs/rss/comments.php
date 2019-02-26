@@ -19,23 +19,18 @@
     # INCLUDES
     # Include any files or libraries that are necessary for this specific
     # page to function.
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/settings.inc.php';
-    include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/functions.inc.php';
+    include_once $_SERVER['DOCUMENT_ROOT'].'/includes/settings.inc.php';
+    include_once $_SERVER['DOCUMENT_ROOT'].'/includes/functions.inc.php';
 
     # LOCALIZE VARIABLES
-    if (isset($_REQUEST['year']))
-    {
-        $year = $_REQUEST['year'];
-    }
-    if (isset($_REQUEST['bill']))
-    {
-        $bill = $_REQUEST['bill'];
-    }
+    if (isset($_REQUEST['year'])) $year = $_REQUEST['year'];
+    if (isset($_REQUEST['bill'])) $bill = $_REQUEST['bill'];
 
     # Make sure that the year and bill number are valid-looking.
     if ((!preg_match('/([0-9]{4})/D', $year)) || (!preg_match('/([b-s]{2})([0-9]+)/D', $year)))
     {
         unset($bill, $year);
+
     }
 
     # PAGE CONTENT
@@ -61,31 +56,35 @@
 			WHERE comments.status="published"
 			ORDER BY comments.date_created DESC
 			LIMIT 20';
-    $result = mysqli_query($db, $sql);
+    $result = mysql_query($sql);
 
     $rss_content = '';
 
     # Generate the RSS.
-    while ($comment = mysqli_fetch_array($result))
+    while ($comment = mysql_fetch_array($result))
     {
 
         # Aggregate the variables into their RSS components.
-        $title = '<![CDATA[' . ($comment['type'] == 'pingback' ? 'Pingback from ' : '') . $comment['name'] . ' ' . $comment['bill_number'] . ']]>';
-        $link = 'http://www.richmondsunlight.com/bill/' . $comment['year'] . '/' . $comment['bill_number'] . '/#comment-' . $comment['number'];
+        $title = '<![CDATA['.($comment['type'] == 'pingback' ? 'Pingback from ' : '').$comment['name'].' '.$comment['bill_number'].']]>';
+        $link = 'http://www.richmondsunlight.com/bill/'.$comment['year'].'/'.$comment['bill_number'].'/#comment-'.$comment['number'];
         $description = '<![CDATA[
-			' . nl2p($comment['comment']) . '
+			'.nl2p($comment['comment']).'
 			]]>';
 
         # Now assemble those RSS components into an XML fragment.
         $rss_content .= '
 		<item>
-			<title>' . $title . '</title>
-			<link>' . $link . '</link>
-			<description>' . $description . '</description>
+			<title>'.$title.'</title>
+			<link>'.$link.'</link>
+			<description>'.$description.'</description>
 		</item>';
 
         # Unset those variables for reuse.
         unset($item_completed, $title, $link, $description);
+
+
+
+
     }
 
 
@@ -98,7 +97,7 @@
 		<link>http://www.richmondsunlight.com/</link>
 		<description>The most recent comments posted to bills on Richmond Sunlight.</description>
 		<language>en-us</language>
-		' . $rss_content . '
+		'.$rss_content.'
 	</channel>
 </rss>';
 

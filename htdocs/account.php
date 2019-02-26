@@ -166,7 +166,7 @@ if (isset($_POST['submit']))
     {
 
         # Clean up the data to be inserted into the database.
-        $form_data = array_map('mysqli_real_escape_string', $_POST['form_data']);
+        $form_data = array_map('mysql_real_escape_string', $_POST['form_data']);
 
         # A blank mailing list variable is a "no."
         if (empty($form_data['mailing_list']))
@@ -215,7 +215,7 @@ if (isset($_POST['submit']))
             $sql .= ', password="' . $form_data['password'] . '"';
         }
         $sql .= ' WHERE id=' . $user['id'];
-        $result = mysqli_query($db, $sql);
+        $result = mysql_query($sql);
         if ($result === FALSE)
         {
             die('Your account could not be updated.');
@@ -225,7 +225,7 @@ if (isset($_POST['submit']))
         $sql = 'UPDATE dashboard_user_data
 				SET organization=' . (empty($form_data['organization']) ? 'NULL' : '"' . $form_data['organization'] . '"') . '
 				WHERE user_id=' . $user['id'];
-        $result = mysqli_query($db, $sql);
+        $result = mysql_query($sql);
 
         header('Location: http://www.richmondsunlight.com/account/?updated');
         exit();
@@ -270,12 +270,12 @@ if (!isset($_POST['submit']))
 			FROM users LEFT JOIN dashboard_user_data
 			ON users.id=dashboard_user_data.user_id
 			WHERE id=' . $user['id'];
-    $result = mysqli_query($db, $sql);
-    if (mysqli_num_rows($result) == 0)
+    $result = mysql_query($sql);
+    if (mysql_num_rows($result) == 0)
     {
         die('No user data found.');
     }
-    $user_data = mysqli_fetch_array($result);
+    $user_data = mysql_fetch_array($result);
 
     $user_data = array_map('stripslashes', $user_data);
 

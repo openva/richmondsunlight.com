@@ -68,21 +68,21 @@ $sql = 'SELECT id, hash, name, watch_list_id
 		FROM dashboard_portfolios
 		WHERE watch_list_id IS NULL AND user_id=' . $user['id'] . '
 		ORDER BY name ASC';
-$result = mysqli_query($db, $sql);
+$result = mysql_query($sql);
 
 # If the user has no portfolios. It shouldn't happen, but it could.
-if (mysqli_num_rows($result) == 0)
+if (mysql_num_rows($result) == 0)
 {
     # We want a portfolio to exist at all times. Create one.
     $sql = 'INSERT INTO dashboard_portfolios
 			SET name = "Bills", public="y", user_id = ' . $user['id'] . ',
 			date_created = now()';
-    mysqli_query($db, $sql);
+    mysql_query($sql);
     $bypass = 1;
 }
 
 # If the user has at least one portfolio, or if one was just created.
-if ((mysqli_num_rows($result) > 0) || ($bypass == 1))
+if ((mysql_num_rows($result) > 0) || ($bypass == 1))
 {
 
     # Display the header for the bill add form field.
@@ -93,9 +93,9 @@ if ((mysqli_num_rows($result) > 0) || ($bypass == 1))
 				<input type="text" size="7" maxlength="9" name="add-bill" id="add-bill" />';
 
     # Store the portfolio ID in a hidden form field, if there's just one portfolio.
-    if (mysqli_num_rows($result) == 1)
+    if (mysql_num_rows($result) == 1)
     {
-        $portfolio = mysqli_fetch_array($result);
+        $portfolio = mysql_fetch_array($result);
         $portfolio = array_map('stripslashes', $portfolio);
         $page_body .= '<input type="hidden" name="portfolio" value="' . $portfolio['hash'] . '" />';
 
@@ -105,12 +105,12 @@ if ((mysqli_num_rows($result) > 0) || ($bypass == 1))
     }
 
     # If there are multiple portfolios, display them as a SELECT.
-    elseif (mysqli_num_rows($result) > 1)
+    elseif (mysql_num_rows($result) > 1)
     {
         $page_body .= '
 					<select name="portfolio" size="1">
 					<option disabled>Select a Portfolio</option>';
-        while ($portfolio = mysqli_fetch_array($result))
+        while ($portfolio = mysql_fetch_array($result))
         {
             $portfolio = array_map('stripslashes', $portfolio);
             $page_body .= '
@@ -136,11 +136,11 @@ $sql = 'SELECT id, name, hash, notes, watch_list_id
 		FROM dashboard_portfolios
 		WHERE user_id=' . $user['id'] . '
 		ORDER BY name ASC';
-$result = mysqli_query($db, $sql);
+$result = mysql_query($sql);
 
-if (mysqli_num_rows($result) > 0)
+if (mysql_num_rows($result) > 0)
 {
-    while ($portfolio = mysqli_fetch_array($result))
+    while ($portfolio = mysql_fetch_array($result))
     {
         $portfolio = array_map('stripslashes', $portfolio);
 

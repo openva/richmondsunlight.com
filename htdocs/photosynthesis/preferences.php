@@ -111,7 +111,7 @@
         else
         {
             # Clean up the data.
-            $form_data = array_map('mysqli_real_escape_string', $_POST['form_data']);
+            $form_data = array_map('mysql_real_escape_string', $_POST['form_data']);
 
             # Create a password hash from the password and store that.
             if (!empty($form_data['password']))
@@ -125,7 +125,7 @@
 					' . (!empty($form_data['password_hash']) ? ', users.password = "' . $form_data['password_hash'] . '"' : '') . '
 					' . (!empty($form_data['email_active']) ? ', dashboard_user_data.email_active = "' . $form_data['email_active'] . '"' : '') . '
 					WHERE users.cookie_hash="' . $_SESSION['id'] . '"';
-            $result = mysqli_query($db, $sql);
+            $result = mysql_query($sql);
 
             # Report on the results.
             if (!$result)
@@ -149,12 +149,12 @@
     $sql = 'SELECT users.id, users.name, users.email, dashboard_user_data.email_active
 			FROM users LEFT JOIN dashboard_user_data ON users.id = dashboard_user_data.user_id
 			WHERE users.cookie_hash="' . $_SESSION['id'] . '"';
-    $result = mysqli_query($db, $sql);
-    if (mysqli_num_rows($result) == 0)
+    $result = mysql_query($sql);
+    if (mysql_num_rows($result) == 0)
     {
         login_redirect();
     }
-    $preferences = mysqli_fetch_array($result);
+    $preferences = mysql_fetch_array($result);
     $preferences = array_map('stripslashes', $preferences);
 
     # Display the preferences form.
