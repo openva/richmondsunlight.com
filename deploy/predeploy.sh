@@ -19,7 +19,7 @@ if [ "SITE_SET_UP" -eq "0" ]; then
     # Install all packages.
     sudo apt-get update
     sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apache2 curl geoip-database git gzip unzip memcached openssl php5.6 php5.6-mysql mysql-client php5.6-curl php5.6-memcached  php5.6-mbstring php5.6-apc php5.6-mbstring php5.6-xml python python-pip s3cmd sphinxsearch wget awscli certbot python-certbot-apache 
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apache2 curl geoip-database git gzip unzip openssl php5.6 php5.6-mysql mysql-client php5.6-curl php5.6-mbstring php5.6-apc php5.6-mbstring php5.6-xml python python-pip s3cmd sphinxsearch wget awscli certbot python-certbot-apache 
 
     # Install mod_pagespeed
     wget https://dl-ssl.google.com/dl/linux/direct/mod-pagespeed-beta_current_amd64.deb

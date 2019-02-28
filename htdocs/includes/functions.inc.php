@@ -731,14 +731,10 @@ function get_content($url, $timeout=10)
     curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
     curl_setopt($ch, CURLOPT_AUTOREFERER, true);
     curl_setopt($ch, CURLOPT_ENCODING, 'gzip,deflate');
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-    ob_start();
-
-    curl_exec($ch);
+    $string = curl_exec($ch);
     curl_close($ch);
-    $string = ob_get_contents();
-
-    ob_end_clean();
 
     if (empty($string))
     {

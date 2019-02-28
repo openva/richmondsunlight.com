@@ -92,6 +92,13 @@ foreach ($spam_strings as $spam_string)
     }
 }
 
+# We don't allow comments from Fairfax County Public Schools, because 99% of the comments from
+# there are garbage, and 75% of garbage comments come from there.
+if ($_SERVER['REMOTE_ADDR'] == '151.188.97.205')
+{
+    exit();
+}
+
 # See if the user is logged in and, if so, save his user data.
 $user = @get_user();
 
