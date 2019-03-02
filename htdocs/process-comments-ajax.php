@@ -78,9 +78,9 @@ if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === TRUE)
 }
 
 # If there are spammy strings in the body, and any links, then it's spam.
-$spam_strings = array('ciprofloxacin', 'viagra', 'cialis', ' topiramate', 'generic propecia',
+$spam_strings = array('ciprofloxacin', 'viagra', 'cialis', ' topiramate', 'propecia',
     'levitra', 'priligy', 'clomid', 'zithromax', 'azithromycin', 'kamagra', 'celebrex',
-    'prednizome', ' sildenafil', 'tadalafil', 'accutane', 'tadalafil');
+    'prednizone', ' sildenafil', 'tadalafil', 'accutane', 'tadalafil', 'topamax', 'amoxicillin');
 foreach ($spam_strings as $spam_string)
 {
     if (mb_stristr($comment['comment'], $spam_string) !== FALSE)
