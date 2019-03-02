@@ -8,11 +8,19 @@ if [ -f html ]; then
     ln -s htdocs html
 fi
 
+cd htdocs
+
 # Set the include path.
-echo 'php_value include_path ".:includes/"' >> .htaccess
+if [ $(grep include_path .htaccess |grep -v "#" |wc -l |xargs) -eq 0 ]; then
+	echo 'php_value include_path ".:includes/"' >> .htaccess
+fi
 
 # Have PHP report errors.
-echo 'php_value error_reporting 2039' >> .htaccess
+if [ $(grep 2039 .htaccess |grep -v "#" |wc -l |xargs) -eq 0 ]; then
+	echo 'php_value error_reporting 2039' >> .htaccess
+fi
+
+cd ..
 
 # Install Composer dependencies
 composer install
