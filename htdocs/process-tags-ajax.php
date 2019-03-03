@@ -96,6 +96,14 @@ if (!empty($_SESSION['id']))
     # Explode the tags into an array to be inserted individually.
     $tag = explode(',', $tags);
 
+    /*
+     * Permit no more than 10 tags in total.
+     */
+    if (count($tag) > 10)
+    {
+        $tag = array_slice($tag, 0, 10);
+    }
+
     for ($i=0; $i<count($tag); $i++)
     {
         $tag[$i] = mb_strtolower(trim($tag[$i]));
