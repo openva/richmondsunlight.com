@@ -32,7 +32,7 @@ script:
   && ./deploy/config_variables.sh
   && sonar-scanner
   && ./deploy/aws_credentials.sh
-  && zip -qr latest .
+  && zip -qr latest . --exclude *.git* *.scannerwork*
   && mkdir -p upload
   && mv latest.zip upload/latest.zip
 - if [ "$TRAVIS_BRANCH" = "master" ]; then mv upload/latest.zip upload/staging.zip; fi
