@@ -131,6 +131,14 @@ if (empty($comment['email']))
     exit();
 }
 
+if (filter_var($comment['email'], FILTER_VALIDATE_EMAIL) === FALSE)
+{
+    header('HTTP/1.0 500 Internal Server Error');
+    $message = array('error' => 'Invalid email address.');
+    echo json_encode($message);
+    exit();
+}
+
 # Validate any provided URL, and silently drop it if it's invalid.
 if (!empty($comment['url']))
 {
