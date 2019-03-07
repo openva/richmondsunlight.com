@@ -6,6 +6,28 @@
 <title>%browser_title%</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#790806"/>
+
+<!-- For IE 11, Chrome, Firefox, Safari, Opera -->
+<link rel="icon" type="image/png" href="/images/favicons/16.png" sizes="16x16" />
+<link rel="icon" type="image/png" href="/images/favicons/32.png" sizes="32x32" />
+<link rel="icon" type="image/png" href="/images/favicons/48.png" sizes="48x48" />
+<link rel="icon" type="image/png" href="/images/favicons/62.png" sizes="62x62" />
+<link rel="icon" type="image/png" href="/images/favicons/192.png" sizes="192x192" />
+
+<!-- Add to Home Screen -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Richmond Sunlight">
+
+<!-- iOS Touch Icons -->
+<link rel="apple-touch-icon" type="image/png" href="/images/favicons/apple_touch_icons/76.png" sizes="76x76" />
+<link rel="apple-touch-icon" type="image/png" href="/images/favicons/apple_touch_icons/120.png" sizes="120x120" />
+<link rel="apple-touch-icon" type="image/png" href="/images/favicons/apple_touch_icons/152.png" sizes="152x152" />
+<link rel="apple-touch-icon" type="image/png" href="/images/favicons/apple_touch_icons/180.png" sizes="180x180" />
+
+<!-- Safari Pinned Site -->
+<link rel="mask-icon" href="safari_icon.svg" />
+
 <link rel="stylesheet" href="/css/new/screen.css" type="text/css" media="screen" />
 <link rel="stylesheet" href="/css/new/print.css" type="text/css" media="print" />
 <link rel="stylesheet" href="/css/page-elements.css" type="text/css" media="screen" />
