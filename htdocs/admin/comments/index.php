@@ -34,8 +34,8 @@ if (!empty($op))
     if (empty($id)) die('No ID found.');
 
     /*
-     * We're going to have the Memcached cache of comments for the bill being affected here, so
-     * let's get that out of the way at the outset.
+     * We're going to have to clear the Memcached cache of comments for the bill being affected
+     * here, so let's get that out of the way at the outset.
      */
     $mc = new Memcached();
     $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
@@ -50,7 +50,7 @@ if (!empty($op))
     {
         $sql = 'UPDATE comments
 				SET status="spam"
-				WHERE id='.$id;
+				WHERE id=' . $id;
         $result = mysql_query($sql);
         if ($result === TRUE)
         {
@@ -63,7 +63,7 @@ if (!empty($op))
     {
         $sql = 'UPDATE comments
 				SET status="deleted"
-				WHERE id='.$id;
+				WHERE id=' . $id;
         $result = mysql_query($sql);
         if ($result === TRUE)
         {
@@ -76,7 +76,7 @@ if (!empty($op))
     {
         $sql = 'UPDATE comments
 				SET editors_pick="y"
-				WHERE id='.$id;
+				WHERE id=' . $id;
         $result = mysql_query($sql);
         if ($result === TRUE)
         {
@@ -86,7 +86,7 @@ if (!empty($op))
 
     elseif ($op == 'edit')
     {
-        $page_body = '<p>This function doesn\'t exist yet &mdash it\'s only there
+        $page_body = '<p>This function doesn’t exist yet — it’s only there
 			to remind me to create it.</p>';
     }
 }
@@ -107,22 +107,22 @@ else
     while ($comment = mysql_fetch_array($result))
     {
         $page_body .= '
-			<div class="comment"'.(($comment['status'] == 'deleted' || $comment['status'] == 'spam') ? ' style="color: #999;"' : '').'>
-				<h2><a href="/bill/'.SESSION_YEAR.'/'.strtolower($comment['bill_number']).'/">'.$comment['bill_number'].'</a>:
-					'.$comment['catch_line'].'</h2>
-				<cite>'.(!empty($comment['url']) ? '<a href="'.$comment['url'].'">' : '').
+			<div class="comment"'.(($comment['status'] == 'deleted' || $comment['status'] == 'spam') ? ' style="color: #999;"' : '') . '>
+				<h2><a href="/bill/' . SESSION_YEAR . '/' . strtolower($comment['bill_number']) . '/">' . $comment['bill_number'] . '</a>:
+					' . $comment['catch_line'] . '</h2>
+				<cite>' . (!empty($comment['url']) ? '<a href="' . $comment['url'] . '">' : '').
                 $comment['name'].
-                (!empty($comment['url']) ? '</a>' : ''). '
-				(<a href="mailto:'.$comment['email'].'">'.$comment['email'].'</a>,
-				<a href="http://ws.arin.net/whois/?queryinput='.$comment['ip'].'">'.$comment['ip'].'</a>)</cite> <strong>writes</strong>:<br />'.
-                nl2p($comment['comment']).'
+                (!empty($comment['url']) ? '</a>' : '') . '
+				(<a href="mailto:' . $comment['email'] . '">' . $comment['email'] . '</a>,
+				<a href="https://search.arin.net/rdap/?query=' . $comment['ip'] . '">' . $comment['ip'] . '</a>)</cite> <strong>writes</strong>:<br />' .
+                nl2p($comment['comment']) . '
 				<div class="metadata">
-					<span class="date">'.$comment['date'].'</span>
-					<a href="/bill/'.SESSION_YEAR.'/'.strtolower($comment['bill_number']).'/#comments">#</a>
+					<span class="date">' . $comment['date'] . '</span>
+					<a href="/bill/' . SESSION_YEAR . '/'.strtolower($comment['bill_number']).'/#comments">#</a>
 				</div>
-				[<a href="/admin/comments?op=delete&amp;id='.$comment['id'].'">delete</a>]
-				[<a href="/admin/comments?op=spam&amp;id='.$comment['id'].'">spam</a>]
-				[<a href="/admin/comments?op=pick&amp;id='.$comment['id'].'">editor’s pick</a>]
+				[<a href="/admin/comments?op=delete&amp;id=' . $comment['id'] . '">delete</a>]
+				[<a href="/admin/comments?op=spam&amp;id=' . $comment['id'] . '">spam</a>]
+				[<a href="/admin/comments?op=pick&amp;id=' . $comment['id'] . '">editor’s pick</a>]
 			</div>';
     }
     $page_body .= '</div>';
