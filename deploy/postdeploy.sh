@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Set permissions properly, since appspec.yml gets this wrong.
-chown -R ricsun:web /vol/www/richmondsunlight.com/
-chmod -R g+w /vol/www/richmondsunlight.com/
+find /vol/www/richmondsunlight.com/ -type f -mmin 5 -exec chown ricsun:web {} \;
+find /vol/www/richmondsunlight.com/ -type f -mmin 5 -exec chmod g+w {} \;
 
 # Set up Apache, if need be.
 SITE_SET_UP="$(sudo apache2ctl -S 2>&1 |grep -c richmondsunlight.com)"
