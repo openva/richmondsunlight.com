@@ -5,7 +5,7 @@ chown -R ricsun:web /vol/www/richmondsunlight.com/
 chmod -R g+w /vol/www/richmondsunlight.com/
 
 # Set up Apache, if need be.
-SITE_SET_UP="$(sudo apache2ctl -S |grep -c richmondsunlight.com)"
+SITE_SET_UP="$(sudo apache2ctl -S 2>&1 |grep -c richmondsunlight.com)"
 if [ "$SITE_SET_UP" -eq "0" ]; then
 
     # Set up Apache
