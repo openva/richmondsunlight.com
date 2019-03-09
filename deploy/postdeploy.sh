@@ -14,14 +14,14 @@ if [ "SITE_SET_UP" -eq "0" ]; then
     sudo a2enmod headers expires rewrite http2
     sudo systemctl reload apache2
 
+    # Install a certificate
+    sudo certbot --apache -d richmondsunlight.com --non-interactive --agree-tos --email jaquith@gmail.com --redirect
+
 fi
 
 # Set the cache directory
 mkdir -p /vol/www/richmondsunlight.com/htdocs/cache
 sudo chgrp www-data /var/www/richmondsunlight.com/htdocs/cache
-
-# Install a certificate
-sudo certbot --apache -d test.richmondsunlight.com --non-interactive --agree-tos --email jaquith@gmail.com --redirect
 
 # Expire the cached template (in case we've made changes to it).
 echo "delete template-new" | nc localhost 11211
