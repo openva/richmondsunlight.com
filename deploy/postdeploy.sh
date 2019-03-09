@@ -24,4 +24,4 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
 fi
 
 # Expire the cached template (in case we've made changes to it).
-echo "delete template-new" | nc localhost 11211
+echo "delete template-new" | nc localhost 11211  || true
