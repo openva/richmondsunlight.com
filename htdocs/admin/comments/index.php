@@ -54,7 +54,8 @@ if (!empty($op))
         $result = mysql_query($sql);
         if ($result === TRUE)
         {
-            $page_body = '<p>Comment marked as spam.</p>';
+            header('Location: https://' . $_SERVER['SERVER_NAME'] . '/admin/comments/');
+            exit();
         }
     }
 
@@ -66,7 +67,8 @@ if (!empty($op))
         $result = mysql_query($sql);
         if ($result === TRUE)
         {
-            $page_body = '<p>Comment marked as deleted.</p>';
+            header('Location: https://' . $_SERVER['SERVER_NAME'] . '/admin/comments/');
+            exit();
         }
     }
 
