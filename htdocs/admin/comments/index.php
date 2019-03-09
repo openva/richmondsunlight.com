@@ -11,8 +11,8 @@
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once $_SERVER['DOCUMENT_ROOT'].'/includes/functions.inc.php';
-include_once $_SERVER['DOCUMENT_ROOT'].'/includes/settings.inc.php';
+include_once 'functions.inc.php';
+include_once 'settings.inc.php';
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
