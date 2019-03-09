@@ -39,8 +39,8 @@ define('MYSQL_DATABASE', 'richmondsunlight');
 define('API_URL', 'http://api/');
 
 # Specify how to connect to Memcached.
-define('MEMCACHED_SERVER', 'memcached');
-define('MEMCACHED_PORT', '11211');
+define('MEMCACHED_SERVER', '');
+define('MEMCACHED_PORT', '');
 
 # The House Speaker's IDs. This is used in update_vote.php to translate votes credited to
 # "H0000," which bizarrely indicates the speaker, to that legislator's ID, and in
