@@ -1,7 +1,7 @@
 <?php
 
 ###
-# Accept Tag Additions
+# Accept Tag Additions via Ajax
 #
 # PURPOSE
 # Receives submitted tags, adds them, and returns the user back to the
@@ -28,19 +28,24 @@ session_start();
 $user = get_user();
 
 # LOCALIZE VARIABLES
-$tags = $_REQUEST['tags'];
-if (isset($_REQUEST['delete']))
+$tags = $_POST['tags'];
+if (isset($_GET['delete']))
 {
-    $delete = $_REQUEST['delete'];
+    $delete = $_GET['delete'];
 }
-if (isset($_REQUEST['bill_id']))
+elseif (!isset($_POST['bill_id']))
 {
-    $bill_id = $_REQUEST['bill_id'];
+    header('HTTP/1.0 500 Internal Server Error');
+    $message = array('error' => 'No tags provided.');
+    echo json_encode($message);
+    exit();
 }
+$bill_id = $_POST['bill_id'];
 
 # REJECT MISSING TAGS
-if (empty($tags['tags']))
+if (empty($tags))
 {
+
     # But if the tags are missing because a trusted user is deleting one, that's fine.
     if (!empty($delete) && ($user['trusted'] == 'y'))
     {
@@ -55,52 +60,62 @@ if (empty($tags['tags']))
         $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
         $result = $mc->delete('bill-' . $bill_id);
 
-        $tmp = parse_url($_SERVER['HTTP_REFERER']);
-        $return_to = $tmp['path'];
-
-        header('Location: ' . $return_to);
-        exit;
+        header('HTTP/1.0 201 Created');
+        exit();
     }
 
-    header('Location: https://' . $_SERVER['SERVER_NAME'] . $tags['return_to']);
-    exit;
+    header('HTTP/1.0 500 Internal Server Error');
+    $message = array('error' => 'No tags provided.');
+    echo json_encode($message);
+    exit();
 }
 
 # BAR SPAMMERS
 if (mb_strlen($_SERVER['HTTP_USER_AGENT']) <= 1)
 {
-    die('Thank you for your comment.');
+    exit();
 }
 if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'curl') === TRUE)
 {
-    die('Thank you for your comment.');
+    exit();
 }
 if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === TRUE)
 {
-    die('Thank you for your comment.');
+    exit();
 }
 
-# Log the user in.
+# Create a user record.
 if (!logged_in())
 {
     create_user();
 }
 
-if ((!empty($_SESSION['id'])))
+if (!empty($_SESSION['id']))
 {// && !blacklisted())
+
     # Explode the tags into an array to be inserted individually.
-    $tag = explode(',', $tags['tags']);
+    $tag = explode(',', $tags);
+
+    /*
+     * Permit no more than 10 tags in total.
+     */
+    if (count($tag) > 10)
+    {
+        $tag = array_slice($tag, 0, 10);
+    }
 
     for ($i=0; $i<count($tag); $i++)
     {
         $tag[$i] = mb_strtolower(trim($tag[$i]));
 
         # Check the tag against the dirty words.
-        /*if (in_array($tag[$i], $GLOBALS['banned_words']))
+        if (in_array(str_rot13($tag[$i]), $GLOBALS['banned_words']))
         {
-            @blacklist($tag[$i]);
-            break;
-        }*/
+            header('HTTP/1.0 403 Forbidden');
+            $message = array('error' => 'Tag prohibited.');
+            echo json_encode($message);
+            exit();
+        }
 
         # Drop useless tags.
         if ($tag[$i] === '1')
@@ -119,41 +134,52 @@ if ((!empty($_SESSION['id'])))
             # Check one more time to make sure it's not empty.
             if (!empty($tag[$i]))
             {
+
                 # Assemble the insertion SQL
                 $sql = 'INSERT INTO tags
-						SET bill_id=' . $tags['bill_id'] . ', tag="' . $tag[$i] . '",
+						SET bill_id=' . $bill_id . ', tag="' . $tag[$i] . '",
 						ip="' . $_SERVER['REMOTE_ADDR'] . '", user_id=
 							(SELECT id
 							FROM users
 							WHERE cookie_hash = "' . $_SESSION['id'] . '"),
 						date_created=now()';
                 $result = mysql_query($sql);
+
+                /*
+                 * If there was a database-insertion error.
+                 */
+                if (!$result)
+                {
+                    header('HTTP/1.0 500 Internal Server Error');
+                    $message = array('error' => 'Tags could not be saved.');
+                    echo json_encode($message);
+                    exit();
+                }
             }
         }
     }
 
-    # If the insert was successful
-    if (!empty($tags['return_to']))
-    {
 
-        # Delete the bill from Memcached.
-        $mc = new Memcached();
-        $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-        $result = $mc->delete('bill-' . $tags['bill_id']);
+    # Delete the bill from Memcached.
+    $mc = new Memcached();
+    $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+    $result = $mc->delete('bill-' . $tags['bill_id']);
 
-        $tag_list = implode(', ', $tag);
-        $log = new Log;
-        $result = $log->put('New tags added: ' . $tag_list . ' https://' . $_SERVER['SERVER_NAME'] . $tags['return_to'], 3);
+    $log = new Log;
+    $result = $log->put('New tags added: ' . implode(', ', $tag) . ' ' . $_SERVER['HTTP_REFERER'], 3);
 
-        # Redirect the user back to the page of origin.
-        header('Location: https://' . $_SERVER['SERVER_NAME'] . $tags['return_to']);
-        exit;
-    }
+    /*
+     * Send a 201 Created HTTP header, to indicate success.
+     */
+    header('HTTP/1.0 201 Created');
+    exit();
 }
 
 # If the user didn't accept a cookie or is blacklisted.
 else
 {
-    header('Location: https://' . $_SERVER['SERVER_NAME'] . $tags['return_to']);
-    exit;
+    header('HTTP/1.0 403 Forbidden');
+    $message = array('error' => 'You do not have permission to add tags.');
+    echo json_encode($message);
+    exit();
 }

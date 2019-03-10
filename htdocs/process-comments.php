@@ -1,7 +1,7 @@
 <?php
 
 ###
-# Accept Comments
+# Accept Comments via Ajax
 #
 # PURPOSE
 # Receives POSTed comments and adds them to the database, determining
@@ -30,13 +30,15 @@ $database->connect_old();
 session_start();
 
 # LOCALIZE VARIABLES
-$comment = $_REQUEST['comment'];
+$comment = array();
+$comment['comment']     = $_POST['comment'];
+$comment['bill_id']     = $_POST['bill_id'];
 
 # RENAME VARIABLES
 # These had faux names to deter spammers.  Give them proper names.
-$comment['name'] = $comment['expiration_date'];
-$comment['email'] = $comment['zip'];
-$comment['url'] = $comment['age'];
+$comment['name']    = $_POST['expiration_date'];
+$comment['email']   = $_POST['zip'];
+$comment['url']     = $_POST['age'];
 
 # CHECK FOR SPAMMERS
 # If any of these form fields have obviously been filled out based on the
@@ -44,41 +46,46 @@ $comment['url'] = $comment['age'];
 # field (state) has been filled out, reject the comment as spam.
 if (preg_match("#([0-9]{2})/([0-9]{2})#D", $comment['name']))
 {
-    die();
+    exit();
+}
+if (preg_match("/([0-9]{6}/", $comment['name']))
+{
+    exit();
 }
 if ((mb_strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})/D", $comment['email'])))
 {
-    die();
+    exit();
 }
 if ((mb_strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})-([0-9]{4})/D", $comment['email'])))
 {
-    die();
+    exit();
 }
 if (preg_match("/([0-9]{2})/D", $comment['age']))
 {
-    die();
+    exit();
 }
 if (!empty($comment['state']))
 {
-    die();
+    exit();
 }
 if (mb_strlen($_SERVER['HTTP_USER_AGENT']) <= 1)
 {
-    die('Thank you for your comment.');
+    exit();
 }
 if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'curl') === TRUE)
 {
-    die('Thank you for your comment.');
+    exit();
 }
 if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === TRUE)
 {
-    die('Thank you for your comment.');
+    exit();
 }
 
 # If there are spammy strings in the body, and any links, then it's spam.
 $spam_strings = array('ciprofloxacin', 'viagra', 'cialis', ' topiramate', 'propecia',
     'levitra', 'priligy', 'clomid', 'zithromax', 'azithromycin', 'kamagra', 'celebrex',
-    'prednizone', ' sildenafil', 'tadalafil', 'accutane', 'tadalafil', 'topamax', 'amoxicillin');
+    'prednizone', ' sildenafil', 'tadalafil', 'accutane', 'tadalafil', 'topamax', 'amoxicillin',
+    '[/URL]');
 foreach ($spam_strings as $spam_string)
 {
     if (mb_stristr($comment['comment'], $spam_string) !== FALSE)
@@ -90,6 +97,13 @@ foreach ($spam_strings as $spam_string)
     }
 }
 
+# We don't allow comments from Fairfax County Public Schools, because 99% of the comments from
+# there are garbage, and 75% of garbage comments come from there.
+if ($_SERVER['REMOTE_ADDR'] == '151.188.97.205')
+{
+    exit();
+}
+
 # See if the user is logged in and, if so, save his user data.
 $user = @get_user();
 
@@ -97,6 +111,38 @@ $user = @get_user();
 $comment = array_map('mysql_escape_string', $comment);
 $comment = array_map('trim', $comment);
 $comment['comment'] = strip_tags($comment['comment'], '<a><em><strong><i><b><s><blockquote><embed>');
+
+if (empty($comment['comment']))
+{
+    header('HTTP/1.0 500 Internal Server Error');
+    $message = array('error' => 'No comment provided.');
+    echo json_encode($message);
+    exit();
+}
+
+if (empty($comment['name']))
+{
+    header('HTTP/1.0 500 Internal Server Error');
+    $message = array('error' => 'No name provided.');
+    echo json_encode($message);
+    exit();
+}
+
+if (empty($comment['email']))
+{
+    header('HTTP/1.0 500 Internal Server Error');
+    $message = array('error' => 'No email address provided.');
+    echo json_encode($message);
+    exit();
+}
+
+if (filter_var($comment['email'], FILTER_VALIDATE_EMAIL) === FALSE)
+{
+    header('HTTP/1.0 500 Internal Server Error');
+    $message = array('error' => 'Invalid email address.');
+    echo json_encode($message);
+    exit();
+}
 
 # Validate any provided URL, and silently drop it if it's invalid.
 if (!empty($comment['url']))
@@ -124,22 +170,6 @@ if (!empty($comment['url']))
     {
         $comment['url'] = '';
     }
-}
-if (empty($comment['comment']))
-{
-    $errors[] .= 'a comment';
-}
-if (empty($comment['name']))
-{
-    $errors[] .= 'your name';
-}
-if (empty($comment['email']))
-{
-    $errors[] .= 'your e-mail address';
-}
-if (!validate_email($comment['email']))
-{
-    $errors[] .= 'a valid e-mail address';
 }
 
 # Run the code through HTML Purifier.
@@ -186,7 +216,10 @@ $sql = 'SELECT id
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-    die('Slow down, cowboy: Only one comment is allowed every five seconds. That’s pretty reasonable.');
+    header('HTTP/1.0 409 Conflict');
+    $message = array('error' => 'Slow down, cowboy: Only one comment is allowed every five seconds. That’s pretty reasonable.');
+    echo json_encode($message);
+    exit();
 }
 
 # Make sure that this person hasn't posted too many times recently.
@@ -197,7 +230,10 @@ $sql = 'SELECT *
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 10)
 {
-    die('Slow down, cowboy: You’re posting way too many comments too fast. Relax, think, then write.');
+    header('HTTP/1.0 409 Conflict');
+    $message = array('error' => 'Slow down, cowboy: You’re posting way too many comments too fast. Relax, think, then write.');
+    echo json_encode($message);
+    exit();
 }
 
 # Make sure that this person hasn't posted this precise same comment within the past hour.
@@ -209,128 +245,105 @@ $sql = 'SELECT id
 $result = mysql_query($sql);
 if (mysql_num_rows($result) > 0)
 {
-    die('You’ve already posted that exact comment. You may not post it again. And, no, don’t '
+    header('HTTP/1.0 409 Conflict');
+    $message = array('error' => 'You’ve already posted that exact comment. You may not post it again. And, no, don’t '
         . 'just change it a little bit and repost it—a moderator will just delete it. If you’re '
         . 'trying to post the same comment on identical bills, we’ve saved you the trouble. Within '
         . 'an hour, your prior comment will show up on every identical bill, automatically. (You’re '
-        . 'welcome!)'
-    );
+        . 'welcome!)');
+    echo json_encode($message);
+    exit();
 }
 
-if (!isset($errors))
+
+# ASSEMBLE THE INSERTION SQL
+$sql = 'INSERT INTO comments
+		SET bill_id=' . $comment['bill_id'] . ', name="' . $comment['name'] . '",
+		email="' . $comment['email'] . '", ip="' . $_SERVER['REMOTE_ADDR'] . '",
+		comment="' . $comment['comment'] . '", status="published",
+		date_created=now()';
+if (!empty($comment['url']))
+{
+    $sql .= ', url="' . $comment['url'] . '"';
+}
+if (!empty($user['id']))
+{
+    $sql .= ', user_id=' . $user['id'];
+}
+$result = mysql_query($sql);
+if (!$result)
+{
+    header('HTTP/1.0 500 Internal Server Error');
+    $message = array('error' => 'Your comment could not be added, though for no good reason. Richmond Sunlight has
+		been alerted to the problem, and somebody will fix this and get back to you. Sorry
+		for the trouble!');
+    echo json_encode($message);
+    mail(
+        'waldo@jaquith.org',
+        'RS: Comment Submission Failed',
+        'A comment submission failed in a way that left the user with an ugly error '
+        . 'message. These are the contents of the comment array:' . "\n\n"
+        . print_r($comment, true)
+        . $sql
+    );
+    exit();
+}
+
+# If this thread has subscribers, e-mail a this comment to those subscribers.
+
+# Create a new instance of the comments-subscription class
+$subscription = new CommentSubscription;
+
+# Pass this bill's ID to $subscription, and have it return a listing of subscriptions
+# to the discussion of this bill (if any).
+$subscription->bill_id = $comment['bill_id'];
+$subscriptions = $subscription->listing();
+
+# If there are any subscriptions to this discussion, we want to send an e-mail to those
+# subscribers.
+if ($subscriptions !== FALSE)
 {
 
-    # ASSEMBLE THE INSERTION SQL
-    $sql = 'INSERT INTO comments
-			SET bill_id=' . $comment['bill_id'] . ', name="' . $comment['name'] . '",
-			email="' . $comment['email'] . '", ip="' . $_SERVER['REMOTE_ADDR'] . '",
-			comment="' . $comment['comment'] . '", status="published",
-			date_created=now()';
-    if (!empty($comment['url']))
-    {
-        $sql .= ', url="' . $comment['url'] . '"';
-    }
-    if (!empty($user['id']))
-    {
-        $sql .= ', user_id=' . $user['id'];
-    }
-    $result = mysql_query($sql);
-    if (!$result)
-    {
-        die('Your comment could not be added, though for no good reason. Richmond Sunlight has
-			been alerted to the problem, and somebody will fix this and get back to you. Sorry
-			for the trouble!');
-        mail(
-            'waldo@jaquith.org',
-            'RS: Comment Submission Failed',
-            'A comment submission failed in a way that left the user with an ugly error '
-            . 'message. These are the contents of the comment array:' . "\n\n"
-            . print_r($comment, true)
-        );
-    }
+    # Pass the comment data to $subscriptions, first removing the HTML and any slashes.
+    $comment['name'] = strip_tags(stripslashes($comment['name']));
+    $comment['comment'] = strip_tags(stripslashes($comment['comment']));
+    $subscription->comment = $comment;
 
-    # If this thread has subscribers, e-mail a this comment to those subscribers.
+    # And pass the subscription data to $subscriptions.
+    $subscription->subscriptions = $subscriptions;
 
-    # Create a new instance of the comments-subscription class
+    # Finally, send out the e-mails.
+    $subscription->send_email();
+}
+
+# If the user has asked to be subscribed to this bill's comments, do so.
+if (isset($comment['subscribe']) && ($comment['subscribe'] == 'y'))
+{
+
+    # create a new instance of the comments-subscription class
     $subscription = new CommentSubscription;
 
-    # Pass this bill's ID to $subscription, and have it return a listing of subscriptions
-    # to the discussion of this bill (if any).
+    # pass the user ID and the bill ID
+    $subscription->user_id = $user['id'];
     $subscription->bill_id = $comment['bill_id'];
-    $subscriptions = $subscription->listing();
 
-    # If there are any subscriptions to this discussion, we want to send an e-mail to those
-    # subscribers.
-    if ($subscriptions !== FALSE)
-    {
-
-        # Pass the comment data to $subscriptions, first removing the HTML and any slashes.
-        $comment['name'] = strip_tags(stripslashes($comment['name']));
-        $comment['comment'] = strip_tags(stripslashes($comment['comment']));
-        $subscription->comment = $comment;
-
-        # And pass the subscription data to $subscriptions.
-        $subscription->subscriptions = $subscriptions;
-
-        # Finally, send out the e-mails.
-        $subscription->send_email();
-    }
-
-    # If the user has asked to be subscribed to this bill's comments, do so.
-    if (isset($comment['subscribe']) && ($comment['subscribe'] == 'y'))
-    {
-        # create a new instance of the comments-subscription class
-        $subscription = new CommentSubscription;
-
-        # pass the user ID and the bill ID
-        $subscription->user_id = $user['id'];
-        $subscription->bill_id = $comment['bill_id'];
-
-        # subscribe this person
-        $subscription->save();
-    }
-
-    /*
-     * Clear the Memcached cache for comments on this bill.
-     */
-    $mc = new Memcached();
-    $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-    $comments = $mc->delete('comments-' . $comment['bill_id']);
-
-    $log = new Log;
-    $log->put('New comment posted, by ' . stripslashes($comment['name']) . ':'
-        . "\n\n" . str_replace("\r\n", ' ¶ ', stripslashes($comment['comment']))
-        . ' https://' . $_SERVER['SERVER_NAME'] . $comment['return_to'] . '#comments', 3);
-
-    # Redirect the user back to the page of origin.
-    if (!empty($comment['return_to']))
-    {
-        header('Location: https://' . $_SERVER['SERVER_NAME'] . $comment['return_to']);
-        exit;
-    }
-    else
-    {
-        header('Location: https://' . $_SERVER['SERVER_NAME']);
-        exit;
-    }
+    # subscribe this person
+    $subscription->save();
 }
-else
-{
 
-    # PAGE METADATA
-    $page_title = 'Comment Verification';
+/*
+ * Clear the Memcached cache for comments on this bill.
+ */
+$mc = new Memcached();
+$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+$comments = $mc->delete('comments-' . $comment['bill_id']);
 
-    $page_body = '<div class="error">
-		<p>You must provide:</p>
-		<ul>
-			<li>' . implode('</li><li>', $errors) . '</li>
-		</ul>
-	</div>';
+$log = new Log;
+$log->put('New comment posted, by ' . stripslashes($comment['name']) . ':'
+    . "\n\n" . str_replace("\r\n", ' ¶ ', stripslashes($comment['comment']))
+    . $_SERVER['HTTP_REFERER'], 3);
 
-    # OUTPUT THE PAGE
-    $page = new Page;
-    $page->page_title = $page_title;
-    $page->page_body = $page_body;
-    $page->page_sidebar = $page_sidebar;
-    $page->process();
-}
+/*
+ * Send a 201 Created HTTP header, to indicate success.
+ */
+header('HTTP/1.0 201 Created');

@@ -465,7 +465,7 @@ $page_sidebar .=
                 var tags = $("#tags").val(),
                     bill_id = $("#bill_id").val();
 
-                var posting = $.post( "/process-tags-ajax.php", { tags: tags, bill_id: bill_id } );
+                var posting = $.post( "/process-tags.php", { tags: tags, bill_id: bill_id } );
 
                 // If the posting was successful.
                 posting.done(function( data ) {
@@ -1419,7 +1419,7 @@ if (($bill['session_id'] == SESSION_ID))
                         bill_id = $("#bill_id").val(),
                         subscribe = $("#subscribe").val();
 
-                    var posting = $.post( "/process-comments-ajax.php", { expiration_date: expiration_date, zip: zip, age: age, bill_id: bill_id, subscribe: subscribe, comment: comment } );
+                    var posting = $.post( "/process-comments.php", { expiration_date: expiration_date, zip: zip, age: age, bill_id: bill_id, subscribe: subscribe, comment: comment } );
 
                     // If the posting was successful.
                     posting.done(function( data ) {
