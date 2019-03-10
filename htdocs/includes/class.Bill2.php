@@ -169,6 +169,17 @@ class Bill2
         $bill['url'] = 'http://www.richmondsunlight.com/bill/' . $bill['year'] . '/'
             . mb_strtolower($bill['number']) . '/';
 
+        /*
+         * Flag this as either a bill or a resolution.
+         */
+        if (in_array(preg_replace('/[0-9]/', '', $bill['number']), array('sr', 'hr', 'hj', 'sj') ) )
+        {
+            $bill['type'] = 'resolution';
+        }
+        else {
+            $bill['type'] = 'bill';
+        }
+
         # If this bill has any copatrons, we want to gather up all of them and include them in the bill
         # array.
         if ($bill['copatron_count'] > 0)
