@@ -148,7 +148,7 @@ if (filter_var($comment['email'], FILTER_VALIDATE_EMAIL) === FALSE)
 if (!empty($comment['url']))
 {
     # If we've got content, but no schema, prepend that.
-    if (!mb_stristr($comment['url'], 'http://'))
+    if (!mb_stristr($comment['url'], 'http://') || !mb_stristr($comment['url'], 'https://'))
     {
         # If there's an at sign in there, then somebody has entered their e-mail address as
         # their URL.
