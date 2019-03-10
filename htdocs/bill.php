@@ -761,45 +761,50 @@ if (isset($bill['status_history']))
         }
         $page_body .= '</td>
 					<td class="text">Passed Senate</td>
-				</tr>
-				<tr class="alt">
-					<td>';
+                </tr>';
     }
-    if (((mb_substr($bill['number'], 0, 2) != 'HR') && (mb_substr($bill['number'], 0, 2) != 'SR'))
-        && (mb_substr($bill['number'], 0, 2) != 'SJ') && (mb_substr($bill['number'], 0, 2) != 'HJ'))
+
+    if ($bill['type'] != 'resolution')
     {
-        if (in_array('vetoed by governor', $statuses))
+        $page_body .= '
+            <tr class="alt">
+            <td>';
+        if (((mb_substr($bill['number'], 0, 2) != 'HR') && (mb_substr($bill['number'], 0, 2) != 'SR'))
+            && (mb_substr($bill['number'], 0, 2) != 'SJ') && (mb_substr($bill['number'], 0, 2) != 'HJ'))
         {
-            $page_body .= $failed;
+            if (in_array('vetoed by governor', $statuses))
+            {
+                $page_body .= $failed;
+            }
+            elseif (in_array('signed by governor', $statuses))
+            {
+                $page_body .= $passed;
+            }
+            else
+            {
+                $page_body .= $neither;
+            }
+            $page_body .= '</td>
+                        <td class="text">Signed by Governor</td>
+                    </tr>
+                    <tr>
+                        <td>';
+            if (in_array('enacted', $statuses))
+            {
+                $page_body .= $passed;
+            }
+            elseif (in_array('vetoed by governor', $statuses))
+            {
+                $page_body .= $failed;
+            }
+            else
+            {
+                $page_body .= $neither;
+            }
+            $page_body .= '</td>
+                        <td class="text">Became Law</td>
+                    </tr>';
         }
-        elseif (in_array('signed by governor', $statuses))
-        {
-            $page_body .= $passed;
-        }
-        else
-        {
-            $page_body .= $neither;
-        }
-        $page_body .= '</td>
-					<td class="text">Signed by Governor</td>
-				</tr>
-				<tr>
-					<td>';
-        if (in_array('enacted', $statuses))
-        {
-            $page_body .= $passed;
-        }
-        elseif (in_array('vetoed by governor', $statuses))
-        {
-            $page_body .= $failed;
-        }
-        else
-        {
-            $page_body .= $neither;
-        }
-        $page_body .= '</td>
-					<td class="text">Became Law</td>
-				</tr>';
     }
     $page_body .= '
 		</table>
