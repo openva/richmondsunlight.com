@@ -406,6 +406,15 @@ $page_sidebar .= '
 
 if (isset($bill['tags']) && (count($bill['tags']) > 0))
 {
+    
+    $page_header .= "
+        $('.delete').click(function(e) {
+            e.preventDefault();
+            var tagId = $(this).attr('data-id');
+            var url = '/process-tags.php';
+            $.post(url, { delete: tagId }, function(data){ console.log('deleted');} );
+        });";
+
     foreach ($bill['tags'] as $tag_id => $tag)
     {
 
@@ -414,8 +423,7 @@ if (isset($bill['tags']) && (count($bill['tags']) > 0))
         $page_sidebar .= '<li><a href="/bills/tags/' . urlencode($tag) . '/">' . $tag . '</a>';
         if (isset($user) && ($user['trusted'] == 'y'))
         {
-            $page_sidebar .= ' [<a href="/process-tags.php?delete=' . $tag_id . '&amp;bill_id='
-                . $bill['id'] . '">x</a>]';
+            $page_sidebar .= ' [<a data-id="' . $tag_id . '" class="delete">x</a>]';
         }
         $page_sidebar .= '</li>';
     }
