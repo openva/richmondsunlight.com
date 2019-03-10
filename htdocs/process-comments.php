@@ -347,3 +347,5 @@ $log->put('New comment posted, by ' . stripslashes($comment['name']) . ':'
  * Send a 201 Created HTTP header, to indicate success.
  */
 header('HTTP/1.0 201 Created');
+$message = array('success' => 'Commented posted.');
+echo json_encode($message);
