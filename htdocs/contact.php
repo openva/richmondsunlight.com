@@ -38,22 +38,40 @@ $site_section = '';
 function show_form($form_data)
 {
     $returned_data = '
-	<form name="comments" method="post" action="/contact/">
-		<p>Your name:<br />
-		<input type="text" name="form_data[name]" size="30" tabindex="1" value="' . $form_data['name'] . '" /></p>
+    <style>
+        fieldset {
+            padding: 0.5em;
+        }
+        label {
+            display: block;
+            font-weight:bold;
+        }
+    </style>
+    <form name="comments" method="post" action="/contact/">
+    
+        <fieldset>
+		    <label for="message-name">Your name</label>
+            <input type="text" name="form_data[name]" id="message-name" size="30" value="' . $form_data['name'] . '" />
+        </fieldset>
 
-		<p>Your e-mail address:<br />
-		<input type="text" name="form_data[email]" size="30" tabindex="2" value="' . $form_data['email'] . '" /></p>
+        <fieldset>
+            <label for="message-email">Your e-mail address</label>
+            <input type="text" name="form_data[email]"  id="message-email" size="30" value="' . $form_data['email'] . '" />
+        </fieldset>
 
-		<p>Subject:<br />
-		<input type="text" name="form_data[subject]" size="30" tabindex="3" value="' . $form_data['subject'] . '" /></p>
+        <fieldset>
+            <label for="message-subject">Subject</label>
+            <input type="text" name="form_data[subject]" id="message-subject" size="30" value="' . $form_data['subject'] . '" />
+        </fieldset>
 
-		<p>Text:<br />
-		<textarea name="form_data[comments]" cols="50" rows="5" tabindex="4">' . $form_data['comments'] . '</textarea></p>
+        <fieldset>
+            <label for="message-comment">Message</label>
+            <textarea name="form_data[comments]" id="message-comments" cols="50" rows="10">' . $form_data['comments'] . '</textarea>
+        </fieldset>
 
 		<div style="display: none;">
-			<input type="text" size="2" maxlength="2" name="form_data[state]" id="state" />
-			<label for="state">Leave this field empty</label><br />
+			<input type="text" size="2" maxlength="2" name="form_data[state]" id="message-state" />
+			<label for="message-state">Leave this field empty</label><br />
 		</div>
 
 		<p><input type="submit" name="submit" value="Send Mail"></p>
