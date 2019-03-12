@@ -124,6 +124,14 @@ if (isset($_POST['form_data']))
         $errors[] = 'the contents of your message are missing';
     }
 
+    preg_match_all('/http:/', $form_data['comments'], $matches);
+    if (count($matches[0]) >= 3)
+    {
+        $errors[] = 'there are ' . count($matches[0])  . ' website addresses in your email — ' .
+            'that’s a hallmark of spam, so please drop it down to no more than 2';
+    }
+
+
     if (isset($errors))
     {
         $page_body = '
