@@ -88,19 +88,6 @@ if (isset($_POST['form_data']))
     {
         die();
     }
-    if (
-        ($form_data['name'] == 'SmallBusinessFundingNow')
-        ||
-        ($form_data['name'] == 'BusinessCapital247')
-        ||
-        mb_stripos($form_data['comments'], 'fiverr.com') !== FALSE
-        ||
-        $form_data['subject'] == 'Capital to Grow Your Business'
-    )
-    {
-        die();
-    }
-
 
     # Filter out newlines to block injection attacks.
     $form_data['email'] = preg_replace("/\r/", "", $form_data['email']);
