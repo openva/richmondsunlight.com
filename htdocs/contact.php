@@ -90,8 +90,7 @@ if (isset($_POST['form_data']))
     $form_data['name'] = preg_replace("/\r/", "", $form_data['name']);
     $form_data['name'] = preg_replace("/\n/", "", $form_data['name']);
 
-    # Limit the string length and strip slashes; the former being to,
-    # again, block injection attacks.
+    # Limit the string length and strip slashes; the former being to, again, block injection attacks.
     $form_data = array_map('stripslashes', $form_data);
     $form_data = array_map('trim', $form_data);
     $form_data['subject'] = mb_substr($form_data['subject'], 0, 80);
@@ -101,23 +100,23 @@ if (isset($_POST['form_data']))
     # Make sure it's all good.
     if (empty($form_data['name']))
     {
-        $errors[] = 'your name';
+        $errors[] = 'your name is missing';
     }
     if (empty($form_data['email']))
     {
-        $errors[] = 'your e-mail address';
+        $errors[] = 'your email address is missing';
     }
     elseif (!validate_email($form_data['email']))
     {
-        $errors[] = 'invalid e-mail address';
+        $errors[] = 'your email address is not a valid email address';
     }
     if (empty($form_data['subject']))
     {
-        $errors[] = 'the subject of your e-mail';
+        $errors[] = 'the subject of your message is missing';
     }
     if (empty($form_data['comments']))
     {
-        $errors[] = 'the contents of your message';
+        $errors[] = 'the contents of your message are missing';
     }
 
     if (isset($errors))
