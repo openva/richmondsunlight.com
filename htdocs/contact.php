@@ -124,7 +124,7 @@ if (isset($_POST['form_data']))
         $errors[] = 'the contents of your message are missing';
     }
 
-    preg_match_all('/http:/', $form_data['comments'], $matches);
+    preg_match_all('/https?:/', $form_data['comments'], $matches);
     if (count($matches[0]) >= 3)
     {
         $errors[] = 'there are ' . count($matches[0])  . ' website addresses in your email — ' .
