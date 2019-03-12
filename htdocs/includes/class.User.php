@@ -36,22 +36,27 @@ class User
         /*
          * If this session ID is stored in Memcached, then we don't need to query the database.
          */
-        $mc = new Memcached();
-        $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-        $result = $mc->get('user-session-' . $_SESSION['id']);
-        if ($mc->getResultCode() === 0)
+        if (MEMCACHED_SERVER != '')
         {
+            $mc = new Memcached();
+            $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+            $result = $mc->get('user-session-' . $_SESSION['id']);
+            if ($mc->getResultCode() === 0)
+            {
 
-            /*
-             * Indicate whether this is a registered user -- that is, somebody who has actually
-             * created an account. (That's the value of "user-session-[id]" -- true or false.)
-             */
-            $this->registered = $result;
+                /*
+                * Indicate whether this is a registered user -- that is, somebody who has actually
+                * created an account. (That's the value of "user-session-[id]" -- true or false.)
+                */
+                $this->registered = $result;
 
-            /*
-             * Report that this is a user.
-             */
-            return TRUE;
+                /*
+                * Report that this is a user.
+                */
+                return TRUE;
+
+            }
+        
         }
 
         $database = new Database;
@@ -81,8 +86,13 @@ class User
             /*
              * Store this session in Memcached for the next 30 minutes.
              */
-            $mc->set('user-session-' . $_SESSION['id'], $this->registered, (60 * 30));
+            if (MEMCACHED_SERVER != '')
+            {
+                $mc->set('user-session-' . $_SESSION['id'], $this->registered, (60 * 30));
+            }
+
             return TRUE;
+
         }
 
         return FALSE;
@@ -152,17 +162,20 @@ class User
         /*
          * Connect to Memcached.
          */
-        $mc = new Memcached();
-        $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-
-        # Get a list of recommended bills for this user.
-        $result = $mc->get('recommendations-' . $user['id']);
-        if ($mc->getResultCode() === 0)
+        if (MEMCACHED_SERVER != '')
         {
-            $bills = unserialize($result);
-            if ($bills !== FALSE)
+            $mc = new Memcached();
+            $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+
+            # Get a list of recommended bills for this user.
+            $result = $mc->get('recommendations-' . $user['id']);
+            if ($mc->getResultCode() === 0)
             {
-                return $bills;
+                $bills = unserialize($result);
+                if ($bills !== FALSE)
+                {
+                    return $bills;
+                }
             }
         }
 
@@ -264,7 +277,10 @@ class User
         # because user sessions are unlikely to last longer than this and to allow their
         # recommendations to be updated as new bills are filed, as they view their recommended
         # bills, and as they view bills that cause their recommendations to change.
-        $mc->set('recommendations-' . $user['id'], serialize($bills), (60 * 30));
+        if (MEMCACHED_SERVER != '')
+        {
+            $mc->set('recommendations-' . $user['id'], serialize($bills), (60 * 30));
+        }
 
         return $bills;
     }

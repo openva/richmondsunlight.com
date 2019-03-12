@@ -37,14 +37,17 @@ if (!empty($op))
      * We're going to have to clear the Memcached cache of comments for the bill being affected
      * here, so let's get that out of the way at the outset.
      */
-    $mc = new Memcached();
-    $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-    $sql = 'SELECT bill_id AS id
-			FROM comments
-			WHERE id = ' . $id;
-    $result = mysql_query($sql);
-    $bill = mysql_fetch_array($result);
-    $mc->delete('comments-' . $bill['id']);
+    if (MEMCACHED_SERVER != '')
+    {
+        $mc = new Memcached();
+        $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+        $sql = 'SELECT bill_id AS id
+                FROM comments
+                WHERE id = ' . $id;
+        $result = mysql_query($sql);
+        $bill = mysql_fetch_array($result);
+        $mc->delete('comments-' . $bill['id']);
+    }
 
     if ($op == 'spam')
     {

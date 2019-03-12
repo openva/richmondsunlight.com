@@ -91,17 +91,20 @@
         mysql_query($sql);
 
         /*
-         * Clear the Memcached cache of comments on this bill, since Photosyntheis comments are
+         * Clear the Memcached cache of comments on this bill, since Photosynthesis comments are
          * among them.
          */
-        $sql = 'SELECT bill_id AS id
-				FROM dashboard_bills
-				WHERE id=' . record_id;
-        $result = mysql_query($sql);
-        $bill = mysql_fetch_array($result);
-        $mc = new Memcached();
-        $mc->addServer("127.0.0.1", 11211);
-        $mc->delete('comments-' . $bill['id']);
+        if (MEMCACHED_SERVER != '')
+        {
+            $sql = 'SELECT bill_id AS id
+                    FROM dashboard_bills
+                    WHERE id=' . record_id;
+            $result = mysql_query($sql);
+            $bill = mysql_fetch_array($result);
+            $mc = new Memcached();
+            $mc->addServer("127.0.0.1", 11211);
+            $mc->delete('comments-' . $bill['id']);
+        }
 
         # Return the user to the dashboard.
         header('Location: ' . $_SERVER['HTTP_REFERER']);

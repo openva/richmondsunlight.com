@@ -334,9 +334,12 @@ if (isset($comment['subscribe']) && ($comment['subscribe'] == 'y'))
 /*
  * Clear the Memcached cache for comments on this bill.
  */
-$mc = new Memcached();
-$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-$comments = $mc->delete('comments-' . $comment['bill_id']);
+if (MEMCACHED_SERVER != '')
+{
+    $mc = new Memcached();
+    $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+    $comments = $mc->delete('comments-' . $comment['bill_id']);
+}
 
 $log = new Log;
 $log->put('New comment posted, by ' . stripslashes($comment['name']) . ':'

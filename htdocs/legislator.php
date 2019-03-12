@@ -142,10 +142,13 @@ if (!empty($legislator['email']))
 /*
  * Try to get the data from Memcached.
  */
-$mc = new Memcached();
-$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-$mc_slug = 'district-map-' . $legislator['id'];
-$district_data = $mc->get($mc_slug);
+if (MEMCACHED_SERVER != '')
+{
+    $mc = new Memcached();
+    $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+    $mc_slug = 'district-map-' . $legislator['id'];
+    $district_data = $mc->get($mc_slug);
+}
 
 if ($district_data == FALSE)
 {
@@ -181,7 +184,10 @@ if ($district_data == FALSE)
     /*
      * Cache the district data for three months.
      */
-    $result = $mc->set($mc_slug, $district_data, 60 * 60 * 24 * 30.5 * 3);
+    if (MEMCACHED_SERVER != '')
+    {
+        $result = $mc->set($mc_slug, $district_data, 60 * 60 * 24 * 30.5 * 3);
+    }
 }
 
 /*

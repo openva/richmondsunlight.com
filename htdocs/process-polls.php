@@ -77,9 +77,12 @@ if (!empty($_SESSION['id']))
     /*
      * Delete the cache.
      */
-    $mc = new Memcached();
-    $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-    $mc->delete('poll-' . $poll['bill_id']);
+    if (MEMCACHED_SERVER != '')
+    {
+        $mc = new Memcached();
+        $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+        $mc->delete('poll-' . $poll['bill_id']);
+    }
 
     # If the insert was successful, redirect the user back to the page of
     # origin.

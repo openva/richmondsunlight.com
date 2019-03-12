@@ -16,9 +16,12 @@ include_once 'vendor/autoload.php';
 session_start();
 
 # Delete the session from Memcached.
-$mc = new Memcached();
-$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-$result = $mc->delete('user-session-' . $_SESSION['id']);
+if (MEMCACHED_SERVER != '')
+{
+    $mc = new Memcached();
+    $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+    $result = $mc->delete('user-session-' . $_SESSION['id']);
+}
 
 # Unset the user's hash and destroy the session. We go way over the top here, because of bug
 # reports from folks maintaining multiple accounts, who have to hop back and forth a lot, and

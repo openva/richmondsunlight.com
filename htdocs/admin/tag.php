@@ -33,8 +33,11 @@ if (!empty($_POST))
     $bills = $_POST['bill'];
 
     # Connect to Memcached.
-    $mc = new Memcached();
-    $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+    if (MEMCACHED_SERVER != '')
+    {
+        $mc = new Memcached();
+        $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+    }
 
     # Iterate through every bill's tags.
     foreach ($bills as $bill_id => $tags)
@@ -96,7 +99,10 @@ if (!empty($_POST))
                     mysql_query($sql);
 
                     # Delete this from the cache.
-                    $mc->delete('bill-' . $bill_id);
+                    if (MEMCACHED_SERVER != '')
+                    {
+                        $mc->delete('bill-' . $bill_id);
+                    }
 
                 }
             }

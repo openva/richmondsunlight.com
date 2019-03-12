@@ -1260,19 +1260,28 @@ $page_body .= '
 /*
  * Get any comments on this bill.
  */
-$mc = new Memcached();
-$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-$comments = $mc->get('comments-' . $bill['id']);
-if ($mc->getResultCode() != 0)
+if (MEMCACHED_SERVER != '')
+{
+
+    $mc = new Memcached();
+    $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+    $comments_raw = $mc->get('comments-' . $bill['id']);
+    if ($mc->getResultCode() == 0)
+    {
+        $comments = unserialize($comments_raw);
+    }
+}
+
+if (!isset($comments))
 {
     $comm = new Comments;
     $comm->bill_id = $bill['id'];
     $comments = $comm->get();
-    $mc->set('comments-' . $bill['id'], serialize($comments), (60 * 60 * 24 * 7));
-}
-else
-{
-    $comments = unserialize($comments);
+
+    if (MEMCACHED_SERVER != '')
+    {
+        $mc->set('comments-' . $bill['id'], serialize($comments), (60 * 60 * 24 * 7));
+    }
 }
 
 $debug_timing['comments retrieved'] = microtime(TRUE);

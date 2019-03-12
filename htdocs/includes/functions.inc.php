@@ -30,123 +30,6 @@ function __autoload_libraries($name)
 
 spl_autoload_register('__autoload_libraries');
 
-# Cache data. Here we're using the original homebrewed caching function as a wrapper for
-# its replacement, PEAR::Cache_Lite.
-function cache_save($data, $key)
-{
-
-    # If a cache key hasn't been specified, assume it's the current page.
-    if (!isset($key) || empty($key))
-    {
-        $key = md5($_SERVER['REQUEST_URI']);
-    }
-
-    /*
-     * Connect to Memcached.
-     */
-    $mc = new Memcached();
-    $mc->addServer("127.0.0.1", 6379);
-
-    /*
-     * Cache this page in Memcached for one hour.
-     */
-    $mc->set('page-' . $key, $data, 3600);
-
-    return TRUE;
-}
-
-# Retrieve data from the cache
-function cache_open($key)
-{
-
-    # If a cache key hasn't been specified, assume it's the current page.
-    if (!isset($key))
-    {
-        $key = md5($_SERVER['REQUEST_URI']);
-    }
-
-    /*
-     * Connect to Memcached.
-     */
-    $mc = new Memcached();
-    $mc->addServer("127.0.0.1", 6379);
-
-    /*
-     * If this page is cached in Memcached, retrieve it from there.
-     */
-    $result = $mc->get('page-' . $key);
-    if ($result !== FALSE)
-    {
-        return $result;
-    }
-    else
-    {
-        return FALSE;
-    }
-}
-
-# Delete data from the cache
-function cache_delete($key)
-{
-
-    # If a cache file name hasn't been specified, assume it's the current page.
-    if (!isset($key))
-    {
-        $key = md5($_SERVER['REQUEST_URI']);
-    }
-
-    # Delete the cache file.
-    $sql = 'DELETE FROM cache
-			WHERE key="' . $key . '"';
-    $result = mysql_query($sql);
-
-    return true;
-}
-
-# Return the age of a specific cache record.
-function cache_age($key)
-{
-
-    # If a cache record name hasn't been specified, assume it's the current page.
-    if (!isset($key))
-    {
-        $key = md5($_SERVER['REQUEST_URI']);
-    }
-
-    # Select the age from the database.
-    $sql = 'SELECT now() - date_created AS age
-			FROM cache
-			WHERE key="' . $key . '"';
-    $result = mysql_query($sql);
-    if ($result === false)
-    {
-        return FALSE;
-    }
-    $cache = mysql_fetch_array($result);
-
-    return $cache['age'];
-}
-
-# Determine whether a cache file exists.
-function cache_exists($key)
-{
-
-    # If a cache file name hasn't been specified, assume it's the current page.
-    if (!isset($key))
-    {
-        $key = md5($_SERVER['REQUEST_URI']);
-    }
-
-    # See if the record is in the database.
-    $sql = 'SELECT *
-			FROM cache
-			WHERE key="' . $key . '"';
-    $result = mysql_query($sql);
-
-    # We can return the result directly.
-    return $result;
-}
-
 # Connect to the database
 function connect_to_db($type = 'old')
 {
@@ -436,16 +319,22 @@ function get_user()
         return FALSE;
     }
 
+    
     # If we have a record of this user cached in Memcached, use that instead.
-    $mc = new Memcached();
-    $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-    $result = $mc->get('user-' . $_SESSION['id']);
-    if ($mc->getResultCode() === 0)
+    if (MEMCACHED_SERVER != '')
     {
-        if ($result != FALSE)
+
+        $mc = new Memcached();
+        $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+        $result = $mc->get('user-' . $_SESSION['id']);
+        if ($mc->getResultCode() === 0)
         {
-            return $result;
+            if ($result != FALSE)
+            {
+                return $result;
+            }
         }
+
     }
 
     $sql = 'SELECT users.id, users.name, users.password, users.email, users.url,
@@ -466,7 +355,10 @@ function get_user()
     $user = array_map('stripslashes', $user);
 
     # Cache this user's data, and save it for one hour. (User sessions are unlikely to last longer.)
-    $mc->set('user-' . $_SESSION['id'], $user, (60 * 60));
+    if (MEMCACHED_SERVER != '')
+    {
+        $mc->set('user-' . $_SESSION['id'], $user, (60 * 60));
+    }
 
     return $user;
 }
@@ -542,12 +434,17 @@ function logged_in($registered = '')
     /*
      * If this session ID is stored in Memcached, then we don't need to query the database.
      */
-    $mc = new Memcached();
-    $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-    $result = $mc->get('user-session-' . $_SESSION['id']);
-    if ($mc->getResultCode() === 0)
+    if (MEMCACHED_SERVER != '')
     {
-        return TRUE;
+
+        $mc = new Memcached();
+        $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+        $result = $mc->get('user-session-' . $_SESSION['id']);
+        if ($mc->getResultCode() === 0)
+        {
+            return TRUE;
+        }
+    
     }
 
     /*
@@ -589,8 +486,13 @@ function logged_in($registered = '')
         /*
          * Store this session in Memcached for the next 30 minutes.
          */
-        $mc->set('user-session-' . $_SESSION['id'], $is_registered, (60 * 30));
+        if (MEMCACHED_SERVER != '')
+        {
+            $mc->set('user-session-' . $_SESSION['id'], $is_registered, (60 * 30));
+        }
+        
         return true;
+
     }
 
     return FALSE;
