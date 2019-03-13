@@ -17,6 +17,28 @@
 <script src="/js/vendor/jquery-ui/jquery-ui.min.js"></script>
 <script src="/js/functions.js"></script>
 <script src="/js/vendor/qtip2/dist/jquery.qtip.min.js"></script>
+
+<!-- For IE 11, Chrome, Firefox, Safari, Opera -->
+<link rel="icon" type="image/png" href="/images/favicons/16.png" sizes="16x16" />
+<link rel="icon" type="image/png" href="/images/favicons/32.png" sizes="32x32" />
+<link rel="icon" type="image/png" href="/images/favicons/48.png" sizes="48x48" />
+<link rel="icon" type="image/png" href="/images/favicons/62.png" sizes="62x62" />
+<link rel="icon" type="image/png" href="/images/favicons/192.png" sizes="192x192" />
+
+<!-- Add to Home Screen -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Richmond Sunlight">
+
+<!-- iOS Touch Icons -->
+<link rel="apple-touch-icon" type="image/png" href="/images/favicons/apple-touch-icons/76.png" sizes="76x76" />
+<link rel="apple-touch-icon" type="image/png" href="/images/favicons/apple-touch-icons/120.png" sizes="120x120" />
+<link rel="apple-touch-icon" type="image/png" href="/images/favicons/apple-touch-icons/152.png" sizes="152x152" />
+<link rel="apple-touch-icon" type="image/png" href="/images/favicons/apple-touch-icons/180.png" sizes="180x180" />
+
+<!-- Safari Pinned Site -->
+<link rel="mask-icon" href="/images/favicons/safari_icon.svg" />
+
 <?php
     # Include the below JavaScript, but only if the browser is IE. We do an Opera check because
     # Opera can include the text "MSIE" in its user agent string.
