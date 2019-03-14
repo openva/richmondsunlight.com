@@ -23,5 +23,12 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
 
 fi
 
-# Expire the cached template (in case we've made changes to it).
+# Copy over the Sphinx configuration, restart Sphinx
+sudo cp deploy/sphinx.conf /etc/sphinxsearch/sphinx.conf
+sudo /etc/init.d/sphinxsearch restart
+
+# Index the database
+sudo indexer --all --rotate
+
+# Expire the cached template (in case we've made changes to it)
 echo "delete template-new" | nc localhost 11211  || true

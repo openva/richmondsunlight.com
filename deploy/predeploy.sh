@@ -33,5 +33,9 @@ if [ "SITE_SET_UP" -eq "0" ]; then
     chmod +x ./install
     sudo ./install auto
     rm install
+
+    # Enable Sphinx's server
+    echo "START=yes" | sudo tee /etc/default/sphinxsearch
+    sudo /etc/init.d/sphinxsearch start
     
 fi
