@@ -50,7 +50,7 @@ function show_form($form_data)
     <form name="comments" method="post" action="/contact/">
     
         <fieldset>
-		    <label for="message-name">Your name</label>
+            <label for="message-name">Your name</label>
             <input type="text" name="form_data[name]" id="message-name" size="30" value="' . $form_data['name'] . '" />
         </fieldset>
 
@@ -65,7 +65,7 @@ function show_form($form_data)
         </fieldset>
 
         <fieldset>
-            <label for="message-comment">Message</label>
+            <label for="message-comments">Message</label>
             <textarea name="form_data[comments]" id="message-comments" cols="50" rows="10">' . $form_data['comments'] . '</textarea>
         </fieldset>
 
