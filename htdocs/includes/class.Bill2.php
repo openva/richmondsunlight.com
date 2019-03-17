@@ -35,7 +35,7 @@ class Bill2
         /*
          * If this bill is from the present year, try to retrieve the bill ID from Memcached.
          */
-        if ($year == SESSION_YEAR)
+        if ($year == SESSION_YEAR && MEMCACHED_SERVER != '')
         {
             $mc = new Memcached();
             $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
@@ -85,16 +85,19 @@ class Bill2
         /*
          * Connect to Memcached.
          */
-        $mc = new Memcached();
-        $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-
-        /*
-         * If this bill is cached in Memcached, retrieve it from there.
-         */
-        $bill = $mc->get('bill-' . $id);
-        if ($mc->getResultCode() === 1)
+        if (MEMCACHED_SERVER != '')
         {
-            return unserialize($bill);
+            $mc = new Memcached();
+            $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+
+            /*
+            * If this bill is cached in Memcached, retrieve it from there.
+            */
+            $bill = $mc->get('bill-' . $id);
+            if ($mc->getResultCode() === 1)
+            {
+                return unserialize($bill);
+            }
         }
 
         $database = new Database;
@@ -168,6 +171,17 @@ class Bill2
         }
         $bill['url'] = 'http://www.richmondsunlight.com/bill/' . $bill['year'] . '/'
             . mb_strtolower($bill['number']) . '/';
+
+        /*
+         * Flag this as either a bill or a resolution.
+         */
+        if (in_array(preg_replace('/[0-9]/', '', $bill['number']), array('sr', 'hr', 'hj', 'sj') ) )
+        {
+            $bill['type'] = 'resolution';
+        }
+        else {
+            $bill['type'] = 'bill';
+        }
 
         # If this bill has any copatrons, we want to gather up all of them and include them in the bill
         # array.
@@ -334,18 +348,23 @@ class Bill2
             }
         }
 
-        /*
-         * Cache this bill in Memcached, for one week.
-         */
-        $mc->set('bill-' . $id, serialize($bill), (60 * 60 * 24 * 7));
-
-        /*
-         * And cache the bill's number in Memcached, indefinitely, if the bill is from this
-         * year.
-         */
-        if ($bill['year'] == SESSION_YEAR)
+        if (MEMCACHED_SERVER != '')
         {
-            $mc->set('bill-' . $bill['number'], $bill['id']);
+            
+            /*
+            * Cache this bill in Memcached, for one week.
+            */
+            $mc->set('bill-' . $id, serialize($bill), (60 * 60 * 24 * 7));
+
+            /*
+            * And cache the bill's number in Memcached, indefinitely, if the bill is from this
+            * year.
+            */
+            if ($bill['year'] == SESSION_YEAR)
+            {
+                $mc->set('bill-' . $bill['number'], $bill['id']);
+            }
+            
         }
 
         return $bill;
@@ -383,16 +402,21 @@ class Bill2
             /*
              * Connect to Memcached.
              */
-            $mc = new Memcached();
-            $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-
-            /*
-             * See if these terms are cached in Memcached.
-             */
-            $this->term_pcres = $mc->get('definitions-' . $this->bill_id);
-            if ($mc->getResultCode() === 0)
+            if (MEMCACHED_SERVER != '')
             {
-                return TRUE;
+
+                $mc = new Memcached();
+                $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+
+                /*
+                * See if these terms are cached in Memcached.
+                */
+                $this->term_pcres = $mc->get('definitions-' . $this->bill_id);
+                if ($mc->getResultCode() === 0)
+                {
+                    return TRUE;
+                }
+
             }
 
             /*
@@ -477,7 +501,10 @@ class Bill2
             /*
              * Save this list of definitions.
              */
-            $mc->set('definitions-' . $this->bill_id, $this->term_pcres);
+            if (MEMCACHED_SERVER != '')
+            {
+                $mc->set('definitions-' . $this->bill_id, $this->term_pcres);
+            }
 
             return TRUE;
         }
@@ -649,7 +676,10 @@ class Bill2
         /*
          * Cache the results for three days.
          */
-        $mc->set('bill-changes-' . $this->text_hash, $this->changes, (60 * 60 * 24 * 3));
+        if (MEMCACHED_SERVER != '')
+        {
+            $mc->set('bill-changes-' . $this->text_hash, $this->changes, (60 * 60 * 24 * 3));
+        }
 
         return $this->changes;
     }

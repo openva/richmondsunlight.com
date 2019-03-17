@@ -17,19 +17,22 @@ class Page
             $this->template = 'new';
         }
 
-        # Connect to Memcached.
-        $mc = new Memcached();
-        $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-
-        # Try to retrieve this template from Memcached.
-        $result = $mc->get('template-' . $this->template);
-        if ($mc->getResultCode() == 0)
+        if (MEMCACHED_SERVER != '')
         {
-            $page = unserialize($result);
+            # Connect to Memcached.
+            $mc = new Memcached();
+            $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+
+            # Try to retrieve this template from Memcached.
+            $result = $mc->get('template-' . $this->template);
+            if ($mc->getResultCode() == 0)
+            {
+                $page = unserialize($result);
+            }
         }
 
         # The template isn't in Memcached, so get it from the filesystem.
-        else
+        if (!isset($page))
         {
 
             # Get the contents of the template.
@@ -38,7 +41,11 @@ class Page
             $page = ob_get_contents();
 
             # Cache this template, with a 24-hour expiration date.
-            $mc->set('template-' . $this->template, serialize($page), (60 * 60 * 24));
+            if (MEMCACHED_SERVER != '')
+            {
+                $mc->set('template-' . $this->template, serialize($page), (60 * 60 * 24));
+            }
+            
         }
 
         # Establish the full browser title.

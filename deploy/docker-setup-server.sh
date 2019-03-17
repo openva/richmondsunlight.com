@@ -15,5 +15,5 @@ fi
 # If the php.ini doesn't exist, create it.
 if [ ! -f "/usr/local/etc/php/php.ini" ]; then
     cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
-    echo "extension=memcached.so" >> /usr/local/etc/php/php.ini
+    #echo "extension=memcached.so" >> /usr/local/etc/php/php.ini
 fi

@@ -37,15 +37,5 @@ services:
     ports:
       - "3306:3306"
     container_name: rs_db
-  memcached:
-    image: memcached:latest
-    entrypoint:
-      - memcached
-      - -m 64
-    ports:
-      - "11211:11211"
-    depends_on:
-      - api
-    container_name: rs_memcached
 volumes:
     db_data: {}

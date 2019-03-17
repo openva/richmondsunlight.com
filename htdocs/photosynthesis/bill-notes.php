@@ -86,14 +86,17 @@ if (isset($_POST['submit']))
          * Clear the Memcached cache of comments on this bill, since Photosynthesis comments are
          * among them.
          */
-        $sql = 'SELECT bill_id AS id
-				FROM dashboard_bills
-				WHERE id=' . $id . ' AND user_id = ' . $user['id'];
-        $result = mysql_query($sql);
-        $bill = mysql_fetch_array($result);
-        $mc = new Memcached();
-        $mc->addServer("127.0.0.1", 11211);
-        $comments = $mc->delete('comments-' . $bill['id']);
+        if (MEMCACHED_SERVER != '')
+        {
+            $sql = 'SELECT bill_id AS id
+                    FROM dashboard_bills
+                    WHERE id=' . $id . ' AND user_id = ' . $user['id'];
+            $result = mysql_query($sql);
+            $bill = mysql_fetch_array($result);
+            $mc = new Memcached();
+            $mc->addServer("127.0.0.1", 11211);
+            $comments = $mc->delete('comments-' . $bill['id']);
+        }
 
         header('Location: https://www.richmondsunlight.com/photosynthesis/#' . $portfolio['hash']);
         exit();

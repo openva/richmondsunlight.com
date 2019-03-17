@@ -48,3 +48,9 @@ for i in "${variables[@]}"
 do
 	sed -i -e "s|define('$i', '')|define('$i', '${!i}')|g" htdocs/includes/settings.inc.php
 done
+
+# Perform the same for Sphinx
+for i in "${variables[@]}"
+do
+	sed -i -e "s|{$i}|${!i}|g" deploy/sphinx.conf
+done

@@ -15,8 +15,10 @@ if [ ! -d "api/" ]; then
 
     mv rs-api-master/ api/
 
-    # Link the includes
-    ln -s htdocs/includes api/htdocs/includes/
+    # Copy over the includes
+    cd api/htdocs/
+    cp -R ../../htdocs/includes/ includes
+    cd ../..
     
     # Remove artifacts.
     rm api.zip

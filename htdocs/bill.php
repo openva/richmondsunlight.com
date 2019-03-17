@@ -406,6 +406,15 @@ $page_sidebar .= '
 
 if (isset($bill['tags']) && (count($bill['tags']) > 0))
 {
+    
+    $page_header .= "
+        $('.delete').click(function(e) {
+            e.preventDefault();
+            var tagId = $(this).attr('data-id');
+            var url = '/process-tags.php';
+            $.post(url, { delete: tagId }, function(data){ console.log('deleted');} );
+        });";
+
     foreach ($bill['tags'] as $tag_id => $tag)
     {
 
@@ -414,8 +423,7 @@ if (isset($bill['tags']) && (count($bill['tags']) > 0))
         $page_sidebar .= '<li><a href="/bills/tags/' . urlencode($tag) . '/">' . $tag . '</a>';
         if (isset($user) && ($user['trusted'] == 'y'))
         {
-            $page_sidebar .= ' [<a href="/process-tags.php?delete=' . $tag_id . '&amp;bill_id='
-                . $bill['id'] . '">x</a>]';
+            $page_sidebar .= ' [<a data-id="' . $tag_id . '" class="delete">x</a>]';
         }
         $page_sidebar .= '</li>';
     }
@@ -465,7 +473,7 @@ $page_sidebar .=
                 var tags = $("#tags").val(),
                     bill_id = $("#bill_id").val();
 
-                var posting = $.post( "/process-tags-ajax.php", { tags: tags, bill_id: bill_id } );
+                var posting = $.post( "/process-tags.php", { tags: tags, bill_id: bill_id } );
 
                 // If the posting was successful.
                 posting.done(function( data ) {
@@ -761,45 +769,50 @@ if (isset($bill['status_history']))
         }
         $page_body .= '</td>
 					<td class="text">Passed Senate</td>
-				</tr>
-				<tr class="alt">
-					<td>';
+                </tr>';
     }
-    if (((mb_substr($bill['number'], 0, 2) != 'HR') && (mb_substr($bill['number'], 0, 2) != 'SR'))
-        && (mb_substr($bill['number'], 0, 2) != 'SJ') && (mb_substr($bill['number'], 0, 2) != 'HJ'))
+
+    if ($bill['type'] != 'resolution')
     {
-        if (in_array('vetoed by governor', $statuses))
+        $page_body .= '
+            <tr class="alt">
+            <td>';
+        if (((mb_substr($bill['number'], 0, 2) != 'HR') && (mb_substr($bill['number'], 0, 2) != 'SR'))
+            && (mb_substr($bill['number'], 0, 2) != 'SJ') && (mb_substr($bill['number'], 0, 2) != 'HJ'))
         {
-            $page_body .= $failed;
+            if (in_array('vetoed by governor', $statuses))
+            {
+                $page_body .= $failed;
+            }
+            elseif (in_array('signed by governor', $statuses))
+            {
+                $page_body .= $passed;
+            }
+            else
+            {
+                $page_body .= $neither;
+            }
+            $page_body .= '</td>
+                        <td class="text">Signed by Governor</td>
+                    </tr>
+                    <tr>
+                        <td>';
+            if (in_array('enacted', $statuses))
+            {
+                $page_body .= $passed;
+            }
+            elseif (in_array('vetoed by governor', $statuses))
+            {
+                $page_body .= $failed;
+            }
+            else
+            {
+                $page_body .= $neither;
+            }
+            $page_body .= '</td>
+                        <td class="text">Became Law</td>
+                    </tr>';
         }
-        elseif (in_array('signed by governor', $statuses))
-        {
-            $page_body .= $passed;
-        }
-        else
-        {
-            $page_body .= $neither;
-        }
-        $page_body .= '</td>
-					<td class="text">Signed by Governor</td>
-				</tr>
-				<tr>
-					<td>';
-        if (in_array('enacted', $statuses))
-        {
-            $page_body .= $passed;
-        }
-        elseif (in_array('vetoed by governor', $statuses))
-        {
-            $page_body .= $failed;
-        }
-        else
-        {
-            $page_body .= $neither;
-        }
-        $page_body .= '</td>
-					<td class="text">Became Law</td>
-				</tr>';
     }
     $page_body .= '
 		</table>
@@ -1247,19 +1260,28 @@ $page_body .= '
 /*
  * Get any comments on this bill.
  */
-$mc = new Memcached();
-$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-$comments = $mc->get('comments-' . $bill['id']);
-if ($mc->getResultCode() != 0)
+if (MEMCACHED_SERVER != '')
+{
+
+    $mc = new Memcached();
+    $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+    $comments_raw = $mc->get('comments-' . $bill['id']);
+    if ($mc->getResultCode() == 0)
+    {
+        $comments = unserialize($comments_raw);
+    }
+}
+
+if (!isset($comments))
 {
     $comm = new Comments;
     $comm->bill_id = $bill['id'];
     $comments = $comm->get();
-    $mc->set('comments-' . $bill['id'], serialize($comments), (60 * 60 * 24 * 7));
-}
-else
-{
-    $comments = unserialize($comments);
+
+    if (MEMCACHED_SERVER != '')
+    {
+        $mc->set('comments-' . $bill['id'], serialize($comments), (60 * 60 * 24 * 7));
+    }
 }
 
 $debug_timing['comments retrieved'] = microtime(TRUE);
@@ -1363,7 +1385,7 @@ if (($bill['session_id'] == SESSION_ID))
 	<h2>Post a Public Comment About this Bill</h2>
 	<form method="post" action="/process-comments.php" id="comment-form">
 		<input type="text" size="30" maxlength="50" name="comment[expiration_date]" id="expiration_date" value="' . $user['name'] . '" required /> <label for="expiration_date"><strong>Name</strong> <small>required</small></label><br />
-		<input type="email" size="30" maxlength="50" name="comment[zip]" id="zip" value="' . $user['email'] . '" required /> <label for="zip"><strong>Mail</strong> <small>won’t be published, required</small></label><br />
+		<input type="email" size="30" maxlength="50" name="comment[zip]" id="zip" value="' . $user['email'] . '" required /> <label for="zip"><strong>Email</strong> <small>won’t be published, required</small></label><br />
 		<input type="url" size="30" maxlength="50" name="comment[age]" id="age" value="' . $user['url'] . '" /> <label for="age"><strong>Website</strong></label> <small>if you have one</small><br />
 		<div style="display: none;"><input type="text" size="2" maxlength="2" name="comment[state]" id="state" /> <label for="state">Leave this field empty</label><br /></div>
 		<textarea rows="16" cols="60" name="comment[comment]" id="comment" required></textarea><br />
@@ -1414,7 +1436,7 @@ if (($bill['session_id'] == SESSION_ID))
                         bill_id = $("#bill_id").val(),
                         subscribe = $("#subscribe").val();
 
-                    var posting = $.post( "/process-comments-ajax.php", { expiration_date: expiration_date, zip: zip, age: age, bill_id: bill_id, subscribe: subscribe, comment: comment } );
+                    var posting = $.post( "/process-comments.php", { expiration_date: expiration_date, zip: zip, age: age, bill_id: bill_id, subscribe: subscribe, comment: comment } );
 
                     // If the posting was successful.
                     posting.done(function( data ) {

@@ -34,16 +34,21 @@ class Legislator
         /*
          * Connect to Memcached.
          */
-        $mc = new Memcached();
-        $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-
-        /*
-         * If this legislator is cached in Memcached, retrieve it from there.
-         */
-        $result = $mc->get('legislator-' . $id);
-        if ($result !== FALSE)
+        if (MEMCACHED_SERVER != '')
         {
-            return unserialize($result);
+
+            $mc = new Memcached();
+            $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+
+            /*
+            * If this legislator is cached in Memcached, retrieve it from there.
+            */
+            $result = $mc->get('legislator-' . $id);
+            if ($result !== FALSE)
+            {
+                return unserialize($result);
+            }
+
         }
 
         $database = new Database;
@@ -170,7 +175,10 @@ class Legislator
         /*
          * Cache this legislator in Memcached.
          */
-        $mc->set('legislator-' . $id, serialize($legislator), (60 * 60 * 24));
+        if (MEMCACHED_SERVER != '')
+        {
+            $mc->set('legislator-' . $id, serialize($legislator), (60 * 60 * 24));
+        }
 
         return $legislator;
     } // end class "info"

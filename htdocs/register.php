@@ -128,9 +128,8 @@ if (isset($_POST['submit']))
         die();
     }
 
-    # Spammers tend to overload the ZIP field with an extra character, and always
-    # specify a URL, so that combination should be enough to just silently bail.
-    if ((mb_strlen($form_data['zip']) == 6) && !empty($form_data['url']))
+    # Spammers tend to overload the ZIP field with an extra character.
+    if (mb_strlen($form_data['zip']) == 6)
     {
         die();
     }

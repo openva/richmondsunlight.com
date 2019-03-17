@@ -5,8 +5,8 @@ chown -R ricsun:web /vol/www/richmondsunlight.com/
 chmod -R g+w /vol/www/richmondsunlight.com/
 
 # Set up Apache, if need be.
-SITE_SET_UP="$(sudo apache2ctl -S |grep richmondsunlight.com |wc -l)"
-if [ "SITE_SET_UP" -eq "0" ]; then
+SITE_SET_UP="$(sudo apache2ctl -S 2>&1 |grep -c richmondsunlight.com)"
+if [ "$SITE_SET_UP" -eq "0" ]; then
 
     # Set up Apache
     sudo cp deploy/virtualhost.txt /etc/apache2/sites-available/richmondsunlight.com.conf
@@ -14,14 +14,21 @@ if [ "SITE_SET_UP" -eq "0" ]; then
     sudo a2enmod headers expires rewrite http2
     sudo systemctl reload apache2
 
+    # Install a certificate
+    sudo certbot --apache -d richmondsunlight.com --non-interactive --agree-tos --email jaquith@gmail.com --redirect
+
+    # Set the cache directory
+    mkdir -p /vol/www/richmondsunlight.com/htdocs/cache
+    sudo chgrp www-data /vol/www/richmondsunlight.com/htdocs/cache
+
 fi
 
-# Set the cache directory
-mkdir -p /vol/www/richmondsunlight.com/htdocs/cache
-sudo chgrp www-data /var/www/richmondsunlight.com/htdocs/cache
+# Copy over the Sphinx configuration, restart Sphinx
+sudo cp deploy/sphinx.conf /etc/sphinxsearch/sphinx.conf
+sudo /etc/init.d/sphinxsearch restart
 
-# Install a certificate
-sudo certbot --apache -d test.richmondsunlight.com --non-interactive --agree-tos --email jaquith@gmail.com --redirect
+# Index the database
+sudo indexer --all --rotate
 
-# Expire the cached template (in case we've made changes to it).
-echo "delete template-new" | nc localhost 11211
+# Expire the cached template (in case we've made changes to it)
+echo "delete template-new" | nc localhost 11211  || true

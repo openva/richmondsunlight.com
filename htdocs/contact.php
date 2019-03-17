@@ -38,22 +38,40 @@ $site_section = '';
 function show_form($form_data)
 {
     $returned_data = '
-	<form name="comments" method="post" action="/contact/">
-		<p>Your name:<br />
-		<input type="text" name="form_data[name]" size="30" tabindex="1" value="' . $form_data['name'] . '" /></p>
+    <style>
+        fieldset {
+            padding: 0.5em;
+        }
+        label {
+            display: block;
+            font-weight:bold;
+        }
+    </style>
+    <form name="comments" method="post" action="/contact/">
+    
+        <fieldset>
+            <label for="message-name">Your name</label>
+            <input type="text" name="form_data[name]" id="message-name" size="30" value="' . $form_data['name'] . '" />
+        </fieldset>
 
-		<p>Your e-mail address:<br />
-		<input type="text" name="form_data[email]" size="30" tabindex="2" value="' . $form_data['email'] . '" /></p>
+        <fieldset>
+            <label for="message-email">Your e-mail address</label>
+            <input type="text" name="form_data[email]"  id="message-email" size="30" value="' . $form_data['email'] . '" />
+        </fieldset>
 
-		<p>Subject:<br />
-		<input type="text" name="form_data[subject]" size="30" tabindex="3" value="' . $form_data['subject'] . '" /></p>
+        <fieldset>
+            <label for="message-subject">Subject</label>
+            <input type="text" name="form_data[subject]" id="message-subject" size="30" value="' . $form_data['subject'] . '" />
+        </fieldset>
 
-		<p>Text:<br />
-		<textarea name="form_data[comments]" cols="50" rows="5" tabindex="4">' . $form_data['comments'] . '</textarea></p>
+        <fieldset>
+            <label for="message-comments">Message</label>
+            <textarea name="form_data[comments]" id="message-comments" cols="50" rows="10">' . $form_data['comments'] . '</textarea>
+        </fieldset>
 
 		<div style="display: none;">
-			<input type="text" size="2" maxlength="2" name="form_data[state]" id="state" />
-			<label for="state">Leave this field empty</label><br />
+			<input type="text" size="2" maxlength="2" name="form_data[state]" id="message-state" />
+			<label for="message-state">Leave this field empty</label><br />
 		</div>
 
 		<p><input type="submit" name="submit" value="Send Mail"></p>
@@ -77,8 +95,7 @@ if (isset($_POST['form_data']))
     $form_data['name'] = preg_replace("/\r/", "", $form_data['name']);
     $form_data['name'] = preg_replace("/\n/", "", $form_data['name']);
 
-    # Limit the string length and strip slashes; the former being to,
-    # again, block injection attacks.
+    # Limit the string length and strip slashes; the former being to, again, block injection attacks.
     $form_data = array_map('stripslashes', $form_data);
     $form_data = array_map('trim', $form_data);
     $form_data['subject'] = mb_substr($form_data['subject'], 0, 80);
@@ -88,30 +105,38 @@ if (isset($_POST['form_data']))
     # Make sure it's all good.
     if (empty($form_data['name']))
     {
-        $errors[] = 'your name';
+        $errors[] = 'your name is missing';
     }
     if (empty($form_data['email']))
     {
-        $errors[] = 'your e-mail address';
+        $errors[] = 'your email address is missing';
     }
     elseif (!validate_email($form_data['email']))
     {
-        $errors[] = 'invalid e-mail address';
+        $errors[] = 'your email address is not a valid email address';
     }
     if (empty($form_data['subject']))
     {
-        $errors[] = 'the subject of your e-mail';
+        $errors[] = 'the subject of your message is missing';
     }
     if (empty($form_data['comments']))
     {
-        $errors[] = 'the contents of your message';
+        $errors[] = 'the contents of your message are missing';
     }
+
+    preg_match_all('/https?:/', $form_data['comments'], $matches);
+    if (count($matches[0]) >= 3)
+    {
+        $errors[] = 'there are ' . count($matches[0])  . ' website addresses in your email — ' .
+            'that’s a hallmark of spam, so please drop it down to no more than 2';
+    }
+
 
     if (isset($errors))
     {
         $page_body = '
 		<div class="error">
-			<p>All is not well with your e-mail—please correct the following:</p>
+			<p>All is not well with your e-mail — please correct the following:</p>
 			<ul>';
         foreach ($errors as $error)
         {
