@@ -2,7 +2,7 @@
 
 # If the site doesn't already exist, then this is a fresh server.
 SITE_SET_UP="$(sudo apache2ctl -S |grep richmondsunlight.com |wc -l)"
-if [ "SITE_SET_UP" -eq "0" ]; then
+if [ "$SITE_SET_UP" -eq "0" ]; then
 
     # Set the timezone to Eastern
     sudo cp /usr/share/zoneinfo/US/Eastern /etc/localtime
