@@ -2,11 +2,11 @@ version: 0.0
 os: linux
 files:
   - source: ./
-    destination: /vol/www/richmondsunlight.com/
+    destination: /var/www/richmondsunlight.com/
 permissions:
-    - object: /vol/www/richmondsunlight.com/
-      owner: ricsun
-      group: web
+    - object: /var/www/richmondsunlight.com/
+      owner: ubuntu
+      group: ubuntu
       mode: 755
       acls:
         - "d:u::rwx"
