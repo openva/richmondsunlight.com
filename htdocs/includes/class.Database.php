@@ -63,15 +63,15 @@ class Database
             return $GLOBALS['db_old'];
         }
 
-        $this->db = mysql_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
+        $this->db = mysqli_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
 
         /*
          * If the connection succeeded.
          */
         if ($this->db !== FALSE)
         {
-            mysql_select_db(MYSQL_DATABASE, $this->db);
-            mysql_query('SET NAMES "utf8"');
+            mysqli_select_db($this->db, MYSQL_DATABASE);
+            mysqli_query($db, 'SET NAMES "utf8"');
             $GLOBALS['db'] = $this->db;
             return TRUE;
         }

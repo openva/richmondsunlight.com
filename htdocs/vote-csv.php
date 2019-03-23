@@ -25,8 +25,8 @@ $database = new Database;
 $database->connect_old();
 
 # LOCALIZE VARIABLES
-$shortname = mysql_real_escape_string($_GET['shortname']);
-$year = mysql_real_escape_string($_GET['year']);
+$shortname = mysqli_real_escape_string($_GET['shortname']);
+$year = mysqli_real_escape_string($_GET['year']);
 
 # Select the vote data from the database.
 $sql = 'SELECT bills.number AS bill_number, bills.catch_line, representatives_votes.vote,
@@ -42,8 +42,8 @@ $sql = 'SELECT bills.number AS bill_number, bills.catch_line, representatives_vo
 		AND sessions.year = ' . $year . ' AND bills_status.date IS NOT NULL
 		AND votes.session_id=sessions.id
 		ORDER BY date ASC, committee ASC';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($db, $sql);
+if (mysqli_num_rows($result) > 0)
 {
 
     # Send the headers to have the data downloaded as a CSV file.
@@ -53,7 +53,7 @@ if (mysql_num_rows($result) > 0)
     echo 'Please note that votes are not necessarily for or against a bill. Many are' . "\n" .
         'procedural votes. Verify the context of votes at richmondsunlight.com' . "\n" .
         'when in doubt.' . "\n\n" . 'Bill #, Title, Vote, Outcome, Committee, Date' . "\n";
-    while ($vote = mysql_fetch_array($result))
+    while ($vote = mysqli_fetch_array($result))
     {
         $vote = array_map('stripslashes', $vote);
         $vote['catch_line'] = str_replace('"', '""', $vote['catch_line']);

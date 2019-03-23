@@ -51,18 +51,18 @@
 			LEFT JOIN bills
 			ON bills_status.bill_id=bills.id
 			WHERE bills.id=bills_status.bill_id AND bills.session_id = '.SESSION_ID.'
-			AND bills.number="'.mysql_real_escape_string($bill['number']).'"
+			AND bills.number="'.mysqli_real_escape_string($bill['number']).'"
 			ORDER BY bills_status.date DESC, bills_status.id DESC';
 
-    $result = mysql_query($sql);
+    $result = mysqli_query($db, $sql);
 
-    if (mysql_num_rows($result) > 0)
+    if (mysqli_num_rows($result) > 0)
     {
 
         $rss_content = '';
 
         # Generate the RSS.
-        while ($status = mysql_fetch_array($result))
+        while ($status = mysqli_fetch_array($result))
         {
 
             $status = array_map('stripslashes', $status);

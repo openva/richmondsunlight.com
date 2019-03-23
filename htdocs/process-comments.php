@@ -108,9 +108,9 @@ if ($_SERVER['REMOTE_ADDR'] == '151.188.97.205')
 $user = @get_user();
 
 # CLEAN UP THE DATA
-$comment = array_map('mysql_escape_string', $comment);
 $comment = array_map('trim', $comment);
 $comment['comment'] = strip_tags($comment['comment'], '<a><em><strong><i><b><s><blockquote><embed>');
+$comment = array_map('addslashes', $comment);
 
 if (empty($comment['comment']))
 {
@@ -213,8 +213,8 @@ $sql = 'SELECT id
 		FROM comments
 		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(SECOND, date_created, now()) < 5)';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($db, $sql);
+if (mysqli_num_rows($result) > 0)
 {
     header('HTTP/1.0 409 Conflict');
     $message = array('error' => 'Slow down, cowboy: Only one comment is allowed every five seconds. That’s pretty reasonable.');
@@ -227,8 +227,8 @@ $sql = 'SELECT *
 		FROM comments
 		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 5)';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 10)
+$result = mysqli_query($db, $sql);
+if (mysqli_num_rows($result) > 10)
 {
     header('HTTP/1.0 409 Conflict');
     $message = array('error' => 'Slow down, cowboy: You’re posting way too many comments too fast. Relax, think, then write.');
@@ -242,8 +242,8 @@ $sql = 'SELECT id
 		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 60)
 		AND comment="' . $comment['comment'] . '"';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($db, $sql);
+if (mysqli_num_rows($result) > 0)
 {
     header('HTTP/1.0 409 Conflict');
     $message = array('error' => 'You’ve already posted that exact comment. You may not post it again. And, no, don’t '
@@ -270,7 +270,7 @@ if (!empty($user['id']))
 {
     $sql .= ', user_id=' . $user['id'];
 }
-$result = mysql_query($sql);
+$result = mysqli_query($db, $sql);
 if (!$result)
 {
     header('HTTP/1.0 500 Internal Server Error');

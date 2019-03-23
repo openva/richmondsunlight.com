@@ -69,8 +69,8 @@ EOD;
 				LEFT JOIN bills_views
 					ON tags.bill_id=bills_views.bill_id
 				WHERE bills_views.user_id='.$user['id'];
-        $result = mysql_query($sql);
-        $tags = mysql_fetch_array($result);
+        $result = mysqli_query($db, $sql);
+        $tags = mysqli_fetch_array($result);
         if ($tags['count'] <= 10)
         {
             $page_body = '
@@ -93,7 +93,7 @@ EOD;
 					WHERE bills_views.user_id = '.$user['id'].' AND tag IS NOT NULL
 					GROUP BY tags.tag
 					ORDER BY count DESC';
-            $result = mysql_query($sql);
+            $result = mysqli_query($db, $sql);
             $page_sidebar .= '
 				<h3>Your Tag Cloud</h3>
 				<div class="box">
@@ -103,7 +103,7 @@ EOD;
 					<div class="tags">';
 
             # Build up an array of tags, with the key being the tag and the value being the count.
-            while ($tag = mysql_fetch_array($result))
+            while ($tag = mysqli_fetch_array($result))
             {
                 $tag = array_map('stripslashes', $tag);
                 $tags[$tag{'tag'}] = $tag['count'];
@@ -196,8 +196,8 @@ EOD;
 					HAVING count > 0
 					ORDER BY count DESC
 					LIMIT 10';
-            $result = mysql_query($sql);
-            if (mysql_num_rows($result) == 0)
+            $result = mysqli_query($db, $sql);
+            if (mysqli_num_rows($result) == 0)
             {
                 $page_body .= '<p>Sorry, no bills could be found that appear to match your tastes
 				that you haven’t already seen. Most likely, you just need to spend some more time
@@ -209,7 +209,7 @@ EOD;
             else
             {
                 $page_body .= '<ul>';
-                while ($bill = mysql_fetch_array($result))
+                while ($bill = mysqli_fetch_array($result))
                 {
                     $bill = array_map('stripslashes', $bill);
                     $page_body .= '<li><a href="/bill/'.$bill['year'].'/'.$bill['number'].'/">'

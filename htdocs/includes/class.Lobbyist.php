@@ -53,13 +53,13 @@ class Lobbyist
 				FROM lobbyists
 				WHERE id_hash = "' . $this->id_hash . '"
 				LIMIT 1';
-        $result = mysql_query($sql);
+        $result = mysqli_query($db, $sql);
         if ($result === FALSE)
         {
             return FALSE;
         }
 
-        $this->lobbyist = mysql_fetch_object($result);
+        $this->lobbyist = mysqli_fetch_object($result);
 
         /*
          * List all principals for whom this lobbyist registered.
@@ -68,7 +68,7 @@ class Lobbyist
 				FROM lobbyists
 				WHERE id_hash = "' . $this->id_hash . '"
 				ORDER BY principal ASC';
-        $result = mysql_query($sql);
+        $result = mysqli_query($db, $sql);
         if ($result === FALSE)
         {
             return FALSE;
@@ -76,7 +76,7 @@ class Lobbyist
 
         $i=0;
         $this->lobbyist->principals = new stdClass();
-        while ($tmp = mysql_fetch_object($result))
+        while ($tmp = mysqli_fetch_object($result))
         {
             $this->lobbyist->principals->{$i} = $tmp;
             $i++;
@@ -101,13 +101,13 @@ class Lobbyist
         $sql = 'SELECT principal
 				FROM lobbyists
 				WHERE principal_hash = "' . $this->principal_hash . '"';
-        $result = mysql_query($sql);
+        $result = mysqli_query($db, $sql);
         if ($result === FALSE)
         {
             return FALSE;
         }
 
-        $tmp = mysql_fetch_object($result);
+        $tmp = mysqli_fetch_object($result);
         $this->name = $tmp->principal;
 
         /*
@@ -131,7 +131,7 @@ class Lobbyist
 				WHERE principal_hash = "' . $this->principal_hash . '"
 				GROUP BY name
 				ORDER BY name ASC';
-        $result = mysql_query($sql);
+        $result = mysqli_query($db, $sql);
         if ($result === FALSE)
         {
             return FALSE;
@@ -139,7 +139,7 @@ class Lobbyist
 
         $i=0;
         $this->lobbyists = new stdClass();
-        while ($tmp = mysql_fetch_object($result))
+        while ($tmp = mysqli_fetch_object($result))
         {
             $this->lobbyists->{$i} = $tmp;
             $i++;
@@ -174,7 +174,7 @@ class Lobbyist
         $sql = 'SELECT name, sc_id, id_hash, principal, principal_hash, statement, date_registered
 				FROM lobbyists
 				WHERE year = "' . $this->year . '"';
-        $result = mysql_query($sql);
+        $result = mysqli_query($db, $sql);
         if ($result === FALSE)
         {
             return FALSE;
@@ -185,7 +185,7 @@ class Lobbyist
          */
         $i=0;
         $this->registrations = new stdClass();
-        while ($registration = mysql_fetch_object($result))
+        while ($registration = mysqli_fetch_object($result))
         {
             $this->registrations->{$i} = $registration;
             $i++;

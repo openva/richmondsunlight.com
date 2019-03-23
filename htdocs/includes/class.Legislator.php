@@ -14,13 +14,13 @@ class Legislator
 
         $sql = 'SELECT id
 				FROM representatives
-				WHERE shortname="' . mysql_real_escape_string($shortname) . '"';
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) == 0)
+				WHERE shortname="' . mysqli_real_escape_string($shortname) . '"';
+        $result = mysqli_query($db, $sql);
+        if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
         }
-        $legislator = mysql_fetch_array($result);
+        $legislator = mysqli_fetch_array($result);
         return $legislator['id'];
     } // end function "getid"
 
@@ -83,13 +83,13 @@ class Legislator
 				FROM representatives
 				LEFT JOIN districts
 					ON representatives.district_id = districts.id
-				WHERE representatives.id=' . mysql_real_escape_string($id);
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) == 0)
+				WHERE representatives.id=' . mysqli_real_escape_string($id);
+        $result = mysqli_query($db, $sql);
+        if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
         }
-        $legislator = mysql_fetch_assoc($result);
+        $legislator = mysqli_fetch_assoc($result);
 
         # Clean it up.
         $legislator = array_map('stripslashes', $legislator);
@@ -154,10 +154,10 @@ class Legislator
 				WHERE committee_members.representative_id = ' . $legislator['id'] . '
 				AND (committee_members.date_ended IS NULL OR
 					committee_members.date_ended > now())';
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) > 0)
+        $result = mysqli_query($db, $sql);
+        if (mysqli_num_rows($result) > 0)
         {
-            while ($committee = mysql_fetch_assoc($result))
+            while ($committee = mysqli_fetch_assoc($result))
             {
                 # Clean it up.
                 $committee = array_map('stripslashes', $committee);
