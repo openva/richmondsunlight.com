@@ -10,7 +10,7 @@ ALL_CONTENTS="committees committee_members districts files representatives repre
 SOME_CONTENTS="bills bills_copatrons bills_full_text bills_places bills_section_numbers bills_status comments dockets meetings minutes polls representatives_votes tags video_clips video_index video_index_faces video_transcript votes"
 
 # Export all of the structural data that we want
-mysqldump -d richmondsun -p"$PASSWORD" --host "$HOST" "$STRUCTURE" > database.sql
+mysqldump -d richmondsunlight --routines --triggers -u ricsun -p"$PASSWORD" --host "$HOST" "$STRUCTURE" > structure.sql
 
-# Append to the export all of the tables for which we want all contents
-mysqldump richmondsun -u ricsun -p"$PASSWORD" --host "$HOST" "$ALL_CONTENTS" >> database.sql
+# Export all of the tables for which we want complete contents
+mysqldump richmondsunlight --no-create-info -u ricsun -p"$PASSWORD" --host "$HOST" "$ALL_CONTENTS" > basic-contents.sql
