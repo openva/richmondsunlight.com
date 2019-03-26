@@ -16,15 +16,19 @@ SOME_CONTENTS=(bills_copatrons bills_full_text bills_places bills_section_number
 # The ID of the bill to use to generate test data
 BILL_ID=46308
 
+# Change to the directory this script is in
+cd `dirname $0`
+mkdir -p mysql
+
 # Export all of the structural data
-mysqldump richmondsunlight -d --routines --triggers -u "$USERNAME" -p"$PASSWORD" --host "$HOST" $STRUCTURE > structure.sql
+mysqldump richmondsunlight -d --routines --triggers -u "$USERNAME" -p"$PASSWORD" --host "$HOST" $STRUCTURE > mysql/structure.sql
 
 # Export all of the tables for which we want complete contents
-mysqldump richmondsunlight --no-create-info -u "$USERNAME" -p"$PASSWORD" --host "$HOST" "$ALL_CONTENTS" > basic-contents.sql
+mysqldump richmondsunlight --no-create-info -u "$USERNAME" -p"$PASSWORD" --host "$HOST" $ALL_CONTENTS > mysql/basic-contents.sql
 
 # Export selected contents from the remaining tables
-mysqldump richmondsunlight --no-create-info -u "$USERNAME" -p"$PASSWORD" --host "$HOST" bills --where "id=$BILL_ID" > test-records.sql 
+mysqldump richmondsunlight --no-create-info -u "$USERNAME" -p"$PASSWORD" --host "$HOST" bills --where "id=$BILL_ID" > mysql/test-records.sql 
 for TABLE in ${SOME_CONTENTS[*]}
 do
-    mysqldump richmondsunlight --no-create-info -u "$USERNAME" -p"$PASSWORD" --host "$HOST" "$TABLE" --where "bill_id=$BILL_ID" >> test-records.sql
+    mysqldump richmondsunlight --no-create-info -u "$USERNAME" -p"$PASSWORD" --host "$HOST" "$TABLE" --where "bill_id=$BILL_ID" >> mysql/test-records.sql
 done
