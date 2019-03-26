@@ -25,6 +25,9 @@ if [ ! -d "api/" ]; then
     cd api/htdocs/ || exit
     cp -R ../../htdocs/includes/ includes
     cd ../..
+
+    # Concatenate the database dumps into a single file, for MySQL to load
+    cat mysql/*.sql > ../api/deploy/database.sql
     
     # Remove artifacts
     rm api.zip
