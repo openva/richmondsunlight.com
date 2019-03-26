@@ -840,12 +840,13 @@ if ($rss != false)
             </td>
             </tr>';
     }
-        # End the DIV for news mentions.
-        $page_body .= '
-            </tbody>
-            </table>
-    </div>';
 }
+
+# End the DIV for news mentions.
+$page_body .= '
+        </tbody>
+        </table>
+</div>';
 
 # News from the legislator's website.
 if (!empty($legislator['rss_url']))
