@@ -698,33 +698,50 @@ body#body-bills div#options ul {
  * The password strength meter on the account and registration pages.
  */
 meter {
-  /* Reset the default appearance */
-  -webkit-appearance: none;
-     -moz-appearance: none;
-          appearance: none;
-
   margin: 0 auto 1em;
   width: 100%;
   height: 0.5em;
-
-  /* Applicable only to Firefox */
-  background: none;
-  background-color: rgba(0, 0, 0, 0.1);
+  /* firefox */
+  background: #eee;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.2) inset;
+  border-radius: 3px;
 }
-
+/* webkit */
 meter::-webkit-meter-bar {
-  background: none;
-  background-color: rgba(0, 0, 0, 0.1);
+  background: #eee;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.2) inset;
+  border-radius: 3px;
 }
-
-/* Webkit based browsers */
-meter[value="1"]::-webkit-meter-optimum-value { background: red; }
-meter[value="2"]::-webkit-meter-optimum-value { background: yellow; }
-meter[value="3"]::-webkit-meter-optimum-value { background: orange; }
-meter[value="4"]::-webkit-meter-optimum-value { background: green; }
-
-/* Gecko based browsers */
-meter[value="1"]::-moz-meter-bar { background: red; }
-meter[value="2"]::-moz-meter-bar { background: yellow; }
-meter[value="3"]::-moz-meter-bar { background: orange; }
-meter[value="4"]::-moz-meter-bar { background: green; }
+meter::-webkit-meter-optimum-value,
+meter::-webkit-meter-suboptimum-value,
+meter::-webkit-meter-even-less-good-value {
+  border-radius: 3px;
+}
+meter::-webkit-meter-optimum-value {
+  background: #86CC00;
+  background:green;
+}
+meter::-webkit-meter-suboptimum-value {
+  background: #FFDB1A;
+  background:yellow;
+}
+meter::-webkit-meter-even-less-good-value  {
+  background: #CC4600;
+  background:orange;
+}
+/* firefox */
+meter::-moz-meter-bar {
+  border-radius: 3px;
+}
+meter:-moz-meter-optimum::-moz-meter-bar {
+  background: #86CC00;
+  background:green;
+}
+meter:-moz-meter-sub-optimum::-moz-meter-bar {
+  background: #FFDB1A;
+  background:yellow;
+}
+meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
+  background: #CC4600;
+  background:orange;
+}
