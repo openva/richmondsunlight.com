@@ -50,7 +50,7 @@ class Database
     }
 
     /*
-     * Connect via the
+     * Connect via MySQLi
      */
     public function connect_old()
     {
@@ -71,7 +71,7 @@ class Database
         if ($this->db !== FALSE)
         {
             mysqli_select_db($this->db, MYSQL_DATABASE);
-            mysqli_query($db, 'SET NAMES "utf8"');
+            mysqli_query($this->db, 'SET NAMES "utf8"');
             $GLOBALS['db'] = $this->db;
             return TRUE;
         }
