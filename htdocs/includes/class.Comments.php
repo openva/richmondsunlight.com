@@ -12,6 +12,11 @@ class Comments
             return FALSE;
         }
 
+        if (!isset($this->config))
+        {
+            $this->config = new stdClass();
+        }
+
         if (!isset($this->config->get_all) || ($this->config->get_all === TRUE))
         {
             $this->config->get_comments = TRUE;
