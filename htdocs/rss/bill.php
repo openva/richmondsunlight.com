@@ -54,7 +54,7 @@
 			AND bills.number="'.mysqli_real_escape_string($bill['number']).'"
 			ORDER BY bills_status.date DESC, bills_status.id DESC';
 
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
 
     if (mysqli_num_rows($result) > 0)
     {

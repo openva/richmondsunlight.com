@@ -65,7 +65,7 @@ class User
         $sql = 'SELECT id, password
 				FROM users
 				WHERE cookie_hash="' . mysqli_real_escape_string($_SESSION['id']) . '"';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         if (mysqli_num_rows($result) == 1)
         {
@@ -123,7 +123,7 @@ class User
 				GROUP BY tags.tag
 				ORDER BY count DESC
 				LIMIT 100';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         # Unless we have ten tags, we just don't have enough data to continue.
         if (mysqli_num_rows($result) < 10)
@@ -195,7 +195,7 @@ class User
 				LEFT JOIN bills
 					ON bills_views.bill_id = bills.id
 				WHERE bills.session_id = ' . SESSION_ID . ' AND user_id = ' . $user['id'];
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0)
         {
             $bills_seen = array();
@@ -253,7 +253,7 @@ class User
 				ORDER BY count DESC
 				LIMIT 100';
 
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
@@ -319,7 +319,7 @@ class User
 				AND longitude >= ' . (round($user['longitude'], 1)-.25) . ')
 				AND bills.session_id = ' . SESSION_ID . '
 				ORDER BY ( lat_diff + lon_diff ) DESC';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
@@ -360,7 +360,7 @@ class User
 					FROM tags
 					WHERE user_id=' . $user['id'] . ') AS bills';
 
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
@@ -397,7 +397,7 @@ class User
 				AND comments.status = "published"
 				ORDER BY comments.date_created DESC
 				LIMIT 10';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             return FALSE;

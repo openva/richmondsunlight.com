@@ -23,7 +23,7 @@ class Video
 					WHERE file_id=files.id) AS index_data
 				FROM files
 				WHERE id=' . $this->id;
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0)
         {
             $tmp = mysqli_fetch_object($result);
@@ -62,7 +62,7 @@ class Video
 				WHERE chamber="' . $this->video['chamber'] . '" AND
 				date="' . $this->video['date'] . '" AND
 				length="' . $this->video['length'] . ' "';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0)
         {
             $file = mysqli_fetch_array($result);
@@ -146,7 +146,7 @@ class Video
         }
 
         # Perform the database query.
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         # If the query fails, complain,
         if (!$result)
@@ -161,7 +161,7 @@ class Video
         }
         else
         {
-            $this->id = mysqli_insert_id($db);
+            $this->id = mysqli_insert_id($GLOBALS['db']);
         }
 
         return TRUE;
@@ -243,8 +243,8 @@ class Video
 				WHERE legislator_id = ' . $this->legislator_id . '
 				AND ( (time_end - time_start) < (60 * 50) )
 				ORDER BY RAND()
-				LIMIT 5';
-        $result = mysqli_query($db, $sql);
+                LIMIT 5';
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
@@ -280,7 +280,7 @@ class Video
 				WHERE legislator_id = ' . $this->legislator_id . '
 				ORDER BY files.date ASC, video_clips.time_start ASC';
 
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
@@ -320,7 +320,7 @@ class Video
 					ON video_index.file_id = files.id
 				WHERE video_index.linked_id=' . $this->bill_id . ' AND video_index.type="bill"
 				ORDER BY files.date ASC, files.chamber ASC, video_index.time ASC';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
@@ -430,7 +430,7 @@ class Video
 				AND tags.tag IS NOT NULL
 				GROUP BY tag
 				ORDER BY number';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         # Unless we have ten tags, we just don't have enough data to continue.
         if (mysqli_num_rows($result) < 10)
@@ -568,7 +568,7 @@ class Video
 				AND video_index.linked_id IS NOT NULL
 				ORDER BY video_index.time ASC';
 
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
@@ -702,7 +702,7 @@ class Video
         # First, remove every clip already stored for this file.
         $sql = 'DELETE FROM video_clips
 				WHERE file_id = ' . $this->id;
-        mysqli_query($db, $sql);
+        mysqli_query($GLOBALS['db'], $sql);
 
         # Get a list of all bill clips.
         $this->clip_type = 'bills';
@@ -726,7 +726,7 @@ class Video
 					time_end = "' . seconds_to_time($clip->end, true) . '",
 					screenshot = "' . $clip->screenshot . '",
 					date_created = now()';
-            mysqli_query($db, $sql);
+            mysqli_query($GLOBALS['db'], $sql);
         }
 
         # Get a list of all legislators clips.
@@ -751,7 +751,7 @@ class Video
 					GROUP BY linked_id
 					ORDER BY number DESC
 					LIMIT 1';
-            $result = mysqli_query($db, $sql);
+            $result = mysqli_query($GLOBALS['db'], $sql);
             if (mysqli_num_rows($result) === 1)
             {
                 $bill = mysqli_fetch_array($result);
@@ -771,7 +771,7 @@ class Video
                 $sql .= ', bill_id = ' . $clip->bill_id;
             }
 
-            mysqli_query($db, $sql);
+            mysqli_query($GLOBALS['db'], $sql);
         }
 
         return TRUE;
@@ -814,7 +814,7 @@ class Video
             $sql .= 'video_clips.file_id = ' . $this->id;
         }
 
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         if (($result == FALSE) || (mysqli_num_rows($result) == 0))
         {
@@ -886,7 +886,7 @@ class Video
 					WHERE video_clips.file_id=' . $this->id;
         }
 
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         if (mysqli_num_rows($result) < 1)
         {
@@ -1028,7 +1028,7 @@ class Video
         $sql = 'UPDATE files
 				SET webvtt = "' . mysqli_real_escape_string($this->webvtt) . '"
 				WHERE id=' . $this->file_id;
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if ($result === FALSE)
         {
             return FALSE;
@@ -1057,7 +1057,7 @@ class Video
 				FROM video_transcript
 				WHERE file_id = ' . $this->id . '
 				ORDER BY time_start ASC, time_end ASC';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         while ($caption = mysqli_fetch_object($result))
         {
             $caption->time_start = time_to_seconds($caption->time_start);
@@ -1077,7 +1077,7 @@ class Video
 					ON video_clips.bill_id = bills.id
 				WHERE video_clips.file_id = ' . $this->id . '
 				ORDER BY time_start ASC, time_end ASC';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         while ($clip = mysqli_fetch_object($result))
         {
             $clip->time_start = time_to_seconds($clip->time_start) - 5;
@@ -1237,7 +1237,7 @@ class Video
          */
         $sql = 'DELETE FROM video_transcript
 				WHERE file_id=' . $this->file_id;
-        mysqli_query($db, $sql);
+        mysqli_query($GLOBALS['db'], $sql);
 
         /*
          * Structure each stanza and load it into the database.
@@ -1286,7 +1286,7 @@ class Video
                 $sql .= ', new_speaker="y"';
             }
 
-            $result = mysqli_query($db, $sql);
+            $result = mysqli_query($GLOBALS['db'], $sql);
             if ($result === FALSE)
             {
                 return FALSE;
@@ -1327,7 +1327,7 @@ class Video
         $sql = 'SELECT id, text, time_start, time_end, new_speaker, legislator_id
 				FROM video_transcript
 				WHERE file_id=' . $this->file_id;
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
@@ -1360,7 +1360,7 @@ class Video
         $sql = 'SELECT legislator_id, bill_id, time_start, time_end
 				FROM video_clips
 				WHERE file_id=' . $this->file_id;
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0)
         {
             $clips = array();
@@ -1581,7 +1581,7 @@ class Video
 							(SELECT chamber
 							FROM files
 							WHERE id=' . $this->file_id . ')';
-                $result = mysqli_query($db, $sql);
+                $result = mysqli_query($GLOBALS['db'], $sql);
 
                 /*
                  * If more than 1 legislator was found, then we need to re-query, this time
@@ -1607,7 +1607,7 @@ class Video
 								(representatives.place LIKE "' . $place . '%"
 								OR
 								districts.description LIKE "%' . $place . '%")';
-                    $result = mysqli_query($db, $sql);
+                    $result = mysqli_query($GLOBALS['db'], $sql);
                 }
 
                 /*
@@ -1648,7 +1648,7 @@ class Video
                     $sql = 'UPDATE video_transcript
 							SET legislator_id = ' . $caption['legislator_id'] . '
 							WHERE id = ' . $caption['id'];
-                    mysqli_query($db, $sql);
+                    mysqli_query($GLOBALS['db'], $sql);
                 }
             }
         }
@@ -1689,7 +1689,7 @@ class Video
 					ON video_transcript.legislator_id = representatives.id
 				WHERE file_id=' . $this->file_id . '
 				ORDER BY time_start ASC';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
@@ -1903,7 +1903,7 @@ class Video
             FROM files
             WHERE type="video" AND path IS NOT NULL
             ORDER BY path ASC';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     while ($video = mysqli_fetch_array($result))
     {
         $videos[$video{path}] = $video['id'];

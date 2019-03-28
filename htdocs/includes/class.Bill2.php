@@ -58,7 +58,7 @@ class Bill2
 					ON bills.session_id=sessions.id
 				WHERE bills.number="' . mysqli_real_escape_string($number) . '"
 				AND sessions.year=' . mysqli_real_escape_string($year);
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) < 1)
         {
             return false;
@@ -150,7 +150,7 @@ class Bill2
 				LEFT JOIN bills AS bills2
 					ON bills.incorporated_into=bills2.id
 				WHERE bills.id=' . $id;
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             return false;
@@ -194,7 +194,7 @@ class Bill2
 						ON bills_copatrons.legislator_id=representatives.id
 					WHERE bills_copatrons.bill_id=' . $bill['id'] . '
 					ORDER BY representatives.chamber ASC, representatives.name ASC';
-            $bill_result = @mysqli_query($db, $sql);
+            $bill_result = @mysqli_query($GLOBALS['db'], $sql);
             while ($copatron = mysqli_fetch_array($bill_result))
             {
                 $copatron = array_map('stripslashes', $copatron);
@@ -206,7 +206,7 @@ class Bill2
         $sql = 'SELECT id, tag
 				FROM tags
 				WHERE bill_id=' . $bill['id'];
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         # If there are any tags, display them.
         if (mysqli_num_rows($result) > 0)
@@ -229,7 +229,7 @@ class Bill2
 				AND bills_status.session_id=votes.session_id
 				WHERE bills_status.bill_id = ' . $bill['id'] . '
 				ORDER BY date_raw DESC, bills_status.id DESC';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0)
         {
             # Initialize this array.
@@ -249,7 +249,7 @@ class Bill2
         $sql = 'SELECT placename AS name, latitude, longitude
 				FROM bills_places
 				WHERE bill_id=' . $bill['id'] . '';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0)
         {
             $bill['places'] = array();
@@ -271,7 +271,7 @@ class Bill2
 				WHERE bills.session_id = ' . $bill['session_id'] . '
 				AND bills.summary_hash = "' . $bill['summary_hash'] . '" AND bills.id != ' . $bill['id'] . '
 				ORDER BY bills.date_introduced ASC, bills.chamber DESC';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0)
         {
             $bill['duplicates'] = array();
@@ -336,7 +336,7 @@ class Bill2
 					ORDER BY count DESC
 					LIMIT 5';
 
-            $result = mysqli_query($db, $sql);
+            $result = mysqli_query($GLOBALS['db'], $sql);
 
             if (mysqli_num_rows($result) > 0)
             {

@@ -42,7 +42,7 @@ class Vote
 					FROM sessions
 					WHERE year="' . $this->session_year . '"
 					AND suffix IS NULL';
-            $result = mysqli_query($db, $sql);
+            $result = mysqli_query($GLOBALS['db'], $sql);
             if (mysqli_num_rows($result) == 0)
             {
                 die('No such vote found.');
@@ -58,7 +58,7 @@ class Vote
 				FROM votes
 				WHERE lis_id="' . $this->lis_id . '"
 				AND session_id = ' . $this->session_id;
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             die('No such vote found.');
@@ -120,7 +120,7 @@ class Vote
 					ON representatives.district_id=districts.id
 				WHERE votes.lis_id="' . $this->lis_id . '" AND votes.session_id="' . $this->session_id . '"
 				ORDER BY vote ASC, name ASC';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) < 1)
         {
             return FALSE;

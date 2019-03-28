@@ -59,7 +59,7 @@ $sql = 'SELECT representatives.shortname, representatives.name, representatives.
 		WHERE (representatives.date_ended IS NULL
 			OR representatives.date_ended > now())
 		ORDER BY representatives.chamber ASC, representatives.name ASC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
 

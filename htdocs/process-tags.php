@@ -53,7 +53,7 @@ if (empty($tags))
         # Delete the tag.
         $sql = 'DELETE FROM tags
 				WHERE id=' . $delete;
-        mysqli_query($db, $sql);
+        mysqli_query($GLOBALS['db'], $sql);
 
         # Delete the bill from Memcached.
         $mc = new Memcached();
@@ -143,7 +143,7 @@ if (!empty($_SESSION['id']))
 							FROM users
 							WHERE cookie_hash = "' . $_SESSION['id'] . '"),
 						date_created=now()';
-                $result = mysqli_query($db, $sql);
+                $result = mysqli_query($GLOBALS['db'], $sql);
 
                 /*
                  * If there was a database-insertion error.

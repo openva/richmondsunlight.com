@@ -51,7 +51,7 @@
 			LEFT JOIN districts
 				ON representatives.district_id=districts.id
 			WHERE representatives.shortname = "'.mysqli_real_escape_string($legislator['shortname']).'"';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) == 0)
     {
         die();
@@ -85,7 +85,7 @@
 			WHERE bills.session_id = '.SESSION_ID.'
 			AND representatives.shortname="'.$legislator['shortname'].'"
 			ORDER BY bills.date_modified DESC';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
 
     // Don't check to make sure the query was successful -- we want to make sure that people can
     // even subscribe to feeds for legislators that have introduced nothing yet.

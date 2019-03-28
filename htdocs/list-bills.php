@@ -178,7 +178,7 @@ else
 			CAST(LPAD(SUBSTRING(bills.number FROM 3), 4, "0") AS unsigned) ASC';
 }
 
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 $num_results = mysqli_num_rows($result);
 if ($num_results > 0)
 {
@@ -377,7 +377,7 @@ if (!empty($year))
         $sql .= ' HAVING count > 5';
     }
     $sql .= ' ORDER BY tags.tag ASC';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0)
     {
         $page_sidebar .= '
@@ -433,7 +433,7 @@ if (!empty($tag))
 			AND bills.session_id = ' . SESSION_ID . '
 			GROUP BY tags2.tag
 			ORDER BY tag ASC';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0)
     {
         $page_sidebar .= '
@@ -484,7 +484,7 @@ if (!empty($committee) && !empty($chamber))
 			FROM committees
 			WHERE shortname="' . $committee . '"
 			AND chamber="' . $chamber . '"';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0)
     {
         $committee = mysqli_fetch_array($result);

@@ -30,8 +30,8 @@ $database->connect_old();
 session_start();
 
 # LOCALIZE AND CLEAN UP VARIABLES
-$year = mysqli_real_escape_string($db, $_REQUEST['year']);
-$bill = mysqli_real_escape_string($db, $_REQUEST['bill']);
+$year = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['year']);
+$bill = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['bill']);
 
 # RETRIEVE THE BILL INFO FROM THE DATABASE
 $sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber,
@@ -49,7 +49,7 @@ $sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber,
 		LEFT JOIN districts
 		ON representatives.district_id=districts.id
 		WHERE bills.number="' . $bill . '" AND sessions.year=' . $year;
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $bill = mysqli_fetch_array($result);
@@ -86,7 +86,7 @@ $sql = 'SELECT DATE_FORMAT(date, "%m/%d/%Y") AS date, date AS date_raw, status
 		FROM bills_status
 		WHERE bill_id=' . $bill['id'] . ' AND session_id=' . $bill['session_id'] . '
 		ORDER BY date_raw ASC, id ASC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 $page_body .= '<ul>';
 while ($history = mysqli_fetch_array($result))
 {

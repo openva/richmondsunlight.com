@@ -56,7 +56,7 @@
 			WHERE comments.status="published"
 			ORDER BY comments.date_created DESC
 			LIMIT 20';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
 
     $rss_content = '';
 

@@ -96,7 +96,7 @@ if (!empty($_POST))
 								WHERE cookie_hash = "' . $_SESSION['id'] . '"),
 							date_created=now()';
                     $page_body .= '.';
-                    mysqli_query($db, $sql);
+                    mysqli_query($GLOBALS['db'], $sql);
 
                     # Delete this from the cache.
                     if (MEMCACHED_SERVER != '')
@@ -126,7 +126,7 @@ else
 			LEFT JOIN tags ON bills.id = tags.bill_id
 			WHERE bills.session_id = ' . SESSION_ID . '
 			AND tags.bill_id IS NULL';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     $remaining = mysqli_fetch_array($result);
     $page_body .= '<p>There are ' . number_format($remaining['number']) . ' bills that don’t have
 		any tags.</p>';
@@ -144,7 +144,7 @@ else
 				WHERE bill_id = bills.id) = 0
 			ORDER BY sessions.year DESC, RAND()
 			LIMIT 20';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) == 0)
     {
         die('Huzzah! There are no untagged bills!');
@@ -175,7 +175,7 @@ else
 					GROUP BY tag
 					HAVING number > 2
 					ORDER BY number DESC';
-            $tag_result = mysqli_query($db, $sql);
+            $tag_result = mysqli_query($GLOBALS['db'], $sql);
             if (mysqli_num_rows($result) > 0)
             {
                 $tags = array();

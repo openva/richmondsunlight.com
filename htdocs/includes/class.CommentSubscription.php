@@ -18,7 +18,7 @@ class CommentSubscription
         $sql = 'INSERT INTO comments_subscriptions
 				SET user_id=' . $this->user_id . ', bill_id=' . $this->bill_id . ',
 				hash="' . generate_hash(8) . '", date_created=now()';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if ($result === FALSE)
         {
             return FALSE;
@@ -40,7 +40,7 @@ class CommentSubscription
 
         $sql = 'DELETE FROM comments_subscriptions
 				WHERE hash="' . $hash . '"';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if ($result === FALSE)
         {
             return FALSE;
@@ -65,7 +65,7 @@ class CommentSubscription
 				FROM comments_subscriptions LEFT JOIN users
 				ON comments_subscriptions.user_id=users.id
 				WHERE comments_subscriptions.bill_id=' . $this->bill_id;
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (($result === FALSE) || (mysqli_num_rows($result) < 1))
         {
             return FALSE;
@@ -99,7 +99,7 @@ class CommentSubscription
         $sql = 'SELECT hash
 				FROM comments_subscriptions
 				WHERE user_id=' . $this->user_id . ' AND bill_id=' . $this->bill_id;
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) < 1)
         {
             return FALSE;

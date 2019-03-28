@@ -59,7 +59,7 @@ $sql = 'SELECT dashboard_portfolios.id, dashboard_portfolios.hash, dashboard_por
 		LEFT JOIN dashboard_user_data
 			ON users.id = dashboard_user_data.user_id
 		WHERE dashboard_portfolios.public = "y" AND dashboard_portfolios.hash="' . $hash . '"';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 
 # If this portfolio doesn't exist or isn't visible.
 if (mysqli_num_rows($result) == 0)
@@ -77,7 +77,7 @@ else
     $sql = 'UPDATE dashboard_portfolios
 			SET view_count = view_count + 1
 			WHERE id = ' . $portfolio['id'];
-    mysqli_query($db, $sql);
+    mysqli_query($GLOBALS['db'], $sql);
 
     # Make the user closer to anonymous.
     $tmp = explode(' ', $portfolio['user_name']);
@@ -152,7 +152,7 @@ else
 			AND sessions.year=' . SESSION_YEAR . '
 			GROUP BY tags.tag
 			ORDER BY tags.tag ASC';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0)
     {
         $page_sidebar .= '
@@ -210,7 +210,7 @@ else
 			ORDER BY bills.chamber DESC,
 			SUBSTRING(bills.number FROM 1 FOR 2) ASC,
 			CAST(LPAD(SUBSTRING(bills.number FROM 3), 4, "0") AS unsigned) ASC';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     $bill_count = mysqli_num_rows($result);
     if ($bill_count == 0)
     {

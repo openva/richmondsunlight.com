@@ -17,7 +17,7 @@ function populate_smart_portfolio($portfolio_id)
     $sql = 'SELECT watch_list_id AS id
 			FROM dashboard_portfolios
 			WHERE id = ' . $portfolio_id;
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) == 0)
     {
         return FALSE;
@@ -28,7 +28,7 @@ function populate_smart_portfolio($portfolio_id)
     $sql = 'SELECT user_id AS id
 			FROM dashboard_portfolios
 			WHERE id = ' . $portfolio_id;
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) == 0)
     {
         return FALSE;
@@ -40,7 +40,7 @@ function populate_smart_portfolio($portfolio_id)
     $sql = 'SELECT tag, patron_id, committee_id, keyword, status, current_chamber
 			FROM dashboard_watch_lists
 			WHERE id =' . $watch_list['id'];
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) == 0)
     {
         return FALSE;
@@ -89,7 +89,7 @@ function populate_smart_portfolio($portfolio_id)
     }
 
     # Run the actual query;
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
 
     # We don't want to fail when no bills are found. It's totally reasonable for somebody to
     # have a smart portfoilo that starts out blank. But we do want to erase any bills in the
@@ -99,7 +99,7 @@ function populate_smart_portfolio($portfolio_id)
     {
         $sql = 'DELETE FROM dashboard_bills
 				WHERE portfolio_id = ' . $portfolio_id . ' AND user_id=' . $user_id;
-        mysqli_query($db, $sql);
+        mysqli_query($GLOBALS['db'], $sql);
         return true;
     }
 
@@ -113,7 +113,7 @@ function populate_smart_portfolio($portfolio_id)
     $sql = 'SELECT bill_id AS id
 			FROM dashboard_bills
 			WHERE portfolio_id = ' . $portfolio_id;
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0)
     {
         while ($bill = mysqli_fetch_array($result))
@@ -168,7 +168,7 @@ function populate_smart_portfolio($portfolio_id)
             $sql = 'DELETE FROM dashboard_bills
 					WHERE portfolio_id = ' . $portfolio_id . ' AND bill_id = ' . $bill_id . '
 					AND user_id=' . $user_id;
-            mysqli_query($db, $sql);
+            mysqli_query($GLOBALS['db'], $sql);
         }
     }
 
@@ -182,7 +182,7 @@ function populate_smart_portfolio($portfolio_id)
 					SET user_id = ' . $user_id . ', bill_id = ' . $bill_id . ',
 					portfolio_id = ' . $portfolio_id . ', date_created = now()
 					ON DUPLICATE KEY UPDATE bill_id=bill_id';
-            $result = mysqli_query($db, $sql);
+            $result = mysqli_query($GLOBALS['db'], $sql);
         }
     }
 }
@@ -573,7 +573,7 @@ function show_portfolio($portfolio, $user_id)
 			AND dashboard_bills.portfolio_id = ' . $portfolio['id'] . '
 			AND bills.session_id = ' . SESSION_ID . '
 			ORDER BY last_date DESC';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0)
     {
         $content = '

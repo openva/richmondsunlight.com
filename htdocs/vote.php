@@ -72,7 +72,7 @@ $sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber, bills.ca
 		LEFT JOIN committees
 			ON votes.committee_id=committees.id
 		WHERE bills.number="' . $bill . '" AND sessions.year=' . $year;
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $bill = mysqli_fetch_assoc($result);
@@ -334,7 +334,7 @@ $sql = 'SELECT DISTINCT bills_status.status, bills_status.translation,
 		WHERE bills_status.bill_id = ' . $bill['id'] . '
         AND (votes.session_id=bills_status.session_id OR votes.session_id IS NULL)
 		ORDER BY date_raw DESC, bills_status.id DESC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $bill['status_history'] = '';

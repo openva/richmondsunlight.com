@@ -125,7 +125,7 @@
 					' . (!empty($form_data['password_hash']) ? ', users.password = "' . $form_data['password_hash'] . '"' : '') . '
 					' . (!empty($form_data['email_active']) ? ', dashboard_user_data.email_active = "' . $form_data['email_active'] . '"' : '') . '
 					WHERE users.cookie_hash="' . $_SESSION['id'] . '"';
-            $result = mysqli_query($db, $sql);
+            $result = mysqli_query($GLOBALS['db'], $sql);
 
             # Report on the results.
             if (!$result)
@@ -149,7 +149,7 @@
     $sql = 'SELECT users.id, users.name, users.email, dashboard_user_data.email_active
 			FROM users LEFT JOIN dashboard_user_data ON users.id = dashboard_user_data.user_id
 			WHERE users.cookie_hash="' . $_SESSION['id'] . '"';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) == 0)
     {
         login_redirect();

@@ -28,7 +28,7 @@ class Poll
 					FROM users
 					WHERE cookie_hash = "' . $_SESSION['id'] . '")
 				AND bill_id=' . $this->bill_id;
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) === 0)
         {
             return FALSE;
@@ -81,7 +81,7 @@ class Poll
                     AND vote = "y") AS yes
                 FROM polls
                 WHERE bill_id= ' . $this->bill_id;
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             return FALSE;

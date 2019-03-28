@@ -24,7 +24,7 @@ $database = new Database;
 $database->connect_old();
 
 # LOCALIZE VARIABLES
-$section = mysqli_real_escape_string($db, urldecode($_REQUEST['section']));
+$section = mysqli_real_escape_string($GLOBALS['db'], urldecode($_REQUEST['section']));
 if (isset($_REQUEST['callback']) && !empty($_REQUEST['callback']))
 {
     $callback = $_REQUEST['callback'];
@@ -39,7 +39,7 @@ $sql = 'SELECT sessions.year, bills.number, bills.catch_line
 			ON bills.session_id = sessions.id
 		WHERE bills_section_numbers.section_number =  "' . $section . '"
 		ORDER BY year ASC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 # The MYSQL_ASSOC variable indicates that we want just the associated array, not both associated
 # and indexed arrays.
 $bill = mysqli_fetch_array($result, MYSQL_ASSOC);

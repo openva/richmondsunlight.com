@@ -53,7 +53,7 @@
 			ON tags.bill_id=bills.id
 			WHERE bills.session_id = '.SESSION_ID.'
 			AND tags.tag="'.mysqli_real_escape_string($tag).'"';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
 
     // Don't check to make sure the query was successful -- we want to make sure that people can
     // even subscribe to feeds for tags that have nothing introduced yet.

@@ -72,7 +72,7 @@ $sql = 'SELECT shortname, name, party, place
 		WHERE chamber="house"
 		AND (date_ended IS NULL OR date_ended > now())
 		ORDER BY name ASC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
@@ -95,7 +95,7 @@ $sql = 'SELECT shortname, name, party, place
 		WHERE chamber="senate"
 		AND (date_ended IS NULL OR date_ended > now())
 		ORDER BY name ASC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '<div class="right_side">
@@ -123,7 +123,7 @@ $sql = 'SELECT id, shortname, name, chamber, latitude, longitude
         FROM representatives
         WHERE (date_ended IS NULL OR date_ended > now())
         AND latitude IS NOT NULL AND longitude IS NOT NULL';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     # Create the HTML that defines the map.

@@ -53,7 +53,7 @@ class Lobbyist
 				FROM lobbyists
 				WHERE id_hash = "' . $this->id_hash . '"
 				LIMIT 1';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if ($result === FALSE)
         {
             return FALSE;
@@ -68,7 +68,7 @@ class Lobbyist
 				FROM lobbyists
 				WHERE id_hash = "' . $this->id_hash . '"
 				ORDER BY principal ASC';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if ($result === FALSE)
         {
             return FALSE;
@@ -101,7 +101,7 @@ class Lobbyist
         $sql = 'SELECT principal
 				FROM lobbyists
 				WHERE principal_hash = "' . $this->principal_hash . '"';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if ($result === FALSE)
         {
             return FALSE;
@@ -131,7 +131,7 @@ class Lobbyist
 				WHERE principal_hash = "' . $this->principal_hash . '"
 				GROUP BY name
 				ORDER BY name ASC';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if ($result === FALSE)
         {
             return FALSE;
@@ -174,7 +174,7 @@ class Lobbyist
         $sql = 'SELECT name, sc_id, id_hash, principal, principal_hash, statement, date_registered
 				FROM lobbyists
 				WHERE year = "' . $this->year . '"';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if ($result === FALSE)
         {
             return FALSE;

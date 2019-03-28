@@ -60,7 +60,7 @@ $sql = 'SELECT DISTINCT meetings.time AS time_raw, DATE_FORMAT(meetings.time, "%
 			ON meetings.committee_id=committees.id
 		WHERE date="' . $date . '"
 		ORDER BY timedesc DESC, time_raw ASC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
@@ -98,7 +98,7 @@ $sql = 'SELECT dockets.date, committees.id AS committee_id, committees.chamber,
 		WHERE dockets.date = "' . mysqli_real_escape_string($date) . '"
 		GROUP BY dockets.committee_id
 		ORDER BY committees.chamber DESC, committees.name ASC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) < 1)
 {
     $page_body .= '<p>No committee or subcommittee meetings are currently scheduled for today.</p>';
@@ -131,7 +131,7 @@ else
 				ORDER BY bills.chamber DESC,
 				SUBSTRING(bills.number FROM 1 FOR 2) ASC,
 				CAST(LPAD(SUBSTRING(bills.number FROM 3), 4, "0") AS unsigned) ASC';
-        $result2 = mysqli_query($db, $sql);
+        $result2 = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result2) > 0)
         {
             # Initialize the array.
@@ -215,7 +215,7 @@ $sql = 'SELECT DISTINCT DATE_FORMAT(date, "%m/%d/%Y") AS date_formatted, date
 		WHERE date >= now()
 		ORDER BY date ASC
 		LIMIT 10';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $page_sidebar = '

@@ -24,8 +24,8 @@ $database->connect_old();
 session_start();
 
 # LOCALIZE AND CLEAN UP VARIABLES
-$chamber = mysqli_real_escape_string($db, $_REQUEST['chamber']);
-$date = mysqli_real_escape_string($db, $_REQUEST['year']) . '-' . mysqli_real_escape_string($db, $_REQUEST['date']);
+$chamber = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['chamber']);
+$date = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['year']) . '-' . mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['date']);
 
 # PAGE METADATA
 $page_title = date('m/d/Y', strtotime($date)) . ' ' . ucfirst($chamber) . ' Proceedings';
@@ -35,7 +35,7 @@ $site_section = 'minutes';
 $sql = 'SELECT text
 		FROM minutes
 		WHERE date="' . $date . '" AND chamber="' . $chamber . '"';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) == 0)
 {
     $page_body = '<p>No minutes are available for that date.</p>';
@@ -63,7 +63,7 @@ elseif (mysqli_num_rows($result) > 0)
 			WHERE type="video" AND committee_id IS NULL AND date="' . $date . '"
 			AND chamber="' . $chamber . '"
 			LIMIT 1';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0)
     {
         $video = mysqli_fetch_array($result);
@@ -214,7 +214,7 @@ elseif (mysqli_num_rows($result) > 0)
 				WHERE bills_status.date="' . $date . '" AND bills.current_chamber="' . $chamber . '"
 				GROUP BY tag
 				ORDER BY count DESC';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0)
         {
             # Build up an array of tags, with the key being the tag and the value being the count.

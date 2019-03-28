@@ -59,7 +59,7 @@ class Comments
 					)
 					AND comments.status="published"
 					ORDER BY comments.date_created ASC';
-            $result = mysqli_query($db, $sql);
+            $result = mysqli_query($GLOBALS['db'], $sql);
             if (mysqli_num_rows($result) > 0)
             {
                 while ($comment = mysqli_fetch_array($result))
@@ -96,7 +96,7 @@ class Comments
 						ON dashboard_user_data.user_id = users.id
 					WHERE dashboard_bills.bill_id=' . $bill_info['id'] . ' AND dashboard_bills.notes IS NOT NULL
 					ORDER BY date_modified ASC';
-            $result = mysqli_query($db, $sql);
+            $result = mysqli_query($GLOBALS['db'], $sql);
             if (mysqli_num_rows($result) > 0)
             {
                 while ($comment = mysqli_fetch_array($result))

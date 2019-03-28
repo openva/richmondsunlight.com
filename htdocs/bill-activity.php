@@ -60,7 +60,7 @@ $sql = 'SELECT bills.number, sessions.year, bills.catch_line, bills_status.statu
 		WHERE DATE_SUB(CURDATE(), INTERVAL ' . $days . ' DAY) <= bills_status.date
 		ORDER BY bills_status.date DESC';
 
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 $num_results = mysqli_num_rows($result);
 if ($num_results > 0)
 {

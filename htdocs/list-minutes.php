@@ -51,7 +51,7 @@ $sql = 'SELECT date, chamber,
 		FROM minutes
 		WHERE DATE_FORMAT(date, "%Y") = ' . $year . '
 		ORDER BY chamber ASC, date ASC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 
 # PAGE SIDEBAR
 $page_sidebar = '

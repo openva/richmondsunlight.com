@@ -215,7 +215,7 @@ if (isset($_POST['submit']))
             $sql .= ', password="' . $form_data['password'] . '"';
         }
         $sql .= ' WHERE id=' . $user['id'];
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if ($result === FALSE)
         {
             die('Your account could not be updated.');
@@ -225,7 +225,7 @@ if (isset($_POST['submit']))
         $sql = 'UPDATE dashboard_user_data
 				SET organization=' . (empty($form_data['organization']) ? 'NULL' : '"' . $form_data['organization'] . '"') . '
 				WHERE user_id=' . $user['id'];
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         header('Location: http://www.richmondsunlight.com/account/?updated');
         exit();
@@ -270,7 +270,7 @@ if (!isset($_POST['submit']))
 			FROM users LEFT JOIN dashboard_user_data
 			ON users.id=dashboard_user_data.user_id
 			WHERE id=' . $user['id'];
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) == 0)
     {
         die('No user data found.');

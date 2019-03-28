@@ -45,7 +45,7 @@ $sql = 'SELECT tags.id, tags.tag, bills.number AS bill, sessions.year, users.nam
 		WHERE DATE_SUB(CURDATE(), INTERVAL 3 DAY) <= tags.date_created
 		AND users.trusted = "n"
 		ORDER BY tags.date_created DESC, bills.id DESC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
@@ -67,7 +67,7 @@ $sql = 'SELECT name, url
 		FROM users
 		WHERE DATE_SUB(CURDATE(), INTERVAL 3 DAY) <= date_created AND name IS NOT NULL
 		ORDER BY date_created DESC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
@@ -95,7 +95,7 @@ $sql = 'SELECT DATE_FORMAT(date_created, "%Y-%m-%d") AS date, COUNT(*) AS number
 		GROUP BY date
 		ORDER BY date DESC
 		LIMIT 7';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
@@ -121,7 +121,7 @@ $sql = 'SELECT DATE_FORMAT(date_created, "%Y-%m-%d") AS date, COUNT(*) AS number
 		GROUP BY date
 		ORDER BY date DESC
 		LIMIT 7';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
@@ -147,7 +147,7 @@ $sql = 'SELECT DATE_FORMAT(date_created, "%Y-%m-%d") AS date, COUNT(*) AS number
 		GROUP BY date
 		ORDER BY date DESC
 		LIMIT 7';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
@@ -175,7 +175,7 @@ $sql = 'SELECT organization AS name, dashboard_portfolios.hash AS url
 		WHERE organization IS NOT NULL
 		ORDER BY dashboard_user_data.date_created DESC
 		LIMIT 10';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
@@ -210,7 +210,7 @@ $sql = 'SELECT bills.number, bills.catch_line, sessions.year, COUNT(*) AS views
 		GROUP BY bills_views.bill_id
 		ORDER BY views DESC
 		LIMIT 10';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '

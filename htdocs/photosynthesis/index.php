@@ -68,7 +68,7 @@ $sql = 'SELECT id, hash, name, watch_list_id
 		FROM dashboard_portfolios
 		WHERE watch_list_id IS NULL AND user_id=' . $user['id'] . '
 		ORDER BY name ASC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 
 # If the user has no portfolios. It shouldn't happen, but it could.
 if (mysqli_num_rows($result) == 0)
@@ -77,7 +77,7 @@ if (mysqli_num_rows($result) == 0)
     $sql = 'INSERT INTO dashboard_portfolios
 			SET name = "Bills", public="y", user_id = ' . $user['id'] . ',
 			date_created = now()';
-    mysqli_query($db, $sql);
+    mysqli_query($GLOBALS['db'], $sql);
     $bypass = 1;
 }
 
@@ -136,7 +136,7 @@ $sql = 'SELECT id, name, hash, notes, watch_list_id
 		FROM dashboard_portfolios
 		WHERE user_id=' . $user['id'] . '
 		ORDER BY name ASC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 
 if (mysqli_num_rows($result) > 0)
 {

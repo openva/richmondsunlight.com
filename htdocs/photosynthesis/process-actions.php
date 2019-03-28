@@ -64,7 +64,7 @@
 					FROM dashboard_portfolios
 					WHERE hash="' . $portfolio_hash . '"),
 				date_created=now()';
-        mysqli_query($db, $sql);
+        mysqli_query($GLOBALS['db'], $sql);
 
         # Return the user back to his dashboard listing.
         header('Location: ' . $_SERVER['HTTP_REFERER']);
@@ -88,7 +88,7 @@
 				AND portfolio_id = (SELECT id
 					FROM dashboard_portfolios
 					WHERE hash="' . $portfolio_hash . '")';
-        mysqli_query($db, $sql);
+        mysqli_query($GLOBALS['db'], $sql);
 
         /*
          * Clear the Memcached cache of comments on this bill, since Photosynthesis comments are
@@ -99,7 +99,7 @@
             $sql = 'SELECT bill_id AS id
                     FROM dashboard_bills
                     WHERE id=' . record_id;
-            $result = mysqli_query($db, $sql);
+            $result = mysqli_query($GLOBALS['db'], $sql);
             $bill = mysqli_fetch_array($result);
             $mc = new Memcached();
             $mc->addServer("127.0.0.1", 11211);
@@ -119,14 +119,14 @@
     {
 
         # Localize and make safe the portfolio hash.
-        $portfolio_hash = mysqli_real_escape_string($db, $_GET['delete-portfolio']);
+        $portfolio_hash = mysqli_real_escape_string($GLOBALS['db'], $_GET['delete-portfolio']);
 
         # Start off by getting the portfolio's ID and its watch list ID. If there is a watch list
         # ID, we'll use it below to delete the watch list.
         $sql = 'SELECT id, hash, watch_list_id
 				FROM dashboard_portfolios
 				WHERE hash="' . $portfolio_hash . '"';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             die('Error: No portfolio found. Could not delete it.');
@@ -136,19 +136,19 @@
         # Remove all of the bills associated with this portfolio.
         $sql = 'DELETE FROM dashboard_bills
 				WHERE portfolio_id=' . $portfolio['id'] . ' AND user_id=' . $user['id'];
-        mysqli_query($db, $sql);
+        mysqli_query($GLOBALS['db'], $sql);
 
         # Delete the portfolio.
         $sql = 'DELETE FROM dashboard_portfolios
 				WHERE id=' . $portfolio['id'] . ' AND user_id=' . $user['id'];
-        mysqli_query($db, $sql);
+        mysqli_query($GLOBALS['db'], $sql);
 
         # Finally, if this is a smart portfolio, remove the watch list entry.
         if (!empty($portfolio['watch_list_id']))
         {
             $sql = 'DELETE FROM dashboard_watch_lists
 					WHERE id = ' . $portfolio['watch_list_id'];
-            mysqli_query($db, $sql);
+            mysqli_query($GLOBALS['db'], $sql);
         }
 
         header('Location: ' . $_SERVER['HTTP_REFERER']);
@@ -198,7 +198,7 @@
         {
             $sql .= ', notify="' . $form_data['notify'] . '"';
         }
-        mysqli_query($db, $sql);
+        mysqli_query($GLOBALS['db'], $sql);
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         exit;
     }
@@ -268,8 +268,8 @@
         $sql .= ' user_id=' . $user['id'] . ', date_created=now()';
 
         # Perform the insert and preserve the watch list ID.
-        mysqli_query($db, $sql);
-        $watch_list_id = mysqli_insert_id($db);
+        mysqli_query($GLOBALS['db'], $sql);
+        $watch_list_id = mysqli_insert_id($GLOBALS['db']);
 
         # Generate a random five-digit hash to ID this portfolio. It's in base 30,
         # allowing for a namespace of 24,300,000.
@@ -291,8 +291,8 @@
         {
             $sql .= ', notify="' . $form_data['notify'] . '"';
         }
-        $result = mysqli_query($db, $sql);
-        $portfolio_id = mysqli_insert_id($db);
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        $portfolio_id = mysqli_insert_id($GLOBALS['db']);
 
         populate_smart_portfolio($portfolio_id);
 

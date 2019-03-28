@@ -193,7 +193,7 @@ if (isset($_POST['submit']))
 				FROM users
 				WHERE email = "' . mysqli_real_escape_string($form_data['email']) . '"
 				AND password IS NOT NULL';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0)
         {
             $errors[] = 'an e-mail address that’s not already in use; better yet,
@@ -307,7 +307,7 @@ if (isset($_POST['submit']))
             $sql = 'INSERT INTO dashboard_portfolios
 					SET name = "Bills", public="y", user_id = ' . $user['id'] . ',
 					hash = "' . $hash . '", date_created = now()';
-            mysqli_query($db, $sql);
+            mysqli_query($GLOBALS['db'], $sql);
 
             # Acknowledge the registration.
             $page_body = '

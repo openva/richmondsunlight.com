@@ -59,7 +59,7 @@ if (isset($_POST['submit']))
         $sql = 'SELECT id, name, cookie_hash
 				FROM users
 				WHERE email = "' . $form_data['email'] . '" AND password = "' . $form_data['password_hash'] . '"';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         if (mysqli_num_rows($result) == 0)
         {
@@ -83,7 +83,7 @@ if (isset($_POST['submit']))
 					FROM dashboard_portfolios
 					WHERE watch_list_id IS NULL AND user_id=' . $user['id'] . '
 					ORDER BY name ASC';
-            $result = mysqli_query($db, $sql);
+            $result = mysqli_query($GLOBALS['db'], $sql);
             if (mysqli_num_rows($result) > 0)
             {
                 while ($portfolio = mysqli_fetch_array($result))

@@ -52,7 +52,7 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 		GROUP BY tags.tag
 		HAVING count > 1
 		ORDER BY tag ASC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 $tag_count = mysqli_num_rows($result);
 if ($tag_count > 0)
 {

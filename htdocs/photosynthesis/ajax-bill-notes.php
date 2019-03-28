@@ -46,7 +46,7 @@ $sql = 'UPDATE dashboard_bills
 			FROM users
 			WHERE private_hash="' . mysqli_real_escape_string($hash) . '"
 			LIMIT 1)';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if ($result === FALSE)
 {
     die(' ');
@@ -65,7 +65,7 @@ else
         $sql = 'SELECT bill_id AS id
                 FROM dashboard_bills
                 WHERE id=' . $_POST['id'];
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         $bill = mysqli_fetch_array($result);
         $mc = new Memcached();
         $mc->addServer("127.0.0.1", 11211);

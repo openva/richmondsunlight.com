@@ -23,7 +23,7 @@ if (count($_POST) == 0)
     $sql = 'SELECT id, name
 			FROM representatives
 			ORDER BY name ASC';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     $legislator_select = '<option value=""></option><option value="ignore">Ignore</option>';
     while ($legislator = mysqli_fetch_array($result))
     {
@@ -54,7 +54,7 @@ if (count($_POST) == 0)
 			HAVING number > 2
 			ORDER BY number DESC
 			LIMIT 50';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) < 1)
     {
         die('No orphaned chyrons found.');
@@ -134,7 +134,7 @@ else
 					AND md5(raw_text) = "' . $chyron_md5 . '"';
         }
 
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if ($result === FALSE)
         {
             echo '<p>Error: Query failed. ' . $sql . '</p>';

@@ -15,7 +15,7 @@ class Legislator
         $sql = 'SELECT id
 				FROM representatives
 				WHERE shortname="' . mysqli_real_escape_string($shortname) . '"';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
@@ -84,7 +84,7 @@ class Legislator
 				LEFT JOIN districts
 					ON representatives.district_id = districts.id
 				WHERE representatives.id=' . mysqli_real_escape_string($id);
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
@@ -154,7 +154,7 @@ class Legislator
 				WHERE committee_members.representative_id = ' . $legislator['id'] . '
 				AND (committee_members.date_ended IS NULL OR
 					committee_members.date_ended > now())';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0)
         {
             while ($committee = mysqli_fetch_assoc($result))

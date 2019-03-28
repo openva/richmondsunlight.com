@@ -47,7 +47,7 @@
 			FROM bills
 			WHERE session_id=' . SESSION_ID . '
 			GROUP BY chamber';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0)
     {
         $page_sidebar .= '
@@ -101,7 +101,7 @@
 			LEFT JOIN representatives ON bills.chief_patron_id=representatives.id
 			WHERE bills.session_id=' . SESSION_ID . '
 			GROUP BY party';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0)
     {
         $page_sidebar .= '
@@ -147,7 +147,7 @@
 			GROUP BY tags.tag
 			HAVING count > 5
 			ORDER BY tags.tag ASC';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0)
     {
         $page_sidebar .= '
@@ -188,7 +188,7 @@
 			GROUP BY tags.tag
 			HAVING count > 3
 			ORDER BY tags.tag ASC';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0)
     {
         $page_sidebar .= '

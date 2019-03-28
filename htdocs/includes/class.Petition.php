@@ -12,7 +12,7 @@ class Petition
         $sql = 'SELECT id, slug, title, date_created
 				FROM petitions
 				ORDER BY date_created DESC';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         // If the query fails.
         if ($result === FALSE)
@@ -93,7 +93,7 @@ class Petition
 				text = "' . mysqli_real_escape_string($this->text) . '",
 				user_id = ' . mysqli_real_escape_string($this->user_id) . '
 				date_created=now()';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         // If the query fails.
         if ($result === FALSE)
@@ -102,7 +102,7 @@ class Petition
         }
 
         # Return the ID of the just-added petition.
-        $this->petition_id = mysqli_insert_id($db);
+        $this->petition_id = mysqli_insert_id($GLOBALS['db']);
     } // end create()
 
     // Generate a random ID for this petition. Strictly speaking, this ought to make sure that the
@@ -133,7 +133,7 @@ class Petition
 				LEFT JOIN users
 					ON petitions.user_id=users.id
 				WHERE petitions.id=' . mysqli_real_escape_string($this->id);
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         // If the query fails.
         if (($result === FALSE) || (mysqli_num_rows($result) > 0))
@@ -171,7 +171,7 @@ class Petition
 				FROM petition_signers
 				WHERE petition_signers.petition_id=' . mysqli_real_escape_string($this->petition_id) . '
 				ORDER BY date_created DESC';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         // If the query fails.
         if (($result === FALSE) || (mysqli_num_rows($result) > 0))
@@ -204,7 +204,7 @@ class Petition
 				user_id=' . mysqli_real_escape_string($this->user_id) . ',
 				ip_address=INET_ATON("' . $_SERVER['REMOTE_ADDR'] . '"),
 				date_created=now()';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         // If the query fails.
         if ($result === FALSE)

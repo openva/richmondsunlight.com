@@ -41,7 +41,7 @@ if (!empty($_GET['street']) && !empty($_GET['city']) && !empty($_GET['zip']))
 						ON representatives.district_id=districts.id
 					WHERE representatives.district_id=' . current($districts) . '
                         OR representatives.district_id=' . next($districts);
-            $result = mysqli_query($db, $sql);
+            $result = mysqli_query($GLOBALS['db'], $sql);
             if (mysqli_num_rows($result) == 0)
             {
                 $page_body .= '<p>Your legislators could not be identified.</p>';

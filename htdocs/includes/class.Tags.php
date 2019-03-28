@@ -21,7 +21,7 @@ class Tags
         		HAVING number > 5
         		ORDER BY number DESC
         		LIMIT 5';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             return FALSE;

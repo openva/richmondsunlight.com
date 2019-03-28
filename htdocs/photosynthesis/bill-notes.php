@@ -74,7 +74,7 @@ if (isset($_POST['submit']))
     $sql = 'UPDATE dashboard_bills
 			SET notes = ' . (empty($notes) ? 'NULL' : '"' . $notes . '"') . '
 			WHERE id=' . $id . ' AND user_id = ' . $user['id'];
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (!$result)
     {
         $message = '<div id="messages" class="errors">Sorry: That note could not be saved.</div>';
@@ -91,7 +91,7 @@ if (isset($_POST['submit']))
             $sql = 'SELECT bill_id AS id
                     FROM dashboard_bills
                     WHERE id=' . $id . ' AND user_id = ' . $user['id'];
-            $result = mysqli_query($db, $sql);
+            $result = mysqli_query($GLOBALS['db'], $sql);
             $bill = mysqli_fetch_array($result);
             $mc = new Memcached();
             $mc->addServer("127.0.0.1", 11211);
@@ -109,7 +109,7 @@ $sql = 'SELECT dashboard_bills.id, dashboard_bills.notes, bills.number, bills.ca
 		LEFT JOIN bills
 		ON dashboard_bills.bill_id = bills.id
 		WHERE dashboard_bills.id=' . $id . ' AND user_id=' . $user['id'];
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) == 0)
 {
     header('Location: ' . $_SERVER['HTTP_REFERER']);

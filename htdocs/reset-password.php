@@ -36,7 +36,7 @@ if (!empty($_GET['hash']))
     $sql = 'SELECT cookie_hash
 			FROM users
 			WHERE private_hash = "' . $hash . '"';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) == 0)
     {
         die('Your password reset link has failed mysteriously.');
@@ -62,7 +62,7 @@ if (!empty($_POST['email']))
 				FROM users
 				WHERE private_hash IS NOT NULL AND password IS NOT NULL
 				AND email = "' . mysqli_real_escape_string($email) . '"';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         # If we find nothing.
         if (mysqli_num_rows($result) == 0)

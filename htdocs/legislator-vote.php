@@ -75,7 +75,7 @@ $sql = 'SELECT bills.number AS bill_number, bills.catch_line, representatives_vo
 		AND sessions.year = ' . mysqli_real_escape_string($year) . '
 		AND bills_status.date IS NOT NULL AND votes.session_id=sessions.id
 		ORDER BY date ASC, committee ASC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $page_body = '

@@ -85,7 +85,7 @@ if (isset($_POST['submit']))
 				public = "' . $form_data['public'] . '",
 				notes = ' . (empty($form_data['notes']) ? 'NULL' : '"' . $form_data['notes'] . '"') . '
 				WHERE id="' . $form_data['id'] . '" AND user_id = ' . $user['id'];
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         # If the update to the portfolio didn't work, say so.
         if (!$result)
@@ -116,7 +116,7 @@ if (isset($_POST['submit']))
 							FROM dashboard_portfolios
 							WHERE id=' . $form_data['id'] . ') = dashboard_watch_lists.id
 						AND user_id = ' . $user['id'];
-                $result = mysqli_query($db, $sql);
+                $result = mysqli_query($GLOBALS['db'], $sql);
                 # If the update to the portfolio didn't work, say so.
                 if (!$result)
                 {
@@ -143,7 +143,7 @@ if (isset($_POST['submit']))
 $sql = 'SELECT id, name, notes, notify, public, hash, watch_list_id
 		FROM dashboard_portfolios
 		WHERE hash="' . $portfolio['hash'] . '" AND user_id=' . $user['id'];
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) == 0)
 {
     header('Location: ' . $_SERVER['HTTP_REFERER']);
@@ -180,7 +180,7 @@ if ($portfolio['type'] == 'smart')
 			current_chamber
 			FROM dashboard_watch_lists
 			WHERE id = ' . $portfolio['watch_list_id'];
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     $watch_list = mysqli_fetch_array($result);
 
     # Clean it up.

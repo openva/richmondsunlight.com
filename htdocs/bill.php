@@ -37,8 +37,8 @@ if (logged_in() === TRUE)
 $debug_timing['logged in'] = microtime(TRUE);
 
 # LOCALIZE AND CLEAN UP VARIABLES
-$year = mysqli_real_escape_string($db, $_REQUEST['year']);
-$bill = mb_strtolower(mysqli_real_escape_string($db, $_REQUEST['bill']));
+$year = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['year']);
+$bill = mb_strtolower(mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['bill']));
 
 # Initialize variables.
 $html_head = '';
@@ -112,7 +112,7 @@ if (!isset($is_bot))
     {
         $sql .= ', user_id = ' . $user['id'];
     }
-    mysqli_query($db, $sql);
+    mysqli_query($GLOBALS['db'], $sql);
 }
 
 # PAGE METADATA
@@ -182,7 +182,7 @@ if ($bill['session_id'] == SESSION_ID)
 					ON dashboard_bills.portfolio_id = dashboard_portfolios.id
 				WHERE dashboard_bills.bill_id = ' . $bill['id'] . '
 				AND dashboard_portfolios.user_id= ' . $user['id'];
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         # If this bill is being tracked, notify this user.
         if (mysqli_num_rows($result) > 0)
@@ -250,7 +250,7 @@ if ($bill['session_id'] == SESSION_ID)
         $sql .= ' AND users.id != ' . $user['id'];
     }
     $sql .= ' ORDER BY RAND()';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     $portfolio_count = mysqli_num_rows($result);
 
     # If we've found anything, list them.
@@ -948,7 +948,7 @@ $sql = 'SELECT DATE_FORMAT(dockets.date, "%m/%d/%Y") AS date, committees.name AS
 		WHERE dockets.bill_id=' . $bill['id'] . ' AND dockets.date > now()
 		LIMIT 1';
 
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $docket = mysqli_fetch_array($result);
@@ -1019,7 +1019,7 @@ if (($bill['video'] !== FALSE) && (count($bill['video']) > 0))
 					AND time_start >= " ' . seconds_to_time($video->start) . ' "
 					AND time_end <= " ' . seconds_to_time($video->end) . ' "
 				ORDER BY video_transcript.time_start ASC';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0)
         {
             $transcript[$video->file_id] = array();

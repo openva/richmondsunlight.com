@@ -24,7 +24,7 @@ class Committee
                 WHERE shortname="' . $this->shortname . '"
                 AND chamber="' . $this->chamber . '"';
 
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
@@ -64,7 +64,7 @@ class Committee
 				AND (committee_members.date_ended > now() OR committee_members.date_ended IS NULL)
 				AND (representatives.date_ended >= now() OR representatives.date_ended IS NULL)
 				ORDER BY committee_members.position DESC, representatives.name ASC';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         if (mysqli_num_rows($result) == 0)
         {
@@ -99,7 +99,7 @@ class Committee
                 WHERE chamber="' . $this->chamber . '"
                 ORDER BY distance DESC
                 LIMIT 1';
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
             return FALSE;

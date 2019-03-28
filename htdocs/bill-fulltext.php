@@ -21,8 +21,8 @@ $database = new Database;
 $database->connect_old();
 
 # LOCALIZE AND CLEAN UP VARIABLES
-$year = mysqli_real_escape_string($db, $_REQUEST['year']);
-$bill = mysqli_real_escape_string($db, $_REQUEST['bill']);
+$year = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['year']);
+$bill = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['bill']);
 
 # RETRIEVE THE BILL INFO FROM THE DATABASE
 
@@ -75,7 +75,7 @@ $sql = 'SELECT number, date_introduced, text
 		FROM bills_full_text
 		WHERE bill_id = ' . $bill['id'] . ' AND bills_full_text.text IS NOT NULL
 		ORDER BY date_introduced DESC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     while ($version = mysqli_fetch_array($result, MYSQL_ASSOC))

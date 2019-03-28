@@ -213,7 +213,7 @@ $sql = 'SELECT id
 		FROM comments
 		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(SECOND, date_created, now()) < 5)';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     header('HTTP/1.0 409 Conflict');
@@ -227,7 +227,7 @@ $sql = 'SELECT *
 		FROM comments
 		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 5)';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 10)
 {
     header('HTTP/1.0 409 Conflict');
@@ -242,7 +242,7 @@ $sql = 'SELECT id
 		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 60)
 		AND comment="' . $comment['comment'] . '"';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     header('HTTP/1.0 409 Conflict');
@@ -270,7 +270,7 @@ if (!empty($user['id']))
 {
     $sql .= ', user_id=' . $user['id'];
 }
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (!$result)
 {
     header('HTTP/1.0 500 Internal Server Error');

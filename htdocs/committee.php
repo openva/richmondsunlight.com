@@ -21,8 +21,8 @@ $database->connect_old();
 session_start();
 
 # LOCALIZE AND CLEAN UP VARIABLES
-$chamber = mysqli_real_escape_string($db, $_REQUEST['chamber']);
-$shortname = mysqli_real_escape_string($db, $_REQUEST['committee']);
+$chamber = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['chamber']);
+$shortname = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['committee']);
 
 /*
  * Get basic data about this committee.
@@ -65,7 +65,7 @@ $sql = 'SELECT date AS date_raw, DATE_FORMAT(date, "%W, %m/%d/%Y") AS date,
 		WHERE committee_id=' . $committee->id . ' AND date >= now()
 		ORDER BY date_raw ASC
 		LIMIT 1';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) == 1)
 {
     $tmp = mysqli_fetch_array($result);
@@ -108,7 +108,7 @@ $sql = 'SELECT COUNT(*) AS failed,
 		WHERE status = "failed" AND last_committee_id = ' . $committee->id . '
 		AND session_id=' . SESSION_ID;
 
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $stats = mysqli_fetch_array($result);
@@ -143,7 +143,7 @@ $sql = 'SELECT representatives.party, representatives.party AS party1,
 		AND session_id=' . SESSION_ID . '
 		GROUP BY party
 		ORDER BY party DESC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $page_sidebar .= '<p>';
@@ -183,7 +183,7 @@ $sql = 'SELECT chamber, number, catch_line
 		AND status != "passed ' . $committee->chamber . '" AND status != "passed"
 		AND status != "vetoed" AND status != "passed committee" AND status != "failed committee"
 		ORDER BY hotness';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $total_bills = mysqli_num_rows($result);
@@ -242,7 +242,7 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 		WHERE committees.id=' . $committee->id . ' AND bills.session_id = ' . SESSION_ID . '
 		GROUP BY tags.tag
 		ORDER BY tags.tag ASC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $page_sidebar .= '
@@ -311,7 +311,7 @@ $sql = 'SELECT name, meeting_time
 		FROM committees
 		WHERE parent_id=' . $committee->id . '
 		ORDER BY name ASC';
-$result = mysqli_query($db, $sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 
 # If there are no subcommittees.
 if (mysqli_num_rows($result) == 0)
