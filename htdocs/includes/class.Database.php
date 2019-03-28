@@ -15,9 +15,9 @@ class Database
         /*
          * If we already have a database connection, reuse it.
          */
-        if (isset($GLOBALS['db']))
+        if (isset($GLOBALS['db_pdo']))
         {
-            return $GLOBALS['db'];
+            return $GLOBALS['db_pdo'];
         }
 
         /*
@@ -27,7 +27,7 @@ class Database
 
         if ($this->db !== FALSE)
         {
-            $GLOBALS['db'] = $this->db;
+            $GLOBALS['db_pdo'] = $this->db;
             return $this->db;
         }
 
@@ -58,9 +58,9 @@ class Database
         /*
          * If we already have a database connection, reuse it.
          */
-        if (isset($GLOBALS['db_old']))
+        if (isset($GLOBALS['db']))
         {
-            return $GLOBALS['db_old'];
+            return $GLOBALS['db'];
         }
 
         $this->db = mysqli_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);

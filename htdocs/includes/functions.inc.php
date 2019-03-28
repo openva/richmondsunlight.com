@@ -33,8 +33,13 @@ spl_autoload_register('__autoload_libraries');
 # Connect to the database
 function connect_to_db($type = 'old')
 {
+
     if ($type == 'old')
     {
+        if (isset($GLOBALS['db']))
+        {
+            return $GLOBALS['db'];
+        }
         $db = mysqli_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
         if ($db === FALSE)
         {
@@ -43,19 +48,23 @@ function connect_to_db($type = 'old')
         }
         mysqli_select_db($db, MYSQL_DATABASE);
         mysqli_query($db, 'SET NAMES "utf8"');
+        return $db;
     }
     elseif ($type == 'pdo')
     {
-        $db = new PDO(PDO_DSN, PDO_USERNAME, PDO_PASSWORD);
-        if ($db === FALSE)
+        if (isset($GLOBALS['db_pdo']))
+        {
+            return true;
+        }
+        $db_pdo = new PDO(PDO_DSN, PDO_USERNAME, PDO_PASSWORD);
+        if ($db_pdo === FALSE)
         {
             header('Location: https://www.richmondsunlight.com/site-down/');
             exit;
         }
-        return $db;
+        return $db_pdo;
     }
 
-    return TRUE;
 }
 
 
@@ -282,7 +291,7 @@ if (!function_exists('create_user'))
         {
             $sql .= $sql_inserts;
         }
-        $result = mysqli_query($db, $sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if (!$result)
         {
             return FALSE;
@@ -291,7 +300,7 @@ if (!function_exists('create_user'))
         {
 
             # Get the user's ID.
-            $user_id = mysqli_insert_id($db);
+            $user_id = mysqli_insert_id($GLOBALS['db']);
 
             # Generate a random eight-digit hash to send out in e-mails for unsubscribing
             # instantly.
@@ -306,7 +315,7 @@ if (!function_exists('create_user'))
             {
                 $sql .= $dashboard_inserts;
             }
-            mysqli_query($db, $sql);
+            mysqli_query($GLOBALS['db'], $sql);
         }
     }
 }
@@ -346,7 +355,7 @@ function get_user()
 			LEFT JOIN dashboard_user_data
 				ON users.id=dashboard_user_data.user_id
 			WHERE users.cookie_hash="' . mysqli_real_escape_string($_SESSION['id']) . '"';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) == 0)
     {
         return FALSE;
@@ -399,7 +408,7 @@ function update_user($options)
         $sql .= $key . ' = "' . $value . '"';
     }
     $sql .= ' WHERE cookie_hash="' . mysqli_real_escape_string($_SESSION['id']) . '"';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (!$result)
     {
         return FALSE;
@@ -468,7 +477,7 @@ function logged_in($registered = '')
 				FROM users
 				WHERE cookie_hash="' . mysqli_real_escape_string($_SESSION['id']) . '"';
     }
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
 
     /*
      * If one result is returned, then this user does have an account.
@@ -508,7 +517,7 @@ function blacklisted()
 				(SELECT id
 				FROM users
 				WHERE cookie_hash = "' . $_SESSION['id'] . '")';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     $data = mysqli_fetch_array($result);
     $score = $data['score'];
     if ($score >= 20)
@@ -536,7 +545,7 @@ function blacklist($word)
         $sql .= ', reason="dirty word - ' . $word . '"';
     }
 
-    mysqli_query($db, $sql);
+    mysqli_query($GLOBALS['db'], $sql);
 }
 
 # Display the CSS balloon providing a tooltip-type interface for bills and legislators.
@@ -659,7 +668,7 @@ function district_to_id($number, $chamber)
 			FROM districts
 			WHERE number = ' . $number . ' AND chamber = "' . $chamber . '"
 			AND date_ended IS NULL';
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
 
     # Continue if we've got a match.
     if (mysqli_num_rows($result) > 0)
@@ -997,7 +1006,7 @@ function bill_sections($bill_id)
 			AND vacode.section_number IS NOT NULL
 			ORDER BY vacode.section_number ASC';
 
-    $result = mysqli_query($db, $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) < 1)
     {
         return FALSE;
