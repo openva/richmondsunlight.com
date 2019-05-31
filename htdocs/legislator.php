@@ -871,7 +871,7 @@ if (!empty($legislator['rss_url']))
             {
                 $page_body .= date('F j, Y', strtotime($item['pubdate'])) . '<br />';
             }
-            strip_tags($item['summary']) . '</p></td></tr>';
+            $page_body .= strip_tags($item['summary']) . '</p></td></tr>';
         }
     }
     # End the DIV for news mentions.
