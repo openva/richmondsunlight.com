@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Set permissions properly, since appspec.yml gets this wrong.
-chown -R ricsun:web /vol/www/richmondsunlight.com/
-chmod -R g+w /vol/www/richmondsunlight.com/
+chown -R ubuntu:ubuntu /var/www/richmondsunlight.com/
+chmod -R g+w /var/www/richmondsunlight.com/
 
 # Set up Apache, if need be.
 SITE_SET_UP="$(sudo apache2ctl -S 2>&1 |grep -c richmondsunlight.com)"
@@ -18,8 +18,8 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
     sudo certbot --apache -d richmondsunlight.com --non-interactive --agree-tos --email jaquith@gmail.com --redirect
 
     # Set the cache directory
-    mkdir -p /vol/www/richmondsunlight.com/htdocs/cache
-    sudo chgrp www-data /vol/www/richmondsunlight.com/htdocs/cache
+    mkdir -p /var/www/richmondsunlight.com/htdocs/cache
+    sudo chgrp www-data /var/www/richmondsunlight.com/htdocs/cache
 
 fi
 
