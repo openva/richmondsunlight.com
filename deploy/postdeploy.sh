@@ -31,4 +31,4 @@ sudo /etc/init.d/sphinxsearch restart
 sudo indexer --all --rotate
 
 # Expire the cached template (in case we've made changes to it)
-echo "delete template-new" | nc localhost 11211  || true
+echo "delete template-new" | nc -N localhost 11211  || true
