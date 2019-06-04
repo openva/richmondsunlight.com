@@ -1,7 +1,7 @@
 .footer a { color: #808080; background: #fff; }
 
 .footer p.quote {
-	font-family: Georgia;
+	font-family: Georgia, sans-serif;
 	font-size: 1.25em;
 	color: #999;
 	font-style: italic;
@@ -107,7 +107,7 @@ a img {
 	#comments div.editors-pick div.notice {
 		float: right;
 		color: #900;
-		font-family: 'Gill Sans', Verdana, Arial, Helvetica;
+		font-family: 'Gill Sans', Verdana, Arial, Helvetica, sans-serif;
 		font-size: .85em;
 		letter-spacing: .2em;
 		text-transform: uppercase;
@@ -345,7 +345,6 @@ div#public-portfolio .bill {
 	clear: both;
 	border-bottom: 1px solid #ccc;
 	height: 20px;
-	clear: both;
 }
 	.tabs > ul li {
 		float: left;
@@ -406,10 +405,10 @@ div.video {
 	width: 500px;
 }
 	div.video h1 {
-		background: #6c757a url(/images/templates/default/corner.gif) no-repeat top right;
+		background: #6c757a url('/images/templates/default/corner.gif') no-repeat top right;
 		color: #fff;
 		padding: 7px 0 7px 5px;
-		font: bold 1em Tahoma, Arial, Sans-Serif;
+		font: bold 1em Tahoma, Arial, sans-serif;
 		margin: 0 0 3px 0;
 		text-align: left;
 	}
@@ -442,7 +441,7 @@ div.video {
 
 /* The bill progress checkboxes */
 div.checkbox {
-	font-family: Helvetica, Verdana, Arial, 'Arial MS', 'sans serif';
+	font-family: Helvetica, Verdana, Arial, 'Arial MS', sans-serif;
 	font-size: 12px;
 	font-weight: bold;
 }
@@ -553,7 +552,7 @@ div#partisanship-graph {
 	#slidebox h2 {
 		color: #fff;
 		font-size: 110%;
-		font-family: arial;
+		font-family: arial, sans-serif;
 		margin: 10px;
 		font-weight: bold !important;
 	}
@@ -583,11 +582,11 @@ div#partisanship-graph {
 				#slidebox li a:link,
 				#slidebox li a:visited {
 					color: #ffffff;
-					font-family: verdana;
+					font-family: Verdana, Helvetica, Arial, sans-serif;
 					font-size: 100%;
 					text-decoration: none;
 					display: block;
-					margin: 0p;
+					margin: 0;
 					padding: 0;
 					width: 100%;
 				}
@@ -642,7 +641,7 @@ body#body-bills div#options ul {
 
 /* Display this to MobileSafari visitors. */
 #iphone-alert {
-	font-family: 'Helvetica Neue', Helvetica, Arial, 'sans serif';
+	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 	font-size: 36px;
 	background: #fff;
 	height: 90px;

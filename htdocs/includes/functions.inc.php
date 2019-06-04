@@ -839,7 +839,7 @@ function login_form()
     {
         $return_uri = $_GET['return_uri'];
     }
-    elseif (isset($form_data['return_uri']))
+    elseif ( isset($form_data) && isset($form_data['return_uri']) )
     {
         $return_uri = $_GET['return_uri'];
     }

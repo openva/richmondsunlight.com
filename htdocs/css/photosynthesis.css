@@ -81,7 +81,7 @@ div.portfolio {
 				width: 400px;
 			}
 		div.portfolio table tr.notes td {
-			font-family: Verdana, 'Lucida Sans', Helvetica, Arial;
+			font-family: Verdana, 'Lucida Sans', Helvetica, Arial, sans-serif;
 			font-size: .85em;
 			background-color: #eef;
 		}
@@ -137,7 +137,7 @@ table.form {
 		margin-top: 10px;
 	}
 	table.form * input[type=text] {
-		font-family: Verdana, 'Lucida Sans', Helvetica, Arial;
+		font-family: Verdana, 'Lucida Sans', Helvetica, Arial, sans-serif;
 		font-size: 1.1em;
 		font-weight: bold;
 		width: 100%;
@@ -146,7 +146,7 @@ table.form {
 		margin-top: 10px;
 	}
 	table.form * textarea {
-		font-family: Verdana, 'Lucida Sans', Helvetica, Arial;
+		font-family: Verdana, 'Lucida Sans', Helvetica, Arial, sans-serif;
 		width: 100%;
 		height: .25em 5em;
 		color: #000;
