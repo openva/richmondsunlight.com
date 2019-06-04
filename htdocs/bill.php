@@ -417,9 +417,8 @@ if (isset($bill['tags']) && (count($bill['tags']) > 0))
 
     foreach ($bill['tags'] as $tag_id => $tag)
     {
-
         # We're saving this list for use below, in the list of related bills.
-        $tags[] = $tag['tag'];
+        $tags[] = $tag;
         $page_sidebar .= '<li><a href="/bills/tags/' . urlencode($tag) . '/">' . $tag . '</a>';
         if (isset($user) && ($user['trusted'] == 'y'))
         {
