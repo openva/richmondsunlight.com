@@ -413,7 +413,7 @@ else
     {
         $next_election = 'November 2019';
     }
-    else
+    elseif ($legislator['chamber'] == 'senate')
     {
         $next_election = 'November 2019';
     }
