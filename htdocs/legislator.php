@@ -160,25 +160,30 @@ if ($district_data == FALSE)
     {
         $c = 'u';
     }
-    $url = 'https://openstates.org/api/v1/districts/boundary/ocd-division/country:us/state:va/sld' . $c . ':' . $legislator['district'] . '/?apikey=' . OPENSTATES_KEY;
-    $json = get_content($url);
-
-    /*
-     * If this is valid JSON.
-     */
-    if ($json != FALSE)
+    if (OPENSTATES_KEY != '')
     {
-        $district_data = json_decode($json);
+
+        $url = 'https://openstates.org/api/v1/districts/boundary/ocd-division/country:us/state:va/sld' . $c . ':' . $legislator['district'] . '/?apikey=' . OPENSTATES_KEY;
+        $json = get_content($url);
 
         /*
-         * Swap lat/lon to X/Y.
-         */
-        foreach ($district_data->shape[0][0] as &$pair)
+        * If this is valid JSON.
+        */
+        if ($json != FALSE)
         {
-            $tmp[0] = $pair[1];
-            $tmp[1] = $pair[0];
-            $pair = $tmp;
+            $district_data = json_decode($json);
+
+            /*
+            * Swap lat/lon to X/Y.
+            */
+            foreach ($district_data->shape[0][0] as &$pair)
+            {
+                $tmp[0] = $pair[1];
+                $tmp[1] = $pair[0];
+                $pair = $tmp;
+            }
         }
+    
     }
 
     /*
@@ -781,62 +786,66 @@ $google_rss = 'https://news.google.com/news/rss/search/section/q/' .
 $google_link = 'https://news.google.com/news/search/section/q/' . urlencode($legislator['name']) .
     '%22+' . (($legislator['chamber'] == 'house') ? 'del+OR+delegate' : 'sen+OR+senator');
 $rss = fetch_rss($google_rss);
-$items = array_slice($rss->items, 0, 5);
-if (count($items) == 0)
+if ($rss != false)
 {
-    $page_body .= '<tr><td><p>No mentions found.</p></td></tr>';
-}
-else
-{
-    foreach ($items as $item)
+    $items = array_slice($rss->items, 0, 5);
+    if (count($items) == 0)
     {
-        $item['pubdate'] = date('F j, Y', strtotime($item['pubdate']));
-        $tmp = explode(' - ', $item['title']);
-        $item['title'] = '';
-        for ($i=0; $i<count($tmp); $i++)
-        {
-            if ($i < (count($tmp) - 1))
-            {
-                $item['title'] .= $tmp[$i];
-            }
-            else
-            {
-                $item['source'] = $tmp[$i];
-            }
-        }
-        $item['summary'] = strip_tags($item['summary']);
-        $item['summary'] = str_replace($tmp, '', $item['summary']);
-        # Don't trail off if we already have a period at the end.
-        $item['summary'] = str_replace('. ...', '.', $item['summary']);
-        # Hack off the dateline.
-        $item['summary'] = preg_replace('/([a-z]{3}) ([0-9]+), 20([0-9]{2})/Di', '', $item['summary']);
-        # Remove the indication of how many hours ago this news item was written.
-        $item['summary'] = preg_replace('/([0-9]*) hour(s*) ago/Di', '', $item['summary']);
-        # Hack off the state that often leads off the article.
-        $item['summary'] = preg_replace('/,&nbsp;([A-Z]{2})&nbsp;- /D', '', $item['summary']);
-        $page_body .= '
-			<tr>
-			<td>
-			<h3>' . $item['source'] . ': <a href="' . htmlspecialchars($item['link']) . '">' . $item['title'] . '</a></h3>' .
-            '<p>' . date('F j, Y', strtotime($item['pubdate'])) . '<br />' .
-            strip_tags($item['summary']) . '</p>
-			</td>
-			</tr>';
+        $page_body .= '<tr><td><p>No mentions found.</p></td></tr>';
     }
-    # Provide a link to read more.
-    $page_body .= '
-		<tr>
-		<td>
-		<div style="float: right;">
-			<a href="' . $google_link . '">More Media Mentions &gt;&gt;</a>
-		</div>
-		</td>
-		</tr>';
+    else
+    {
+        foreach ($items as $item)
+        {
+            $item['pubdate'] = date('F j, Y', strtotime($item['pubdate']));
+            $tmp = explode(' - ', $item['title']);
+            $item['title'] = '';
+            for ($i=0; $i<count($tmp); $i++)
+            {
+                if ($i < (count($tmp) - 1))
+                {
+                    $item['title'] .= $tmp[$i];
+                }
+                else
+                {
+                    $item['source'] = $tmp[$i];
+                }
+            }
+            $item['summary'] = strip_tags($item['summary']);
+            $item['summary'] = str_replace($tmp, '', $item['summary']);
+            # Don't trail off if we already have a period at the end.
+            $item['summary'] = str_replace('. ...', '.', $item['summary']);
+            # Hack off the dateline.
+            $item['summary'] = preg_replace('/([a-z]{3}) ([0-9]+), 20([0-9]{2})/Di', '', $item['summary']);
+            # Remove the indication of how many hours ago this news item was written.
+            $item['summary'] = preg_replace('/([0-9]*) hour(s*) ago/Di', '', $item['summary']);
+            # Hack off the state that often leads off the article.
+            $item['summary'] = preg_replace('/,&nbsp;([A-Z]{2})&nbsp;- /D', '', $item['summary']);
+            $page_body .= '
+                <tr>
+                <td>
+                <h3>' . $item['source'] . ': <a href="' . htmlspecialchars($item['link']) . '">' . $item['title'] . '</a></h3>' .
+                '<p>' . date('F j, Y', strtotime($item['pubdate'])) . '<br />' .
+                strip_tags($item['summary']) . '</p>
+                </td>
+                </tr>';
+        }
+        # Provide a link to read more.
+        $page_body .= '
+            <tr>
+            <td>
+            <div style="float: right;">
+                <a href="' . $google_link . '">More Media Mentions &gt;&gt;</a>
+            </div>
+            </td>
+            </tr>';
+    }
 }
-    # End the DIV for news mentions.
-    $page_body .= '
-		</tbody>
-		</table>
+
+# End the DIV for news mentions.
+$page_body .= '
+        </tbody>
+        </table>
 </div>';
 
 # News from the legislator's website.
@@ -845,7 +854,8 @@ if (!empty($legislator['rss_url']))
     # Start a new DIV for legislator's blogs, etc.
     $page_body .= '
 	<div id="news">
-		<table style="width: 100%">';
+		<table style="width: 100%">
+            <tbody>';
     $rss = fetch_rss($legislator['rss_url']);
     if ($rss !== FALSE)
     {
@@ -854,7 +864,6 @@ if (!empty($legislator['rss_url']))
         foreach ($items as $item)
         {
             $page_body .= '
-				<tbody>
 				<tr><td>
 				<h3><a href="' . $item['guid'] . '">' . $item['title'] . '</a></h3>' .
                 '<p>';
@@ -862,7 +871,7 @@ if (!empty($legislator['rss_url']))
             {
                 $page_body .= date('F j, Y', strtotime($item['pubdate'])) . '<br />';
             }
-            strip_tags($item['summary']) . '</p></td></tr>';
+            $page_body .= strip_tags($item['summary']) . '</p></td></tr>';
         }
     }
     # End the DIV for news mentions.
