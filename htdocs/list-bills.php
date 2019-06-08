@@ -27,7 +27,7 @@ if (!empty($_GET['tag']))
 }
 elseif (!empty($_GET['year']))
 {
-    $year = mysqli_real_escape_string($_GET['year']);
+    $year = mysqli_real_escape_string($GLOBALS['db'], $_GET['year']);
 }
 elseif (!empty($_GET['committee']) && !empty($_GET['chamber']))
 {
