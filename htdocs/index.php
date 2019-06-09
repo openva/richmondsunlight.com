@@ -217,7 +217,6 @@ if (mysqli_num_rows($result) > 0)
     while ($bill = mysqli_fetch_array($result))
     {
         $bill = array_map('stripslashes', $bill);
-        $bill['summary'] = mb_substr($bill['summary'], 0, 175) . ' .&thinsp;.&thinsp;.';
         $page_sidebar .= '
 			<li><a href="/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/" class="balloon">' . mb_strtoupper($bill['number']) . balloon($bill, 'bill') . '</a>: ' . $bill['catch_line'] . '</li>
 		';
