@@ -16,7 +16,7 @@ chown -R ubuntu:ubuntu "$SITE_PATH"
 chmod -R g+w "$SITE_PATH"
 
 # Set up Apache, if need be.
-SITE_SET_UP="$(sudo apache2ctl -S 2>&1 |grep -c ' $SITE_URL ')"
+SITE_SET_UP="$(sudo apache2ctl -S 2>&1 |grep -c " $SITE_URL ")"
 if [ "$SITE_SET_UP" -eq "0" ]; then
 
     # Set up Apache
