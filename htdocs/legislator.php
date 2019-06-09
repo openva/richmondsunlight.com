@@ -171,6 +171,7 @@ if ($district_data == FALSE)
         */
         if ($json != FALSE)
         {
+
             $district_data = json_decode($json);
 
             /*
@@ -493,7 +494,7 @@ $result = mysqli_query($GLOBALS['db'], $sql);
 $tmp = array();
 while ($copatron = mysqli_fetch_array($result))
 {
-    $tmp[$copatron{party}] = $copatron['number'];
+    $tmp[$copatron{'party'}] = $copatron['number'];
 }
 $total = array_sum($tmp);
 if ($total > 0)
@@ -586,7 +587,7 @@ $result = mysqli_query($GLOBALS['db'], $sql);
 $tmp = array();
 while ($copatron = mysqli_fetch_array($result))
 {
-    $tmp[$copatron{party}] = $copatron['number'];
+    $tmp[$copatron{'party'}] = $copatron['number'];
 }
 $total = array_sum($tmp);
 if ($total > 0)
