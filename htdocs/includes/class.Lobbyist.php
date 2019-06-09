@@ -26,6 +26,7 @@ class Lobbyist
 				FROM lobbyists
 				WHERE sc_id = "' . $this->sc_id . '"';
 
+        $lobbyist = new stdClass();
 
         /*
          * Generate URL for the JSON file.

@@ -15,8 +15,10 @@ class Statistics
      */
     public function daily_activity()
     {
+
         $database = new Database;
-        $database->connect();
+        $db = $database->connect();
+        global $db;
 
         $sql = 'SELECT date, COUNT(*) as number
 				FROM bill_status
@@ -46,7 +48,7 @@ class Statistics
     public function bills_filed_daily()
     {
         $database = new Database;
-        $database->connect();
+        $db = $database->connect();
 
         $sql = 'SELECT date_introduced AS date, COUNT(*) AS number
 				FROM bills
@@ -76,13 +78,13 @@ class Statistics
      */
     public function bill_views()
     {
-        if (empty($bill->id))
+        if ( !isset($bill) && empty($bill->id) )
         {
             return FALSE;
         }
 
         $database = new Database;
-        $database->connect();
+        $db = $database->connect();
 
         $sql = 'SELECT DATE_FORMAT(date, "%Y-%m-%d") AS day, COUNT(*) AS number
 				FROM bills_views

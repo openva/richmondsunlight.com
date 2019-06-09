@@ -413,7 +413,7 @@ else
     {
         $next_election = 'November 2019';
     }
-    else
+    elseif ($legislator['chamber'] == 'senate')
     {
         $next_election = 'November 2019';
     }
@@ -854,7 +854,8 @@ if (!empty($legislator['rss_url']))
     # Start a new DIV for legislator's blogs, etc.
     $page_body .= '
 	<div id="news">
-		<table style="width: 100%">';
+		<table style="width: 100%">
+            <tbody>';
     $rss = fetch_rss($legislator['rss_url']);
     if ($rss !== FALSE)
     {
@@ -863,7 +864,6 @@ if (!empty($legislator['rss_url']))
         foreach ($items as $item)
         {
             $page_body .= '
-				<tbody>
 				<tr><td>
 				<h3><a href="' . $item['guid'] . '">' . $item['title'] . '</a></h3>' .
                 '<p>';
@@ -871,7 +871,7 @@ if (!empty($legislator['rss_url']))
             {
                 $page_body .= date('F j, Y', strtotime($item['pubdate'])) . '<br />';
             }
-            strip_tags($item['summary']) . '</p></td></tr>';
+            $page_body .= strip_tags($item['summary']) . '</p></td></tr>';
         }
     }
     # End the DIV for news mentions.

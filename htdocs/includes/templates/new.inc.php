@@ -416,7 +416,7 @@
 			return re;
 		}
 
-		$(document).ready(function() {
+		$(function(){
 			/* Mentions of bill numbers. */
 			$("a.balloon").each(function() {
 
@@ -442,15 +442,20 @@
 						tip: "bottom center"
 					},
 					content: {
-						text: 'Loading .&thinsp;.&thinsp;.',
-						ajax: {
-							url: '<?php echo API_URL; ?>1.1/bill/'+year+'/'+bill_number+'.json',
-							type: 'GET',
-							dataType: 'jsonp',
-							success: function(data, status) {
+						text: function(event, api) {
+							$.ajax({
+								url: '<?php echo API_URL; ?>1.1/bill/'+year+'/'+bill_number+'.json'
+							})
+							.then(function(data) {
+								// Set the tooltip content
 								var content = '<a href="/legislator/' + data.chief_patron_id + '/">' + data.patron_name_formatted + '</a>: ' + data.summary.truncate();
-								this.set('content.text', content);
-							}
+								api.set('content.text', content);
+							}, function(xhr, status, error) {
+								// Upon error
+								api.set('content.text', 'View bill');
+							});
+							
+							return 'Loading .&thinsp;.&thinsp;.'; // Set some initial text
 						}
 					}
 				})
@@ -480,18 +485,22 @@
 						tip: "bottom center"
 					},
 					content: {
-						text: 'Loading .&thinsp;.&thinsp;.',
-						ajax: {
-							url: '<?php echo API_URL; ?>1.1/legislator/'+legislator+'.json',
-							type: 'GET',
-							dataType: 'jsonp',
-							success: function(data, status) {
-								var d = new Date(Date.parse(data.date_started));
+						text: function(event, api) {
+							$.ajax({
+								url: '<?php echo API_URL; ?>1.1/legislator/'+legislator+'.json',
+							})
+							.then(function(data) {
+								// Set the tooltip content
 								var content = '<img src="/images/legislators/thumbnails/' + legislator + '.jpg" height="50" style="float: left; margin: 0 .5em .5em 0" \/>'
 									+ '<strong>' + data.name_formatted + '</strong></br >Represents: '
-									+ data.district_description + '<br />Took Office: ' + data.date_started.substring(0,4);
-								this.set('content.text', content);
-							}
+									+ data.district_description + '<br />Took Office: ' + data.date_started;
+								api.set('content.text', content);
+							}, function(xhr, status, error) {
+								// Upon error
+								api.set('content.text', 'View legislator');
+							});
+							
+							return 'Loading .&thinsp;.&thinsp;.'; // Set some initial text
 						}
 					}
 				})
@@ -521,13 +530,15 @@
 						tip: "bottom center"
 					},
 					content: {
-						text: 'Loading .&thinsp;.&thinsp;.',
-						ajax: {
-							url: 'https://vacode.org/api/law/'+section_number+'/',
-							type: 'GET',
-							data: { fields: 'catch_line,ancestry', key: 'zxo8k592ztiwbgre' },
-							dataType: 'jsonp',
-							success: function(section, status) {
+						text: function(event, api) {
+							$.ajax({
+								url: 'https://vacode.org/api/law/'+section_number+'/',
+								type: 'GET',
+								data: { fields: 'catch_line,ancestry', key: 'zxo8k592ztiwbgre' },
+								dataType: 'jsonp',
+							})
+							.then(function(section) {
+								// Set the tooltip content
 								if( section.ancestry instanceof Object ) {
 									var content = '';
 									for (key in section.ancestry) {
@@ -535,8 +546,13 @@
 									}
 								}
 								var content = content + section.catch_line;
-								this.set('content.text', content);
-							}
+								api.set('content.text', content);
+							}, function(xhr, status, error) {
+								// Upon error
+								api.set('content.text', 'View law');
+							});
+							
+							return 'Loading .&thinsp;.&thinsp;.'; // Set some initial text
 						}
 					}
 				})
@@ -561,14 +577,18 @@
 						width: 300,
 						tip: "bottom center"
 					},
+
+
 					content: {
-						text: 'Loading .&thinsp;.&thinsp;.',
-						ajax: {
-							url: 'https://vacode.org/api/dictionary/' + encodeURI(term) + '/',
-							type: 'GET',
-							data: { section: section_number, key: 'zxo8k592ztiwbgre' },
-							dataType: 'jsonp',
-							success: function(data, status) {
+						text: function(event, api) {
+							$.ajax({
+								url: 'https://vacode.org/api/dictionary/' + encodeURI(term) + '/',
+								type: 'GET',
+								data: { fields: 'catch_line,ancestry', key: 'zxo8k592ztiwbgre' },
+								dataType: 'jsonp',
+							})
+							.then(function(data) {
+								// Set the tooltip content
 								var content = data.definition;
 								if (data.section_number != null) {
 									content = content + ' (<a href="' + data.url + '">§&nbsp;' + data.section_number + '</a>)';
@@ -576,8 +596,13 @@
 								else if (data.source) {
 									content = content + ' (Source: <a href="' + data.url + '">' + data.source + '</a>)';
 								}
-								this.set('content.text', content);
-							}
+								api.set('content.text', content);
+							}, function(xhr, status, error) {
+								// Upon error
+								api.set('content.text', '');
+							});
+							
+							return 'Loading .&thinsp;.&thinsp;.'; // Set some initial text
 						}
 					}
 				})

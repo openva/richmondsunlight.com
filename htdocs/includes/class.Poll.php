@@ -42,6 +42,7 @@ class Poll
      */
     public function get_results()
     {
+        
         if (empty($this->bill_id))
         {
             return FALSE;
@@ -52,17 +53,17 @@ class Poll
          */
         if (MEMCACHED_SERVER != '')
         {
+
             $mc = new Memcached();
             $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
             $this->results = $mc->get('poll-' . $this->bill_id);
-
 
             /*
             * If we have poll results in the cache.
             */
             if ($this->results != FALSE)
             {
-                $this->results = unserialize($poll);
+                $this->results = unserialize($this->results);
                 return TRUE;
             }
 
