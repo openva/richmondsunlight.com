@@ -2,8 +2,8 @@
   Protocols h2 http/1.1
   ServerName staging.richmondsunlight.com
   DocumentRoot /var/www/staging.richmondsunlight.com/htdocs
-  ErrorLog ${APACHE_LOG_DIR}/staging-error.log
-  CustomLog ${APACHE_LOG_DIR}/staging-access.log combined
+  ErrorLog ${APACHE_LOG_DIR}/staging.richmondsunlight.com.error.log
+  CustomLog ${APACHE_LOG_DIR}/staging.richmondsunlight.com.access.log combined
 </VirtualHost>
 <Directory "/var/www/staging.richmondsunlight.com">
 	AllowOverride All
