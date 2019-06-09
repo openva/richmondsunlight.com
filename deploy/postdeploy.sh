@@ -1,34 +1,49 @@
 #!/bin/bash
 
+# Set variables based on whether this is for the staging site or the production site.
+if [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Staging" ]
+then
+    SITE_PATH=/var/www/staging.richmondsunlight.com
+    SITE_URL=staging.richmondsunlight.com
+elif [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Fleet" ]
+then
+    SITE_PATH=/var/www/richmondsunlight.com
+    SITE_URL=richmondsunlight.com
+fi
+
 # Set permissions properly, since appspec.yml gets this wrong.
-chown -R ubuntu:ubuntu /var/www/richmondsunlight.com/
-chmod -R g+w /var/www/richmondsunlight.com/
+chown -R ubuntu:ubuntu "$SITE_PATH"
+chmod -R g+w "$SITE_PATH"
 
 # Set up Apache, if need be.
-SITE_SET_UP="$(sudo apache2ctl -S 2>&1 |grep -c richmondsunlight.com)"
+SITE_SET_UP="$(sudo apache2ctl -S 2>&1 |grep -c ' $SITE_URL ')"
 if [ "$SITE_SET_UP" -eq "0" ]; then
 
     # Set up Apache
-    sudo cp deploy/virtualhost.txt /etc/apache2/sites-available/richmondsunlight.com.conf
-    sudo a2ensite richmondsunlight.com
+    sudo cp deploy/virtualhost.txt /etc/apache2/sites-available/"$SITE_PATH".conf
+    sudo a2ensite "$SITE_URL"
     sudo a2enmod headers expires rewrite http2
     sudo systemctl reload apache2
 
     # Install a certificate
-    sudo certbot --apache -d richmondsunlight.com --non-interactive --agree-tos --email jaquith@gmail.com --redirect
+    sudo certbot --apache -d "$SITE_URL" --non-interactive --agree-tos --email jaquith@gmail.com --redirect
 
     # Set the cache directory
-    mkdir -p /var/www/richmondsunlight.com/htdocs/cache
-    sudo chgrp www-data /var/www/richmondsunlight.com/htdocs/cache
+    mkdir -p "$SITE_PATH"/htdocs/cache
+    sudo chgrp www-data "$SITE_PATH"/htdocs/cache
 
 fi
 
-# Copy over the Sphinx configuration, restart Sphinx
-sudo cp deploy/sphinx.conf /etc/sphinxsearch/sphinx.conf
-sudo /etc/init.d/sphinxsearch restart
+# If this is for production, then reindex the data.
+if [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Fleet" ]
+then
+    # Copy over the Sphinx configuration, restart Sphinx
+    sudo cp deploy/sphinx.conf /etc/sphinxsearch/sphinx.conf
+    sudo /etc/init.d/sphinxsearch restart
 
-# Index the database
-sudo indexer --all --rotate
+    # Index the database
+    sudo indexer --all --rotate
+fi
 
 # Expire the cached template (in case we've made changes to it)
 echo "delete template-new" | nc -N localhost 11211  || true

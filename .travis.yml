@@ -68,3 +68,15 @@ deploy:
     branch: master
   bucket: deploy.richmondsunlight.com
   region: us-east-1
+- provider: codedeploy
+  access_key_id: $AWS_ACCESS_KEY
+  secret_access_key: $AWS_SECRET_KEY
+  bucket: staging.richmondsunlight.com
+  key: rs-web-staging.zip
+  bundle_type: zip
+  application: RS-Web
+  deployment_group: RS-Web-Staging
+  region: us-east-1
+  on:
+    branch: master
+  wait-until-deployed: true
