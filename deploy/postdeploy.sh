@@ -20,7 +20,7 @@ SITE_SET_UP="$(sudo apache2ctl -S 2>&1 |grep -c ' $SITE_URL ')"
 if [ "$SITE_SET_UP" -eq "0" ]; then
 
     # Set up Apache
-    sudo cp deploy/virtualhost.txt /etc/apache2/sites-available/"$SITE_PATH".conf
+    sudo cp deploy/virtualhost-"$SITE_URL".txt /etc/apache2/sites-available/"$SITE_URL".conf
     sudo a2ensite "$SITE_URL"
     sudo a2enmod headers expires rewrite http2
     sudo systemctl reload apache2
