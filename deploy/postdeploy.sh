@@ -9,6 +9,9 @@ elif [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Fleet" ]
 then
     SITE_PATH=/var/www/richmondsunlight.com
     SITE_URL=richmondsunlight.com
+else
+    echo "Fatal error: No deployment group found"
+    exit 1
 fi
 
 # Set permissions properly, since appspec.yml gets this wrong.
