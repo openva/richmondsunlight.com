@@ -42,12 +42,12 @@ class Vote
 					FROM sessions
 					WHERE year="' . $this->session_year . '"
 					AND suffix IS NULL';
-            $result = mysql_query($sql);
-            if (mysql_num_rows($result) == 0)
+            $result = mysqli_query($GLOBALS['db'], $sql);
+            if (mysqli_num_rows($result) == 0)
             {
                 die('No such vote found.');
             }
-            $session_info = mysql_fetch_assoc($result);
+            $session_info = mysqli_fetch_assoc($result);
             $this->session_id = $session_info['id'];
         }
 
@@ -58,13 +58,13 @@ class Vote
 				FROM votes
 				WHERE lis_id="' . $this->lis_id . '"
 				AND session_id = ' . $this->session_id;
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) == 0)
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        if (mysqli_num_rows($result) == 0)
         {
             die('No such vote found.');
         }
 
-        $vote = mysql_fetch_assoc($result);
+        $vote = mysqli_fetch_assoc($result);
         $vote = array_map('stripslashes', $vote);
         return $vote;
     }
@@ -120,15 +120,15 @@ class Vote
 					ON representatives.district_id=districts.id
 				WHERE votes.lis_id="' . $this->lis_id . '" AND votes.session_id="' . $this->session_id . '"
 				ORDER BY vote ASC, name ASC';
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) < 1)
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        if (mysqli_num_rows($result) < 1)
         {
             return FALSE;
         }
 
         # Store all of the resulting data in an array, since we have to reuse it a couple of times.
         $legislators = array();
-        while ($legislator = mysql_fetch_assoc($result))
+        while ($legislator = mysqli_fetch_assoc($result))
         {
             $legislators[] = $legislator;
         }

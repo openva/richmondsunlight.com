@@ -45,14 +45,14 @@ $sql = 'SELECT tags.id, tags.tag, bills.number AS bill, sessions.year, users.nam
 		WHERE DATE_SUB(CURDATE(), INTERVAL 3 DAY) <= tags.date_created
 		AND users.trusted = "n"
 		ORDER BY tags.date_created DESC, bills.id DESC';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
 		<h2>Recent Tags</h2>
 		<p>The following tags have been applied to bills in the last three days by non-trusted
 		users.</p>';
-    while ($tag = mysql_fetch_array($result))
+    while ($tag = mysqli_fetch_array($result))
     {
         $tag = array_map('stripslashes', $tag);
         $tag['bill'] = strtolower($tag['bill']);
@@ -67,13 +67,13 @@ $sql = 'SELECT name, url
 		FROM users
 		WHERE DATE_SUB(CURDATE(), INTERVAL 3 DAY) <= date_created AND name IS NOT NULL
 		ORDER BY date_created DESC';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
 		<h2>Recent Registrants</h2>
 		<p>The following people have signed up in the past 3 days.</p>';
-    while ($user = mysql_fetch_array($result))
+    while ($user = mysqli_fetch_array($result))
     {
         $user = array_map('stripslashes', $user);
         if (!empty($user['url']))
@@ -95,8 +95,8 @@ $sql = 'SELECT DATE_FORMAT(date_created, "%Y-%m-%d") AS date, COUNT(*) AS number
 		GROUP BY date
 		ORDER BY date DESC
 		LIMIT 7';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
 		<h2>Comments by Day</h2>
@@ -105,7 +105,7 @@ if (mysql_num_rows($result) > 0)
 		<table class="sortable" id="comments">
 			<thead><tr><th>Day</th><th>#</th></tr></thead>
 			<tbody>';
-    while ($day = mysql_fetch_array($result))
+    while ($day = mysqli_fetch_array($result))
     {
         $page_body .= '
 			<tr><td>'.$day['date'].'</td><td>'.$day['number'].'</td></tr>';
@@ -121,8 +121,8 @@ $sql = 'SELECT DATE_FORMAT(date_created, "%Y-%m-%d") AS date, COUNT(*) AS number
 		GROUP BY date
 		ORDER BY date DESC
 		LIMIT 7';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
 		<h2>Poll Votes by Day</h2>
@@ -131,7 +131,7 @@ if (mysql_num_rows($result) > 0)
 		<table class="sortable" id="poll">
 			<thead><tr><th>Day</th><th>#</th></tr></thead>
 			<tbody>';
-    while ($day = mysql_fetch_array($result))
+    while ($day = mysqli_fetch_array($result))
     {
         $page_body .= '
 			<tr><td>'.$day['date'].'</td><td>'.$day['number'].'</td></tr>';
@@ -147,8 +147,8 @@ $sql = 'SELECT DATE_FORMAT(date_created, "%Y-%m-%d") AS date, COUNT(*) AS number
 		GROUP BY date
 		ORDER BY date DESC
 		LIMIT 7';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
 		<h2>Comment Subscriptions by Day</h2>
@@ -157,7 +157,7 @@ if (mysql_num_rows($result) > 0)
 		<table class="sortable" id="comment-subscriptions">
 			<thead><tr><th>Day</th><th>#</th></tr></thead>
 			<tbody>';
-    while ($day = mysql_fetch_array($result))
+    while ($day = mysqli_fetch_array($result))
     {
         $page_body .= '
 			<tr><td>'.$day['date'].'</td><td>'.$day['number'].'</td></tr>';
@@ -175,14 +175,14 @@ $sql = 'SELECT organization AS name, dashboard_portfolios.hash AS url
 		WHERE organization IS NOT NULL
 		ORDER BY dashboard_user_data.date_created DESC
 		LIMIT 10';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
 		<h2>Newest Photosynthesis Organizations</h2>
 		<p>These are the last ten organizations to sign up for Photosynthesis.</p>
 		<p>';
-    while ($organization = mysql_fetch_array($result))
+    while ($organization = mysqli_fetch_array($result))
     {
         $organization = array_map('stripslashes', $organization);
         $page_body .= '<a href="/photosynthesis/'.$organization['url'].'/">'
@@ -210,8 +210,8 @@ $sql = 'SELECT bills.number, bills.catch_line, sessions.year, COUNT(*) AS views
 		GROUP BY bills_views.bill_id
 		ORDER BY views DESC
 		LIMIT 10';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
 		<h2>Most Popular Bills</h2>
@@ -219,7 +219,7 @@ if (mysql_num_rows($result) > 0)
 		<table class="sortable" id="popular-bills">
 			<thead><tr><th>Year</th><th>Title</th><th>Views</th></tr></thead>
 			<tbody>';
-    while ($bill = mysql_fetch_array($result))
+    while ($bill = mysqli_fetch_array($result))
     {
         $bill = array_map('stripslashes', $bill);
         $bill['number'] = strtolower($bill['number']);

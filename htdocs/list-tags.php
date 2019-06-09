@@ -22,11 +22,11 @@ session_start();
 # LOCALIZE VARIABLES
 if (!empty($_GET['year']))
 {
-    $year = mysql_real_escape_string($_GET['year']);
+    $year = mysqli_real_escape_string($_GET['year']);
 }
 elseif (!empty($_GET['party']))
 {
-    $party = mysql_real_escape_string($_GET['committee']);
+    $party = mysqli_real_escape_string($_GET['committee']);
 }
 else
 {
@@ -52,14 +52,14 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 		GROUP BY tags.tag
 		HAVING count > 1
 		ORDER BY tag ASC';
-$result = mysql_query($sql);
-$tag_count = mysql_num_rows($result);
+$result = mysqli_query($GLOBALS['db'], $sql);
+$tag_count = mysqli_num_rows($result);
 if ($tag_count > 0)
 {
     $page_body .= '
 	<div class="tags">';
     # Build up an array of tags, with the key being the tag and the value being the count.
-    while ($tag = mysql_fetch_array($result))
+    while ($tag = mysqli_fetch_array($result))
     {
         $tag = array_map('stripslashes', $tag);
         $tags[$tag{tag}] = $tag['count'];

@@ -52,8 +52,8 @@
 			LEFT JOIN tags
 			ON tags.bill_id=bills.id
 			WHERE bills.session_id = '.SESSION_ID.'
-			AND tags.tag="'.mysql_real_escape_string($tag).'"';
-    $result = mysql_query($sql);
+			AND tags.tag="'.mysqli_real_escape_string($tag).'"';
+    $result = mysqli_query($GLOBALS['db'], $sql);
 
     // Don't check to make sure the query was successful -- we want to make sure that people can
     // even subscribe to feeds for tags that have nothing introduced yet.
@@ -61,7 +61,7 @@
     $rss_content = '';
 
     # Generate the RSS.
-    while ($bill = mysql_fetch_array($result))
+    while ($bill = mysqli_fetch_array($result))
     {
 
         # Aggregate the variables into their RSS components.

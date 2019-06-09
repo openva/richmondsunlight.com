@@ -56,12 +56,12 @@
 			WHERE comments.status="published"
 			ORDER BY comments.date_created DESC
 			LIMIT 20';
-    $result = mysql_query($sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
 
     $rss_content = '';
 
     # Generate the RSS.
-    while ($comment = mysql_fetch_array($result))
+    while ($comment = mysqli_fetch_array($result))
     {
 
         # Aggregate the variables into their RSS components.

@@ -52,12 +52,12 @@ if (!isset($clip_hash))
 				ON video_clips.bill_id = bills.id
 			ORDER BY files.date ASC, video_clips.time_start ASC';
 
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) > 0)
+    $result = mysqli_query($db, $sql);
+    if (mysqli_num_rows($result) > 0)
     {
 
         $page_body = '<ul>';
-        while ($clip = mysql_fetch_assoc($result))
+        while ($clip = mysqli_fetch_assoc($result))
         {
 
             $page_body .= '<li><a href="/video/clip/' . $clip['hash'] . '/">';

@@ -25,7 +25,7 @@ class Statistics
 				WHERE session_id = ' . SESSION_ID . '
 				GROUP BY date
 				ORDER BY date ASC';
-        $stmt = $db->prepare($sql);
+        $stmt = $GLOBALS['db']->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll();
         if (count($result) == 0)
@@ -55,7 +55,7 @@ class Statistics
 				WHERE session_id = ' . SESSION_ID . '
 				GROUP BY date_introduced
 				ORDER BY date_introduced ASC';
-        $stmt = $db->prepare($sql);
+        $stmt = $GLOBALS['db']->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll();
         if (count($result) == 0)
@@ -91,7 +91,7 @@ class Statistics
 				WHERE bill_id= ' . $this->bill_id . '
 				GROUP BY day
 				ORDER BY day ASC';
-        $stmt = $db->prepare($sql);
+        $stmt = $GLOBALS['db']->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll();
         if (count($result) == 0)

@@ -15,9 +15,9 @@ class Database
         /*
          * If we already have a database connection, reuse it.
          */
-        if (isset($GLOBALS['db']))
+        if (isset($GLOBALS['db_pdo']))
         {
-            return $GLOBALS['db'];
+            return $GLOBALS['db_pdo'];
         }
 
         /*
@@ -27,7 +27,7 @@ class Database
 
         if ($this->db !== FALSE)
         {
-            $GLOBALS['db'] = $this->db;
+            $GLOBALS['db_pdo'] = $this->db;
             return $this->db;
         }
 
@@ -50,7 +50,7 @@ class Database
     }
 
     /*
-     * Connect via the
+     * Connect via MySQLi
      */
     public function connect_old()
     {
@@ -58,20 +58,20 @@ class Database
         /*
          * If we already have a database connection, reuse it.
          */
-        if (isset($GLOBALS['db_old']))
+        if (isset($GLOBALS['db']))
         {
-            return $GLOBALS['db_old'];
+            return $GLOBALS['db'];
         }
 
-        $this->db = mysql_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
+        $this->db = mysqli_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
 
         /*
          * If the connection succeeded.
          */
         if ($this->db !== FALSE)
         {
-            mysql_select_db(MYSQL_DATABASE, $this->db);
-            mysql_query('SET NAMES "utf8"');
+            mysqli_select_db($this->db, MYSQL_DATABASE);
+            mysqli_query($this->db, 'SET NAMES "utf8"');
             $GLOBALS['db'] = $this->db;
             return TRUE;
         }

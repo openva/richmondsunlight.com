@@ -23,16 +23,16 @@ $database->connect_old();
 # LOCALIZE VARIABLES
 if (!empty($_GET['tag']))
 {
-    $tag = mysql_real_escape_string(urldecode($_GET['tag']));
+    $tag = mysqli_real_escape_string(urldecode($_GET['tag']));
 }
 elseif (!empty($_GET['year']))
 {
-    $year = mysql_real_escape_string($_GET['year']);
+    $year = mysqli_real_escape_string($GLOBALS['db'], $_GET['year']);
 }
 elseif (!empty($_GET['committee']) && !empty($_GET['chamber']))
 {
-    $committee = mysql_real_escape_string($_GET['committee']);
-    $chamber = mysql_real_escape_string($_GET['chamber']);
+    $committee = mysqli_real_escape_string($_GET['committee']);
+    $chamber = mysqli_real_escape_string($_GET['chamber']);
 }
 else
 {
@@ -43,7 +43,7 @@ if (!empty($_GET['status']))
 {
     if (($_GET['status'] == 'passed') || ($_GET['status'] == 'failed'))
     {
-        $status = mysql_real_escape_string($_GET['status']);
+        $status = mysqli_real_escape_string($_GET['status']);
     }
 }
 if (!empty($_GET['session_suffix']))
@@ -178,8 +178,8 @@ else
 			CAST(LPAD(SUBSTRING(bills.number FROM 3), 4, "0") AS unsigned) ASC';
 }
 
-$result = mysql_query($sql);
-$num_results = mysql_num_rows($result);
+$result = mysqli_query($GLOBALS['db'], $sql);
+$num_results = mysqli_num_rows($result);
 if ($num_results > 0)
 {
     $page_body .= '<p>' . number_format($num_results) . ' bill' . ($num_results > 1 ? 's' : '') . ' found.</p>';
@@ -200,7 +200,7 @@ if ($num_results > 0)
     }
 
     # Loop through the bill results.
-    while ($bill = mysql_fetch_array($result))
+    while ($bill = mysqli_fetch_array($result))
     {
         $bill = array_map('stripslashes', $bill);
 
@@ -377,8 +377,8 @@ if (!empty($year))
         $sql .= ' HAVING count > 5';
     }
     $sql .= ' ORDER BY tags.tag ASC';
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) > 0)
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    if (mysqli_num_rows($result) > 0)
     {
         $page_sidebar .= '
 	<a href="javascript:openpopup(\'/help/tag-clouds/\')"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
@@ -388,7 +388,7 @@ if (!empty($year))
 		<div class="tags">';
         $top_tag = 1;
         $top_tag_size = 3;
-        while ($tag = mysql_fetch_array($result))
+        while ($tag = mysqli_fetch_array($result))
         {
             $tags[] = array_map('stripslashes', $tag);
             if (($tag['count'] > $top_tag) && ($tag['tag'] != 'commendation'))
@@ -433,8 +433,8 @@ if (!empty($tag))
 			AND bills.session_id = ' . SESSION_ID . '
 			GROUP BY tags2.tag
 			ORDER BY tag ASC';
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) > 0)
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    if (mysqli_num_rows($result) > 0)
     {
         $page_sidebar .= '
 	<a href="javascript:openpopup(\'/help/tag-clouds/\')"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
@@ -442,7 +442,7 @@ if (!empty($tag))
 	<div class="box">
 		<h3>Related Tag Cloud</h3>
 		<div class="tags">';
-        while ($tag_data = mysql_fetch_array($result))
+        while ($tag_data = mysqli_fetch_array($result))
         {
             $tags[] = array_map('stripslashes', $tag_data);
         }
@@ -484,10 +484,10 @@ if (!empty($committee) && !empty($chamber))
 			FROM committees
 			WHERE shortname="' . $committee . '"
 			AND chamber="' . $chamber . '"';
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) > 0)
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    if (mysqli_num_rows($result) > 0)
     {
-        $committee = mysql_fetch_array($result);
+        $committee = mysqli_fetch_array($result);
         $page_title = ucfirst($committee['chamber']) . ' ' . $committee['name'] . ' Bills';
     }
 }

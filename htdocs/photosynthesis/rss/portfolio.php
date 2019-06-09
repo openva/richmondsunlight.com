@@ -49,10 +49,10 @@ $database->connect_old();
 # Query the database for information on this portfolio.
 $sql = 'SELECT id, name
 		FROM dashboard_portfolios
-		WHERE hash = "'.mysql_real_escape_string($hash).'"';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) == 0) die();
-$portfolio = mysql_fetch_array($result);
+		WHERE hash = "'.mysqli_real_escape_string($hash).'"';
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) == 0) die();
+$portfolio = mysqli_fetch_array($result);
 $portfolio = array_map('stripslashes', $portfolio);
 
 # Query the database for all bills in that portfolio.
@@ -69,7 +69,7 @@ $sql = 'SELECT bills.number, bills.catch_line, bills.summary,
 			ON dashboard_bills.portfolio_id = dashboard_portfolios.id
 		WHERE dashboard_portfolios.id="'.$portfolio['id'].'"
 		AND bills.session_id='.SESSION_ID;
-$result = mysql_query($sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 
 #Don't check to make sure the query was successful -- we want to make sure that people can
 # even subscribe to feeds for tags that have introduced nothing yet.
@@ -77,7 +77,7 @@ $result = mysql_query($sql);
 $rss_content = '';
 
 # Generate the RSS.
-while ($bill = mysql_fetch_array($result))
+while ($bill = mysqli_fetch_array($result))
 {
 
     # Aggregate the variables into their RSS components.

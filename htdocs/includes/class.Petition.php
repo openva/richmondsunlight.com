@@ -12,7 +12,7 @@ class Petition
         $sql = 'SELECT id, slug, title, date_created
 				FROM petitions
 				ORDER BY date_created DESC';
-        $result = mysql_query($sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         // If the query fails.
         if ($result === FALSE)
@@ -21,7 +21,7 @@ class Petition
         }
 
         $i=0;
-        while ($petition = mysql_fetch_array($result))
+        while ($petition = mysqli_fetch_array($result))
         {
             $this->list->$i = $petition;
         }
@@ -89,11 +89,11 @@ class Petition
 
         $sql = 'INSERT INTO petitions
 				SET slug = "' . $this->generate_slug() . '"
-				title = "' . mysql_real_escape_string($this->title) . '",
-				text = "' . mysql_real_escape_string($this->text) . '",
-				user_id = ' . mysql_real_escape_string($this->user_id) . '
+				title = "' . mysqli_real_escape_string($this->title) . '",
+				text = "' . mysqli_real_escape_string($this->text) . '",
+				user_id = ' . mysqli_real_escape_string($this->user_id) . '
 				date_created=now()';
-        $result = mysql_query($sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         // If the query fails.
         if ($result === FALSE)
@@ -102,7 +102,7 @@ class Petition
         }
 
         # Return the ID of the just-added petition.
-        $this->petition_id = mysql_insert_id();
+        $this->petition_id = mysqli_insert_id($GLOBALS['db']);
     } // end create()
 
     // Generate a random ID for this petition. Strictly speaking, this ought to make sure that the
@@ -132,16 +132,16 @@ class Petition
 				FROM petition
 				LEFT JOIN users
 					ON petitions.user_id=users.id
-				WHERE petitions.id=' . mysql_real_escape_string($this->id);
-        $result = mysql_query($sql);
+				WHERE petitions.id=' . mysqli_real_escape_string($this->id);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         // If the query fails.
-        if (($result === FALSE) || (mysql_num_rows($result) > 0))
+        if (($result === FALSE) || (mysqli_num_rows($result) > 0))
         {
             return FALSE;
         }
 
-        $petition = mysql_fetch_object($result);
+        $petition = mysqli_fetch_object($result);
 
         // Bring this result into the object namespace.
         foreach ($petition as $key => $value)
@@ -169,19 +169,19 @@ class Petition
 
         $sql = 'SELECT users.name, petition_signers.date_created
 				FROM petition_signers
-				WHERE petition_signers.petition_id=' . mysql_real_escape_string($this->petition_id) . '
+				WHERE petition_signers.petition_id=' . mysqli_real_escape_string($this->petition_id) . '
 				ORDER BY date_created DESC';
-        $result = mysql_query($sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         // If the query fails.
-        if (($result === FALSE) || (mysql_num_rows($result) > 0))
+        if (($result === FALSE) || (mysqli_num_rows($result) > 0))
         {
             return FALSE;
         }
 
         // Fetch all results.
         $i=0;
-        while ($signer = mysql_fetch_object($result))
+        while ($signer = mysqli_fetch_object($result))
         {
             $this->signers->{$i} = $signer;
             $i++;
@@ -200,11 +200,11 @@ class Petition
         }
 
         $sql = 'INSERT DELAYED into petition_signers
-				SET petition_id=' . mysql_real_escape_string($this->petition_id) . ',
-				user_id=' . mysql_real_escape_string($this->user_id) . ',
+				SET petition_id=' . mysqli_real_escape_string($this->petition_id) . ',
+				user_id=' . mysqli_real_escape_string($this->user_id) . ',
 				ip_address=INET_ATON("' . $_SERVER['REMOTE_ADDR'] . '"),
 				date_created=now()';
-        $result = mysql_query($sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         // If the query fails.
         if ($result === FALSE)
