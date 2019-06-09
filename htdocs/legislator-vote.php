@@ -71,8 +71,8 @@ $sql = 'SELECT bills.number AS bill_number, bills.catch_line, representatives_vo
 		LEFT JOIN committees ON votes.committee_id = committees.id
 		LEFT JOIN representatives ON representatives_votes.representative_id=representatives.id
 		LEFT JOIN sessions ON bills.session_id = sessions.id
-		WHERE representatives.shortname = "' . mysqli_real_escape_string($shortname) . '"
-		AND sessions.year = ' . mysqli_real_escape_string($year) . '
+		WHERE representatives.shortname = "' . mysqli_real_escape_string($GLOBALS['db'], $shortname) . '"
+		AND sessions.year = ' . mysqli_real_escape_string($GLOBALS['db'], $year) . '
 		AND bills_status.date IS NOT NULL AND votes.session_id=sessions.id
 		ORDER BY date ASC, committee ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);

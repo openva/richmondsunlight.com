@@ -46,7 +46,7 @@ $site_section = '';
 
 # Terminate the subscription.
 $sql = 'DELETE FROM comments_subscriptions
-		WHERE hash="' . mysqli_real_escape_string($hash) . '"
+		WHERE hash="' . mysqli_real_escape_string($GLOBALS['db'], $hash) . '"
 		LIMIT 1';
 mysqli_query($GLOBALS['db'], $sql);
 

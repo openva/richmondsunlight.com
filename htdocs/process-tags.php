@@ -129,7 +129,7 @@ if (!empty($_SESSION['id']))
 
             # Make sure it's safe.
             $tag[$i] = preg_replace("/[[:punct:]]/D", '', $tag[$i]);
-            $tag[$i] = trim(mysqli_real_escape_string($tag[$i]));
+            $tag[$i] = trim(mysqli_real_escape_string($GLOBALS['db'], $tag[$i]));
 
             # Check one more time to make sure it's not empty.
             if (!empty($tag[$i]))

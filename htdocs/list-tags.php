@@ -22,11 +22,11 @@ session_start();
 # LOCALIZE VARIABLES
 if (!empty($_GET['year']))
 {
-    $year = mysqli_real_escape_string($_GET['year']);
+    $year = mysqli_real_escape_string($GLOBALS['db'], $_GET['year']);
 }
 elseif (!empty($_GET['party']))
 {
-    $party = mysqli_real_escape_string($_GET['committee']);
+    $party = mysqli_real_escape_string($GLOBALS['db'], $_GET['committee']);
 }
 else
 {

@@ -59,8 +59,8 @@ if (!isset($_GET['id']))
 }
 
 # Clean up and localize the portfolio and bill data.
-$portfolio['hash'] = mysqli_real_escape_string($_GET['hash']);
-$id = mysqli_real_escape_string($_GET['id']);
+$portfolio['hash'] = mysqli_real_escape_string($GLOBALS['db'], $_GET['hash']);
+$id = mysqli_real_escape_string($GLOBALS['db'], $_GET['id']);
 
 # If the form is being posted, accept the updated notes and store them.
 if (isset($_POST['submit']))
@@ -69,7 +69,7 @@ if (isset($_POST['submit']))
     # Strip out all tags other than the following.
     $notes = strip_tags($_POST['notes'], '<a><em><strong><i><b><s><blockquote><embed><ol><ul><li>');
     $notes = trim($notes);
-    $notes = mysqli_real_escape_string($notes);
+    $notes = mysqli_real_escape_string($GLOBALS['db'], $notes);
 
     $sql = 'UPDATE dashboard_bills
 			SET notes = ' . (empty($notes) ? 'NULL' : '"' . $notes . '"') . '

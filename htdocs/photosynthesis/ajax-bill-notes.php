@@ -39,12 +39,12 @@ $hash = mysqli_real_escape_string($_POST['user_hash']);
 
 # Update the database.
 $sql = 'UPDATE dashboard_bills
-		SET notes = ' . (empty($notes) ? 'NULL' : '"' . mysqli_real_escape_string($notes) . '"') . '
-		WHERE id=' . mysqli_real_escape_string($_POST['id']) . '
+		SET notes = ' . (empty($notes) ? 'NULL' : '"' . mysqli_real_escape_string($GLOBALS['db'], $notes) . '"') . '
+		WHERE id=' . mysqli_real_escape_string($GLOBALS['db'], $_POST['id']) . '
 		AND user_id = (
 			SELECT id
 			FROM users
-			WHERE private_hash="' . mysqli_real_escape_string($hash) . '"
+			WHERE private_hash="' . mysqli_real_escape_string($GLOBALS['db'], $hash) . '"
 			LIMIT 1)';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if ($result === FALSE)

@@ -32,7 +32,7 @@ session_start();
 # link in an e-mail after completing the first half of the process.
 if (!empty($_GET['hash']))
 {
-    $hash = mysqli_real_escape_string($_GET['hash']);
+    $hash = mysqli_real_escape_string($GLOBALS['db'], $_GET['hash']);
     $sql = 'SELECT cookie_hash
 			FROM users
 			WHERE private_hash = "' . $hash . '"';
@@ -61,7 +61,7 @@ if (!empty($_POST['email']))
         $sql = 'SELECT name, email, private_hash
 				FROM users
 				WHERE private_hash IS NOT NULL AND password IS NOT NULL
-				AND email = "' . mysqli_real_escape_string($email) . '"';
+				AND email = "' . mysqli_real_escape_string($GLOBALS['db'], $email) . '"';
         $result = mysqli_query($GLOBALS['db'], $sql);
 
         # If we find nothing.

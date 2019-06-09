@@ -50,7 +50,7 @@
 			FROM representatives
 			LEFT JOIN districts
 				ON representatives.district_id=districts.id
-			WHERE representatives.shortname = "'.mysqli_real_escape_string($legislator['shortname']).'"';
+			WHERE representatives.shortname = "'.mysqli_real_escape_string($GLOBALS['db'], $legislator['shortname']).'"';
     $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) == 0)
     {

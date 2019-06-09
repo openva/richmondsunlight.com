@@ -49,7 +49,7 @@ $database->connect_old();
 # Query the database for information on this portfolio.
 $sql = 'SELECT id, name
 		FROM dashboard_portfolios
-		WHERE hash = "'.mysqli_real_escape_string($hash).'"';
+		WHERE hash = "'.mysqli_real_escape_string($GLOBALS['db'], $hash).'"';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) == 0) die();
 $portfolio = mysqli_fetch_array($result);

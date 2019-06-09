@@ -46,7 +46,7 @@ if (!isset($_GET['hash']))
 else
 {
     # Clean up and localize the portfolio hash.
-    $portfolio['hash'] = mysqli_real_escape_string($_GET['hash']);
+    $portfolio['hash'] = mysqli_real_escape_string($GLOBALS['db'], $_GET['hash']);
 }
 
 if (isset($_POST['submit']))

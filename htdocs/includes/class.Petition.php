@@ -89,9 +89,9 @@ class Petition
 
         $sql = 'INSERT INTO petitions
 				SET slug = "' . $this->generate_slug() . '"
-				title = "' . mysqli_real_escape_string($this->title) . '",
-				text = "' . mysqli_real_escape_string($this->text) . '",
-				user_id = ' . mysqli_real_escape_string($this->user_id) . '
+				title = "' . mysqli_real_escape_string($GLOBALS['db'], $this->title) . '",
+				text = "' . mysqli_real_escape_string($GLOBALS['db'], $this->text) . '",
+				user_id = ' . mysqli_real_escape_string($GLOBALS['db'], $this->user_id) . '
 				date_created=now()';
         $result = mysqli_query($GLOBALS['db'], $sql);
 
@@ -132,7 +132,7 @@ class Petition
 				FROM petition
 				LEFT JOIN users
 					ON petitions.user_id=users.id
-				WHERE petitions.id=' . mysqli_real_escape_string($this->id);
+				WHERE petitions.id=' . mysqli_real_escape_string($GLOBALS['db'], $this->id);
         $result = mysqli_query($GLOBALS['db'], $sql);
 
         // If the query fails.
@@ -169,7 +169,7 @@ class Petition
 
         $sql = 'SELECT users.name, petition_signers.date_created
 				FROM petition_signers
-				WHERE petition_signers.petition_id=' . mysqli_real_escape_string($this->petition_id) . '
+				WHERE petition_signers.petition_id=' . mysqli_real_escape_string($GLOBALS['db'], $this->petition_id) . '
 				ORDER BY date_created DESC';
         $result = mysqli_query($GLOBALS['db'], $sql);
 
@@ -200,8 +200,8 @@ class Petition
         }
 
         $sql = 'INSERT DELAYED into petition_signers
-				SET petition_id=' . mysqli_real_escape_string($this->petition_id) . ',
-				user_id=' . mysqli_real_escape_string($this->user_id) . ',
+				SET petition_id=' . mysqli_real_escape_string($GLOBALS['db'], $this->petition_id) . ',
+				user_id=' . mysqli_real_escape_string($GLOBALS['db'], $this->user_id) . ',
 				ip_address=INET_ATON("' . $_SERVER['REMOTE_ADDR'] . '"),
 				date_created=now()';
         $result = mysqli_query($GLOBALS['db'], $sql);

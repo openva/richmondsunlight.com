@@ -64,7 +64,7 @@ class User
 
         $sql = 'SELECT id, password
 				FROM users
-				WHERE cookie_hash="' . mysqli_real_escape_string($_SESSION['id']) . '"';
+				WHERE cookie_hash="' . mysqli_real_escape_string($GLOBALS['db'], $_SESSION['id']) . '"';
         $result = mysqli_query($GLOBALS['db'], $sql);
 
         if (mysqli_num_rows($result) == 1)

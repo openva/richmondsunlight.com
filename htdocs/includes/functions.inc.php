@@ -216,7 +216,7 @@ if (!function_exists('create_user'))
                 $sql_inserts = '';
                 foreach ($options as $key => $value)
                 {
-                    $value = mysqli_real_escape_string($value);
+                    $value = mysqli_real_escape_string($GLOBALS['db'], $value);
                     if (empty($value))
                     {
                         $sql_inserts .= ', ' . $key . ' = NULL';
@@ -239,7 +239,7 @@ if (!function_exists('create_user'))
                 foreach ($options as $key => $value)
                 {
                     # Make the data safe for the database.
-                    $value = mysqli_real_escape_string($value);
+                    $value = mysqli_real_escape_string($GLOBALS['db'], $value);
 
                     # Determine which SQL string this data should be appended to.
                     if (($key == 'organization') || ($key == 'type') || ($key == 'expires'))
@@ -354,7 +354,7 @@ function get_user()
 			FROM users
 			LEFT JOIN dashboard_user_data
 				ON users.id=dashboard_user_data.user_id
-			WHERE users.cookie_hash="' . mysqli_real_escape_string($_SESSION['id']) . '"';
+			WHERE users.cookie_hash="' . mysqli_real_escape_string($GLOBALS['db'], $_SESSION['id']) . '"';
     $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) == 0)
     {
@@ -396,7 +396,7 @@ function update_user($options)
     $first = 'yes';
     foreach ($options as $key => $value)
     {
-        mysqli_real_escape_string($value);
+        $value = mysqli_real_escape_string($GLOBALS['db'], $value);
         if (!isset($first))
         {
             $sql .= ', ';
@@ -407,7 +407,7 @@ function update_user($options)
         }
         $sql .= $key . ' = "' . $value . '"';
     }
-    $sql .= ' WHERE cookie_hash="' . mysqli_real_escape_string($_SESSION['id']) . '"';
+    $sql .= ' WHERE cookie_hash="' . mysqli_real_escape_string($GLOBALS['db'], $_SESSION['id']) . '"';
     $result = mysqli_query($GLOBALS['db'], $sql);
     if (!$result)
     {
@@ -464,7 +464,7 @@ function logged_in($registered = '')
     {
         $sql = 'SELECT id
 				FROM users
-				WHERE cookie_hash="' . mysqli_real_escape_string($_SESSION['id']) . '"
+				WHERE cookie_hash="' . mysqli_real_escape_string($GLOBALS['db'], $_SESSION['id']) . '"
 				AND password IS NOT NULL';
     }
 
@@ -475,7 +475,7 @@ function logged_in($registered = '')
     {
         $sql = 'SELECT id
 				FROM users
-				WHERE cookie_hash="' . mysqli_real_escape_string($_SESSION['id']) . '"';
+				WHERE cookie_hash="' . mysqli_real_escape_string($GLOBALS['db'], $_SESSION['id']) . '"';
     }
     $result = mysqli_query($GLOBALS['db'], $sql);
 

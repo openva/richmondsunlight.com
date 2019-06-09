@@ -23,7 +23,7 @@ $database->connect_old();
 # LOCALIZE VARIABLES
 if (!empty($_GET['tag']))
 {
-    $tag = mysqli_real_escape_string(urldecode($_GET['tag']));
+    $tag = mysqli_real_escape_string($GLOBALS['db'], urldecode($_GET['tag']));
 }
 elseif (!empty($_GET['year']))
 {
@@ -31,8 +31,8 @@ elseif (!empty($_GET['year']))
 }
 elseif (!empty($_GET['committee']) && !empty($_GET['chamber']))
 {
-    $committee = mysqli_real_escape_string($_GET['committee']);
-    $chamber = mysqli_real_escape_string($_GET['chamber']);
+    $committee = mysqli_real_escape_string($GLOBALS['db'], $_GET['committee']);
+    $chamber = mysqli_real_escape_string($GLOBALS['db'], $_GET['chamber']);
 }
 else
 {
@@ -43,7 +43,7 @@ if (!empty($_GET['status']))
 {
     if (($_GET['status'] == 'passed') || ($_GET['status'] == 'failed'))
     {
-        $status = mysqli_real_escape_string($_GET['status']);
+        $status = mysqli_real_escape_string($GLOBALS['db'], $_GET['status']);
     }
 }
 if (!empty($_GET['session_suffix']))

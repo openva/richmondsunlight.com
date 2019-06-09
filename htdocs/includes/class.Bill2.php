@@ -56,8 +56,8 @@ class Bill2
 				FROM bills
 				LEFT JOIN sessions
 					ON bills.session_id=sessions.id
-				WHERE bills.number="' . mysqli_real_escape_string($number) . '"
-				AND sessions.year=' . mysqli_real_escape_string($year);
+				WHERE bills.number="' . mysqli_real_escape_string($GLOBALS['db'], $number) . '"
+				AND sessions.year=' . mysqli_real_escape_string($GLOBALS['db'], $year);
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) < 1)
         {
