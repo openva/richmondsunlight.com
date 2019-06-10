@@ -287,6 +287,10 @@ class Video
         }
         else
         {
+            if (!isset($this->clips))
+            {
+                $this->clips = new stdClass;
+            }
             $i=0;
             while ($clip = mysqli_fetch_object($result))
             {

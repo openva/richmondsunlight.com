@@ -43,6 +43,7 @@ $bill = mb_strtolower(mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['bill'
 # Initialize variables.
 $html_head = '';
 $page_body = '';
+$page_header = '';
 
 # Get the bill's content from the API.
 # We append a query string, containing the current time, to avoid getting a cached copy.
@@ -1383,9 +1384,9 @@ if (($bill['session_id'] == SESSION_ID))
     $page_body .= '
 	<h2>Post a Public Comment About this Bill</h2>
 	<form method="post" action="/process-comments.php" id="comment-form">
-		<input type="text" size="30" maxlength="50" name="comment[expiration_date]" id="expiration_date" value="' . $user['name'] . '" required /> <label for="expiration_date"><strong>Name</strong> <small>required</small></label><br />
-		<input type="email" size="30" maxlength="50" name="comment[zip]" id="zip" value="' . $user['email'] . '" required /> <label for="zip"><strong>Email</strong> <small>won’t be published, required</small></label><br />
-		<input type="url" size="30" maxlength="50" name="comment[age]" id="age" value="' . $user['url'] . '" /> <label for="age"><strong>Website</strong></label> <small>if you have one</small><br />
+		<input type="text" size="30" maxlength="50" name="comment[expiration_date]" id="expiration_date" value="' . (isset($user) ? $user['name'] : '') . '" required /> <label for="expiration_date"><strong>Name</strong> <small>required</small></label><br />
+		<input type="email" size="30" maxlength="50" name="comment[zip]" id="zip" value="' . (isset($user) ? $user['email'] : '') . '" required /> <label for="zip"><strong>Email</strong> <small>won’t be published, required</small></label><br />
+		<input type="url" size="30" maxlength="50" name="comment[age]" id="age" value="' . (isset($user) ? $user['url'] : '') . '" /> <label for="age"><strong>Website</strong></label> <small>if you have one</small><br />
 		<div style="display: none;"><input type="text" size="2" maxlength="2" name="comment[state]" id="state" /> <label for="state">Leave this field empty</label><br /></div>
 		<textarea rows="16" cols="60" name="comment[comment]" id="comment" required></textarea><br />
 		<small>(Limited HTML is OK: &lt;a&gt;, &lt;em&gt;, &lt;strong&gt;, &lt;s&gt)</small><br />';
