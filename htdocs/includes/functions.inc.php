@@ -897,6 +897,13 @@ function wp_html_split( $input ) {
 /*
  * A helper function for nl2p.
  */
+function _autop_newline_preservation_helper( $matches ) {
+	return str_replace( "\n", '<WPPreserveNewline />', $matches[0] );
+}
+
+/*
+ * A helper function for nl2p.
+ */
 function get_html_split_regex() {
 	static $regex;
 
