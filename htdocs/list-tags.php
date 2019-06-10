@@ -19,6 +19,10 @@ $database->connect_old();
 # INITIALIZE SESSION
 session_start();
 
+# INITIALIZE VARIABLES
+$page_body = '';
+$page_sidebar = '';
+
 # LOCALIZE VARIABLES
 if (!empty($_GET['year']))
 {
@@ -62,7 +66,7 @@ if ($tag_count > 0)
     while ($tag = mysqli_fetch_array($result))
     {
         $tag = array_map('stripslashes', $tag);
-        $tags[$tag{tag}] = $tag['count'];
+        $tags[$tag{'tag'}] = $tag['count'];
     }
 
     # Sort the tags in reverse order by key (their count), shave off the top 30, and then
@@ -87,7 +91,7 @@ else
 }
 
 # SIDEBAR
-$page_sidebar = '
+$page_sidebar .= '
 	<div class="box">
 		<h3>Explanation</h3>
 		<p>This is a “tag cloud,” a sort of a graph of the topics addressed by these bills. Each
@@ -105,5 +109,4 @@ $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
-$page->html_head = $html_head;
 $page->process();
