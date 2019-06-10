@@ -39,7 +39,7 @@ class CommentSubscription
         $database->connect_old();
 
         $sql = 'DELETE FROM comments_subscriptions
-                WHERE hash="' . $hash . '"';
+                WHERE hash="' . $this->hash . '"';
         $result = mysqli_query($GLOBALS['db'], $sql);
         if ($result === FALSE)
         {
