@@ -29,9 +29,9 @@ $browser_title = 'Tracking the Virginia General Assembly';
 $site_section = 'home';
 
 # PAGE CONTENT
-$page_body = '<p>The 2018 Virginia General Assembly session began on January 9, 2019, and will
-			continue for 45 days. Here you can track <a href="/bills/">the bills that are
-			proposed</a>, voted on, and the few that will ultimately become law.</p>';
+$page_body = '<p>The 2019 Virginia General Assembly session began on January 9, 2019, and
+			continued for 45 days. Here you can read <a href="/bills/">the bills that were
+			proposed</a>, voted on, and the few that ultimately become law.</p>';
 
 $sql = 'SELECT COUNT(*) AS count, tags.tag
 		FROM tags
