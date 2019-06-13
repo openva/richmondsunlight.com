@@ -79,7 +79,9 @@
 
     if (isset($_POST['submit']))
     {
-        $form_data = array_map('stripslashes', $_POST['form_data']);
+        $form_data = array_map(function ($field) {
+            return mysqli_real_escape_string($GLOBALS['db'], $field);
+        }, $_POST['form_data']);
 
         # Error correction.
         if (empty($form_data['name']))
@@ -111,7 +113,9 @@
         else
         {
             # Clean up the data.
-            $form_data = array_map('mysqli_real_escape_string', $_POST['form_data']);
+            $form_data = array_map(function ($field) {
+                return mysqli_real_escape_string($GLOBALS['db'], $field);
+            }, $_POST['form_data']);
 
             # Create a password hash from the password and store that.
             if (!empty($form_data['password']))

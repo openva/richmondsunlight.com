@@ -48,7 +48,9 @@ class Video
 
         # Clean up the data.
         $this->video = array_map('stripslashes', $this->video);
-        $this->video = array_map('mysqli_real_escape_string', $this->video);
+        $this->video = array_map(function ($field) {
+            return mysqli_real_escape_string($GLOBALS['db'], $field);
+        }, $this->video);
 
         # When in doubt, the video is public domain.
         if (empty($this->video['license']))

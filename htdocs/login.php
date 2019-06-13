@@ -54,7 +54,10 @@ if (isset($_POST['submit']))
     }
     else
     {
-        $form_data = array_map('mysqli_real_escape_string', $_POST['form_data']);
+        $form_data = array_map(function ($field) {
+            return mysqli_real_escape_string($GLOBALS['db'], $field);
+        }, $_POST['form_data']);
+        
         $form_data['password_hash'] = md5($form_data['password']);
         $sql = 'SELECT id, name, cookie_hash
 				FROM users

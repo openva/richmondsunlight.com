@@ -166,7 +166,9 @@ if (isset($_POST['submit']))
     {
 
         # Clean up the data to be inserted into the database.
-        $form_data = array_map('mysqli_real_escape_string', $_POST['form_data']);
+        $form_data = array_map(function ($field) {
+            return mysqli_real_escape_string($GLOBALS['db'], $field);
+        }, $_POST['form_data']);
 
         # A blank mailing list variable is a "no."
         if (empty($form_data['mailing_list']))

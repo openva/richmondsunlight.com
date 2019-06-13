@@ -250,7 +250,9 @@ if (isset($_POST['submit']))
             }
         }
 
-        $form_data = array_map('mysqli_real_escape_string', $_POST['form_data']);
+        $form_data = array_map(function ($field) {
+            return mysqli_real_escape_string($GLOBALS['db'], $field);
+        }, $_POST['form_data']);
 
         # Generate a random eight-digit hash in case this user has to recover his password.
         $chars = 'bcdfghjklmnpqrstvxyz0123456789';

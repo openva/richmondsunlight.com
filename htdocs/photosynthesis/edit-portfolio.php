@@ -79,7 +79,9 @@ if (isset($_POST['submit']))
     }
     else
     {
-        $form_data = array_map('mysqli_real_escape_string', $_POST['form_data']);
+        $form_data = array_map(function ($field) {
+            return mysqli_real_escape_string($GLOBALS['db'], $field);
+        }, $_POST['form_data']);
         $sql = 'UPDATE dashboard_portfolios
 				SET name = "' . $form_data['name'] . '", notify = "' . $form_data['notify'] . '",
 				public = "' . $form_data['public'] . '",

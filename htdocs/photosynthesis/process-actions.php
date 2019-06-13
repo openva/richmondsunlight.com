@@ -176,7 +176,9 @@
 
         # Iterate through $form_data and prepare it to be inserted.
         $form_data = array_map('trim', $_POST['form_data']);
-        $form_data = array_map('mysqli_real_escape_string', $_POST['form_data']);
+        $form_data = array_map(function ($field) {
+            return mysqli_real_escape_string($GLOBALS['db'], $field);
+        }, $_POST['form_data']);
 
         # Generate a random five-digit hash to ID this portfolio. It's in base 30,
         # allowing for a namespace of 24,300,000.
@@ -232,7 +234,9 @@
 
         # Iterate through $form_data and prepare it to be inserted.
         $form_data = array_map('trim', $_POST['form_data']);
-        $form_data = array_map('mysqli_real_escape_string', $_POST['form_data']);
+        $form_data = array_map(function ($field) {
+            return mysqli_real_escape_string($GLOBALS['db'], $field);
+        }, $_POST['form_data']);
 
         # Create the watch list SQL.
         $sql = 'INSERT INTO dashboard_watch_lists
