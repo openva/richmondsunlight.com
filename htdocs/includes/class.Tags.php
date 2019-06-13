@@ -12,7 +12,7 @@ class Tags
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         $sql = 'SELECT tag AS text, COUNT(*) AS number
         		FROM tags

@@ -39,7 +39,7 @@
 
     # Open a database connection.
     $database = new Database;
-    $database->connect_old();
+    $database->connect_mysqli();
 
     # Query the database for all bills by that tag.
     $sql = 'SELECT bills.number, bills.catch_line, bills.summary,

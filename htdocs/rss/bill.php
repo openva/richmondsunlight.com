@@ -43,7 +43,7 @@
 
     # Open a database connection.
     $database = new Database;
-    $database->connect_old();
+    $database->connect_mysqli();
 
     # Query the database for all bills by that bill number.
     $sql = 'SELECT bills_status.status, bills.catch_line

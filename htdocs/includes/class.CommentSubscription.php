@@ -13,7 +13,7 @@ class CommentSubscription
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         $sql = 'INSERT INTO comments_subscriptions
 				SET user_id=' . $this->user_id . ', bill_id=' . $this->bill_id . ',
@@ -36,7 +36,7 @@ class CommentSubscription
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         $sql = 'DELETE FROM comments_subscriptions
                 WHERE hash="' . $this->hash . '"';
@@ -59,7 +59,7 @@ class CommentSubscription
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         $sql = 'SELECT users.name, users.email, comments_subscriptions.hash
 				FROM comments_subscriptions LEFT JOIN users
@@ -94,7 +94,7 @@ class CommentSubscription
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         $sql = 'SELECT hash
 				FROM comments_subscriptions

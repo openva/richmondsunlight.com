@@ -42,7 +42,7 @@
 
     # Open a database connection.
     $database = new Database;
-    $database->connect_old();
+    $database->connect_mysqli();
 
     # Query the database for information about that patron.
     $sql = 'SELECT representatives.id, representatives.name, representatives.chamber,

@@ -33,7 +33,7 @@ class Vote
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         # If we have a session year, but not a session ID, look up the session ID.
         if (empty($this->session_id) && !empty($this->session_year))
@@ -97,7 +97,7 @@ class Vote
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         // The following bit was commented out of the WHERE portion of this query:
         //

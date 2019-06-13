@@ -24,7 +24,7 @@ include_once 'vendor/autoload.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();

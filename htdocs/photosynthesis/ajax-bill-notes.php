@@ -25,7 +25,7 @@ include_once '../includes/photosynthesis.inc.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # Make sure we have all of the appropriate data.
 if (!isset($_POST['user_hash']) || !isset($_POST['id']) || !isset($_POST['value']))

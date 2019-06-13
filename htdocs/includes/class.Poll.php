@@ -19,7 +19,7 @@ class Poll
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         $sql = 'SELECT *
 				FROM polls
@@ -73,7 +73,7 @@ class Poll
          * Else if there are no poll results in the cache.
          */
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         $sql = 'SELECT COUNT(*) AS total,
                     (SELECT COUNT(*)

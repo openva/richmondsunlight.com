@@ -25,7 +25,7 @@
     # Run those functions that are necessary prior to loading this specific
     # page.
     $database = new Database;
-    $database->connect_old();
+    $database->connect_mysqli();
 
     # PAGE METADATA
     $page_title = 'Photosynthesis &raquo; Preferences';

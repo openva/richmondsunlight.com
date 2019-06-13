@@ -52,7 +52,7 @@ class Database
     /*
      * Connect via MySQLi
      */
-    public function connect_old()
+    public function connect_mysqli()
     {
 
         /*

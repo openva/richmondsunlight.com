@@ -14,7 +14,7 @@ class Committee
         }
 
         $db = new Database;
-        $db->connect_old();
+        $db->connect_mysqli();
 
         /*
          * Select the basic committee information.
@@ -51,7 +51,7 @@ class Committee
         }
 
         $db = new Database;
-        $db->connect_old();
+        $db->connect_mysqli();
 
         $sql = 'SELECT representatives.shortname, representatives.name_formatted AS name,
 				representatives.name AS name_simple, committee_members.position,

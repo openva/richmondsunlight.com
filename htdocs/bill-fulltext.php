@@ -18,7 +18,7 @@ include_once 'vendor/autoload.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # LOCALIZE AND CLEAN UP VARIABLES
 $year = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['year']);

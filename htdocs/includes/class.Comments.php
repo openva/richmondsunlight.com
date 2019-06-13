@@ -33,7 +33,7 @@ class Comments
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         # Initliaze the array to store comments.
         $comments = array();

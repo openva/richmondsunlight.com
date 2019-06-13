@@ -14,7 +14,7 @@ include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();

@@ -21,7 +21,7 @@ include_once 'vendor/autoload.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # LOCALIZE VARIABLES
 $section = mysqli_real_escape_string($GLOBALS['db'], urldecode($_REQUEST['section']));

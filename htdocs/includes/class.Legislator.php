@@ -10,7 +10,7 @@ class Legislator
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         $sql = 'SELECT id
 				FROM representatives
@@ -52,7 +52,7 @@ class Legislator
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         /*
          * RETRIEVE THE LEGISLATOR'S INFO FROM THE DATABASE

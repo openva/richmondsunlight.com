@@ -13,7 +13,7 @@ class Video
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         $sql = 'SELECT id, committee_id, author_name, title, html, path, capture_directory,
 				description, license, length, fps, capture_rate, sponsor, width, height, date,
@@ -44,7 +44,7 @@ class Video
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         # Clean up the data.
         $this->video = array_map('stripslashes', $this->video);
@@ -213,7 +213,7 @@ class Video
         $start = microtime(TRUE);
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         /*$sql = 'SELECT DISTINCT
 
@@ -269,7 +269,7 @@ class Video
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         $sql = 'SELECT files.id, files.path, files.date, files.chamber, files.capture_directory,
 				video_clips.legislator_id, video_clips.bill_id, video_clips.time_start,
@@ -315,7 +315,7 @@ class Video
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         $sql = 'SELECT files.id, files.path, files.capture_directory, files.date, files.chamber,
 				files.capture_rate, video_index.time, video_index.screenshot
@@ -419,7 +419,7 @@ class Video
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         # Generate a list of all tags applied to this file, getting each tag for every screenshot
         # that we have. So if we have ten screenshots of a bill tagged with "business," that would
@@ -534,7 +534,7 @@ class Video
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         # Generates a list of every moment.
         $sql = 'SELECT files.path, files.capture_directory, files.date, files.chamber,
@@ -701,7 +701,7 @@ class Video
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         # First, remove every clip already stored for this file.
         $sql = 'DELETE FROM video_clips
@@ -796,7 +796,7 @@ class Video
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         $sql = 'SELECT files.path, files.date, DATE_FORMAT(files.date, "%b %e, %Y") AS date_formatted,
 				representatives.name_formatted AS legislator_name, bills.number AS bill_number,
@@ -855,7 +855,7 @@ class Video
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         if ($this->clip_type == 'legislators')
         {
@@ -1027,7 +1027,7 @@ class Video
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         $sql = 'UPDATE files
 				SET webvtt = "' . mysqli_real_escape_string($GLOBALS['db'], $this->webvtt) . '"
@@ -1052,7 +1052,7 @@ class Video
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         $this->transcript = new stdClass;
 
@@ -1234,7 +1234,7 @@ class Video
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         /*
          * Delete all existing text for this video (which there may or may not be already).
@@ -1323,7 +1323,7 @@ class Video
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         /*
          * Retrieve all captions for this file.
@@ -1679,7 +1679,7 @@ class Video
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         /*
          * Retrieve all captions for this file.

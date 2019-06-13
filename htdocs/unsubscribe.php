@@ -26,7 +26,7 @@ include_once 'vendor/autoload.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # LOCALIZE VARIABLES
 if (isset($_GET['hash']) && (mb_strlen($_GET['hash']) == 8))
