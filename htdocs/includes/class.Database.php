@@ -73,7 +73,7 @@ class Database
             mysqli_select_db($this->db, MYSQL_DATABASE);
             mysqli_query($this->db, 'SET NAMES "utf8"');
             $GLOBALS['db'] = $this->db;
-            return TRUE;
+            return $this->db;
         }
 
         /*
