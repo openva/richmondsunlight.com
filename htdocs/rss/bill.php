@@ -98,7 +98,7 @@
 
 
     # Cache the RSS file.
-    $fp = @file_put_contents('cache/bill-'.$bill['number'].'.xml', $rss);
+    $fp = file_put_contents('cache/bill-'.$bill['number'].'.xml', $rss);
 
     header('Content-Type: application/rss+xml');
     header('Last-Modified: '.date('r', filemtime('cache/bill-'.$bill['number'].'.xml')));
