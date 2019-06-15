@@ -27,7 +27,9 @@ if [ ! -d "api/" ]; then
     cd ../..
 
     # Concatenate the database dumps into a single file, for MySQL to load
+    cd deploy/
     cat mysql/*.sql > ../api/deploy/database.sql
+    cd ..
     
     # Remove artifacts
     rm api.zip
