@@ -36,7 +36,7 @@ class Database
          */
         if (mb_stristr($_GET['REQUEST_URI'], 'api.richmondsunlight.com') === FALSE)
         {
-            header('Location: https://www.richmondsunlight.com/site-down/');
+            header('Location: https://'. $_SERVER['SERVER_NAME'] .'/site-down/');
             exit;
         }
 
@@ -81,7 +81,7 @@ class Database
          */
         if (mb_stristr($_GET['REQUEST_URI'], 'api.richmondsunlight.com') === FALSE)
         {
-            header('Location: https://www.richmondsunlight.com/site-down/');
+            header('Location: https://'. $_SERVER['SERVER_NAME'] .'/site-down/');
             exit;
         }
 
@@ -130,7 +130,7 @@ class Database
          */
         if (mb_stristr($_GET['REQUEST_URI'], 'api.richmondsunlight.com') === FALSE)
         {
-            header('Location: https://www.richmondsunlight.com/site-down/');
+            header('Location: https://'. $_SERVER['SERVER_NAME'] .'/site-down/');
             exit;
         }
 

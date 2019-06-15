@@ -36,7 +36,7 @@ if (
         ((@logged_in() === TRUE) && empty($user['type']))
     ) {
     # If the user isn't logged in, have the user create an account (or log in).
-    header('Location: https://www.richmondsunlight.com/account/login/?return_uri=' . urlencode($_SERVER['REQUEST_URI']));
+    header('Location: https://'. $_SERVER['SERVER_NAME'] .'/account/login/?return_uri=' . urlencode($_SERVER['REQUEST_URI']));
     exit;
 }
 
@@ -49,7 +49,7 @@ $html_head = '
 	<script src="/js/vendor/jquery-jeditable/dist/jquery.jeditable.min.js"></script>
 	<script>
 		$(document).ready(function() {
-			$(".edit").editable("https://www.richmondsunlight.com/photosynthesis/ajax-bill-notes.php", {
+			$(".edit").editable("https://'. $_SERVER['SERVER_NAME'] .'/photosynthesis/ajax-bill-notes.php", {
 				type: "textarea",
 				cancel: "cancel",
 				submit: "OK",

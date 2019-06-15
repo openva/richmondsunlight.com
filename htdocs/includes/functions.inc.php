@@ -43,7 +43,7 @@ function connect_to_db($type = 'old')
         $db = mysqli_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
         if ($db === FALSE)
         {
-            header('Location: https://www.richmondsunlight.com/site-down/');
+            header('Location: https://'. $_SERVER['SERVER_NAME'] .'/site-down/');
             exit;
         }
         mysqli_select_db($db, MYSQL_DATABASE);
@@ -59,7 +59,7 @@ function connect_to_db($type = 'old')
         $db_pdo = new PDO(PDO_DSN, PDO_USERNAME, PDO_PASSWORD);
         if ($db_pdo === FALSE)
         {
-            header('Location: https://www.richmondsunlight.com/site-down/');
+            header('Location: https://'. $_SERVER['SERVER_NAME'] .'/site-down/');
             exit;
         }
         return $db_pdo;
@@ -986,7 +986,7 @@ function login_form()
 
 function login_redirect()
 {
-    header('Location: http://www.richmondsunlight.com/login/?return_uri=' . $_SERVER['REQUEST_URI']);
+    header('Location: http://'. $_SERVER['SERVER_NAME'] .'/login/?return_uri=' . $_SERVER['REQUEST_URI']);
     exit();
 }
 

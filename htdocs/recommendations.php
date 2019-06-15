@@ -41,7 +41,7 @@ if (@logged_in() === false)
 {
     # If the user isn't logged in, he shouldn't even be seeing this page in the first place.
     # Send him to the home page, for lack of any better idea.
-    header('Location: http://www.richmondsunlight.com/');
+    header('Location: http://'. $_SERVER['SERVER_NAME'] .'/');
     exit;
 }
 

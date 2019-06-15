@@ -38,7 +38,7 @@ $html_head = '<script src="/js/vendor/zxcvbn/dist/zxcvbn.js"></script>
 if (@logged_in() === false)
 {
     # If the user isn't logged in, have the user create an account (or log in).
-    header('Location: https://www.richmondsunlight.com/account/login/');
+    header('Location: https://'. $_SERVER['SERVER_NAME'] .'/account/login/');
     exit;
 }
 
@@ -229,7 +229,7 @@ if (isset($_POST['submit']))
 				WHERE user_id=' . $user['id'];
         $result = mysqli_query($GLOBALS['db'], $sql);
 
-        header('Location: http://www.richmondsunlight.com/account/?updated');
+        header('Location: http://'. $_SERVER['SERVER_NAME'] .'/account/?updated');
         exit();
     }
 }

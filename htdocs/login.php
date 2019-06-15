@@ -109,7 +109,7 @@ if (isset($_POST['submit']))
                 $form_data['return_uri'] = '/';
             }
 
-            header('Location: https://www.richmondsunlight.com' . urldecode($form_data['return_uri']));
+            header('Location: https://' . $_SERVER['SERVER_NAME'] . urldecode($form_data['return_uri']));
             exit();
         }
     }

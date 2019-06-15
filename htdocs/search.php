@@ -82,7 +82,7 @@ if (!empty($q))
     if (preg_match('/([hs]{1})([bjr]{1})([[:space:]]?)([0-9]+)/Di', $q))
     {
         $q = str_replace(' ', '', $q);
-        header('Location: http://www.richmondsunlight.com/bill/' . SESSION_YEAR . '/' . mb_strtolower($q) . '/');
+        header('Location: http://'. $_SERVER['SERVER_NAME'] .'/bill/' . SESSION_YEAR . '/' . mb_strtolower($q) . '/');
         exit;
     }
 
