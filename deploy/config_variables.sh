@@ -54,3 +54,9 @@ for i in "${variables[@]}"
 do
 	sed -i -e "s|{$i}|${!i}|g" deploy/sphinx.conf
 done
+
+# Perform the same for the MySQL export script
+for i in "${variables[@]}"
+do
+	sed -i -e "s|{$i}|${!i}|g" deploy/database_export.sh
+done
