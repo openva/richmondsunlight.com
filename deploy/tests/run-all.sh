@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 
-# If any sets of tests fails, exit the test script
-set -e
-
+# Run the front-end tests
 ./front-end.sh
+if [ $? -ne 0 ]; then
+    ERRORED=true
+fi
 
-echo "All tests passed"
+# If any tests failed, have this script return that failure
+if [ "$ERRORED" == true ]; then
+    echo "Some tests failed"
+    exit 1
+fi
