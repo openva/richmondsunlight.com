@@ -35,7 +35,7 @@ for TABLE in ${SOME_CONTENTS[*]}
 do
     # Genericize all IP addresses and email addresses, to maintain privacy.
     mysqldump {MYSQL_DATABASE} --no-create-info -u "$USERNAME" -p"$PASSWORD" --host "$HOST" "$TABLE" \
-        --where "bill_id=$BILL_ID" |sed -E "s/'[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}'/'192.168.0.1'/g" \
+        --where "bill_id=$BILL_ID" |perl -pe 's{[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}}{ sprintf "127.%01d.%01d.%01d", int(255*rand()), int(255*rand()), int(255*rand()) }ge' \
         |sed -E "s/\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/example@example.com/g" \
         >> mysql/test-records.sql
 done
