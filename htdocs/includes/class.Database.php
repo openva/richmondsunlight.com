@@ -58,7 +58,7 @@ class Database
         /*
          * If we already have a database connection, reuse it.
          */
-        if ( isset($GLOBALS['db']) && get_class($GLOBALS['db'] == 'mysqli') )
+        if ( isset($GLOBALS['db']) && is_object($GLOBALS['db']) && get_class($GLOBALS['db'] == 'mysqli') )
         {
             return $GLOBALS['db'];
         }
@@ -107,7 +107,7 @@ class Database
         {
             return $GLOBALS['db_old'];
         }
-        elseif ( isset($GLOBALS['db']) && get_class($GLOBALS['db'] == 'mysql') )
+        elseif ( isset($GLOBALS['db']) && is_object($GLOBALS['db']) && get_class($GLOBALS['db'] == 'mysql') )
         {
             return $GLOBALS['db'];
         }
