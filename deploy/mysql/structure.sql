@@ -82,7 +82,7 @@ CREATE TABLE `bills_copatrons` (
   KEY `bill_legislator` (`bill_id`,`legislator_id`),
   KEY `bill_id` (`bill_id`),
   KEY `legislator_id` (`legislator_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1531565 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1535236 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -105,7 +105,7 @@ CREATE TABLE `bills_full_text` (
   UNIQUE KEY `bill_id_2` (`bill_id`,`number`),
   KEY `bill_id` (`bill_id`),
   FULLTEXT KEY `text` (`text`)
-) ENGINE=InnoDB AUTO_INCREMENT=779861 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=779870 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -191,7 +191,7 @@ CREATE TABLE `bills_views` (
   KEY `bill_id` (`bill_id`),
   KEY `user_id` (`user_id`),
   KEY `date` (`date`)
-) ENGINE=MyISAM AUTO_INCREMENT=13148444 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=MyISAM AUTO_INCREMENT=13149336 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -548,7 +548,7 @@ CREATE TABLE `meetings` (
   PRIMARY KEY (`id`),
   KEY `session_id` (`session_id`),
   KEY `triumverate` (`date`,`time`,`committee_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=402434 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=402583 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1043,4 +1043,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-06-16 18:47:04
+-- Dump completed on 2019-06-18  0:44:59
