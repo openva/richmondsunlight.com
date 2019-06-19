@@ -1,8 +1,17 @@
 #!/usr/bin/env bash
 
+# Switch to the working directory from wherever this is being invoked
+pushd .
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd "$DIR" || exit
+
 # Run the front-end tests
-./front-end.sh
-if [ $? -ne 0 ]; then
+if ! ./front-end.sh; then
+    ERRORED=true
+fi
+
+# Run the API tests
+if ! ./api.sh; then
     ERRORED=true
 fi
 
@@ -11,3 +20,6 @@ if [ "$ERRORED" == true ]; then
     echo "Some tests failed"
     exit 1
 fi
+
+# Switch back to the directory this was invoked from
+popd || exit
