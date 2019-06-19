@@ -1,8 +1,13 @@
 #!/usr/bin/env bash
 
+
 # Run the front-end tests
-./front-end.sh
-if [ $? -ne 0 ]; then
+if ! ./front-end.sh; then
+    ERRORED=true
+fi
+
+# Run the API tests
+if ! ./api.sh; then
     ERRORED=true
 fi
 
