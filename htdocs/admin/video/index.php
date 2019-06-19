@@ -18,7 +18,7 @@ include_once 'functions.inc.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # PAGE METADATA
 $page_title = 'Videos';
@@ -164,18 +164,18 @@ if (isset($_GET['id']) && !isset($_GET['op']))
 			license, type, length, date, fps, capture_rate, width, height, sponsor
 			FROM files
 			WHERE id='.$id;
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) == 0)
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    if (mysqli_num_rows($result) == 0)
     {
         die('No such file available.');
     }
-    $video = mysql_fetch_array($result);
+    $video = mysqli_fetch_array($result);
 
     $sql = 'SELECT *
 			FROM video_index
 			WHERE file_id='.$_GET['id'];
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) == 0)
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    if (mysqli_num_rows($result) == 0)
     {
         $page_body .= '<p style="font-size: 1.5em; text-align: center;">
 			<a href="/utilities/parse_video.php?id=' . $id . '">Parse Video</a></p>';
@@ -204,12 +204,12 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'srt'))
     $sql = 'SELECT chamber, date
 			FROM files
 			WHERE id = ' . $_GET['id'];
-    $result = mysql_query($sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (!$result)
     {
         die('No file of that ID is found.');
     }
-    $file = mysql_fetch_array($result);
+    $file = mysqli_fetch_array($result);
     $filename = $_SERVER['DOCUMENT_ROOT'] . 'video/' . $file['chamber'] . '/floor/' . str_replace('-', '', $file['date']) . '.srt';
     if (file_exists($filename) == FALSE)
     {
@@ -232,9 +232,9 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'srt'))
     }
 
     $sql = 'UPDATE files
-			SET srt = "' . mysql_real_escape_string($captions->srt) . '"
+			SET srt = "' . mysqli_real_escape_string($GLOBALS['db'], $captions->srt) . '"
 			WHERE id = ' . $_GET['id'];
-    $result = mysql_query($sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if ($result === FALSE)
     {
         die('Captions could not be inserted');
@@ -256,12 +256,12 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'transcript'))
     $sql = 'SELECT srt
 			FROM files
 			WHERE id = ' . $_GET['id'];
-    $result = mysql_query($sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (!$result)
     {
         die('No file of that ID is found.');
     }
-    $file = mysql_fetch_array($result);
+    $file = mysqli_fetch_array($result);
     $file['srt'] = stripslashes($file['srt']);
 
     $captions = new Video;
@@ -276,9 +276,9 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'transcript'))
     }
 
     $sql = 'UPDATE files
-			SET transcript = "' . mysql_real_escape_string($captions->transcript) . '"
+			SET transcript = "' . mysqli_real_escape_string($GLOBALS['db'], $captions->transcript) . '"
 			WHERE id = ' . $_GET['id'];
-    $result = mysql_query($sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if ($result === FALSE)
     {
         die('Transcript could not be inserted.');
@@ -298,12 +298,12 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'atomize'))
     $sql = 'SELECT srt
 			FROM files
 			WHERE id = ' . $_GET['id'];
-    $result = mysql_query($sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (!$result)
     {
         die('No file of that ID is found.');
     }
-    $file = mysql_fetch_array($result);
+    $file = mysqli_fetch_array($result);
     $file['srt'] = stripslashes($file['srt']);
 
     $captions = new Video;
@@ -371,8 +371,8 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'metadata') && isset($_GET['path']
 			license, type, length, date, fps, capture_rate, width, height, sponsor
 			FROM files
 			WHERE id=' . $_GET['id'];
-    $result = mysql_query($sql);
-    $video_data = mysql_fetch_array($result);
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    $video_data = mysqli_fetch_array($result);
 
     /*
      * Switch the fields in question to our updated values.
@@ -404,14 +404,14 @@ else
 			(SELECT COUNT(*) FROM video_transcript WHERE file_id=files.id AND legislator_id IS NOT NULL) AS identified_count
 			FROM files
 			ORDER BY date DESC';
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) == 0)
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    if (mysqli_num_rows($result) == 0)
     {
         die('No videos found.');
     }
     $videos = array();
     $video_paths = array();
-    while ($video = mysql_fetch_array($result))
+    while ($video = mysqli_fetch_array($result))
     {
 
         $videos[] = array_map('stripslashes', $video);

@@ -18,14 +18,14 @@ include_once 'vendor/autoload.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();
 
 # LOCALIZE AND CLEAN UP VARIABLES
-$chamber = mysql_escape_string($_REQUEST['chamber']);
-$date = mysql_escape_string($_REQUEST['year']) . '-' . mysql_escape_string($_REQUEST['date']);
+$chamber = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['chamber']);
+$date = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['year']) . '-' . mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['date']);
 
 # PAGE METADATA
 $page_title = date('m/d/Y', strtotime($date)) . ' ' . ucfirst($chamber) . ' Proceedings';
@@ -35,14 +35,14 @@ $site_section = 'minutes';
 $sql = 'SELECT text
 		FROM minutes
 		WHERE date="' . $date . '" AND chamber="' . $chamber . '"';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) == 0)
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) == 0)
 {
     $page_body = '<p>No minutes are available for that date.</p>';
 }
-elseif (mysql_num_rows($result) > 0)
+elseif (mysqli_num_rows($result) > 0)
 {
-    $minutes = mysql_fetch_array($result);
+    $minutes = mysqli_fetch_array($result);
     $minutes = stripslashes($minutes['text']);
 
     # Turn every bill number into a link.
@@ -63,10 +63,10 @@ elseif (mysql_num_rows($result) > 0)
 			WHERE type="video" AND committee_id IS NULL AND date="' . $date . '"
 			AND chamber="' . $chamber . '"
 			LIMIT 1';
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) > 0)
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    if (mysqli_num_rows($result) > 0)
     {
-        $video = mysql_fetch_array($result);
+        $video = mysqli_fetch_array($result);
         $video = array_map('stripslashes', $video);
     }
 
@@ -214,11 +214,11 @@ elseif (mysql_num_rows($result) > 0)
 				WHERE bills_status.date="' . $date . '" AND bills.current_chamber="' . $chamber . '"
 				GROUP BY tag
 				ORDER BY count DESC';
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) > 0)
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        if (mysqli_num_rows($result) > 0)
         {
             # Build up an array of tags, with the key being the tag and the value being the count.
-            while ($tag = mysql_fetch_array($result))
+            while ($tag = mysqli_fetch_array($result))
             {
                 $tag = array_map('stripslashes', $tag);
                 $tags[$tag{tag}] = $tag['count'];

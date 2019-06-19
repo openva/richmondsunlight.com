@@ -36,7 +36,7 @@
     # PAGE CONTENT
     # Open a database connection.
     $database = new Database;
-    $database->connect_old();
+    $database->connect_mysqli();
 
     # Query the database for the last 20 comments.
     $sql = 'SELECT comments.id, comments.bill_id, comments.date_created AS date,
@@ -56,12 +56,12 @@
 			WHERE comments.status="published"
 			ORDER BY comments.date_created DESC
 			LIMIT 20';
-    $result = mysql_query($sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
 
     $rss_content = '';
 
     # Generate the RSS.
-    while ($comment = mysql_fetch_array($result))
+    while ($comment = mysqli_fetch_array($result))
     {
 
         # Aggregate the variables into their RSS components.

@@ -18,7 +18,7 @@ include_once 'vendor/autoload.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 $log = new Log;
 
@@ -191,10 +191,10 @@ if (isset($_POST['submit']))
         # Make sure that this isn't a duplicate user account.
         $sql = 'SELECT *
 				FROM users
-				WHERE email = "' . mysql_real_escape_string($form_data['email']) . '"
+				WHERE email = "' . mysqli_real_escape_string($GLOBALS['db'], $form_data['email']) . '"
 				AND password IS NOT NULL';
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) > 0)
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        if (mysqli_num_rows($result) > 0)
         {
             $errors[] = 'an e-mail address that’s not already in use; better yet,
 				<a href="/account/reset-password/">reset your password</a> and use your existing
@@ -250,7 +250,9 @@ if (isset($_POST['submit']))
             }
         }
 
-        $form_data = array_map('mysql_real_escape_string', $_POST['form_data']);
+        $form_data = array_map(function ($field) {
+            return mysqli_real_escape_string($GLOBALS['db'], $field);
+        }, $_POST['form_data']);
 
         # Generate a random eight-digit hash in case this user has to recover his password.
         $chars = 'bcdfghjklmnpqrstvxyz0123456789';
@@ -307,7 +309,7 @@ if (isset($_POST['submit']))
             $sql = 'INSERT INTO dashboard_portfolios
 					SET name = "Bills", public="y", user_id = ' . $user['id'] . ',
 					hash = "' . $hash . '", date_created = now()';
-            mysql_query($sql);
+            mysqli_query($GLOBALS['db'], $sql);
 
             # Acknowledge the registration.
             $page_body = '

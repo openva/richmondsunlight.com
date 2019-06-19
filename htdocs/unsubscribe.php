@@ -26,7 +26,7 @@ include_once 'vendor/autoload.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # LOCALIZE VARIABLES
 if (isset($_GET['hash']) && (mb_strlen($_GET['hash']) == 8))
@@ -46,9 +46,9 @@ $site_section = '';
 
 # Terminate the subscription.
 $sql = 'DELETE FROM comments_subscriptions
-		WHERE hash="' . mysql_real_escape_string($hash) . '"
+		WHERE hash="' . mysqli_real_escape_string($GLOBALS['db'], $hash) . '"
 		LIMIT 1';
-mysql_query($sql);
+mysqli_query($GLOBALS['db'], $sql);
 
 # If we've got a referer, get the domain for us to figure out where to send this person.
 if (isset($_SERVER['HTTP_REFERER']))

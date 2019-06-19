@@ -14,7 +14,7 @@ include_once '../../includes/functions.inc.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 if (count($_POST) == 0)
 {
@@ -23,9 +23,9 @@ if (count($_POST) == 0)
     $sql = 'SELECT id, name
 			FROM representatives
 			ORDER BY name ASC';
-    $result = mysql_query($sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     $legislator_select = '<option value=""></option><option value="ignore">Ignore</option>';
-    while ($legislator = mysql_fetch_array($result))
+    while ($legislator = mysqli_fetch_array($result))
     {
         $legislator_select .= '<option value="' . $legislator['id'] . '">' .  stripslashes($legislator['name'])
             . '</option>';
@@ -54,8 +54,8 @@ if (count($_POST) == 0)
 			HAVING number > 2
 			ORDER BY number DESC
 			LIMIT 50';
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) < 1)
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    if (mysqli_num_rows($result) < 1)
     {
         die('No orphaned chyrons found.');
     }
@@ -79,7 +79,7 @@ if (count($_POST) == 0)
 					<th>Legislator</th>
 				</tr>
 			<tbody>';
-    while ($chyron = mysql_fetch_array($result))
+    while ($chyron = mysqli_fetch_array($result))
     {
 
         $chyron['url'] = str_replace(
@@ -134,7 +134,7 @@ else
 					AND md5(raw_text) = "' . $chyron_md5 . '"';
         }
 
-        $result = mysql_query($sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if ($result === FALSE)
         {
             echo '<p>Error: Query failed. ' . $sql . '</p>';

@@ -19,7 +19,7 @@ include_once 'vendor/autoload.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();
@@ -71,12 +71,12 @@ $sql = 'SELECT bills.number AS bill_number, bills.catch_line, representatives_vo
 		LEFT JOIN committees ON votes.committee_id = committees.id
 		LEFT JOIN representatives ON representatives_votes.representative_id=representatives.id
 		LEFT JOIN sessions ON bills.session_id = sessions.id
-		WHERE representatives.shortname = "' . mysql_real_escape_string($shortname) . '"
-		AND sessions.year = ' . mysql_real_escape_string($year) . '
+		WHERE representatives.shortname = "' . mysqli_real_escape_string($GLOBALS['db'], $shortname) . '"
+		AND sessions.year = ' . mysqli_real_escape_string($GLOBALS['db'], $year) . '
 		AND bills_status.date IS NOT NULL AND votes.session_id=sessions.id
 		ORDER BY date ASC, committee ASC';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0)
 {
     $page_body = '
 		<p><a href="/legislator/' . $shortname . '/votes/' . $year . '.csv">Download List as a
@@ -94,7 +94,7 @@ if (mysql_num_rows($result) > 0)
 				</tr>
 			</thead>
 			<tbody>';
-    while ($vote = mysql_fetch_array($result))
+    while ($vote = mysqli_fetch_array($result))
     {
         $vote = array_map('stripslashes', $vote);
         $page_body .= '

@@ -18,7 +18,7 @@ include_once 'vendor/autoload.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();
@@ -51,7 +51,7 @@ $sql = 'SELECT date, chamber,
 		FROM minutes
 		WHERE DATE_FORMAT(date, "%Y") = ' . $year . '
 		ORDER BY chamber ASC, date ASC';
-$result = mysql_query($sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 
 # PAGE SIDEBAR
 $page_sidebar = '
@@ -74,18 +74,18 @@ $page_sidebar .= '
 		which are a lot more informative than the minutes.</p>
 	</div>';
 
-if (mysql_num_rows($result) == 0)
+if (mysqli_num_rows($result) == 0)
 {
     $page_body = '<p>No minutes are yet available for ' . SESSION_YEAR . ', but you may select minutes
 		from past years using the menu at right.</p>';
 }
-elseif (mysql_num_rows($result) > 0)
+elseif (mysqli_num_rows($result) > 0)
 {
 
     # PAGE CONTENT
 
     # Iterate through the query results.
-    while ($minutes = mysql_fetch_array($result))
+    while ($minutes = mysqli_fetch_array($result))
     {
         $minutes = array_map('stripslashes', $minutes);
         if (!isset($chamber))

@@ -40,6 +40,6 @@ if (!empty($_SERVER['HTTP_REFERER']))
 }
 else
 {
-    header('Location: http://www.richmondsunlight.com/');
+    header('Location: http://'. $_SERVER['SERVER_NAME'] .'/');
 }
 exit;

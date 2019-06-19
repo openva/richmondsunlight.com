@@ -25,7 +25,7 @@ include_once '../includes/photosynthesis.inc.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # PAGE METADATA
 $page_title = 'Photosynthesis';
@@ -59,10 +59,10 @@ $sql = 'SELECT dashboard_portfolios.id, dashboard_portfolios.hash, dashboard_por
 		LEFT JOIN dashboard_user_data
 			ON users.id = dashboard_user_data.user_id
 		WHERE dashboard_portfolios.public = "y" AND dashboard_portfolios.hash="' . $hash . '"';
-$result = mysql_query($sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 
 # If this portfolio doesn't exist or isn't visible.
-if (mysql_num_rows($result) == 0)
+if (mysqli_num_rows($result) == 0)
 {
     die('Invalid ID.');
 }
@@ -70,14 +70,14 @@ if (mysql_num_rows($result) == 0)
 # If this portfolio does exist.
 else
 {
-    $portfolio = mysql_fetch_array($result);
+    $portfolio = mysqli_fetch_array($result);
     $portfolio = array_map('stripslashes', $portfolio);
 
     # Increment the view count.
     $sql = 'UPDATE dashboard_portfolios
 			SET view_count = view_count + 1
 			WHERE id = ' . $portfolio['id'];
-    mysql_query($sql);
+    mysqli_query($GLOBALS['db'], $sql);
 
     # Make the user closer to anonymous.
     $tmp = explode(' ', $portfolio['user_name']);
@@ -152,8 +152,8 @@ else
 			AND sessions.year=' . SESSION_YEAR . '
 			GROUP BY tags.tag
 			ORDER BY tags.tag ASC';
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) > 0)
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    if (mysqli_num_rows($result) > 0)
     {
         $page_sidebar .= '
 		<a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
@@ -162,7 +162,7 @@ else
 			<div class="tags">';
         $top_tag = 1;
         $top_tag_size = 3;
-        while ($tag = mysql_fetch_array($result))
+        while ($tag = mysqli_fetch_array($result))
         {
             $tags[] = array_map('stripslashes', $tag);
             if ($tag['count'] > $top_tag)
@@ -210,8 +210,8 @@ else
 			ORDER BY bills.chamber DESC,
 			SUBSTRING(bills.number FROM 1 FOR 2) ASC,
 			CAST(LPAD(SUBSTRING(bills.number FROM 3), 4, "0") AS unsigned) ASC';
-    $result = mysql_query($sql);
-    $bill_count = mysql_num_rows($result);
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    $bill_count = mysqli_num_rows($result);
     if ($bill_count == 0)
     {
         die('Empty portfolio.');
@@ -230,7 +230,7 @@ else
             $page_body .= '<p><em>' . $bill_count . ' bills are being tracked.</em></p>';
         }
 
-        while ($bill = mysql_fetch_array($result))
+        while ($bill = mysqli_fetch_array($result))
         {
             $bill = array_map('stripslashes', $bill);
 

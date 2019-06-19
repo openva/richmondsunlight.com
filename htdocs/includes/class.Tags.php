@@ -12,7 +12,7 @@ class Tags
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         $sql = 'SELECT tag AS text, COUNT(*) AS number
         		FROM tags
@@ -21,13 +21,13 @@ class Tags
         		HAVING number > 5
         		ORDER BY number DESC
         		LIMIT 5';
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) == 0)
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
         }
         $tags = array();
-        while ($tag = mysql_fetch_array($result))
+        while ($tag = mysqli_fetch_array($result))
         {
             $tags[] = $tag['text'];
         }

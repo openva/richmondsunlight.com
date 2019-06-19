@@ -14,7 +14,7 @@ class Committee
         }
 
         $db = new Database;
-        $db->connect_old();
+        $db->connect_mysqli();
 
         /*
          * Select the basic committee information.
@@ -24,13 +24,13 @@ class Committee
                 WHERE shortname="' . $this->shortname . '"
                 AND chamber="' . $this->chamber . '"';
 
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) == 0)
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
         }
 
-        $info = mysql_fetch_assoc($result);
+        $info = mysqli_fetch_assoc($result);
 
         foreach ($info as $name => $value)
         {
@@ -51,7 +51,7 @@ class Committee
         }
 
         $db = new Database;
-        $db->connect_old();
+        $db->connect_mysqli();
 
         $sql = 'SELECT representatives.shortname, representatives.name_formatted AS name,
 				representatives.name AS name_simple, committee_members.position,
@@ -64,15 +64,15 @@ class Committee
 				AND (committee_members.date_ended > now() OR committee_members.date_ended IS NULL)
 				AND (representatives.date_ended >= now() OR representatives.date_ended IS NULL)
 				ORDER BY committee_members.position DESC, representatives.name ASC';
-        $result = mysql_query($sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
-        if (mysql_num_rows($result) == 0)
+        if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
         }
 
         $this->members = array();
-        while ($member = mysql_fetch_assoc($result))
+        while ($member = mysqli_fetch_assoc($result))
         {
             $member['name_simple'] = pivot($member['name_simple']);
             $this->members[] = $member;
@@ -99,12 +99,12 @@ class Committee
                 WHERE chamber="' . $this->chamber . '"
                 ORDER BY distance DESC
                 LIMIT 1';
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) == 0)
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
         }
-        $committee = mysql_fetch_assoc($result);
+        $committee = mysqli_fetch_assoc($result);
         $this->id = $committee['id'];
         return $this->id;
     } // end get_id()

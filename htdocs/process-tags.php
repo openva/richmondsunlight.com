@@ -19,7 +19,7 @@ include_once 'vendor/autoload.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();
@@ -53,7 +53,7 @@ if (empty($tags))
         # Delete the tag.
         $sql = 'DELETE FROM tags
 				WHERE id=' . $delete;
-        mysql_query($sql);
+        mysqli_query($GLOBALS['db'], $sql);
 
         # Delete the bill from Memcached.
         $mc = new Memcached();
@@ -129,7 +129,7 @@ if (!empty($_SESSION['id']))
 
             # Make sure it's safe.
             $tag[$i] = preg_replace("/[[:punct:]]/D", '', $tag[$i]);
-            $tag[$i] = trim(mysql_real_escape_string($tag[$i]));
+            $tag[$i] = trim(mysqli_real_escape_string($GLOBALS['db'], $tag[$i]));
 
             # Check one more time to make sure it's not empty.
             if (!empty($tag[$i]))
@@ -143,7 +143,7 @@ if (!empty($_SESSION['id']))
 							FROM users
 							WHERE cookie_hash = "' . $_SESSION['id'] . '"),
 						date_created=now()';
-                $result = mysql_query($sql);
+                $result = mysqli_query($GLOBALS['db'], $sql);
 
                 /*
                  * If there was a database-insertion error.

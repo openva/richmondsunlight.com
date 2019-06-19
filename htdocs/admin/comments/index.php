@@ -18,7 +18,7 @@ include_once '../../includes/settings.inc.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # LOCALIZE VARIABLES
 if (isset($_REQUEST['op'])) $op = $_REQUEST['op'];
@@ -44,8 +44,8 @@ if (!empty($op))
         $sql = 'SELECT bill_id AS id
                 FROM comments
                 WHERE id = ' . $id;
-        $result = mysql_query($sql);
-        $bill = mysql_fetch_array($result);
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        $bill = mysqli_fetch_array($result);
         $mc->delete('comments-' . $bill['id']);
     }
 
@@ -54,7 +54,7 @@ if (!empty($op))
         $sql = 'UPDATE comments
 				SET status="spam"
 				WHERE id=' . $id;
-        $result = mysql_query($sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if ($result === TRUE)
         {
             header('Location: https://' . $_SERVER['SERVER_NAME'] . '/admin/comments/');
@@ -67,7 +67,7 @@ if (!empty($op))
         $sql = 'UPDATE comments
 				SET status="deleted"
 				WHERE id=' . $id;
-        $result = mysql_query($sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if ($result === TRUE)
         {
             header('Location: https://' . $_SERVER['SERVER_NAME'] . '/admin/comments/');
@@ -80,7 +80,7 @@ if (!empty($op))
         $sql = 'UPDATE comments
 				SET editors_pick="y"
 				WHERE id=' . $id;
-        $result = mysql_query($sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
         if ($result === TRUE)
         {
             $page_body = '<p>Comment marked as an editor’s pick.</p>';
@@ -105,9 +105,9 @@ else
 				ON comments.bill_id = bills.id
 			ORDER BY comments.date_created DESC
 			LIMIT 30';
-    $result = mysql_query($sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     $page_body = '<div id="comments">';
-    while ($comment = mysql_fetch_array($result))
+    while ($comment = mysqli_fetch_array($result))
     {
         $page_body .= '
 			<div class="comment"'.(($comment['status'] == 'deleted' || $comment['status'] == 'spam') ? ' style="color: #999;"' : '') . '>

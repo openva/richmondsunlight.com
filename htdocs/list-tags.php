@@ -14,19 +14,23 @@ include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();
 
+# INITIALIZE VARIABLES
+$page_body = '';
+$page_sidebar = '';
+
 # LOCALIZE VARIABLES
 if (!empty($_GET['year']))
 {
-    $year = mysql_real_escape_string($_GET['year']);
+    $year = mysqli_real_escape_string($GLOBALS['db'], $_GET['year']);
 }
 elseif (!empty($_GET['party']))
 {
-    $party = mysql_real_escape_string($_GET['committee']);
+    $party = mysqli_real_escape_string($GLOBALS['db'], $_GET['committee']);
 }
 else
 {
@@ -52,17 +56,17 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 		GROUP BY tags.tag
 		HAVING count > 1
 		ORDER BY tag ASC';
-$result = mysql_query($sql);
-$tag_count = mysql_num_rows($result);
+$result = mysqli_query($GLOBALS['db'], $sql);
+$tag_count = mysqli_num_rows($result);
 if ($tag_count > 0)
 {
     $page_body .= '
 	<div class="tags">';
     # Build up an array of tags, with the key being the tag and the value being the count.
-    while ($tag = mysql_fetch_array($result))
+    while ($tag = mysqli_fetch_array($result))
     {
         $tag = array_map('stripslashes', $tag);
-        $tags[$tag{tag}] = $tag['count'];
+        $tags[$tag{'tag'}] = $tag['count'];
     }
 
     # Sort the tags in reverse order by key (their count), shave off the top 30, and then
@@ -87,7 +91,7 @@ else
 }
 
 # SIDEBAR
-$page_sidebar = '
+$page_sidebar .= '
 	<div class="box">
 		<h3>Explanation</h3>
 		<p>This is a “tag cloud,” a sort of a graph of the topics addressed by these bills. Each
@@ -105,5 +109,4 @@ $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
-$page->html_head = $html_head;
 $page->process();

@@ -27,7 +27,7 @@ include_once 'vendor/autoload.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # PAGE METADATA
 $page_title = 'Legislators';
@@ -72,14 +72,14 @@ $sql = 'SELECT shortname, name, party, place
 		WHERE chamber="house"
 		AND (date_ended IS NULL OR date_ended > now())
 		ORDER BY name ASC';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
 	<div class="left_side">
 		<h2>House of Delegates</h2>
 		<ul>';
-    while ($legislator = mysql_fetch_array($result))
+    while ($legislator = mysqli_fetch_array($result))
     {
         $legislator = array_map('stripslashes', $legislator);
         $page_body .= '<li><a href="/legislator/' . $legislator['shortname'] . '/">' . $legislator['name'] .
@@ -95,13 +95,13 @@ $sql = 'SELECT shortname, name, party, place
 		WHERE chamber="senate"
 		AND (date_ended IS NULL OR date_ended > now())
 		ORDER BY name ASC';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '<div class="right_side">
 		<h2>Senate</h2>
 		<ul>';
-    while ($legislator = mysql_fetch_array($result))
+    while ($legislator = mysqli_fetch_array($result))
     {
         $page_body .= '<li><a href="/legislator/' . $legislator['shortname'] . '/">' . $legislator['name'] .
             ' (' . $legislator['party'] . '-' . $legislator['place'] . ')</a></li>';
@@ -123,8 +123,8 @@ $sql = 'SELECT id, shortname, name, chamber, latitude, longitude
         FROM representatives
         WHERE (date_ended IS NULL OR date_ended > now())
         AND latitude IS NOT NULL AND longitude IS NOT NULL';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0)
 {
     # Create the HTML that defines the map.
     $html_head .= "\r\t".'<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp;key=ABQIAAAAn01L8sl4uwWn5vTPpoEoXhS0gyL4OV3haSzsE_slDr_NsupiLRSOvHSKmqYYxuXboyr-TTQzL6K8gg" type="text/javascript"></script>';
@@ -150,7 +150,7 @@ if (mysql_num_rows($result) > 0)
             map.addControl(new GSmallZoomControl());
             map.setCenter(new GLatLng(38, -79), 6);'."\r\r\t\t\t\t";
 
-    while ($legislator = mysql_fetch_array($result))
+    while ($legislator = mysqli_fetch_array($result))
     {
         $legislator = array_map('stripslashes', $legislator);
 

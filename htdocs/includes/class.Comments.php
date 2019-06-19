@@ -33,7 +33,7 @@ class Comments
         }
 
         $database = new Database;
-        $database->connect_old();
+        $database->connect_mysqli();
 
         # Initliaze the array to store comments.
         $comments = array();
@@ -52,17 +52,17 @@ class Comments
 					LEFT JOIN bills
 						ON comments.bill_id=bills.id
 					WHERE
-					(comments.bill_id=' . mysql_real_escape_string($this->bill_id) . '
+					(comments.bill_id=' . mysqli_real_escape_string($GLOBALS['db'], $this->bill_id) . '
 					OR
 						(bills.summary_hash = "' . $bill_info['summary_hash'] . '"
 						AND bills.session_id=' . $bill_info['session_id'] . ')
 					)
 					AND comments.status="published"
 					ORDER BY comments.date_created ASC';
-            $result = mysql_query($sql);
-            if (mysql_num_rows($result) > 0)
+            $result = mysqli_query($GLOBALS['db'], $sql);
+            if (mysqli_num_rows($result) > 0)
             {
-                while ($comment = mysql_fetch_array($result))
+                while ($comment = mysqli_fetch_array($result))
                 {
 
                     # Clean up the data.
@@ -96,10 +96,10 @@ class Comments
 						ON dashboard_user_data.user_id = users.id
 					WHERE dashboard_bills.bill_id=' . $bill_info['id'] . ' AND dashboard_bills.notes IS NOT NULL
 					ORDER BY date_modified ASC';
-            $result = mysql_query($sql);
-            if (mysql_num_rows($result) > 0)
+            $result = mysqli_query($GLOBALS['db'], $sql);
+            if (mysqli_num_rows($result) > 0)
             {
-                while ($comment = mysql_fetch_array($result))
+                while ($comment = mysqli_fetch_array($result))
                 {
 
                     # Clean up the data.

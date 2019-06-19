@@ -19,7 +19,7 @@
     # Run those functions that are necessary prior to loading this specific
     # page.
     $database = new Database;
-    $database->connect_old();
+    $database->connect_mysqli();
 
     # PAGE METADATA
     $page_title = 'Statistics';
@@ -47,13 +47,13 @@
 			FROM bills
 			WHERE session_id=' . SESSION_ID . '
 			GROUP BY chamber';
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) > 0)
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    if (mysqli_num_rows($result) > 0)
     {
         $page_sidebar .= '
 			<div class="box">
 				<h3>By Chamber</h3>';
-        while ($chamber = mysql_fetch_array($result))
+        while ($chamber = mysqli_fetch_array($result))
         {
             if ($chamber['chamber'] == 'house')
             {
@@ -101,13 +101,13 @@
 			LEFT JOIN representatives ON bills.chief_patron_id=representatives.id
 			WHERE bills.session_id=' . SESSION_ID . '
 			GROUP BY party';
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) > 0)
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    if (mysqli_num_rows($result) > 0)
     {
         $page_sidebar .= '
 			<div class="box">
 				<h3>By Party</h3>';
-        while ($party = mysql_fetch_array($result))
+        while ($party = mysqli_fetch_array($result))
         {
             if ($party['party'] == 'R')
             {
@@ -147,8 +147,8 @@
 			GROUP BY tags.tag
 			HAVING count > 5
 			ORDER BY tags.tag ASC';
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) > 0)
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    if (mysqli_num_rows($result) > 0)
     {
         $page_sidebar .= '
 		<a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-beige.gif" class="help-icon" alt="?" /></a>
@@ -156,7 +156,7 @@
 		<div class="box">
 			<h3>Republican Tag Cloud</h3>
 			<div class="tags">';
-        while ($tag = mysql_fetch_array($result))
+        while ($tag = mysqli_fetch_array($result))
         {
             $tags[] = array_map('stripslashes', $tag);
         }
@@ -188,8 +188,8 @@
 			GROUP BY tags.tag
 			HAVING count > 3
 			ORDER BY tags.tag ASC';
-    $result = mysql_query($sql);
-    if (mysql_num_rows($result) > 0)
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    if (mysqli_num_rows($result) > 0)
     {
         $page_sidebar .= '
 		<a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-beige.gif" class="help-icon" alt="?" /></a>
@@ -197,7 +197,7 @@
 		<div class="box">
 			<h3>Democratic Tag Cloud</h3>
 			<div class="tags">';
-        while ($tag = mysql_fetch_array($result))
+        while ($tag = mysqli_fetch_array($result))
         {
             $tags[] = array_map('stripslashes', $tag);
         }

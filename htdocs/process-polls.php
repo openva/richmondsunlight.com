@@ -19,7 +19,7 @@ include_once 'vendor/autoload.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();
@@ -68,7 +68,7 @@ if (!empty($_SESSION['id']))
 				FROM users
 				WHERE cookie_hash = "' . $_SESSION['id'] . '"),
 			date_created=now()';
-    $result = mysql_query($sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (!$result)
     {
         die("Poll vote could not be cast.");

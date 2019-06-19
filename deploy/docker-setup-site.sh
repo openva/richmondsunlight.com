@@ -27,3 +27,9 @@ composer install
 
 # Move over the settings file.
 cp deploy/settings-docker.inc.php htdocs/includes/settings.inc.php
+
+# Load database contents
+apt-get install -y mysql-client
+mysql -h rs_db -u root -ppassword richmondsunlight < /var/www/deploy/mysql/structure.sql \
+    && mysql -h rs_db -u root -ppassword richmondsunlight < /var/www/deploy/mysql/basic-contents.sql \
+    && mysql -h rs_db -u root -ppassword richmondsunlight < /var/www/deploy/mysql/test-records.sql

@@ -18,11 +18,11 @@ include_once 'vendor/autoload.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # LOCALIZE AND CLEAN UP VARIABLES
-$year = mysql_escape_string($_REQUEST['year']);
-$bill = mysql_escape_string($_REQUEST['bill']);
+$year = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['year']);
+$bill = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['bill']);
 
 # RETRIEVE THE BILL INFO FROM THE DATABASE
 
@@ -75,10 +75,10 @@ $sql = 'SELECT number, date_introduced, text
 		FROM bills_full_text
 		WHERE bill_id = ' . $bill['id'] . ' AND bills_full_text.text IS NOT NULL
 		ORDER BY date_introduced DESC';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0)
 {
-    while ($version = mysql_fetch_array($result, MYSQL_ASSOC))
+    while ($version = mysqli_fetch_array($result, MYSQL_ASSOC))
     {
         $version = array_map('stripslashes', $version);
 

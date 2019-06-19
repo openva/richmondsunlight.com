@@ -19,7 +19,7 @@ include_once 'vendor/autoload.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();
@@ -60,12 +60,12 @@ $sql = 'SELECT DISTINCT meetings.time AS time_raw, DATE_FORMAT(meetings.time, "%
 			ON meetings.committee_id=committees.id
 		WHERE date="' . $date . '"
 		ORDER BY timedesc DESC, time_raw ASC';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
 		<h2 id="calendar">The Day’s Calendar</h2>';
-    while ($meeting = mysql_fetch_array($result))
+    while ($meeting = mysqli_fetch_array($result))
     {
         $meeting = array_map('stripslashes', $meeting);
         $page_body .= '<p><strong>';
@@ -95,11 +95,11 @@ $sql = 'SELECT dockets.date, committees.id AS committee_id, committees.chamber,
 			ON committees.parent_id=committees2.id
 		LEFT JOIN meetings
 			ON committees.id = meetings.committee_id
-		WHERE dockets.date = "' . mysql_real_escape_string($date) . '"
+		WHERE dockets.date = "' . mysqli_real_escape_string($GLOBALS['db'], $date) . '"
 		GROUP BY dockets.committee_id
 		ORDER BY committees.chamber DESC, committees.name ASC';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) < 1)
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) < 1)
 {
     $page_body .= '<p>No committee or subcommittee meetings are currently scheduled for today.</p>';
 }
@@ -107,7 +107,7 @@ else
 {
 
     # Step through each scheduled meeting.
-    while ($meeting = mysql_fetch_array($result))
+    while ($meeting = mysqli_fetch_array($result))
     {
 
         # Clean up the data.
@@ -131,13 +131,13 @@ else
 				ORDER BY bills.chamber DESC,
 				SUBSTRING(bills.number FROM 1 FOR 2) ASC,
 				CAST(LPAD(SUBSTRING(bills.number FROM 3), 4, "0") AS unsigned) ASC';
-        $result2 = mysql_query($sql);
-        if (mysql_num_rows($result2) > 0)
+        $result2 = mysqli_query($GLOBALS['db'], $sql);
+        if (mysqli_num_rows($result2) > 0)
         {
             # Initialize the array.
             $bills = array();
 
-            while ($bill = mysql_fetch_array($result2))
+            while ($bill = mysqli_fetch_array($result2))
             {
                 # Save the bills into an array to use later.
                 $bill = array_map('stripslashes', $bill);
@@ -215,14 +215,14 @@ $sql = 'SELECT DISTINCT DATE_FORMAT(date, "%m/%d/%Y") AS date_formatted, date
 		WHERE date >= now()
 		ORDER BY date ASC
 		LIMIT 10';
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0)
 {
     $page_sidebar = '
 	<div class="box">
 		<h3>Upcoming Dates</h3>
 		<ul>';
-    while ($upcoming = mysql_fetch_array($result))
+    while ($upcoming = mysqli_fetch_array($result))
     {
         # Create the URL for this day's link.
         $upcoming['url'] = '/schedule/' . str_replace('-', '/', $upcoming['date']) . '/';

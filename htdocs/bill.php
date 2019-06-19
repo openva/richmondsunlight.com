@@ -23,7 +23,7 @@ include_once 'vendor/autoload.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_old();
+$database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();
@@ -37,16 +37,17 @@ if (logged_in() === TRUE)
 $debug_timing['logged in'] = microtime(TRUE);
 
 # LOCALIZE AND CLEAN UP VARIABLES
-$year = mysql_escape_string($_REQUEST['year']);
-$bill = mb_strtolower(mysql_escape_string($_REQUEST['bill']));
+$year = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['year']);
+$bill = mb_strtolower(mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['bill']));
 
 # Initialize variables.
 $html_head = '';
 $page_body = '';
+$page_header = '';
 
 # Get the bill's content from the API.
 # We append a query string, containing the current time, to avoid getting a cached copy.
-$json_url = 'https://api.richmondsunlight.com/1.1/bill/' . $year . '/' . $bill . '.json?' . time();
+$json_url = API_URL . '1.1/bill/' . $year . '/' . $bill . '.json?' . time();
 $json = get_content($json_url);
 
 $debug_timing['JSON retrieved'] = microtime(TRUE);
@@ -112,7 +113,7 @@ if (!isset($is_bot))
     {
         $sql .= ', user_id = ' . $user['id'];
     }
-    mysql_query($sql);
+    mysqli_query($GLOBALS['db'], $sql);
 }
 
 # PAGE METADATA
@@ -182,12 +183,12 @@ if ($bill['session_id'] == SESSION_ID)
 					ON dashboard_bills.portfolio_id = dashboard_portfolios.id
 				WHERE dashboard_bills.bill_id = ' . $bill['id'] . '
 				AND dashboard_portfolios.user_id= ' . $user['id'];
-        $result = mysql_query($sql);
+        $result = mysqli_query($GLOBALS['db'], $sql);
 
         # If this bill is being tracked, notify this user.
-        if (mysql_num_rows($result) > 0)
+        if (mysqli_num_rows($result) > 0)
         {
-            $portfolio = mysql_fetch_array($result);
+            $portfolio = mysqli_fetch_array($result);
             $portfolio = array_map('stripslashes', $portfolio);
             if (count($_SESSION['portfolios'] == 1))
             {
@@ -250,8 +251,8 @@ if ($bill['session_id'] == SESSION_ID)
         $sql .= ' AND users.id != ' . $user['id'];
     }
     $sql .= ' ORDER BY RAND()';
-    $result = mysql_query($sql);
-    $portfolio_count = mysql_num_rows($result);
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    $portfolio_count = mysqli_num_rows($result);
 
     # If we've found anything, list them.
     if ($portfolio_count > 0)
@@ -262,7 +263,7 @@ if ($bill['session_id'] == SESSION_ID)
             $ps_portfolios .= 'one member, ';
         }
         $i=2;
-        while ($portfolio = mysql_fetch_array($result))
+        while ($portfolio = mysqli_fetch_array($result))
         {
             $portfolio = array_map('stripslashes', $portfolio);
 
@@ -948,10 +949,10 @@ $sql = 'SELECT DATE_FORMAT(dockets.date, "%m/%d/%Y") AS date, committees.name AS
 		WHERE dockets.bill_id=' . $bill['id'] . ' AND dockets.date > now()
 		LIMIT 1';
 
-$result = mysql_query($sql);
-if (mysql_num_rows($result) > 0)
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0)
 {
-    $docket = mysql_fetch_array($result);
+    $docket = mysqli_fetch_array($result);
     $docket = array_map('stripslashes', $docket);
 
     $page_body .= '
@@ -1019,12 +1020,12 @@ if (($bill['video'] !== FALSE) && (count($bill['video']) > 0))
 					AND time_start >= " ' . seconds_to_time($video->start) . ' "
 					AND time_end <= " ' . seconds_to_time($video->end) . ' "
 				ORDER BY video_transcript.time_start ASC';
-        $result = mysql_query($sql);
-        if (mysql_num_rows($result) > 0)
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        if (mysqli_num_rows($result) > 0)
         {
             $transcript[$video->file_id] = array();
 
-            while ($line = mysql_fetch_assoc($result))
+            while ($line = mysqli_fetch_assoc($result))
             {
                 $transcript[$video->file_id][] = $line;
             }
@@ -1383,9 +1384,9 @@ if (($bill['session_id'] == SESSION_ID))
     $page_body .= '
 	<h2>Post a Public Comment About this Bill</h2>
 	<form method="post" action="/process-comments.php" id="comment-form">
-		<input type="text" size="30" maxlength="50" name="comment[expiration_date]" id="expiration_date" value="' . $user['name'] . '" required /> <label for="expiration_date"><strong>Name</strong> <small>required</small></label><br />
-		<input type="email" size="30" maxlength="50" name="comment[zip]" id="zip" value="' . $user['email'] . '" required /> <label for="zip"><strong>Email</strong> <small>won’t be published, required</small></label><br />
-		<input type="url" size="30" maxlength="50" name="comment[age]" id="age" value="' . $user['url'] . '" /> <label for="age"><strong>Website</strong></label> <small>if you have one</small><br />
+		<input type="text" size="30" maxlength="50" name="comment[expiration_date]" id="expiration_date" value="' . (isset($user) ? $user['name'] : '') . '" required /> <label for="expiration_date"><strong>Name</strong> <small>required</small></label><br />
+		<input type="email" size="30" maxlength="50" name="comment[zip]" id="zip" value="' . (isset($user) ? $user['email'] : '') . '" required /> <label for="zip"><strong>Email</strong> <small>won’t be published, required</small></label><br />
+		<input type="url" size="30" maxlength="50" name="comment[age]" id="age" value="' . (isset($user) ? $user['url'] : '') . '" /> <label for="age"><strong>Website</strong></label> <small>if you have one</small><br />
 		<div style="display: none;"><input type="text" size="2" maxlength="2" name="comment[state]" id="state" /> <label for="state">Leave this field empty</label><br /></div>
 		<textarea rows="16" cols="60" name="comment[comment]" id="comment" required></textarea><br />
 		<small>(Limited HTML is OK: &lt;a&gt;, &lt;em&gt;, &lt;strong&gt;, &lt;s&gt)</small><br />';
