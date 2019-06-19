@@ -18,6 +18,15 @@ then
     ERRORED=true
 fi
 
+# Is the legislator's formatted name correct?
+OUTPUT="$(curl --silent http://localhost:5001/1.1/legislator/rbbell.json | jq '.name_formatted')"
+EXPECTED='"Del. Rob Bell (R-Charlottesville)"';
+if [ "$OUTPUT" != "$EXPECTED" ]
+then
+    echo "ERROR: Legislator's formatted name isn't correct"
+    ERRORED=true
+fi
+
 # If any tests failed, have this script return that failure
 if [ "$ERRORED" == true ]; then
     exit 1
