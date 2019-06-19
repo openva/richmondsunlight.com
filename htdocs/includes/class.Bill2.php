@@ -169,7 +169,7 @@ class Bill2
         {
             $bill['patron_prefix'] = 'Sen.';
         }
-        $bill['url'] = 'http://www.richmondsunlight.com/bill/' . $bill['year'] . '/'
+        $bill['url'] = 'https://www.richmondsunlight.com/bill/' . $bill['year'] . '/'
             . mb_strtolower($bill['number']) . '/';
 
         /*
