@@ -36,34 +36,16 @@ function connect_to_db($type = 'old')
 
     if ($type == 'old')
     {
-        if (isset($GLOBALS['db']))
-        {
-            return $GLOBALS['db'];
-        }
-        $db = mysqli_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
-        if ($db === FALSE)
-        {
-            header('Location: https://'. $_SERVER['SERVER_NAME'] .'/site-down/');
-            exit;
-        }
-        mysqli_select_db($db, MYSQL_DATABASE);
-        mysqli_query($db, 'SET NAMES "utf8"');
-        return $db;
+        $database = new Database;
+        $database->connect_old();
     }
     elseif ($type == 'pdo')
     {
-        if (isset($GLOBALS['db_pdo']))
-        {
-            return true;
-        }
-        $db_pdo = new PDO(PDO_DSN, PDO_USERNAME, PDO_PASSWORD);
-        if ($db_pdo === FALSE)
-        {
-            header('Location: https://'. $_SERVER['SERVER_NAME'] .'/site-down/');
-            exit;
-        }
-        return $db_pdo;
+        $database = new Database;
+        $database->connect();
     }
+
+    return false;
 
 }
 
