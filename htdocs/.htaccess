@@ -15,6 +15,17 @@ php_value include_path ".:includes/"
 #php_value session.cache_limiter 525600
 #php_value session.gc_maxlifetime 525600
 
+# Security settings
+php_flag session.cookie_httponly on
+php_flag session.use_only_cookies on
+php_flag session.cookie_secure on
+Header always set Feature-Policy "push 'self'; fullscreen 'self'; geolocation 'self'; notifications 'self'; autoplay 'self'"
+Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+Header always set X-Frame-Options "SAMEORIGIN"
+Header always set X-Xss-Protection "1; mode=block"
+Header always set X-Content-Type-Options "nosniff"
+Header always set Referrer-Policy "strict-origin-when-cross-origin"
+
 <IfModule mod_deflate.c>
 	AddOutputFilterByType DEFLATE text/text text/html text/plain text/xml text/css application/x-javascript application/javascript
 </IfModule>
@@ -156,3 +167,4 @@ RewriteRule ^legislator$ /bills/ [R]
 RewriteRule ^search$ /search/
 RewriteRule ^schedule$ /schedule/ [R]
 RewriteRule ^minutes$ /minutes/ [R]
+php_value error_reporting 2039
