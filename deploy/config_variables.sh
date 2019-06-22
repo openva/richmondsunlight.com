@@ -25,6 +25,8 @@ variables=(
 	PUSHOVER_KEY
 	SLACK_WEBHOOK
 	API_URL
+	AWS_SES_SMTP_USERNAME
+	AWS_SES_SMTP_PASSWORD
 )
 
 # Iterate over the variables and warn if any aren't populated
@@ -66,4 +68,10 @@ done
 for i in "${variables[@]}"
 do
 	sed -i -e "s|{$i}|${!i}|g" deploy/database_export.sh
+done
+
+# Perform the same for the Postfix/SES authentication file
+for i in "${variables[@]}"
+do
+	sed -i -e "s|{$i}|${!i}|g" deploy/sasl_passwd
 done
