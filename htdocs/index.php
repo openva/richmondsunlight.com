@@ -12,7 +12,6 @@
 # INCLUDES
 include_once 'settings.inc.php';
 include_once 'vendor/autoload.php';
-include_once 'magpierss/rss_fetch.inc';
 
 # INITIALIZE SESSION
 session_start();
