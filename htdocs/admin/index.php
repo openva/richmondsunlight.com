@@ -26,12 +26,30 @@ $site_section = 'admin';
 
 # PAGE CONTENT
 
-$page_body .= '
-<div><a href="/admin/comments/">Comments</a> | <a href="/admin/tag.php">Tag Bills</a> | <a href="/admin/video/">Video</a> | <a href="apc.php">APC</a>  | <a href="memcache.php">Memcached</a></div>
+/*
+ * If there's an operation to perform prior to loading the page
+ */
+if (isset($op))
+{
+	/*
+	 * Delete a user
+	 */
+	if ( $op == 'delete' && !empty($user_id) )
+	{
+		$user = new User;
+		$user->id=$user_id;
+		$user->delete();
+	}
+}
 
-<h2>Load Average</h2>';
-$load = sys_getloadavg();
-$page_body .= '<p>'.round($load[0], 2).', '.round($load[1], 2).', '.round($load[2], 2).'</p>';
+$page_body = '
+		<div>
+			<a href="/admin/comments/">Comments</a> |
+			<a href="/admin/tag.php">Tag Bills</a> |
+			<a href="/admin/video/">Video</a> |
+			<a href="apc.php">APC</a>  |
+			<a href="memcache.php">Memcached</a>
+		</div>';
 
 # Select the tags from the past 3 days that were not added by me.
 $sql = 'SELECT tags.id, tags.tag, bills.number AS bill, sessions.year, users.name AS author
@@ -84,7 +102,8 @@ if (mysqli_num_rows($result) > 0)
         if (!empty($user['url']))
         {
             $page_body .= '</a> ';
-        }
+		}
+		$page_body .= '[<a href="?op=delete&amp;user_id=' . $user['id'] . '">x</a>]';
         $page_body .= ', ';
     }
 }

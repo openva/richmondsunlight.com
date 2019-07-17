@@ -408,4 +408,28 @@ class User
         }
         return $comments;
     }
+
+    /**
+     * Delete a user.
+     **/
+    public function delete()
+    {
+
+        if (!isset($this->id))
+        {
+            return FALSE;
+        }
+
+        $sql = 'DELETE FROM users
+                WHERE id=' . $this->id;
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        if ($result != TRUE)
+        {
+            return FALSE;
+        }
+
+        return TRUE;
+
+    }
+
 }
