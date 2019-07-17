@@ -147,7 +147,7 @@ if (mysqli_num_rows($result) > 0)
 		<h2>Poll Votes by Day</h2>
 		<p>This is the number of votes cast in polls, by day. Only lists the last seven days for
 		which there were any poll votes.</p>
-		<table class="sortable" id="poll">
+		<table id="poll">
 			<thead><tr><th>Day</th><th>#</th></tr></thead>
 			<tbody>';
     while ($day = mysqli_fetch_array($result))
@@ -173,7 +173,7 @@ if (mysqli_num_rows($result) > 0)
 		<h2>Comment Subscriptions by Day</h2>
 		<p>This is the number of new subscriptions to discussions, by day. Only lists the last
 		seven days for which there were any new subscriptions.</p>
-		<table class="sortable" id="comment-subscriptions">
+		<table id="comment-subscriptions">
 			<thead><tr><th>Day</th><th>#</th></tr></thead>
 			<tbody>';
     while ($day = mysqli_fetch_array($result))
