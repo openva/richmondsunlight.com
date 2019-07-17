@@ -80,18 +80,19 @@ if (mysqli_num_rows($result) > 0)
     }
 }
 
-# Select the new users from the past 3 days.
-$sql = 'SELECT name, url
+# Select the new users from the past month.
+$sql = 'SELECT name, id, url
 		FROM users
-		WHERE DATE_SUB(CURDATE(), INTERVAL 3 DAY) <= date_created AND name IS NOT NULL
+		WHERE DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= date_created
+		AND name IS NOT NULL
 		ORDER BY date_created DESC';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
 		<h2>Recent Registrants</h2>
-		<p>The following people have signed up in the past 3 days.</p>';
-    while ($user = mysqli_fetch_array($result))
+		<p>The following people have signed up in the past 30 days.</p>';
+    while ($user = mysqli_fetch_assoc($result))
     {
         $user = array_map('stripslashes', $user);
         if (!empty($user['url']))
