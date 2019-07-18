@@ -62,14 +62,14 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
     sudo DEBIAN_FRONTEND=noninteractive apt-get install -y postfix mailutils
 
     # First set append to the Postfix config file
-    echo <<'EOF'
+    echo <<'EOF' | sudo tee -a /etc/postfix/main.cf
     smtp_sasl_security_options = noanonymous
     smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
     smtp_use_tls = yes
     smtp_tls_security_level = encrypt
     smtp_tls_note_starttls_offer = yes
     smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
-EOF | sudo tee -a /etc/postfix/main.cf
+EOF
 
     # Then set up the SES SMTP credentials in Postfix
     sudo mv sasl_passwd /etc/postfix/sasl_passwd
