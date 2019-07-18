@@ -26,12 +26,30 @@ $site_section = 'admin';
 
 # PAGE CONTENT
 
-$page_body .= '
-<div><a href="/admin/comments/">Comments</a> | <a href="/admin/tag.php">Tag Bills</a> | <a href="/admin/video/">Video</a> | <a href="apc.php">APC</a>  | <a href="memcache.php">Memcached</a></div>
+/*
+ * If there's an operation to perform prior to loading the page
+ */
+if (isset($op))
+{
+	/*
+	 * Delete a user
+	 */
+	if ( $op == 'delete' && !empty($user_id) )
+	{
+		$user = new User;
+		$user->id=$user_id;
+		$user->delete();
+	}
+}
 
-<h2>Load Average</h2>';
-$load = sys_getloadavg();
-$page_body .= '<p>'.round($load[0], 2).', '.round($load[1], 2).', '.round($load[2], 2).'</p>';
+$page_body = '
+		<div>
+			<a href="/admin/comments/">Comments</a> |
+			<a href="/admin/tag.php">Tag Bills</a> |
+			<a href="/admin/video/">Video</a> |
+			<a href="apc.php">APC</a>  |
+			<a href="memcache.php">Memcached</a>
+		</div>';
 
 # Select the tags from the past 3 days that were not added by me.
 $sql = 'SELECT tags.id, tags.tag, bills.number AS bill, sessions.year, users.name AS author
@@ -62,18 +80,19 @@ if (mysqli_num_rows($result) > 0)
     }
 }
 
-# Select the new users from the past 3 days.
-$sql = 'SELECT name, url
+# Select the new users from the past month.
+$sql = 'SELECT name, id, url
 		FROM users
-		WHERE DATE_SUB(CURDATE(), INTERVAL 3 DAY) <= date_created AND name IS NOT NULL
+		WHERE DATE_SUB(CURDATE(), INTERVAL 30 DAY) <= date_created
+		AND name IS NOT NULL
 		ORDER BY date_created DESC';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
 		<h2>Recent Registrants</h2>
-		<p>The following people have signed up in the past 3 days.</p>';
-    while ($user = mysqli_fetch_array($result))
+		<p>The following people have signed up in the past 30 days.</p>';
+    while ($user = mysqli_fetch_assoc($result))
     {
         $user = array_map('stripslashes', $user);
         if (!empty($user['url']))
@@ -84,7 +103,8 @@ if (mysqli_num_rows($result) > 0)
         if (!empty($user['url']))
         {
             $page_body .= '</a> ';
-        }
+		}
+		$page_body .= '[<a href="?op=delete&amp;user_id=' . $user['id'] . '">x</a>]';
         $page_body .= ', ';
     }
 }
@@ -128,7 +148,7 @@ if (mysqli_num_rows($result) > 0)
 		<h2>Poll Votes by Day</h2>
 		<p>This is the number of votes cast in polls, by day. Only lists the last seven days for
 		which there were any poll votes.</p>
-		<table class="sortable" id="poll">
+		<table id="poll">
 			<thead><tr><th>Day</th><th>#</th></tr></thead>
 			<tbody>';
     while ($day = mysqli_fetch_array($result))
@@ -154,7 +174,7 @@ if (mysqli_num_rows($result) > 0)
 		<h2>Comment Subscriptions by Day</h2>
 		<p>This is the number of new subscriptions to discussions, by day. Only lists the last
 		seven days for which there were any new subscriptions.</p>
-		<table class="sortable" id="comment-subscriptions">
+		<table id="comment-subscriptions">
 			<thead><tr><th>Day</th><th>#</th></tr></thead>
 			<tbody>';
     while ($day = mysqli_fetch_array($result))

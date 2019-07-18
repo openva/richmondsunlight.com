@@ -22,6 +22,8 @@ addons:
       - awscli
   sonarcloud:
     organization: "openva"
+services:
+  - docker
 install:
 - composer install
 - cd htdocs/js/vendor; npm install; npm run build

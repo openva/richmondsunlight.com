@@ -25,9 +25,11 @@ variables=(
 	PUSHOVER_KEY
 	SLACK_WEBHOOK
 	API_URL
+	AWS_SES_SMTP_USERNAME
+	AWS_SES_SMTP_PASSWORD
 )
 
-# Iterate over the variables and warn if any aren't populated.
+# Iterate over the variables and warn if any aren't populated
 for i in "${variables[@]}"
 do
 	if [ -z "${!i}" ]; then
@@ -35,15 +37,22 @@ do
 	fi
 done
 
-# If this is our staging site, then set the PDO_DSN value to that of our staging database.
+# Duplicate the default setting file to populate our settings file
+cp htdocs/includes/settings-default.inc.php htdocs/includes/settings.inc.php
+
+# If this is our staging site
 if [ "$TRAVIS" = true ]&& [ "$TRAVIS_BRANCH" = "master" ]
 then
+
+	# Set the PDO_DSN value to that of our staging database
 	sed -i -e "s|define('PDO_DSN', '')|define('PDO_DSN', '${PDO_DSN_STAGING}')|g" htdocs/includes/settings.inc.php
 	sed -i -e "s|define('MYSQL_DATABASE', '')|define('MYSQL_DATABASE', '${MYSQL_DATABASE_STAGING}')|g" htdocs/includes/settings.inc.php
+	
+	# Don't use Memcached at all
+	MEMCACHED_SERVER=
 fi
 
-# Now iterate over again and perform the replacement.
-cp htdocs/includes/settings-default.inc.php htdocs/includes/settings.inc.php
+# Now iterate over again and perform the replacement
 for i in "${variables[@]}"
 do
 	sed -i -e "s|define('$i', '')|define('$i', '${!i}')|g" htdocs/includes/settings.inc.php
@@ -59,4 +68,10 @@ done
 for i in "${variables[@]}"
 do
 	sed -i -e "s|{$i}|${!i}|g" deploy/database_export.sh
+done
+
+# Perform the same for the Postfix/SES authentication file
+for i in "${variables[@]}"
+do
+	sed -i -e "s|{$i}|${!i}|g" deploy/sasl_passwd
 done

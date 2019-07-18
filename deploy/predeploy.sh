@@ -34,7 +34,10 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
     # Install all packages.
     sudo apt-get update
     sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
-    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apache2 curl geoip-database git gzip unzip openssl php5.6 php5.6-mysql mysql-client php5.6-curl php5.6-mbstring php5.6-apc php5.6-mbstring php5.6-xml python python-pip s3cmd sphinxsearch wget awscli certbot python-certbot-apache
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apache2 curl geoip-database git gzip \
+    unzip openssl php5.6 php5.6-mysql mysql-client php5.6-curl php5.6-mbstring php5.6-apc \
+    php5.6-mbstring php5.6-xml python python-pip s3cmd sphinxsearch wget awscli certbot \
+    python-certbot-apache
 
     # Install mod_pagespeed
     dpkg -s mod-pagespeed-beta
@@ -54,6 +57,35 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
         sudo ./install auto
         rm install
     fi
+
+    # Set up mail relay to AWS SES
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y postfix mailutils
+
+    # First set append to the Postfix config file
+    echo <<'EOF'
+    smtp_sasl_security_options = noanonymous
+    smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+    smtp_use_tls = yes
+    smtp_tls_security_level = encrypt
+    smtp_tls_note_starttls_offer = yes
+    smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+EOF | sudo tee -a /etc/postfix/main.cf
+
+    # Then set up the SES SMTP credentials in Postfix
+    sudo mv sasl_passwd /etc/postfix/sasl_passwd
+    sudo chown root:root /etc/postfix/sasl_passwd
+    sudo chmod 0600 /etc/postfix/sasl_passwd
+
+    # Create hashmap database
+    sudo postmap hash:/etc/postfix/sasl_passwd
+    sudo chown root:root /etc/postfix/sasl_passwd.db
+    sudo chmod 0600 /etc/postfix/sasl_passwd.db
+
+    # Tell Postfix where to find the SES certificate
+    sudo postconf -e 'smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt'
+
+    # Restart Postfix
+    sudo service postfix restart
 
     # Enable Sphinx's server
     echo "START=yes" | sudo tee /etc/default/sphinxsearch

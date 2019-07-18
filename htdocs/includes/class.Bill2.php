@@ -169,7 +169,7 @@ class Bill2
         {
             $bill['patron_prefix'] = 'Sen.';
         }
-        $bill['url'] = 'http://www.richmondsunlight.com/bill/' . $bill['year'] . '/'
+        $bill['url'] = 'https://www.richmondsunlight.com/bill/' . $bill['year'] . '/'
             . mb_strtolower($bill['number']) . '/';
 
         /*
@@ -194,8 +194,8 @@ class Bill2
 						ON bills_copatrons.legislator_id=representatives.id
 					WHERE bills_copatrons.bill_id=' . $bill['id'] . '
 					ORDER BY representatives.chamber ASC, representatives.name ASC';
-            $bill_result = @mysqli_query($GLOBALS['db'], $sql);
-            while ($copatron = mysqli_fetch_array($bill_result))
+            $bill_result = mysqli_query($GLOBALS['db'], $sql);
+            while ($copatron = mysqli_fetch_assoc($bill_result))
             {
                 $copatron = array_map('stripslashes', $copatron);
                 $bill['copatron'][] = $copatron;
