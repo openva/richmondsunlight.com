@@ -11,8 +11,6 @@ htdocs/downloads/
 htdocs/video/
 htdocs/admin/memcache.php
 htdocs/audio/
-htdocs/cache/
-htdocs/rss/cache/
 htdocs/photosynthesis/rss/cache/
 htdocs/finance/
 htdocs/api/1.0/finance
