@@ -29,8 +29,12 @@ $site_section = 'admin';
 /*
  * If there's an operation to perform prior to loading the page
  */
-if (isset($op))
+if (isset($_GET['op']))
 {
+
+	$op = $_GET['op'];
+	$user_id = $_GET['user_id'];
+
 	/*
 	 * Delete a user
 	 */
