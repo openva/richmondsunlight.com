@@ -101,11 +101,30 @@ if (mysqli_num_rows($result) > 0)
 			});
 		});
 		</script>
+		<style>
+			.user {
+				display: inline-block;
+				background-color: #f4eee5;
+				padding: 2px 6px;
+				margin: 3px;
+				border-radius: 5px;
+			}
+				a.user_delete {
+					font-family: arial;
+					color: black;
+					font-weight: 800;
+					font-size: .75em;
+					margin-left: .5em;
+					text-decoration: none;
+				}
+		</style>
+		
 		<h2>Recent Registrants</h2>
 		<p>The following people have signed up in the past 30 days.</p>';
     while ($user = mysqli_fetch_assoc($result))
     {
-        $user = array_map('stripslashes', $user);
+		$user = array_map('stripslashes', $user);
+		$page_body .= '<div class="user">';
         if (!empty($user['url']))
         {
             $page_body .= '<a href="'.$user['url'].'">';
@@ -115,8 +134,8 @@ if (mysqli_num_rows($result) > 0)
         {
             $page_body .= '</a> ';
 		}
-		$page_body .= '[<a href="?op=delete&amp;user_id=' . $user['id'] . '" class="user_delete">x</a>]';
-        $page_body .= ', ';
+		$page_body .= '<a href="?op=delete&amp;user_id=' . $user['id'] . '" class="user_delete">✕</a>';
+        $page_body .= '</div>';
     }
 }
 
