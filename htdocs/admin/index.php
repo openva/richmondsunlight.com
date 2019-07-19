@@ -29,8 +29,12 @@ $site_section = 'admin';
 /*
  * If there's an operation to perform prior to loading the page
  */
-if (isset($op))
+if (isset($_GET['op']))
 {
+
+	$op = $_GET['op'];
+	$user_id = $_GET['user_id'];
+
 	/*
 	 * Delete a user
 	 */
@@ -66,7 +70,7 @@ $sql = 'SELECT tags.id, tags.tag, bills.number AS bill, sessions.year, users.nam
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
-    $page_body .= '
+	$page_body .= '
 		<h2>Recent Tags</h2>
 		<p>The following tags have been applied to bills in the last three days by non-trusted
 		users.</p>';
@@ -90,11 +94,37 @@ $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
+		<script>
+		$(document).ready(function(){
+			$(".user_delete").click(function(){
+				return confirm("Are you sure you want to delete this user?");
+			});
+		});
+		</script>
+		<style>
+			.user {
+				display: inline-block;
+				background-color: #f4eee5;
+				padding: 2px 6px;
+				margin: 3px;
+				border-radius: 5px;
+			}
+				a.user_delete {
+					font-family: arial;
+					color: black;
+					font-weight: 800;
+					font-size: .75em;
+					margin-left: .5em;
+					text-decoration: none;
+				}
+		</style>
+		
 		<h2>Recent Registrants</h2>
 		<p>The following people have signed up in the past 30 days.</p>';
     while ($user = mysqli_fetch_assoc($result))
     {
-        $user = array_map('stripslashes', $user);
+		$user = array_map('stripslashes', $user);
+		$page_body .= '<div class="user">';
         if (!empty($user['url']))
         {
             $page_body .= '<a href="'.$user['url'].'">';
@@ -104,8 +134,8 @@ if (mysqli_num_rows($result) > 0)
         {
             $page_body .= '</a> ';
 		}
-		$page_body .= '[<a href="?op=delete&amp;user_id=' . $user['id'] . '">x</a>]';
-        $page_body .= ', ';
+		$page_body .= '<a href="?op=delete&amp;user_id=' . $user['id'] . '" class="user_delete">✕</a>';
+        $page_body .= '</div>';
     }
 }
 
