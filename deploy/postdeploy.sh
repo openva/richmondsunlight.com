@@ -44,8 +44,8 @@ then
     sudo cp deploy/sphinx.conf /etc/sphinxsearch/sphinx.conf
     sudo /etc/init.d/sphinxsearch restart
 
-    # Index the database
-    sudo indexer --all --rotate
+    # Index the database, continuing after logout, because it ~40 minutes to run
+    nohup sudo indexer --all --rotate > /dev/null 2>&1 &
 fi
 
 # Expire the cached template (in case we've made changes to it)
