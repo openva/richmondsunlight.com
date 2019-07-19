@@ -70,7 +70,7 @@ $sql = 'SELECT tags.id, tags.tag, bills.number AS bill, sessions.year, users.nam
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
-    $page_body .= '
+	$page_body .= '
 		<h2>Recent Tags</h2>
 		<p>The following tags have been applied to bills in the last three days by non-trusted
 		users.</p>';
@@ -94,6 +94,13 @@ $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
     $page_body .= '
+		<script>
+		$(document).ready(function(){
+			$(".user_delete").click(function(){
+				return confirm("Are you sure you want to delete this user?");
+			});
+		});
+		</script>
 		<h2>Recent Registrants</h2>
 		<p>The following people have signed up in the past 30 days.</p>';
     while ($user = mysqli_fetch_assoc($result))
@@ -108,7 +115,7 @@ if (mysqli_num_rows($result) > 0)
         {
             $page_body .= '</a> ';
 		}
-		$page_body .= '[<a href="?op=delete&amp;user_id=' . $user['id'] . '">x</a>]';
+		$page_body .= '[<a href="?op=delete&amp;user_id=' . $user['id'] . '" class="user_delete">x</a>]';
         $page_body .= ', ';
     }
 }
