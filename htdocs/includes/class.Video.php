@@ -83,7 +83,7 @@ class Video
         $sql .= '
 				SET chamber="' . $this->video['chamber'] . '",
 				title="' . $this->video['title'] . '",
-				type="' . $this->video['type'] . '",
+				type="video",
 				date="' . $this->video['date'] . '",
 				length="' . $this->video['length'] . '"';
         if (!empty($this->video['committee_id']))
