@@ -857,28 +857,29 @@ $page_body .= '</tbody></table></div>';
 # News from the legislator's website.
 if (!empty($legislator['rss_url']))
 {
+
+    $newsfeed->set_feed_url($legislator['rss_url']);
+    $newsfeed->init();
+    $newsfeed->handle_content_type();
+
     # Start a new DIV for legislator's blogs, etc.
     $page_body .= '
 	<div id="news">
 		<table style="width: 100%">
-            <tbody>';
-    $rss = fetch_rss($legislator['rss_url']);
-    if ($rss !== FALSE)
+            <tbody>
+            <caption>From the Legislator’s Website</caption>';
+   
+    $rss_count = 0;
+    foreach ($newsfeed->get_items() as $item)
     {
-        $page_body .= '<caption>From the Legislator’s Website</caption>';
-        $items = array_slice($rss->items, 0, 5);
-        foreach ($items as $item)
-        {
-            $page_body .= '
-				<tr><td>
-				<h3><a href="' . $item['guid'] . '">' . $item['title'] . '</a></h3>' .
-                '<p>';
-            if (!empty($item['pubdate']))
-            {
-                $page_body .= date('F j, Y', strtotime($item['pubdate'])) . '<br />';
-            }
-            $page_body .= strip_tags($item['summary']) . '</p></td></tr>';
-        }
+        
+        $page_body .= '
+            <tr><td>
+            <h3><a href="' . $item->get_permalink() . '">' . $item->get_title() . '</a></h3>' .
+            '<p>';
+        $page_body .= $item->get_date('F j, Y') . '<br />';
+        $page_body .= strip_tags($item->get_description()) . '</p></td></tr>';
+    
     }
     # End the DIV for news mentions.
     $page_body .= '
