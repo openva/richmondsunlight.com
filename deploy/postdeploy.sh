@@ -31,9 +31,10 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
     # Install a certificate
     sudo certbot --apache -d "$SITE_URL" --non-interactive --agree-tos --email jaquith@gmail.com --redirect
 
-    # Set the cache directory
+    # Create the cache directory, make it writable
     mkdir -p "$SITE_PATH"/htdocs/cache
     sudo chgrp www-data "$SITE_PATH"/htdocs/cache
+    sudo chmod g+w -R "$SITE_PATH"/htdocs/cache
 
 fi
 

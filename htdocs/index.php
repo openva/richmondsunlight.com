@@ -6,7 +6,6 @@
 # PURPOSE
 # The front page of the site.
 #
-
 ###
 
 # INCLUDES

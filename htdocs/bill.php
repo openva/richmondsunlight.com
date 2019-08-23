@@ -122,7 +122,8 @@ $site_section = 'bills';
 /*
  * Facebook metadata.
  */
-$html_head .= '<meta property="og:title" content="' . mb_strtoupper($bill['number']) . ': '
+$html_head .= '
+    <meta property="og:title" content="' . mb_strtoupper($bill['number']) . ': '
     . $bill['catch_line'] . '"/>
 	<meta property="og:image" content="https://www.richmondsunlight.com/images/legislators/thumbnails/'
         . $bill['patron_shortname'] . '.jpg"/>
@@ -134,12 +135,17 @@ $html_head .= '<meta property="og:title" content="' . mb_strtoupper($bill['numbe
 /*
  * Twitter metadata.
  */
-$html_head .= '<meta name="twitter:card" content="summary" />
+$html_head .= '
+    <meta name="twitter:card" content="summary" />
 	<meta property="twitter:title" content="' . mb_strtoupper($bill['number']) . ', introduced by ' . $bill['patron_name_formatted'] . '"/>
 	<meta property="twitter:image" content="https://www.richmondsunlight.com/images/legislators/thumbnails/'
         . $bill['patron_shortname'] . '.jpg"/>
 	<meta name="twitter:site" content="@richmond_sun" />
-	<meta property="twitter:description" content="' . $bill['catch_line'] . '" />';
+    <meta property="twitter:description" content="' . $bill['catch_line'] . '" />
+    <meta name="twitter:label1" value="Introduced By" />
+    <meta name="twitter:data1" value="' . $bill['patron_name_formatted'] . '" />
+    <meta name="twitter:label2" value="Status" />
+    <meta name="twitter:data2" value="' . (!empty($bill['outcome']) ? $bill['outcome'] : $bill['status']) . '" />';
 
 /*
  * Alternate representations of the data on this page.
@@ -159,7 +165,8 @@ if (!empty($bill['summary']))
     $tmp = strip_tags($tmp);
     $tmp = str_replace($bill['catch_line'], '', $tmp);
     $tmp = htmlspecialchars(trim($tmp));
-    $html_head .= '<meta property="og:description" content="' . $tmp . '" />
+    $html_head .= '
+        <meta property="og:description" content="' . $tmp . '" />
 		<meta name="description" content="' . $tmp . '" />';
 }
 
@@ -947,7 +954,6 @@ $sql = 'SELECT DATE_FORMAT(dockets.date, "%m/%d/%Y") AS date, committees.name AS
 			ON committees.parent_id = committees_parent.id
 		WHERE dockets.bill_id=' . $bill['id'] . ' AND dockets.date > now()
 		LIMIT 1';
-
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {

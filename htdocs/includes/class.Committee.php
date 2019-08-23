@@ -8,7 +8,7 @@ class Committee
      */
     public function info()
     {
-        if (empty($this->shortname) || empty($this->chamber))
+        if ( ( empty($this->shortname) && empty($this->chamber) ) || empty($this->id) )
         {
             return FALSE;
         }
@@ -21,8 +21,15 @@ class Committee
          */
         $sql = 'SELECT id, shortname, name, chamber, meeting_time, url
                 FROM committees
-                WHERE shortname="' . $this->shortname . '"
-                AND chamber="' . $this->chamber . '"';
+                WHERE ';
+        if (isset($this->id))
+        {
+            $sql .= 'id = ' . $this->id;
+        }
+        else {
+            $sql .= 'shortname="' . $this->shortname . '"
+                    AND chamber="' . $this->chamber . '"';
+        }
 
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
