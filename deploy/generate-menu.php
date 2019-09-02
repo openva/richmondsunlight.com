@@ -7,13 +7,16 @@
  * The resulting list is sent to stdout.
  **/
 
+require '../htdocs/includes/settings.inc.php';
+require '../htdocs/includes/class.Database.php';
+
 $database = new Database;
 $db = $database->connect_mysqli();
 
 /*
  * Get a list of all legislators.
  */
-$sql = 'SELECT name_formatted, shortname, chamber
+$sql = 'SELECT name, name_formatted, shortname, chamber
         FROM representatives
         WHERE date_ended IS NOT NULL OR date_ended >= now()
         ORDER BY chamber ASC, name ASC';
@@ -28,21 +31,40 @@ while ($legislator = mysqli_fetch_assoc($result))
 {
 
     $legislator = array_map('stripslashes', $legislator);
-    $legislators[$legislator{'chamber'}][] = '<li><a href="/legislator/' . $legislator['shortname']
-        . ' /">' . $legislator . '</a></li>';
+    $legislators[$legislator{'chamber'}][substr($legislator{'name'}, 0, 1)][] = '<li><a href="/legislator/' . $legislator['shortname']
+        . ' /">' . $legislator['name_formatted'] . '</a></li>';
 
 }
 
 /*
- *
+ * Establish our alphabetical groupings
+ */
+$house_categories = explode(',', 'a,i,d,m,s');
+$senate_categories = explode(',',  'a,n');
+
+/*
+ * Output menu data
  */
 echo '
 <ul>
     <li>House »
         <ul class="alphabetic">
         <li>A–Z »
-            <ul class="legislators">
-                ' . implode("\t", $legislators['house']) . '
+            <ul class="legislators">';
+
+foreach ($legislators['house'] as $letter => $by_letter)
+{
+    echo '<li>
+        ' . $letter . ' »
+        <ul class="legislators">';
+    foreach ($by_letter as $legislator)
+    {
+        echo $legislator;
+    }
+    echo '</ul></li>';
+}
+
+echo '
             </ul>
         </li>
         </ul>
@@ -50,8 +72,11 @@ echo '
     <li>Senate »
         <ul class="alphabetic">
         <li>A–Z »
-            <ul class="legislators">
-                ' . implode("\t", $legislators['senate']) . '
+            <ul class="legislators">';
+
+echo implode("\t", $legislators['senate']);
+
+echo '
             </ul>
         </li>
         </ul>
