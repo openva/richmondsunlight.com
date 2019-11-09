@@ -158,7 +158,8 @@ if (isset($_POST['form_data']))
             $form_data['comments'],
         'From: waldo@jaquith.org' . "\n" .
         'Reply-To: ' . $form_data['name'] . ' <' . $form_data['email'] . ">\n" .
-        'X-Originating-IP: ' . $_SERVER['REMOTE_ADDR']
+        'X-Originating-IP: ' . $_SERVER['REMOTE_ADDR'] . "\n" .
+        'X-Originating-URL: ' . $_SERVER['REQUEST_URI']
         );
         $page_body .= '<p>E-mail sent.  Thanks for writing!</p>';
     }
