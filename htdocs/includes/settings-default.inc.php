@@ -10,16 +10,16 @@
 
 # THE CURRENT SESSION
 # As defined by Richmond Sunlight's database
-define('SESSION_ID', 22);
+define('SESSION_ID', 23);
 
 # Is this the main session or a special session? As defined by Richmond Sunlight's database.
 define('SESSION_SUFFIX', '');
 
 # As defined by the GA LIS' database.
-define('SESSION_LIS_ID', '191');
+define('SESSION_LIS_ID', '201');
 
 # As defined by the year.
-define('SESSION_YEAR', 2019);
+define('SESSION_YEAR', 2020);
 
 # Determine whether the GA is currently in session.
 define('IN_SESSION', 'Y');

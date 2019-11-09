@@ -183,7 +183,7 @@
 								<li><a href="/legislator/cmfariss/">Del. Matt Fariss (R-Rustburg)</a></li>
 								<li><a href="/legislator/erfiller-corn/">Del. Eileen Filler-Corn (D-Fairfax Station)</a></li>
 								<li><a href="/legislator/hffowler/">Del. Buddy Fowler (R-Ashland)</a></li>
-								<li><a href="/legislator/kkfowler/">Kelly Fowler (D-Virginia Beach</a></li>
+								<li><a href="/legislator/kkfowler/">Del. Kelly Fowler (D-Virginia Beach</a></li>
 								<li><a href="/legislator/njfreitas/">Del. Nick Freitas (R-Culpeper)</a></li>
 								<li><a href="/legislator/tsgarrett/">Del. Scott Garrett (R-Lynchburg)</a></li>
 								<li><a href="/legislator/ctgilbert/">Del. Todd Gilbert (R-Woodstock)</a></li>

@@ -23,11 +23,11 @@ class Vote
         {
             return FALSE;
         }
-        if (mb_strlen($this->session_id) > 4)
+        if ( isset($this->session_id) && mb_strlen($this->session_id) > 4 )
         {
             return FALSE;
         }
-        if (mb_strlen($this->session_year) <> 4)
+        if ( isset($this->session_year) && mb_strlen($this->session_year) <> 4 )
         {
             return FALSE;
         }
