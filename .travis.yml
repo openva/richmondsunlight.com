@@ -29,8 +29,7 @@ install:
 - cd htdocs/js/vendor; npm install; npm run build
 script:
 - cd ../../..
-- find htdocs/*.php -print0 |xargs -0 -n1 -P8 php -l
-  && ./deploy/branch_deploy.sh
+- ./deploy/branch_deploy.sh
   && ./deploy/config_variables.sh
   && sonar-scanner
   && ./deploy/aws_credentials.sh
