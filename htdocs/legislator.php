@@ -158,31 +158,27 @@ if ($district_data == FALSE)
     {
         $c = 'u';
     }
-    if (OPENSTATES_KEY != '')
+
+    $url = 'https://data.openstates.org/boundaries/2018/ocd-division/country:us/state:va/sld' . $c . ':' . $legislator['district'] . '.json';
+    $json = get_content($url);
+
+    /*
+    * If this is valid JSON.
+    */
+    if ($json != FALSE)
     {
 
-        $url = 'https://openstates.org/api/v1/districts/boundary/ocd-division/country:us/state:va/sld' . $c . ':' . $legislator['district'] . '/?apikey=' . OPENSTATES_KEY;
-        $json = get_content($url);
+        $district_data = json_decode($json);
 
         /*
-        * If this is valid JSON.
+        * Swap lat/lon to X/Y.
         */
-        if ($json != FALSE)
+        foreach ($district_data->shape->coordinates[0][0] as &$pair)
         {
-
-            $district_data = json_decode($json);
-
-            /*
-            * Swap lat/lon to X/Y.
-            */
-            foreach ($district_data->shape[0][0] as &$pair)
-            {
-                $tmp[0] = $pair[1];
-                $tmp[1] = $pair[0];
-                $pair = $tmp;
-            }
+            $tmp[0] = $pair[1];
+            $tmp[1] = $pair[0];
+            $pair = $tmp;
         }
-    
     }
 
     /*
@@ -194,32 +190,26 @@ if ($district_data == FALSE)
     }
 }
 
-/*
- * Double check, since sometimes we're caching bad responses from OpenStates.
- */
-if ($district_data !== FALSE && isset($district_data->region->center_lat))
-{
-    $html_head .= ' <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css">
-		<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js"></script>
-		<style>
-			#district_map { height: 250px; }
-		</style>
-		<script>
-			$( document ).ready(function() {
-				var district_map = L.map("district_map").setView([' . $district_data->region->center_lat . ', ' . $district_data->region->center_lon . '], 7);
-				L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
-    				attribution: "Map data &copy; <a href=http://openstreetmap.org>OpenStreetMap</a> contributors, <a href=http://creativecommons.org/licenses/by-sa/2.0/>CC-BY-SA</a>, Imagery © <a href=http://mapbox.com>Mapbox</a>",
-				    maxZoom: 18,
-				    id: "mapbox.streets",
-				    accessToken: "' . MAPBOX_TOKEN . '"
-				}).addTo(district_map);
-				var district = L.polygon(' . json_encode($district_data->shape[0][0]) . ').addTo(district_map);
-				district_map.fitBounds(district.getBounds());
-			});
-		</script>';
+$html_head .= ' <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js"></script>
+    <style>
+        #district_map { height: 250px; }
+    </style>
+    <script>
+        $( document ).ready(function() {
+            var district_map = L.map("district_map").setView([' . $district_data->centroid->coordinates[0] . ', ' . $district_data->centroid->coordinates[1] . '], 7);
+            L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
+                attribution: "Map data &copy; <a href=http://openstreetmap.org>OpenStreetMap</a> contributors, <a href=http://creativecommons.org/licenses/by-sa/2.0/>CC-BY-SA</a>, Imagery © <a href=http://mapbox.com>Mapbox</a>",
+                maxZoom: 18,
+                id: "mapbox.streets",
+                accessToken: "' . MAPBOX_TOKEN . '"
+            }).addTo(district_map);
+            var district = L.polygon(' . json_encode($district_data->shape->coordinates[0][0]) . ').addTo(district_map);
+            district_map.fitBounds(district.getBounds());
+        });
+    </script>';
 
-    $page_sidebar .= '<div id="district_map"></div>';
-}
+$page_sidebar .= '<div id="district_map"></div>';
 
 $page_sidebar .= '
 </div>';
