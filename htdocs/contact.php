@@ -161,7 +161,7 @@ if (isset($_POST['form_data']))
         'X-Originating-IP: ' . $_SERVER['REMOTE_ADDR'] . "\n" .
         'X-Originating-URL: ' . $_SERVER['REQUEST_URI']
         );
-        $page_body .= '<p>E-mail sent.  Thanks for writing!</p>';
+        $page_body .= '<p>E-mail sent. Thanks for writing!</p>';
     }
 }
 else
