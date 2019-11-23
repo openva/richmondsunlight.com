@@ -290,7 +290,7 @@ if (isset($_POST['submit']))
 
         if ($result === FALSE)
         {
-            $log->put('Somebody tried to create an account, and it failed entirely. They are frustrated now.', 5);
+            $log->put('Somebody tried to create an account, and it failed entirely. They are frustrated now. Input: ' . $user_query, 5);
             $page_body = '<p>Your registration has failed mysteriously, in a way that indicates
 				that some sort of a bug is at work. Please do us a favor and <a
 				href="/contact/">contact us</a> to report that you got this error. We’ll figure
@@ -313,8 +313,9 @@ if (isset($_POST['submit']))
 
             # Acknowledge the registration.
             $page_body = '
-				<h2>Thanks for Registering!</h2>
-				<p>Now that you’re set up, you can start using Photosynthesis to track legislation.</p>
+                <h2>Thanks for Registering!</h2>
+                
+				<p>Now that you’re set up, you can start using tracking legislation.</p>
 
 				<p style="font-family: Georgia, Palatino, \'Times New Roman\', Times, sans-serif;
 					font-size: 2em; text-align: center; margin: 2em 0;">
