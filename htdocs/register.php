@@ -134,8 +134,8 @@ if (isset($_POST['submit']))
         die();
     }
 
-    # Spammers also tend to provide a ZIP of "123456," "10001," and "30332."
-    if (($form_data['zip'] == '123456') || ($form_data['zip'] == '10001')  || ($form_data['zip'] == '30332'))
+    # Spammers also tend to provide a ZIP of "12345," "10001," and "30332."
+    if (($form_data['zip'] == '12345') || ($form_data['zip'] == '10001')  || ($form_data['zip'] == '30332'))
     {
         die();
     }
