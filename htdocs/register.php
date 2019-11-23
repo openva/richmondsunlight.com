@@ -121,9 +121,9 @@ if (isset($_POST['submit']))
     $form_data = array_map('stripslashes', $_POST['form_data']);
     $form_data = array_map('trim', $form_data);
 
-    # If somebody filled out this form in an implausibly short time (two seconds), then it's a
+    # If somebody filled out this form in an implausibly short time (five seconds), then it's a
     # spammer.
-    if ((time() - $form_data['time']) <= 2)
+    if ((time() - $form_data['time']) <= 5)
     {
         die();
     }
