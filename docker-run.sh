@@ -21,11 +21,6 @@ if [ ! -d "api/" ]; then
 
     mv rs-api-master/ api/
 
-    # Copy over the includes
-    cd api/htdocs/ || exit
-    cp -R ../../htdocs/includes/ includes
-    cd ../..
-
     # Concatenate the database dumps into a single file, for MySQL to load
     cd deploy/
     cat mysql/structure.sql mysql/basic-contents.sql mysql/test-records.sql > ../api/deploy/database.sql
@@ -41,6 +36,11 @@ docker-compose build && docker-compose up -d
 # Run the site setup script
 WEB_ID=$(docker ps |grep rs_web |cut -d " " -f 1)
 docker exec "$WEB_ID" /var/www/deploy/docker-setup-site.sh
+
+# Copy over the API includes
+cd api/htdocs/ || exit
+cp -R ../../htdocs/includes/ includes/
+cd ../../
 
 # Return to the original directory
 cd "$CWD" || exit
