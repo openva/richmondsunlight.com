@@ -107,11 +107,12 @@ if (!isset($is_bot))
 {
     # Increment the view counter for this bill.
     $sql = 'INSERT DELAYED INTO bills_views
-			SET bill_id = ' . $bill['id'] . ', ip="' . $_SERVER['REMOTE_ADDR'] . '"';
+            SET bill_id = ' . $bill['id'] . ', ip="' . $_SERVER['REMOTE_ADDR'] . '"';
     if (isset($user) && !empty($user['id']))
     {
         $sql .= ', user_id = ' . $user['id'];
     }
+    
     mysqli_query($GLOBALS['db'], $sql);
 }
 

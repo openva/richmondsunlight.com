@@ -121,9 +121,9 @@ if (isset($_POST['submit']))
     $form_data = array_map('stripslashes', $_POST['form_data']);
     $form_data = array_map('trim', $form_data);
 
-    # If somebody filled out this form in an implausibly short time (two seconds), then it's a
+    # If somebody filled out this form in an implausibly short time (five seconds), then it's a
     # spammer.
-    if ((time() - $form_data['time']) <= 2)
+    if ((time() - $form_data['time']) <= 5)
     {
         die();
     }
@@ -134,8 +134,8 @@ if (isset($_POST['submit']))
         die();
     }
 
-    # Spammers also tend to provide a ZIP of "123456," "10001," and "30332."
-    if (($form_data['zip'] == '123456') || ($form_data['zip'] == '10001')  || ($form_data['zip'] == '30332'))
+    # Spammers also tend to provide a ZIP of "12345," "10001," and "30332."
+    if (($form_data['zip'] == '12345') || ($form_data['zip'] == '10001')  || ($form_data['zip'] == '30332'))
     {
         die();
     }
@@ -290,7 +290,7 @@ if (isset($_POST['submit']))
 
         if ($result === FALSE)
         {
-            $log->put('Somebody tried to create an account, and it failed entirely. They are frustrated now.', 5);
+            $log->put('Somebody tried to create an account, and it failed entirely. They are frustrated now. Input: ' . $user_query, 5);
             $page_body = '<p>Your registration has failed mysteriously, in a way that indicates
 				that some sort of a bug is at work. Please do us a favor and <a
 				href="/contact/">contact us</a> to report that you got this error. We’ll figure
@@ -313,8 +313,9 @@ if (isset($_POST['submit']))
 
             # Acknowledge the registration.
             $page_body = '
-				<h2>Thanks for Registering!</h2>
-				<p>Now that you’re set up, you can start using Photosynthesis to track legislation.</p>
+                <h2>Thanks for Registering!</h2>
+                
+				<p>Now that you’re set up, you can start using tracking legislation.</p>
 
 				<p style="font-family: Georgia, Palatino, \'Times New Roman\', Times, sans-serif;
 					font-size: 2em; text-align: center; margin: 2em 0;">

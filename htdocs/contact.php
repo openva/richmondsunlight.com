@@ -70,8 +70,8 @@ function show_form($form_data)
         </fieldset>
 
 		<div style="display: none;">
-			<input type="text" size="2" maxlength="2" name="form_data[state]" id="message-state" />
-			<label for="message-state">Leave this field empty</label><br />
+			<input type="text" size="2" maxlength="2" name="form_data[zip]" id="message-zip" />
+			<label for="message-zip">Leave this field empty</label><br />
 		</div>
 
 		<p><input type="submit" name="submit" value="Send Mail"></p>
@@ -84,7 +84,7 @@ if (isset($_POST['form_data']))
 {
 
     # Give spammers the boot.
-    if (!empty($form_data['state']))
+    if (!empty($form_data['zip']))
     {
         die();
     }
@@ -158,9 +158,10 @@ if (isset($_POST['form_data']))
             $form_data['comments'],
         'From: waldo@jaquith.org' . "\n" .
         'Reply-To: ' . $form_data['name'] . ' <' . $form_data['email'] . ">\n" .
-        'X-Originating-IP: ' . $_SERVER['REMOTE_ADDR']
+        'X-Originating-IP: ' . $_SERVER['REMOTE_ADDR'] . "\n" .
+        'X-Originating-URL: ' . $_SERVER['REQUEST_URI']
         );
-        $page_body .= '<p>E-mail sent.  Thanks for writing!</p>';
+        $page_body .= '<p>E-mail sent. Thanks for writing!</p>';
     }
 }
 else
