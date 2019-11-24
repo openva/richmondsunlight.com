@@ -7,6 +7,7 @@ htdocs/js/vendor/*
 htdocs/includes/vendor/
 htdocs/includes/settings.inc.php
 htdocs/downloads/
+htdocs/cache/
 *.srt
 htdocs/video/
 htdocs/admin/memcache.php
