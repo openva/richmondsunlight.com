@@ -26,7 +26,7 @@ jobs:
     steps:
 
     - name: Figure out where we are
-      run: pwd && ls
+      run: ls
 
     - name: Specify filesystem path, per branch
       run: ./deploy/branch_deploy.sh
