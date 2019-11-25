@@ -21,24 +21,17 @@ if (isset($_SESSION['portfolios']))
 
     $page_body .= <<<EOD
     <div id="portfolio-sidebar">
-        <h1>Your Bill Portfolio</h1>
-        <div id="portfolio-list">
-            <div class="bill changed">
-                <a href="/bill/hb1052/" class="balloon">HB1052</a>: Catchline that says a lot.
-                <span class="last-updated">today</span>
-            </div>
-            <div class="bill changed">
-                <a href="/bill/hb12/" class="balloon">HB12</a>: Catchline that says something else.
-                <span class="last-updated">yesterday</span>
-            </div>
-            <div class="bill">
-                <a href="/bill/sb670/" class="balloon">SB670</a>: Catchline that says something else entirely.
-            </div>
-            <div class="bill">
-                <a href="/bill/sj6/" class="balloon">SJ6</a>: Catching that says something great about a person.
-            </div>
-        </div>
+        <h1><a class="handle">Your Bill Portfolio</a></h1>
+        <div id="portfolio-list"></div>
     <div>
+
+    <!-- slider -->
+    <link rel="stylesheet" href="https://cdn.rawgit.com/hawk-ip/jquery.tabSlideOut.js/v2.4/jquery.tabSlideOut.css"> 
+    <script src="https://use.fontawesome.com/2be9406092.js"></script>
+    <script src="https://cdn.rawgit.com/hawk-ip/jquery.tabSlideOut.js/v2.4/jquery.tabSlideOut.js"></script>
+    <script>
+        $('#portfolio-sidebar').tabSlideOut( {'tabLocation':'bottom'} );
+    </script>
 
     <style>
         #portfolio-sidebar {
@@ -68,55 +61,20 @@ if (isset($_SESSION['portfolios']))
 
     </style>
 
-    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
     <script>
-        /* MAKE SURE THIS WORKS FOR THE MAIN PORTFOLIO PAGE, TOO */
+        var portfolios_bills = [];
 
-        // query localstorage
-        //var rawPortfolio = localStorage.getItem('portfolio');
-        //var portfolio = JSON.parse(rawPortfolio);
-            // if nothing is in localstorage, run the function to populate it
-            // when did they most recently view their portfolio?
-            // what is the most recent update of a bill in the portfolio?
-            // if most recent update is since the most recent view
-                // change color of tab
-
-        // iterate through bills
-            // append to portfolio element
-            // if bill has been changed since localstorage time, class="changed"
-
-        // See whether localstorage differs from the API.
-        function check_for_updates() {
-
-
-
-        }
-
-        // Populate localstorage with the contents of this portfolio.
-        function portfolio_store() {
-
-            var store = {};
-
-            // iterate through every "portfolios" element
-            $.each(portfolios, function(index, portfolio_hash) {
-
-                url = 'https://api.richmondsunlight.com/1.1/photosynthesis/' + portfolio_hash + '.json';
-                $.getJSON(url, function(data) {
-                    store[portfolio_hash] = data;
+        // Create a list of all bills in all portfolios
+        $.each( portfolios, function( index, portfolio_hash ) {
+            url = 'https://api.richmondsunlight.com/1.1/photosynthesis/' + portfolio_hash + '.json';
+            $.getJSON(url, function(data) {
+                $.each( data.bills, function( index, bill ) {
+                    portfolios_bills.push(bill);
+                    $( "#portfolio-list" ).append( "<div class=bill><a href=" + bill.url + ">"
+                        + bill.number + "</a>: " + bill.catch_line + "</div>");
                 });
             });
-
-            store.updated = + new Date();
-
-            console.log(store);
-            console.log(JSON.stringify(store));
-
-            // store built-up object in localstorage
-            localStorage.setItem('portfolio', JSON.stringify(store));
-
-        }
-
-        portfolio_store();
+        });
 
     </script>
 EOD;
