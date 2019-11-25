@@ -25,6 +25,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
+    - name: Figure out where we are
+      run: pwd
+
     - name: Specify filesystem path, per branch
       run: ./deploy/branch_deploy.sh
     
