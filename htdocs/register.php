@@ -140,6 +140,22 @@ if (isset($_POST['submit']))
         die();
     }
 
+    # This is a spammer if this request is coming from outside of the U.S., there are no spaces
+    # in their name, a URL has been provided, and the ZIP is outside of Virginia.
+    $url = 'https://ipapi.co/' . $_SERVER['REMOTE_ADDR'] . '/country/';
+    if (
+        get_content($url) != 'US'
+        &&
+        strpos($form_data['name'], ' ') == FALSE
+        &&
+        !empty($form_data['url'])
+        &&
+        ($form_data['zip'] < 20101 || $form_data['zip'] > 24700)
+    )
+    {
+            die();
+    }
+
     # If the email address ends with ".ru", this is a spammer.
     if (mb_substr($form_data['email'], -3) == '.ru')
     {
