@@ -652,7 +652,6 @@
 				// List all bills in all portfolios
 				$.each( portfolios, function( index, portfolio_hash ) {
 				url = '<?php echo API_URL; ?>1.1/photosynthesis/' + portfolio_hash + '.json';
-					console.log(url);
 					$.getJSON(url, function(data) {
 						$.each( data.bills, function( index, bill ) {
 							$( "#portfolio-list" ).append( '<div class="bill"><a href="' + bill.url + '">'
