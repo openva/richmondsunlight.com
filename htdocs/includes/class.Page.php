@@ -119,6 +119,10 @@ class Page
         {
             $page = str_replace('%body_tag%', $this->body_tag, $page);
         }
+        else
+        {
+            $page = str_replace('%body_tag%', '', $page);
+        }
 
         # See if we have any recommended bills and, if so, insert a promo for them.
 
