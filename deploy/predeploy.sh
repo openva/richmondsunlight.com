@@ -37,7 +37,7 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
     sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apache2 curl geoip-database git gzip \
     unzip openssl php5.6 php5.6-mysql mysql-client php5.6-curl php5.6-mbstring php5.6-apc \
     php5.6-mbstring php5.6-xml python python-pip s3cmd sphinxsearch wget awscli certbot \
-    python-certbot-apache
+    python-certbot-apache yarn
 
     # Install mod_pagespeed
     dpkg -s mod-pagespeed-beta
