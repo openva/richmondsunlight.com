@@ -6,18 +6,20 @@
 <title>%browser_title%</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#790806"/>
-<link rel="stylesheet" href="/js/vendor/qtip2/dist/jquery.qtip.min.css" type="text/css" media="screen">
 <link rel="stylesheet" href="/css/new/screen.css" media="screen" />
 <link rel="stylesheet" href="/css/new/print.css" media="print" />
 <link rel="stylesheet" href="/css/page-elements.css" media="screen" />
 <link rel="stylesheet" href="/css/jquery-ui.theme.min.css" media="screen">
 <link rel="stylesheet" href="/js/vendor/qtip2/dist/jquery.qtip.min.css" media="screen">
+<link rel="stylesheet" href="/js/vendor/jquery.tabSlideOut.js/jquery.tabSlideOut.css"> 
+    
 <!--<link media="only screen and (max-device-width: 480px), only screen and (min-device-width: 560px) and (max-device-width: 1136px) and (-webkit-min-device-pixel-ratio: 2)"
 	href="/css/iphone.css" rel="stylesheet" />-->
 <script src="/js/vendor/jquery/dist/jquery.min.js"></script>
 <script src="/js/vendor/jquery-ui/jquery-ui.min.js"></script>
 <script src="/js/functions.js"></script>
 <script src="/js/vendor/qtip2/dist/jquery.qtip.min.js"></script>
+<script src="/js/vendor/jquery.tabSlideOut.js/jquery.tabSlideOut.js"></script>
 
 <!-- For IE 11, Chrome, Firefox, Safari, Opera -->
 <link rel="icon" type="image/png" href="/images/favicons/16.png" sizes="16x16" />
