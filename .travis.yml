@@ -16,13 +16,14 @@ addons:
       - php5.6-memcached
       - zip
       - awscli
+      - yarn
   sonarcloud:
     organization: "openva"
 services:
   - docker
 install:
 - composer install
-- cd htdocs/js/vendor; npm install; npm run build
+- cd htdocs/js/vendor; yarn build
 script:
 - cd ../../..
 - ./deploy/branch_deploy.sh

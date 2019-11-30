@@ -10,6 +10,6 @@
 		"zxcvbn": "dropbox/zxcvbn"
 	},
 	"scripts": {
-		"build": "npm install; cp -r node_modules/* .; rm -Rf node_modules/; mv jquery-ui-dist jquery-ui"
+		"build": "yarn install && cp -r node_modules/* . && rm -Rf node_modules/ && mv jquery-ui-dist jquery-ui"
 	}
 }
