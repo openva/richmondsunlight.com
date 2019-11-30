@@ -1,7 +1,7 @@
 .footer a { color: #808080; background: #fff; }
 
 .footer p.quote {
-	font-family: Georgia, sans-serif;
+	font-family: Georgia, serif;
 	font-size: 1.25em;
 	color: #999;
 	font-style: italic;
@@ -441,7 +441,7 @@ div.video {
 
 /* The bill progress checkboxes */
 div.checkbox {
-	font-family: Helvetica, Verdana, Arial, 'Arial MS', sans-serif;
+	font-family: Helvetica, Verdana, Arial, Lucida Grande, sans-serif;
 	font-size: 12px;
 	font-weight: bold;
 }
@@ -538,7 +538,7 @@ div#partisanship-graph {
 	#slidebox h2 {
 		color: #fff;
 		font-size: 110%;
-		font-family: arial, sans-serif;
+		font-family: Helvetica, Verdana, Arial, Lucida Grande, sans-serif;
 		margin: 10px;
 		font-weight: bold !important;
 	}
@@ -568,7 +568,7 @@ div#partisanship-graph {
 				#slidebox li a:link,
 				#slidebox li a:visited {
 					color: #ffffff;
-					font-family: Verdana, Helvetica, Arial, sans-serif;
+					font-family: Verdana, Arial, Lucida Grande, sans-serif;
 					font-size: 100%;
 					text-decoration: none;
 					display: block;
