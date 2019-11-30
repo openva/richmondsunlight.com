@@ -44,19 +44,32 @@ div#bio {
 		padding-left: 0;
 	}
 
-table#bill-progress {
-	margin: 0;
-	padding: 0;
-	border-collapse: collapse;
-	width: 100%;
-	background: transparent;
+/* Bill Progress Table */
+div#bill-progress {
+	width: 125px;
+	float: right;
+	margin: 0 0 1em 1em;
+	font-size: .9em;
 }
-	table#bill-progress tr td {
-		border: 0;
-		border-top: 1px solid #ccc;
-		margin: 0;
-		padding: 0 3px;
+	#bill-progress h2 {
+		font: bold 1em Verdana, Arial, Helvetica, 'sans serif';
+		padding: 3px 0 3px 5px;
+		font-size: 1.1em;
+		background-color: #dccbaf;
 	}
+	#bill-progress table {
+		margin: 0;
+		padding: 0;
+		border-collapse: collapse;
+		width: 100%;
+		background: transparent;
+	}
+		#bill-progress td {
+			border: 0;
+			border-top: 1px solid #ccc;
+			margin: 0;
+			padding: 0 3px;
+		}
 
 /* The status history, displayed within a hidden DIV on every bill page. */
 div#status-history {

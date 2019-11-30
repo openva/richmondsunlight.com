@@ -716,7 +716,7 @@ if (isset($bill['status_history']))
     $page_body .= '
 	<div id="bill-progress">
 		<h2>Progress</h2>
-		<table id="bill-progress">
+		<table>
 			<tr class="alt">
 				<td>' . $passed . '</td>
 				<td class="text">Introduced</td>

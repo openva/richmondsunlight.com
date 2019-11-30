@@ -359,19 +359,6 @@ table.sortable span.sortarrow {
 	margin: 0;
 }
 
-/* Bill Progress Table */
-#bill-progress {
-	width: 125px;
-	float: right;
-	margin: 0 0 1em 1em;
-	font-size: .85em;
-}
-	#bill-progress h2 {
-		font: bold 1em Verdana, Arial, Helvetica, 'sans serif';
-		padding: 3px 0 3px 5px;
-		font-size: 1.1em;
-		background-color: #dccbaf;
-	}
 /* The bill's ultimate outcome */
 .bill-outcome {
 	font-size: 1.5em;
