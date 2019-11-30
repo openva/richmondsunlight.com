@@ -20,6 +20,9 @@ include_once 'vendor/autoload.php';
 $database = new Database;
 $database->connect_mysqli();
 
+# INITIALIZE SESSION
+session_start();
+
 # LOCALIZE VARIABLES
 if (!empty($_GET['tag']))
 {

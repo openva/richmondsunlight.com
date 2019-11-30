@@ -20,6 +20,9 @@ include_once 'vendor/autoload.php';
 $database = new Database;
 $database->connect_mysqli();
 
+# INITIALIZE SESSION
+session_start();
+
 # LOCALIZE AND CLEAN UP VARIABLES
 $year = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['year']);
 $bill = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['bill']);

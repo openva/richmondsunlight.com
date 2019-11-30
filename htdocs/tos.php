@@ -14,12 +14,12 @@
 include_once 'settings.inc.php';
 include_once 'vendor/autoload.php';
 
-# LOCALIZE AND CLEAN UP VARIABLES
-
-
 # PAGE METADATA
 $page_title = 'Terms of Service';
 $site_section = '';
+
+# INITIALIZE SESSION
+session_start();
 
 # PAGE CONTENT
 $page_body = <<<EOD

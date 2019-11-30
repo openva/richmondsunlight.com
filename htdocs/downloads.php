@@ -24,6 +24,9 @@
     $page_title = 'Downloads';
     $site_section = '';
 
+    # INITIALIZE SESSION
+    session_start();
+
     # PAGE CONTENT
     $page_body = <<<EOD
 

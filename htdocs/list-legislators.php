@@ -29,6 +29,9 @@ include_once 'vendor/autoload.php';
 $database = new Database;
 $database->connect_mysqli();
 
+# INITIALIZE SESSION
+session_start();
+
 # PAGE METADATA
 $page_title = 'Legislators';
 $site_section = 'legislators';
