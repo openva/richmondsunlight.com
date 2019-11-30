@@ -26,13 +26,12 @@ if (isset($_SESSION['portfolios']))
     </div>
 
     <!-- slider -->
-    <script src="https://cdn.rawgit.com/hawk-ip/jquery.tabSlideOut.js/v2.4/jquery.tabSlideOut.js"></script>
-    <link rel="stylesheet" href="https://cdn.rawgit.com/hawk-ip/jquery.tabSlideOut.js/v2.4/jquery.tabSlideOut.css"> 
-    <script src="https://use.fontawesome.com/2be9406092.js"></script>
+    <script src="/js/vendor/jquery.tabSlideOut.js/jquery.tabSlideOut.js"></script>
+    <link rel="stylesheet" href="/js/vendor/jquery.tabSlideOut.js/jquery.tabSlideOut.css"> 
 
     <script>
         
-        $('#portfolio-sidebar').tabSlideOut({'tabLocation':'right','action':'hover'});
+        $('#portfolio-sidebar').tabSlideOut({'tabLocation':'right','action':'click'});
 
         // List all bills in all portfolios
         $.each( portfolios, function( index, portfolio_hash ) {
@@ -56,7 +55,7 @@ if (isset($_SESSION['portfolios']))
             padding: 5px;
             z-index: 100;
             background-color: #f4eee5;
-            border: 5px solid #790806;
+            border: 1px solid #790806;
         }
             #portfolio-sidebar h5
             {
