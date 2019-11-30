@@ -363,10 +363,17 @@
 			</header>
 
 			<main>
+
 			<div id="content">
 				<h1>%page_title%</h1>
 				%page_body%
 			</div>
+
+			<div id="portfolio-sidebar">
+				<h5><a href="/photosynthesis/" class="handle">Your Bill Portfolio</a></h5>
+				<div id="portfolio-list"></div>
+			</div>
+
 			</main>
 
 			<aside>
@@ -618,6 +625,42 @@
 				// Animation complete.
 			});
 		});
+	
+		<?php
+		if (isset($_SESSION['portfolios']))
+		{
+
+			// Make our portfolio IDs available to JavaScript.
+			$page_body = 'var portfolios = [];';
+			foreach ($_SESSION['portfolios'] as $portfolio)
+			{
+				$page_body .= 'portfolios.push("' . $portfolio['hash'] . '");';
+			}
+			$page_body .= '</script>';
+		?>
+
+		// Photosynthesis sidebar
+		$(document).ready(function() {
+
+			// Show the sidebar if there's a portfolio hash
+			if ($.isArray(portfolio_hash)) {
+
+				$('#portfolio-sidebar').tabSlideOut({'tabLocation':'right','action':'click'});
+
+				// List all bills in all portfolios
+				$.each( portfolios, function( index, portfolio_hash ) {
+				url = '<?php echo API_URL; ?>1.1/photosynthesis/' + portfolio_hash + '.json';
+					console.log(url);
+					$.getJSON(url, function(data) {
+						$.each( data.bills, function( index, bill ) {
+							$( "#portfolio-list" ).append( '<div class="bill"><a href="' + bill.url + '">'
+								+ bill.number + '</a>: ' + bill.catch_line + '</div>');
+						});
+					});
+				});
+			}
+		});
+
 	</script>
 
 </body>
