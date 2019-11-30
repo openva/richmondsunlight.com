@@ -644,7 +644,7 @@
 		$(document).ready(function() {
 
 			// Show the sidebar if there's a portfolio hash
-			if ($.isArray(portfolios)) {
+			if (typeof portfolios !== 'undefined') {
 
 				$('#portfolio-sidebar').show();
 				$('#portfolio-sidebar').tabSlideOut({'tabLocation':'right','action':'click'});
