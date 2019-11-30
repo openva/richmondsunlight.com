@@ -31,13 +31,20 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
         sudo add-apt-repository -y ppa:certbot/certbot
     fi
 
+    # Add the Yarn repo
+    dpkg -s yarn
+    if [ $? -eq 1 ]; then
+        curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+        echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+    fi
+
     # Install all packages.
     sudo apt-get update
     sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
     sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apache2 curl geoip-database git gzip \
     unzip openssl php5.6 php5.6-mysql mysql-client php5.6-curl php5.6-mbstring php5.6-apc \
     php5.6-mbstring php5.6-xml python python-pip s3cmd sphinxsearch wget awscli certbot \
-    python-certbot-apache
+    python-certbot-apache yarn
 
     # Install mod_pagespeed
     dpkg -s mod-pagespeed-beta

@@ -1,7 +1,7 @@
 .footer a { color: #808080; background: #fff; }
 
 .footer p.quote {
-	font-family: Georgia, sans-serif;
+	font-family: Georgia, serif;
 	font-size: 1.25em;
 	color: #999;
 	font-style: italic;
@@ -44,19 +44,32 @@ div#bio {
 		padding-left: 0;
 	}
 
-table#bill-progress {
-	margin: 0;
-	padding: 0;
-	border-collapse: collapse;
-	width: 100%;
-	background: transparent;
+/* Bill Progress Table */
+div#bill-progress {
+	width: 125px;
+	float: right;
+	margin: 0 0 1em 1em;
+	font-size: .9em;
 }
-	table#bill-progress tr td {
-		border: 0;
-		border-top: 1px solid #ccc;
-		margin: 0;
-		padding: 0 3px;
+	#bill-progress h2 {
+		font: bold 1em Verdana, Arial, Helvetica, 'sans serif';
+		padding: 3px 0 3px 5px;
+		font-size: 1.1em;
+		background-color: #dccbaf;
 	}
+	#bill-progress table {
+		margin: 0;
+		padding: 0;
+		border-collapse: collapse;
+		width: 100%;
+		background: transparent;
+	}
+		#bill-progress td {
+			border: 0;
+			border-top: 1px solid #ccc;
+			margin: 0;
+			padding: 0 3px;
+		}
 
 /* The status history, displayed within a hidden DIV on every bill page. */
 div#status-history {
@@ -441,7 +454,7 @@ div.video {
 
 /* The bill progress checkboxes */
 div.checkbox {
-	font-family: Helvetica, Verdana, Arial, 'Arial MS', sans-serif;
+	font-family: Helvetica, Verdana, Arial, Lucida Grande, sans-serif;
 	font-size: 12px;
 	font-weight: bold;
 }
@@ -458,20 +471,6 @@ div.checkbox {
 div.box a.sponsor {
 	display: block;
 	text-align: center;
-}
-
-/* The Blue Ridge Internetworks button */
-img#bri {
-	width: 100px;
-	height: 35px;
-	margin: 5px;
-}
-
-/* The Blue Ridge Internetworks button */
-img#peo {
-	width: 50px;
-	height: 49px;
-	margin: 5px;
 }
 
 /* The links for Delicious, StumbleUpon, etc. */
@@ -552,7 +551,7 @@ div#partisanship-graph {
 	#slidebox h2 {
 		color: #fff;
 		font-size: 110%;
-		font-family: arial, sans-serif;
+		font-family: Helvetica, Verdana, Arial, Lucida Grande, sans-serif;
 		margin: 10px;
 		font-weight: bold !important;
 	}
@@ -582,7 +581,7 @@ div#partisanship-graph {
 				#slidebox li a:link,
 				#slidebox li a:visited {
 					color: #ffffff;
-					font-family: Verdana, Helvetica, Arial, sans-serif;
+					font-family: Verdana, Arial, Lucida Grande, sans-serif;
 					font-size: 100%;
 					text-decoration: none;
 					display: block;
