@@ -31,6 +31,13 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
         sudo add-apt-repository -y ppa:certbot/certbot
     fi
 
+    # Add the Yarn repo
+    dpkg -s yarn
+    if [ $? -eq 1 ]; then
+        curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+        echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+    fi
+
     # Install all packages.
     sudo apt-get update
     sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
