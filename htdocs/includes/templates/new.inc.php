@@ -629,22 +629,24 @@
 		<?php
 		if (isset($_SESSION['portfolios']))
 		{
-
+			
 			// Make our portfolio IDs available to JavaScript.
-			$page_body = 'var portfolios = [];';
+			echo 'var portfolios = [];';
 			foreach ($_SESSION['portfolios'] as $portfolio)
 			{
-				$page_body .= 'portfolios.push("' . $portfolio['hash'] . '");';
+				echo 'portfolios.push("' . $portfolio['hash'] . '");';
 			}
-			$page_body .= '</script>';
+
+		}
 		?>
 
 		// Photosynthesis sidebar
 		$(document).ready(function() {
 
 			// Show the sidebar if there's a portfolio hash
-			if ($.isArray(portfolio_hash)) {
+			if ($.isArray(portfolios)) {
 
+				$('#portfolio-sidebar').show();
 				$('#portfolio-sidebar').tabSlideOut({'tabLocation':'right','action':'click'});
 
 				// List all bills in all portfolios
