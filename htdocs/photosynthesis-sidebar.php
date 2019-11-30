@@ -21,104 +21,79 @@ if (isset($_SESSION['portfolios']))
 
     $page_body .= <<<EOD
     <div id="portfolio-sidebar">
-        <h1>Your Bill Portfolio</h1>
-        <div id="portfolio-list">
-            <div class="bill changed">
-                <a href="/bill/hb1052/" class="balloon">HB1052</a>: Catchline that says a lot.
-                <span class="last-updated">today</span>
-            </div>
-            <div class="bill changed">
-                <a href="/bill/hb12/" class="balloon">HB12</a>: Catchline that says something else.
-                <span class="last-updated">yesterday</span>
-            </div>
-            <div class="bill">
-                <a href="/bill/sb670/" class="balloon">SB670</a>: Catchline that says something else entirely.
-            </div>
-            <div class="bill">
-                <a href="/bill/sj6/" class="balloon">SJ6</a>: Catching that says something great about a person.
-            </div>
-        </div>
-    <div>
+        <h5><a href="/photosynthesis/" class="handle">Your Bill Portfolio</a></h5>
+        <div id="portfolio-list"></div>
+    </div>
+
+    <!-- slider -->
+    <script src="/js/vendor/jquery.tabSlideOut.js/jquery.tabSlideOut.js"></script>
+    <link rel="stylesheet" href="/js/vendor/jquery.tabSlideOut.js/jquery.tabSlideOut.css"> 
+
+    <script>
+        
+        $('#portfolio-sidebar').tabSlideOut({'tabLocation':'right','action':'click'});
+
+        // List all bills in all portfolios
+        $.each( portfolios, function( index, portfolio_hash ) {
+            url = 'https://api.richmondsunlight.com/1.1/photosynthesis/' + portfolio_hash + '.json';
+            console.log(url);
+            $.getJSON(url, function(data) {
+                $.each( data.bills, function( index, bill ) {
+                    $( "#portfolio-list" ).append( '<div class="bill"><a href="' + bill.url + '">'
+                        + bill.number + '</a>: ' + bill.catch_line + '</div>');
+                });
+            });
+        });
+
+    </script>
 
     <style>
         #portfolio-sidebar {
             width: 250px;
             min-height: 300px;
-            max-height: 600px;
+            max-height: 400px;
             padding: 5px;
-            right: 0px;
             z-index: 100;
-            background-color: white;
-            border: 5px solid black;
+            background-color: #f4eee5;
+            border: 1px solid #790806;
         }
-            #portfolio-sidebar .bill {
-                padding: 2px;
+            #portfolio-sidebar h5
+            {
+                font-size: 1em;
+                font-weight: normal;
+                padding-bottom: 0;
             }
-                #portfolio-sidebar .bill+.bill {
-                    margin-top: 1em;
+                #portfolio-sidebar h5 a.handle {
+                    font-family: Verdana, Lucida Grande, sans serif;
+                    background-color: #790806;
+                    color: white;
+                    border-radius: 10px 10px 0 0;
+                    text-decoration: none;
+                    font-weight: normal;
                 }
-                #portfolio-sidebar .bill.changed {
-                    background-color: yellow;
+                #portfolio-sidebar h5 a.handle:hover {
+                    text-decoration: none;
                 }
-                #portfolio-sidebar .bill .last-updated {
-                    text-transform: uppercase;
-                    font-size: .8em;
-                    color: red;
+                #portfolio-list {
+                    max-height: 385px;
+                    overflow: auto;
                 }
+                #portfolio-sidebar .bill {
+                    padding: 2px;
+                }
+                    #portfolio-sidebar .bill+.bill {
+                        margin-top: 1em;
+                    }
+                    #portfolio-sidebar .bill.changed {
+                        background-color: yellow;
+                    }
+                    #portfolio-sidebar .bill .last-updated {
+                        text-transform: uppercase;
+                        font-size: .8em;
+                        color: red;
+                    }
 
     </style>
-
-    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
-    <script>
-        /* MAKE SURE THIS WORKS FOR THE MAIN PORTFOLIO PAGE, TOO */
-
-        // query localstorage
-        //var rawPortfolio = localStorage.getItem('portfolio');
-        //var portfolio = JSON.parse(rawPortfolio);
-            // if nothing is in localstorage, run the function to populate it
-            // when did they most recently view their portfolio?
-            // what is the most recent update of a bill in the portfolio?
-            // if most recent update is since the most recent view
-                // change color of tab
-
-        // iterate through bills
-            // append to portfolio element
-            // if bill has been changed since localstorage time, class="changed"
-
-        // See whether localstorage differs from the API.
-        function check_for_updates() {
-
-
-
-        }
-
-        // Populate localstorage with the contents of this portfolio.
-        function portfolio_store() {
-
-            var store = {};
-
-            // iterate through every "portfolios" element
-            $.each(portfolios, function(index, portfolio_hash) {
-
-                url = 'https://api.richmondsunlight.com/1.1/photosynthesis/' + portfolio_hash + '.json';
-                $.getJSON(url, function(data) {
-                    store[portfolio_hash] = data;
-                });
-            });
-
-            store.updated = + new Date();
-
-            console.log(store);
-            console.log(JSON.stringify(store));
-
-            // store built-up object in localstorage
-            localStorage.setItem('portfolio', JSON.stringify(store));
-
-        }
-
-        portfolio_store();
-
-    </script>
 EOD;
 }
 
