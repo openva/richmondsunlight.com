@@ -6,17 +6,20 @@
 <title>%browser_title%</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#790806"/>
-<link rel="stylesheet" href="/css/new/screen.css" type="text/css" media="screen" />
-<link rel="stylesheet" href="/css/new/print.css" type="text/css" media="print" />
-<link rel="stylesheet" href="/css/page-elements.css" type="text/css" media="screen" />
-<link rel="stylesheet" href="/css/jquery-ui.theme.min.css" type="text/css" media="screen">
-<link rel="stylesheet" href="/js/vendor/qtip2/dist/jquery.qtip.min.css" type="text/css" media="screen">
+<link rel="stylesheet" href="/css/new/screen.css" media="screen" />
+<link rel="stylesheet" href="/css/new/print.css" media="print" />
+<link rel="stylesheet" href="/css/page-elements.css" media="screen" />
+<link rel="stylesheet" href="/css/jquery-ui.theme.min.css" media="screen">
+<link rel="stylesheet" href="/js/vendor/qtip2/dist/jquery.qtip.min.css" media="screen">
+<link rel="stylesheet" href="/js/vendor/jquery.tabSlideOut.js/jquery.tabSlideOut.css"> 
+    
 <!--<link media="only screen and (max-device-width: 480px), only screen and (min-device-width: 560px) and (max-device-width: 1136px) and (-webkit-min-device-pixel-ratio: 2)"
-	href="/css/iphone.css" type="text/css" rel="stylesheet" />-->
+	href="/css/iphone.css" rel="stylesheet" />-->
 <script src="/js/vendor/jquery/dist/jquery.min.js"></script>
 <script src="/js/vendor/jquery-ui/jquery-ui.min.js"></script>
 <script src="/js/functions.js"></script>
 <script src="/js/vendor/qtip2/dist/jquery.qtip.min.js"></script>
+<script src="/js/vendor/jquery.tabSlideOut.js/jquery.tabSlideOut.js"></script>
 
 <!-- For IE 11, Chrome, Firefox, Safari, Opera -->
 <link rel="icon" type="image/png" href="/images/favicons/16.png" sizes="16x16" />
@@ -183,7 +186,7 @@
 								<li><a href="/legislator/cmfariss/">Del. Matt Fariss (R-Rustburg)</a></li>
 								<li><a href="/legislator/erfiller-corn/">Del. Eileen Filler-Corn (D-Fairfax Station)</a></li>
 								<li><a href="/legislator/hffowler/">Del. Buddy Fowler (R-Ashland)</a></li>
-								<li><a href="/legislator/kkfowler/">Del. Kelly Fowler (D-Virginia Beach</a></li>
+								<li><a href="/legislator/kkfowler/">Del. Kelly Fowler (D-Virginia Beach)</a></li>
 								<li><a href="/legislator/njfreitas/">Del. Nick Freitas (R-Culpeper)</a></li>
 								<li><a href="/legislator/tsgarrett/">Del. Scott Garrett (R-Lynchburg)</a></li>
 								<li><a href="/legislator/ctgilbert/">Del. Todd Gilbert (R-Woodstock)</a></li>
@@ -360,10 +363,17 @@
 			</header>
 
 			<main>
+
 			<div id="content">
 				<h1>%page_title%</h1>
 				%page_body%
 			</div>
+
+			<div id="portfolio-sidebar" style="display: none">
+				<h5><a href="/photosynthesis/" class="handle">Your Bill Portfolio</a></h5>
+				<div id="portfolio-list"></div>
+			</div>
+
 			</main>
 
 			<aside>
@@ -615,6 +625,43 @@
 				// Animation complete.
 			});
 		});
+	
+		<?php
+		if (isset($_SESSION['portfolios']))
+		{
+			
+			// Make our portfolio IDs available to JavaScript.
+			echo 'var portfolios = [];';
+			foreach ($_SESSION['portfolios'] as $portfolio)
+			{
+				echo 'portfolios.push("' . $portfolio['hash'] . '");';
+			}
+
+		}
+		?>
+
+		// Photosynthesis sidebar
+		$(document).ready(function() {
+
+			// Show the sidebar if there's a portfolio hash
+			if ($.isArray(portfolios)) {
+
+				$('#portfolio-sidebar').show();
+				$('#portfolio-sidebar').tabSlideOut({'tabLocation':'right','action':'click'});
+
+				// List all bills in all portfolios
+				$.each( portfolios, function( index, portfolio_hash ) {
+				url = '<?php echo API_URL; ?>1.1/photosynthesis/' + portfolio_hash + '.json';
+					$.getJSON(url, function(data) {
+						$.each( data.bills, function( index, bill ) {
+							$( "#portfolio-list" ).append( '<div class="bill"><a href="' + bill.url + '">'
+								+ bill.number + '</a>: ' + bill.catch_line + '</div>');
+						});
+					});
+				});
+			}
+		});
+
 	</script>
 
 </body>

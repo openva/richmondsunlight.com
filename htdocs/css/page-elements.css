@@ -693,6 +693,55 @@ body#body-bills div#options ul {
 }
 
 /*
+ * The Photosynthesis bill portfolio sidebar tab
+ */
+ #portfolio-sidebar {
+	width: 250px;
+	min-height: 300px;
+	max-height: 400px;
+	padding: 5px;
+	z-index: 100;
+	background-color: #f4eee5;
+	border: 1px solid #790806;
+}
+	#portfolio-sidebar h5
+	{
+		font-size: 1em;
+		font-weight: normal;
+		padding-bottom: 0;
+	}
+		#portfolio-sidebar h5 a.handle {
+			font-family: Verdana, Lucida Grande, sans serif;
+			background-color: #790806;
+			color: white;
+			border-radius: 10px 10px 0 0;
+			text-decoration: none;
+			font-weight: normal;
+		}
+		#portfolio-sidebar h5 a.handle:hover {
+			text-decoration: none;
+		}
+		#portfolio-list {
+			max-height: 385px;
+			overflow: auto;
+		}
+		#portfolio-sidebar .bill {
+			padding: 2px;
+		}
+			#portfolio-sidebar .bill+.bill {
+				margin-top: 1em;
+			}
+			#portfolio-sidebar .bill.changed {
+				background-color: yellow;
+			}
+			#portfolio-sidebar .bill .last-updated {
+				text-transform: uppercase;
+				font-size: .8em;
+				color: red;
+			}
+
+
+/*
  * The password strength meter on the account and registration pages.
  */
 meter {

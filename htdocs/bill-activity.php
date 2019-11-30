@@ -20,6 +20,9 @@ include_once 'vendor/autoload.php';
 $database = new Database;
 $database->connect_mysqli();
 
+# INITIALIZE SESSION
+session_start();
+
 # LOCALIZE VARIABLES
 $days = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['days']);
 if (empty($days))
