@@ -369,7 +369,7 @@
 				%page_body%
 			</div>
 
-			<div id="portfolio-sidebar">
+			<div id="portfolio-sidebar" style="display: none">
 				<h5><a href="/photosynthesis/" class="handle">Your Bill Portfolio</a></h5>
 				<div id="portfolio-list"></div>
 			</div>
