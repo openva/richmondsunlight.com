@@ -9,7 +9,7 @@
         "components/jquery": "~1.7",
         "components/jqueryui": "~1.8",
         "simplepie/simplepie": "1.5",
-        "romainneutron/Sphinx-Search-API-PHP-Client": "2.0.8.1"
+        "romainneutron/sphinx-search-api-php-client": "2.0.8.1"
 
     },
     "autoload": {
