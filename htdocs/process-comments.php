@@ -109,7 +109,7 @@ $user = @get_user();
 
 # CLEAN UP THE DATA
 $comment = array_map('trim', $comment);
-$comment['comment'] = strip_tags($comment['comment'], '<a><em><strong><i><b><s><blockquote><embed>');
+$comment['comment'] = strip_tags($comment['comment'], '<a><em><strong><i><b><s><blockquote>');
 $comment = array_map('addslashes', $comment);
 
 if (empty($comment['comment']))
