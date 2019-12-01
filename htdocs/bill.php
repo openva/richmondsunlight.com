@@ -51,14 +51,14 @@ $json = get_content($json_url);
 
 $debug_timing['JSON retrieved'] = microtime(TRUE);
 
-if ($json === FALSE)
+$bill = json_decode($json);
+
+if ($json === FALSE || $bill == FALSE || isset($bill->error))
 {
     header("Status: 404 Not Found\n\r");
     include '404.php';
     exit();
 }
-
-$bill = json_decode($json);
 
 # Cast this bill as an array, rather than an object, in which the array is wrapped as a result of
 # being stored in JSON.
