@@ -81,7 +81,7 @@ if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === TRUE)
     exit();
 }
 
-# If there are spammy strings in the body, and any links, then it's spam.
+# It's spam if there are spammy strings in the body, and also any links.
 $spam_strings = array('ciprofloxacin', 'viagra', 'cialis', ' topiramate', 'propecia',
     'levitra', 'priligy', 'clomid', 'zithromax', 'azithromycin', 'kamagra', 'celebrex',
     'prednizone', ' sildenafil', 'tadalafil', 'accutane', 'tadalafil', 'topamax', 'amoxicillin',
@@ -104,7 +104,7 @@ if ($_SERVER['REMOTE_ADDR'] == '151.188.97.205')
     exit();
 }
 
-# See if the user is logged in and, if so, save his user data.
+# See if the user is logged in and, if so, save their user data.
 $user = @get_user();
 
 # CLEAN UP THE DATA
@@ -178,7 +178,7 @@ if (!empty($comment['url']))
 //$purifier = new HTMLPurifier();
 //$comment['comment'] = $purifier->purify($comment['comment']);
 
-# SEE IF HE'S LOGGED IN AND DEAL WITH HIM ACCORDINGLY
+# See if they're logged in and deal with them accordingly.
 if (logged_in() === TRUE)
 {
     update_user('name=' . $comment['name'] . '&email=' . $comment['email'] . '&url=' . $comment['url']);
@@ -189,7 +189,7 @@ else
     $user = @get_user();
 }
 
-# If this user is blacklisted, don't let him post.
+# If this user is blacklisted, don't let them post.
 /*if (@blacklisted() === TRUE)
 {
     die();
@@ -254,7 +254,6 @@ if (mysqli_num_rows($result) > 0)
     echo json_encode($message);
     exit();
 }
-
 
 # ASSEMBLE THE INSERTION SQL
 $sql = 'INSERT INTO comments
