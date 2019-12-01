@@ -111,7 +111,7 @@ else
     {
         $page_body .= '
 			<div class="comment"'.(($comment['status'] == 'deleted' || $comment['status'] == 'spam') ? ' style="color: #999;"' : '') . '>
-				<h2><a href="/bill/' . SESSION_YEAR . '/' . strtolower($comment['bill_number']) . '/">' . $comment['bill_number'] . '</a>:
+				<h2 id="comment-' . $comment['id'] . '"><a href="/bill/' . SESSION_YEAR . '/' . strtolower($comment['bill_number']) . '/">' . $comment['bill_number'] . '</a>:
 					' . $comment['catch_line'] . '</h2>
 				<cite>' . (!empty($comment['url']) ? '<a href="' . $comment['url'] . '">' : '').
                 $comment['name'].
