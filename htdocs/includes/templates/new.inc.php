@@ -625,20 +625,6 @@
 				// Animation complete.
 			});
 		});
-	
-		<?php
-		if (isset($_SESSION['portfolios']))
-		{
-			
-			// Make our portfolio IDs available to JavaScript.
-			echo 'var portfolios = [];';
-			foreach ($_SESSION['portfolios'] as $portfolio)
-			{
-				echo 'portfolios.push("' . $portfolio['hash'] . '");';
-			}
-
-		}
-		?>
 
 		// Photosynthesis sidebar
 		$(document).ready(function() {
