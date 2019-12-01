@@ -289,6 +289,11 @@ if (!$result)
     exit();
 }
 
+/*
+ * Get the comment ID.
+ */
+$comment['id'] = mysqli_insert_id($GLOBALS['db']);
+
 # If this thread has subscribers, e-mail a this comment to those subscribers.
 
 # Create a new instance of the comments-subscription class
@@ -344,7 +349,7 @@ if (MEMCACHED_SERVER != '')
 $log = new Log;
 $log->put('New comment posted, by ' . stripslashes($comment['name']) . ':'
     . "\n\n" . str_replace("\r\n", ' ¶ ', stripslashes($comment['comment']))
-    . ' ' . $_SERVER['HTTP_REFERER'], 3);
+    . ' https://' . $_SERVER['HTTP_HOST'] . '/admin/comments/#comment-' . $comment['id'], 3);
 
 /*
  * Send a 201 Created HTTP header, to indicate success.
