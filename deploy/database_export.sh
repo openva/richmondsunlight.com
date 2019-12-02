@@ -13,29 +13,34 @@ ALL_CONTENTS="committees committee_members districts files representatives repre
 # All database tables that we want to export some contents of, as test data
 SOME_CONTENTS=(bills_copatrons bills_full_text bills_places bills_section_numbers bills_status bills_views comments dockets polls video_clips votes)
 
-# The ID of the bill to use to generate test data
-BILL_ID=46308
+# The ID of the bills to use to generate test data
+BILL_IDS=(45618 45663 46308 46058 45113 44355 44599 45136 45453 45811)
 
 # Change to the directory this script is in
-cd `dirname $0`
+cd "$(dirname "$0")"
 mkdir -p mysql
 
 # Export all of the structural data
 mysqldump {MYSQL_DATABASE} -d --routines --triggers -u "$USERNAME" -p"$PASSWORD" \
-    --host "$HOST" $STRUCTURE > mysql/structure.sql
+    --host "$HOST" --tables "$STRUCTURE" > mysql/structure.sql
 
 # Export all of the tables for which we want complete contents
 mysqldump {MYSQL_DATABASE} --no-create-info -u "$USERNAME" -p"$PASSWORD" --host "$HOST" \
-    $ALL_CONTENTS > mysql/basic-contents.sql
+    --tables "$ALL_CONTENTS" > mysql/basic-contents.sql
 
 # Export selected contents from the remaining tables
-mysqldump {MYSQL_DATABASE} --no-create-info -u "$USERNAME" -p"$PASSWORD" --host "$HOST" bills \
-    --where "id=$BILL_ID" > mysql/test-records.sql 
+for BILL_ID in "${BILL_IDS[@]}"; do
+    mysqldump {MYSQL_DATABASE} --no-create-info -u "$USERNAME" -p"$PASSWORD" --host "$HOST" bills \
+        --where "id=$BILL_ID" > mysql/test-records.sql
+done
+
 for TABLE in ${SOME_CONTENTS[*]}
 do
-    # Genericize all IP addresses and email addresses, to maintain privacy.
-    mysqldump {MYSQL_DATABASE} --no-create-info -u "$USERNAME" -p"$PASSWORD" --host "$HOST" "$TABLE" \
-        --where "bill_id=$BILL_ID" |perl -pe 's{[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}}{ sprintf "127.%01d.%01d.%01d", int(255*rand()), int(255*rand()), int(255*rand()) }ge' \
-        |sed -E "s/\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/example@example.com/g" \
-        >> mysql/test-records.sql
+    for BILL_ID in "${BILL_IDS[@]}"; do
+        # Genericize all IP addresses and email addresses, to maintain privacy.
+        mysqldump {MYSQL_DATABASE} --no-create-info -u "$USERNAME" -p"$PASSWORD" --host "$HOST" "$TABLE" \
+            --where "bill_id=$BILL_ID" |perl -pe 's{[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}}{ sprintf "127.%01d.%01d.%01d", int(255*rand()), int(255*rand()), int(255*rand()) }ge' \
+            |sed -E "s/\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/example@example.com/g" \
+            >> mysql/test-records.sql
+    done
 done

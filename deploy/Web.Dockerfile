@@ -4,9 +4,13 @@ RUN docker-php-ext-install mysqli && docker-php-ext-install mysql && a2enmod rew
 # Install our packages
 RUN apt --fix-broken install
 RUN apt-get update
-RUN apt-get install -y git zip libmemcached-dev zlib1g-dev \
+RUN apt-get install -y apt-transport-https ca-certificates gnupg2
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+RUN apt-get update
+RUN apt-get install -y git zip libmemcached-dev zlib1g-dev yarn \
     && pecl install memcached-2.2.0 \
-	&& docker-php-ext-enable memcached yarn
+	&& docker-php-ext-enable memcached
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer

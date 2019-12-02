@@ -81,7 +81,7 @@ if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === TRUE)
     exit();
 }
 
-# If there are spammy strings in the body, and any links, then it's spam.
+# It's spam if there are spammy strings in the body, and also any links.
 $spam_strings = array('ciprofloxacin', 'viagra', 'cialis', ' topiramate', 'propecia',
     'levitra', 'priligy', 'clomid', 'zithromax', 'azithromycin', 'kamagra', 'celebrex',
     'prednizone', ' sildenafil', 'tadalafil', 'accutane', 'tadalafil', 'topamax', 'amoxicillin',
@@ -104,12 +104,12 @@ if ($_SERVER['REMOTE_ADDR'] == '151.188.97.205')
     exit();
 }
 
-# See if the user is logged in and, if so, save his user data.
+# See if the user is logged in and, if so, save their user data.
 $user = @get_user();
 
 # CLEAN UP THE DATA
 $comment = array_map('trim', $comment);
-$comment['comment'] = strip_tags($comment['comment'], '<a><em><strong><i><b><s><blockquote><embed>');
+$comment['comment'] = strip_tags($comment['comment'], '<a><em><strong><i><b><s><blockquote>');
 $comment = array_map('addslashes', $comment);
 
 if (empty($comment['comment']))
@@ -178,7 +178,7 @@ if (!empty($comment['url']))
 //$purifier = new HTMLPurifier();
 //$comment['comment'] = $purifier->purify($comment['comment']);
 
-# SEE IF HE'S LOGGED IN AND DEAL WITH HIM ACCORDINGLY
+# See if they're logged in and deal with them accordingly.
 if (logged_in() === TRUE)
 {
     update_user('name=' . $comment['name'] . '&email=' . $comment['email'] . '&url=' . $comment['url']);
@@ -189,7 +189,7 @@ else
     $user = @get_user();
 }
 
-# If this user is blacklisted, don't let him post.
+# If this user is blacklisted, don't let them post.
 /*if (@blacklisted() === TRUE)
 {
     die();
@@ -255,7 +255,6 @@ if (mysqli_num_rows($result) > 0)
     exit();
 }
 
-
 # ASSEMBLE THE INSERTION SQL
 $sql = 'INSERT INTO comments
 		SET bill_id=' . $comment['bill_id'] . ', name="' . $comment['name'] . '",
@@ -288,6 +287,11 @@ if (!$result)
     );
     exit();
 }
+
+/*
+ * Get the comment ID.
+ */
+$comment['id'] = mysqli_insert_id($GLOBALS['db']);
 
 # If this thread has subscribers, e-mail a this comment to those subscribers.
 
@@ -344,7 +348,7 @@ if (MEMCACHED_SERVER != '')
 $log = new Log;
 $log->put('New comment posted, by ' . stripslashes($comment['name']) . ':'
     . "\n\n" . str_replace("\r\n", ' ¶ ', stripslashes($comment['comment']))
-    . ' ' . $_SERVER['HTTP_REFERER'], 3);
+    . ' https://' . $_SERVER['HTTP_HOST'] . '/admin/comments/#comment-' . $comment['id'], 3);
 
 /*
  * Send a 201 Created HTTP header, to indicate success.
