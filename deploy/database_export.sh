@@ -22,11 +22,11 @@ mkdir -p mysql
 
 # Export all of the structural data
 mysqldump {MYSQL_DATABASE} -d --routines --triggers -u "$USERNAME" -p"$PASSWORD" \
-    --host "$HOST" "$STRUCTURE" > mysql/structure.sql
+    --host "$HOST" --tables "$STRUCTURE" > mysql/structure.sql
 
 # Export all of the tables for which we want complete contents
 mysqldump {MYSQL_DATABASE} --no-create-info -u "$USERNAME" -p"$PASSWORD" --host "$HOST" \
-    "$ALL_CONTENTS" > mysql/basic-contents.sql
+    --tables "$ALL_CONTENTS" > mysql/basic-contents.sql
 
 # Export selected contents from the remaining tables
 for BILL_ID in "${BILL_IDS[@]}"; do
