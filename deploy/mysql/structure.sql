@@ -1,4 +1,4 @@
--- MySQL dump 10.13  Distrib 5.7.26, for Linux (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
 --
 -- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
 -- ------------------------------------------------------
@@ -62,8 +62,112 @@ CREATE TABLE `bills` (
   KEY `duplicates` (`session_id`,`summary_hash`,`id`),
   KEY `interestingness` (`interestingness`),
   KEY `dls_prepared` (`dls_prepared`)
-) ENGINE=InnoDB AUTO_INCREMENT=47634 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=47908 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:38
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `bills_copatrons`
@@ -82,8 +186,112 @@ CREATE TABLE `bills_copatrons` (
   KEY `bill_legislator` (`bill_id`,`legislator_id`),
   KEY `bill_id` (`bill_id`),
   KEY `legislator_id` (`legislator_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=1535236 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1727420 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:38
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `bills_full_text`
@@ -105,8 +313,112 @@ CREATE TABLE `bills_full_text` (
   UNIQUE KEY `bill_id_2` (`bill_id`,`number`),
   KEY `bill_id` (`bill_id`),
   FULLTEXT KEY `text` (`text`)
-) ENGINE=InnoDB AUTO_INCREMENT=779870 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=780241 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:38
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `bills_places`
@@ -128,6 +440,110 @@ CREATE TABLE `bills_places` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:38
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
 -- Table structure for table `bills_section_numbers`
 --
 
@@ -144,8 +560,112 @@ CREATE TABLE `bills_section_numbers` (
   PRIMARY KEY (`id`),
   KEY `bill_id` (`bill_id`,`section_number`),
   KEY `full_text_id` (`full_text_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=76400 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=76806 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:38
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `bills_status`
@@ -171,8 +691,112 @@ CREATE TABLE `bills_status` (
   KEY `date` (`date`),
   KEY `bill_id` (`bill_id`),
   FULLTEXT KEY `status` (`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=121122200 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=121122504 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:38
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `bills_views`
@@ -191,8 +815,112 @@ CREATE TABLE `bills_views` (
   KEY `bill_id` (`bill_id`),
   KEY `user_id` (`user_id`),
   KEY `date` (`date`)
-) ENGINE=MyISAM AUTO_INCREMENT=13149336 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=MyISAM AUTO_INCREMENT=13319268 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:38
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `blacklist`
@@ -216,6 +944,110 @@ CREATE TABLE `blacklist` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:38
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
 -- Table structure for table `chamber_status`
 --
 
@@ -231,6 +1063,110 @@ CREATE TABLE `chamber_status` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=397624 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:38
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `comments`
@@ -259,8 +1195,112 @@ CREATE TABLE `comments` (
   KEY `user_id` (`user_id`),
   KEY `status` (`status`),
   KEY `publishable` (`bill_id`,`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=13585 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=13608 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:38
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `comments_subscriptions`
@@ -280,6 +1320,110 @@ CREATE TABLE `comments_subscriptions` (
   KEY `user_id` (`user_id`,`bill_id`,`hash`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1545 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `committees`
@@ -308,6 +1452,110 @@ CREATE TABLE `committees` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
 -- Table structure for table `committee_members`
 --
 
@@ -329,6 +1577,110 @@ CREATE TABLE `committee_members` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
 -- Table structure for table `dashboard_bills`
 --
 
@@ -348,8 +1700,112 @@ CREATE TABLE `dashboard_bills` (
   KEY `user_id` (`user_id`,`bill_id`),
   KEY `portfoilo_id` (`portfolio_id`),
   FULLTEXT KEY `notes` (`notes`)
-) ENGINE=InnoDB AUTO_INCREMENT=46487 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=46530 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `dashboard_portfolios`
@@ -377,8 +1833,112 @@ CREATE TABLE `dashboard_portfolios` (
   KEY `watch_list_id` (`watch_list_id`),
   KEY `public` (`public`),
   FULLTEXT KEY `notes` (`notes`)
-) ENGINE=InnoDB AUTO_INCREMENT=4607 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=4695 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `dashboard_user_data`
@@ -398,9 +1958,114 @@ CREATE TABLE `dashboard_user_data` (
   `date_created` datetime NOT NULL,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`user_id`),
-  KEY `organization_id` (`organization`,`email_active`,`expires`)
+  KEY `organization_id` (`organization`,`email_active`,`expires`),
+  CONSTRAINT `parent_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `dashboard_watch_lists`
@@ -426,6 +2091,110 @@ CREATE TABLE `dashboard_watch_lists` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
 -- Table structure for table `districts`
 --
 
@@ -448,6 +2217,110 @@ CREATE TABLE `districts` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
 -- Table structure for table `dockets`
 --
 
@@ -464,8 +2337,112 @@ CREATE TABLE `dockets` (
   PRIMARY KEY (`id`),
   KEY `date` (`date`,`committee_id`,`bill_id`),
   KEY `bill_id` (`bill_id`,`date`)
-) ENGINE=InnoDB AUTO_INCREMENT=962867 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1225928 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `files`
@@ -503,8 +2480,112 @@ CREATE TABLE `files` (
   PRIMARY KEY (`id`),
   KEY `chamber` (`chamber`),
   FULLTEXT KEY `description` (`description`)
-) ENGINE=InnoDB AUTO_INCREMENT=1085 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1308 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `gazetteer`
@@ -528,6 +2609,110 @@ CREATE TABLE `gazetteer` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
 -- Table structure for table `meetings`
 --
 
@@ -548,8 +2733,112 @@ CREATE TABLE `meetings` (
   PRIMARY KEY (`id`),
   KEY `session_id` (`session_id`),
   KEY `triumverate` (`date`,`time`,`committee_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=402583 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=405711 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `minutes`
@@ -569,6 +2858,110 @@ CREATE TABLE `minutes` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
 -- Table structure for table `polls`
 --
 
@@ -586,8 +2979,112 @@ CREATE TABLE `polls` (
   UNIQUE KEY `bill_id_4` (`bill_id`,`ip`),
   UNIQUE KEY `one_vote` (`bill_id`,`user_id`),
   KEY `bill_id` (`bill_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=103747 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=103858 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `representatives`
@@ -639,8 +3136,112 @@ CREATE TABLE `representatives` (
   KEY `place` (`place`),
   KEY `partisanship` (`partisanship`),
   FULLTEXT KEY `name_2` (`name_formal`,`bio`,`notes`)
-) ENGINE=InnoDB AUTO_INCREMENT=445 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=467 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `representatives_districts`
@@ -659,6 +3260,110 @@ CREATE TABLE `representatives_districts` (
   UNIQUE KEY `representative_id` (`representative_id`,`district_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=441 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `representatives_fundraising`
@@ -680,6 +3385,110 @@ CREATE TABLE `representatives_fundraising` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
 -- Table structure for table `representatives_terms`
 --
 
@@ -698,6 +3507,110 @@ CREATE TABLE `representatives_terms` (
   KEY `representative_id` (`representative_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `representatives_votes`
@@ -721,6 +3634,110 @@ CREATE TABLE `representatives_votes` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
 -- Table structure for table `sessions`
 --
 
@@ -741,8 +3758,112 @@ CREATE TABLE `sessions` (
   KEY `year` (`year`,`suffix`),
   KEY `lis_id` (`lis_id`),
   FULLTEXT KEY `notes` (`notes`)
-) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `tags`
@@ -763,8 +3884,112 @@ CREATE TABLE `tags` (
   UNIQUE KEY `unique_pairing` (`bill_id`,`tag`),
   KEY `bill_id` (`bill_id`),
   KEY `tag` (`tag`)
-) ENGINE=InnoDB AUTO_INCREMENT=71094 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=71294 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `users`
@@ -797,8 +4022,112 @@ CREATE TABLE `users` (
   `date_created` datetime NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `cookie_hash` (`cookie_hash`)
-) ENGINE=InnoDB AUTO_INCREMENT=82591 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=82769 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `vacode`
@@ -817,6 +4146,110 @@ CREATE TABLE `vacode` (
   UNIQUE KEY `section_number` (`section_number`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `video_clips`
@@ -843,8 +4276,112 @@ CREATE TABLE `video_clips` (
   CONSTRAINT `video_clips_ibfk_3` FOREIGN KEY (`file_id`) REFERENCES `files` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `video_clips_ibfk_4` FOREIGN KEY (`file_id`) REFERENCES `files` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `video_clips_ibfk_5` FOREIGN KEY (`file_id`) REFERENCES `files` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=221781 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=222241 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `video_index`
@@ -872,8 +4409,112 @@ CREATE TABLE `video_index` (
   KEY `ignore` (`ignored`),
   CONSTRAINT `video_index_ibfk_1` FOREIGN KEY (`file_id`) REFERENCES `files` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `video_index_ibfk_2` FOREIGN KEY (`file_id`) REFERENCES `files` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=1163926 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1171116 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `video_index_faces`
@@ -902,6 +4543,110 @@ CREATE TABLE `video_index_faces` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
 -- Table structure for table `video_transcript`
 --
 
@@ -923,6 +4668,110 @@ CREATE TABLE `video_transcript` (
   KEY `speaker` (`legislator_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=613852 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping routines for database 'richmondsunlight'
+--
+/*!50003 DROP FUNCTION IF EXISTS `LEVENSHTEIN` */;
+/*!50003 SET @saved_cs_client      = @@character_set_client */ ;
+/*!50003 SET @saved_cs_results     = @@character_set_results */ ;
+/*!50003 SET @saved_col_connection = @@collation_connection */ ;
+/*!50003 SET character_set_client  = utf8 */ ;
+/*!50003 SET character_set_results = utf8 */ ;
+/*!50003 SET collation_connection  = utf8_general_ci */ ;
+/*!50003 SET @saved_sql_mode       = @@sql_mode */ ;
+/*!50003 SET sql_mode              = 'NO_ENGINE_SUBSTITUTION' */ ;
+DELIMITER ;;
+CREATE DEFINER=`ricsun`@`%` FUNCTION `LEVENSHTEIN`(s1 VARCHAR(255) CHARACTER SET utf8, s2 VARCHAR(255) CHARACTER SET utf8) RETURNS int(11)
+    DETERMINISTIC
+BEGIN
+    DECLARE s1_len, s2_len, i, j, c, c_temp, cost INT;
+    DECLARE s1_char CHAR CHARACTER SET utf8;
+    
+    DECLARE cv0, cv1 VARBINARY(256);
+
+    SET s1_len = CHAR_LENGTH(s1),
+        s2_len = CHAR_LENGTH(s2),
+        cv1 = 0x00,
+        j = 1,
+        i = 1,
+        c = 0;
+
+    IF (s1 = s2) THEN
+      RETURN (0);
+    ELSEIF (s1_len = 0) THEN
+      RETURN (s2_len);
+    ELSEIF (s2_len = 0) THEN
+      RETURN (s1_len);
+    END IF;
+
+    WHILE (j <= s2_len) DO
+      SET cv1 = CONCAT(cv1, CHAR(j)),
+          j = j + 1;
+    END WHILE;
+
+    WHILE (i <= s1_len) DO
+      SET s1_char = SUBSTRING(s1, i, 1),
+          c = i,
+          cv0 = CHAR(i),
+          j = 1;
+
+      WHILE (j <= s2_len) DO
+        SET c = c + 1,
+            cost = IF(s1_char = SUBSTRING(s2, j, 1), 0, 1);
+
+        SET c_temp = ORD(SUBSTRING(cv1, j, 1)) + cost;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET c_temp = ORD(SUBSTRING(cv1, j+1, 1)) + 1;
+        IF (c > c_temp) THEN
+          SET c = c_temp;
+        END IF;
+
+        SET cv0 = CONCAT(cv0, CHAR(c)),
+            j = j + 1;
+      END WHILE;
+
+      SET cv1 = cv0,
+          i = i + 1;
+    END WHILE;
+
+    RETURN (c);
+  END ;;
+DELIMITER ;
+/*!50003 SET sql_mode              = @saved_sql_mode */ ;
+/*!50003 SET character_set_client  = @saved_cs_client */ ;
+/*!50003 SET character_set_results = @saved_cs_results */ ;
+/*!50003 SET collation_connection  = @saved_col_connection */ ;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2019-12-03  2:55:39
+-- MySQL dump 10.13  Distrib 5.7.28, for Linux (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	5.6.35-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
 -- Table structure for table `votes`
@@ -1043,4 +4892,4 @@ DELIMITER ;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2019-06-18  0:44:59
+-- Dump completed on 2019-12-03  2:55:39
