@@ -45,3 +45,5 @@ cd ../../
 
 # Return to the original directory
 cd "$CWD" || exit
+
+echo "Site available at http://localhost:5000/"
