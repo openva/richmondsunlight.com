@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Save the current directory, to return to at the end
 CWD=$(pwd)
