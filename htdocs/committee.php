@@ -301,6 +301,7 @@ if (is_array($committee->members))
         {
             $page_body .= ' <strong>' . ucwords($member['position']) . '</strong>';
         }
+        $page_body .= "</li>\n";
     }
     $page_body .= '
 			</ul>';

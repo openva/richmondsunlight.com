@@ -70,6 +70,37 @@ then
     ERRORED=true
 fi
 
+# Are committee pages working?
+if ! curl --no-buffer --silent "http://localhost:5000/committee/house/finance/" |grep -q "<h1>House Finance Committee"
+then
+    echo "ERROR: The House Finance committee page doesn't work"
+    ERRORED=true
+fi
+
+# Are committee members listed?
+# This is not a great test. We're using the presence of a committee chair as a proxy for whether
+# members are listed at all, because there's no practical way to separate that out from the menu
+# list of legislators.
+if ! curl --no-buffer --silent "http://localhost:5000/committee/house/finance/" |grep -q "Chair"
+then
+    echo "ERROR: House Finance committee members aren't listed"
+    ERRORED=true
+fi
+
+# Are subcommittees listed?
+if ! curl --no-buffer --silent "http://localhost:5000/committee/house/finance/" |grep -q "Subcommittee "
+then
+    echo "ERROR: House Finance subcommittees aren't listed"
+    ERRORED=true
+fi
+
+# Are legislative hearings listed for bills?
+if ! curl --no-buffer --silent "http://localhost:5000/schedule/2019/01/15/" |grep -q "SB1038"
+then
+    echo "ERROR: SB1038 isn't listed on the schedule for 2019-01-15"
+    ERRORED=true
+fi
+
 # If any tests failed, have this script return that failure
 if [ "$ERRORED" == true ]; then
     exit 1
