@@ -15,7 +15,7 @@ include_once 'vendor/autoload.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_mysqli();
+$db = $database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();
@@ -101,7 +101,6 @@ if (isset($committee->meeting->next))
 }
 $page_sidebar .= '</div>';
 
-
 # Overall batting average.
 $sql = 'SELECT COUNT(*) AS failed,
 			(SELECT COUNT(*)
@@ -113,6 +112,7 @@ $sql = 'SELECT COUNT(*) AS failed,
 		AND session_id=' . SESSION_ID;
 
 $result = mysqli_query($GLOBALS['db'], $sql);
+
 if (mysqli_num_rows($result) > 0)
 {
     $stats = mysqli_fetch_array($result);
@@ -142,11 +142,12 @@ $sql = 'SELECT representatives.party, representatives.party AS party1,
 			AS total
 		FROM bills
 		LEFT JOIN representatives
-		ON bills.chief_patron_id = representatives.id
-		WHERE status = "failed" AND last_committee_id = ' . $committee->id . '
-		AND session_id=' . SESSION_ID . '
-		GROUP BY party
-		ORDER BY party DESC';
+		    ON bills.chief_patron_id = representatives.id
+		WHERE status = "failed"
+            AND last_committee_id = ' . $committee->id . '
+            AND session_id=' . SESSION_ID . '
+        GROUP BY party
+            ORDER BY party DESC';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
