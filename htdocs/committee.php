@@ -30,8 +30,12 @@ $shortname = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['committee']);
 $committee = new Committee;
 $committee->chamber = $chamber;
 $committee->shortname = $shortname;
-$committee->info();
-$committee->members();
+if (!$committee->info() || !$committee->members())
+{
+    header('Status: 404 Not Found');
+    include '404.php';
+    exit();
+}
 
 # PAGE METADATA
 $page_title = ucfirst($chamber) . ' ' . $committee->name . ' Committee';
