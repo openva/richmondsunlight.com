@@ -45,14 +45,14 @@ fi
 # Are bill co-sponsors listed?
 if ! curl --no-buffer --silent "http://localhost:5000/bill/2019/hb2491/" |grep -q "with support from co-patrons"
 then
-    echo "ERROR: Bill copatrons aren't being displayed for HB2491"
+    echo "ERROR: Bill copatrons aren't displayed for HB2491"
     ERRORED=true
 fi
 
 # Are poll results displayed?
 if ! curl --no-buffer --silent "http://localhost:5000/bill/2019/hb2491/" |grep -q "32 votes"
 then
-    echo "ERROR: Bill copatrons aren't being displayed for HB2491"
+    echo "ERROR: Poll results aren't displayed for HB2491"
     ERRORED=true
 fi
 
@@ -66,7 +66,7 @@ fi
 # Are the newest comments displayed on the home page?
 if [ "$(curl --no-buffer --silent "http://localhost:5000//" |grep -c "#comment-")" -ne 6 ]
 then
-    echo "ERROR: Basic legislator information isn't being displayed"
+    echo "ERROR: Recent comments aren't being displayed on the home page"
     ERRORED=true
 fi
 
