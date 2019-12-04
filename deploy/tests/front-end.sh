@@ -28,22 +28,43 @@ then
     ERRORED=true
 fi
 
-# Are bill outcomes being displayed?
+# Are bill outcomes displayed?
 if ! curl --no-buffer --silent "http://localhost:5000/bill/2019/sb1604/" |grep -q "Bill Has Passed"
 then
     echo "ERROR: Bill outcomes aren't being displayed"
     ERRORED=true
 fi
 
-# Are bill histories being displayed?
+# Are bill histories displayed?
 if ! curl --no-buffer --silent "http://localhost:5000/bill/2019/sb1604/" |grep -q "Rereferred to Finance"
 then
     echo "ERROR: Bill histories aren't being displayed"
     ERRORED=true
 fi
 
+# Are bill co-sponsors listed?
+if ! curl --no-buffer --silent "http://localhost:5000/bill/2019/hb2491/" |grep -q "with support from co-patrons"
+then
+    echo "ERROR: Bill copatrons aren't being displayed for HB2491"
+    ERRORED=true
+fi
+
+# Are poll results displayed?
+if ! curl --no-buffer --silent "http://localhost:5000/bill/2019/hb2491/" |grep -q "32 votes"
+then
+    echo "ERROR: Bill copatrons aren't being displayed for HB2491"
+    ERRORED=true
+fi
+
 # Is basic legislator information being displayed?
 if ! curl --no-buffer --silent "http://localhost:5000/legislator/lradams/" |grep -q "<h1>Del. Les Adams"
+then
+    echo "ERROR: Basic legislator information isn't being displayed"
+    ERRORED=true
+fi
+
+# Are the newest comments displayed on the home page?
+if [ "$(curl --no-buffer --silent "http://localhost:5000//" |grep -c "#comment-")" -ne 6 ]
 then
     echo "ERROR: Basic legislator information isn't being displayed"
     ERRORED=true
