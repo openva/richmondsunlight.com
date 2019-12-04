@@ -625,26 +625,12 @@
 				// Animation complete.
 			});
 		});
-	
-		<?php
-		if (isset($_SESSION['portfolios']))
-		{
-			
-			// Make our portfolio IDs available to JavaScript.
-			echo 'var portfolios = [];';
-			foreach ($_SESSION['portfolios'] as $portfolio)
-			{
-				echo 'portfolios.push("' . $portfolio['hash'] . '");';
-			}
-
-		}
-		?>
 
 		// Photosynthesis sidebar
 		$(document).ready(function() {
 
 			// Show the sidebar if there's a portfolio hash
-			if ($.isArray(portfolios)) {
+			if (typeof portfolios !== 'undefined') {
 
 				$('#portfolio-sidebar').show();
 				$('#portfolio-sidebar').tabSlideOut({'tabLocation':'right','action':'click'});

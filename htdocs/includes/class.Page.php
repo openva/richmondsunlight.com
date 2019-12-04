@@ -93,6 +93,24 @@ class Page
             $this->body_tag .= ' id="body-' . $this->site_section . '"';
         }
 
+        /*
+         * Inject a Javascript array of bill portfolio IDs into the HTML.
+         */
+		if (isset($_SESSION['portfolios']))
+		{
+			
+            $portfolio_js = '<script>var portfolios = [];';
+			foreach ($_SESSION['portfolios'] as $portfolio)
+			{
+				$portfolio_js .= 'portfolios.push("' . $portfolio['hash'] . '");';
+            }
+            $portfolio_js .= '</script>';
+
+            # Note that we retain the placeholder tag, because the actual replacement comes later.
+            $page = str_replace('%html_head%', '%html_head% ' . $portfolio_js, $page);
+
+		}
+
         # Step through and replace each variable in the template with the
         # contents of the page.
         $page = str_replace('%browser_title%', $this->browser_title, $page);
@@ -104,7 +122,7 @@ class Page
             {
                 $this->html_head = '';
             }
-            $this->html_head .= "\r\t" . '<style type="text/css">' . "\r\t\t" . '#sidebar { display: none; }'
+            $this->html_head .= "\r\t" . '<style>' . "\r\t\t" . '#sidebar { display: none; }'
                 . "\r\t\t" . '#content { width: 62em; }'
                 . "\r\t" . '</style>';
             $page = str_replace('%page_sidebar%', '', $page);
@@ -125,7 +143,6 @@ class Page
         }
 
         # See if we have any recommended bills and, if so, insert a promo for them.
-
         $user = new User();
         $bills = $user->recommended_bills();
         if ($bills != FALSE)
@@ -141,7 +158,7 @@ class Page
             }
             else
             {
-                $recommended_Bills = '';
+                $recommended_bills = '';
             }
         }
         $page = str_replace('%recommended_bills%', $recommended_bills, $page);
