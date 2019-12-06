@@ -30,7 +30,6 @@ $shortname = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['committee']);
 $committee = new Committee;
 $committee->chamber = $chamber;
 $committee->shortname = $shortname;
-
 if (!$committee->info() || !$committee->members())
 {
     header('Status: 404 Not Found');
@@ -102,7 +101,6 @@ if (isset($committee->meeting->next))
 }
 $page_sidebar .= '</div>';
 
-
 # Overall batting average.
 $sql = 'SELECT COUNT(*) AS failed,
 			(SELECT COUNT(*)
@@ -114,6 +112,7 @@ $sql = 'SELECT COUNT(*) AS failed,
 		AND session_id=' . SESSION_ID;
 
 $result = mysqli_query($GLOBALS['db'], $sql);
+
 if (mysqli_num_rows($result) > 0)
 {
     $stats = mysqli_fetch_array($result);
@@ -302,6 +301,7 @@ if (is_array($committee->members))
         {
             $page_body .= ' <strong>' . ucwords($member['position']) . '</strong>';
         }
+        $page_body .= "</li>\n";
     }
     $page_body .= '
 			</ul>';
