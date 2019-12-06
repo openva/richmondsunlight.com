@@ -143,11 +143,12 @@ $sql = 'SELECT representatives.party, representatives.party AS party1,
 			AS total
 		FROM bills
 		LEFT JOIN representatives
-		ON bills.chief_patron_id = representatives.id
-		WHERE status = "failed" AND last_committee_id = ' . $committee->id . '
-		AND session_id=' . SESSION_ID . '
-		GROUP BY party
-		ORDER BY party DESC';
+		    ON bills.chief_patron_id = representatives.id
+		WHERE status = "failed"
+            AND last_committee_id = ' . $committee->id . '
+            AND session_id=' . SESSION_ID . '
+        GROUP BY party
+            ORDER BY party DESC';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
