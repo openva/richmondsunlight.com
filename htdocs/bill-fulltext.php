@@ -184,7 +184,7 @@ $page_body .= '
 foreach ($versions as $version)
 {
     $page_body .= '
-		<div id="' . $version['number'] . '"" class="bill-text">
+		<div id="' . $version['number'] . '" class="bill-text">
 			<p style="clear: left;">' . $version['text'] . '</p>
 		</div>';
 }
