@@ -574,7 +574,7 @@ a.balloon div {
 	#sidebar {
 		display: none;
 	}
-	#date-status, p.quote, #bri, #watch, #bill-progress, #facebook {
+	#date, #status, p.quote, #bill-progress {
 		display: none;
 	}
 
