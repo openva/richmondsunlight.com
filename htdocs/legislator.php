@@ -376,7 +376,7 @@ if ($legislator['batting']['total'] == 0)
 
 $page_body .= '
 	<img src="/images/legislators/thumbnails/' . $legislator['shortname'] . '.jpg" alt="Photo of '
-        . $legislator['name'] . '" id="legislator" />
+        . $legislator['name'] . '" width="150" id="legislator" />
 	<dl>
 		<dt>Party</dt>
 		<dd>' . $legislator['party_name'] . '</dd>
