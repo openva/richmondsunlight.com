@@ -631,13 +631,13 @@ class Bill2
             /*
              * Include the text in question.
              */
-            $this->changes[$i]['text'] = $matches[3][$i];
+            $this->changes[$i]['text'] = mb_convert_encoding($matches[3][$i], 'UTF-8', 'UTF-8');
 
             /*
              * Include the text and immediately precedes and follows the text in question.
              */
-            $this->changes[$i]['preceded_by'] = $matches[1][$i];
-            $this->changes[$i]['followed_by'] = $matches[5][$i];
+            $this->changes[$i]['preceded_by'] = mb_convert_encoding($matches[1][$i], 'UTF-8', 'UTF-8');
+            $this->changes[$i]['followed_by'] = mb_convert_encoding($matches[5][$i], 'UTF-8', 'UTF-8');
 
             /*
              * Include both the original and the new text, which is to say that we apply the
@@ -654,7 +654,7 @@ class Bill2
                 $this->changes[$i]['new'] = $this->changes[$i]['preceded_by'] . $this->changes[$i]['followed_by'];
             }
 
-            $this->changes[$i]['diff'] = $matches[0][$i];
+            $this->changes[$i]['diff'] = mb_convert_encoding($matches[0][$i], 'UTF-8', 'UTF-8');
 
             /*
              * Indicate at what point we are in the text, which is useful as only an approximate
