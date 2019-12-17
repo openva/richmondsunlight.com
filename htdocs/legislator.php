@@ -358,15 +358,28 @@ else
 $sql = 'SELECT COUNT(*) AS passed,
 		(
 			SELECT COUNT(*)
-			FROM bills LEFT JOIN sessions ON bills.session_id = sessions.id
+			FROM bills
+                LEFT JOIN sessions
+                    ON bills.session_id = sessions.id
 			WHERE sessions.year = ' . $batting_year . '
-			AND chief_patron_id = ' . $legislator['id'] . '
+            AND chief_patron_id = ' . $legislator['id'] . '
+            AND
+                (bills.number LIKE "hb%"
+                OR
+                bills.number LIKE "sb%")
 		) AS total
 		FROM bills
-		LEFT JOIN representatives ON bills.chief_patron_id = representatives.id
-		LEFT JOIN sessions ON bills.session_id = sessions.id
-		WHERE sessions.year = ' . $batting_year . ' AND chief_patron_id = ' . $legislator['id'] . '
-		AND (bills.outcome = "passed")';
+            LEFT JOIN representatives
+                ON bills.chief_patron_id = representatives.id
+            LEFT JOIN sessions
+                ON bills.session_id = sessions.id
+		WHERE sessions.year = ' . $batting_year . '
+        AND chief_patron_id = ' . $legislator['id'] . '
+        AND (bills.outcome = "passed")
+        AND
+            (bills.number LIKE "hb%"
+            OR
+            bills.number LIKE "sb%")';
 $result = mysqli_query($GLOBALS['db'], $sql);
 $legislator['batting'] = mysqli_fetch_array($result);
 if ($legislator['batting']['total'] == 0)
