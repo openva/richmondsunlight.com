@@ -26,7 +26,7 @@ $page_title = 'Photosynthesis » Edit Portfolio';
 $site_section = 'photosynthesis';
 
 # ADDITIONAL HTML HEADERS
-$html_head = '<link rel="stylesheet" href="/css/photosynthesis.css" type="text/css" />';
+$html_head = '<link rel="stylesheet" href="/css/photosynthesis.css" />';
 
 # INITIALIZE SESSION
 session_start();
