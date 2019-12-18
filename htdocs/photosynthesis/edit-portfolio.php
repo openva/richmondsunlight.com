@@ -22,7 +22,7 @@ $database = new Database;
 $database->connect_mysqli();
 
 # PAGE METADATA
-$page_title = 'Photosynthesis &raquo; Edit Portfolio';
+$page_title = 'Photosynthesis » Edit Portfolio';
 $site_section = 'photosynthesis';
 
 # ADDITIONAL HTML HEADERS

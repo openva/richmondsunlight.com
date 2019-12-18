@@ -28,7 +28,7 @@
     $database->connect_mysqli();
 
     # PAGE METADATA
-    $page_title = 'Photosynthesis &raquo; Preferences';
+    $page_title = 'Photosynthesis » Preferences';
     $site_section = 'photosynthesis';
 
     # ADDITIONAL HTML HEADERS
