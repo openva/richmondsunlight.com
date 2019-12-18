@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Save the current directory, to return to at the end
 CWD=$(pwd)
@@ -44,3 +45,5 @@ cd ../../
 
 # Return to the original directory
 cd "$CWD" || exit
+
+echo "Site available at http://localhost:5000/"

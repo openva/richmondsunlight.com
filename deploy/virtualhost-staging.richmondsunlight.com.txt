@@ -2,6 +2,7 @@
   Protocols h2 http/1.1
   ServerName staging.richmondsunlight.com
   DocumentRoot /var/www/staging.richmondsunlight.com/htdocs
+  RewriteMap tolower int:tolower
   ErrorLog ${APACHE_LOG_DIR}/staging.richmondsunlight.com.error.log
   CustomLog ${APACHE_LOG_DIR}/staging.richmondsunlight.com.access.log combined
 </VirtualHost>

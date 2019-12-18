@@ -352,19 +352,26 @@ div#public-portfolio .bill {
 /* Subsection Tabs
 --------------------*/
 .tabs > ul {
-	list-style-type: none;
+	list-style-type: none !important;
 	margin: 0 1em 0 0;
 	padding: 0;
 	clear: both;
-	border-bottom: 1px solid #ccc;
+	border: 0;
 	height: 20px;
+	background-color: transparent;
 }
+	.tabs > ul.ui-widget.ui-widget-content {
+		border: 0;
+	}
 	.tabs > ul li {
 		float: left;
 		margin-right: 5px;
 		text-align: center;
 		font-weight: bold;
 	}
+		.tabs > ul li.ui-state-active {
+			background-color: #dccbaf;
+		}
 		.tabs > ul li a {
 			display: block;
 			height: 20px;
@@ -753,42 +760,42 @@ meter {
   box-shadow: 0 2px 3px rgba(0,0,0,0.2) inset;
   border-radius: 3px;
 }
-/* webkit */
-meter::-webkit-meter-bar {
-  background: #eee;
-  box-shadow: 0 2px 3px rgba(0,0,0,0.2) inset;
-  border-radius: 3px;
-}
-meter::-webkit-meter-optimum-value,
-meter::-webkit-meter-suboptimum-value,
-meter::-webkit-meter-even-less-good-value {
-  border-radius: 3px;
-}
-meter::-webkit-meter-optimum-value {
-  background: #86CC00;
-  background:green;
-}
-meter::-webkit-meter-suboptimum-value {
-  background: #FFDB1A;
-  background:yellow;
-}
-meter::-webkit-meter-even-less-good-value  {
-  background: #CC4600;
-  background:orange;
-}
-/* firefox */
-meter::-moz-meter-bar {
-  border-radius: 3px;
-}
-meter:-moz-meter-optimum::-moz-meter-bar {
-  background: #86CC00;
-  background:green;
-}
-meter:-moz-meter-sub-optimum::-moz-meter-bar {
-  background: #FFDB1A;
-  background:yellow;
-}
-meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
-  background: #CC4600;
-  background:orange;
-}
+	/* webkit */
+	meter::-webkit-meter-bar {
+	background: #eee;
+	box-shadow: 0 2px 3px rgba(0,0,0,0.2) inset;
+	border-radius: 3px;
+	}
+	meter::-webkit-meter-optimum-value,
+	meter::-webkit-meter-suboptimum-value,
+	meter::-webkit-meter-even-less-good-value {
+	border-radius: 3px;
+	}
+	meter::-webkit-meter-optimum-value {
+	background: #86CC00;
+	background:green;
+	}
+	meter::-webkit-meter-suboptimum-value {
+	background: #FFDB1A;
+	background:yellow;
+	}
+	meter::-webkit-meter-even-less-good-value  {
+	background: #CC4600;
+	background:orange;
+	}
+	/* firefox */
+	meter::-moz-meter-bar {
+	border-radius: 3px;
+	}
+	meter:-moz-meter-optimum::-moz-meter-bar {
+	background: #86CC00;
+	background:green;
+	}
+	meter:-moz-meter-sub-optimum::-moz-meter-bar {
+	background: #FFDB1A;
+	background:yellow;
+	}
+	meter:-moz-meter-sub-sub-optimum::-moz-meter-bar {
+	background: #CC4600;
+	background:orange;
+	}

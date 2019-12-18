@@ -93,11 +93,11 @@ else
     # Set the page title to the user's name.
     if (!empty($portfolio['organization']))
     {
-        $page_title .= ' &raquo; ' . $portfolio['organization'];
+        $page_title .= ' » ' . $portfolio['organization'];
     }
     else
     {
-        $page_title .= ' &raquo; ' . $portfolio['user_name'];
+        $page_title .= ' » ' . $portfolio['user_name'];
     }
     $page_title .= '’s Portfolio';
 
@@ -281,7 +281,7 @@ else
                 }
             }
             $page_body .= ' <a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number'])
-                . '/#comments">&raquo;</a></p>
+                . '/#comments">»</a></p>
 			</div>';
         }
 

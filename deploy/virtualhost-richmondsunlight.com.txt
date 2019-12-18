@@ -3,6 +3,7 @@
   ServerName richmondsunlight.com
   ServerAlias www.richmondsunlight.com
   DocumentRoot /var/www/richmondsunlight.com/htdocs
+  RewriteMap tolower int:tolower
   ErrorLog ${APACHE_LOG_DIR}/richmondsunlight.com.error.log
   CustomLog ${APACHE_LOG_DIR}/richmondsunlight.com.access.log combined
 </VirtualHost>

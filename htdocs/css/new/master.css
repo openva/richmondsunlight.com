@@ -425,52 +425,6 @@ div#bio {
 			height: 70px;
 		}
 
-/* The Blue Ridge Internetworks button */
-img#bri {
-	background-color: white;
-	padding: 3px;
-	border: 1px solid black;
-	width: 100px;
-	height: 35px;
-}
-
-/* The floating promo box for live video streams. */
-div#watch {
-	z-index: 100;
-	position: absolute;
-	top: 10px;
-	right: 10px;
-	margin: 0 auto;
-	padding: .5em;
-	width: 200px;
-	border: 5px solid #790806;
-	background-color: #f4eee5;
-	color: #000;
-	cursor: move;
-	font-family: Verdana, Arial, sans-serif;
-	font-size: small;
-}
-	div#watch h1 {
-		font-size: 1.2em;
-		line-height: 1.3em;
-	}
-	div#watch ul {
-		margin-top: 1em;
-	}
-		div#watch ul li + li {
-			margin-top: .5em;
-		}
-	div#watch div#close {
-		text-align: right;
-		margin: .75em -.5em -.5em 0;
-		font-size: .8em;
-	}
-		div#watch div#close a {
-			color: #000;
-			text-decoration: none;
-			font-weight: normal;
-		}
-
 /* The registration form */
 #registration fieldset {
 	background-color: #f4eee5;
@@ -498,22 +452,6 @@ a.balloon div {
 	height: 25em;
 	overflow: scroll;
 }
-
-/* The blog on the homepage */
-#body-home #blog h2 {
-	margin-bottom: 1em;
-}
-#body-home #blog div.date {
-	margin: 0;
-	padding: 0;
-}
-#body-home div#blog h3 {
-	margin: 0;
-	padding: 0;
-}
-	#body-home div#blog div.entry + div.entry {
-		margin-top: 2em;
-	}
 
 /* The search page. */
 #body-search .results h2 {
@@ -636,7 +574,7 @@ a.balloon div {
 	#sidebar {
 		display: none;
 	}
-	#date-status, p.quote, #bri, #watch, #bill-progress, #facebook {
+	#date, #status, p.quote, #bill-progress {
 		display: none;
 	}
 
