@@ -32,7 +32,7 @@ while ($legislator = mysqli_fetch_assoc($result))
 
     $legislator = array_map('stripslashes', $legislator);
     $legislators[$legislator{'chamber'}][substr($legislator{'name'}, 0, 1)][] = '<li><a href="/legislator/' . $legislator['shortname']
-        . ' /">' . $legislator['name_formatted'] . '</a></li>';
+        . '/">' . $legislator['name_formatted'] . '</a></li>';
 
 }
 
