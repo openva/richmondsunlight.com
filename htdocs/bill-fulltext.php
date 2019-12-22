@@ -62,6 +62,39 @@ else
 }
 
 /*
+ * Indicate whether this bill amends existing laws. (This affects styling.)
+ */
+if ($bill['type'] == 'bill'
+    &&
+        (
+        mb_stripos($bill['full_text'], 'A BILL to amend and reenact') !== FALSE
+        ||
+        mb_stripos($bill['full_text'], 'Proposing an amendment') !== FALSE
+        )
+    )
+{
+    $bill['amends'] = TRUE;
+}
+else
+{
+    $bill['amends'] = FALSE;
+}
+
+/*
+ * If this bill isn't amending existing law, but instead is adding a new one, we don't want to
+ * highlight every line of text, because that's annoying.
+ */
+if ($bill['amends'] == FALSE)
+{
+    $html_head = '
+    <style>
+        div.full-text ins {
+            background-color: transparent;
+        }
+    </style>';
+}
+
+/*
  * Retrieve from Virginia Decoded all defined terms that apply to the text that this bill
  * proposes to amend (if, indeed, it is amending the Code).
  */
@@ -69,7 +102,7 @@ $bill_text = new Bill2;
 $bill_text->bill_id = $bill['id'];
 if ($bill_text->get_terms() === TRUE)
 {
-    $html_head = $bill_text->javascript;
+    $html_head .= $bill_text->javascript;
     $term_pcres = $bill_text->term_pcres;
 }
 
@@ -79,64 +112,71 @@ $sql = 'SELECT number, date_introduced, text
 		WHERE bill_id = ' . $bill['id'] . ' AND bills_full_text.text IS NOT NULL
 		ORDER BY date_introduced DESC';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
+if (mysqli_num_rows($result) == 0)
 {
-    while ($version = mysqli_fetch_array($result, MYSQL_ASSOC))
+    die('Bill text not found.');
+}
+
+while ($version = mysqli_fetch_array($result, MYSQL_ASSOC))
+{
+    
+    $version = array_map('stripslashes', $version);
+
+    # The HTML for amended versions of bills is beastly. Clean it up.
+    $version['text'] = str_replace('<center><b><br><center><b>', '<center><b>', $version['text']);
+
+    # Replace every instance of a URL for a section of the state code with the URL
+    # for Virginia Decoded.
+    $version['text'] = preg_replace(
+        '/"http:\/\/leg1.state.va.us\/cgi-bin\/legp504\.exe\?000\+cod\+([0-9A-Z\.:-]+)"/',
+        '"https://vacode.org/$1/" class="code"',
+        $version['text']
+    );
+
+    # Convert the <i> tags to <em> tags in the head of the bill, so that we can pretty
+    # up the bill text without affecting the header text.  Those tags should be found
+    # within the first 20 lines of the bill's text.
+    $version['text'] = explode("\r", $version['text']);
+    for ($i=0; $i<19; $i++)
     {
-        $version = array_map('stripslashes', $version);
-
-        # The HTML for amended versions of bills is beastly. Clean it up.
-        $version['text'] = str_replace('<center><b><br><center><b>', '<center><b>', $version['text']);
-
-        # Replace every instance of a URL for a section of the state code with the URL
-        # for Virginia Decoded.
-        $version['text'] = preg_replace(
-            '/"http:\/\/leg1.state.va.us\/cgi-bin\/legp504\.exe\?000\+cod\+([0-9A-Z\.:-]+)"/',
-            '"https://vacode.org/$1/" class="code"',
-            $version['text']
-        );
-
-        # Convert the <i> tags to <em> tags in the head of the bill, so that we can pretty
-        # up the bill text without affecting the header text.  Those tags should be found
-        # within the first 20 lines of the bill's text.
-        $version['text'] = explode("\r", $version['text']);
-        for ($i=0; $i<19; $i++)
+        $version['text'][$i] = str_replace('<i>', '<em>', $version['text'][$i]);
+        $version['text'][$i] = str_replace('</i>', '</em>', $version['text'][$i]);
+        if ($i < count($version['text']))
         {
-            $version['text'][$i] = str_replace('<i>', '<em>', $version['text'][$i]);
-            $version['text'][$i] = str_replace('</i>', '</em>', $version['text'][$i]);
-            if ($i < count($version['text']))
-            {
-                break;
-            }
+            break;
         }
-
-        # All subsequent <i> tags should become <ins> tags, and <s> tags should become
-        # <del> tags.
-        if ($bill['type'] == 'bill')
-        {
-            for ($i=20; $i<count($version['text']); $i++)
-            {
-                $version['text'][$i] = str_replace('<i>', '<ins>', $version['text'][$i]);
-                $version['text'][$i] = str_replace('</i>', '</ins>', $version['text'][$i]);
-                $version['text'][$i] = str_replace('<s>', '<del>', $version['text'][$i]);
-                $version['text'][$i] = str_replace('</s>', '</del>', $version['text'][$i]);
-            }
-        }
-        $version['text'] = implode("\r", $version['text']);
-
-        # If we have a list of terms (in regular expression form), then wrap every use of
-        # that term with <span class="dictionary"></span>.
-        if (is_array($term_pcres))
-        {
-            $version['text'] = preg_replace_callback($term_pcres, 'replace_terms', $version['text']);
-        }
-
-        # Every set of centered hyphens should become an HR.
-        $version['text'] = str_replace('<center>----------</center>', '<hr>', $version['text']);
-
-        # Save all of this to an array.
-        $versions[] = $version;
     }
+
+    /*
+     * All subsequent <i> tags should become <ins> tags, and <s> tags should become
+     * <del> tags, but only bother if this is a bill that amends existing laws. (Otherwise
+     * the whole bill gets highlighted, because it's ALL being inserted.)
+     */
+    if ($bill['amends'] == TRUE)
+    {
+        for ($i=20; $i<count($version['text']); $i++)
+        {
+            $version['text'][$i] = str_replace('<i>', '<ins>', $version['text'][$i]);
+            $version['text'][$i] = str_replace('</i>', '</ins>', $version['text'][$i]);
+            $version['text'][$i] = str_replace('<s>', '<del>', $version['text'][$i]);
+            $version['text'][$i] = str_replace('</s>', '</del>', $version['text'][$i]);
+        }
+    }
+    $version['text'] = implode("\r", $version['text']);
+
+    # If we have a list of terms (in regular expression form), then wrap every use of
+    # that term with <span class="dictionary"></span>.
+    if (is_array($term_pcres))
+    {
+        $version['text'] = preg_replace_callback($term_pcres, 'replace_terms', $version['text']);
+    }
+
+    # Every set of centered hyphens should become an HR.
+    $version['text'] = str_replace('<center>----------</center>', '<hr>', $version['text']);
+
+    # Save all of this to an array.
+    $versions[] = $version;
+
 }
 
 # PAGE METADATA
@@ -155,7 +195,7 @@ $page_sidebar = '
 		amending existing law, proposing the addition or removal of words from laws that are
 		already on the books, but sometimes it’s proposing an entirely new law.</p>';
 
-if ($bill['type'] != 'resolution')
+if ($bill['amends'] == TRUE)
 {
     $page_sidebar .= '
 		<p>Words that are <span style="background-color: #98fb98;">highlighted in green</span> are
@@ -202,7 +242,7 @@ $page_body .= '
 		border: 0;
     	height: 1px;
     	background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
-	}
+    }
 </style>';
 
 # OUTPUT THE PAGE
