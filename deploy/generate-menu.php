@@ -74,7 +74,18 @@ echo '
         <li>A–Z »
             <ul class="legislators">';
 
-echo implode("\t", $legislators['senate']);
+
+            foreach ($legislators['senate'] as $letter => $by_letter)
+            {
+                echo '<li>
+                    ' . $letter . ' »
+                    <ul class="legislators">';
+                foreach ($by_letter as $legislator)
+                {
+                    echo $legislator;
+                }
+                echo '</ul></li>';
+            }
 
 echo '
             </ul>
