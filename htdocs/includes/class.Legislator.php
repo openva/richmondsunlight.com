@@ -2,8 +2,43 @@
 
 class Legislator
 {
+
+    /*
+     * List all legislators, either current or all legislators ever
+     */
+    public function list($subset)
+    {
+
+        $database = new Database;
+        $database->connect_mysqli();
+
+        $sql = 'SELECT id, lis_id, shortname, name, name_formatted
+                FROM representatives';
+        if ($subset == 'current')
+        {
+            $sql .= ' WHERE date_ended IS NULL OR date_ended <= now()';
+        }
+
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        if (mysqli_num_rows($result) == 0)
+        {
+            return FALSE;
+        }
+
+        $legislators = array();
+        while ($legislator = mysqli_fetch_array($result))
+        {
+            $legislator['url'] = '/legislator/' . $legislator['shortname'];
+            $legislators[] = $legislator;
+        }
+
+        return $legislators;
+
+    } // end method "list"
+
     public function getid($shortname)
     {
+
         if (!isset($shortname) || empty($shortname))
         {
             return FALSE;
@@ -22,10 +57,12 @@ class Legislator
         }
         $legislator = mysqli_fetch_array($result);
         return $legislator['id'];
-    } // end function "getid"
+
+    } // end method "getid"
 
     public function info($id)
     {
+
         if (!isset($id))
         {
             return FALSE;
@@ -181,5 +218,7 @@ class Legislator
         }
 
         return $legislator;
-    } // end class "info"
-} // end class "legislator"
+
+    } // end method "info"
+
+}
