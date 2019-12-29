@@ -48,27 +48,31 @@ class Committee
     }
 
     /**
-     * Return the list of members for a single committee.
+     * Return the list of members for a single committee, or for all committees.
      */
     public function members()
     {
-        if (empty($this->id))
-        {
-            return FALSE;
-        }
 
         $db = new Database;
         $db->connect_mysqli();
 
         $sql = 'SELECT representatives.shortname, representatives.name_formatted AS name,
 				representatives.name AS name_simple, committee_members.position,
-				representatives.email
-				FROM representatives
+				representatives.email';
+        if (isset($this->id))
+        {
+            $sql .= ', committee_members.committee_id';
+        }
+        $sql .= ' FROM representatives
 				LEFT JOIN
 				committee_members
 					ON representatives.id=committee_members.representative_id
-				WHERE committee_members.committee_id=' . $this->id . '
-				AND (committee_members.date_ended > now() OR committee_members.date_ended IS NULL)
+                WHERE ';
+        if (isset($this->id))
+        {
+            $sql .= 'committee_members.committee_id=' . $this->id . ' AND';
+        }      
+        $sql .= '(committee_members.date_ended > now() OR committee_members.date_ended IS NULL)
 				AND (representatives.date_ended >= now() OR representatives.date_ended IS NULL)
 				ORDER BY committee_members.position DESC, representatives.name ASC';
         $result = mysqli_query($GLOBALS['db'], $sql);
