@@ -9,6 +9,9 @@ php_value include_path ".:includes/"
 #php_value session.save_handler redis
 #php_value session.save_path tcp://127.0.0.1:6379
 
+# For Matomo
+php_value always_populate_raw_post_data -1
+
 # Instruct browsers to cache and proxies not to cache, timing out cookies after a year. Affects only
 # PHP.
 #php_value session.cache_limiter private
