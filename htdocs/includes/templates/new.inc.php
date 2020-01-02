@@ -664,6 +664,7 @@
 						});
 					});
 				});
+				$( "#portfolio-list" ).append('<p><a href="/photosynthesis/">View your portfolio »</a></p>');
 			}
 		});
 
