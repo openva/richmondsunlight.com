@@ -88,7 +88,6 @@
 ?>
 
 %html_head%
-
 <!-- Matomo -->
 <script type="text/javascript">
   var _paq = window._paq || [];
@@ -653,11 +652,15 @@
 
 				// List all bills in all portfolios
 				$.each( portfolios, function( index, portfolio_hash ) {
-				url = '<?php echo API_URL; ?>1.1/photosynthesis/' + portfolio_hash + '.json';
+					url = '<?php echo API_URL; ?>1.1/photosynthesis/' + portfolio_hash + '.json';
 					$.getJSON(url, function(data) {
 						$.each( data.bills, function( index, bill ) {
+							
+							var d = new Date(bill.date);
+							var date = (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear();
+
 							$( "#portfolio-list" ).append( '<div class="bill"><a href="' + bill.url + '">'
-								+ bill.number + '</a>: ' + bill.catch_line + '</div>');
+								+ bill.number + '</a>: ' + bill.catch_line + ' <span class="last-updated">Updated&nbsp;' + date + '</span></div>');
 						});
 					});
 				});
