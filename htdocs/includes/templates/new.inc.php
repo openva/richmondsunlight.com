@@ -88,6 +88,21 @@
 ?>
 
 %html_head%
+<!-- Matomo -->
+<script type="text/javascript">
+  var _paq = window._paq || [];
+  /* tracker methods like "setCustomDimension" should be called before "trackPageView" */
+  _paq.push(['trackPageView']);
+  _paq.push(['enableLinkTracking']);
+  (function() {
+    var u="//www.richmondsunlight.com/matomo/";
+    _paq.push(['setTrackerUrl', u+'matomo.php']);
+    _paq.push(['setSiteId', '1']);
+    var d=document, g=d.createElement('script'), s=d.getElementsByTagName('script')[0];
+    g.type='text/javascript'; g.async=true; g.defer=true; g.src=u+'matomo.js'; s.parentNode.insertBefore(g,s);
+  })();
+</script>
+<!-- End Matomo Code -->
 </head>
 <body%body_tag%>
 	<div id="page-wrap">
@@ -637,14 +652,19 @@
 
 				// List all bills in all portfolios
 				$.each( portfolios, function( index, portfolio_hash ) {
-				url = '<?php echo API_URL; ?>1.1/photosynthesis/' + portfolio_hash + '.json';
+					url = '<?php echo API_URL; ?>1.1/photosynthesis/' + portfolio_hash + '.json';
 					$.getJSON(url, function(data) {
 						$.each( data.bills, function( index, bill ) {
+							
+							var d = new Date(bill.date);
+							var date = (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear();
+
 							$( "#portfolio-list" ).append( '<div class="bill"><a href="' + bill.url + '">'
-								+ bill.number + '</a>: ' + bill.catch_line + '</div>');
+								+ bill.number + '</a>: ' + bill.catch_line + ' <span class="last-updated">Updated&nbsp;' + date + '</span></div>');
 						});
 					});
 				});
+				$( "#portfolio-list" ).append('<p><a href="/photosynthesis/">View your portfolio »</a></p>');
 			}
 		});
 

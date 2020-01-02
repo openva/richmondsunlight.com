@@ -32,7 +32,7 @@ while ($legislator = mysqli_fetch_assoc($result))
 
     $legislator = array_map('stripslashes', $legislator);
     $legislators[$legislator{'chamber'}][substr($legislator{'name'}, 0, 1)][] = '<li><a href="/legislator/' . $legislator['shortname']
-        . ' /">' . $legislator['name_formatted'] . '</a></li>';
+        . '/">' . $legislator['name_formatted'] . '</a></li>';
 
 }
 
@@ -54,27 +54,30 @@ echo '
 
 foreach ($legislators['house'] as $letter => $by_letter)
 {
-    echo '<li>
-        ' . $letter . ' »
+    echo '<li>' . $letter . ' »
         <ul class="legislators">';
     foreach ($by_letter as $legislator)
     {
-        echo $legislator;
+        echo '<li>' . $legislator . '</li>';
     }
     echo '</ul></li>';
 }
 
 echo '
-            </ul>
-        </li>
-        </ul>
     </li>
     <li>Senate »
-        <ul class="alphabetic">
-        <li>A–Z »
-            <ul class="legislators">';
+        <ul class="alphabetic">';
 
-echo implode("\t", $legislators['senate']);
+            foreach ($legislators['senate'] as $letter => $by_letter)
+            {
+                echo '<li>' . $letter . ' »
+                    <ul class="legislators">';
+                foreach ($by_letter as $legislator)
+                {
+                    echo '<li>' . $legislator . '</li>';
+                }
+                echo '</ul></li>';
+            }
 
 echo '
             </ul>
