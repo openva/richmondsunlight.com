@@ -25,7 +25,7 @@ include_once '../includes/photosynthesis.inc.php';
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_mysqli();
+$db = $database->connect_mysqli();
 
 # Make sure we have all of the appropriate data.
 if (!isset($_POST['user_hash']) || !isset($_POST['id']) || !isset($_POST['value']))
@@ -34,8 +34,8 @@ if (!isset($_POST['user_hash']) || !isset($_POST['id']) || !isset($_POST['value'
 }
 
 # Strip out all tags other than the following.
-$notes = trim(strip_tags($_POST['value'], '<a><em><strong><i><b><s><blockquote><embed><ol><ul><li>'));
-$hash = mysqli_real_escape_string($_POST['user_hash']);
+$notes = trim(strip_tags($_POST['value'], '<a><em><strong><i><b><s><blockquote><ol><ul><li>'));
+$hash = mysqli_real_escape_string($GLOBALS['db'], $_POST['user_hash']);
 
 # Update the database.
 $sql = 'UPDATE dashboard_bills
