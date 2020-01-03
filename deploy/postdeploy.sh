@@ -17,6 +17,8 @@ fi
 # Set permissions properly, since appspec.yml gets this wrong.
 chown -R ubuntu:ubuntu "$SITE_PATH"
 chmod -R g+w "$SITE_PATH"
+chown -R www-data:www-data "$SITE_PATH"/htdocs/matomo
+chmod -R 777 "$SITE_PATH"/htdocs/matomo/tmp/
 
 # Set up Apache, if need be.
 SITE_SET_UP="$(sudo apache2ctl -S 2>&1 |grep -c " $SITE_URL ")"
