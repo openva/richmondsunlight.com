@@ -67,10 +67,7 @@
         $page_body .= '</ul>';
     }
 
-    # OUTPUT THE PAGE
-    /*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
-        '&site_section='.urlencode($site_section));*/
-
+# OUTPUT THE PAGE
 $page = new Page;
 $page->page_title = $page_title;
 $page->page_body = $page_body;
