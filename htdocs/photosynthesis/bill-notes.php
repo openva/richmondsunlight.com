@@ -94,7 +94,7 @@ if (isset($_POST['submit']))
             $result = mysqli_query($GLOBALS['db'], $sql);
             $bill = mysqli_fetch_array($result);
             $mc = new Memcached();
-            $mc->addServer("127.0.0.1", 11211);
+            $mc->addServer(MEMCACHED_SERVER, 11211);
             $comments = $mc->delete('comments-' . $bill['id']);
         }
 
