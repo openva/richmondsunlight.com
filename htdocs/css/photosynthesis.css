@@ -99,6 +99,11 @@ div.portfolio {
 				vertical-align: top;
 				border-right: 1px solid #999;
 			}
+				div.portfolio .comments textarea {
+					width: 40em !important;
+				}
+				div.portfolio .comments button[type="submit"] {
+					margin-left: 1em;
 				}
 			div.portfolio td.options {
 				text-align: center;
