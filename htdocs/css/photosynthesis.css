@@ -73,40 +73,42 @@ div.portfolio {
 			background-color: #ccc;
 			font-weight: normal;
 		}
-			div.portfolio table thead tr th#bill, div.portfolio table thead tr th#catch-line,
-			div.portfolio table thead tr th#last-action {
+			div.portfolio th#bill, div.portfolio th#catch-line,
+			div.portfolio th#last-action {
 				border-right: 1px solid #666;
 			}
-			div.portfolio table thead tr th#catch-line {
+			div.portfolio th#catch-line {
 				width: 400px;
 			}
-		div.portfolio table tr.notes td {
+		div.portfolio tr.notes td {
 			font-family: Verdana, 'Lucida Sans', Helvetica, Arial, sans-serif;
 			font-size: .85em;
 			background-color: #eef;
 		}
-		div.portfolio table tr {
+		div.portfolio tr {
 			border-bottom: 1px solid #ccc;
 		}
-			div.portfolio table tr.changed {
+			div.portfolio tr.changed {
 				background-color: #ffa;
 			}
-			div.portfolio table tbody tr:hover {
+			div.portfolio tbody tr:hover {
 				background-color: #fff;
 			}
-			div.portfolio table tr td {
+			div.portfolio tr td {
 				padding: 0 3px;
 				vertical-align: top;
 				border-right: 1px solid #999;
 			}
-				div.portfolio table tr td textarea {
-					width: 100%;
-					height: 3em;
+				div.portfolio .comments textarea {
+					width: 40em !important;
 				}
-			div.portfolio table tr td.options {
+				div.portfolio .comments button[type="submit"] {
+					margin-left: 1em;
+				}
+			div.portfolio td.options {
 				text-align: center;
 			}
-				div.portfolio table tr td.options a {
+				div.portfolio td.options a {
 					color: #000;
 					text-decoration: none;
 				}
@@ -116,11 +118,11 @@ div.portfolio {
 			text-align: center;
 			margin: 2em 0 1em 0;
 		}
-div#create-portfolio {
+#create-portfolio {
 	float: right;
 	clear: both;
 }
-div#create-bill {
+#create-bill {
 	float: right;
 	clear: both;
 }
