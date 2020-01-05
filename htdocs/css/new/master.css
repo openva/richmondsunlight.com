@@ -380,6 +380,10 @@ body#body-bills div#news h3 {
 
 #comments textarea {
 	width: 95%;
+	font-size: 1em;
+	font-family: Verdana, Geneva, Tahoma, sans-serif;
+	line-height: 1.2em;
+	color: #333;
 }
 
 /* Tab styles, expanding on and overriding default tab styles. */
