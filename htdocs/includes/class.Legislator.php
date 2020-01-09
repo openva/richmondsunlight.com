@@ -6,7 +6,7 @@ class Legislator
     /*
      * List all legislators, either current or all legislators ever
      */
-    public function list($subset)
+    public function get_list($subset)
     {
 
         $database = new Database;
@@ -34,7 +34,7 @@ class Legislator
 
         return $legislators;
 
-    } // end method "list"
+    } // end method "get_list"
 
     public function getid($shortname)
     {
