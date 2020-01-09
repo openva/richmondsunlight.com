@@ -380,7 +380,7 @@ body#body-bills div#news h3 {
 
 #comments textarea {
 	width: 95%;
-	font-size: 1em;
+	font-size: .95em;
 	font-family: Verdana, Geneva, Tahoma, sans-serif;
 	line-height: 1.2em;
 	color: #333;
