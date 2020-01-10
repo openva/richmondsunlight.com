@@ -9,6 +9,7 @@
 
 require '../htdocs/includes/settings.inc.php';
 require '../htdocs/includes/class.Database.php';
+require '../htdocs/includes/vendor/autoload.php';
 
 $database = new Database;
 $db = $database->connect_mysqli();
@@ -17,7 +18,7 @@ $db = $database->connect_mysqli();
  * Get a list of all legislators.
  */
 $legislator = new Legislator;
-$legislator_list = $legislator->list('current');
+$legislator_list = $legislator->get_list('current');
 
 $legislators = array('house' => array(), 'senate' => array());
 
