@@ -16,10 +16,12 @@ class Legislator
                 FROM representatives';
         if ($subset == 'current')
         {
-            $sql .= ' WHERE date_ended IS NULL OR date_ended <= now()';
+            $sql .= ' WHERE date_ended IS NULL OR date_ended >= now()';
         }
+        $sql .= ' ORDER BY name ASC';
 
         $result = mysqli_query($GLOBALS['db'], $sql);
+
         if (mysqli_num_rows($result) == 0)
         {
             return FALSE;
