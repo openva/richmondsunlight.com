@@ -241,6 +241,35 @@ if (mysqli_num_rows($result) > 0)
     $page_body .= '</p>';
 }
 
+# Show top bill-view IPs in the past day
+$sql = 'SELECT ip, COUNT(*) AS number
+		FROM bills_views
+		WHERE DATE_SUB(CURDATE(), INTERVAL 1 HOUR) <= date
+		GROUP BY ip
+		ORDER BY number DESC
+		LIMIT 5';
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0)
+{
+    $page_body .= '
+		<h2>IPs with the Most Bill Views</h2>
+		<p>These are the IPs that have viewed the largest number of bills in the past hour</p>
+		<table class="sortable" id="popular-bills">
+			<thead><tr><th>IP</th><th>Views</th>
+			<tbody>';
+    while ($viewer = mysqli_fetch_array($result))
+    {
+        $page_body .= '
+			<tr>
+				<td>'.$viewer['ip'].'</td>
+				<td>'.$viewer['number'].'</td>
+			</tr>';
+    }
+    $page_body .= '
+			</tbody>
+		</table>';
+}
+
 # Select the most popular bills of the past X days.
 if (IN_SESSION == 'Y')
 {

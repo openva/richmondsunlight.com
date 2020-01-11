@@ -9,7 +9,7 @@ class Committee
     public function info()
     {
 
-        if ( ( empty($this->shortname) || empty($this->chamber) ) && empty($this->id) )
+        if ( ( empty($this->name) || empty($this->chamber) ) && ( empty($this->shortname) || empty($this->chamber) ) && empty($this->id) )
         {
             return FALSE;
         }
@@ -27,9 +27,14 @@ class Committee
         {
             $sql .= 'id = ' . $this->id;
         }
-        else
+        elseif (isset($this->shortname))
         {
             $sql .= 'shortname="' . $this->shortname . '"
+                    AND chamber="' . $this->chamber . '"';
+        }
+        elseif (isset($this->name))
+        {
+            $sql .= 'name="' . $this->name . '"
                     AND chamber="' . $this->chamber . '"';
         }
 
@@ -59,17 +64,14 @@ class Committee
         $db = new Database;
         $db->connect_mysqli();
 
-        $sql = 'SELECT representatives.shortname, representatives.name_formatted AS name,
+        $sql = 'SELECT representatives.id, representatives.shortname,
+                representatives.name_formatted AS name,
 				representatives.name AS name_simple, committee_members.position,
-				representatives.email';
-        if (isset($this->id))
-        {
-            $sql .= ', committee_members.committee_id';
-        }
-        $sql .= ' FROM representatives
+				representatives.email, committee_members.committee_id
+                FROM committee_members
 				LEFT JOIN
-				committee_members
-					ON representatives.id=committee_members.representative_id
+				representatives
+					ON committee_members.representative_id=representatives.id
                 WHERE ';
         if (isset($this->id))
         {
@@ -86,6 +88,7 @@ class Committee
         }
 
         $this->members = array();
+
         while ($member = mysqli_fetch_assoc($result))
         {
             $member['name_simple'] = pivot($member['name_simple']);
