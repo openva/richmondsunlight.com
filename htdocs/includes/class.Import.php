@@ -136,6 +136,8 @@ class Import
 			return FALSE;
 		}
 
+		$log = new Log;
+
 		$bills = get_content($url);
 
 		if (!$bills || empty($bills))
@@ -290,7 +292,9 @@ class Import
 	{
 
         $database = new Database;
-        $database->connect_mysqli();
+        $db = $database->connect();
+
+		$log = new Log;
 
 		$sql = 'SELECT id, lis_id, chamber
 				FROM committees
@@ -299,7 +303,7 @@ class Import
 		$result = $db->query($sql);
 		if ( ($result === FALSE) || ($result->rowCount() == 0) )
 		{
-			$log->put('No committees were found in the database, which seems bad.', 9);
+			$log->put('No committees were found in the database, which seems bad.', 8);
 			return FALSE;
 		}
 		$committees = array();
@@ -321,7 +325,9 @@ class Import
 	{
 
         $database = new Database;
-        $database->connect_mysqli();
+        $db = $database->connect();
+
+		$log = new Log;
 
 		$sql = 'SELECT id, lis_id, chamber
 				FROM legislators
@@ -329,7 +335,7 @@ class Import
 		$result = $db->query($sql);
 		if ( ($result === FALSE) || ($result->rowCount() == 0) )
 		{
-			$log->put('No legislators were found in the database, which seems bad.', 9);
+			$log->put('No legislators were found in the database, which seems bad.', 8);
 			return FALSE;
 		}
 		$legislators = array();
@@ -432,6 +438,8 @@ class Import
 
 		$url = 'ftp://' . LIS_FTP_USERNAME . ':' . LIS_FTP_PASSWORD . '@legis.state.va.us/fromdlas/csv'
 			. $dlas_session_id . '/CommitteeMembers.csv';$bills = get_content($url);
+
+		$log = new Log;
 
 		$members = get_content($url);
 
