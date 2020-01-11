@@ -24,8 +24,12 @@
         "components/jqueryui": "~1.8",
         "simplepie/simplepie": "1.5",
         "romainneutron/sphinx-search-api-php-client": "2.0.8.1",
+        "tijsverkoyen/akismet": "~1"
     },
     "autoload": {
+        "psr-4": {
+            "TijsVerkoyen\\": "htdocs/includes/vendor/tijsverkoyen/"
+        },
         "classmap": [
             "htdocs/includes/vendor/"
         ],
