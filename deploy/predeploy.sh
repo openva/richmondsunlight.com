@@ -55,9 +55,8 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
         rm mod-pagespeed-*.deb
     fi
 
-    # Install Certbot
-    dpkg -s mod-pagespeed-beta
-    if [ $? -eq 1 ]; then
+    # Install Codedeploy
+    if [ ! -d /opt/codedeploy-agent/ ]; then
         sudo apt-get install -y ruby
         wget https://aws-codedeploy-us-east-1.s3.amazonaws.com/latest/install
         chmod +x ./install
