@@ -433,7 +433,7 @@ class Import
      * @param string $dlas_session_id
      * @return string
      */
-	function committee_members_csv_fetch($dlas_session_id = SESSION_ID)
+	function committee_members_csv_fetch($dlas_session_id = SESSION_LIS_ID)
 	{
 
 		$url = 'ftp://' . LIS_FTP_USERNAME . ':' . LIS_FTP_PASSWORD . '@legis.state.va.us/fromdlas/csv'
