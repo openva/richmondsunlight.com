@@ -292,7 +292,7 @@ class Import
 	{
 
         $database = new Database;
-        $db = $database->connect();
+        $db = $database->connect_mysqli();
 
 		$log = new Log;
 
@@ -300,14 +300,14 @@ class Import
 				FROM committees
 				WHERE parent_id IS NULL
 				ORDER BY id ASC';
-		$result = $db->query($sql);
-		if ( ($result === FALSE) || ($result->rowCount() == 0) )
+		$result = mysqli_query($db, $sql);
+		if ( $result === FALSE || mysqli_num_rows($result) == 0 )
 		{
 			$log->put('No committees were found in the database, which seems bad.', 8);
 			return FALSE;
 		}
 		$committees = array();
-		while ($committee = $result->fetch(PDO::FETCH_ASSOC))
+		while ($committee = mysqli_fetch_assoc($result))
 		{
 			$committees[] = $committee;
 		}
@@ -325,21 +325,21 @@ class Import
 	{
 
         $database = new Database;
-        $db = $database->connect();
+        $db = $database->connect_mysqli();
 
 		$log = new Log;
 
 		$sql = 'SELECT id, lis_id, chamber
-				FROM legislators
+				FROM representatives
 				ORDER BY id ASC';
-		$result = $db->query($sql);
-		if ( ($result === FALSE) || ($result->rowCount() == 0) )
+		$result = mysqli_query($db, $sql);
+		if ( $result === FALSE || mysqli_num_rows($result) == 0 )
 		{
 			$log->put('No legislators were found in the database, which seems bad.', 8);
 			return FALSE;
 		}
 		$legislators = array();
-		while ($legislator = $result->fetch(PDO::FETCH_ASSOC))
+		while ($legislator = mysqli_fetch_assoc($result))
 		{
 			$legislators[] = $legislator;
 		}
