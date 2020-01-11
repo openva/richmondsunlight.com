@@ -453,7 +453,7 @@ class Import
 		$members = trim($members);
 
 		# If the MD5 value of the new file is the same as the saved file, then there's nothing to update.
-		if (md5($members) == md5_file('committee_members.csv'))
+		if ( file_exists('/tmp/committee_members.csv') && md5($members) == md5_file('/tmp/committee_members.csv') )
 		{
 			$log->put('Not updating committee members, because committee_members.csv has not been '
 				. ' modified since it was last downloaded.', 2);
