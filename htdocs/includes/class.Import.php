@@ -450,6 +450,8 @@ class Import
 			return FALSE;
 		}
 
+		$members = trim($members);
+
 		# If the MD5 value of the new file is the same as the saved file, then there's nothing to update.
 		if (md5($members) == md5_file('committee_members.csv'))
 		{
