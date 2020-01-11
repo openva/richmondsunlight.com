@@ -2,6 +2,20 @@
     "config": {
     	"vendor-dir": "htdocs/includes/vendor"
     },
+    "repositories": {
+        "sphinx-search-api-php-client": {
+            "type": "package",
+            "package": {
+                "name": "romainneutron/sphinx-search-api-php-client",
+                "version": "2.0.8.1",
+                "source": {
+                    "url": "https://github.com/romainneutron/Sphinx-Search-API-PHP-Client/",
+                    "type": "git",
+                    "reference": "origin/master"
+                }
+            }
+        }
+    },
     "require": {
         "phpmailer/phpmailer": "~5.2",
         "ezyang/htmlpurifier":"~4.9",
@@ -10,7 +24,6 @@
         "components/jqueryui": "~1.8",
         "simplepie/simplepie": "1.5",
         "romainneutron/sphinx-search-api-php-client": "2.0.8.1",
-        "cedx/akismet": "~11"
     },
     "autoload": {
         "classmap": [
