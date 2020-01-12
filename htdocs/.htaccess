@@ -192,3 +192,5 @@ Deny from 123.126.113.177
 Deny from 198.20.66.122
 Deny from 136.243.36.87
 Deny from 106.120.173.96
+Deny from 203.133.170.52
+Deny from 49.7.20.150
