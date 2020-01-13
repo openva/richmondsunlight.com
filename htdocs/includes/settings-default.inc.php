@@ -71,6 +71,9 @@ define('VA_DECODED_KEY', '');
 # Mapbox API access token
 define('MAPBOX_TOKEN', '');
 
+# Akismet API access token
+define('AKISMET_KEY', '');
+
 # Logging verbosity, on a scale of 1–8
 define('LOG_VERBOSITY', 3);
 
