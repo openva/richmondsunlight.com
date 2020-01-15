@@ -105,15 +105,20 @@ foreach ($bots as $bot)
 # as a bot.
 if (!isset($is_bot))
 {
-    # Increment the view counter for this bill.
-    $sql = 'INSERT DELAYED INTO bills_views
-            SET bill_id = ' . $bill['id'] . ', ip="' . $_SERVER['REMOTE_ADDR'] . '"';
-    if (isset($user) && !empty($user['id']))
+    if (filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP))
     {
-        $sql .= ', user_id = ' . $user['id'];
+        
+        # Increment the view counter for this bill.
+        $sql = 'INSERT DELAYED INTO bills_views
+                SET bill_id = ' . $bill['id'] . ', ip="' . $_SERVER['REMOTE_ADDR'] . '"';
+        if (isset($user) && !empty($user['id']))
+        {
+            $sql .= ', user_id = ' . $user['id'];
+        }
+        
+        mysqli_query($GLOBALS['db'], $sql);
+
     }
-    
-    mysqli_query($GLOBALS['db'], $sql);
 }
 
 # PAGE METADATA
