@@ -32,7 +32,7 @@ else
 {
     die();
 }
-if ( isset($_GET['year']) && strlen($_GET['year'] == 4) && is_numeric($$_GET['year']) )
+if ( isset($_GET['year']) && strlen($_GET['year'] == 4) && is_numeric($_GET['year']) )
 {
     $year = $_GET['year'];
 }
