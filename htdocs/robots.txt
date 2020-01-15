@@ -85,6 +85,12 @@ Disallow: /
 User-agent: AhrefsBot
 Disallow: /
 
+User-agent: Sogou
+Disallow: /
+
+User-agent: discobot
+Disallow: /
+
 User-agent: msnbot
 Crawl-delay: 5
 

@@ -27,7 +27,7 @@ $browser_title = 'Tracking the Virginia General Assembly';
 $site_section = 'home';
 
 # PAGE CONTENT
-$page_body = '<p>The 2020 Virginia General Assembly session will begin on January 8, and
+$page_body = '<p>The 2020 Virginia General Assembly session began on January 8, and will
 			continue for 60 days. Here you can read <a href="/bills/">the bills that are
 			proposed</a>, follow them as they’re voted on, and learn about the few that
 			ultimately become law.</p>';
