@@ -60,6 +60,9 @@ define('GMAPS_KEY', '');
 # Geoparser.io API key
 define('GEOPARSER_KEY', '');
 
+# Open States API Key
+define('OPENSTATES_KEY', '');
+
 # Open Virginia / Virginia Decoded API Key
 # (We're inconsistent in our nomenclature.)
 define('OPENVA_KEY', '');

@@ -91,7 +91,7 @@ $debug_timing['definitions retrieved'] = microtime(TRUE);
 # We want to record a view count hit for this bill, but only if this is a real user, not a
 # search engine. Start by defining a list of bots.
 $bots = array('Googlebot', 'msnbot', 'Gigabot', 'Slurp', 'Teoma', 'ia_archiver', 'Yandex',
-            'Heritrix', 'twiceler', 'bingbot', 'bot');
+            'Heritrix', 'twiceler', 'bingbot', 'bot', 'updown.io');
 # Check to see if the current user agent is a known bot.
 foreach ($bots as $bot)
 {
