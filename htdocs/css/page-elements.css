@@ -52,7 +52,7 @@ div#bill-progress {
 	font-size: .9em;
 }
 	#bill-progress h2 {
-		font: bold 1em Verdana, Arial, Helvetica, 'sans serif';
+		font: bold 1em Verdana, Arial, Helvetica, sans-serif;
 		padding: 3px 0 3px 5px;
 		font-size: 1.1em;
 		background-color: #dccbaf;
@@ -461,7 +461,7 @@ div.video {
 
 /* The bill progress checkboxes */
 div.checkbox {
-	font-family: Helvetica, Verdana, Arial, Lucida Grande, sans-serif;
+	font-family: Helvetica, Verdana, Arial, 'Lucida Grande', sans-serif;
 	font-size: 12px;
 	font-weight: bold;
 }
@@ -558,7 +558,7 @@ div#partisanship-graph {
 	#slidebox h2 {
 		color: #fff;
 		font-size: 110%;
-		font-family: Helvetica, Verdana, Arial, Lucida Grande, sans-serif;
+		font-family: Helvetica, Verdana, Arial, 'Lucida Grande', sans-serif;
 		margin: 10px;
 		font-weight: bold !important;
 	}
@@ -588,7 +588,7 @@ div#partisanship-graph {
 				#slidebox li a:link,
 				#slidebox li a:visited {
 					color: #ffffff;
-					font-family: Verdana, Arial, Lucida Grande, sans-serif;
+					font-family: Verdana, Arial, 'Lucida Grande', sans-serif;
 					font-size: 100%;
 					text-decoration: none;
 					display: block;
@@ -718,7 +718,7 @@ body#body-bills div#options ul {
 		padding-bottom: 0;
 	}
 		#portfolio-sidebar h5 a.handle {
-			font-family: Verdana, Lucida Grande, sans serif;
+			font-family: Verdana, 'Lucida Grande', sans-serif;
 			background-color: #790806;
 			color: white;
 			border-radius: 10px 10px 0 0;

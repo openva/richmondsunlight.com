@@ -63,7 +63,7 @@ em {
 	font-style: italic;
 }
 code {
-	font-family: Courier, 'Courier New';
+	font-family: Courier, 'Courier New', monospace;
 }
 
 /* The default look for tables. */
@@ -247,7 +247,7 @@ div#content ul {
 	margin-left: 45em;
 }
 	#sidebar h3 {
-		font-family: Verdana, 'Lucida Sans', Arial, Helvetica, 'sans serif';
+		font-family: Verdana, 'Lucida Sans', Arial, Helvetica, sans-serif;
 		font-weight: bold;
 		font-size: 100%;
 		background: #dccbaf;
@@ -281,7 +281,7 @@ div#content ul {
 	border-top: 1px solid #dccbaf;
 }
 	#footer p.quote {
-		font-family: Georgia;
+		font-family: Georgia, Times, serif;
 		font-size: 1.75em;
 		color: #666;
 		font-style: italic;
@@ -312,7 +312,7 @@ div#content ul {
 
 /* The bill count */
 .stat-number {
-	font: bold 240% "Georgia", serif;
+	font: bold 240% Georgia, serif;
 	color: #333333;
 	position: absolute;
 	margin-top: 0.2em;
