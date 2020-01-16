@@ -6,12 +6,6 @@
 # PURPOSE
 # Provides a listing of bills that the user might be interested in, but hasn't seen.
 #
-# NOTES
-# None.
-#
-# TODO
-# None.
-#
 ###
 
 # INCLUDES

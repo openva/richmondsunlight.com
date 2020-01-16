@@ -6,12 +6,6 @@
     # PURPOSE
     # Individual user settings.
     #
-    # NOTES
-    # None.
-    #
-    # TODO
-    # None.
-    #
     ###
 
     # INCLUDES

@@ -6,12 +6,6 @@
 # PURPOSE
 # Accepts AJAX callbacks for the creation and editing of public notes for individual bills.
 #
-# NOTES
-# None.
-#
-# TODO
-# None.
-#
 ###
 
 # INCLUDES

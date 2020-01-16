@@ -6,14 +6,6 @@
     # PURPOSE
     # Information about the API, experimental work, etc.
     #
-    # NOTES
-    # None.
-    #
-    # TODO
-    # * Provide a ZIP file (generated on the fly?) of the images of every member of the house and
-    #   senate.
-    # * Add the bill XML, though not until first making sure that it's using a standard DOCTYPE.
-    #
     ###
 
     # INCLUDES

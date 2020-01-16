@@ -6,12 +6,6 @@
     # PURPOSE
     # Describes the RSS feeds that are available
     #
-    # NOTES
-    # None.
-    #
-    # TODO
-    # None.
-    #
     ###
 
     # INCLUDES

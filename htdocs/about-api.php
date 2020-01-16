@@ -6,12 +6,6 @@
     # PURPOSE
     # Describes the APIs that are available
     #
-    # NOTES
-    # None.
-    #
-    # TODO
-    # None.
-    #
     ###
 
     # INCLUDES

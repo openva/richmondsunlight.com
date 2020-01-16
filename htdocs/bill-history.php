@@ -6,12 +6,6 @@
 # PURPOSE
 # List the history of actions of individual bills.
 #
-# NOTES
-# None.
-#
-# TODO
-# None.
-#
 ###
 
 # INCLUDES

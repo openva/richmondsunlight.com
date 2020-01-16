@@ -6,12 +6,6 @@
 # PURPOSE
 # Lists the contents of a single public portfolio.
 #
-# NOTES
-# None.
-#
-# TODO
-# None.
-#
 ###
 
 # INCLUDES

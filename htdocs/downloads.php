@@ -6,12 +6,6 @@
     # PURPOSE
     # A list of files available for download.
     #
-    # NOTES
-    # None.
-    #
-    # TODO
-    # None.
-    #
     ###
 
     # INCLUDES

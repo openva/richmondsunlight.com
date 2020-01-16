@@ -6,12 +6,6 @@
     # PURPOSE
     # Provides a pitch to sign up for Photosynthesis (free version).
     #
-    # NOTES
-    # None.
-    #
-    # TODO
-    # None.
-    #
     ###
 
     # INCLUDES

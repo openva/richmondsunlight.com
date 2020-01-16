@@ -1,8 +1,5 @@
 <?php
 
-# TODO
-# * Modify get_signers() to use MDB2's function to retrieve all results at once.
-
 class Petition
 {
 

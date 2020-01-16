@@ -8,12 +8,6 @@
 # somebody posts a comment to a bill that they're following -- this terminates that. Or, rather,
 # this terminates e-mails about that one bill. It doesn't end all of their subscriptions.
 #
-# NOTES
-# None.
-#
-# TODO
-# None.
-#
 ###
 
 # INCLUDES

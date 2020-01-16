@@ -7,12 +7,6 @@
     # Receives functions and processes them. The intention is to replace this
     # with an AJAX equivalent.
     #
-    # NOTES
-    # None
-    #
-    # TODO
-    # None.
-    #
     ###
 
     # INCLUDES

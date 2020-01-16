@@ -6,11 +6,6 @@
 # PURPOSE
 # Lists all current representatives, but with lots of details about them.
 #
-# NOTES
-# None.
-#
-# TODO
-#
 ###
 
 # INCLUDES
