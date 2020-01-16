@@ -170,9 +170,6 @@ $page_body .= '
 
 
 # OUTPUT THE PAGE
-/*display_page('page_title='.urlencode($page_title).'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
-    '&site_section='.urlencode($site_section).'&body_tag='.urlencode($body_tag).'&html_head='.urlencode($html_head));*/
-
 $page = new Page;
 $page->page_title = $page_title;
 $page->page_body = $page_body;
