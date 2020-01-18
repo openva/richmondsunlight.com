@@ -8,12 +8,6 @@
 # somebody posts a comment to a bill that they're following -- this terminates that. Or, rather,
 # this terminates e-mails about that one bill. It doesn't end all of their subscriptions.
 #
-# NOTES
-# None.
-#
-# TODO
-# None.
-#
 ###
 
 # INCLUDES
@@ -68,9 +62,6 @@ if ($url['host'] == $_SERVER['SERVER_NAME'])
 $page_body .= '<p>You have been unsubscribed.</p>';
 
 # OUTPUT THE PAGE
-/*display_page('page_title='.urlencode($page_title).'&page_body='.urlencode($page_body).
-    '&page_sidebar='.urlencode($page_sidebar).'&site_section='.urlencode($site_section));*/
-
 $page = new Page;
 $page->page_title = $page_title;
 $page->page_body = $page_body;

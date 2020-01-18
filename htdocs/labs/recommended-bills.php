@@ -6,12 +6,6 @@
     # PURPOSE
     # Display a list of bills that an individual is likely to find interesting.
     #
-    # NOTES
-    # None.
-    #
-    # TODO
-    # None.
-    #
     ###
 
     # INCLUDES

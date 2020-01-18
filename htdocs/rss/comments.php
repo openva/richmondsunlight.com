@@ -6,14 +6,6 @@
     # PURPOSE
     # Lists the last 20 comments posted.
     #
-    # NOTES
-    # None.
-    #
-    # TODO
-    # * Support If-Modified-Since and If-None-Match headers to reduce bandwidth.
-    # * The session year in the RSS URL is hard-coded due to soem kind of a weird
-    #   MySQL join error.
-    #
     ###
 
     # INCLUDES

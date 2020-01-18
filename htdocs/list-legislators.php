@@ -6,15 +6,6 @@
 # PURPOSE
 # Lists all current representatives.
 #
-# NOTES
-# None.
-#
-# TODO
-# Reinstate the Google Maps code. The problem is that it can't handle displaying all of the
-# markers. It craps out at more than ~20. The solution is to institute the Marker Manager,
-# which is part of the GMaps Utility Library. But it's a pain in the ass to implement. In the
-# interim, the mapping bit is just disabled.
-#
 ###
 
 # INCLUDES
@@ -179,9 +170,6 @@ $page_body .= '
 
 
 # OUTPUT THE PAGE
-/*display_page('page_title='.urlencode($page_title).'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
-    '&site_section='.urlencode($site_section).'&body_tag='.urlencode($body_tag).'&html_head='.urlencode($html_head));*/
-
 $page = new Page;
 $page->page_title = $page_title;
 $page->page_body = $page_body;

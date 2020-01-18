@@ -6,13 +6,6 @@
 # PURPOSE
 # Lists the last 20 bill actions of bills for a particular portfolio.
 #
-# NOTES
-# None.
-#
-# TODO
-# * Have die() provide an error that will appear in an RSS reader.
-# * Support If-Modified-Since and If-None-Match headers to reduce bandwidth.
-#
 ###
 
 # INCLUDES

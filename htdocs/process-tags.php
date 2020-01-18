@@ -29,7 +29,7 @@ $user = get_user();
 
 # LOCALIZE VARIABLES
 $tags = $_POST['tags'];
-if (isset($_GET['delete']))
+if (isset($_GET['delete']) && is_numeric($_GET['delete']) && strlen($_GET['delete']) < 10 )
 {
     $delete = $_GET['delete'];
 }
@@ -40,7 +40,14 @@ elseif (!isset($_POST['bill_id']))
     echo json_encode($message);
     exit();
 }
-$bill_id = $_POST['bill_id'];
+if (isset($_POST['bill_id']) && is_numeric($_POST['bill_id']) && strlen($_POST['bill_id']) < 10 )
+{
+    $bill_id = $_POST['bill_id'];
+}
+else
+{
+    die();
+}
 
 # REJECT MISSING TAGS
 if (empty($tags))
