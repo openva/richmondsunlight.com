@@ -11,14 +11,14 @@
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once 'settings.inc.php';
-include_once 'functions.inc.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/settings.inc.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
 $database = new Database;
-$database->connect_mysqli();
+$db = $database->connect_mysqli();
 
 # PAGE METADATA
 $page_title = 'Videos';
@@ -398,13 +398,17 @@ else
 {
 
     # Select all of the videos.
-    $sql = 'SELECT id, chamber, capture_directory, committee_id, title, type, length, date, path,
-			srt, transcript,
+    $sql = 'SELECT files.id, files.chamber, files.capture_directory,
+            files.title, files.type, files.length, files.date, files.path, files.srt,
+            files.transcript, committees.name AS committee_name,
 			(SELECT COUNT(*) FROM video_transcript WHERE file_id=files.id) AS atomized_count,
 			(SELECT COUNT(*) FROM video_transcript WHERE file_id=files.id AND legislator_id IS NOT NULL) AS identified_count
 			FROM files
-			ORDER BY date DESC';
-    $result = mysqli_query($GLOBALS['db'], $sql);
+            LEFT JOIN committees
+                ON files.committee_id=committees.id
+            ORDER BY date DESC
+            LIMIT 100';
+    $result = mysqli_query($db, $sql);
     if (mysqli_num_rows($result) == 0)
     {
         die('No videos found.');
@@ -415,74 +419,6 @@ else
     {
 
         $videos[] = array_map('stripslashes', $video);
-        # We save this to a separate array, which we use to detect newly uploaded files.
-        if ($video['capture_directory'] != '')
-        {
-            $video_paths[] = $video['capture_directory'];
-        }
-
-    }
-
-    # Get a list of all video files.
-    foreach (array('house','senate') as $chamber)
-    {
-
-        $directory = '/video/' . $chamber . '/floor/';
-        if ($fp = opendir($_SERVER['DOCUMENT_ROOT'] . $directory))
-        {
-
-            while (($filename = readdir($fp)) !== FALSE)
-            {
-                if (($filename == '.') || ($filename == '..'))
-                {
-                    continue;
-                }
-                if (is_dir($_SERVER['DOCUMENT_ROOT'] . $directory . $filename) === TRUE)
-                {
-                    $files[$chamber][] = $directory . $filename . '/';
-                }
-            }
-            closedir($fp);
-
-        }
-
-        sort($files[$chamber]);
-
-    }
-
-    # Iterate through our file list to look for capture directories that have not yet been added
-    # to the database.
-    foreach ($files as $chamber)
-    {
-
-        foreach ($chamber as $file)
-        {
-
-            if (!in_array($file, $video_paths))
-            {
-
-                $tmp = explode('/', $file);
-                $chamber = $tmp[2];
-                $date = $tmp[4];
-                $date = $date{0}.$date{1}.$date{2}.$date{3}.'-'.$date{4}.$date{5}.'-'.$date{6}.$date{7};
-                $path = substr($file, 0, -1);
-                $page_body .= '<a href="/admin/video/?new=&amp;';
-                $page_body .= 'form_data[path]='.$path.'.mp4'
-                .'&amp;form_data[chamber]='.$chamber.'&amp;form_data[date]='.$date;
-                if (strstr($file, 'house') !== false)
-                {
-                    $page_body .= '&amp;form_data[title]=House+Session';
-                }
-                elseif (strstr($file, 'senate') !== false)
-                {
-                    $page_body .= '&amp;form_data[title]=Senate+Session';
-                }
-                $page_body .= '">'.$file
-                .'</a> ';
-
-            }
-
-        }
 
     }
 
@@ -498,7 +434,7 @@ else
 		<tr>
 			<th>Date</th>
 			<th>Chamber</th>
-			<th>Type</th>
+			<th>Committee</th>
 			<th>Title</th>
 			<th>Length</th>
 			<th>Parse</th>
@@ -515,7 +451,7 @@ else
 			<tr>
 				<td>' . $video['date'] . '</td>
 				<td>' . $video['chamber'] . '</td>
-				<td>' . $video['type'] . '</td>
+				<td>' . $video['committee_name'] . '</td>
 				<td>' . $video['title'] . '</a></td>
 				<td>' . $video['length'] . '</td>
 				<td><a href="/utilities/resolve_chyrons.php?id=' . $video['id'] . '">redo</a></td>
