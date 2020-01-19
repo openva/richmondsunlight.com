@@ -113,7 +113,7 @@ elseif (mysqli_num_rows($result) > 0)
             date('Y', strtotime($minutes['date'])) . '/' . date('m', strtotime($minutes['date'])) . '/' .
             date('d', strtotime($minutes['date'])) . '/">' . date('m/d/Y', strtotime($minutes['date'])) .
             '</a>' .
-            (!empty($minutes['video']) ? ' with ' . $minutes['video'] . ' of video' : '') .
+            (!empty($minutes['video']) ? ' with video' : '') .
             '</li>';
     }
     $page_body .= '
