@@ -6,14 +6,6 @@
     # PURPOSE
     # Information about the API, experimental work, etc.
     #
-    # NOTES
-    # None.
-    #
-    # TODO
-    # * Provide a ZIP file (generated on the fly?) of the images of every member of the house and
-    #   senate.
-    # * Add the bill XML, though not until first making sure that it's using a standard DOCTYPE.
-    #
     ###
 
     # INCLUDES
@@ -83,9 +75,6 @@ EOD;
 EOD;
 
     # OUTPUT THE PAGE
-    /*display_page('page_title='.$page_title.'&page_body='.urlencode($page_body).'&page_sidebar='.urlencode($page_sidebar).
-        '&site_section='.urlencode($site_section));*/
-
     $page = new Page;
     $page->page_title = $page_title;
     $page->page_body = $page_body;

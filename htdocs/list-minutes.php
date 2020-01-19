@@ -24,7 +24,7 @@ $database->connect_mysqli();
 session_start();
 
 # LOCALIZE VARIABLES
-if (!empty($_REQUEST['year']))
+( isset($_REQUEST['year']) && strlen($_REQUEST['year'] == 4) && is_numeric($_REQUEST['year']) )
 {
     $year = $_REQUEST['year'];
 }

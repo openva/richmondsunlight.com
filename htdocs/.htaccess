@@ -28,6 +28,7 @@ Header always set X-Frame-Options "SAMEORIGIN"
 Header always set X-Xss-Protection "1; mode=block"
 Header always set X-Content-Type-Options "nosniff"
 Header always set Referrer-Policy "strict-origin-when-cross-origin"
+Header always edit Set-Cookie (.*) "$1; SameSite=Lax"
 
 <IfModule mod_deflate.c>
 	AddOutputFilterByType DEFLATE text/text text/html text/plain text/xml text/css application/x-javascript application/javascript
@@ -192,3 +193,5 @@ Deny from 123.126.113.177
 Deny from 198.20.66.122
 Deny from 136.243.36.87
 Deny from 106.120.173.96
+Deny from 203.133.170.52
+Deny from 49.7.20.150

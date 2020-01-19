@@ -78,9 +78,9 @@ if (mysqli_num_rows($result) > 0)
     {
         $tag = array_map('stripslashes', $tag);
         $tag['bill'] = strtolower($tag['bill']);
-        $page_body .= '<a href="/bill/'.$tag['year'].'/'.$tag['bill'].'/" title="'
-            .$tag['author'].'">'.$tag['tag'].'</a>—[<a href="/process-tags.php?delete='
-            .$tag['id'].'">x</a>] ';
+        $page_body .= '<div class="tag"><a href="/bill/'.$tag['year'].'/'.$tag['bill'].'/" title="'
+            .$tag['author'].'">'.$tag['tag'].'</a> <a href="/process-tags.php?delete='
+            .$tag['id'].'" class="delete">✕</a></div>';
     }
 }
 
@@ -102,14 +102,19 @@ if (mysqli_num_rows($result) > 0)
 		});
 		</script>
 		<style>
-			.user {
+			.user, .tag {
 				display: inline-block;
 				background-color: #f4eee5;
 				padding: 2px 6px;
 				margin: 3px;
 				border-radius: 5px;
 			}
-				a.user_delete {
+				.tag a {
+					text-decoration: none;
+					color: #333;
+					font-weight: normal;
+				}
+				a.user_delete, .tag .delete {
 					font-family: arial;
 					color: black;
 					font-weight: 800;

@@ -136,7 +136,7 @@ $page_body .= '
 $page_body .= @notes_form($notes);
 
 $page_body .= '
-	<p style="margin-top: 2em; font-family: Georgia, Palatino, \'Times New Roman\', Times; margin-left: 1em; font-size: 1.2em;">
+	<p style="margin-top: 2em; font-family: Georgia, Palatino, \'Times New Roman\', Times, sans-serif; margin-left: 1em; font-size: 1.2em;">
 		<a href="/photosynthesis/">&lt;&lt; Back to Your Bills</a>
 	</p>
 ';

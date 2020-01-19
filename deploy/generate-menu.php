@@ -9,6 +9,7 @@
 
 require '../htdocs/includes/settings.inc.php';
 require '../htdocs/includes/class.Database.php';
+require '../htdocs/includes/vendor/autoload.php';
 
 $database = new Database;
 $db = $database->connect_mysqli();
@@ -16,21 +17,17 @@ $db = $database->connect_mysqli();
 /*
  * Get a list of all legislators.
  */
-$sql = 'SELECT name, name_formatted, shortname, chamber
-        FROM representatives
-        WHERE date_ended IS NOT NULL OR date_ended >= now()
-        ORDER BY chamber ASC, name ASC';
-$result = mysqli_query($db, $sql);
+$legislator = new Legislator;
+$legislator_list = $legislator->get_list('current');
 
 $legislators = array('house' => array(), 'senate' => array());
 
 /*
  * Build up an HTML-formatted array of legislators by chamber.
  */
-while ($legislator = mysqli_fetch_assoc($result))
+foreach ($legislator_list as $legislator)
 {
 
-    $legislator = array_map('stripslashes', $legislator);
     $legislators[$legislator{'chamber'}][substr($legislator{'name'}, 0, 1)][] = '<li><a href="/legislator/' . $legislator['shortname']
         . '/">' . $legislator['name_formatted'] . '</a></li>';
 

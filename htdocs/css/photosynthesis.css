@@ -82,7 +82,6 @@ div.portfolio {
 			}
 		div.portfolio tr.notes td {
 			font-family: Verdana, 'Lucida Sans', Helvetica, Arial, sans-serif;
-			font-size: .85em;
 			background-color: #eef;
 		}
 		div.portfolio tr {
@@ -101,6 +100,7 @@ div.portfolio {
 			}
 				div.portfolio .comments textarea {
 					width: 40em !important;
+					font-size: 1em;
 				}
 				div.portfolio .comments button[type="submit"] {
 					margin-left: 1em;

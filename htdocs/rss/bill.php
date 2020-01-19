@@ -6,17 +6,6 @@
     # PURPOSE
     # Lists the last 20 bill actions for a specific bill.
     #
-    # NOTES
-    # None.
-    #
-    # TODO
-    # * Have die() provide an error that will appear in an RSS reader.
-    # * Support If-Modified-Since and If-None-Match headers to reduce bandwidth.
-    # * Bill numbers are reused here -- the cache file consists solely of the bill number, which
-    #   isn't unique. That'll reset with every new session, so that's not terrible, but it's not
-    #   good. The solution is to improve the URL structure (which currently contains only bill
-    #   numbers) as well as the cache filename structure.
-    #
     ###
 
     # INCLUDES

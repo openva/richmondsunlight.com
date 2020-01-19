@@ -13,6 +13,7 @@
 # page to function.
 include_once 'includes/settings.inc.php';
 include_once 'vendor/autoload.php';
+use TijsVerkoyen\Akismet;
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -149,6 +150,28 @@ if (isset($_POST['form_data']))
     }
     else
     {
+
+        /*
+         * Query Akismet to see if this is spam.
+         */
+        /*$akismet = new Akismet();
+        $akismet->apiKey = KISMET_KEY;
+        $akismet->url = 'https://www.richmondsunlight.com/';
+
+        $is_spam = $akismet->isSpam(
+            $form_data['comments'],
+            $form_data['name'],
+            $form_data['email']
+        );*/
+
+        /*
+         * This is spam. End silently.
+         */
+        if ($is_spam)
+        {
+            die();
+        }
+
         $form_data['comments'] = 'From: "' . $form_data['name'] . '" <' . $form_data['email'] . '>'
             . "\n\n" . $form_data['comments'];
 
@@ -162,6 +185,7 @@ if (isset($_POST['form_data']))
         'X-Originating-URL: ' . $_SERVER['REQUEST_URI']
         );
         $page_body .= '<p>E-mail sent. Thanks for writing!</p>';
+
     }
 }
 else
@@ -183,7 +207,7 @@ else
     }
 
     $page_body = '<p>Found a mistake? Have some extra information? Just want to call to say “I love
-		you”? Bring it on. <em>Completing this form will send an e-mail to Richmond Sunlight,
+		you”? Bring it on. <em>Completing this form will send an email to Richmond Sunlight,
 		not to any member of the General Assembly</em>.</p>';
     $page_body .= @show_form($form_data);
 }
