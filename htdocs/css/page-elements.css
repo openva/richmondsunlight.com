@@ -749,6 +749,18 @@ body#body-bills div#options ul {
 
 
 /*
+ * The login form
+ */
+fieldset.login input[type="email"], fieldset.login input[type="password"] {
+	width: 15em;
+	font-size: 1.25em;
+	font-kerning: 2px;
+}
+fieldset.login label {
+	font-weight: bold;
+}
+
+/*
  * The password strength meter on the account and registration pages.
  */
 meter {

@@ -154,7 +154,7 @@ if (isset($_POST['form_data']))
         /*
          * Query Akismet to see if this is spam.
          */
-        $akismet = new Akismet();
+        /*$akismet = new Akismet();
         $akismet->apiKey = KISMET_KEY;
         $akismet->url = 'https://www.richmondsunlight.com/';
 
@@ -162,7 +162,7 @@ if (isset($_POST['form_data']))
             $form_data['comments'],
             $form_data['name'],
             $form_data['email']
-        );
+        );*/
 
         /*
          * This is spam. End silently.

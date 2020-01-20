@@ -40,7 +40,7 @@ if (mysqli_num_rows($result) == 0)
 {
     $page_body = '<p>No minutes are available for that date.</p>';
 }
-elseif (mysqli_num_rows($result) > 0)
+else
 {
     $minutes = mysqli_fetch_array($result);
     $minutes = stripslashes($minutes['text']);
