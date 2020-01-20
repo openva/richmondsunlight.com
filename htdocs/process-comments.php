@@ -101,6 +101,10 @@ foreach ($spam_strings as $spam_string)
 # there are garbage, and 75% of garbage comments come from there.
 if ($_SERVER['REMOTE_ADDR'] == '151.188.97.205')
 {
+    echo '<p>We do not allow comments from Fairfax County Public Schools, because it means that
+    every time a teacher has a class go to the website on their computers, the site is temporarily
+    drowned in garbage comments. Maybe <em>you</em> just tried to post a reasonable comment, but
+    I assure you that your classmates are attempting nothing of the sort.</p>';
     exit();
 }
 

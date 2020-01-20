@@ -426,6 +426,9 @@ if (isset($bill['tags']) && (count($bill['tags']) > 0))
             var tagId = $(this).attr('data-id');
             var url = '/process-tags.php';
             $.post(url, { delete: tagId }, function(data){ console.log('deleted');} );
+            
+            // Report the tag to Matomo.
+            _paq.push([‘trackGoal’, 2]);
         });";
 
     foreach ($bill['tags'] as $tag_id => $tag)
@@ -1468,6 +1471,9 @@ if (($bill['session_id'] == SESSION_ID))
 
                         // Flash and fade the comment
                         $("#newcomment").fadeIn(200).fadeOut(200).fadeIn(200).fadeOut(200).fadeIn(200);
+
+                        // Report the comment to Matomo.
+                        _paq.push([‘trackGoal’, 1]);
 
                     });
 

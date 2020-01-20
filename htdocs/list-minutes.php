@@ -24,7 +24,7 @@ $database->connect_mysqli();
 session_start();
 
 # LOCALIZE VARIABLES
-( isset($_REQUEST['year']) && strlen($_REQUEST['year'] == 4) && is_numeric($_REQUEST['year']) )
+if ( isset($_REQUEST['year']) && strlen($_REQUEST['year'] == 4) && is_numeric($_REQUEST['year']) )
 {
     $year = $_REQUEST['year'];
 }
@@ -113,7 +113,7 @@ elseif (mysqli_num_rows($result) > 0)
             date('Y', strtotime($minutes['date'])) . '/' . date('m', strtotime($minutes['date'])) . '/' .
             date('d', strtotime($minutes['date'])) . '/">' . date('m/d/Y', strtotime($minutes['date'])) .
             '</a>' .
-            (!empty($minutes['video']) ? ' with ' . $minutes['video'] . ' of video' : '') .
+            (!empty($minutes['video']) ? ' with video' : '') .
             '</li>';
     }
     $page_body .= '
