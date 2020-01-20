@@ -947,14 +947,14 @@ function login_form()
     }
     $returned_data = '
 		<form method="post" action="/account/login/">
-
-			<table class="form">
-				<tr><td><label for="name">E-Mail Address</label></td></tr>
-				<tr><td><input type="email" size="20" maxlength="60" id="email" name="form_data[email]" /></td></tr>
-				<tr><td><label for="password">Password</label></td></tr>
-				<tr><td><input type="password" size="20" maxlength="255" id="password" name="form_data[password]" /></td></tr>
-				<tr><td><input type="submit" name="submit" value="Log In" /></td></tr>
-			</table>';
+  
+            <fieldset class="login">
+                <label for="email">E-Mail Address</label><br>
+                <input type="email" size="20" maxlength="60" id="email" name="form_data[email]"><br>
+                <label for="password">Password</label><br>
+                <input type="password" size="20" maxlength="255" id="password" name="form_data[password]"><br>
+                <input type="submit" name="submit" value="Log In" />
+            </fieldset>';
     if (isset($return_uri))
     {
         $returned_data .= '
