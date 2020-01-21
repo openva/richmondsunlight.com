@@ -1339,9 +1339,6 @@ if (isset($comments) && is_array($comments))
             if ($comment['type'] == 'comment')
             {
 
-            # Replace the provided name with the legislator's proper name.
-            $comment['name'] = $bill['patron_prefix'] . ' ' . pivot($bill['patron']) . ' '
-                . $bill['patron_suffix'];
                 $page_body .= ' legislator';
 
                 # Replace the provided URL with the legislator's Richmond Sunlight page.
