@@ -1207,71 +1207,6 @@ if (isset($bill['duplicates']))
 $page_body .= '
 	</div>';
 
-# Get our own blog entries about this bill.
-/*
-// COMMENTED OUT UNTIL VCU STARTS DOING THIS AGAIN -- IT'S TOO SLOW
-$mc = new Memcached();
-$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-$news = $mc->get('blog-entries-' . $bill['id']);
-if ($mc->getResultCode() > 0)
-{
-
-    unset($news);
-
-    $blog_api_url = 'https://www.richmondsunlight.com/blog/wp-json/posts?filter[tag]=' . urlencode($bill['number']);
-    $blog_json = file_get_contents($blog_api_url);
-    if ($blog_json !== FALSE)
-    {
-
-        $blog_entries = json_decode($blog_json);
-        if ( ($blog_entries !== FALSE) && (count($blog_entries) > 0) )
-        {
-
-            # Set a counter to allow us to limit the output to the last five blog entries.
-            $i=0;
-            $news = '';
-
-            foreach ($blog_entries as $blog_entry)
-            {
-
-                # If this blog entry is from the same year as this bill.
-                if ( $bill['year'] != date('Y', strtotime($blog_entry->date)) )
-                {
-                    continue;
-                }
-
-                $news .= '
-                    <h3><a href="' . $blog_entry->link . '">' . $blog_entry->title . '</a></h3>'
-                    . '<p>' . date('F j, Y', strtotime($blog_entry->date) ) . '<br />'
-                    . strip_tags($blog_entry->excerpt) . '</p>';
-                $i++;
-                if ($i==5)
-                {
-                    break;
-                }
-
-            }
-
-        }
-
-    }
-
-    # Cache these blog entries for an hour (even if there are none).
-    $mc->set('blog-entries-' . $bill['id'], $news, (60 * 60) );
-
-}
-
-if (!empty($news))
-{
-    $page_body .= '
-    <div id="news">
-        <h2>In the News</h2>
-        ' . $news . '
-    </div>';
-}
-
-$debug_timing['blog entries retrieved'] = microtime(TRUE);*/
-
 # BILL COMMENTS
 $page_body .= '
     <div id="comments">
@@ -1332,7 +1267,6 @@ if (isset($comments) && is_array($comments))
         # treatment
         if ($comment['representative_id'] === $bill['chief_patron_id'])
         {
-            $page_body .= ' legislator';
 
             # If this is a comment, as opposed to a Photosynthesis bill note, then display it
             # inline with the other comments, but format it differently.
