@@ -873,6 +873,12 @@ if (!empty($bill['notes']))
 		</div>';
 }
 
+/*
+ * Include a placeholder for the legislator's statement about this bill. If they have one, we will
+ * discover that while grabbing the Photosynthesis comments on the bill, and insert it then.
+ */
+$page_body .= '<!--legislator_statement-->';
+
 # If this bill is no longer alive.
 if (!empty($bill['outcome']))
 {
@@ -1322,23 +1328,47 @@ if (isset($comments) && is_array($comments))
         # Start off the DIV that contains every comment.
         $page_body .= '<div class="comment';
 
-        # If this comment was posted by the legislator who introduced it, apply a special style and
-        # reformat the name and URL.
+        # If this is a comment posted by the legislator who introduced this bill, give it special
+        # treatment
         if ($comment['representative_id'] === $bill['chief_patron_id'])
         {
             $page_body .= ' legislator';
 
-            # Replace the provided URL with the legislator's Richmond Sunlight page.
-            $comment['url'] = 'https://www.richmondsunlight.com/legislator/'
-                . $bill['patron_shortname'] . '/';
+            # If this is a comment, as opposed to a Photosynthesis bill note, then display it
+            # inline with the other comments, but format it differently.
+            if ($comment['type'] == 'comment')
+            {
 
             # Replace the provided name with the legislator's proper name.
             $comment['name'] = $bill['patron_prefix'] . ' ' . pivot($bill['patron']) . ' '
                 . $bill['patron_suffix'];
+                $page_body .= ' legislator';
 
-            # Display the legislator's photograph.
-            $badge = '<img src="/images/legislators/thumbnails/'
-                . $bill['patron_shortname'] . '.jpg" width="50" class="photo" />';
+                # Replace the provided URL with the legislator's Richmond Sunlight page.
+                $comment['url'] = 'https://www.richmondsunlight.com/legislator/'
+                    . $bill['patron_shortname'] . '/';
+
+                # Replace the provided name with the legislator's proper name.
+                $comment['name'] = $bill['patron_name_formatted'];
+
+                # Display the legislator's photograph.
+                $badge = '<img src="/images/legislators/thumbnails/'
+                    . $bill['patron_shortname'] . '.jpg" width="50" class="photo" />';
+
+            }
+
+            # If this is a Photosynthesis bill note, then display it on the page earlier, as a
+            # statement by the legislator.
+            if ($comment['type'] == 'photosynthesis')
+            {
+
+                $legislator_statement = '<h2>Legislator’s Statement</h2>';
+                $legislator_statement .= $comment['comment'];
+
+                $page_body = str_ireplace('<!--legislator_statement-->', $legislator_statement, $page_body);
+
+            }
+
         }
 
         # If this comment is an editor's pick, apply a special style and add a note.
