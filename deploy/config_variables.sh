@@ -28,6 +28,8 @@ variables=(
 	API_URL
 	AWS_SES_SMTP_USERNAME
 	AWS_SES_SMTP_PASSWORD
+	AWS_ACCESS_KEY
+	AWS_SECRET_KEY
 )
 
 # Iterate over the variables and warn if any aren't populated
