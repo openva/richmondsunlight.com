@@ -78,7 +78,7 @@ then
 fi
 
 # Are committee members listed?
-if [! curl --no-buffer --silent "http://localhost:5000/committee/house/finance/" |grep "textarea" |wc -m -gt 500 ]
+if [ "$(curl --no-buffer --silent "http://localhost:5000/committee/house/finance/" |grep "textarea" |wc -m)" -gt 500 ];
 then
     echo "ERROR: House Finance committee members aren't listed"
     ERRORED=true
