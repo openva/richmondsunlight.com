@@ -37,9 +37,14 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
     mkdir -p "$SITE_PATH"/htdocs/cache
     sudo chgrp www-data "$SITE_PATH"/htdocs/cache
     sudo chmod g+w -R "$SITE_PATH"/htdocs/cache
+
     mkdir -p "$SITE_PATH"/htdocs/rss/cache
     sudo chgrp www-data "$SITE_PATH"/htdocs/rss/cache
     sudo chmod g+w -R "$SITE_PATH"/htdocs/rss/cache
+    
+    mkdir -p "$SITE_PATH"/htdocs/photosynthesis/rss/cache
+    sudo chgrp www-data "$SITE_PATH"/htdocs/photosynthesis/rss/cache
+    sudo chmod g+w -R "$SITE_PATH"/htdocs/photosynthesis/rss/cache
 
 fi
 
