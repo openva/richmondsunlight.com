@@ -36,6 +36,8 @@ script:
 - ./deploy/branch_deploy.sh
   && ./deploy/config_variables.sh
   && sonar-scanner
+  && ./docker-run.sh
+  && ./deploy/tests/run-all.sh
   && ./deploy/aws_credentials.sh
   && zip -qr rs-web-deploy . --exclude *.git* *.scannerwork*
   && mkdir -p upload
