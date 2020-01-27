@@ -296,6 +296,7 @@ class Video
             $i=0;
             while ($clip = mysqli_fetch_object($result))
             {
+                $this->clips->{$i} = new stdClass();
                 $this->clips->{$i}->path = $clip->path;
                 $this->clips->{$i}->date = $clip->date;
                 $this->clips->{$i}->chamber = $clip->chamber;
