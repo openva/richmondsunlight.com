@@ -870,6 +870,12 @@ if (!empty($bill['notes']))
 		</div>';
 }
 
+/*
+ * Include a placeholder for the legislator's statement about this bill. If they have one, we will
+ * discover that while grabbing the Photosynthesis comments on the bill, and insert it then.
+ */
+$page_body .= '<!--legislator_statement-->';
+
 # If this bill is no longer alive.
 if (!empty($bill['outcome']))
 {
@@ -1198,71 +1204,6 @@ if (isset($bill['duplicates']))
 $page_body .= '
 	</div>';
 
-# Get our own blog entries about this bill.
-/*
-// COMMENTED OUT UNTIL VCU STARTS DOING THIS AGAIN -- IT'S TOO SLOW
-$mc = new Memcached();
-$mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-$news = $mc->get('blog-entries-' . $bill['id']);
-if ($mc->getResultCode() > 0)
-{
-
-    unset($news);
-
-    $blog_api_url = 'https://www.richmondsunlight.com/blog/wp-json/posts?filter[tag]=' . urlencode($bill['number']);
-    $blog_json = file_get_contents($blog_api_url);
-    if ($blog_json !== FALSE)
-    {
-
-        $blog_entries = json_decode($blog_json);
-        if ( ($blog_entries !== FALSE) && (count($blog_entries) > 0) )
-        {
-
-            # Set a counter to allow us to limit the output to the last five blog entries.
-            $i=0;
-            $news = '';
-
-            foreach ($blog_entries as $blog_entry)
-            {
-
-                # If this blog entry is from the same year as this bill.
-                if ( $bill['year'] != date('Y', strtotime($blog_entry->date)) )
-                {
-                    continue;
-                }
-
-                $news .= '
-                    <h3><a href="' . $blog_entry->link . '">' . $blog_entry->title . '</a></h3>'
-                    . '<p>' . date('F j, Y', strtotime($blog_entry->date) ) . '<br />'
-                    . strip_tags($blog_entry->excerpt) . '</p>';
-                $i++;
-                if ($i==5)
-                {
-                    break;
-                }
-
-            }
-
-        }
-
-    }
-
-    # Cache these blog entries for an hour (even if there are none).
-    $mc->set('blog-entries-' . $bill['id'], $news, (60 * 60) );
-
-}
-
-if (!empty($news))
-{
-    $page_body .= '
-    <div id="news">
-        <h2>In the News</h2>
-        ' . $news . '
-    </div>';
-}
-
-$debug_timing['blog entries retrieved'] = microtime(TRUE);*/
-
 # BILL COMMENTS
 $page_body .= '
     <div id="comments">
@@ -1319,23 +1260,43 @@ if (isset($comments) && is_array($comments))
         # Start off the DIV that contains every comment.
         $page_body .= '<div class="comment';
 
-        # If this comment was posted by the legislator who introduced it, apply a special style and
-        # reformat the name and URL.
+        # If this is a comment posted by the legislator who introduced this bill, give it special
+        # treatment
         if ($comment['representative_id'] === $bill['chief_patron_id'])
         {
-            $page_body .= ' legislator';
 
-            # Replace the provided URL with the legislator's Richmond Sunlight page.
-            $comment['url'] = 'https://www.richmondsunlight.com/legislator/'
-                . $bill['patron_shortname'] . '/';
+            # If this is a comment, as opposed to a Photosynthesis bill note, then display it
+            # inline with the other comments, but format it differently.
+            if ($comment['type'] == 'comment')
+            {
 
-            # Replace the provided name with the legislator's proper name.
-            $comment['name'] = $bill['patron_prefix'] . ' ' . pivot($bill['patron']) . ' '
-                . $bill['patron_suffix'];
+                $page_body .= ' legislator';
 
-            # Display the legislator's photograph.
-            $badge = '<img src="/images/legislators/thumbnails/'
-                . $bill['patron_shortname'] . '.jpg" width="50" class="photo" />';
+                # Replace the provided URL with the legislator's Richmond Sunlight page.
+                $comment['url'] = 'https://www.richmondsunlight.com/legislator/'
+                    . $bill['patron_shortname'] . '/';
+
+                # Replace the provided name with the legislator's proper name.
+                $comment['name'] = $bill['patron_name_formatted'];
+
+                # Display the legislator's photograph.
+                $badge = '<img src="/images/legislators/thumbnails/'
+                    . $bill['patron_shortname'] . '.jpg" width="50" class="photo" />';
+
+            }
+
+            # If this is a Photosynthesis bill note, then display it on the page earlier, as a
+            # statement by the legislator.
+            if ($comment['type'] == 'photosynthesis')
+            {
+
+                $legislator_statement = '<h2>Legislator’s Statement</h2>';
+                $legislator_statement .= $comment['comment'];
+
+                $page_body = str_ireplace('<!--legislator_statement-->', $legislator_statement, $page_body);
+
+            }
+
         }
 
         # If this comment is an editor's pick, apply a special style and add a note.

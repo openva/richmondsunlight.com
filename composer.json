@@ -20,8 +20,6 @@
         "phpmailer/phpmailer": "~6.1",
         "ezyang/htmlpurifier":"~4.9",
         "doctrine/instantiator":"1.0.5",
-        "components/jquery": "~1.7",
-        "components/jqueryui": "~1.8",
         "simplepie/simplepie": "1.5.4",
         "romainneutron/sphinx-search-api-php-client": "2.0.8.1",
         "tijsverkoyen/akismet": "~1",
