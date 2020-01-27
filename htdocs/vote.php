@@ -32,7 +32,7 @@ else
 {
     die();
 }
-if ( isset($_GET['year']) && strlen($_GET['year'] == 4) && is_numeric($_GET['year']) )
+if ( isset($_GET['year']) && (strlen($_GET['year']) == 4) && is_numeric($_GET['year']) )
 {
     $year = $_GET['year'];
 }
@@ -71,7 +71,7 @@ $sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber, bills.ca
 			ON bills_status.lis_vote_id=votes.lis_id
 		LEFT JOIN committees
 			ON votes.committee_id=committees.id
-		WHERE bills.number="' . $bill . '" AND sessions.year=' . $year;
+        WHERE bills.number="' . $bill . '" AND sessions.year=' . $year;
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
 {
