@@ -37,6 +37,7 @@ script:
   && ./deploy/config_variables.sh
   && sonar-scanner
   && ./docker-run.sh
+  && sleep 30
   && ./deploy/tests/run-all.sh
   && ./deploy/aws_credentials.sh
   && zip -qr rs-web-deploy . --exclude *.git* *.scannerwork*
