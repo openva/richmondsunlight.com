@@ -860,6 +860,28 @@ if ($bill['word_count'] > 0)
     $page_body .= ' <a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number']) . '/fulltext/">Read&nbsp;the&nbsp;Bill&nbsp;»</a></p>';
 }
 
+/*
+ * Show an anti-disinformation warning on vaccine bills.
+ */
+if (
+        in_array('vaccine', array_values((array)$bill['tags']))
+        || 
+        in_array('vaccines', array_values((array)$bill['tags']))
+    )
+{
+
+    $page_body .= '<div id="disinformation">
+        <h2>Looking for Vaccine Info?</h2>
+
+        <p>When it comes to health, everyone wants reliable, up-to-date information. The U.S.
+        Centers for Disease Control (CDC) has information that can help answer questions you
+        might have about vaccines.</p>
+
+        <p><a href="https://www.cdc.gov/vaccines/vac-gen/">Go to CDC.gov</a></p>
+    </div>';
+
+}
+
 # If we have any notes about this bill.
 if (!empty($bill['notes']))
 {
