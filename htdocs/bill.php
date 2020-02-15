@@ -1015,7 +1015,7 @@ if (isset($bill['places']) && (count($bill['places']) > 0))
     foreach ($bill['places'] as $place)
     {
         $place = (array) $place;
-        $page_body .= '&amp;markers=' . $place['latitude'] . ',' . $place['longitude'];
+        $page_body .= '&amp;markers=' . $place['longitude'] . ',' . $place['latitude'];
     }
     $page_body .= '" /></div>';
 }

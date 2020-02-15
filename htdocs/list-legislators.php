@@ -111,8 +111,7 @@ $page_body .= '</div>';
 
 /*$page_body .= "\r\r\t".'<div id="location">';
 
-# Get a listing legislators with their latitude and longitude, remembering that these are,
-# bizarrely, reversed in the database.
+# Get a listing legislators with their latitude and longitude.
 $sql = 'SELECT id, shortname, name, chamber, latitude, longitude
         FROM representatives
         WHERE (date_ended IS NULL OR date_ended > now())
@@ -149,7 +148,7 @@ if (mysqli_num_rows($result) > 0)
         $legislator = array_map('stripslashes', $legislator);
 
         $page_body .= "\r\r
-            var point = new GLatLng(".$legislator['longitude'].", ".$legislator['latitude'].");
+            var point = new GLatLng(".$legislator['latitude'].", ".$legislator['longitude'].");
             var marker = createMarker(point,'".pivot($legislator['name'])."')
             map.addOverlay(marker);";
 
