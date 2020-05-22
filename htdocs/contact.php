@@ -151,6 +151,22 @@ if (isset($_POST['form_data']))
     else
     {
 
+        $spam_strings = array(
+            'explainer video',
+            'click here',
+            'guest post',
+            'affiliate account',
+            'content syndication'
+        );
+        foreach ($spam_strings as $spam_string)
+        {
+            if (stripos($form_data['comments'], $spam_string) !== false)
+            {
+                $is_spam = true;
+                break;
+            }
+        }
+
         /*
          * Query Akismet to see if this is spam.
          */
@@ -169,6 +185,7 @@ if (isset($_POST['form_data']))
          */
         if ($is_spam)
         {
+            header("HTTP/1.0 404 Not Found");
             die();
         }
 
