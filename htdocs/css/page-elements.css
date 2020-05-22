@@ -811,3 +811,10 @@ meter {
 	background: #CC4600;
 	background:orange;
 	}
+
+/* Disinformation alerts (e.g., vaccine bills) */
+#disinformation {
+	border: 3px solid red;
+	padding: .5em;
+	margin: .5em;
+}
