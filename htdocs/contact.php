@@ -94,7 +94,7 @@ if (isset($_POST['form_data']))
         $ip_data = json_decode($json);
         if ($ip_data !== FALSE)
         {
-            if ($ip_data['countryCode'] != 'US')
+            if ($ip_data->countryCode != 'US')
             {
                 die();
             }
