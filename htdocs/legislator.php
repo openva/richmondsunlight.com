@@ -190,22 +190,60 @@ if ($district_data == FALSE)
     }
 }
 
-$html_head .= ' <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/leaflet.js"></script>
+/*
+ * Convert lat, lon to lon, lat
+ */
+foreach($district_data->shape->coordinates[0][0] as &$pair)
+{
+    $tmp = $pair[0];
+    $pair[0] = $pair[1];
+    $pair[1] = $tmp;
+}
+
+$html_head .= ' <script src="https://api.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.js"></script>
+<link href="https://api.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.css" rel="stylesheet" />
     <style>
         #district_map { height: 250px; }
     </style>
     <script>
         $( document ).ready(function() {
-            var district_map = L.map("district_map").setView([' . $district_data->centroid->coordinates[0] . ', ' . $district_data->centroid->coordinates[1] . '], 7);
-            L.tileLayer("https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}", {
-                attribution: "Map data &copy; <a href=http://openstreetmap.org>OpenStreetMap</a> contributors, <a href=http://creativecommons.org/licenses/by-sa/2.0/>CC-BY-SA</a>, Imagery © <a href=http://mapbox.com>Mapbox</a>",
-                maxZoom: 18,
-                id: "mapbox.streets",
-                accessToken: "' . MAPBOX_TOKEN . '"
-            }).addTo(district_map);
-            var district = L.polygon(' . json_encode($district_data->shape->coordinates[0][0]) . ').addTo(district_map);
-            district_map.fitBounds(district.getBounds());
+
+            mapboxgl.accessToken = "' . MAPBOX_TOKEN . '";
+            var map = new mapboxgl.Map({
+                container: "district_map",
+                style: "mapbox://styles/mapbox/streets-v11",
+                center: [' . $district_data->centroid->coordinates[0] . ', ' . $district_data->centroid->coordinates[1] . '],
+                zoom: 7
+            });
+
+            map.on("load", function() {
+                map.addSource("boundaries", {
+                    "type": "geojson",
+                    "data": {
+                        "type": "Feature",
+                        "properties": {},
+                        "geometry": {
+                            "type": "LineString",
+                            "coordinates": ' . json_encode($district_data->shape->coordinates[0][0]) . '
+                        }
+                    }
+                });
+                map.addLayer({
+                    "id": "boundaries",
+                    "type": "line",
+                    "source": "boundaries",
+                    "layout": {
+                        "line-join": "round",
+                        "line-cap": "round"
+                    },
+                    "paint": {
+                        "line-color": "#888",
+                        "line-width": 8
+                    }
+                });  
+               
+            });
+
         });
     </script>';
 
