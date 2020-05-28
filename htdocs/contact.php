@@ -84,6 +84,23 @@ function show_form($form_data)
 if (isset($_POST['form_data']))
 {
 
+    /*
+     * Block non-US IPs. (This is where most spam comes from.)
+     */
+    $url = 'http://ip-api.com/json/' . $_SERVER['REMOTE_ADDR'];
+    $json = get_content($url);
+    if ($json !== FALSE)
+    {
+        $ip_data = json_decode($json);
+        if ($ip_data !== FALSE)
+        {
+            if ($ip_data->countryCode != 'US')
+            {
+                die();
+            }
+        }
+    }
+
     # Give spammers the boot.
     if (!empty($form_data['zip']))
     {

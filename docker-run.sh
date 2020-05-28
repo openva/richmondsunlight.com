@@ -22,7 +22,7 @@ if [ ! -d "api/" ]; then
 
     mv rs-api-master/ api/
 
-    # Concatenate the database dumps into a single file, for MySQL to load
+    # Concatenate the database dumps into a single file, for MariaDB to load
     cd deploy/
     cat mysql/structure.sql mysql/basic-contents.sql mysql/test-records.sql > ../api/deploy/database.sql
     cd ..
@@ -33,6 +33,9 @@ fi
 
 # Stand it up
 docker-compose build && docker-compose up -d
+
+# Wait for MariaDB to be available
+while ! nc -z localhost 3306; do sleep 1; done
 
 # Run the site setup script
 WEB_ID=$(docker ps |grep rs_web |cut -d " " -f 1)
