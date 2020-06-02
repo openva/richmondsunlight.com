@@ -173,7 +173,14 @@ if (isset($_POST['form_data']))
             'click here',
             'guest post',
             'affiliate account',
-            'content syndication'
+            'affiliate sales',
+            'content syndication',
+            'growth hacking',
+            'LinkedIn',
+            'marketing plan',
+            'lead prospecting',
+            ' SEO ',
+            'low pricing',
         );
         foreach ($spam_strings as $spam_string)
         {
