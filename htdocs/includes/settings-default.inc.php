@@ -10,19 +10,19 @@
 
 # THE CURRENT SESSION
 # As defined by Richmond Sunlight's database
-define('SESSION_ID', 23);
+define('SESSION_ID', 24);
 
 # Is this the main session or a special session? As defined by Richmond Sunlight's database.
-define('SESSION_SUFFIX', '');
+define('SESSION_SUFFIX', '1');
 
 # As defined by the GA LIS' database.
-define('SESSION_LIS_ID', '201');
+define('SESSION_LIS_ID', '202');
 
 # As defined by the year.
 define('SESSION_YEAR', 2020);
 
 # Determine whether the GA is currently in session.
-define('IN_SESSION', 'N');
+define('IN_SESSION', 'Y');
 
 # Set the FTP auth pair for legislative data.
 define('LIS_FTP_USERNAME', '');
