@@ -33,3 +33,4 @@ composer.phar
 
 .php_cs.dist
 .php_cs.cache
+.DS_Store
