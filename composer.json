@@ -23,7 +23,7 @@
         "simplepie/simplepie": "1.5.5",
         "romainneutron/sphinx-search-api-php-client": "2.0.8.1",
         "tijsverkoyen/akismet": "~1",
-        "aws/aws-sdk-php": "~2.0"
+        "aws/aws-sdk-php": "~3.151"
     },
     "autoload": {
         "psr-4": {
