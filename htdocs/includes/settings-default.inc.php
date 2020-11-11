@@ -22,7 +22,7 @@ define('SESSION_LIS_ID', '202');
 define('SESSION_YEAR', 2020);
 
 # Determine whether the GA is currently in session.
-define('IN_SESSION', 'Y');
+define('IN_SESSION', 'N');
 
 # Set the FTP auth pair for legislative data.
 define('LIS_FTP_USERNAME', '');
