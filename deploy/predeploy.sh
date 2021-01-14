@@ -22,7 +22,9 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
         sudo apt-get -y purge $(dpkg -l | grep php| awk '{print $2}' |tr "\n" " ")
 
         # Add the PHP 5 repo
+        sudo apt install python-software-properties
         sudo add-apt-repository -y ppa:ondrej/php
+    
     fi
 
     # Add the Certbot repo
@@ -42,9 +44,11 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
     sudo apt-get update
     sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
     sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apache2 curl geoip-database git gzip \
-    unzip openssl php5.6 php5.6-mysql mysql-client php5.6-curl php5.6-mbstring php5.6-apc \
-    php5.6-mbstring php5.6-xml python python-pip s3cmd sphinxsearch wget awscli certbot \
-    python-certbot-apache yarn redis-server php-redis
+    unzip openssl mysql-client \
+    php5.6 php5.6-mysql php5.6-curl php5.6-mbstring php5.6-apc php5.6-xml php5.6-fpm \
+    php7.4 php7.4-mysql php7.4-curl php5.6-mbstring php7.4-apc php7.4-xml php7.4-fpm\
+    python python-pip s3cmd sphinxsearch wget awscli certbot \
+    python-certbot-apache yarn redis-server php-redis \
 
     # Install mod_pagespeed
     dpkg -s mod-pagespeed-beta
