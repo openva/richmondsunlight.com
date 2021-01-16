@@ -331,7 +331,7 @@ if (isset($_POST['submit']))
             $page_body = '
                 <h2>Thanks for Registering!</h2>
                 
-				<p>Now that you’re set up, you can start using tracking legislation.</p>
+				<p>Now that you’re set up, you can start tracking legislation.</p>
 
 				<p style="font-family: Georgia, Palatino, \'Times New Roman\', Times, sans-serif;
 					font-size: 2em; text-align: center; margin: 2em 0;">
