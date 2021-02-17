@@ -1,4 +1,5 @@
 <VirtualHost *:80>
+
   Protocols h2 http/1.1
   ServerName richmondsunlight.com
   ServerAlias www.richmondsunlight.com
@@ -6,7 +7,16 @@
   RewriteMap tolower int:tolower
   ErrorLog ${APACHE_LOG_DIR}/richmondsunlight.com.error.log
   CustomLog ${APACHE_LOG_DIR}/richmondsunlight.com.access.log combined
+  RewriteMap tolower int:tolower
+
+  <Directory "/var/www/richmondsunlight.com">
+    AllowOverride All
+  </Directory>
+
+  <Directory "/var/www/richmondsunlight.com/htdocs/matomo">
+    <FilesMatch \.php$>
+      SetHandler "proxy:unix:/run/php/php7.4-fpm.sock|fcgi://localhost"
+    </FilesMatch>
+  </Directory>
+
 </VirtualHost>
-<Directory "/var/www/richmondsunlight.com">
-	AllowOverride All
-</Directory>

@@ -867,6 +867,12 @@ if (
         in_array('vaccine', array_values((array)$bill['tags']))
         || 
         in_array('vaccines', array_values((array)$bill['tags']))
+        || 
+        in_array('COVID', array_values((array)$bill['tags']))
+        || 
+        stripos($bill['summary'], ' vaccin') !== FALSE
+        ||
+        stripos($bill['summary'], ' COVID') !== FALSE
     )
 {
 
@@ -878,6 +884,10 @@ if (
         might have about vaccines.</p>
 
         <p><a href="https://www.cdc.gov/vaccines/vac-gen/">Go to CDC.gov</a></p>
+
+        <p>Richmond Sunlight prohibits comments that spread propaganda about COVID-19 or
+        COVID vaccines. We will promptly delete any claims that COVID isn’t serious, or
+        claims that vaccines are unsafe or ineffective.</p>
     </div>';
 
 }
