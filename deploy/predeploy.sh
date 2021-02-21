@@ -48,7 +48,7 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
     php5.6 php5.6-mysql php5.6-curl php5.6-mbstring php5.6-apc php5.6-xml php5.6-fpm \
     php7.4 php7.4-mysql php7.4-curl php5.6-mbstring php7.4-apc php7.4-xml php7.4-fpm\
     python python-pip s3cmd sphinxsearch wget awscli certbot \
-    python-certbot-apache yarn redis-server php-redis \
+    python-certbot-apache yarn \
 
     # Install mod_pagespeed
     dpkg -s mod-pagespeed-beta
