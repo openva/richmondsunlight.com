@@ -27,9 +27,9 @@ $browser_title = 'Tracking the Virginia General Assembly';
 $site_section = 'home';
 
 # PAGE CONTENT
-$page_body = '<p>The 2021 Virginia General Assembly session will begin on January 13, and
-			will continue for at least 30 days. Here you can read <a href="/bills/">the bills
-			that are proposed</a>.</p>';
+$page_body = '<p>The 2021 Virginia General Assembly session began on January 13, and
+			continue until March 1. Here you can read <a href="/bills/">the bills
+			that were proposed</a>.</p>';
 
 $sql = 'SELECT COUNT(*) AS count, tags.tag
 		FROM tags
