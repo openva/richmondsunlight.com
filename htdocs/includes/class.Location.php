@@ -20,7 +20,7 @@ class Location
         }
 
         # Assemble our URL, instructing Yahoo to return a serialized PHP array.
-        $url = 'https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=' . urlencode($q) . '&benchmark=9&format=json';
+        $url = 'https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=' . urlencode($q) . '&benchmark=4&format=json';
 
         # Retrieve the resulting serialized array.
         $response = get_content($url);
