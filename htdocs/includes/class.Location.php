@@ -62,8 +62,8 @@ class Location
         }
 
         # Assemble our URL.
-        $url = 'https://openstates.org/api/v1/legislators/geo/?apikey=' . OPENSTATES_KEY . '&lat='
-            . $this->latitude . '&long=' . $this->longitude;
+        $url = 'https://v3.openstates.org/people.geo?apikey=' . OPENSTATES_KEY . '&lat='
+                . $this->latitude . '&lng=' . $this->longitude;
 
         # Retrieve the resulting JSON..
         $district = get_content($url);
@@ -77,24 +77,25 @@ class Location
         $district = json_decode($district, TRUE);
 
         # If this isn't an array with two elements (one for each legislator), bail.
-        if (count($district) != 2)
+        if (count($district['results']) != 2)
         {
             return FALSE;
         }
 
         $result = new stdClass();
-        foreach ($district as $legislator)
+        foreach ($district['results'] as $legislator)
         {
 
             # If it's the house.
-            if ($legislator['chamber'] == 'lower')
+            if ($legislator['current_role']['org_classification'] == 'lower')
             {
-                $result->house = district_to_id($legislator['district'], 'house');
+                $result->house = district_to_id($legislator['current_role']['district'], 'house');
             }
+
             # Else if it's the senate.
-            elseif ($legislator['chamber'] == 'upper')
+            elseif ($legislator['current_role']['org_classification'] == 'upper')
             {
-                $result->senate = district_to_id($legislator['district'], 'senate');
+                $result->senate = district_to_id($legislator['current_role']['district'], 'senate');
             }
 
         }
