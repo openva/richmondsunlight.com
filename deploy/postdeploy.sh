@@ -55,7 +55,7 @@ then
     sudo cp deploy/sphinx.conf /etc/sphinxsearch/sphinx.conf
     sudo /etc/init.d/sphinxsearch restart
 
-    # Index the database, continuing after logout, because it ~40 minutes to run
+    # Index the database, continuing after logout, because it takes ~40 minutes to run
     nohup sudo indexer --all --rotate > /dev/null 2>&1 &
 fi
 
