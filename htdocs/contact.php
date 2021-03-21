@@ -73,6 +73,7 @@ function show_form($form_data)
 		<div style="display: none;">
 			<input type="text" size="2" maxlength="2" name="form_data[zip]" id="message-zip" />
 			<label for="message-zip">Leave this field empty</label><br />
+            <input type="text" size="9" maxlength="9" name="form_data[timestamp]" id="message-timestamp" value="' . time() . '" />
 		</div>
 
 		<p><input type="submit" name="submit" value="Send Mail"></p>
@@ -107,6 +108,11 @@ if (isset($_POST['form_data']))
         die();
     }
 
+    # Prohibit any emails sent suspiciously quickly.
+    if ( (time() - $form_data['timestamp']) <  10)
+    {
+        die();
+    }
     # Filter out newlines to block injection attacks.
     $form_data['email'] = preg_replace("/\r/", "", $form_data['email']);
     $form_data['email'] = preg_replace("/\n/", "", $form_data['email']);
