@@ -188,6 +188,7 @@ if (isset($_POST['form_data']))
             'lead prospecting',
             ' SEO ',
             'low pricing',
+            'copyrighted image'
         );
         foreach ($spam_strings as $spam_string)
         {
