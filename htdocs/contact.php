@@ -232,7 +232,7 @@ if (isset($_POST['form_data']))
         'X-Originating-IP: ' . $_SERVER['REMOTE_ADDR'] . "\n" .
         'X-Originating-URL: ' . $_SERVER['REQUEST_URI']
         );
-        $page_body .= '<p>E-mail sent. Thanks for writing!</p>';
+        $page_body .= '<p>Email sent. Thanks for writing!</p>';
 
     }
 }
@@ -256,7 +256,7 @@ else
 
     $page_body = '<p>Found a mistake? Have some extra information? Just want to call to say “I love
 		you”? Bring it on. <em>Completing this form will send an email to Richmond Sunlight,
-		not to any member of the General Assembly</em>.</p>';
+		not to any member of the General Assembly.</em></p>';
     $page_body .= @show_form($form_data);
 }
 
