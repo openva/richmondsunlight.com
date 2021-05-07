@@ -73,7 +73,7 @@ function show_form($form_data)
 		<div style="display: none;">
 			<input type="text" size="2" maxlength="2" name="form_data[zip]" id="message-zip" />
 			<label for="message-zip">Leave this field empty</label><br />
-            <input type="text" size="9" maxlength="9" name="form_data[timestamp]" id="message-timestamp" value="' . time() . '" />
+            <input type="text" size="9" maxlength="9" name="form_data[timestamp]" id="message-timestamp" value="' . time() * 2 . '" />
 		</div>
 
 		<p><input type="submit" name="submit" value="Send Mail"></p>
@@ -108,8 +108,9 @@ if (isset($_POST['form_data']))
         die();
     }
 
-    # Prohibit any emails sent suspiciously quickly.
-    if ( (time() - $form_data['timestamp']) <  10)
+    # Prohibit any emails sent suspiciously quickly. We double the timestamp
+    # value because spammers will plug in a timestamp value.
+    if ( (time() - ($form_data['timestamp']) / 2) < 10)
     {
         die();
     }
