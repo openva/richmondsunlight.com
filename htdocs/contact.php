@@ -73,6 +73,7 @@ function show_form($form_data)
 		<div style="display: none;">
 			<input type="text" size="2" maxlength="2" name="form_data[zip]" id="message-zip" />
 			<label for="message-zip">Leave this field empty</label><br />
+            <input type="text" size="9" maxlength="9" name="form_data[timestamp]" id="message-timestamp" value="' . time() * 2 . '" />
 		</div>
 
 		<p><input type="submit" name="submit" value="Send Mail"></p>
@@ -107,6 +108,12 @@ if (isset($_POST['form_data']))
         die();
     }
 
+    # Prohibit any emails sent suspiciously quickly. We double the timestamp
+    # value because spammers will plug in a timestamp value.
+    if ( (time() - ($form_data['timestamp']) / 2) < 10)
+    {
+        die();
+    }
     # Filter out newlines to block injection attacks.
     $form_data['email'] = preg_replace("/\r/", "", $form_data['email']);
     $form_data['email'] = preg_replace("/\n/", "", $form_data['email']);
@@ -173,7 +180,15 @@ if (isset($_POST['form_data']))
             'click here',
             'guest post',
             'affiliate account',
-            'content syndication'
+            'affiliate sales',
+            'content syndication',
+            'growth hacking',
+            'LinkedIn',
+            'marketing plan',
+            'lead prospecting',
+            ' SEO ',
+            'low pricing',
+            'copyrighted image'
         );
         foreach ($spam_strings as $spam_string)
         {
@@ -218,7 +233,7 @@ if (isset($_POST['form_data']))
         'X-Originating-IP: ' . $_SERVER['REMOTE_ADDR'] . "\n" .
         'X-Originating-URL: ' . $_SERVER['REQUEST_URI']
         );
-        $page_body .= '<p>E-mail sent. Thanks for writing!</p>';
+        $page_body .= '<p>Email sent. Thanks for writing!</p>';
 
     }
 }
@@ -242,7 +257,7 @@ else
 
     $page_body = '<p>Found a mistake? Have some extra information? Just want to call to say “I love
 		you”? Bring it on. <em>Completing this form will send an email to Richmond Sunlight,
-		not to any member of the General Assembly</em>.</p>';
+		not to any member of the General Assembly.</em></p>';
     $page_body .= @show_form($form_data);
 }
 

@@ -20,7 +20,7 @@ class Location
         }
 
         # Assemble our URL, instructing Yahoo to return a serialized PHP array.
-        $url = 'https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=' . urlencode($q) . '&benchmark=9&format=json';
+        $url = 'https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=' . urlencode($q) . '&benchmark=4&format=json';
 
         # Retrieve the resulting serialized array.
         $response = get_content($url);
@@ -62,8 +62,8 @@ class Location
         }
 
         # Assemble our URL.
-        $url = 'https://openstates.org/api/v1/legislators/geo/?apikey=' . OPENSTATES_KEY . '&lat='
-            . $this->latitude . '&long=' . $this->longitude;
+        $url = 'https://v3.openstates.org/people.geo?apikey=' . OPENSTATES_KEY . '&lat='
+                . $this->latitude . '&lng=' . $this->longitude;
 
         # Retrieve the resulting JSON..
         $district = get_content($url);
@@ -76,25 +76,32 @@ class Location
 
         $district = json_decode($district, TRUE);
 
-        # If this isn't an array with two elements (one for each legislator), bail.
-        if (count($district) != 2)
+        # If this isn't an array with at least two elements (one for each legislator), bail.
+        if (count($district['results']) < 2)
         {
             return FALSE;
         }
 
         $result = new stdClass();
-        foreach ($district as $legislator)
+        foreach ($district['results'] as $legislator)
         {
 
-            # If it's the house.
-            if ($legislator['chamber'] == 'lower')
+            # Make sure it's a state seat.
+            if ($legislator['jurisdiction']['classification'] != 'state')
             {
-                $result->house = district_to_id($legislator['district'], 'house');
+                continue;
             }
-            # Else if it's the senate.
-            elseif ($legislator['chamber'] == 'upper')
+
+            # If it's the house.
+            if ($legislator['current_role']['org_classification'] == 'lower')
             {
-                $result->senate = district_to_id($legislator['district'], 'senate');
+                $result->house = district_to_id($legislator['current_role']['district'], 'house');
+            }
+
+            # Else if it's the senate.
+            elseif ($legislator['current_role']['org_classification'] == 'upper')
+            {
+                $result->senate = district_to_id($legislator['current_role']['district'], 'senate');
             }
 
         }
