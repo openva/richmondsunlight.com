@@ -17,7 +17,7 @@
         }
     },
     "require": {
-        "phpmailer/phpmailer": "~6.1",
+        "phpmailer/phpmailer": "~6.5",
         "ezyang/htmlpurifier":"~4.9",
         "doctrine/instantiator":"1.4.0",
         "simplepie/simplepie": "1.5.5",
