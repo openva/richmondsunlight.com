@@ -76,8 +76,8 @@ class Location
 
         $district = json_decode($district, TRUE);
 
-        # If this isn't an array with two elements (one for each legislator), bail.
-        if (count($district['results']) != 2)
+        # If this isn't an array with at least two elements (one for each legislator), bail.
+        if (count($district['results']) < 2)
         {
             return FALSE;
         }
@@ -85,6 +85,12 @@ class Location
         $result = new stdClass();
         foreach ($district['results'] as $legislator)
         {
+
+            # Make sure it's a state seat.
+            if ($legislator['jurisdiction']['classification'] != 'state')
+            {
+                continue;
+            }
 
             # If it's the house.
             if ($legislator['current_role']['org_classification'] == 'lower')
