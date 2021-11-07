@@ -45,8 +45,8 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
     sudo DEBIAN_FRONTEND=noninteractive apt-get -y upgrade
     sudo DEBIAN_FRONTEND=noninteractive apt-get install -y apache2 curl geoip-database git gzip \
     unzip openssl mysql-client \
-    php5.6 php5.6-mysql php5.6-curl php5.6-mbstring php5.6-apc php5.6-xml php5.6-fpm \
-    php7.4 php7.4-mysql php7.4-curl php5.6-mbstring php7.4-apc php7.4-xml php7.4-fpm\
+    php5.6 php5.6-mysql php5.6-curl php5.6-mbstring php5.6-apc php5.6-xml php5.6-fpm php5.6-memcached \
+    php7.4 php7.4-mysql php7.4-curl php5.6-mbstring php7.4-apc php7.4-xml php7.4-fpm php7.4-memcached \
     python python-pip s3cmd sphinxsearch wget awscli certbot \
     python-certbot-apache yarn \
 
