@@ -13,7 +13,7 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
         sudo /sbin/mkswap /var/swap.1
         sudo chmod 600 /var/swap.1
         sudo /sbin/swapon /var/swap.1
-        echo "/var/swap.1   swap    swap    defaults        0   0" | sudo tee /etc/fstab
+        echo "/var/swap.1   swap    swap    defaults        0   0" | sudo tee -a /etc/fstab
     fi
 
     # Remove all PHP packages (they may well be PHP 7)
