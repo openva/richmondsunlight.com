@@ -58,9 +58,6 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
         sudo apt-get -f install
         rm mod-pagespeed-*.deb
     fi
-    
-    # Enable Apache's SSL module
-    sudo a2enmod ssl
 
     # Install Codedeploy
     if [ ! -d /opt/codedeploy-agent/ ]; then
