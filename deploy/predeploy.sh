@@ -99,6 +99,7 @@ EOF
 
     # Enable Sphinx's server
     echo "START=yes" | sudo tee /etc/default/sphinxsearch
+    sudo cp /etc/sphinxsearch/sphinx.conf.sample /etc/sphinxsearch/sphinx.conf
     sudo /etc/init.d/sphinxsearch start
     
 fi
