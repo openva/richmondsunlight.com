@@ -37,7 +37,7 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
     # Set up Apache
     sudo cp deploy/virtualhost-"$SITE_URL".txt /etc/apache2/sites-available/"$SITE_URL".conf
     sudo a2ensite "$SITE_URL"
-    sudo a2enmod headers expires rewrite http2
+    sudo a2enmod headers expires rewrite http2 ssl
     sudo systemctl reload apache2
 
     # Install a certificate
