@@ -38,6 +38,7 @@ jobs:
           ./deploy/increase_verbosity.sh; fi
   deploy:
     runs-on: ubuntu-18.04
+    needs: build # Don't deploy unless the build succeeds
     env:
       GITHUB_BRANCH: ${{ github.head_ref }} 
     steps:
