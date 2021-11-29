@@ -1,0 +1,64 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-18.04
+    env:
+      GITHUB_BRANCH: ${{ github.head_ref }}
+    steps:
+      - name: Install dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: >-
+          sudo apt-get update
+          sudo apt-get install -y awscli php5.6-cli php5.6-curl php5.6-memcached
+          php5.6-mysql zip
+      - uses: actions/checkout@v2
+      - run: 'sudo apt-key adv --fetch-keys http://dl.yarnpkg.com/debian/pubkey.gpg'
+      - run: >-
+          echo "deb http://dl.yarnpkg.com/debian/ stable main" | sudo tee
+          /etc/apt/sources.list.d/yarn.list
+      - run: sudo apt-get update -qq
+      - run: sudo apt-get install -y -qq yarn=1.19.2-1
+      - run: composer install
+      - run: cd htdocs/js/vendor; yarn build
+      - run: cd ../../..
+      - run: find htdocs/*.php -print0 |xargs -0 -n1 -P8 php -l
+      - run: >-
+          ./deploy/branch_deploy.sh && ./deploy/config_variables.sh &&
+          ./deploy/aws_credentials.sh && zip -qr rs-web-deploy . --exclude
+          *.git* *.scannerwork* && mkdir -p upload && mv rs-web-deploy.zip
+          upload/rs-web-deploy.zip
+      - run: >-
+          if [ "$GITHUB_BRANCH" = "master" ]; then mv upload/rs-web-deploy.zip
+          upload/rs-web-staging.zip; fi
+      - run: >-
+          if [ "$GITHUB_BRANCH" = "master" ]; then
+          ./deploy/increase_verbosity.sh; fi
+  deploy:
+    runs-on: ubuntu-18.04
+    env:
+      GITHUB_BRANCH: ${{ github.head_ref }} 
+    steps:
+      - uses: actions/checkout@v2
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+      - name: Create CodeDeploy Deployment
+              id: deploy
+              run: |
+                aws deploy create-deployment \
+                  --application-name application-name \
+                  --deployment-group-name RS-Web-Staging \
+                  --deployment-config-name CodeDeployDefault.OneAtATime \
+                  --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
