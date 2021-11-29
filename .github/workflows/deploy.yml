@@ -14,9 +14,10 @@ jobs:
     env:
       GITHUB_BRANCH: ${{ github.head_ref }}
     steps:
-      - name: Install dependencies (Ubuntu)
-        if: runner.os == 'Linux'
-        run: >-
+      - uses: Firenza/secrets-to-env@v1.1.0
+        with:
+          secrets: ${{ toJSON(secrets) }}
+      - run: >-
           sudo apt-get update && 
           sudo apt-get install -y awscli php5.6-cli php5.6-curl php5.6-memcached php5.6-mysql yarn zip
       - uses: actions/checkout@v2
