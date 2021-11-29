@@ -51,7 +51,7 @@ jobs:
       - name: Create CodeDeploy Deployment
         run: |
           aws deploy create-deployment \
-            --application-name application-name \
+            --application-name RS-Web \
             --deployment-group-name RS-Web-Staging \
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
