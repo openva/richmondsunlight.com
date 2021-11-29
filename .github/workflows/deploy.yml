@@ -24,7 +24,7 @@ jobs:
       - run: composer install
       - run: cd htdocs/js/vendor; yarn build
       - run: cd ../../..
-      - run: find htdocs/*.php -print0 |xargs -0 -n1 -P8 php -l
+      - run: find htdocs/*.php -print0 |xargs -0 -n1 -P8 php5.6 -l
       - run: >-
           ./deploy/branch_deploy.sh && ./deploy/config_variables.sh &&
           ./deploy/aws_credentials.sh && zip -qr rs-web-deploy . --exclude
