@@ -18,14 +18,9 @@ jobs:
         if: runner.os == 'Linux'
         run: >-
           sudo apt-get update && 
-          sudo apt-get install -y awscli php5.6-cli php5.6-curl php5.6-memcached php5.6-mysql zip
+          sudo apt-get install -y awscli php5.6-cli php5.6-curl php5.6-memcached php5.6-mysql yarn zip
       - uses: actions/checkout@v2
-      - run: 'sudo apt-key adv --fetch-keys http://dl.yarnpkg.com/debian/pubkey.gpg'
-      - run: >-
-          echo "deb http://dl.yarnpkg.com/debian/ stable main" | sudo tee &&
-          /etc/apt/sources.list.d/yarn.list
       - run: sudo apt-get update -qq
-      - run: sudo apt-get install -y -qq yarn=1.19.2-1
       - run: composer install
       - run: cd htdocs/js/vendor; yarn build
       - run: cd ../../..
