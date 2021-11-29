@@ -18,8 +18,7 @@ jobs:
         if: runner.os == 'Linux'
         run: >-
           sudo apt-get update && 
-          sudo apt-get install -y awscli php5.6-cli php5.6-curl php5.6-memcached &&
-          php5.6-mysql zip
+          sudo apt-get install -y awscli php5.6-cli php5.6-curl php5.6-memcached php5.6-mysql zip
       - uses: actions/checkout@v2
       - run: 'sudo apt-key adv --fetch-keys http://dl.yarnpkg.com/debian/pubkey.gpg'
       - run: >-
