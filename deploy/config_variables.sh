@@ -1,8 +1,8 @@
 #!/bin/bash
 #==================================================================================
-# Uses environment variables within Travis CI to populate includes/settings.inc.php
-# prior to deployment. This allows secrets (e.g., API keys) to be stored in Travis,
-# while the settings file is stored on GitHub.
+# Uses environment variables within GitHub to populate includes/settings.inc.php
+# prior to deployment. This allows secrets (e.g., API keys) to be stored
+# separately from the settings.
 #==================================================================================
 
 # Define the list of environment variables that we may want to populate during
@@ -44,7 +44,7 @@ done
 cp htdocs/includes/settings-default.inc.php htdocs/includes/settings.inc.php
 
 # If this is our staging site
-if [ "$TRAVIS" = true ]&& [ "$TRAVIS_BRANCH" = "master" ]
+if [ "$GITHUB_BRANCH" = "master" ]
 then
 
 	# Set the PDO_DSN value to that of our staging database

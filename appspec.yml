@@ -3,6 +3,7 @@ os: linux
 files:
   - source: ./
     destination: /var/www/richmondsunlight.com/
+file_exists_behavior: OVERWRITE
 permissions:
     - object: /var/www/richmondsunlight.com/
       owner: ubuntu
