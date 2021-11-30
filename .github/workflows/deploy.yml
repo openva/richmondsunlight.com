@@ -32,9 +32,6 @@ jobs:
           *.git* *.scannerwork* && mkdir -p upload && mv rs-web-deploy.zip
           upload/rs-web-deploy.zip
       - run: >-
-          if [ "$GITHUB_BRANCH" = "master" ]; then mv upload/rs-web-deploy.zip
-          upload/rs-web-staging.zip; fi
-      - run: >-
           if [ "$GITHUB_BRANCH" = "master" ]; then
           ./deploy/increase_verbosity.sh; fi
   deploy:
