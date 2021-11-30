@@ -1,0 +1,22 @@
+version: 0.0
+os: linux
+files:
+  - source: ./
+    destination: /var/www/staging.richmondsunlight.com/
+file_exists_behavior: OVERWRITE
+permissions:
+    - object: /var/www/staging.richmondsunlight.com/
+      owner: ubuntu
+      group: ubuntu
+      mode: 755
+      acls:
+        - "d:u::rwx"
+        - "d:g::rwx"
+        - "d:o::rwx"
+      type:
+       - directory
+hooks:
+  BeforeInstall:
+    - location: deploy/predeploy.sh
+  AfterInstall:
+    - location: deploy/postdeploy.sh
