@@ -36,9 +36,9 @@ jobs:
           ./deploy/increase_verbosity.sh; fi
       - run: >-
           if [ "$GITHUB_BRANCH" = "master" ]; then
-            mv appspec-staging.yml appspec.yml
+            cp appspec-staging.yml appspec.yml
           elif [ "$GITHUB_BRANCH" = "deploy" ]; then
-            mv appspec-deploy.yml appspec.yml
+            cp appspec-deploy.yml appspec.yml
           fi
   deploy:
     runs-on: ubuntu-18.04
