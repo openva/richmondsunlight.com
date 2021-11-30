@@ -32,11 +32,14 @@ jobs:
           *.git* *.scannerwork* && mkdir -p upload && mv rs-web-deploy.zip
           upload/rs-web-deploy.zip
       - run: >-
-          if [ "$GITHUB_BRANCH" = "master" ]; then mv upload/rs-web-deploy.zip
-          upload/rs-web-staging.zip; fi
-      - run: >-
           if [ "$GITHUB_BRANCH" = "master" ]; then
           ./deploy/increase_verbosity.sh; fi
+      - run: >-
+          if [ "$GITHUB_BRANCH" = "master" ]; then
+            mv appspec-staging.yml appspec.yml
+          elif [ "$GITHUB_BRANCH" = "deploy" ]; then
+            mv appspec-deploy.yml appspec.yml
+          fi
   deploy:
     runs-on: ubuntu-18.04
     needs: build # Don't deploy unless the build succeeds
