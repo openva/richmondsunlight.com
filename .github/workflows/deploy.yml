@@ -64,7 +64,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-1
       - name: Staging CodeDeploy Deployment
-        if: ${{ github.head_ref == 'master' }}
+        if: ${{ GITHUB_BRANCH == 'master' }}
         run: |
           aws deploy create-deployment \
             --application-name RS-Web \
@@ -72,7 +72,7 @@ jobs:
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
       - name: Production CodeDeploy Deployment
-        if: ${{ github.head_ref == 'deploy' }}
+        if: ${{ GITHUB_BRANCH == 'deploy' }}
         run: |
           aws deploy create-deployment \
             --application-name RS-Web \
