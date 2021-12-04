@@ -47,11 +47,14 @@ jobs:
         with:
           name: codebase
           path: .
+    outputs:
+      github_branch: ${{ github.head_ref }}
+
   deploy:
     runs-on: ubuntu-18.04
     needs: build # Don't deploy unless the build succeeds
     env:
-      GITHUB_BRANCH: ${{ github.head_ref }} 
+      GITHUB_BRANCH: ${{ needs.build.outputs.github_branch }} 
     steps:
       - name: Get the secret-populated code
         uses: actions/download-artifact@v2
@@ -64,7 +67,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-1
       - name: Staging CodeDeploy Deployment
-        if: ${{ GITHUB_BRANCH == 'master' }}
+        if: ${{ needs.build.outputs.github_branch == 'master' }}
         run: |
           aws deploy create-deployment \
             --application-name RS-Web \
@@ -72,7 +75,7 @@ jobs:
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
       - name: Production CodeDeploy Deployment
-        if: ${{ GITHUB_BRANCH == 'deploy' }}
+        if: ${{ needs.build.outputs.github_branch == 'deploy' }}
         run: |
           aws deploy create-deployment \
             --application-name RS-Web \
