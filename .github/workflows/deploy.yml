@@ -48,9 +48,10 @@ jobs:
           name: codebase
           path: .
       - name: Save branch name for the deploy step
+        id: save_branch
         run: echo "::set-output name=github_branch::${{ github.head_ref }}"
     outputs:
-      github_branch: ${{ github.head_ref }}
+      github_branch: ${{ steps.save_branch.outputs.github_branch }}
 
   deploy:
     runs-on: ubuntu-18.04
