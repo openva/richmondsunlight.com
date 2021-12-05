@@ -47,6 +47,8 @@ jobs:
         with:
           name: codebase
           path: .
+      - name: Save branch name for the deploy step
+        run: echo "::set-output name=github_branch::${{ github.head_ref }}"
     outputs:
       github_branch: ${{ github.head_ref }}
 
