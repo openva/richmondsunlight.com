@@ -13,8 +13,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-18.04
-    env:
-      GITHUB_BRANCH: ${{ github.head_ref }}
     steps:
       - uses: Firenza/secrets-to-env@v1.1.0
         with:
