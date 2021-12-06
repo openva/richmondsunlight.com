@@ -21,7 +21,7 @@ jobs:
         shell: bash
         run: echo ${GITHUB_REF#refs/heads/}
       - name: Make branch name available as Bash variable
-        run: env GITHUB_BRANCH=${GITHUB_REF#refs/heads/}
+        run: echo "GITHUB_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
       - run: >-
           sudo apt-get update && 
           sudo apt-get install -y awscli php5.6-cli php5.6-curl php5.6-memcached php5.6-mysql yarn zip
