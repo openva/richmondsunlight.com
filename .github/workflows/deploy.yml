@@ -22,7 +22,7 @@ jobs:
       - name: Get branch name
         shell: bash
         run: echo "##[set-output name=github_branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: save_branch
+        id: get_branch_name
       - name: Make branch name available as Bash variable
         run: GITHUB_BRANCH=${GITHUB_REF#refs/heads/}
       - run: >-
