@@ -53,6 +53,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-18.04
+    if: github.ref == 'refs/heads/master || github.ref == 'refs/heads/staging
     needs: build # Don't deploy unless the build succeeds
     steps:
       - run: echo "Deploy branch is ${{ needs.build.outputs.github_branch }}"
