@@ -17,6 +17,9 @@ jobs:
       - uses: Firenza/secrets-to-env@v1.1.0
         with:
           secrets: ${{ toJSON(secrets) }}
+      - name: Display branch name (debug step)
+        shell: bash
+        run: echo ${GITHUB_REF#refs/heads/}
       - name: Get branch name
         shell: bash
         run: echo "##[set-output name=github_branch;]$(echo ${GITHUB_REF#refs/heads/})"
