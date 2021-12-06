@@ -1,22 +1,24 @@
-name: Deploy
+name: Deploy Process
 
 on:
   push:
     branches:
       - master
+      - deploy
   pull_request:
     branches:
       - master
+      - deploy
 
 jobs:
   build:
     runs-on: ubuntu-18.04
-    env:
-      GITHUB_BRANCH: ${{ github.head_ref }}
     steps:
       - uses: Firenza/secrets-to-env@v1.1.0
         with:
           secrets: ${{ toJSON(secrets) }}
+      - name: Make branch name available as Bash variable
+        run: echo "GITHUB_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
       - run: >-
           sudo apt-get update && 
           sudo apt-get install -y awscli php5.6-cli php5.6-curl php5.6-memcached php5.6-mysql yarn zip
@@ -36,27 +38,50 @@ jobs:
           ./deploy/increase_verbosity.sh; fi
       - run: >-
           if [ "$GITHUB_BRANCH" = "master" ]; then
-            mv appspec-staging.yml appspec.yml
+            cp appspec-staging.yml appspec.yml
           elif [ "$GITHUB_BRANCH" = "deploy" ]; then
-            mv appspec-deploy.yml appspec.yml
+            cp appspec-deploy.yml appspec.yml
           fi
+      - name: Save secret-populated code for a subsequent deploy step
+        uses: actions/upload-artifact@v2
+        with:
+          name: codebase
+          path: .
+      - name: Get the branch name for use in the build step
+        shell: bash
+        run: echo "##[set-output name=github_branch;]$(echo $GITHUB_BRANCH)"
+        id: get_branch
+    outputs:
+      github_branch: ${{ steps.get_branch.outputs.github_branch }}
+
   deploy:
     runs-on: ubuntu-18.04
     needs: build # Don't deploy unless the build succeeds
-    env:
-      GITHUB_BRANCH: ${{ github.head_ref }} 
     steps:
-      - uses: actions/checkout@v2
+      - run: echo "Deploy branch is ${{ needs.build.outputs.github_branch }}"
+      - name: Get the secret-populated code
+        uses: actions/download-artifact@v2
+        with:
+          name: codebase
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v1
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-1
-      - name: Create CodeDeploy Deployment
+      - name: Staging CodeDeploy Deployment
+        if: ${{ needs.build.outputs.github_branch == 'master' }}
         run: |
           aws deploy create-deployment \
             --application-name RS-Web \
             --deployment-group-name RS-Web-Staging \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
+            --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
+      - name: Production CodeDeploy Deployment
+        if: ${{ needs.build.outputs.github_branch == 'deploy' }}
+        run: |
+          aws deploy create-deployment \
+            --application-name RS-Web \
+            --deployment-group-name RS-Web-Fleet \
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
