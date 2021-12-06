@@ -52,7 +52,7 @@ jobs:
         run: echo "##[set-output name=github_branch;]$(echo $GITHUB_BRANCH)"
         id: get_branch
     outputs:
-      github_branch: ${{ steps.save_branch.outputs.github_branch }}
+      github_branch: ${{ steps.get_branch.outputs.github_branch }}
 
   deploy:
     runs-on: ubuntu-18.04
