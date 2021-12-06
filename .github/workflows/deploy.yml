@@ -20,10 +20,6 @@ jobs:
       - name: Display branch name (debug step)
         shell: bash
         run: echo ${GITHUB_REF#refs/heads/}
-      - name: Get branch name
-        shell: bash
-        run: echo "##[set-output name=github_branch;]$(echo ${GITHUB_REF#refs/heads/})"
-        id: get_branch
       - name: Make branch name available as Bash variable
         run: env GITHUB_BRANCH=${GITHUB_REF#refs/heads/}
       - run: >-
@@ -54,6 +50,10 @@ jobs:
         with:
           name: codebase
           path: .
+      - name: Get the branch name for use in the build step
+        shell: bash
+        run: echo "##[set-output name=github_branch;]$(echo $GITHUB_BRANCH)"
+        id: get_branch
     outputs:
       github_branch: ${{ steps.save_branch.outputs.github_branch }}
 
