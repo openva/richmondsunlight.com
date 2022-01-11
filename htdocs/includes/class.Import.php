@@ -142,8 +142,8 @@ class Import
 
 		if (!$bills || empty($bills))
 		{
-			$log->put('BILLS.CSV doesn’t exist on legis.state.va.us.', 8);
-			echo 'No data found on DLAS’s FTP server.';
+			$log->put('BILLS.CSV doesn’t exist on sftp.dlas.virginia.gov.', 8);
+			echo 'No data found on DLAS’s SFTP server.';
 			return FALSE;
 		}
 
@@ -436,8 +436,9 @@ class Import
 	function committee_members_csv_fetch($dlas_session_id = SESSION_LIS_ID)
 	{
 
-		$url = 'ftp://' . LIS_FTP_USERNAME . ':' . LIS_FTP_PASSWORD . '@legis.state.va.us/fromdlas/csv'
-			. $dlas_session_id . '/CommitteeMembers.csv';$bills = get_content($url);
+		$url = 'sftp://' . LIS_FTP_USERNAME . ':' . LIS_FTP_PASSWORD . '@sftp.dlas.virginia.gov/CSV'
+			. $dlas_session_id . '/csv' . $dlas_session_id . '/CommitteeMembers.csv';
+		$bills = get_content($url);
 
 		$log = new Log;
 
@@ -445,8 +446,8 @@ class Import
 
 		if (!$members || empty($members))
 		{
-			$log->put('CommitteeMembers.csv doesn’t exist on legis.state.va.us.', 8);
-			echo 'No committee member data found on DLAS’s FTP server.';
+			$log->put('CommitteeMembers.csv doesn’t exist on sftp.dlas.virginia.gov.', 8);
+			echo 'No committee member data found on DLAS’s SFTP server.';
 			return FALSE;
 		}
 
