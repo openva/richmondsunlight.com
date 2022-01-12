@@ -319,6 +319,7 @@ if (!empty($year))
 			</ul>
 		</li>
 			<li><a href="/bills/2021/">2021</a></li>
+			<li><a href="/bills/2022/">2022</a></li>
 		</ul>
 
 		<p style="margin-top: 1em;">View bills that:</p>
