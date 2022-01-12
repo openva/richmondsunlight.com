@@ -123,42 +123,6 @@ class Import
     }
 
 	/**
-     * Fetch the latest bill CSV
-     *
-     * @param string $url
-     * @return string
-     */
-	function update_bills_csv($url)
-	{
-
-		if (empty($url))
-		{
-			return FALSE;
-		}
-
-		$log = new Log;
-
-		$bills = get_content($url);
-
-		if (!$bills || empty($bills))
-		{
-			$log->put('BILLS.CSV doesn’t exist on sftp.dlas.virginia.gov.', 8);
-			echo 'No data found on DLAS’s SFTP server.';
-			return FALSE;
-		}
-
-		# If the MD5 value of the new file is the same as the saved file, then there's nothing to update.
-		if (md5($bills) == md5_file('bills.csv'))
-		{
-			$log->put('Not updating bills, because bills.csv has not been modified since it was last downloaded.', 2);
-			return FALSE;
-		}
-
-		return $bills;
-
-	}
-
-	/**
      * Turn the CSV array into well-formatted, well-named fields.
      *
      * @param array $bill
