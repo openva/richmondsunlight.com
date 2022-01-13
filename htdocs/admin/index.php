@@ -51,8 +51,9 @@ $page_body = '
 			<a href="/admin/comments/">Comments</a> |
 			<a href="/admin/tag.php">Tag Bills</a> |
 			<a href="/admin/video/">Video</a> |
-			<a href="apc.php">APC</a>  |
-			<a href="memcache.php">Memcached</a>
+			<a href="apc.php">APC</a> |
+			<a href="memcache.php">Memcached</a> |
+			<a href="districts.php">Districts</a>
 		</div>';
 
 # Select the tags from the past 3 days that were not added by me.
