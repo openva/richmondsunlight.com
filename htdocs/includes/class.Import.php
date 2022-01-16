@@ -390,44 +390,6 @@ class Import
 		return FALSE;
 
 	}
-
-	/**
-     * Fetch the CSV listing committee members
-     *
-     * @param string $dlas_session_id
-     * @return string
-     */
-	function committee_members_csv_fetch($dlas_session_id = SESSION_LIS_ID)
-	{
-
-		$url = 'sftp://' . LIS_FTP_USERNAME . ':' . LIS_FTP_PASSWORD . '@sftp.dlas.virginia.gov/CSV'
-			. $dlas_session_id . '/csv' . $dlas_session_id . '/CommitteeMembers.csv';
-		$bills = get_content($url);
-
-		$log = new Log;
-
-		$members = get_content($url);
-
-		if (!$members || empty($members))
-		{
-			$log->put('CommitteeMembers.csv doesn’t exist on sftp.dlas.virginia.gov.', 8);
-			echo 'No committee member data found on DLAS’s SFTP server.';
-			return FALSE;
-		}
-
-		$members = trim($members);
-
-		# If the MD5 value of the new file is the same as the saved file, then there's nothing to update.
-		if ( file_exists('/tmp/committee_members.csv') && md5($members) == md5_file('/tmp/committee_members.csv') )
-		{
-			$log->put('Not updating committee members, because committee_members.csv has not been '
-				. ' modified since it was last downloaded.', 2);
-			return FALSE;
-		}
-
-		return $members;
-
-	}
 	
 	/**
      * Turn committee member CSV into an array ready to be inserted into the database
