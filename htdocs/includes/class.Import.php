@@ -123,42 +123,6 @@ class Import
     }
 
 	/**
-     * Fetch the latest bill CSV
-     *
-     * @param string $url
-     * @return string
-     */
-	function update_bills_csv($url)
-	{
-
-		if (empty($url))
-		{
-			return FALSE;
-		}
-
-		$log = new Log;
-
-		$bills = get_content($url);
-
-		if (!$bills || empty($bills))
-		{
-			$log->put('BILLS.CSV doesn’t exist on legis.state.va.us.', 8);
-			echo 'No data found on DLAS’s FTP server.';
-			return FALSE;
-		}
-
-		# If the MD5 value of the new file is the same as the saved file, then there's nothing to update.
-		if (md5($bills) == md5_file('bills.csv'))
-		{
-			$log->put('Not updating bills, because bills.csv has not been modified since it was last downloaded.', 2);
-			return FALSE;
-		}
-
-		return $bills;
-
-	}
-
-	/**
      * Turn the CSV array into well-formatted, well-named fields.
      *
      * @param array $bill
@@ -424,43 +388,6 @@ class Import
 		}
 		
 		return FALSE;
-
-	}
-
-	/**
-     * Fetch the CSV listing committee members
-     *
-     * @param string $dlas_session_id
-     * @return string
-     */
-	function committee_members_csv_fetch($dlas_session_id = SESSION_LIS_ID)
-	{
-
-		$url = 'ftp://' . LIS_FTP_USERNAME . ':' . LIS_FTP_PASSWORD . '@legis.state.va.us/fromdlas/csv'
-			. $dlas_session_id . '/CommitteeMembers.csv';$bills = get_content($url);
-
-		$log = new Log;
-
-		$members = get_content($url);
-
-		if (!$members || empty($members))
-		{
-			$log->put('CommitteeMembers.csv doesn’t exist on legis.state.va.us.', 8);
-			echo 'No committee member data found on DLAS’s FTP server.';
-			return FALSE;
-		}
-
-		$members = trim($members);
-
-		# If the MD5 value of the new file is the same as the saved file, then there's nothing to update.
-		if ( file_exists('/tmp/committee_members.csv') && md5($members) == md5_file('/tmp/committee_members.csv') )
-		{
-			$log->put('Not updating committee members, because committee_members.csv has not been '
-				. ' modified since it was last downloaded.', 2);
-			return FALSE;
-		}
-
-		return $members;
 
 	}
 	

@@ -6,9 +6,6 @@ on:
       - master
       - deploy
   pull_request:
-    branches:
-      - master
-      - deploy
 
 jobs:
   build:

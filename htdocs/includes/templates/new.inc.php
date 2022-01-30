@@ -165,106 +165,110 @@
 							</li>
 						</ul>
 					</li>
-
+					
 					<li id="t-legislators"><a href="/legislators/" accesskey="l">Legislators</a>
 						<ul>
 						<li>House »
 							<ul class="alphabetic">
-							<li>A-C »
+							<li>A–B »
 								<ul class="legislators">
 									<li><a href="/legislator/dmadams/">Del. Dawn Adams (D-Richmond)</a></li>
 									<li><a href="/legislator/lradams/">Del. Les Adams (R-Chatham)</a></li>
-									<li><a href="/legislator/ldaird/">Del. Lashrecse D. Aird (D-Petersburg)</a></li>
-									<li><a href="/legislator/aqaskew/">Del. Alex Askew (D-Virginia Beach)</a></li>
+									<li><a href="/legislator/tvanderson/">Del. Tim Anderson (R-Virginia Beach)</a></li>
 									<li><a href="/legislator/tlaustin/">Del. Terry Austin (R-Buchanan)</a></li>
 									<li><a href="/legislator/gavoli/">Del. John Avoli (R-Staunton)</a></li>
-									<li><a href="/legislator/hsayala/">Del. Hala Ayala (D-Woodbridge)</a></li>
 									<li><a href="/legislator/lbagby/">Del. Lamont Bagby (D-Richmond)</a></li>
+									<li><a href="/legislator/jsballard/">Del. Jason Ballard (R-Pearisburg)</a></li>
 									<li><a href="/legislator/aebatten/">Del. Amanda Batten (R-Toano)</a></li>
 									<li><a href="/legislator/rbbell/">Del. Rob Bell (R-Charlottesville)</a></li>
+									<li><a href="/legislator/ebbennett-parker/">Del. Elizabeth Bennett-Parker (D-Alexandria)</a></li>
 									<li><a href="/legislator/rtbloxom/">Del. Rob Bloxom (R-Accomack)</a></li>
 									<li><a href="/legislator/jmbourne/">Del. Jeff Bourne (D-Richmond)</a></li>
 									<li><a href="/legislator/embrewer/">Del. Emily Brewer (R-Suffolk)</a></li>
 									<li><a href="/legislator/dlbulova/">Del. David Bulova (D-Fairfax)</a></li>
 									<li><a href="/legislator/kjbyron/">Del. Kathy Byron (R-Lynchburg)</a></li>
+								</ul>
+							</li>
+							<li>C–F »
+								<ul class="legislators">
 									<li><a href="/legislator/jlcampbell/">Del. Jeff Campbell (R-Marion)</a></li>
 									<li><a href="/legislator/rrcampbell/">Del. Ronnie Campbell (R-Raphine)</a></li>
 									<li><a href="/legislator/bbcarr/">Del. Betsy Carr (D-Richmond)</a></li>
-									<li><a href="/legislator/jcarrollfoy/">Del. Jennifer Carroll Foy (D-Woodbridge)</a></li>
-									<li><a href="/legislator/ljcarter/">Del. Lee Carter (D-Manassas)</a></li>
-									<li><a href="/legislator/jgcole/">Del. Josh Cole (D-Stafford)</a></li>
-									<li><a href="/legislator/mlcole/">Del. Mark Cole (R-Fredericksburg)</a></li>
-									<li><a href="/legislator/cecollins/">Del. Chris Collins (R-Winchester)</a></li>
-									<li><a href="/legislator/mkcox/">Del. Kirk Cox (R-Colonial Heights)</a></li>
+									<li><a href="/legislator/macherry/">Del. Mike Cherry (R-Colonial Heights)</a></li>
+									<li><a href="/legislator/neclark/">Del. Nadarius Clark (D-Portsmouth)</a></li>
+									<li><a href="/legislator/accordoza/">A.C. Cordoza</a></li>
 									<li><a href="/legislator/cecoyner/">Del. Carrie Coyner (R-Chesterfield)</a></li>
-								</ul>
-							</li>
-							<li>D-J »
-								<ul class="legislators">
 									<li><a href="/legislator/grdavis/">Del. Glenn Davis (R-Virginia Beach)</a></li>
 									<li><a href="/legislator/kkdelaney/">Del. Karrie Delaney (D-Centreville)</a></li>
+									<li><a href="/legislator/tadurant/">Tara Durant (R-Fredericksburg)</a></li>
 									<li><a href="/legislator/jeedmunds/">Del. James Edmunds (R-South Boston)</a></li>
 									<li><a href="/legislator/cmfariss/">Del. Matt Fariss (R-Rustburg)</a></li>
 									<li><a href="/legislator/erfiller-corn/">Del. Eileen Filler-Corn (D-Fairfax Station)</a></li>
 									<li><a href="/legislator/hffowler/">Del. Buddy Fowler (R-Ashland)</a></li>
 									<li><a href="/legislator/kkfowler/">Del. Kelly Fowler (D-Virginia Beach)</a></li>
 									<li><a href="/legislator/njfreitas/">Del. Nick Freitas (R-Culpeper)</a></li>
+								</ul>
+							</li>
+							<li>G–H »
+								<ul class="legislators">
 									<li><a href="/legislator/ctgilbert/">Del. Todd Gilbert (R-Woodstock)</a></li>
+									<li><a href="/legislator/jhglass/">Del. Jackie Glass (D-Norfolk)</a></li>
 									<li><a href="/legislator/gwgooditis/">Del. Wendy Gooditis (D-Clarke)</a></li>
-									<li><a href="/legislator/ndguy/">Del. Nancy Guy (D-Virginia Beach)</a></li>
+									<li><a href="/legislator/awgraves/">Del. Angelia Williams Graves (D-Norfolk)</a></li>
+									<li><a href="/legislator/ksgreenhalgh/">Del. Karen Greenhalgh (R-Virginia Beach)</a></li>
 									<li><a href="/legislator/erguzman/">Del. Elizabeth Guzman (D-Dale City)</a></li>
 									<li><a href="/legislator/cehayes/">Del. Cliff Hayes (D-Chesapeake)</a></li>
 									<li><a href="/legislator/cthead/">Del. Chris Head (R-Roanoke)</a></li>
 									<li><a href="/legislator/dihlemer/">Del. Dan Helmer (D-Fairfax Station)</a></li>
-									<li><a href="/legislator/seheretick/">Del. Steve Heretick (D-Portsmouth)</a></li>
 									<li><a href="/legislator/clherring/">Del. Charniele Herring (D-Alexandria)</a></li>
 									<li><a href="/legislator/mkhodges/">Del. Keith Hodges (R-Urbanna)</a></li>
 									<li><a href="/legislator/pahope/">Del. Patrick Hope (D-Arlington)</a></li>
 									<li><a href="/legislator/slhudson/">Del. Sally Hudson (D-Charlottesville)</a></li>
-									<li><a href="/legislator/clhurst/">Del. Chris Hurst (D-Blacksburg)</a></li>
-									<li><a href="/legislator/cljenkins/">Del. Clinton Jenkins (D-Suffolk)</a></li>
-									<li><a href="/legislator/jcjones/">Del. Jay Jones (D-Norfolk)</a></li>
 								</ul>
 							</li>
-							<li>K-M »
+							<li>J–L »
 								<ul class="legislators">
+									<li><a href="/legislator/cljenkins/">Del. Clinton Jenkins (D-Suffolk)</a></li>
 									<li><a href="/legislator/mlkeam/">Del. Mark Keam (D-Vienna)</a></li>
 									<li><a href="/legislator/tgkilgore/">Del. Terry Kilgore (R-Gate City)</a></li>
+									<li><a href="/legislator/cpking/">Del. Candi King (D-Woodbridge)</a></li>
 									<li><a href="/legislator/bdknight/">Del. Barry Knight (R-Virginia Beach)</a></li>
 									<li><a href="/legislator/lkkory/">Del. Kaye Kory (D-Falls Church)</a></li>
 									<li><a href="/legislator/pekrizek/">Del. Paul Krizek (D-Alexandria)</a></li>
 									<li><a href="/legislator/dalarock/">Del. Dave LaRock (R-Loudoun)</a></li>
 									<li><a href="/legislator/jaleftwich/">Del. Jay Leftwich (R-Chesapeake)</a></li>
-									<li><a href="/legislator/mhlevine/">Del. Mark Levine (D-Alexandria)</a></li>
-									<li><a href="/legislator/jclindsey/">Del. Joe Lindsey (D-Norfolk)</a></li>
 									<li><a href="/legislator/ahlopez/">Del. Alfonso Lopez (D-Arlington)</a></li>
+								</ul>
+							</li>
+							<li>M–P »
+								<ul class="legislators">
+									<li><a href="/legislator/memaldonado/">Del. Michelle Maldonado (D-Manassas)</a></li>
+									<li><a href="/legislator/memarch/">Del. Marie March (R-Floyd)</a></li>
 									<li><a href="/legislator/dwmarshall/">Del. Danny Marshall (R-Danville)</a></li>
 									<li><a href="/legislator/jjmcguire/">Del. John McGuire (R-Glen Allen)</a></li>
 									<li><a href="/legislator/jpmcnamara/">Del. Joe McNamara (R-Roanoke)</a></li>
 									<li><a href="/legislator/dlmcquinn/">Del. Delores McQuinn (D-Richmond)</a></li>
-									<li><a href="/legislator/jsmiyares/">Del. Jason Miyares (R-Virginia Beach)</a></li>
 									<li><a href="/legislator/jwmorefield/">Del. Will Morefield (R-North Tazewell)</a></li>
-									<li><a href="/legislator/mmmugler/">Del. Martha Mugler (D-Hampton</a></li>
 									<li><a href="/legislator/mpmullin/">Del. Mike Mullin (D-Newport News)</a></li>
 									<li><a href="/legislator/kjmurphy/">Del. Kathleen Murphy (D-McLean)</a></li>
-								</ul>
-							</li>
-							<li>N-S »
-								<ul class="legislators">
 									<li><a href="/legislator/idoquinn/">Del. Israel O'Quinn (R-Bristol)</a></li>
 									<li><a href="/legislator/rdorrock/">Del. Bobby Orrock (R-Thornburg)</a></li>
 									<li><a href="/legislator/krplum/">Del. Ken Plum (D-Reston)</a></li>
-									<li><a href="/legislator/cdpoindexter/">Del. Charles Poindexter (R-Glade Hill)</a></li>
 									<li><a href="/legislator/msprice/">Del. Cia Price (D-Newport News)</a></li>
+								</ul>
+							</li>
+							<li>R–S »
+								<ul class="legislators">
 									<li><a href="/legislator/mbransone/">Del. Margaret Ransone (R-Kinsale)</a></li>
 									<li><a href="/legislator/srasoul/">Del. Sam Rasoul (D-Roanoke)</a></li>
 									<li><a href="/legislator/dareid/">Del. David Reid (D-Loudoun)</a></li>
 									<li><a href="/legislator/rlrobinson/">Del. Roxann Robinson (R-Chesterfield)</a></li>
 									<li><a href="/legislator/daroem/">Del. Danica Roem (D-Manassas Park)</a></li>
 									<li><a href="/legislator/csrunion/">Del. Chris Runion (R-Bridgewater)</a></li>
-									<li><a href="/legislator/lnrush/">Del. Nick Rush (R-Christiansburg)</a></li>
-									<li><a href="/legislator/issamirah/">Del. Ibraheem Samirah (D-Herndon)</a></li>
 									<li><a href="/legislator/dlscott/">Del. Don Scott (D-Portsmouth)</a></li>
+									<li><a href="/legislator/pascott/">Del. Phil Scott (R-Spotsylvania)</a></li>
+									<li><a href="/legislator/bdsewell/">Del. Briana Sewell (D-Prince William)</a></li>
+									<li><a href="/legislator/ishin/">Irene Shin (D-Herndon)</a></li>
 									<li><a href="/legislator/mdsickles/">Del. Mark Sickles (D-Alexandria)</a></li>
 									<li><a href="/legislator/mbsimon/">Del. Marcus Simon (D-Falls Church)</a></li>
 									<li><a href="/legislator/masimonds/">Del. Shelly Simonds (D-Newport News)</a></li>
@@ -272,19 +276,23 @@
 									<li><a href="/legislator/rcsullivan/">Del. Rip Sullivan (D-Arlington)</a></li>
 								</ul>
 							</li>
-							<li>T-Z »
+							<li>T–W »
 								<ul class="legislators">
+									<li><a href="/legislator/aftata/">Del. Anne Ferrell Tata (R-Virginia Beach)</a></li>
+									<li><a href="/legislator/kataylor/">Del. Kim Taylor (R-Dinwiddie)</a></li>
 									<li><a href="/legislator/letorian/">Del. Luke Torian (D-Woodbridge)</a></li>
 									<li><a href="/legislator/kkltran/">Del. Kathy Tran (D-Springfield)</a></li>
-									<li><a href="/legislator/rctyler/">Del. Roslyn Tyler (D-Jarratt)</a></li>
 									<li><a href="/legislator/stvanvalkenburg/">Del. Schuyler VanValkenburg (D-Henrico)</a></li>
+									<li><a href="/legislator/howachsmann/">Del. Otto Wachsmann (R-Sussex)</a></li>
 									<li><a href="/legislator/wswalker/">Del. Wendell Walker (R-Lynchburg)</a></li>
 									<li><a href="/legislator/wcwampler3/">Del. Will Wampler (R-Abingdon)</a></li>
 									<li><a href="/legislator/jaward/">Del. Jeion Ward (D-Hampton)</a></li>
 									<li><a href="/legislator/rlware/">Del. Lee Ware (R-Powhatan)</a></li>
 									<li><a href="/legislator/vewatts/">Del. Vivian Watts (D-Annandale)</a></li>
 									<li><a href="/legislator/mjwebert/">Del. Michael Webert (R-Marshall)</a></li>
+									<li><a href="/legislator/wdwiley/">Del. Bill Wiley (R-Winchester)</a></li>
 									<li><a href="/legislator/rtwillett/">Del. Rodney Willett (D-Henrico)</a></li>
+									<li><a href="/legislator/wmwilliams/">Del. Wren Williams (R-Stuart)</a></li>
 									<li><a href="/legislator/aowilt/">Del. Tony Wilt (R-Harrisonburg)</a></li>
 									<li><a href="/legislator/tcwright/">Del. Tommy Wright (R-Victoria)</a></li>
 									<li><a href="/legislator/sawyatt/">Del. Scott Wyatt (R-Mechanicsville)</a></li>
@@ -294,51 +302,60 @@
 						</li>
 						<li>Senate »
 							<ul class="alphabetic">
-								<li>A-M »
+								<li>A–H »
 									<ul class="legislators">
-										<li><a href="/legislator/glbarker/">Sen. George Barker (D-Alexandria)</a></li>
-										<li><a href="/legislator/jjbell/">Sen. John Bell (D-Chantilly)</a></li>
-										<li><a href="/legislator/jbboysko/">Sen. Jennifer Boysko (D-Herndon)</a></li>
-										<li><a href="/legislator/abchafin/">Sen. Ben Chafin (R-Lebanon)</a></li>
-										<li><a href="/legislator/afchase/">Sen. Amanda Chase (R-Midlothian)</a></li>
-										<li><a href="/legislator/jacosgrove/">Sen. John Cosgrove (R-Chesapeake)</a></li>
-										<li><a href="/legislator/rcdeeds/">Sen. Creigh Deeds (D-Bath)</a></li>
-										<li><a href="/legislator/wrdesteph/">Sen. Bill DeSteph (R-Virginia Beach)</a></li>
-										<li><a href="/legislator/ssdunnavant/">Sen. Siobhan Dunnavant (R-Henrico)</a></li>
-										<li><a href="/legislator/apebbin/">Sen. Adam Ebbin (D-Alexandria)</a></li>
-										<li><a href="/legislator/jsedwards/">Sen. John Edwards (D-Roanoke)</a></li>
-										<li><a href="/legislator/bafavola/">Sen. Barbara Favola (D-Arlington)</a></li>
-										<li><a href="/legislator/ewhanger/">Sen. Emmett Hanger (R-Mount Solon)</a></li>
-										<li><a href="/legislator/gfhashmi/">Sen. Gazala Hashmi (D-Midlothian)</a></li>
-										<li><a href="/legislator/jdhowell/">Sen. Janet Howell (D-Reston)</a></li>
-										<li><a href="/legislator/jakiggins/">Sen. Jen Kiggans (D-Virginia Beach)</a></li>
-										<li><a href="/legislator/lwlewis/">Sen. Lynwood Lewis (D-Accomac)</a></li>
-										<li><a href="/legislator/melocke/">Sen. Mamie Locke (D-Hampton)</a></li>
-										<li><a href="/legislator/lllucas/">Sen. Louise Lucas (D-Portsmouth)</a></li>
-										<li><a href="/legislator/dwmarsden/">Sen. Dave Marsden (D-Burke)</a></li>
-										<li><a href="/legislator/tmmason/">Sen. Monty Mason (D-Williamsburg)</a></li>
-										<li><a href="/legislator/jlmcclellan/">Sen. Jennifer McClellan (D-Richmond)</a></li>
-										<li><a href="/legislator/rtmcdougle/">Sen. Ryan McDougle (R-Mechanicsville)</a></li>
-										<li><a href="/legislator/jsmcpike/">Sen. Jeremy McPike (D-Dale City)</a></li>
+									<li><a href="/legislator/glbarker/">Sen. George Barker (D-Alexandria)</a></li>
+									<li><a href="/legislator/jjbell/">Sen. John Bell (D-Chantilly)</a></li>
+									<li><a href="/legislator/jbboysko/">Sen. Jennifer Boysko (D-Herndon)</a></li>
+									<li><a href="/legislator/afchase/">Sen. Amanda Chase (R-Midlothian)</a></li>
+									<li><a href="/legislator/jacosgrove/">Sen. John Cosgrove (R-Chesapeake)</a></li>
+									<li><a href="/legislator/rcdeeds/">Sen. Creigh Deeds (D-Bath)</a></li>
+									<li><a href="/legislator/wrdesteph/">Sen. Bill DeSteph (R-Virginia Beach)</a></li>
+									<li><a href="/legislator/ssdunnavant/">Sen. Siobhan Dunnavant (R-Henrico)</a></li>
+									<li><a href="/legislator/apebbin/">Sen. Adam Ebbin (D-Alexandria)</a></li>
+									<li><a href="/legislator/jsedwards/">Sen. John Edwards (D-Roanoke)</a></li>
+									<li><a href="/legislator/bafavola/">Sen. Barbara Favola (D-Arlington)</a></li>
+									<li><a href="/legislator/tthackworth/">Sen. Travis Hackworth (R-Richlands)</a></li>
+									<li><a href="/legislator/ewhanger/">Sen. Emmett Hanger (R-Mount Solon)</a></li>
+									<li><a href="/legislator/gfhashmi/">Sen. Ghazala Hashmi (D-Midlothian)</a></li>
+									<li><a href="/legislator/jdhowell/">Sen. Janet Howell (D-Reston)</a></li>
 									</ul>
 								</li>
-								<li>N-Z »
+								<li>K–M »
 									<ul class="legislators">
-										<li><a href="/legislator/sdnewman/">Sen. Steve Newman (R-Forest)</a></li>
-										<li><a href="/legislator/tknorment/">Sen. Tommy Norment (R-Williamsburg)</a></li>
-										<li><a href="/legislator/mdobenshain/">Sen. Mark Obenshain (R-Harrisonburg)</a></li>
-										<li><a href="/legislator/mjpeake/">Sen. Mark Peake (R-Lynchburg)</a></li>
-										<li><a href="/legislator/jcpetersen/">Sen. Chap Petersen (D-Fairfax)</a></li>
-										<li><a href="/legislator/tepillion/">Sen. Todd E. Pillion (R-Abingdon)</a></li>
-										<li><a href="/legislator/bereeves/">Sen. Bryce Reeves (R-Spotsylvania)</a></li>
-										<li><a href="/legislator/fmruff/">Sen. Frank Ruff (R-Clarksville)</a></li>
-										<li><a href="/legislator/rlsaslaw/">Sen. Dick Saslaw (D-Springfield)</a></li>
-										<li><a href="/legislator/lspruill/">Sen. Lionell Spruill (D-Chesapeake)</a></li>
-										<li><a href="/legislator/wmstanley/">Sen. Bill Stanley (R-Moneta)</a></li>
-										<li><a href="/legislator/rhstuart/">Sen. Richard Stuart (R-Westmoreland)</a></li>
-										<li><a href="/legislator/drsuetterlein/">Sen. David Suetterlein (R-Salem)</a></li>
-										<li><a href="/legislator/sasurovell/">Sen. Scott Surovell (D-Mount Vernon)</a></li>
-										<li><a href="/legislator/jhvogel/">Sen. Jill Holtzman Vogel (R-Winchester)</a></li>
+									<li><a href="/legislator/jakiggins/">Sen. Jen Kiggans (R-Virginia Beach)</a></li>
+									<li><a href="/legislator/lwlewis/">Sen. Lynwood Lewis (D-Accomac)</a></li>
+									<li><a href="/legislator/melocke/">Sen. Mamie Locke (D-Hampton)</a></li>
+									<li><a href="/legislator/lllucas/">Sen. Louise Lucas (D-Portsmouth)</a></li>
+									<li><a href="/legislator/dwmarsden/">Sen. Dave Marsden (D-Burke)</a></li>
+									<li><a href="/legislator/tmmason/">Sen. Monty Mason (D-Williamsburg)</a></li>
+									<li><a href="/legislator/jlmcclellan/">Sen. Jennifer McClellan (D-Richmond)</a></li>
+									<li><a href="/legislator/rtmcdougle/">Sen. Ryan McDougle (R-Mechanicsville)</a></li>
+									<li><a href="/legislator/jsmcpike/">Sen. Jeremy McPike (D-Dale City)</a></li>
+									<li><a href="/legislator/jdmorrissey/">Sen. Joe Morrissey (D-Richmond)</a></li>
+									</ul>
+								</li>
+								<li>N–R »
+									<ul class="legislators">
+									<li><a href="/legislator/sdnewman/">Sen. Steve Newman (R-Forest)</a></li>
+									<li><a href="/legislator/tknorment/">Sen. Tommy Norment (R-Williamsburg)</a></li>
+									<li><a href="/legislator/mdobenshain/">Sen. Mark Obenshain (R-Harrisonburg)</a></li>
+									<li><a href="/legislator/mjpeake/">Sen. Mark Peake (R-Lynchburg)</a></li>
+									<li><a href="/legislator/jcpetersen/">Sen. Chap Petersen (D-Fairfax)</a></li>
+									<li><a href="/legislator/tepillion/">Sen. Todd E. Pillion (R-Abingdon)</a></li>
+									<li><a href="/legislator/bereeves/">Sen. Bryce Reeves (R-Spotsylvania)</a></li>
+									<li><a href="/legislator/fmruff/">Sen. Frank Ruff (R-Clarksville)</a></li>
+									</ul>
+								</li>
+								<li>S–V »
+									<ul class="legislators">
+									<li><a href="/legislator/rlsaslaw/">Sen. Dick Saslaw (D-Springfield)</a></li>
+									<li><a href="/legislator/lspruill/">Sen. Lionell Spruill (D-Chesapeake)</a></li>
+									<li><a href="/legislator/wmstanley/">Sen. Bill Stanley (R-Moneta)</a></li>
+									<li><a href="/legislator/rhstuart/">Sen. Richard Stuart (R-Westmoreland)</a></li>
+									<li><a href="/legislator/drsuetterlein/">Sen. David Suetterlein (R-Salem)</a></li>
+									<li><a href="/legislator/sasurovell/">Sen. Scott Surovell (D-Mount Vernon)</a></li>
+									<li><a href="/legislator/jhvogel/">Sen. Jill Holtzman Vogel (R-Winchester)</a></li>
 									</ul>
 								</li>
 							</ul>

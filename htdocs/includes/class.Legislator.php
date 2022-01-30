@@ -12,7 +12,7 @@ class Legislator
         $database = new Database;
         $database->connect_mysqli();
 
-        $sql = 'SELECT id, lis_id, shortname, name, name_formatted
+        $sql = 'SELECT id, lis_id, shortname, name, name_formatted, chamber
                 FROM representatives';
         if ($subset == 'current')
         {
@@ -28,7 +28,7 @@ class Legislator
         }
 
         $legislators = array();
-        while ($legislator = mysqli_fetch_array($result))
+        while ($legislator = mysqli_fetch_assoc($result))
         {
             $legislator['url'] = '/legislator/' . $legislator['shortname'];
             $legislators[] = $legislator;

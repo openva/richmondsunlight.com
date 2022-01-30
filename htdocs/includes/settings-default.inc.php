@@ -44,10 +44,10 @@ define('MEMCACHED_PORT', '11211');
 
 # The House Speaker's IDs. This is used in update_vote.php to translate votes credited to
 # "H0000," which bizarrely indicates the speaker, to that legislator's ID, and in
-# Video::identify_speakers to match the speaker to her identity. Here, H229 and 349 indicate
-# Eileen Filler-Corn.
-define('HOUSE_SPEAKER_LIS_ID', 'H229');
-define('HOUSE_SPEAKER_ID', '349');
+# Video::identify_speakers to match the speaker to her identity. Here, H181 and 34 indicate
+# Todd Gilbert.
+define('HOUSE_SPEAKER_LIS_ID', 'H181');
+define('HOUSE_SPEAKER_ID', '34');
 
 # Set the directory to look to for cache data.
 define('CACHE_DIR', '/vol/www/richmondsunlight.com/html/cache/');
