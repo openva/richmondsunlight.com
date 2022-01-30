@@ -28,7 +28,7 @@ class Legislator
         }
 
         $legislators = array();
-        while ($legislator = mysqli_fetch_array($result))
+        while ($legislator = mysqli_fetch_assoc($result))
         {
             $legislator['url'] = '/legislator/' . $legislator['shortname'];
             $legislators[] = $legislator;
