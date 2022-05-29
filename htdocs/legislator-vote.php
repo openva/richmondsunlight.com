@@ -81,8 +81,21 @@ if (mysqli_num_rows($result) > 0)
     $page_body = '
 		<p><a href="/legislator/' . $shortname . '/votes/' . $year . '.csv">Download List as a
 			Spreadsheet</a> <code>(' . $shortname . '-' . $year . '.csv)</code></p>
-		<p>Y = “yes” N = “no” X = “did not vote” A = “abstained from voting”</p>
-		<table class="sorttable">
+
+		<p><em>These are not as simple as you might think.</em> Somebody voting “yes” on a bill
+		might be voting “yes” that it should be killed. Somebody voting “no” on a bill might
+		be voting that, no, it should not be sent to a backwater committee to ensure that it
+		never sees the light of day. Click on the “Outcome” link to find out exactly what was
+		being voted on.</p>
+
+		<h2>Key</h2>
+		<ul>
+			<li><code>Y</code> = “yes”</li>
+			<li><code>N</code> = “no”</li>
+			<li><code>X</code> = “did not vote”</li>
+			<li><code>A</code> = “abstained from voting”</li>
+		</ul>
+		<table>
 			<thead>
 				<tr>
 					<th>Bill #</th>
