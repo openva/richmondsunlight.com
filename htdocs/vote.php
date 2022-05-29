@@ -221,7 +221,8 @@ ksort($parties);
 if (count($graph) > 1)
 {
     $html_head .= '
-	<script type="text/javascript">
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+	<script>
 		google.load("visualization", "1", {packages:["corechart"]});
 		google.setOnLoadCallback(drawChart);
 		function drawChart() {
