@@ -74,6 +74,7 @@ $sql = 'SELECT bills.number AS bill_number, bills.catch_line, representatives_vo
 		WHERE representatives.shortname = "' . mysqli_real_escape_string($GLOBALS['db'], $shortname) . '"
 		AND sessions.year = ' . mysqli_real_escape_string($GLOBALS['db'], $year) . '
 		AND bills_status.date IS NOT NULL AND votes.session_id=sessions.id
+		AND bills_status.status NOT LIKE "Constitutional reading%"
 		ORDER BY date ASC, committee ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0)
