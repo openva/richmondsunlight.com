@@ -7,6 +7,9 @@ Disallow: /process-comments.php
 Disallow: /process-polls.php
 Disallow: /downloads/bills/
 
+User-agent: GPTBot
+Disallow: /
+
 User-agent: Speedy
 Disallow: /
 
