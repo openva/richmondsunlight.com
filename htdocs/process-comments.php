@@ -85,15 +85,13 @@ if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === TRUE)
 $spam_strings = array('ciprofloxacin', 'viagra', 'cialis', ' topiramate', 'propecia',
     'levitra', 'priligy', 'clomid', 'zithromax', 'azithromycin', 'kamagra', 'celebrex',
     'prednizone', ' sildenafil', 'tadalafil', 'accutane', 'tadalafil', 'topamax', 'amoxicillin',
-    '[/URL]');
+    '[/URL]', 'stolen bitcoin', 'bitcoin wallet', 'cryptocurrency scam', 'bitcoin recovery',
+    'telegram', 'whatsapp' ,'recover', 'Craker');
 foreach ($spam_strings as $spam_string)
 {
     if (mb_stristr($comment['comment'], $spam_string) !== FALSE)
     {
-        if (mb_stripos($comment['comment'], 'href') !== FALSE)
-        {
-            exit();
-        }
+        exit();
     }
 }
 
