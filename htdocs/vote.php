@@ -88,6 +88,62 @@ $vote_info->lis_id = $lis_id;
 $vote_info->session_id = $bill['session_id'];
 $vote = $vote_info->get_aggregate();
 
+$page_sidebar = <<<EOD
+
+	<div class="box">
+		<h3>Explanation</h3>
+		<p>At left is the tally of who voted how on this bill.</p>
+
+		<p>It’s important to understand that most bills are voted on multiple times, and the
+		vote is not necessarily simply whether or not the bill should pass.  Be sure to look at
+		the bill’s history to determine what, exactly, was being voted on, and at what point in
+		the bill’s progress.</p>
+	</div>
+EOD;
+
+
+# The status table.
+$sql = 'SELECT DISTINCT bills_status.status, bills_status.translation,
+		DATE_FORMAT(bills_status.date, "%m/%d/%Y") AS date, bills_status.date AS date_raw,
+		bills_status.lis_vote_id, votes.total AS vote_count
+		FROM bills_status
+		LEFT JOIN votes
+			ON bills_status.lis_vote_id = votes.lis_id
+		WHERE bills_status.bill_id = ' . $bill['id'] . '
+        AND (votes.session_id=bills_status.session_id OR votes.session_id IS NULL)
+		ORDER BY date_raw DESC, bills_status.id DESC';
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0)
+{
+    $bill['status_history'] = '';
+    while ($status = mysqli_fetch_array($result))
+    {
+
+        # Provide a link to view this vote, but only if it's not the vote that we're currently
+        # viewing.
+        if (!empty($status['lis_vote_id']) && ($status['vote_count'] > 0) && ($status['lis_vote_id'] != $lis_id))
+        {
+            $tmp = '<a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number']) . '/' . mb_strtolower($status['lis_vote_id']) . '/">' . $status['status'] . '</a>';
+            $status['status'] = $tmp;
+        }
+
+        # If we've found this vote in the status history, save it for use in the page text.
+        elseif ($status['lis_vote_id'] == $lis_id)
+        {
+            $vote_description = trim(preg_replace('/\((.+)\)/', '', $status['status']));
+        }
+
+        $bill['status_history'] = '<li' . ($status['lis_vote_id'] == $lis_id ? ' class="highlight"' : '') . '>' . $status['date'] . ' ' . $status['status'] . '</li>' . $bill['status_history'];
+    }
+    $page_sidebar .= '
+
+		<div class="box">
+			<h3>Progress History</h3>
+			' . $bill['status_history'] . '
+		</div>';
+}
+
+
 $page_title = mb_strtoupper($bill['number']) . ': ' . $bill['catch_line'];
 $page_body = '<p>';
 if (!empty($bill['committee_name']))
@@ -101,6 +157,12 @@ else
     $page_body .= 'This vote on <a href="/bill/' . $year . '/' . $bill['number'] . '/">'
         . mb_strtoupper($bill['number']) . '</a> was held in the ' . ucfirst($vote['chamber']) . '.  ';
 }
+
+if (isset($vote_description))
+{
+    $page_body .= 'The vote was on this subject: “' . $vote_description . '”. ';
+}
+
 $page_body .= 'This vote ' . $vote['outcome'] . 'ed ' . $vote['tally'] . '.</p>';
 
 /*
@@ -159,7 +221,8 @@ ksort($parties);
 if (count($graph) > 1)
 {
     $html_head .= '
-	<script type="text/javascript">
+    <script src="https://www.gstatic.com/charts/loader.js"></script>
+	<script>
 		google.load("visualization", "1", {packages:["corechart"]});
 		google.setOnLoadCallback(drawChart);
 		function drawChart() {
@@ -306,57 +369,6 @@ foreach ($legislators as $legislator)
 $page_body .= '
 		</ul>
 	</div>';
-
-
-$page_sidebar = <<<EOD
-
-	<div class="box">
-		<h3>Explanation</h3>
-		<p>At left is the tally of who voted how on this bill.</p>
-
-		<p>It’s important to understand that most bills are voted on multiple times, and the
-		vote is not necessarily simply whether or not the bill should pass.  Be sure to look at
-		the bill’s history to determine what, exactly, was being voted on, and at what point in
-		the bill’s progress.</p>
-	</div>
-EOD;
-
-
-
-
-# The status table.
-$sql = 'SELECT DISTINCT bills_status.status, bills_status.translation,
-		DATE_FORMAT(bills_status.date, "%m/%d/%Y") AS date, bills_status.date AS date_raw,
-		bills_status.lis_vote_id, votes.total AS vote_count
-		FROM bills_status
-		LEFT JOIN votes
-			ON bills_status.lis_vote_id = votes.lis_id
-		WHERE bills_status.bill_id = ' . $bill['id'] . '
-        AND (votes.session_id=bills_status.session_id OR votes.session_id IS NULL)
-		ORDER BY date_raw DESC, bills_status.id DESC';
-$result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
-    $bill['status_history'] = '';
-    while ($status = mysqli_fetch_array($result))
-    {
-
-        # Provide a link to view this vote, but only if it's not the vote that we're currently
-        # viewing.
-        if (!empty($status['lis_vote_id']) && ($status['vote_count'] > 0) && ($status['lis_vote_id'] != $lis_id))
-        {
-            $tmp = '<a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number']) . '/' . mb_strtolower($status['lis_vote_id']) . '/">' . $status['status'] . '</a>';
-            $status['status'] = $tmp;
-        }
-        $bill['status_history'] = '<li' . ($status['lis_vote_id'] == $lis_id ? ' class="highlight"' : '') . '>' . $status['date'] . ' ' . $status['status'] . '</li>' . $bill['status_history'];
-    }
-    $page_sidebar .= '
-
-		<div class="box">
-			<h3>Progress History</h3>
-			' . $bill['status_history'] . '
-		</div>';
-}
 
 # OUTPUT THE PAGE
 
