@@ -14,6 +14,10 @@ class Location
         {
             $q = $this->street . ', ' . $this->city . ', VA ' . $this->zip;
         }
+        elseif (isset($this->address))
+        {
+            $q = $this->address;
+        }
         elseif (isset($this->zip))
         {
             $q = $this->zip;
