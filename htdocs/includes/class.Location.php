@@ -5,55 +5,64 @@ class Location
 {
 
     # When given an address (whether a ZIP code alone or a complete street address), returns the
-    # lat/lon pair for that location. Results return as an array, not an object.
+    # lat/lon pair for that location, querying the Virginia GIS server. Results return as an
+    # array, not an object.
     public function get_coordinates()
     {
 
         # If we've got a full address, join its components into a single string.
         if (isset($this->street, $this->city, $this->zip))
         {
-            $q = $this->street . ', ' . $this->city . ', VA ' . $this->zip;
-        }
+            $q = '?Street=' . urlencode($this->street) . '&City=' . urlencode($this->city)
+                . '&ZIP=' . urlencode($this->zip);
+	    }
         elseif (isset($this->address))
         {
-            $q = $this->address;
+            $q = '?SingleLine=' . urlencode($this->address);
         }
         elseif (isset($this->zip))
         {
-            $q = $this->zip;
+            $q = '?ZIP=' . urlencode($this->zip);
         }
 
-        # Assemble our URL, instructing Yahoo to return a serialized PHP array.
-        $url = 'https://geocoding.geo.census.gov/geocoder/locations/onelineaddress?address=' . urlencode($q) . '&benchmark=4&format=json';
-
-        # Retrieve the resulting serialized array.
+        # Assemble our URL, instructing the Virginia GIS server
+        $url = 'https://gismaps.vdem.virginia.gov/arcgis/rest/services/Geocoding/VGIN_Composite_Locator/GeocodeServer/findAddressCandidates'
+            . $q . '&maxLocations=1&f=pjson';
+        
+        # Fetch the result
         $response = get_content($url);
 
-        # If the response doesn't come, return false.
-        if ($response === FALSE)
+        # If the response is no good.
+        if ($response === false)
         {
-            return FALSE;
+            return false;
         }
 
         # Turn the JSON into a PHP array.
         $response = json_decode($response, TRUE);
-        $response = $response['result'];
-
-        # If ther are no address matches, bail.
-        if (count($response['addressMatches']) == 0)
+        
+        if ($response == false)
         {
-            return FALSE;
+            return false;
+        }
+
+        # If there are no address candidates, bail.
+        if (count($response['candidates']) == 0)
+        {
+            return false;
         }
 
         # In theory there could be multiple responses, but we don't have any method of dealing with
         # that outcome, so we simply return the first match and hope it's right. We save them to the
         # object namespace, too, since this function is generally followed by coords_to_districts().
-        $this->latitude = $response['addressMatches'][0]['coordinates']['y'];
-        $this->longitude = $response['addressMatches'][0]['coordinates']['x'];
+        $this->latitude = $response['candidates'][0]['location']['y'];
+        $this->longitude = $response['candidates'][0]['location']['x'];
+
         $coordinates = array();
         $coordinates['latitude'] = $this->latitude;
         $coordinates['longitude'] = $this->longitude;
         return $coordinates;
+
     }
 
     # Convert coordinates into district IDs.
@@ -80,8 +89,8 @@ class Location
 
         $district = json_decode($district, TRUE);
 
-        # If this isn't an array with at least two elements (one for each legislator), bail.
-        if (count($district['results']) < 2)
+        # If this isn't an array with two elements (one for each legislator), bail.
+        if (count($district['results']) != 2)
         {
             return FALSE;
         }
@@ -89,12 +98,6 @@ class Location
         $result = new stdClass();
         foreach ($district['results'] as $legislator)
         {
-
-            # Make sure it's a state seat.
-            if ($legislator['jurisdiction']['classification'] != 'state')
-            {
-                continue;
-            }
 
             # If it's the house.
             if ($legislator['current_role']['org_classification'] == 'lower')
