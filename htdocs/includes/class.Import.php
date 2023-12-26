@@ -1,5 +1,7 @@
 <?php
 
+use Sunra\PhpSimple\HtmlDomParser;
+
 class Import
 {
 
