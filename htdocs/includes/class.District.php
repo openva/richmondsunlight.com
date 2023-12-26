@@ -12,7 +12,7 @@ class District
                 FROM districts
                 WHERE
                     date_ended = "0000-00-00"
-                    AND chamber=' . mysqli_real_escape_string($GLOBALS['db'], $chamber) . '
+                    AND chamber="' . mysqli_real_escape_string($GLOBALS['db'], $chamber) . '"
                     AND number=' . mysqli_real_escape_string($GLOBALS['db'], $number);
 
         $result = mysqli_query($GLOBALS['db'], $sql);
