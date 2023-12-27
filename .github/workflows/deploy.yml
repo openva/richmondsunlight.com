@@ -89,7 +89,7 @@ jobs:
             --ignore-hidden-files
           aws deploy create-deployment \
             --application-name RS-Web \
-            --deployment-group-name RS-Web-Feet \
+            --deployment-group-name RS-Web-Fleet \
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --s3-location bucket=s3://deploy.richmondsunlight.com/rs-web-deploy.zip,key=rs-web-deploy.zip,bundleType=zip
 
