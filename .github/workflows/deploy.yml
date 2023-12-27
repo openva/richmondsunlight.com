@@ -43,7 +43,6 @@ jobs:
           elif [ "$GITHUB_BRANCH" = "deploy" ]; then
             cp appspec-deploy.yml appspec.yml
           fi
-      - run: ls appspec*
       - name: Save secret-populated code for a subsequent deploy step
         uses: actions/upload-artifact@v4
         with:
@@ -65,7 +64,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: codebase
-      - run: ls appspec*
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
         with:
@@ -75,16 +73,26 @@ jobs:
       - name: Staging CodeDeploy Deployment
         if: ${{ needs.build.outputs.github_branch == 'master' }}
         run: |
+          aws deploy push --application-name RS-Web \
+            --s3-location s3://deploy.richmondsunlight.com/rs-web-staging.zip \
+            --ignore-hidden-files
           aws deploy create-deployment \
             --application-name RS-Web \
             --deployment-group-name RS-Web-Staging \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
+            --s3-location s3://deploy.richmondsunlight.com/rs-web-staging.zip
       - name: Production CodeDeploy Deployment
         if: ${{ needs.build.outputs.github_branch == 'deploy' }}
         run: |
+          aws deploy push --application-name RS-Web \
+            --s3-location s3://deploy.richmondsunlight.com/rs-web-deploy.zip \
+            --ignore-hidden-files
           aws deploy create-deployment \
             --application-name RS-Web \
-            --deployment-group-name RS-Web-Fleet \
+            --deployment-group-name RS-Web-Feet \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
+            --s3-location s3://deploy.richmondsunlight.com/rs-web-deploy.zip
+
+
+
+
