@@ -80,7 +80,7 @@ jobs:
             --application-name RS-Web \
             --deployment-group-name RS-Web-Staging \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --s3-location bucket=s3://deploy.richmondsunlight.com/rs-web-staging.zip
+            --s3-location bucket=s3://deploy.richmondsunlight.com/rs-web-staging.zip,key=rs-web-staging.zip,bundleType=zip
       - name: Production CodeDeploy Deployment
         if: ${{ needs.build.outputs.github_branch == 'deploy' }}
         run: |
@@ -91,7 +91,7 @@ jobs:
             --application-name RS-Web \
             --deployment-group-name RS-Web-Feet \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --s3-location bucket=s3://deploy.richmondsunlight.com/rs-web-deploy.zip
+            --s3-location bucket=s3://deploy.richmondsunlight.com/rs-web-deploy.zip,key=rs-web-deploy.zip,bundleType=zip
 
 
 
