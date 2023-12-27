@@ -60,6 +60,7 @@ jobs:
     runs-on: ubuntu-20.04
     needs: build # Don't deploy unless the build succeeds
     steps:
+      - run: ls appspec*
       - run: echo "Deploy branch is ${{ needs.build.outputs.github_branch }}"
       - name: Get the secret-populated code
         uses: actions/download-artifact@v4
