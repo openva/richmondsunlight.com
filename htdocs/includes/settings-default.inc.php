@@ -57,9 +57,6 @@ define('CACHE_DIR', '/vol/www/richmondsunlight.com/html/cache/');
 # Google Maps
 define('GMAPS_KEY', '');
 
-# Geoparser.io API key
-define('GEOPARSER_KEY', '');
-
 # Open States API Key
 define('OPENSTATES_KEY', '');
 
