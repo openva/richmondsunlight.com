@@ -265,16 +265,6 @@ if (IN_SESSION == 'y')
     }
 }
 
-$page_sidebar .= '
-		<h3>Keep Up With Us</h3>
-		<div class="box" id="social-networking" style="text-align: center;">
-
-			<p><a href="http://twitter.com/richmond_sun"><img src="/images/twitter.gif" width="100"
-				height="31" alt="Twitter" /></a></p>
-
-		</div>';
-
-
 $html_head = '
 <script type="application/ld+json">
 {
