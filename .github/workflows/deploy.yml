@@ -11,7 +11,7 @@ jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
-      - uses: Firenza/secrets-to-env@v1.1.0
+      - uses: Firenza/secrets-to-env@v1.2.0
         with:
           secrets: ${{ toJSON(secrets) }}
       - name: Specify PHP version
@@ -23,7 +23,7 @@ jobs:
       - run: >-
           sudo apt-get update && 
           sudo apt-get install -y awscli php5.6-cli php5.6-curl php5.6-memcached php5.6-mysql yarn zip
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: sudo apt-get update -qq
       - run: composer install
       - run: cd htdocs/js/vendor; yarn build
