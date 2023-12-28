@@ -27,8 +27,8 @@ $browser_title = 'Tracking the Virginia General Assembly';
 $site_section = 'home';
 
 # PAGE CONTENT
-$page_body = '<p>The 2023 Virginia General Assembly session began on January 11, and
-			is scheduled to continue for six weeks. Here you can read <a href="/bills/">the bills
+$page_body = '<p>The 2024 Virginia General Assembly session will begin on January 10, and is
+			scheduled to continue until March 9. Here you can read <a href="/bills/">the bills
 			that are proposed</a>.</p>';
 
 $sql = 'SELECT COUNT(*) AS count, tags.tag
