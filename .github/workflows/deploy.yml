@@ -74,7 +74,7 @@ jobs:
         if: ${{ needs.build.outputs.github_branch == 'master' }}
         run: |
           aws deploy push --application-name RS-Web \
-            --s3-location deploy.richmondsunlight.com/rs-web-staging.zip \
+            --s3-location s3://deploy.richmondsunlight.com/rs-web-staging.zip \
             --ignore-hidden-files
           aws deploy create-deployment \
             --application-name RS-Web \
@@ -85,7 +85,7 @@ jobs:
         if: ${{ needs.build.outputs.github_branch == 'deploy' }}
         run: |
           aws deploy push --application-name RS-Web \
-            --s3-location deploy.richmondsunlight.com/rs-web-deploy.zip \
+            --s3-location s3://deploy.richmondsunlight.com/rs-web-deploy.zip \
             --ignore-hidden-files
           aws deploy create-deployment \
             --application-name RS-Web \
