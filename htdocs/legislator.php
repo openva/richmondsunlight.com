@@ -149,7 +149,7 @@ if ($legislator['district_boundaries'] != FALSE)
 
     $html_head .= '<script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet" />
-    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/turf/v3.0.11/turf.min.js"></script> 
+    <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
         <style>
             #district_map { height: 250px; }
         </style>
