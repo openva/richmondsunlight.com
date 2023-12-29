@@ -145,7 +145,7 @@ if ($legislator['district_boundaries'] != FALSE)
      */
     $legislator['district_boundaries'] = json_decode($legislator['district_boundaries']);
     unset($legislator['district_boundaries']->features[0]->properties);
-    $legislator['district_boundaries'] = $legislator['district_boundaries']->features;
+    $legislator['district_boundaries'] = $legislator['district_boundaries']->features[0];
     $legislator['district_boundaries'] = json_encode($legislator['district_boundaries']);
 
     $html_head .= '<script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
