@@ -3120,7 +3120,7 @@ CREATE TABLE `representatives` (
   `rss_url` varchar(64) CHARACTER SET latin1 DEFAULT NULL,
   `twitter` varchar(96) CHARACTER SET latin1 DEFAULT NULL,
   `sbe_id` varchar(11) COLLATE utf8_bin DEFAULT NULL,
-  `lis_id` smallint(5) unsigned DEFAULT NULL,
+  `lis_id` varchar(10) unsigned DEFAULT NULL,
   `place` varchar(60) CHARACTER SET latin1 DEFAULT NULL COMMENT 'District office location',
   `latitude` float DEFAULT NULL,
   `longitude` float DEFAULT NULL,
