@@ -2209,6 +2209,7 @@ CREATE TABLE `districts` (
   `date_started` date NOT NULL,
   `date_ended` date NOT NULL,
   `description` varchar(300) CHARACTER SET latin1 DEFAULT NULL,
+  `boundaries` json DEFAULT NULL,
   `notes` text CHARACTER SET latin1,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_created` datetime NOT NULL,
