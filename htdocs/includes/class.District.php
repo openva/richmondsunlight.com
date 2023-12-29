@@ -8,7 +8,7 @@ class District
         $database = new Database;
         $database->connect_mysqli();
 
-        $sql = 'SELECT id, chamber, number, description, notes
+        $sql = 'SELECT id, chamber, number, description, notes, boundaries
                 FROM districts
                 WHERE
                     date_ended = "0000-00-00"
