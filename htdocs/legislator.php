@@ -165,7 +165,7 @@ if ($legislator['district_boundaries'] != FALSE)
                     zoom: 7
                 });
 
-                var geojsonData = { ' . $legislator['district_boundaries'] . ' }
+                var geojsonData = ' . $legislator['district_boundaries'] . '
 
                 map.on("load", function() {
                     map.addSource("boundaries", {
