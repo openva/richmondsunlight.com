@@ -6,6 +6,8 @@ on:
       - master
       - deploy
   pull_request:
+  schedule:
+    - cron: 0 4 * * * # Redeploy at 4 AM every day
 
 jobs:
   build:
