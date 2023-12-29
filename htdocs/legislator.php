@@ -172,7 +172,7 @@ if ($legislator['district_boundaries'] != FALSE)
                         "type": "geojson",
                         "data": geojsonData
                         }
-                    });
+                    );
                     map.addLayer({
                         "id": "boundaries",
                         "type": "line",
