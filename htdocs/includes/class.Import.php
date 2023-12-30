@@ -1227,4 +1227,63 @@ class Import
 
 	}
 
+	/**
+	 * Retrieve an individual legislator's record from the legislative CSV
+	 *
+	 * @param [type] $lis_id
+	 * @return void
+	 */
+	public function check_legislator_csv($lis_id)
+	{
+
+		if (!isset($lis_id) && preg_match('/([HS][0-9]{1,4})/', $lis_id))
+		{
+			return false;
+		}
+
+		/*
+		 * Read in members.csv, which we fetch regularly from LIS.
+		 */
+		$filename = __DIR__ . '/members.csv';
+		$csv = file_get_contents($filename);
+		if ($csv === false)
+		{
+			return false;
+		}
+
+		/*
+		 * Turn the CSV file into an associative array.
+		 */
+		$csv_lines = explode("\n", $csv);
+		
+		unset($csv_lines[0]);
+		$csv_header = array('chamber', 'number', 'name', 'id');
+
+		$legislators = array();
+
+		foreach ($csv_lines as $csv_line)
+		{
+			$values = explode(',', $csv_line);
+			foreach ($values as &$value)
+			{
+				$value = trim($value);
+			}
+			$associativeArray[] = array_combine($csv_header, $values);
+		}
+
+		/*
+		 * Look up the requested record.
+		 */
+		foreach ($legislators as $legislator)
+		{
+			if ($legislator['id'] == $lis_id)
+			{
+				return $legislator;
+			}
+		}
+
+		return false;
+
+	}
+
 }
