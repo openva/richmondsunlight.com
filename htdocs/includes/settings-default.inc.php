@@ -80,6 +80,9 @@ define('SLACK_WEBHOOK', '');
 # Pushover API key
 define('PUSHOVER_KEY', '');
 
+# OpenAI API key
+define('OPENAPI_KEY, '');
+
 # AWS auth info
 # This is only used in some RS instances.
 define('AWS_ACCESS_KEY', '');
