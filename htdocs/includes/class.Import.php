@@ -513,11 +513,11 @@ class Import
 		$id = preg_replace('/[H,S]/', '', $id);
 
 		/*
-		* Determine what date to use to mark the legislator as no longer in office.
-		* 
-		* If it's November or December of an odd-numbered year, then the legislator's end date is
-		* the day before the next session starts.
-		*/
+		 * Determine what date to use to mark the legislator as no longer in office.
+		 * 
+		 * If it's November or December of an odd-numbered year, then the legislator's end date is
+		 * the day before the next session starts.
+		 */
 		if (date('m') >= 11 && date('Y') % 2 == 1)
 		{
 
@@ -823,7 +823,7 @@ class Import
 			unset($matches);
 
 			/*
-			 * Get legislator start date.
+			 * Get delegate's start date.
 			 */
 			preg_match('/Member Since: (.+)</', $html, $matches);
 			$legislator['date_started'] = date('Y-m-d', strtotime(trim($matches[1])));
@@ -876,7 +876,7 @@ class Import
 			$legislator['phone_district'] = substr(str_replace(') ', '-', $matches[0]), 1);
 
 			/*
-			 * Get legislator photo.
+			 * Get delegate's photo URL.
 			 */
 			preg_match('/https:\/\/memdata\.virginiageneralassembly\.gov\/images\/display_image\/H[0-9]{4}/', $html, $matches);
 			$legislator['photo_url'] = $matches[0];
@@ -890,7 +890,7 @@ class Import
 			unset($matches);
 
 			/*
-			 * Get race.
+			 * Get delegate'srace.
 			 */
 			preg_match('/Race\(s\):<\/span> (.+)</', $html, $matches);
 			$legislator['race'] = trim(strtolower($matches[1]));
@@ -913,14 +913,14 @@ class Import
 			unset($matches);
 
 			/*
-			 * Get political party.
+			 * Get delegate's political party.
 			 */
 			preg_match('/distDescriptPlacement">([D,I,R]{1}) -/', $html, $matches);
 			$legislator['party'] = trim($matches[1]);
 			unset($matches);
 
 			/*
-			 * Get personal website.
+			 * Get delegate's personal website.
 			 */
 			preg_match('/Delegate\'s Personal Website[\s\S]+(http(.+))"/U', $html, $matches);
 			$legislator['website'] = trim($matches[1]);
@@ -938,7 +938,7 @@ class Import
 			$legislator['district_id'] = $d['id'];
 
 			/*
-			 * Get place name
+			 * Get delegate's place name
 			 */
 			preg_match('/<th scope="col">District Office(.+)<td>([A-Za-z ]+), (VA|Virginia)(\s+)([0-9]{5})/sU', $html, $matches);
 			if (isset($matches[2]))
