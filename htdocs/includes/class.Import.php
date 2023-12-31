@@ -542,6 +542,7 @@ class Import
 			{
 				$date_ended = date('Y') + 1 . '-01-01';
 			}
+
 		}
 
 		/*
@@ -830,7 +831,7 @@ class Import
 			unset($matches);
 
 			/*
-			 * Get district number.
+			 * Get delegate's district number.
 			 */
 			preg_match('/([0-9]{1,2})([a-z]{2}) District/', $html, $matches);
 			$legislator['district_number'] = $matches[1];
@@ -977,67 +978,15 @@ class Import
 		{
 
 			/*
-			 * Fetch the HTML.
+			 * Fetch the HTML and save parse the DOM. We use this page, as opposed to either of
+			 * the other two legislator records on the GA's site, because it is available before
+			 * either of the other two. It's nowhere near as detailed as apps.senate.virginia.gov,
+			 * but it exists so it's got that going for it.
 			 */
-			$url = 'https://whosmy.virginiageneralassembly.gov/index.php/legislator';
+			$url = 'https://lis.virginia.gov/cgi-bin/legp604.exe?' . SESSION_LIS_ID . '+mbr+'
+				. $lis_id;
 			$html = file_get_contents($url);
 
-			/*
-			 * Extract JSON from the data.
-			 */
-			preg_match('/senatorData">(.+)<\/div>/', $html, $matches);
-			$senators_json = $matches[1];
-			unset($matches);
-			$senators = json_decode($senators_json);
-			if (false === $senators)
-			{
-				return false;
-			}
-
-			foreach ($senators as $senator_data)
-			{
-				$senator_data->member_key = trim($senator_data->member_key);
-				if ($senator_data->member_key == $lis_id)
-				{
-					$senator = $senator_data;
-					break;
-				}
-			}
-
-			if (!isset($senator))
-			{
-				return false;
-			}
-
-			/*
-			 * Use the correct names for elements; example JSON response:
-			 * "last_name": "Mason",
-			 * "first_name": "T. Montgomery",
-			 * "middle_name": "\"Monty\"",
-			 * "suffix": "",
-			 * "district": "1",
-			 * "party": "D",
-			 * "capitol_phone": "(804) 698-7501",
-			 * "district_phone": "(757) 229-9310",
-			 * "email_address": "district01@senate.virginia.gov",
-			 * "member_key": "S102 "
-			 */
-			$legislator = [];
-			$legislator['name'] = $senator->last_name . ', ' . $senator->first_name;
-			$legislator['name_formal'] = $senator->first_name . ' ' . $senator->middle_name  . ' ' . $senator->last_name;
-			$legislator['name_formal'] = preg_replace('/\s{2,}/', ' ', $legislator['name_formal']);
-			$legislator['lis_id'] = substr(trim($senator->member_key), 1);
-			$legislator['chamber'] = 'senate';
-			$legislator['party'] = trim($senator->party);
-			$legislator['email'] = trim($senator->email_address);
-			$legislator['district_number'] = trim($senator->district);
-
-			/*
-			 * Fetch the HTML and save parse the DOM.
-			 */
-			$url = 'https://apps.senate.virginia.gov/Senator/memberpage.php?id=' . $lis_id;
-			$html = file_get_contents($url);
-			
 			if ($html === false)
 			{
 				return false;
@@ -1049,43 +998,121 @@ class Import
 				return false;
 			}
 
+			$legislator = [];
+
+			$legislator['lis_id'] = $lis_id;
+			$legislator['chamber'] = 'senate';
+
+			/*
+			 * Get the senator's name.
+			 */
+			$tmp = $dom->find('h3.subttl');
+			preg_match('/Senator(.+)&/', $tmp[0], $matches);
+			$legislator['name'] = trim($matches[1]);
+
+			/*
+			 * Get senator's preferred first name.
+			 */
+			preg_match('/ "(.+)" /', $legislator['name'], $matches);
+			if (!empty($matches))
+			{
+				$legislator['nickname'] = trim($matches[1]);
+				unset($matches);
+			}
+
+			/*
+			 * Set aside the name to use later, when establishing the shortname.
+			 */
+			$shortname = pivot($legislator['name']);
+
+			/*
+			 * Generate a placeholder for the senator's formal name.
+			 */
+			$legislator['name_formal'] = pivot($legislator['name']);
+			
+			/*
+			 * Remove any middle initials, but only if they're surrounded by spaces on either side.
+			 * (Otherwise, e.g. "K.C. Smith" would become "Smith.")
+			 */
+			$legislator['name'] = preg_replace('/ [A-Z]\. /', ' ', $legislator['name']);
+
+			/*
+			 * Save the senator's name in Lastname, Firstname format.
+			 */
+			if (isset($legislator['nickname']))
+			{
+				$legislator['name'] = substr($legislator['name'], strripos($legislator['name'], ' ')+1)
+					. ', ' . $legislator['nickname'];
+			}
+			else
+			{
+				$last_space = strripos($legislator['name'], ' ');
+
+				if ($last_space !== false)
+				{
+					$legislator['name'] =
+						substr($legislator['name'], $last_space + 1) .
+						', ' .
+						substr($legislator['name'], 0, $last_space);
+				}
+			}
+			$legislator['name'] = preg_replace('/\s{2,}/', ' ', $legislator['name']);
+
+			/*
+			 * We no longer need a nickname.
+			 */
+			if (isset($legislator['nickname']))
+			{
+				unset($legislator['nickname']);
+			}
+
 			/*
 			 * Get district number.
 			 */
-			preg_match('/, District ([0-9]{1,2})/', $html, $matches);
-			$legislator['district_number'] = $matches[1];
-			unset($matches);
+			if (preg_match('/Senate District ([0-9]{1,2})/', $html, $matches) == 1)
+			{
+				$legislator['district_number'] = trim($matches[1]);
+				unset($matches);
+			}
 
 			/*
-			 * Get legislator photo.
+			 * Get the legislator's party affiliation.
 			 */
-			preg_match('/(Senator\/images\/member_photos\/[a-zA-Z0-9-]+)/', $html, $matches);
-			$legislator['photo_url'] = 'https://apps.senate.virginia.gov/' . trim($matches[0]);
-			unset($matches);
+			$tmp = $dom->find('h3.subttl');
+			if (preg_match('/\(([DIR]{1})\)/', $tmp[0], $matches) == 1)
+			{
+				$legislator['party'] = trim($matches[1]);
+				unset($matches);
+			}
 
 			/*
-			 * Get legislator biography.
+			 * Put together the email address.
 			 */
-			preg_match('/Biography(.+?)<div class="lrgblacktext">(.+?)<\/div>/s', $html, $matches);
-			$legislator['bio'] = trim($matches[2]);
-			$legislator['bio'] = str_replace("\n", ' ', $legislator['bio']);
-			$legislator['bio'] = preg_replace('/\s+/', ' ', $legislator['bio']);
-			unset($matches);
+			$legislator['email'] = 'district' . $legislator['district_number']
+				. '@senate.virginia.gov';
 
 			/*
 			 * Get district address.
 			 */
-			preg_match('/District Office(.+)<div class="lrgblacktext">(.+)Phone/s', $html, $matches);
-			$legislator['address_district'] = trim($matches[2]);
-			$legislator['address_district'] = preg_replace('/\s+/', ' ', $legislator['address_district']);
-			$legislator['address_district'] = trim(str_replace('<br />', "\n", $legislator['address_district']));
-			unset($matches);
+			if (preg_match('/Mailing address:<\/h4><ul class="linkNon">\s*(<li>(.+)\n*)<\/ul>/sU',
+				$html, $matches) == 1)
+			{
+				$legislator['address_district'] = trim(strip_tags($matches[2]));
+				if (strlen($legislator['address_district']) < 20)
+				{
+					unset($legislator['address_district']);
+				}
+				unset($matches);
+			}
 
 			/*
 			 * Get place name
 			 */
-			preg_match('/(.+)\n(.+), VA/s', $legislator['address_district'], $matches);
-			$legislator['place'] = trim($matches[2]);
+			if (preg_match('/(.+)\n(.+), Virginia/s', $legislator['address_district'],
+				$matches) == 1)
+			{
+				$legislator['place'] = trim($matches[2]);
+			}
 
 			/*
 			 * Create formatted name
@@ -1105,52 +1132,146 @@ class Import
 				$legislator['name_formatted'] .= $legislator['district_number'];
 			}
 			$legislator['name_formatted'] .= ')';
-			
 
 			/*
-			 * Get Richmond office number.
+			 * Now fetch data from apps.senate.virginia.gov, which has a lot more data (albeit
+			 * unavailable until a legislator is actually sworn in).
 			 */
-			preg_match('/Room No: ([0-9]+)/', $html, $matches);
-			$legislator['address_richmond'] = trim($matches[1]);
-			unset($matches);
+			$url = 'https://apps.senate.virginia.gov/Senator/memberpage.php?id=' . $lis_id;
+			$html = file_get_contents($url);
 
-			/*
-			 * Get Richmond phone number.
-			 */
-			preg_match('/Session Office<\/strong>(.+?)Phone: \(804\) ([0-9]{3})-([0-9]{4})/s', $html, $matches);
-			$legislator['phone_richmond'] = '804-' . $matches[2] . '-' . $matches[3];
-			unset($matches);
-
-			/*
-			 * Get District phone number.
-			 */
-			preg_match('/District Office<\/strong>(.+?)Phone: \(([0-9]{3})\) ([0-9]{3})-([0-9]{4})/s', $html, $matches);
-			if (count($matches) == 5)
+			if ($html === true)
 			{
-				$legislator['phone_district'] = $matches[2] . '-' . $matches[3] . '-' . $matches[4];
+
+				$dom = HtmlDomParser::str_get_html($html);
+				if ($dom === false)
+				{
+					return false;
+				}
+
+				/*
+				 * Get legislator photo.
+				 */
+				if (preg_match('/(Senator\/images\/member_photos\/[a-zA-Z0-9-]+)/', $html,
+					$matches) == 1)
+				{
+					$legislator['photo_url'] = 'https://apps.senate.virginia.gov/' . trim($matches[0]);
+					unset($matches);
+				}
+
+				/*
+				 * Get legislator biography.
+				 */
+				if (preg_match('/Biography(.+?)<div class="lrgblacktext">(.+?)<\/div>/s',
+					$html, $matches) == 1)
+				{
+					$legislator['bio'] = trim($matches[2]);
+					$legislator['bio'] = str_replace("\n", ' ', $legislator['bio']);
+					$legislator['bio'] = preg_replace('/\s+/', ' ', $legislator['bio']);
+					unset($matches);
+				}
+
+				/*
+				 * Get Richmond office number.
+				 */
+				preg_match('/Room No: ([0-9]+)/', $html, $matches);
+				$legislator['address_richmond'] = trim($matches[1]);
+				unset($matches);
+
+				/*
+				 * Get Richmond phone number.
+				 */
+				preg_match('/Session Office<\/strong>(.+?)Phone: \(804\) ([0-9]{3})-([0-9]{4})/s', $html, $matches);
+				$legislator['phone_richmond'] = '804-' . $matches[2] . '-' . $matches[3];
+				unset($matches);
+
+				/*
+				 * Get District phone number.
+				 */
+				preg_match('/District Office<\/strong>(.+?)Phone: \(([0-9]{3})\) ([0-9]{3})-([0-9]{4})/s', $html, $matches);
+				if (count($matches) == 5)
+				{
+					$legislator['phone_district'] = $matches[2] . '-' . $matches[3] . '-' . $matches[4];
+				}
+				unset($matches);
+			
+			} // end fetching from apps.senate.virginia.gov
+
+			/*
+			 * Determine what date to use as the senator's start date. We have to do this because the
+			 * senate provides no information anywhere whatsoever about when a senator started their
+			 * term in office, bafflingly.
+			 * 
+			 * If it's November or December of an odd-numbered year, then the legislator's start date
+			 * is the day the next session starts.
+			 */
+			if (date('m') >= 11 && date('Y') % 2 == 1)
+			{
+
+				/*
+			  	 * See if we know when the next session starts.
+				 */
+				$sql = 'SELECT date_started
+						FROM sessions
+						WHERE date_started > now()';
+				$stmt = $GLOBALS['db']->prepare($sql);
+				$stmt->execute();
+				$session = $stmt->fetch(PDO::FETCH_OBJ);
+				if (count($session) > 0)
+				{
+					$legislator['date_started'] = $session->date_started;
+				}
+
+				/*
+				 * If we don't know when the next session starts, go with January 1.
+				 */
+				else
+				{
+					$legislator['date_started'] = date('Y') + 1 . '-01-01';
+				}
+				
 			}
-			unset($matches);
+
+			/*
+			 * If this is not post-election, just make the date yesterday.
+			 */
+			else
+			{
+				$legislator['date_started'] = date('Y-m-d', strtotime('-1 day'));
+			}
 
 			/*
 			 * Format senator's shortname.
 			 */
-			preg_match_all('([A-Z]{1})', $legislator['name_formal'], $matches);
-			$legislator['shortname'] = implode('', array_slice($matches[0], 0, -1));
+			preg_match_all('([A-Za-z-]+)', $shortname, $matches);
+			$legislator['shortname'] = '';
+			$i=0;
+			while ($i+1 < count($matches[0]))
+			{
+				$legislator['shortname'] .= $matches[0][$i][0];
+				$i++;
+			}
 			$tmp = explode(', ', $legislator['name']);
 			$legislator['shortname'] .= $tmp[0];
 			$legislator['shortname'] = strtolower($legislator['shortname']);
-
+			
 			/*
 			 * Turn district number into a district ID
 			 */
 			$district = new District;
 			$d = $district->info('senate', $legislator['district_number']);
 			$legislator['district_id'] = $d['id'];
+			$district = null;
+
+			///// The above is failing with this MySQL error:
+			///// Error: Commands out of sync; you can't run this command now
 
 			/*
 			 * We no longer need the district number.
 			 */
 			unset($legislator['district_number']);
+
+			print_r($legislator);
 
 		} // fetch senator
 
@@ -1224,65 +1345,6 @@ class Import
 		}
 		
 		return $legislator;
-
-	}
-
-	/**
-	 * Retrieve an individual legislator's record from the legislative CSV
-	 *
-	 * @param [type] $lis_id
-	 * @return void
-	 */
-	public function check_legislator_csv($lis_id)
-	{
-
-		if (!isset($lis_id) && preg_match('/([HS][0-9]{1,4})/', $lis_id))
-		{
-			return false;
-		}
-
-		/*
-		 * Read in members.csv, which we fetch regularly from LIS.
-		 */
-		$filename = __DIR__ . '/members.csv';
-		$csv = file_get_contents($filename);
-		if ($csv === false)
-		{
-			return false;
-		}
-
-		/*
-		 * Turn the CSV file into an associative array.
-		 */
-		$csv_lines = explode("\n", $csv);
-		
-		unset($csv_lines[0]);
-		$csv_header = array('chamber', 'number', 'name', 'id');
-
-		$legislators = array();
-
-		foreach ($csv_lines as $csv_line)
-		{
-			$values = explode(',', $csv_line);
-			foreach ($values as &$value)
-			{
-				$value = trim($value);
-			}
-			$associativeArray[] = array_combine($csv_header, $values);
-		}
-
-		/*
-		 * Look up the requested record.
-		 */
-		foreach ($legislators as $legislator)
-		{
-			if ($legislator['id'] == $lis_id)
-			{
-				return $legislator;
-			}
-		}
-
-		return false;
 
 	}
 
