@@ -81,7 +81,7 @@ define('SLACK_WEBHOOK', '');
 define('PUSHOVER_KEY', '');
 
 # OpenAI API key
-define('OPENAI_KEY, '');
+define('OPENAI_KEY', '');
 
 # AWS auth info
 # This is only used in some RS instances.
