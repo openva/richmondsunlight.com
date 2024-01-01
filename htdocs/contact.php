@@ -174,28 +174,53 @@ if (isset($_POST['form_data']))
     else
     {
 
+        /*
+         * In which we reinvent Bayesian filtering but, like...badly.
+         */
         $spam_strings = array(
-            'explainer video',
-            'click here',
-            'guest post',
-            'affiliate account',
-            'affiliate sales',
-            'content syndication',
-            'growth hacking',
-            'LinkedIn',
-            'marketing plan',
-            'lead prospecting',
-            ' SEO ',
-            'low pricing',
-            'copyrighted image',
-            'under penalty of perjury',
+            'explainer video' => 3,
+            'click here' => 5,
+            'guest post' => 5,
+            'affiliate account' => 5,
+            'affiliate sales' => 5,
+            'content syndication' => 5,
+            'growth hacking' => 5,
+            'LinkedIn' => 3,
+            'marketing plan' => 5,
+            'lead prospecting' => 5,
+            ' SEO ' => 5,
+            'low pricing' => 3,
+            'copyright' => 3,
+            'under penalty of perjury' => 5,
+            'bitcoin' => 3,
+            'blockchain' => 3,
+            ' keto ' => 5,
+            'financial assistance' => 3,
+            'from home' => 3,
+            'social media' => 3,
+            'financing' => 3,
+            'http' => 1,
+            'bit.y' => 2,
+            'discount' => 2,
+            '$' => 2,
+            'hacking' => 2,
         );
-        foreach ($spam_strings as $spam_string)
+
+        /*
+         * Tally the message's spam score, to see if it exceeds the threshold of 5 points.
+         */
+        $score = 0;
+        foreach ($spam_strings as $spam_string => $points)
         {
-            if (stripos($form_data['comments'], $spam_string) !== false)
+            $present = substr_count($form_data['comments'], $spam_string);
+            if ($present != false)
             {
-                $is_spam = true;
-                break;
+                $score = $score + ($present * $points);
+                if ($score >= 5)
+                {
+                    $is_spam = true;
+                    break;
+                }
             }
         }
 
