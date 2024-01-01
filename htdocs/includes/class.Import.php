@@ -1263,9 +1263,6 @@ class Import
 			$legislator['district_id'] = $d['id'];
 			$district = null;
 
-			///// The above is failing with this MySQL error:
-			///// Error: Commands out of sync; you can't run this command now
-
 			/*
 			 * We no longer need the district number.
 			 */
