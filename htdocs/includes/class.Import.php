@@ -644,7 +644,7 @@ class Import
 		$sql = 'INSERT INTO representatives SET ';
 		foreach ($legislator as $key=>$value)
 		{
-			$sql .= $key.'="' . $value . '", ';
+			$sql .= $key.'="' . addslashes($value) . '", ';
 		}
 
 		$sql .= 'date_created=now()';
