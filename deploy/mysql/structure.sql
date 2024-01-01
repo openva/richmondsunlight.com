@@ -3876,7 +3876,7 @@ DROP TABLE IF EXISTS `tags`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tags` (
   `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` int(5) unsigned NOT NULL,
+  `user_id` int(5) unsigned,
   `bill_id` mediumint(8) unsigned NOT NULL,
   `tag` varchar(30) CHARACTER SET latin1 NOT NULL,
   `ip` varchar(19) CHARACTER SET latin1 DEFAULT NULL,
