@@ -77,5 +77,8 @@ then
     
 fi
 
-# Expire the cached template (in case we've made changes to it)
+# Populate the template with the list of legislators
+php deploy/populate_menu.php
+
+# Expire the cached template
 echo "delete template-new" | nc -N localhost 11211  || true
