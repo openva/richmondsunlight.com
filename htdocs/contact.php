@@ -13,7 +13,6 @@
 # page to function.
 include_once 'includes/settings.inc.php';
 include_once 'vendor/autoload.php';
-use TijsVerkoyen\Akismet;
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -199,19 +198,6 @@ if (isset($_POST['form_data']))
                 break;
             }
         }
-
-        /*
-         * Query Akismet to see if this is spam.
-         */
-        /*$akismet = new Akismet();
-        $akismet->apiKey = KISMET_KEY;
-        $akismet->url = 'https://www.richmondsunlight.com/';
-
-        $is_spam = $akismet->isSpam(
-            $form_data['comments'],
-            $form_data['name'],
-            $form_data['email']
-        );*/
 
         /*
          * This is spam. End silently.

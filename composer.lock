@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2e9cc5f4ae24d035b6f1f95c1065e230",
+    "content-hash": "03eedde637321d06a8db535aa83fb96a",
     "packages": [
         {
             "name": "aws/aws-crt-php",
@@ -1368,50 +1368,6 @@
                 }
             ],
             "time": "2020-10-23T09:01:57+00:00"
-        },
-        {
-            "name": "tijsverkoyen/akismet",
-            "version": "1.1.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/tijsverkoyen/Akismet.git",
-                "reference": "6f7987fe181fd0fddbc9832f2ddeaf088425c83f"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/tijsverkoyen/Akismet/zipball/6f7987fe181fd0fddbc9832f2ddeaf088425c83f",
-                "reference": "6f7987fe181fd0fddbc9832f2ddeaf088425c83f",
-                "shasum": ""
-            },
-            "require": {
-                "ext-curl": "*",
-                "php": ">=5.2.0"
-            },
-            "type": "library",
-            "autoload": {
-                "classmap": [
-                    ""
-                ]
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "BSD"
-            ],
-            "authors": [
-                {
-                    "name": "Tijs Verkoyen",
-                    "email": "akismet@verkoyen.eu",
-                    "role": "Developer"
-                }
-            ],
-            "description": "Akismet is a wrapper-class to communicate with the Akismet API.",
-            "homepage": "https://github.com/tijsverkoyen/Akismet",
-            "support": {
-                "issues": "https://github.com/tijsverkoyen/Akismet/issues",
-                "source": "https://github.com/tijsverkoyen/Akismet/tree/master"
-            },
-            "abandoned": true,
-            "time": "2016-07-19T13:50:18+00:00"
         }
     ],
     "packages-dev": [],
