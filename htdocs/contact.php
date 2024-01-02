@@ -254,6 +254,14 @@ if (isset($_POST['form_data']))
 else
 {
 
+    /*
+     * Spammers have no referrer -- block them.
+     */
+    if ( !isset($SERVER['HTTP_REFERER']) || $SERVER['HTTP_REFERER'] == '' )
+    {
+        die();
+    }
+
     # Retrieve the user data to populate the comment form.
     # Grab the user data.
     if (logged_in() === TRUE)
