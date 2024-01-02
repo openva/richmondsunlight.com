@@ -204,6 +204,8 @@ if (isset($_POST['form_data']))
             'discount' => 2,
             '$' => 2,
             'hacking' => 2,
+            'opt out' => 3,
+            'marketing' => 3,
         );
 
         /*
