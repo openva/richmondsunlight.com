@@ -246,7 +246,8 @@ if (isset($_POST['form_data']))
         'From: waldo@jaquith.org' . "\n" .
         'Reply-To: ' . $form_data['name'] . ' <' . $form_data['email'] . ">\n" .
         'X-Originating-IP: ' . $_SERVER['REMOTE_ADDR'] . "\n" .
-        'X-Originating-URL: ' . $_SERVER['REQUEST_URI']
+        'X-Originating-URL: ' . $_SERVER['REQUEST_URI'] . "\n" .
+        'X-Spam-Score: ' . $score
         );
         $page_body .= '<p>Email sent. Thanks for writing!</p>';
 
