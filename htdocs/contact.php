@@ -110,7 +110,8 @@ if (isset($_POST['form_data']))
 
     # Prohibit any emails sent suspiciously quickly. We double the timestamp
     # value because spammers will plug in a timestamp value.
-    if ( (time() - ($form_data['secret']) / 2) <= 10)
+    $time_elapsed = time() - ($form_data['secret']) / 2;
+    if ( $time_elapsed <= 10)
     {
         die();
     }
@@ -247,6 +248,7 @@ if (isset($_POST['form_data']))
         'Reply-To: ' . $form_data['name'] . ' <' . $form_data['email'] . ">\n" .
         'X-Originating-IP: ' . $_SERVER['REMOTE_ADDR'] . "\n" .
         'X-Originating-URL: ' . $_SERVER['REQUEST_URI'] . "\n" .
+        'X-Time-Elapsed: ' . $time_elapsed . "\n" .
         'X-Spam-Score: ' . $score
         );
         $page_body .= '<p>Email sent. Thanks for writing!</p>';
