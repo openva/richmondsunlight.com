@@ -401,13 +401,31 @@ if (!empty($legislator['date_ended']))
 }
 else
 {
+    $elections = [];
+    $elections['house'] = [2025, 2027, 2029, 2031, 2033, 2035, 2037, 2039];
+    $elections['senate'] = [2027, 2031, 2035, 2039];
     if ($legislator['chamber'] == 'house')
     {
-        $next_election = 'November 2025';
+        foreach ($elections['house'] as $election)
+        {
+            if (strtotime($election. '-11-15') > time())
+            {
+                $next_election = 'November ' . $election;
+                break;
+            }
+        }
+        
     }
     elseif ($legislator['chamber'] == 'senate')
     {
-        $next_election = 'November 2027';
+        foreach ($elections['senate'] as $election)
+        {
+            if (strtotime($election. '-11-15') > time())
+            {
+                $next_election = 'November ' . $election;
+                break;
+            }
+        }
     }
     $page_body .= '
 		<dt>Next Election</dt>
