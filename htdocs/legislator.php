@@ -379,9 +379,7 @@ $page_body .= '
 		<dt>Party</dt>
 		<dd>' . $legislator['party_name'] . '</dd>
 		<dt>District</dt>
-		<dd>' . $legislator['district'] . ': ' . $legislator['district_description'] . '
-			[<a href="/images/districts/' . $legislator['district_id'] . '.jpg"
-			title="View a map of this district">map</a>]</dd>';
+		<dd>' . $legislator['district'] . ': ' . $legislator['district_description'] . '</dd>';
 if ($legislator['date_started'] != '0000-00-00')
 {
     $page_body .= '
