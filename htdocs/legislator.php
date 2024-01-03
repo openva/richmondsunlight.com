@@ -403,11 +403,11 @@ else
 {
     if ($legislator['chamber'] == 'house')
     {
-        $next_election = 'November 2019';
+        $next_election = 'November 2025';
     }
     elseif ($legislator['chamber'] == 'senate')
     {
-        $next_election = 'November 2019';
+        $next_election = 'November 2027';
     }
     $page_body .= '
 		<dt>Next Election</dt>
