@@ -71,9 +71,8 @@ $site_section = 'legislators';
  */
 $html_head .= '<meta name="twitter:card" content="summary" />
 	<meta property="twitter:title" content="' . $legislator['name_formatted'] . ' "/>
-	<meta property="twitter:image" content="https://www.richmondsunlight.com/images/legislators/thumbnails/'
+	<meta property="twitter:image" content="https://www.richmondsunlight.com/images/legislators/medium/'
         . $legislator['shortname'] . '.jpg"/>
-	<meta name="twitter:site" content="@richmond_sun" />
 	<meta property="twitter:description" content="Representing Virginia ' . ucfirst($legislator['chamber'])
         . ' District ' . $legislator['district'] . ', including ' . $legislator['district_description'] . ', '
         . 'since ' . date('Y', strtotime($legislator['date_started'])) . '." />';
