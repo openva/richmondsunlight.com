@@ -261,7 +261,7 @@ else
     /*
      * Spammers have no referrer -- block them.
      */
-    if ( !isset($SERVER['HTTP_REFERER']) || $SERVER['HTTP_REFERER'] == '' )
+    if ( !isset($_SERVER['HTTP_REFERER']) || $_SERVER['HTTP_REFERER'] == '' )
     {
         die();
     }
