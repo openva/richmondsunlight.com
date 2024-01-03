@@ -313,10 +313,6 @@ $page_body = '
 <div class="tabs">
 <ul class="tabs">
 	<li><a href="#bio">Bio</a></li>';
-/*if (!empty($legislator['contributions']))
-{
-    $page_body .= '<li><a href="#donors">Donors</a></li>';
-}*/
 $page_body .= '
 	<li><a href="#media">Media</a></li>';
 if (!empty($legislator['rss_url']))
