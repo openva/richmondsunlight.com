@@ -161,7 +161,7 @@ if ($legislator['district_boundaries'] != FALSE)
                     container: "district_map",
                     style: "mapbox://styles/mapbox/streets-v11",
                     center: [-78.57,37.48],
-                    zoom: 7
+                    zoom: 5
                 });
 
                 var geojsonData = ' . $legislator['district_boundaries'] . '
