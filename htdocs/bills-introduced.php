@@ -97,7 +97,7 @@ if ($num_results > 0)
 $page_sidebar = '
 	<div class="box">
 		<h3>Options</h3>
-		View the past&thinsp;.&thinsp;.&thinsp;.
+		View the past . . .
 		<ul>
 			<li><a href="/bills/introduced/3/">3 Days</a></li>
 			<li><a href="/bills/introduced/7/">7 Days</a></li>

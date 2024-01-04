@@ -434,7 +434,7 @@
 			var l = re[0].length;
 			var re = re[0].replace(/\s$/,'');
 			if(l < this.length)
-				re = re + "&nbsp;.&thinsp;.&thinsp;.&thinsp;";
+				re = re + "&nbsp;. . . ";
 			return re;
 		}
 
