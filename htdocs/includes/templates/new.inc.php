@@ -147,6 +147,9 @@
 									<li><a href="/bills/2018/">2018</a></li>
 									<li><a href="/bills/2019/">2019</a></li>
 									<li><a href="/bills/2020/">2020</a></li>
+									<li><a href="/bills/2021/">2021</a></li>
+									<li><a href="/bills/2022/">2022</a></li>
+									<li><a href="/bills/2023/">2023</a></li>
 								</ul>
 							</li>
 						</ul>
