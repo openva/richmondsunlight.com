@@ -1380,6 +1380,7 @@ if (isset($comments) && is_array($comments))
  */
 $page_body .= '</div>';
 
+$debug_timing['comments displayed'] = microtime(TRUE);
 
 # Only let the user add a new comment if this bill is from the current session and, if
 # the session is over, if the bill has passed.
@@ -1404,6 +1405,8 @@ if (($bill['session_id'] == SESSION_ID))
     # Get the user's subscription status. (Either false or, if true, we get a hash of the
     # subscription ID.
     $subscription_status = $subscription->is_subscribed();
+
+    $debug_timing['subscription determined'] = microtime(TRUE);
 
     # If the person isn't already subscribed to this bill's comments.
     if ($subscription_status === false)
