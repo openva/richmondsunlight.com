@@ -1493,6 +1493,7 @@ $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
 $page->html_head = $html_head;
+$debug_timing['contents prepped for output'] = microtime(TRUE);
 $page->process();
 
 $debug_timing['contents sent for output'] = microtime(TRUE);
