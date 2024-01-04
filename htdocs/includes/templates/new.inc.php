@@ -127,6 +127,7 @@
 						<ul>
 							<li><a href="/bills/topic/">By Topic</a></li>
 							<li><a href="/bills/introduced/">Newest</a></li>
+							<li><a href="/bills/activity/">Activity</a></li>
 							<li><a href="/bills/#house">House</a></li>
 							<li><a href="/bills/#senate">Senate</a></li>
 							<li>Past Years »
