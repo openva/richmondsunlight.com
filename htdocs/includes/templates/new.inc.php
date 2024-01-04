@@ -474,7 +474,7 @@
 							})
 							.then(function(data) {
 								// Set the tooltip content
-								var content = '<a href="/legislator/' + data.chief_patron_id + '/">' + data.patron_name_formatted + '</a>: ' + data.summary.truncate();
+								var content = '<a href="/legislator/' + data.chief_patron_shortname + '/">' + data.patron_name_formatted + '</a>: ' + data.summary.truncate();
 								api.set('content.text', content);
 							}, function(xhr, status, error) {
 								// Upon error
