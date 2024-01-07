@@ -28,16 +28,23 @@ $legislators = array('house' => array(), 'senate' => array());
 foreach ($legislator_list as $legislator)
 {
 
-    $legislators[$legislator{'chamber'}][substr($legislator{'name'}, 0, 1)][] = '<li><a href="/legislator/' . $legislator['shortname']
-        . '/">' . $legislator['name_formatted'] . '</a></li>';
+    $legislators[$legislator{'chamber'}][substr($legislator{'name'}, 0, 1)][] = '<a href="/legislator/' . $legislator['shortname']
+        . '/">' . $legislator['name_formatted'] . '</a>';
 
 }
 
 /*
  * Establish our alphabetical groupings
  */
-$house_categories = explode(',', 'a,i,d,m,s');
-$senate_categories = explode(',',  'a,n');
+$alphabet = explode(',', 'A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z');
+$house_categories = explode(',', 'A,I,D,M,S');
+$senate_categories = explode(',', 'A,J,S');
+
+////////////////////////////////////////////////////////////////////////
+///// Redo this to be based on iterating through the alphabet, NOT 
+///// iterating through the list of legislators. Missing alphabetical
+///// letters from legislators names is hobbling this.
+////////////////////////////////////////////////////////////////////////
 
 /*
  * Output menu data
@@ -45,19 +52,33 @@ $senate_categories = explode(',',  'a,n');
 echo '
 <ul>
     <li>House »
-        <ul class="alphabetic">
-        <li>A–Z »
-            <ul class="legislators">';
+        <ul class="alphabetic">';
 
+$first = true;
 foreach ($legislators['house'] as $letter => $by_letter)
 {
-    echo '<li>' . $letter . ' »
-        <ul class="legislators">';
+
+    if (in_array($letter, $house_categories) || $first == true)
+    {
+        echo 
+            '<li>' . $letter . ' »
+            <ul class="legislators">';
+    }
+
     foreach ($by_letter as $legislator)
     {
-        echo '<li>' . $legislator . '</li>';
+        echo '
+                <li>' . $legislator . '</li>';
     }
-    echo '</ul></li>';
+
+    if (in_array($alphabet[array_search($letter, $alphabet)]+1, $house_categories))
+    {
+        echo '
+            </ul></li>';
+    }
+
+    $first = false;
+
 }
 
 echo '
@@ -65,16 +86,32 @@ echo '
     <li>Senate »
         <ul class="alphabetic">';
 
-            foreach ($legislators['senate'] as $letter => $by_letter)
-            {
-                echo '<li>' . $letter . ' »
-                    <ul class="legislators">';
-                foreach ($by_letter as $legislator)
-                {
-                    echo '<li>' . $legislator . '</li>';
-                }
-                echo '</ul></li>';
-            }
+$first = true;
+foreach ($legislators['senate'] as $letter => $by_letter)
+{
+
+    if (in_array($letter, $senate_categories) || $first == true)
+    {
+        echo '
+            <li>' . $letter . ' »
+            <ul class="legislators">';
+    }
+
+    foreach ($by_letter as $legislator)
+    {
+        echo '
+                <li>' . $legislator . '</li>';
+    }
+
+    if (in_array($alphabet[array_search($letter, $alphabet)]+1, $senate_categories))
+    {
+        echo '
+            </ul></li>';
+    }
+
+    $first = false;
+
+}
 
 echo '
             </ul>
