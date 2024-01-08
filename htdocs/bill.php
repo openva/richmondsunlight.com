@@ -1046,7 +1046,7 @@ if (isset($bill['places']) && (count($bill['places']) > 0))
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet" />
     <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
         <style>
-            #map { height: 250px; width:100%; }
+            #map { height: 250px; width:100%; margin-bottom: 1.5em; }
         </style>
         <script>
             $( document ).ready(function() {
