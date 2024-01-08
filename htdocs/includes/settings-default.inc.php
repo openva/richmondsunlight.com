@@ -21,6 +21,10 @@ define('SESSION_LIS_ID', '241');
 # As defined by the year.
 define('SESSION_YEAR', 2024);
 
+# Start and end of this session.
+define('SESSION_START', '2024-01-10');
+define('SESSION_END', '2024-03-09');
+
 # Set the FTP auth pair for legislative data.
 define('LIS_FTP_USERNAME', '');
 define('LIS_FTP_PASSWORD', '');
@@ -97,15 +101,24 @@ setlocale(LC_MONETARY, 'en_US');
 date_default_timezone_set('America/New_York');
 
 /*
- * Generate status constants dynamically.
+ * Dynamically determine whether the legislature is in session and whether it's legislative season.
  */
-//$session = new Session;
-//$status = $session->status();
-
-# Is the GA currently in session?
-//define('IN_SESSION', $status['in_session']);
-define('IN_SESSION', false);
-
-# Is it a time of year when the legislature is doing anything at all?
-//define('LEGISLATIVE_SEASON', $status['in_season']);
-define('LEGISLATIVE_SEASON', true);
+if (time() >= strtotime(SESSION_START)
+    &&
+    time() <= strtotime(SESSION_END)
+)
+{
+    define('IN_SESSION', true);
+}
+else
+{
+    define('IN_SESSION', false);
+}
+if (date('n') >= 11 || date('n') <= 4)
+{
+    define('LEGISLATIVE_SEASON', true);
+}
+else
+{
+    define('LEGISLATIVE_SEASON', false);
+}
