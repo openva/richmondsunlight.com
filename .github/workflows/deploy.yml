@@ -6,12 +6,14 @@ on:
       - master
       - deploy
   pull_request:
+  schedule:
+    - cron: 0 4 * * * # Redeploy at 4 AM every day
 
 jobs:
   build:
     runs-on: ubuntu-20.04
     steps:
-      - uses: Firenza/secrets-to-env@v1.1.0
+      - uses: Firenza/secrets-to-env@v1.2.0
         with:
           secrets: ${{ toJSON(secrets) }}
       - name: Specify PHP version
@@ -23,7 +25,7 @@ jobs:
       - run: >-
           sudo apt-get update && 
           sudo apt-get install -y awscli php5.6-cli php5.6-curl php5.6-memcached php5.6-mysql yarn zip
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - run: sudo apt-get update -qq
       - run: composer install
       - run: cd htdocs/js/vendor; yarn build
@@ -44,7 +46,7 @@ jobs:
             cp appspec-deploy.yml appspec.yml
           fi
       - name: Save secret-populated code for a subsequent deploy step
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: codebase
           path: .
@@ -61,11 +63,11 @@ jobs:
     steps:
       - run: echo "Deploy branch is ${{ needs.build.outputs.github_branch }}"
       - name: Get the secret-populated code
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4
         with:
           name: codebase
       - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v1
+        uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
@@ -73,16 +75,22 @@ jobs:
       - name: Staging CodeDeploy Deployment
         if: ${{ needs.build.outputs.github_branch == 'master' }}
         run: |
+          aws deploy push --application-name RS-Web \
+            --s3-location s3://deploy.richmondsunlight.com/rs-web-staging.zip \
+            --ignore-hidden-files
           aws deploy create-deployment \
             --application-name RS-Web \
             --deployment-group-name RS-Web-Staging \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
+            --s3-location bucket=deploy.richmondsunlight.com,key=rs-web-staging.zip,bundleType=zip
       - name: Production CodeDeploy Deployment
         if: ${{ needs.build.outputs.github_branch == 'deploy' }}
         run: |
+          aws deploy push --application-name RS-Web \
+            --s3-location s3://deploy.richmondsunlight.com/rs-web-deploy.zip \
+            --ignore-hidden-files
           aws deploy create-deployment \
             --application-name RS-Web \
             --deployment-group-name RS-Web-Fleet \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --github-location repository=${{ github.repository }},commitId=${{ github.sha }}
+            --s3-location bucket=deploy.richmondsunlight.com,key=rs-web-deploy.zip,bundleType=zip

@@ -277,7 +277,7 @@ if (mysqli_num_rows($result) > 0)
 }
 
 # Select the most popular bills of the past X days.
-if (IN_SESSION == 'Y')
+if (LEGISLATIVE_SEASON == true)
 {
     $days = 3;
 }

@@ -1043,7 +1043,7 @@ if (isset($bill['places']) && (count($bill['places']) > 0))
 
 	<div id="map" style="width: 100%; height: 190px;">
 		<img src="//maps.googleapis.com/maps/api/staticmap?center=38.1%2C-79.8&amp;zoom=6&amp;size=420x190' .
-        '&amp;maptype=terrain&amp;sensor=false';
+        '&amp;maptype=terrain&amp;sensor=false&amp;key=AIzaSyCOpfFJJQ7j6zrgl6ngYwvD34G9klL_NPs';
     foreach ($bill['places'] as $place)
     {
         $place = (array) $place;
@@ -1380,6 +1380,7 @@ if (isset($comments) && is_array($comments))
  */
 $page_body .= '</div>';
 
+$debug_timing['comments displayed'] = microtime(TRUE);
 
 # Only let the user add a new comment if this bill is from the current session and, if
 # the session is over, if the bill has passed.
@@ -1404,6 +1405,8 @@ if (($bill['session_id'] == SESSION_ID))
     # Get the user's subscription status. (Either false or, if true, we get a hash of the
     # subscription ID.
     $subscription_status = $subscription->is_subscribed();
+
+    $debug_timing['subscription determined'] = microtime(TRUE);
 
     # If the person isn't already subscribed to this bill's comments.
     if ($subscription_status === false)
@@ -1490,6 +1493,7 @@ $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
 $page->html_head = $html_head;
+$debug_timing['contents prepped for output'] = microtime(TRUE);
 $page->process();
 
 $debug_timing['contents sent for output'] = microtime(TRUE);

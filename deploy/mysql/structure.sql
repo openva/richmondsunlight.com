@@ -2209,6 +2209,7 @@ CREATE TABLE `districts` (
   `date_started` date NOT NULL,
   `date_ended` date NOT NULL,
   `description` varchar(300) CHARACTER SET latin1 DEFAULT NULL,
+  `boundaries` json DEFAULT NULL,
   `notes` text CHARACTER SET latin1,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `date_created` datetime NOT NULL,
@@ -2598,7 +2599,7 @@ DROP TABLE IF EXISTS `gazetteer`;
 CREATE TABLE `gazetteer` (
   `id` mediumint(8) unsigned NOT NULL,
   `name` varchar(128) CHARACTER SET utf8 NOT NULL,
-  `municipality` varchar(64) CHARACTER SET utf8 NOT NULL,
+  `municipality` varchar(64) CHARACTER SET utf8,
   `latitude` float NOT NULL,
   `longitude` float NOT NULL,
   `elevation` tinyint(3) unsigned DEFAULT NULL,
@@ -3120,7 +3121,7 @@ CREATE TABLE `representatives` (
   `rss_url` varchar(64) CHARACTER SET latin1 DEFAULT NULL,
   `twitter` varchar(96) CHARACTER SET latin1 DEFAULT NULL,
   `sbe_id` varchar(11) COLLATE utf8_bin DEFAULT NULL,
-  `lis_id` smallint(5) unsigned DEFAULT NULL,
+  `lis_id` varchar(10) unsigned DEFAULT NULL,
   `place` varchar(60) CHARACTER SET latin1 DEFAULT NULL COMMENT 'District office location',
   `latitude` float DEFAULT NULL,
   `longitude` float DEFAULT NULL,
@@ -3875,7 +3876,7 @@ DROP TABLE IF EXISTS `tags`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `tags` (
   `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
-  `user_id` int(5) unsigned NOT NULL,
+  `user_id` int(5) unsigned,
   `bill_id` mediumint(8) unsigned NOT NULL,
   `tag` varchar(30) CHARACTER SET latin1 NOT NULL,
   `ip` varchar(19) CHARACTER SET latin1 DEFAULT NULL,

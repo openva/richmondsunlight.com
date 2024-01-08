@@ -71,9 +71,8 @@ $site_section = 'legislators';
  */
 $html_head .= '<meta name="twitter:card" content="summary" />
 	<meta property="twitter:title" content="' . $legislator['name_formatted'] . ' "/>
-	<meta property="twitter:image" content="https://www.richmondsunlight.com/images/legislators/thumbnails/'
+	<meta property="twitter:image" content="https://www.richmondsunlight.com/images/legislators/large/'
         . $legislator['shortname'] . '.jpg"/>
-	<meta name="twitter:site" content="@richmond_sun" />
 	<meta property="twitter:description" content="Representing Virginia ' . ucfirst($legislator['chamber'])
         . ' District ' . $legislator['district'] . ', including ' . $legislator['district_description'] . ', '
         . 'since ' . date('Y', strtotime($legislator['date_started'])) . '." />';
@@ -137,117 +136,69 @@ if (!empty($legislator['email']))
  * Display a map of the district boundaries.
  */
 
-/*
- * Try to get the data from Memcached.
- */
-if (MEMCACHED_SERVER != '')
+if ($legislator['district_boundaries'] != FALSE)
 {
-    $mc = new Memcached();
-    $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-    $mc_slug = 'district-map-' . $legislator['id'];
-    $district_data = $mc->get($mc_slug);
-}
-
-if ($district_data == FALSE)
-{
-    if ($legislator['chamber'] == 'house')
-    {
-        $c = 'l';
-    }
-    else
-    {
-        $c = 'u';
-    }
-
-    $url = 'https://data.openstates.org/boundaries/2018/ocd-division/country:us/state:va/sld' . $c . ':' . $legislator['district'] . '.json';
-    $json = get_content($url);
 
     /*
-    * If this is valid JSON.
-    */
-    if ($json != FALSE)
-    {
-
-        $district_data = json_decode($json);
-
-        /*
-        * Swap lat/lon to X/Y.
-        */
-        foreach ($district_data->shape->coordinates[0][0] as &$pair)
-        {
-            $tmp[0] = $pair[1];
-            $tmp[1] = $pair[0];
-            $pair = $tmp;
-        }
-    }
-
-    /*
-     * Cache the district data for three months.
+     * Pull out the relevant bit from the GeoJSON
      */
-    if (MEMCACHED_SERVER != '')
-    {
-        $result = $mc->set($mc_slug, $district_data, 60 * 60 * 24 * 30.5 * 3);
-    }
-}
+    $legislator['district_boundaries'] = json_decode($legislator['district_boundaries']);
+    unset($legislator['district_boundaries']->features[0]->properties);
+    $legislator['district_boundaries'] = $legislator['district_boundaries']->features[0];
+    $legislator['district_boundaries'] = json_encode($legislator['district_boundaries']);
 
-/*
- * Convert lat, lon to lon, lat
- */
-foreach($district_data->shape->coordinates[0][0] as &$pair)
-{
-    $tmp = $pair[0];
-    $pair[0] = $pair[1];
-    $pair[1] = $tmp;
-}
+    $html_head .= '<script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
+        <style>
+            #district_map { height: 250px; }
+        </style>
+        <script>
+            $( document ).ready(function() {
 
-$html_head .= ' <script src="https://api.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.js"></script>
-<link href="https://api.mapbox.com/mapbox-gl-js/v1.10.0/mapbox-gl.css" rel="stylesheet" />
-    <style>
-        #district_map { height: 250px; }
-    </style>
-    <script>
-        $( document ).ready(function() {
-
-            mapboxgl.accessToken = "' . MAPBOX_TOKEN . '";
-            var map = new mapboxgl.Map({
-                container: "district_map",
-                style: "mapbox://styles/mapbox/streets-v11",
-                center: [' . $district_data->centroid->coordinates[0] . ', ' . $district_data->centroid->coordinates[1] . '],
-                zoom: 7
-            });
-
-            map.on("load", function() {
-                map.addSource("boundaries", {
-                    "type": "geojson",
-                    "data": {
-                        "type": "Feature",
-                        "properties": {},
-                        "geometry": {
-                            "type": "LineString",
-                            "coordinates": ' . json_encode($district_data->shape->coordinates[0][0]) . '
-                        }
-                    }
+                mapboxgl.accessToken = "' . MAPBOX_TOKEN . '";
+                var map = new mapboxgl.Map({
+                    container: "district_map",
+                    style: "mapbox://styles/mapbox/streets-v11",
+                    center: [-78.57,37.48],
+                    zoom: 7
                 });
-                map.addLayer({
-                    "id": "boundaries",
-                    "type": "line",
-                    "source": "boundaries",
-                    "layout": {
-                        "line-join": "round",
-                        "line-cap": "round"
-                    },
-                    "paint": {
-                        "line-color": "#888",
-                        "line-width": 8
-                    }
-                });  
-               
+
+                var geojsonData = ' . $legislator['district_boundaries'] . '
+
+                map.on("load", function() {
+                    map.addSource("boundaries", {
+                        "type": "geojson",
+                        "data": geojsonData
+                        }
+                    );
+                    map.addLayer({
+                        "id": "boundaries",
+                        "type": "line",
+                        "source": "boundaries",
+                        "layout": {
+                            "line-join": "round",
+                            "line-cap": "round"
+                        },
+                        "paint": {
+                            "line-color": "#888",
+                            "line-width": 8
+                        }
+                    });
+
+                    var center = turf.center(geojsonData);
+                    map.flyTo({
+                        center: center.geometry.coordinates,
+                        essential: true
+                    });
+                
+                });
+
             });
+        </script>';
 
-        });
-    </script>';
-
-$page_sidebar .= '<div id="district_map"></div>';
+    $page_sidebar .= '<div id="district_map"></div>';
+}
 
 $page_sidebar .= '
 </div>';
@@ -362,10 +313,6 @@ $page_body = '
 <div class="tabs">
 <ul class="tabs">
 	<li><a href="#bio">Bio</a></li>';
-/*if (!empty($legislator['contributions']))
-{
-    $page_body .= '<li><a href="#donors">Donors</a></li>';
-}*/
 $page_body .= '
 	<li><a href="#media">Media</a></li>';
 if (!empty($legislator['rss_url']))
@@ -385,7 +332,7 @@ $page_body .= '
 
 # Get the batting average data.  Use the current session's year if the session
 # is finished.  Otherwise, use the prior year.
-if (IN_SESSION == 'Y')
+if (IN_SESSION == true)
 {
     $batting_year = SESSION_YEAR - 1;
 }
@@ -432,9 +379,7 @@ $page_body .= '
 		<dt>Party</dt>
 		<dd>' . $legislator['party_name'] . '</dd>
 		<dt>District</dt>
-		<dd>' . $legislator['district'] . ': ' . $legislator['district_description'] . '
-			[<a href="/images/districts/' . $legislator['district_id'] . '.jpg"
-			title="View a map of this district">map</a>]</dd>';
+		<dd>' . $legislator['district'] . ': ' . $legislator['district_description'] . '</dd>';
 if ($legislator['date_started'] != '0000-00-00')
 {
     $page_body .= '
@@ -449,13 +394,31 @@ if (!empty($legislator['date_ended']))
 }
 else
 {
+    $elections = [];
+    $elections['house'] = [2025, 2027, 2029, 2031, 2033, 2035, 2037, 2039];
+    $elections['senate'] = [2027, 2031, 2035, 2039];
     if ($legislator['chamber'] == 'house')
     {
-        $next_election = 'November 2019';
+        foreach ($elections['house'] as $election)
+        {
+            if (strtotime($election. '-11-15') > time())
+            {
+                $next_election = 'November ' . $election;
+                break;
+            }
+        }
+        
     }
     elseif ($legislator['chamber'] == 'senate')
     {
-        $next_election = 'November 2019';
+        foreach ($elections['senate'] as $election)
+        {
+            if (strtotime($election. '-11-15') > time())
+            {
+                $next_election = 'November ' . $election;
+                break;
+            }
+        }
     }
     $page_body .= '
 		<dt>Next Election</dt>
@@ -505,7 +468,7 @@ if (!empty($legislator['twitter']))
 		<dd><a href="https://twitter.com/' . $legislator['twitter'] . '">@' . $legislator['twitter'] . '</a></dd>';
 }
 
-if (!empty($legislator['activity']) && IN_SESSION == 'Y')
+if (!empty($legislator['activity']) && IN_SESSION == true)
 {
     $page_body .= '
 		<dt>Daily Activity</dt>
@@ -1025,7 +988,7 @@ if (count($legislator['bills']) > 0)
         if (count($bills) > 9)
         {
             $page_body .= '
-				<li><a href="#' . $year . '">' . str_replace('20', "‘", $year) . '</a></li>';
+				<li><a href="#' . $year . '">' . preg_replace('/^20/', "‘", $year) . '</a></li>';
         }
         else
         {

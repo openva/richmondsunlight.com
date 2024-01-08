@@ -13,7 +13,6 @@
 # page to function.
 include_once 'includes/settings.inc.php';
 include_once 'vendor/autoload.php';
-use TijsVerkoyen\Akismet;
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
@@ -73,7 +72,8 @@ function show_form($form_data)
 		<div style="display: none;">
 			<input type="text" size="2" maxlength="2" name="form_data[zip]" id="message-zip" />
 			<label for="message-zip">Leave this field empty</label><br />
-            <input type="text" size="9" maxlength="9" name="form_data[timestamp]" id="message-timestamp" value="' . time() * 2 . '" />
+            <input type="text" size="11" maxlength="11" name="form_data[secret]" id="message-secret" value="' . time() * 2 . '" />
+			<label for="message-secret">Leave this field empty</label><br />
 		</div>
 
 		<p><input type="submit" name="submit" value="Send Mail"></p>
@@ -110,7 +110,8 @@ if (isset($_POST['form_data']))
 
     # Prohibit any emails sent suspiciously quickly. We double the timestamp
     # value because spammers will plug in a timestamp value.
-    if ( (time() - ($form_data['timestamp']) / 2) < 10)
+    $time_elapsed = time() - ($form_data['secret']) / 2;
+    if ( $time_elapsed <= 10)
     {
         die();
     }
@@ -175,43 +176,57 @@ if (isset($_POST['form_data']))
     else
     {
 
+        /*
+         * In which we reinvent Bayesian filtering but, like...badly.
+         */
         $spam_strings = array(
-            'explainer video',
-            'click here',
-            'guest post',
-            'affiliate account',
-            'affiliate sales',
-            'content syndication',
-            'growth hacking',
-            'LinkedIn',
-            'marketing plan',
-            'lead prospecting',
-            ' SEO ',
-            'low pricing',
-            'copyrighted image',
-            'under penalty of perjury',
+            'explainer video' => 3,
+            'click here' => 5,
+            'guest post' => 5,
+            'affiliate account' => 5,
+            'affiliate sales' => 5,
+            'content syndication' => 5,
+            'growth hacking' => 5,
+            'LinkedIn' => 3,
+            'marketing plan' => 5,
+            'lead prospecting' => 5,
+            ' SEO ' => 5,
+            'low pricing' => 3,
+            'copyright' => 3,
+            'under penalty of perjury' => 5,
+            'bitcoin' => 3,
+            'blockchain' => 3,
+            ' keto ' => 5,
+            'financial assistance' => 3,
+            'from home' => 3,
+            'social media' => 3,
+            'financing' => 3,
+            'http' => 1,
+            'bit.y' => 2,
+            'discount' => 2,
+            '$' => 2,
+            'hacking' => 2,
+            'opt out' => 3,
+            'marketing' => 3,
         );
-        foreach ($spam_strings as $spam_string)
-        {
-            if (stripos($form_data['comments'], $spam_string) !== false)
-            {
-                $is_spam = true;
-                break;
-            }
-        }
 
         /*
-         * Query Akismet to see if this is spam.
+         * Tally the message's spam score, to see if it exceeds the threshold of 5 points.
          */
-        /*$akismet = new Akismet();
-        $akismet->apiKey = KISMET_KEY;
-        $akismet->url = 'https://www.richmondsunlight.com/';
-
-        $is_spam = $akismet->isSpam(
-            $form_data['comments'],
-            $form_data['name'],
-            $form_data['email']
-        );*/
+        $score = 0;
+        foreach ($spam_strings as $spam_string => $points)
+        {
+            $present = substr_count($form_data['comments'], $spam_string);
+            if ($present != false)
+            {
+                $score = $score + ($present * $points);
+                if ($score >= 5)
+                {
+                    $is_spam = true;
+                    break;
+                }
+            }
+        }
 
         /*
          * This is spam. End silently.
@@ -232,7 +247,9 @@ if (isset($_POST['form_data']))
         'From: waldo@jaquith.org' . "\n" .
         'Reply-To: ' . $form_data['name'] . ' <' . $form_data['email'] . ">\n" .
         'X-Originating-IP: ' . $_SERVER['REMOTE_ADDR'] . "\n" .
-        'X-Originating-URL: ' . $_SERVER['REQUEST_URI']
+        'X-Originating-URL: ' . $_SERVER['REQUEST_URI'] . "\n" .
+        'X-Time-Elapsed: ' . $time_elapsed . "\n" .
+        'X-Spam-Score: ' . $score
         );
         $page_body .= '<p>Email sent. Thanks for writing!</p>';
 
@@ -240,6 +257,14 @@ if (isset($_POST['form_data']))
 }
 else
 {
+
+    /*
+     * Spammers have no referrer -- block them.
+     */
+    if ( !isset($_SERVER['HTTP_REFERER']) || $_SERVER['HTTP_REFERER'] == '' )
+    {
+        die();
+    }
 
     # Retrieve the user data to populate the comment form.
     # Grab the user data.

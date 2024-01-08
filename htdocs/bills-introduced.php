@@ -97,7 +97,7 @@ if ($num_results > 0)
 $page_sidebar = '
 	<div class="box">
 		<h3>Options</h3>
-		View the past&thinsp;.&thinsp;.&thinsp;.
+		View the past . . .
 		<ul>
 			<li><a href="/bills/introduced/3/">3 Days</a></li>
 			<li><a href="/bills/introduced/7/">7 Days</a></li>
@@ -110,11 +110,8 @@ $page_sidebar = '
 
 	<div class="box">
 		<h3>Explanation</h3>
-		<p>There are many steps between the introduction of a bill and when (if) it becomes law.
-		At left is every individual step taken by all bills in the past ' . $days . ' days.  This also
-		gives an idea of what the General Assembly is up to every day, even when they\'re not in
-		session.  Some days no committees or subcommittees meet, some days there\'s a lot
-		going on.</p>
+		<p>The very first step in changing the law is introducing a bill. This is a list of every
+		bill that has been introduced in the past ' . $days . ' days.</p>
 	</div>';
 
 # OUTPUT THE PAGE

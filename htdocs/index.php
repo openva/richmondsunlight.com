@@ -27,8 +27,8 @@ $browser_title = 'Tracking the Virginia General Assembly';
 $site_section = 'home';
 
 # PAGE CONTENT
-$page_body = '<p>The 2023 Virginia General Assembly session began on January 11, and
-			is scheduled to continue for six weeks. Here you can read <a href="/bills/">the bills
+$page_body = '<p>The 2024 Virginia General Assembly session will begin on January 10, and is
+			scheduled to continue until March 9. Here you can read <a href="/bills/">the bills
 			that are proposed</a>.</p>';
 
 $sql = 'SELECT COUNT(*) AS count, tags.tag
@@ -225,7 +225,7 @@ if (mysqli_num_rows($result) > 0)
 }
 
 # Newest Bills
-if (IN_SESSION == 'y')
+if (LEGISLATIVE_SEASON == true)
 {
     $sql = 'SELECT bills.number, bills.catch_line, sessions.year,
 			DATE_FORMAT(bills.date_introduced, "%M %d, %Y") AS date_introduced,
@@ -264,16 +264,6 @@ if (IN_SESSION == 'y')
 			</div>';
     }
 }
-
-$page_sidebar .= '
-		<h3>Keep Up With Us</h3>
-		<div class="box" id="social-networking" style="text-align: center;">
-
-			<p><a href="http://twitter.com/richmond_sun"><img src="/images/twitter.gif" width="100"
-				height="31" alt="Twitter" /></a></p>
-
-		</div>';
-
 
 $html_head = '
 <script type="application/ld+json">
