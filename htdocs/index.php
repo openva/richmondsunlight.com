@@ -27,9 +27,21 @@ $browser_title = 'Tracking the Virginia General Assembly';
 $site_section = 'home';
 
 # PAGE CONTENT
-$page_body = '<p>The 2024 Virginia General Assembly session will begin on January 10, and is
-			scheduled to continue until March 9. Here you can read <a href="/bills/">the bills
-			that are proposed</a>.</p>';
+if (strtotime(SESSION_END) <= time())
+{
+	$page_body = '<p>The ' . SESSION_YEAR . ' Virginia General Assembly session will begin on '
+		. date('F j', strtotime(SESSION_START)) . ', scheduled to continue until '
+		. date('F j', strtotime(SESSION_END)) . '. Here you can read <a href="/bills/">the '
+		. 'bills are proposed</a>.</p>';
+}
+else
+{
+	$page_body = '<p>The ' . SESSION_YEAR . ' Virginia General Assembly session began on '
+		. date('F j', strtotime(SESSION_START)) . ' and continued through '
+		. date('F j', strtotime(SESSION_END)) . '. Here you can read <a href="/bills/">the '
+		. 'bills were proposed</a> and <a href="/bills/passed/">the bills that passed into '
+		. 'law.</p>';
+}
 
 $sql = 'SELECT COUNT(*) AS count, tags.tag
 		FROM tags
