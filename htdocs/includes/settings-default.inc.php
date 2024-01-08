@@ -99,11 +99,13 @@ date_default_timezone_set('America/New_York');
 /*
  * Generate status constants dynamically.
  */
-$session = new Session;
-$status = $session->status();
+//$session = new Session;
+//$status = $session->status();
 
 # Is the GA currently in session?
-define('IN_SESSION', $status['in_session']);
+//define('IN_SESSION', $status['in_session']);
+define('IN_SESSION', false);
 
 # Is it a time of year when the legislature is doing anything at all?
-define('LEGISLATIVE_SEASON', $status['in_season]);
+//define('LEGISLATIVE_SEASON', $status['in_season']);
+define('LEGISLATIVE_SEASON', true);
