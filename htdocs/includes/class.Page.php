@@ -111,6 +111,15 @@ class Page
 
 		}
 
+        /*
+         * By default, the page header says that the legislature is not in sesssion. But if they
+         * are in session, modify the header to say so.
+         */
+        if (IN_SESSION == true)
+        {
+            $page = str_replace('Assembly is not in session', 'Assembly is now in session', $page);
+        }
+
         # Step through and replace each variable in the template with the
         # contents of the page.
         $page = str_replace('%browser_title%', $this->browser_title, $page);
@@ -147,7 +156,8 @@ class Page
         $bills = $user->recommended_bills();
         if ($bills != FALSE)
         {
-            $recommended_bills = 'We have <a href="/recommended-bills/">' . count($bills) . ' bill recommendations</a> for you.';
+            $recommended_bills = 'We have <a href="/recommended-bills/">' . count($bills)
+                . ' bill recommendations</a> for you.';
         }
         else
         {
