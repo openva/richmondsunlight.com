@@ -1055,7 +1055,7 @@ if (isset($bill['places']) && (count($bill['places']) > 0))
                 var map = new mapboxgl.Map({
                     container: "map",
                     style: "mapbox://styles/mapbox/streets-v11",
-                    center: [-78.57,38],
+                    center: [-78.57,37.8],
                     zoom: 5
                 });';
     
