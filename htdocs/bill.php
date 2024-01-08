@@ -1080,7 +1080,7 @@ if (isset($bill['places']) && (count($bill['places']) > 0))
                             .addTo(map);
                     });
 
-                    var center = turf.center(geojsonData);
+                    var center = turf.center(markers);
                     map.flyTo({
                         center: center.geometry.coordinates,
                         essential: true
