@@ -1056,7 +1056,7 @@ if (isset($bill['places']) && (count($bill['places']) > 0))
                     container: "map",
                     style: "mapbox://styles/mapbox/streets-v11",
                     center: [-78.57,37.48],
-                    zoom: 7
+                    zoom: 5
                 });';
     
     $markers = [];
