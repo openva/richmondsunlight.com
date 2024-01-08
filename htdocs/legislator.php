@@ -332,7 +332,7 @@ $page_body .= '
 
 # Get the batting average data.  Use the current session's year if the session
 # is finished.  Otherwise, use the prior year.
-if (IN_SESSION == 'Y')
+if (IN_SESSION == true)
 {
     $batting_year = SESSION_YEAR - 1;
 }
@@ -468,7 +468,7 @@ if (!empty($legislator['twitter']))
 		<dd><a href="https://twitter.com/' . $legislator['twitter'] . '">@' . $legislator['twitter'] . '</a></dd>';
 }
 
-if (!empty($legislator['activity']) && IN_SESSION == 'Y')
+if (!empty($legislator['activity']) && IN_SESSION == true)
 {
     $page_body .= '
 		<dt>Daily Activity</dt>
