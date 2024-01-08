@@ -21,8 +21,11 @@ define('SESSION_LIS_ID', '191');
 # As defined by the year.
 define('SESSION_YEAR', 2019);
 
-# Determine whether the GA is currently in session.
-define('IN_SESSION', 'Y');
+# Is the GA currently in session?
+define('IN_SESSION', true);
+
+# Is it a time of year when the legislature is doing anything at all?
+define('LEGISLATIVE_SEASON', true);
 
 # Set the FTP auth pair for legislative data.
 define('LIS_FTP_USERNAME', '');

@@ -225,7 +225,7 @@ if (mysqli_num_rows($result) > 0)
 }
 
 # Newest Bills
-if (IN_SESSION == 'y')
+if (LEGISLATIVE_SEASON == true)
 {
     $sql = 'SELECT bills.number, bills.catch_line, sessions.year,
 			DATE_FORMAT(bills.date_introduced, "%M %d, %Y") AS date_introduced,

@@ -21,9 +21,6 @@ define('SESSION_LIS_ID', '241');
 # As defined by the year.
 define('SESSION_YEAR', 2024);
 
-# Determine whether the GA is currently in session.
-define('IN_SESSION', 'Y');
-
 # Set the FTP auth pair for legislative data.
 define('LIS_FTP_USERNAME', '');
 define('LIS_FTP_PASSWORD', '');
@@ -98,3 +95,15 @@ setlocale(LC_MONETARY, 'en_US');
 
 # Set the timezone.
 date_default_timezone_set('America/New_York');
+
+/*
+ * Generate status constants dynamically.
+ */
+$session = new Session;
+$status = $session->status();
+
+# Is the GA currently in session?
+define('IN_SESSION', $status['in_session']);
+
+# Is it a time of year when the legislature is doing anything at all?
+define('LEGISLATIVE_SEASON', $status['in_season]);
