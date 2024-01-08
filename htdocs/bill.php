@@ -1043,7 +1043,7 @@ if (isset($bill['places']) && (count($bill['places']) > 0))
 
 	<div id="map" style="width: 100%; height: 190px;">
 		<img src="//maps.googleapis.com/maps/api/staticmap?center=38.1%2C-79.8&amp;zoom=6&amp;size=420x190' .
-        '&amp;maptype=terrain&amp;sensor=false';
+        '&amp;maptype=terrain&amp;sensor=false&amp;key=AIzaSyCOpfFJJQ7j6zrgl6ngYwvD34G9klL_NPs';
     foreach ($bill['places'] as $place)
     {
         $place = (array) $place;
