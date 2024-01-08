@@ -1029,6 +1029,7 @@ $debug_timing['hearings retrieved'] = microtime(TRUE);
  */
 if (isset($bill['places']) && (count($bill['places']) > 0))
 {
+
     $page_body .= '
 		<h2>Map</h2>
 		<p>This bill mentions';
@@ -1039,17 +1040,58 @@ if (isset($bill['places']) && (count($bill['places']) > 0))
         $page_body .= ' ' . $place['name'] . ',';
     }
     $page_body = rtrim($page_body, ',');
-    $page_body .= '.</p>
+    $page_body .= '.</p>';
 
-	<div id="map" style="width: 100%; height: 190px;">
-		<img src="//maps.googleapis.com/maps/api/staticmap?center=38.1%2C-79.8&amp;zoom=6&amp;size=420x190' .
-        '&amp;maptype=terrain&amp;sensor=false&amp;key=AIzaSyCOpfFJJQ7j6zrgl6ngYwvD34G9klL_NPs';
+    $html_head .= '<script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
+        <style>
+            #map { height: 250px; width:100%; }
+        </style>
+        <script>
+            $( document ).ready(function() {
+
+                mapboxgl.accessToken = "' . MAPBOX_TOKEN . '";
+                var map = new mapboxgl.Map({
+                    container: "map",
+                    style: "mapbox://styles/mapbox/streets-v11",
+                    center: [-78.57,37.48],
+                    zoom: 7
+                });';
+    
+    $markers = [];
     foreach ($bill['places'] as $place)
     {
-        $place = (array) $place;
-        $page_body .= '&amp;markers=' . $place['longitude'] . ',' . $place['latitude'];
+        $place['lng'] = $place['longitude'];
+        $place['lat'] = $place['latitude'];
+        unset($place['longitude']);
+        unset($place['latitude']);
+        $markers[] = $place;
     }
-    $page_body .= '" /></div>';
+    $markers_json = json_encode($markers);
+
+    $html_head .= '
+                var markers = ' . $markers_json . ';
+                map.on("load", function() {
+                    
+                    markers.forEach(function(marker) {
+                        new mapboxgl.Marker()
+                            .setLngLat([marker.lng, marker.lat])
+                            .addTo(map);
+                    });
+
+                    var center = turf.center(geojsonData);
+                    map.flyTo({
+                        center: center.geometry.coordinates,
+                        essential: true
+                    });
+                
+                });
+
+            });
+        </script>';
+
+	$page_body .= '<div id="map"></div>';
 }
 
 if (($bill['video'] !== FALSE) && (count($bill['video']) > 0))
