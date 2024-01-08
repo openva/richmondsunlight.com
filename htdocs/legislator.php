@@ -379,7 +379,12 @@ $page_body .= '
 		<dt>Party</dt>
 		<dd>' . $legislator['party_name'] . '</dd>
 		<dt>District</dt>
-		<dd>' . $legislator['district'] . ': ' . $legislator['district_description'] . '</dd>';
+		<dd>' . $legislator['district'];
+if (!empty($legislator['district_description']))
+{
+    $page_body .= ': ' . $legislator['district_description'];
+}
+$page_body .= '</dd>';
 if ($legislator['date_started'] != '0000-00-00')
 {
     $page_body .= '
