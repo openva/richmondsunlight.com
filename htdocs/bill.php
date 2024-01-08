@@ -1062,10 +1062,10 @@ if (isset($bill['places']) && (count($bill['places']) > 0))
     $markers = [];
     foreach ($bill['places'] as $place)
     {
-        $place['lng'] = $place['longitude'];
-        $place['lat'] = $place['latitude'];
-        unset($place['longitude']);
-        unset($place['latitude']);
+        $place->lng = $place->longitude;
+        $place->lat = $place->latitude;
+        unset($place->longitude);
+        unset($place->latitude);
         $markers[] = $place;
     }
     $markers_json = json_encode($markers);
