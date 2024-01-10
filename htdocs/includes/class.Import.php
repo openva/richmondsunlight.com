@@ -662,7 +662,81 @@ class Import
 		
 		return true;
 
-	}
+	} // add_legislator()
+
+
+
+	/*
+	 * update_legislator()
+	 *
+	 * Updates an existing record for a legislator. All array keys must have the same names as the
+	 * database columns.
+	 */
+	public function update_legislator($legislator)
+	{
+
+		if ( !isset($legislator) || !is_array($legislator) || empty($legislator['id']) )
+		{
+			return false;
+		}
+
+		/*
+		* These are the only fields that may be updated automatically
+		*/
+		$allowed_fields = array(
+			'email' => true,
+			'address_richmond' => true,
+			'address_district' => true,
+			'phone_richmond' => true,
+			'phone_district' => true,
+			'race' => true,
+			'sex' => true,
+			'url' => true,
+			'sbe_id' => true,
+			'place' => true,
+		);
+
+		/*
+		 * See if any of these fields are found within $legislator
+		 */
+		$changed_fields = array_intersect_key($allowed_fields, $legislator);
+		if (count($changed_fields) == 0)
+		{
+			return;
+		}
+
+		/*
+		 * LIS IDs are preceded with an "H" or an "S," but we don't use those within the
+		 * database, so strip that out.
+		 */
+		$legislator['lis_id'] = preg_replace('/[H,S]/', '', $legislator['lis_id']);
+
+		/*
+		 * Build the SQL query
+		 */
+		$sql = 'UPDATE representatives SET ';
+		foreach ($changed_fields as $key=>$value)
+		{
+			$sql .= $key.'="' . addslashes($legislator[$key]) . '", ';
+		}
+
+		$sql .= 'WHERE id=' . $legislator['id'];
+
+		/*
+		 * Update the legislator record
+		 */
+		$stmt = $GLOBALS['dbh']->prepare($sql);
+		echo $sql;
+		/*$result = $stmt->execute();
+		if ($result == false)
+		{
+			$this->log->put('Error: Legislator record could not be updated.' . "\n" . $sql . "\n", 6);
+			return false;
+		}*/
+		
+		return true;
+
+	} // update_legislator
 
 	/*
 	 * fetch_legislator_data()
