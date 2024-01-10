@@ -761,8 +761,8 @@ class Import
 			/*
 			 * Fetch the HTML and save parse the DOM.
 			 */
-			$url = 'https://virginiageneralassembly.gov/house/members/members.php?ses=' . SESSION_YEAR
-				. '&id=' . $lis_id;
+			$url_id = 'H' . str_pad($lis_id, 4, '0', STR_PAD_LEFT);
+			$url = 'https://virginiageneralassembly.gov/house/members/members.php?id=' . $url_id;
 			$html = file_get_contents($url);
 			
 			if ($html === false)
@@ -1057,7 +1057,7 @@ class Import
 			 * either of the other two. It's nowhere near as detailed as apps.senate.virginia.gov,
 			 * but it exists so it's got that going for it.
 			 */
-			$url = 'https://lis.virginia.gov/cgi-bin/legp604.exe?' . SESSION_LIS_ID . '+mbr+'
+			$url = 'https://lis.virginia.gov/cgi-bin/legp604.exe?' . SESSION_LIS_ID . '+mbr+S'
 				. $lis_id;
 			$html = file_get_contents($url);
 
