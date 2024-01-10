@@ -27,7 +27,7 @@ $browser_title = 'Tracking the Virginia General Assembly';
 $site_section = 'home';
 
 # PAGE CONTENT
-if (strtotime(SESSION_END) <= time())
+if (strtotime(SESSION_START) > time())
 {
 	$page_body = '<p>The ' . SESSION_YEAR . ' Virginia General Assembly session will begin on '
 		. date('F j', strtotime(SESSION_START)) . ', scheduled to continue until '
