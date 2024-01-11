@@ -513,6 +513,11 @@ class Import
 		$id = preg_replace('/[H,S]/', '', $id);
 
 		/*
+		 * LIS has started sometimes left-padding with 0s, confusingly. Strip those out.
+		 */
+		$id = ltrim($id, '0');
+
+		/*
 		 * Determine what date to use to mark the legislator as no longer in office.
 		 * 
 		 * If it's November or December of an odd-numbered year, then the legislator's end date is
@@ -680,6 +685,8 @@ class Import
 			return false;
 		}
 
+		$log = new Log;
+
 		/*
 		* These are the only fields that may be updated automatically
 		*/
@@ -694,6 +701,9 @@ class Import
 			'url' => true,
 			'sbe_id' => true,
 			'place' => true,
+			'latitude' => true,
+			'longitude' => true,
+			'district_id' => true,
 		);
 
 		/*
@@ -720,19 +730,22 @@ class Import
 			$sql .= $key.'="' . addslashes($legislator[$key]) . '", ';
 		}
 
+		$sql = substr($sql, 0, -2) . ' ';
+
 		$sql .= 'WHERE id=' . $legislator['id'];
 
 		/*
 		 * Update the legislator record
 		 */
 		$stmt = $GLOBALS['dbh']->prepare($sql);
-		echo $sql;
-		/*$result = $stmt->execute();
+		$result = $stmt->execute();
 		if ($result == false)
 		{
 			$this->log->put('Error: Legislator record could not be updated.' . "\n" . $sql . "\n", 6);
 			return false;
-		}*/
+		}
+
+		$log->put('Refreshed the legislator record for ' . $legislator['name_formatted'] . '.', 3);
 		
 		return true;
 
@@ -761,7 +774,15 @@ class Import
 			/*
 			 * Fetch the HTML and save parse the DOM.
 			 */
-			$url_id = 'H' . str_pad($lis_id, 4, '0', STR_PAD_LEFT);
+			if (stripos($lis_id, 'H') === false)
+			{
+				$url_id = 'H' . str_pad($lis_id, 4, '0', STR_PAD_LEFT);
+			}
+			else
+			{
+				$url_id = $lis_id;
+			}
+			
 			$url = 'https://virginiageneralassembly.gov/house/members/members.php?id=' . $url_id;
 			$html = file_get_contents($url);
 			
@@ -914,7 +935,7 @@ class Import
 			/*
 			 * Get capitol office address.
 			 */
-			preg_match('/Room Number:<\/span> ([E,W]([0-9]{3}))/', $html, $matches);
+			preg_match('/Room Number:<\/span> ([E,W]?([0-9]{3}))/', $html, $matches);
 			if (isset($matches[1]))
 			{
 				$legislator['address_richmond'] = $matches[1];
@@ -946,9 +967,8 @@ class Import
 			/*
 			 * Get district phone number.
 			 */
-			$tmp = 'Address: ' . $dom->find('div[class=memBioOffice]', 1)->plaintext;
-			preg_match('/(\(804\) ([0-9]{3})-([0-9]{4}))/', $html, $matches);
-			$legislator['phone_district'] = substr(str_replace(') ', '-', $matches[0]), 1);
+			preg_match('/Office:<\/span> (\(([0-9]{3})\) ([0-9]{3})-([0-9]{4}))/', $html, $matches);
+			$legislator['phone_district'] = substr(str_replace(') ', '-', $matches[1]), 1);
 
 			/*
 			 * Get delegate's photo URL.
@@ -965,7 +985,7 @@ class Import
 			unset($matches);
 
 			/*
-			 * Get delegate'srace.
+			 * Get delegate's race.
 			 */
 			preg_match('/Race\(s\):<\/span> (.+)</', $html, $matches);
 			$legislator['race'] = trim(strtolower($matches[1]));
@@ -998,10 +1018,10 @@ class Import
 			 * Get delegate's personal website.
 			 */
 			preg_match('/Delegate\'s Personal Website[\s\S]+(http(.+))"/U', $html, $matches);
-			$legislator['website'] = trim($matches[1]);
-			if ($legislator['website'] == 'https://whosmy.virginiageneralassembly.gov/')
+			$legislator['url'] = trim($matches[1]);
+			if (stripos($legislator['url'], '.gov') !== false)
 			{
-				unset($legislator['website']);
+				unset($legislator['url']);
 			}
 			unset($matches);
 
@@ -1057,6 +1077,10 @@ class Import
 			 * either of the other two. It's nowhere near as detailed as apps.senate.virginia.gov,
 			 * but it exists so it's got that going for it.
 			 */
+			if ($lis_id[0] == 'S')
+			{
+				$lis_id = substr($lis_id, 1);
+			}
 			$url = 'https://lis.virginia.gov/cgi-bin/legp604.exe?' . SESSION_LIS_ID . '+mbr+S'
 				. $lis_id;
 			$html = file_get_contents($url);
@@ -1171,7 +1195,8 @@ class Import
 			if (preg_match('/Mailing address:<\/h4><ul class="linkNon">\s*(<li>(.+)\n*)<\/ul>/sU',
 				$html, $matches) == 1)
 			{
-				$legislator['address_district'] = trim(strip_tags($matches[2]));
+				$tmp = preg_replace('/\([0-9]{3}\) [0-9]{3}-[0-9]{4}/', '', $matches[1]);
+				$legislator['address_district'] = trim(strip_tags($tmp));
 				if (strlen($legislator['address_district']) < 20)
 				{
 					unset($legislator['address_district']);
@@ -1341,8 +1366,6 @@ class Import
 			 * We no longer need the district number.
 			 */
 			unset($legislator['district_number']);
-
-			print_r($legislator);
 
 		} // fetch senator
 
