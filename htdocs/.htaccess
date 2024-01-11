@@ -171,6 +171,23 @@ RewriteRule ^schedule$ /schedule/ [R]
 RewriteRule ^minutes$ /minutes/ [R]
 php_value error_reporting 2039
 
+# Photosynthesis
+RewriteRule ^photosynthesis/delete/([a-z0-9]{5})-([0-9]+)?/?$ /photosynthesis/process-actions.php?delete-bill=$1-$2 [QSA]
+RewriteRule ^photosynthesis/add/([A-Za-z0-9]+)?/?$ /photosynthesis/process-actions.php?add-bill=$1 [QSA]
+RewriteRule ^photosynthesis/edit/([a-z0-9]{5})-([0-9]+)?/?$ /photosynthesis/edit-bill.php?hash=$1&bill=$2 [QSA]
+RewriteRule ^photosynthesis/portfolios?/?$ /photosynthesis/list-portfolios.php [QSA]
+RewriteRule ^photosynthesis/portfolios/([a-z0-9]{5})?/?$ /photosynthesis/portfolio.php?hash=$1 [QSA]
+RewriteRule ^photosynthesis/portfolios/add/([A-Za-z0-9]+)?/?$ /photosynthesis/process-actions.php?add-portfolio=$1 [QSA]
+RewriteRule ^photosynthesis/portfolios/delete/([a-z0-9]{5})?/?$ /photosynthesis/process-actions.php?delete-portfolio=$1 [QSA]
+RewriteRule ^photosynthesis/portfolios/edit/([a-z0-9]{5})?/?$ /photosynthesis/edit-portfolio.php?hash=$1 [QSA]
+RewriteRule ^photosynthesis/notes/([a-z0-9]{5})-([0-9]+)?/?$ /photosynthesis/bill-notes.php?hash=$1&id=$2 [QSA]
+RewriteRule ^photosynthesis/notes-ajax/([a-z0-9]{5})-([0-9]+)?/?$ /photosynthesis/ajax-bill-notes.php?hash=$1&id=$2 [QSA]
+RewriteRule ^photosynthesis/preferences?/?$ /photosynthesis/preferences.php [QSA]
+RewriteRule ^photosynthesis/([a-z0-9]{5})/$ /photosynthesis/public-portfolio.php?hash=$1 [QSA]
+RewriteRule ^photosynthesis/unsubscribe/([a-z0-9]{8})/$ /photosynthesis/unsubscribe.php?hash=$1 [QSA]
+RewriteRule ^photosynthesis/pro?/?$ pro.php [QSA]
+RewriteRule ^photosynthesis/rss/portfolio/([a-z0-9]{5})?/?$ /photosynthesis/rss/portfolio.php?hash=$1 [QSA]
+
 # Block bandwidth abusers
 Order Deny,Allow
 Deny from 5.9.151.67
