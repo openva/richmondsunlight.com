@@ -87,7 +87,8 @@ if ($tag_count > 0)
             $size = .75;
         }
 
-        $page_body .= '<span style="font-size: ' . $size . 'em;"><a href="/bills/tags/' . urlencode($tag) . '/">' . $tag . '</a></span> ';
+        $page_body .= '<span style="font-size: ' . $size . 'em;"><a href="/bills/tags/'
+			. urlencode($tag) . '/">' . $tag . '</a></span> ';
     }
     $page_body .= '
 	</div>';
@@ -95,8 +96,12 @@ if ($tag_count > 0)
 
 # Show all bills, with a hotness greater than or equal to 10, that have recently hit progress
 # milestones.
-$sql = 'SELECT bills.number, bills.catch_line, bills.hotness, bills_status.status,
-		bills_status.translation AS status_translation
+$sql = 'SELECT
+			bills.number,
+			bills.catch_line,
+			bills.hotness,
+			bills_status.status,
+			bills_status.translation AS status_translation
 		FROM bills_status
 		LEFT JOIN bills
 			ON bills_status.bill_id = bills.id
@@ -107,7 +112,7 @@ $sql = 'SELECT bills.number, bills.catch_line, bills.hotness, bills_status.statu
 			OR bills_status.translation = "failed committee"
 			OR bills_status.translation = "failed house"
 			OR bills_status.translation = "failed senate")
-		AND DATEDIFF( NOW( ) , bills_status.date ) <=5
+		AND DATEDIFF( NOW( ) , bills_status.date ) <= 5
 		AND interestingness >= 100
 		ORDER BY DATE DESC';
 $result = mysqli_query($GLOBALS['db'], $sql);
@@ -120,7 +125,8 @@ if (mysqli_num_rows($result) > 0)
     {
         $bill['url'] = '/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/';
         $page_body .= '<tr>
-						<td><a href="' . $bill['url'] . '" class="balloon">' . mb_strtoupper($bill['number']) . '</td>
+						<td><a href="' . $bill['url'] . '" class="balloon">'
+							. mb_strtoupper($bill['number']) . '</td>
 						<td>' . $bill['catch_line'] . '</td>
 						<td>' . $bill['status_translation'] . '</td>
 					</tr>';
@@ -129,15 +135,23 @@ if (mysqli_num_rows($result) > 0)
 }
 
 # Newest Comments
-$sql = 'SELECT comments.id, comments.bill_id, comments.date_created AS date,
-		comments.name, comments.email, comments.url, comments.comment,
-		comments.type, bills.number AS bill_number, bills.catch_line AS bill_catch_line,
-		sessions.year,
+$sql = 'SELECT
+			comments.id,
+			comments.bill_id,
+			comments.date_created AS date,
+			comments.name,
+			comments.email,
+			comments.url,
+			comments.comment,
+			comments.type,
+			bills.number AS bill_number,
+			bills.catch_line AS bill_catch_line,
+			sessions.year,
 			(
-			SELECT COUNT(*)
-			FROM comments
-			WHERE bill_id=bills.id AND status="published"
-			AND date_created <= date
+				SELECT COUNT(*)
+				FROM comments
+				WHERE bill_id=bills.id AND status="published"
+				AND date_created <= date
 			) AS number
 		FROM comments
 		LEFT JOIN bills
@@ -161,10 +175,11 @@ if (mysqli_num_rows($result) > 0)
             $comment['comment'] = preg_replace('#<blockquote>(.*)</blockquote>#D', '', $comment['comment']);
             $comment['comment'] = strip_tags($comment['comment']);
         }
-        $page_body .= '<a href="/bill/' . $comment['year'] . '/' . $comment['bill_number'] . '/#comment-' . $comment['number'] . '">
-				<div><strong>' . $comment['bill_catch_line'] . '</strong><br />
-				' . $comment['name'] . ' writes:
-				' . $comment['comment'] . '</div></a>';
+        $page_body .= '<a href="/bill/' . $comment['year'] . '/' . $comment['bill_number']
+			. '/#comment-' . $comment['number'] . '">
+			<div><strong>' . $comment['bill_catch_line'] . '</strong><br />
+			' . $comment['name'] . ' writes:
+			' . $comment['comment'] . '</div></a>';
     }
     $page_body .= '
 		</div>';
@@ -228,7 +243,9 @@ if (mysqli_num_rows($result) > 0)
     {
         $bill = array_map('stripslashes', $bill);
         $page_sidebar .= '
-			<li><a href="/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/" class="balloon">' . mb_strtoupper($bill['number']) . balloon($bill, 'bill') . '</a>: ' . $bill['catch_line'] . '</li>
+			<li><a href="/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/" class="balloon">'
+				. mb_strtoupper($bill['number']) . balloon($bill, 'bill') . '</a>: '
+				. $bill['catch_line'] . '</li>
 		';
     }
     $page_sidebar .= '
