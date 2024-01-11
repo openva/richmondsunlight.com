@@ -157,10 +157,6 @@ RewriteRule ^finance/([a-z0-9-]+)/([a-z0-9-]+)/([0-9]{5})/$ /finance/individual.
 # Downloads
 RewriteRule ^downloads/$ /downloads.php [QSA]
 
-# Photosynthesis
-RewriteRule ^photosynthesis/portfolios/$ /photosynthesis/list-portfolios.php [QSA]
-RewriteRule ^photosynthesis/([A-Za-z0-9]{5})/$ /photosynthesis/public-portfolio.php?hash=$1 [QSA]
-
 # API requests to the dedicated domain
 RewriteRule ^api/(.*)$ https://api.richmondsunlight.com/$1 [NC,R,L]
 
