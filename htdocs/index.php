@@ -275,7 +275,9 @@ if (LEGISLATIVE_SEASON == true)
             $bill = array_map('stripslashes', $bill);
             $bill['summary'] = mb_substr($bill['summary'], 0, 175) . '...';
             $page_sidebar .= '
-				<li><a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number']) . '/" class="balloon">' . $bill['number'] . balloon($bill, 'bill') . '</a>: ' . $bill['catch_line'] . '</li>
+				<li><a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number'])
+					. '/" class="balloon">' . mb_strtoupper($bill['number'])
+					. balloon($bill, 'bill') . '</a>: ' . $bill['catch_line'] . '</li>
 			';
         }
         $page_sidebar .= '
