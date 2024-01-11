@@ -239,22 +239,29 @@ if (mysqli_num_rows($result) > 0)
 # Newest Bills
 if (LEGISLATIVE_SEASON == true)
 {
-    $sql = 'SELECT bills.number, bills.catch_line, sessions.year,
-			DATE_FORMAT(bills.date_introduced, "%M %d, %Y") AS date_introduced,
-			representatives.name AS patron,
-			(
-				SELECT status
-				FROM bills_status
-				WHERE bill_id=bills.id
-				ORDER BY date DESC, id DESC
-				LIMIT 1
-			) AS status
+    $sql = 'SELECT
+				bills.number,
+				bills.catch_line,
+				sessions.year,
+				DATE_FORMAT(bills.date_introduced, "%M %d, %Y") AS date_introduced,
+				representatives.name AS patron,
+				(
+					SELECT status
+					FROM bills_status
+					WHERE bill_id=bills.id
+					ORDER BY date DESC, id DESC
+					LIMIT 1
+				) AS status
 			FROM bills
 			LEFT JOIN sessions
 				ON bills.session_id=sessions.id
 			LEFT JOIN representatives
 				ON bills.chief_patron_id = representatives.id
-			ORDER BY bills.date_introduced DESC, bills.id DESC
+			WHERE
+				bills.date_introduced >= CURDATE() - INTERVAL 4 DAY
+			ORDER BY
+				bills.date_introduced DESC,
+				bills.id DESC
 			LIMIT 5';
     $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0)
