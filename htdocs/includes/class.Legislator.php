@@ -166,7 +166,8 @@ class Legislator
         }
         else
         {
-            $legislator['pronoun'] = 'their';
+            $legislator['pronoun'] = 'they';
+            $legislator['possessive'] = 'their';
         }
 
         # Set the full name of the legislator's party.
