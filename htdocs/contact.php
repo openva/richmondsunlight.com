@@ -188,7 +188,6 @@ if (isset($_POST['form_data']))
             'content syndication' => 5,
             'growth hacking' => 5,
             'LinkedIn' => 3,
-            'marketing plan' => 5,
             'lead prospecting' => 5,
             ' SEO ' => 5,
             'low pricing' => 3,
@@ -208,6 +207,8 @@ if (isset($_POST['form_data']))
             'hacking' => 2,
             'opt out' => 3,
             'marketing' => 3,
+            'marketing plan' => 5,
+            'marketing messages' => 5,
         );
 
         /*
