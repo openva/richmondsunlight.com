@@ -40,7 +40,7 @@ define('MYSQL_DATABASE', '');
 define('API_URL', '');
 
 # Specify how to connect to Memcached.
-define('MEMCACHED_SERVER', 'localhost');
+define('MEMCACHED_SERVER', '');
 define('MEMCACHED_PORT', '11211');
 
 # The House Speaker's IDs. This is used in update_vote.php to translate votes credited to
