@@ -1045,19 +1045,19 @@ if (isset($bill['places']) && (count($bill['places']) > 0))
     $html_head .= '<script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet" />
     <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
-        <style>
-            #map { height: 250px; width:100%; margin-bottom: 1.5em; }
-        </style>
-        <script>
-            $( document ).ready(function() {
+    <style>
+        #map { height: 250px; width:100%; margin-bottom: 1.5em; }
+    </style>
+    <script>
+        $( document ).ready(function() {
 
-                mapboxgl.accessToken = "' . MAPBOX_TOKEN . '";
-                var map = new mapboxgl.Map({
-                    container: "map",
-                    style: "mapbox://styles/mapbox/streets-v11",
-                    center: [-78.57,37.8],
-                    zoom: 5
-                });';
+            mapboxgl.accessToken = "' . MAPBOX_TOKEN . '";
+            var map = new mapboxgl.Map({
+                container: "map",
+                style: "mapbox://styles/mapbox/streets-v11",
+                center: [-78.57,37.8],
+                zoom: 5
+            });';
     
     $markers = [];
     foreach ($bill['places'] as $place)
@@ -1071,25 +1071,25 @@ if (isset($bill['places']) && (count($bill['places']) > 0))
     $markers_json = json_encode($markers);
 
     $html_head .= '
-                var markers = ' . $markers_json . ';
-                map.on("load", function() {
-                    
-                    markers.forEach(function(marker) {
-                        new mapboxgl.Marker()
-                            .setLngLat([marker.lng, marker.lat])
-                            .addTo(map);
-                    });
-
-                    var center = turf.center(markers);
-                    map.flyTo({
-                        center: center.geometry.coordinates,
-                        essential: true
-                    });
+            var markers = ' . $markers_json . ';
+            map.on("load", function() {
                 
+                markers.forEach(function(marker) {
+                    new mapboxgl.Marker()
+                        .setLngLat([marker.lng, marker.lat])
+                        .addTo(map);
                 });
 
+                var center = turf.center(markers);
+                map.flyTo({
+                    center: center.geometry.coordinates,
+                    essential: true
+                });
+            
             });
-        </script>';
+
+        });
+    </script>';
 
 	$page_body .= '<div id="map"></div>';
 }
