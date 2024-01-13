@@ -134,6 +134,165 @@ if (mysqli_num_rows($result) > 0)
     $page_body .= '</table></div>';
 }
 
+# Legislative Map
+$sql = 'SELECT
+			bills.number,
+			bills.catch_line,
+			bills_places.longitude,
+			bills_places.latitude,
+			bills_places.placename
+		FROM bills_places
+		LEFT JOIN bills
+			ON bills_places.bill_id=bills.id
+		WHERE
+			bills.session_id=' . SESSION_ID;
+$result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0)
+{
+
+	$places = [];
+	while ($place = mysqli_fetch_array($result, MYSQLI_ASSOC))
+	{
+		$place_json = [];
+		$place_json['latitude'] = $place['latitude'];
+		$place_json['longitude'] = $place['longitude'];
+		$place_json['place'] = $place['placename'];
+		$place_json['description'] = strtoupper($place['number']) . ': ' . $place['catch_line'];
+		$place_json['url'] = '/bill/' . SESSION_YEAR . '/' . $place['number'] . '/';
+        $places[] = $place_json;
+	}
+	
+    $geojson = [
+		'type' => 'FeatureCollection',
+		'features' => array_map(function ($item) {
+			return [
+				'type' => 'Feature',
+				'geometry' => [
+					'type' => 'Point',
+					'coordinates' => [(float)$item['longitude'], (float)$item['latitude']]
+				],
+				'properties' => [
+					'description' => $item['description'],
+					'url' => $item['url'],
+					'place' => $item['place']
+				]
+			];
+		}, $places)
+	];
+	$geojson = json_encode($geojson);
+	
+	$html_head .= '<script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet" />';
+
+	$page_body .= '<h2>Bills that Mention Places</h2>
+	<script>
+		
+		$( document ).ready(function() {
+			mapboxgl.accessToken = "' . MAPBOX_TOKEN . '";
+			
+			var markers = ' . $geojson . '
+
+			var map = new mapboxgl.Map({
+				container: "map",
+				style: "mapbox://styles/mapbox/streets-v11",
+				center: [-79.4,37.8],
+				zoom: 5.4
+			});
+
+			function fanOutCoordinates(features, distance) {
+				const groupedByCoordinates = {};
+			
+				// Group features by their coordinates
+				features.forEach(feature => {
+					const key = feature.geometry.coordinates.join(",");
+					if (!groupedByCoordinates[key]) {
+						groupedByCoordinates[key] = [];
+					}
+					groupedByCoordinates[key].push(feature);
+				});
+			
+				// Adjust coordinates for each group
+				Object.keys(groupedByCoordinates).forEach(key => {
+					const group = groupedByCoordinates[key];
+					if (group.length > 1) {
+						group.forEach((feature, index) => {
+							const angle = (2 * Math.PI / group.length) * index;
+							const dx = distance * Math.cos(angle);
+							const dy = distance * Math.sin(angle);
+							feature.geometry.coordinates[0] += dx;
+							feature.geometry.coordinates[1] += dy;
+						});
+					}
+				});
+			
+				return Object.values(groupedByCoordinates).flat();
+			}
+			
+			const adjustedFeatures = fanOutCoordinates(markers.features, 0.0001);
+			markers.features = adjustedFeatures;
+
+			map.on("load", function () {
+                
+				map.addSource("places", {
+					"type": "geojson",
+					"data": markers
+				});
+
+				map.addLayer({
+					"id": "places",
+					"type": "symbol",
+					"source": "places",
+					"layout": {
+						"icon-image": "marker-15",
+						"icon-allow-overlap": true
+					}
+				});
+
+				var popup = new mapboxgl.Popup({
+					closeButton: false,
+					closeOnClick: false
+				});
+ 
+				map.on("mouseenter", "places", (e) => {
+
+					// Change the cursor style as a UI indicator.
+					map.getCanvas().style.cursor = "pointer";
+					 
+					// Copy coordinates array.
+					const coordinates = e.features[0].geometry.coordinates.slice();
+					const description = e.features[0].properties.description;
+					 
+					// Ensure that if the map is zoomed out such that multiple
+					// copies of the feature are visible, the popup appears
+					// over the copy being pointed to.
+					while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+						coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+					}
+					 
+					// Populate the popup and set its coordinates
+					// based on the feature found.
+					popup.setLngLat(coordinates).setHTML(description).addTo(map);
+				});
+					 
+				map.on("mouseleave", "places", () => {
+					map.getCanvas().style.cursor = "";
+					popup.remove();
+				});
+
+				map.on("click", "places", function (e) {
+					var url = e.features[0].properties.url;
+					if (url) {
+						window.location.href = url;
+					}
+				});
+
+			});
+		});
+	</script>
+	<div id="map" style="height:250px; width: 100%;"></div>';
+
+}
+
 # Newest Comments
 $sql = 'SELECT
 			comments.id,
@@ -184,7 +343,6 @@ if (mysqli_num_rows($result) > 0)
     $page_body .= '
 		</div>';
 }
-
 
 $page_sidebar = '';
 
@@ -303,7 +461,7 @@ if (LEGISLATIVE_SEASON == true)
     }
 }
 
-$html_head = '
+$html_head .= '
 <script type="application/ld+json">
 {
    "@context": "http://schema.org",
