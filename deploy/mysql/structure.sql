@@ -435,7 +435,8 @@ CREATE TABLE `bills_places` (
   `longitude` float NOT NULL,
   `date_modified` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
-  KEY `bill_id` (`bill_id`,`latitude`,`longitude`)
+  KEY `bill_id` (`bill_id`,`latitude`,`longitude`),
+  UNIQUE KEY `bill_place` (`bill_id`,`placename`)
 ) ENGINE=InnoDB AUTO_INCREMENT=10328 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
