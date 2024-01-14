@@ -18,6 +18,10 @@ fi
 chown -R ubuntu:ubuntu "$SITE_PATH"
 chmod -R g+w "$SITE_PATH"
 
+# Make the cache directories writeable
+chmod o+w "$SITE_PATH"/htdocs/cache/
+chmod o+w "$SITE_PATH"/htdocs/rss/cache/
+
 # Set Memcached to start every time
 sudo systemctl enable memcached
 
