@@ -73,12 +73,16 @@ $sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber, bills.ca
 			ON votes.committee_id=committees.id
         WHERE bills.number="' . $bill . '" AND sessions.year=' . $year;
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
+if (mysqli_num_rows($result) == 0)
 {
-    $bill = mysqli_fetch_assoc($result);
-    $bill = array_map('stripslashes', $bill);
-    $bill = array_map('trim', $bill);
+    header("Status: 404 Not Found\n\r") ;
+    include '404.php';
+    exit();
 }
+
+$bill = mysqli_fetch_assoc($result);
+$bill = array_map('stripslashes', $bill);
+$bill = array_map('trim', $bill);
 
 /*
  * Create a new instance of the Vote class, and get aggregate data about the outcome.
