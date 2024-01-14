@@ -1,11 +1,11 @@
 User-agent: *
 Disallow: /bills/tags
 Disallow: /search
-Disallow: /charts
 Disallow: /process-tags.php
 Disallow: /process-comments.php
 Disallow: /process-polls.php
 Disallow: /downloads/bills/
+Disallow: /rss/
 
 User-agent: GPTBot
 Disallow: /
