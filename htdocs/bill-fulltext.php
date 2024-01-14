@@ -112,7 +112,7 @@ $sql = 'SELECT number, date_introduced, text
 		WHERE bill_id = ' . $bill['id'] . ' AND bills_full_text.text IS NOT NULL
 		ORDER BY date_introduced DESC';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) == 0)
+if ($result == false)
 {
     die('Bill text not found.');
 }
