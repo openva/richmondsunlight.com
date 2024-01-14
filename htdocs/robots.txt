@@ -94,6 +94,18 @@ Disallow: /
 User-agent: discobot
 Disallow: /
 
+User-agent: ImagesiftBot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+User-agent: magpie-crawler
+Disallow: /
+
 User-agent: msnbot
 Crawl-delay: 5
 
