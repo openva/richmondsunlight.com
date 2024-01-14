@@ -623,6 +623,7 @@ function get_content($url, $timeout=10)
     curl_setopt($ch, CURLOPT_TIMEOUT, 60);
     curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
     curl_setopt($ch, CURLOPT_AUTOREFERER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); 
     curl_setopt($ch, CURLOPT_ENCODING, 'gzip,deflate');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
