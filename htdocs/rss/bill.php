@@ -100,8 +100,19 @@ $rss = '<?xml version="1.0" encoding="utf-8"?>
 # Cache the RSS file.
 $fp = file_put_contents('cache/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml', $rss);
 
+if ($fp !== false)
+{
+    $last_modified = date('r', filemtime('cache/bill-' . SESSION_YEAR . '-' . $bill['number']
+        . '.xml'));
+    $md5 = md5_file('cache/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml');
+}
+else
+{
+    $last_modified = date('r', time());
+    $md5 = md5($rss);
+}
+
 header('Content-Type: application/rss+xml');
-header('Last-Modified: '.date('r', filemtime('cache/bill-' . SESSION_YEAR . '-' . $bill['number']
-    . '.xml')));
-header('ETag: ' . md5_file('cache/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml'));
+header('Last-Modified: ' . $last_modified);
+header('ETag: ' . $md5);
 echo $rss;
