@@ -125,14 +125,6 @@ while ($version = mysqli_fetch_array($result, MYSQL_ASSOC))
     # The HTML for amended versions of bills is beastly. Clean it up.
     $version['text'] = str_replace('<center><b><br><center><b>', '<center><b>', $version['text']);
 
-    # Replace every instance of a URL for a section of the state code with the URL
-    # for Virginia Decoded.
-    $version['text'] = preg_replace(
-        '/"http:\/\/leg1.state.va.us\/cgi-bin\/legp504\.exe\?000\+cod\+([0-9A-Z\.:-]+)"/',
-        '"https://vacode.org/$1/" class="code"',
-        $version['text']
-    );
-
     # Convert the <i> tags to <em> tags in the head of the bill, so that we can pretty
     # up the bill text without affecting the header text.  Those tags should be found
     # within the first 20 lines of the bill's text.
