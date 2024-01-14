@@ -68,7 +68,7 @@ if (mysqli_num_rows($result) > 0)
 
         # Aggregate the variables into their RSS components.
         $title = '<![CDATA['.$status['status'].']]>';
-        $link = 'http://www.richmondsunlight.com/bill/'.SESSION_YEAR.'/'.$bill['number'].'/';
+        $link = 'http://www.richmondsunlight.com/bill/' . SESSION_YEAR . '/' . $bill['number'].'/';
         $description = '<![CDATA['.$status['status'].']]>';
 
         # Now assemble those RSS components into an XML fragment.
