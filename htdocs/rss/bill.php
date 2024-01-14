@@ -39,13 +39,19 @@ $database = new Database;
 $database->connect_mysqli();
 
 # Query the database for all bills by that bill number.
-$sql = 'SELECT bills_status.status, bills.catch_line
+$sql = 'SELECT
+            bills_status.status,
+            bills.catch_line
         FROM bills_status
         LEFT JOIN bills
-        ON bills_status.bill_id=bills.id
-        WHERE bills.id=bills_status.bill_id AND bills.session_id = '.SESSION_ID.'
-        AND bills.number="'.mysqli_real_escape_string($GLOBALS['db'], $bill['number']).'"
-        ORDER BY bills_status.date DESC, bills_status.id DESC';
+            ON bills_status.bill_id=bills.id
+        WHERE
+            bills.id=bills_status.bill_id AND
+            bills.session_id = ' . SESSION_ID . ' AND
+            bills.number="' . mysqli_real_escape_string($GLOBALS['db'], $bill['number']) . '"
+        ORDER BY
+            bills_status.date DESC,
+            bills_status.id DESC';
 
 $result = mysqli_query($GLOBALS['db'], $sql);
 
