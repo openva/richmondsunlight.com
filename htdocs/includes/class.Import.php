@@ -584,7 +584,8 @@ class Import
 			throw new Exception('LIS ID is invalid');
 		}
 
-		$csv_file = getcwd() . '/members.csv';
+		global $csv_dir;
+		$csv_file = $csv_dir . '/members.csv';
 		$csv = file_get_contents($csv_file);
 		if ($csv === false)
 		{
