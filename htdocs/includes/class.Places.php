@@ -15,7 +15,7 @@ class Places
      * @param int $session_id
      * @return array
      */
-    public function list($session_id = SESSION_ID)
+    public function list_all($session_id = SESSION_ID)
     {
 
         $sql = 'SELECT DISTINCT
