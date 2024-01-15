@@ -209,6 +209,7 @@ if (isset($_POST['form_data']))
             'marketing' => 3,
             'marketing plan' => 5,
             'marketing messages' => 5,
+            'manifestation' => 4,
         );
 
         /*
