@@ -72,8 +72,8 @@ function show_form($form_data)
 		<div style="display: none;">
 			<input type="text" size="2" maxlength="2" name="form_data[zip]" id="message-zip" />
 			<label for="message-zip">Leave this field empty</label><br />
-            <input type="text" size="11" maxlength="11" name="form_data[secret]" id="message-secret" value="' . time() * 2 . '" />
 			<label for="message-secret">Leave this field empty</label><br />
+            <input type="text" size="10" maxlength="10" name="form_data[secret]" id="message-secret" value="' . time() * 2 . '" />
 		</div>
 
 		<p><input type="submit" name="submit" value="Send Mail"></p>
