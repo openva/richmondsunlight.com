@@ -106,6 +106,9 @@ Disallow: /
 User-agent: magpie-crawler
 Disallow: /
 
+User-agent: PetalBot
+Disallow: /
+
 User-agent: msnbot
 Crawl-delay: 5
 
