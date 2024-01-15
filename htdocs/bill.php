@@ -54,10 +54,11 @@ $debug_timing['JSON retrieved'] = microtime(TRUE);
 
 $bill = json_decode($json);
 
+/*
+ * This bill does not exist, so return a 404
+ */
 if ($json === FALSE || $bill == FALSE || isset($bill->error))
 {
-    $log->put('A query to ' . $json_url . ' failed . The returned content is: '
-        . var_dump($json), 5);
     header("Status: 404 Not Found\n\r");
     include '404.php';
     exit();
