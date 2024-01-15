@@ -584,10 +584,11 @@ class Import
 			throw new Exception('LIS ID is invalid');
 		}
 
-		$csv = file_get_contents('members.csv');
+		$csv_file = getcwd() . '/members.csv';
+		$csv = file_get_contents($csv_file);
 		if ($csv === false)
 		{
-			throw new Exception('CSV file could not be loaded');
+			throw new Exception('CSV file could not be loaded from ' . $csv_file);
 		}
 
 		if (stripos($csv, '"' . $lis_id . '"') !== false)
