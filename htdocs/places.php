@@ -168,7 +168,7 @@ if (!empty($place))
 else
 {
 
-    $place_list = $places->list();
+    $place_list = $places->list_all();
     foreach ($place_list as $place)
     {
         $page_body .= '<li><a href="/place/'. urlencode($place['name']) . '/">' . $place['name']
