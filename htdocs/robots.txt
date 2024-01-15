@@ -109,6 +109,15 @@ Disallow: /
 User-agent: PetalBot
 Disallow: /
 
+User-agent: Bytespider
+Disallow: /
+
+User-agent: proximic
+Disallow: /
+
+User-agent: adbeat_bot
+Disallow: /
+
 User-agent: msnbot
 Crawl-delay: 5
 
