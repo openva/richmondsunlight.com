@@ -568,6 +568,37 @@ class Import
 
 	} // deactivate_legislator()
 
+
+	
+	/**
+     * Verify that a legislator is listed in the legislative CSV listing
+     *
+     * @param string $lis_id
+     * @return boolean
+     */
+	public function legislator_in_csv($lis_id)
+	{
+
+		if ( substr($lis_id, 0, 1) !== 'H' &&  substr($lis_id, 0, 1) !== 'S' )
+		{
+			throw new Exception('LIS ID is invalid');
+		}
+
+		$csv = file_get_contents('members.csv');
+		if ($csv === false)
+		{
+			throw new Exception('CSV file could not be loaded');
+		}
+
+		if (stripos($csv, '"' . $lis_id . '"') !== false)
+		{
+			return true;
+		}
+		
+		return false;
+
+	} //
+
 	/*
 	 * add_legislator()
 	 *
