@@ -423,8 +423,8 @@ class Bill2
             /*
              * The terms aren't cached in Memcached, so get them from the Virginia Decoded API.
              */
+            $url = 'https://vacode.org/api/dictionary/?key=' . VA_DECODED_KEY . '&section=';
 
-            $url = 'https://vacode.org/api/dictionary/?key=zxo8k592ztiwbgre&section=';
             /*
              * Just use the first cited section of the code. It ain't fancy, but it kind of
              * works.
