@@ -111,7 +111,7 @@ if (isset($_POST['form_data']))
     # Prohibit any emails sent suspiciously quickly. We double the timestamp
     # value because spammers will plug in a timestamp value.
     $time_elapsed = time() - ($form_data['secret'] / 2);
-    if ( $time_elapsed <= 10)
+    if ( $time_elapsed <= 10 || $time_elapsed > 604800 )
     {
         die();
     }
