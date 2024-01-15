@@ -142,7 +142,7 @@ RewriteRule ^unsubscribe/([0-9a-z]{8})/$ /unsubscribe.php?hash=$1 [QSA]
 RewriteRule ^your-legislators/$ /your-legislators.php [QSA]
 
 # Places
-RewriteRule ^places/(.+)?/?$ /places.php [QSA]
+RewriteRule ^places/([A-Za-z+]+)?/?$ /places.php?place=$1 [QSA]
 
 # Downloads
 RewriteRule ^downloads/$ /downloads.php [QSA]
