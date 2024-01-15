@@ -217,7 +217,7 @@ if (isset($_POST['form_data']))
         $score = 0;
         foreach ($spam_strings as $spam_string => $points)
         {
-            $present = substr_count($form_data['comments'], $spam_string);
+            $present = substr_count(strtolower($form_data['comments']), strtolower($spam_string));
             if ($present != false)
             {
                 $score = $score + ($present * $points);
