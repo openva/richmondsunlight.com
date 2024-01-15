@@ -93,14 +93,6 @@ RewriteRule ^legislators/detailed?/?$ /list-legislators-detailed.php [QSA]
 RewriteRule ^committee/([a-z]+)/([a-z-]+)?/?$ /committee.php?chamber=$1&committee=$2 [QSA]
 RewriteRule ^committees?/?$ /list-committees.php [QSA]
 
-# XML
-RewriteRule ^bill/([0-9]{4})/([A-Za-z0-9]+).xml$ /bill-xml.php?year=$1&bill=$2 [QSA]
-RewriteRule ^bills/([0-9]{4})-tags.xml$ /list-tags-xml.php?year=$1 [QSA]
-RewriteRule ^bills/([0-9]{4}).xml$ /list-bills-xml.php?year=$1 [QSA]
-RewriteRule ^bills/tags/([0-9]{4})/([A-Za-z0-9+]+).xml$ /tag-xml.php?year=$1&tag=$2 [QSA]
-RewriteRule ^bills/tags/([A-Za-z0-9+]+).xml$ /tag-xml.php?tag=$1 [QSA]
-RewriteRule ^legislator/([a-z-]+).xml$ /legislator-xml.php?shortname=$1 [QSA]
-
 # RSS
 RewriteRule ^rss/legislator/([a-z-]+)?/?$ /rss/legislator.php?shortname=$1 [QSA]
 RewriteRule ^rss/tag/([a-z0-9-+]+)?/?$ /rss/tag.php?tag=$1 [QSA]
