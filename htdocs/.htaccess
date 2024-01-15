@@ -68,7 +68,7 @@ RewriteCond %{HTTP_HOST} ^richmondsunlight.com [NC]
 RewriteRule ^(.*)$ https://www.richmondsunlight.com/$1 [L,R=301,NC]
 
 # Individual Bill
-RewriteRule ^bill/([0-9]{4})/([A-Z0-9]+)?/?$ /bill/$1/${tolower:$2}/ [R=301]
+RewriteRule ^bill/([0-9]{4})/([A-Z]{2-3})([0-9]{1,4})?/?$ /bill/$1/${tolower:$2}{$3}/ [R=301]
 RewriteRule ^bill/([0-9]{4})/([A-Za-z0-9]+)?/?$ /bill.php?year=$1&bill=$2 [QSA]
 RewriteRule ^bill/([0-9]{4})/([A-Za-z0-9]+)/fulltext?/?$ /bill-fulltext.php?year=$1&bill=$2 [QSA]
 RewriteRule ^bill/([0-9]{4})/([A-Za-z0-9]+)/history?/?$ /bill-history.php?year=$1&bill=$2 [QSA]
