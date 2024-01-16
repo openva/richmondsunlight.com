@@ -6,6 +6,12 @@
 class Places
 {
 
+    protected $db;
+
+    public function __construct($db) {
+        $this->db = $db;
+    }
+
     /**
      * List places that we have a record of.
      * 
@@ -26,9 +32,11 @@ class Places
                     LEFT JOIN bills
                     ON bills_places.bill_id = bills.id
                 WHERE
-                    bills.session_id=' . $session_id;
-        $stmt = $GLOBALS['dbh']->prepare($sql);
-        $stmt->bindParam(":year", $year, PDO::PARAM_INT);
+                    bills.session_id=' . $session_id . '
+                ORDER BY 
+                    name ASC';
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(":session_id", $session_id, PDO::PARAM_INT);
         $stmt->execute();
         $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -69,25 +77,61 @@ class Places
                     bills.status AS status_raw,
                     representatives.name AS patron,
                     bills.date_introduced,
-                    bills.status
+                    bills.status,
+                    sessions.year
                 FROM bills
                 LEFT JOIN representatives
                     ON bills.chief_patron_id = representatives.id
                 LEFT JOIN sessions
                     ON bills.session_id = sessions.id
+                LEFT JOIN bills_places
+                    ON bills.id = bills_places.bill_id
                 WHERE
-                    bills_places.placename = "' . $place . '"
-                    bills.session_id = ' . $session_id . '
+                    bills_places.placename = :place AND
+                    bills.session_id = :session_id
                 ORDER BY
                     bills.chamber DESC,
                     SUBSTRING(bills.number FROM 1 FOR 2) ASC,
                     CAST(LPAD(SUBSTRING(bills.number FROM 3), 4, "0") AS unsigned) ASC';
-        $stmt = $GLOBALS['dbh']->prepare($sql);
-        $stmt->bindParam(":year", $year, PDO::PARAM_INT);
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(":session_id", $session_id, PDO::PARAM_INT);
+        $stmt->bindParam(":place", $place, PDO::PARAM_STR);
         $stmt->execute();
         $bills = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return $bills;
+
+    }
+
+    /**
+     * List legislators for a given place
+     *
+     * @param string $place
+     * @return array
+     */
+    public function legislators($place)
+    {
+
+        $sql = 'SELECT representatives.id
+                FROM districts
+                LEFT JOIN representatives
+                    ON districts.id=representatives.district_id
+                WHERE
+                    districts.date_ended IS NULL AND
+                    districts.description LIKE :place';
+        $stmt = $this->db->prepare($sql);
+        $place_sql = '%' . $place . '%';
+        $stmt->bindParam(':place', $place_sql, PDO::PARAM_STR);
+        $stmt->execute();
+        $representatives_array = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $representatives = [];
+        foreach ($representatives_array as $rep)
+        {
+            $representatives[] = $rep['id'];
+        }
+
+        return $representatives;
 
     }
 

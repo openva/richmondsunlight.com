@@ -18,7 +18,7 @@ include_once 'vendor/autoload.php';
  * Run those functions that are necessary prior to loading this specific page.
  */
 $database = new Database;
-$database->connect();
+$db = $database->connect();
 
 /*
  * Initialize the sessio
@@ -51,19 +51,18 @@ else
  */
 if (!empty($place))
 {
-    $page_title = SESSION_YEAR . ' Bills Affecting ' . $place;
+    $page_title = $year . ' Bills Affecting ' . $place;
 }
 else
 {
-    $page_title = $year . ' Bills Affecting ' . $place;
+    $page_title = $year . ' Bills Affecting Places Throughout Virginia';
 }
 $site_section = 'bills';
 
 /*
  * PAGE CONTENT
  */
-
-$places = new Places;
+$places = new Places($db);
 
 /*
  * If we're looking at a specific place.
@@ -71,7 +70,25 @@ $places = new Places;
 if (!empty($place))
 {
 
+    $legislator_ids = $places->legislators($place);
+    if ($legislator_ids !== false)
+    {
+        $legislators = [];
+        foreach ($legislator_ids as $legislator_id)
+        {
+            $leg = new Legislator;
+            $legislators[] = $leg->info($legislator_id);
+        }
+        
+        foreach ($legislators as $legislator)
+        {
+            $page_body .= '<li>' . $legislator['name_formatted'] . '</li>';
+        }
+
+    }
+
     $bills = $places->bills($place);
+
     if ($bills == false)
     {
         $page_body .= '<p>No bills found in ' . $place . ' in ' . $year . '</p>';
@@ -82,18 +99,6 @@ if (!empty($place))
         $num_results = count($bills);
         $page_body .= '<p>' . number_format($num_results) . ' bill'
             . ($num_results > 1 ? 's' : '') . ' found.</p>';
-
-        
-        $page_body .= '
-        <table id="' . urlencode($place) . '" class="bill-listing sortable">
-            <thead>
-                <tr>
-                    <th>#</th>
-                    <th>Title</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>';
 
         foreach ($bills as $bill)
         {
@@ -171,7 +176,7 @@ else
     $place_list = $places->list_all();
     foreach ($place_list as $place)
     {
-        $page_body .= '<li><a href="/place/'. urlencode($place['name']) . '/">' . $place['name']
+        $page_body .= '<li><a href="/places/'. urlencode($place['name']) . '/">' . $place['name']
             . '</a></li>';
     }
 
