@@ -179,6 +179,8 @@ RewriteRule ^photosynthesis/pro?/?$ pro.php [QSA]
 RewriteRule ^photosynthesis/rss/portfolio/([a-z0-9]{5})?/?$ /photosynthesis/rss/portfolio.php?hash=$1 [QSA]
 
 # Block bandwidth abusers
+RewriteCond %{HTTP_USER_AGENT} BDBot/1.0 [NC]
+RewriteRule .* - [F,L]
 Order Deny,Allow
 Deny from 5.9.151.67
 Deny from 220.181.125.132
