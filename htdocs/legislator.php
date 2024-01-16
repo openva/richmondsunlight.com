@@ -385,7 +385,7 @@ if (!empty($legislator['district_description']))
     $page_body .= ': ' . $legislator['district_description'];
 }
 $page_body .= '</dd>';
-if ($legislator['date_started'] != '0000-00-00')
+if (!empty($legislator['date_started'])
 {
     $page_body .= '
 		<dt>Took Office</dt>

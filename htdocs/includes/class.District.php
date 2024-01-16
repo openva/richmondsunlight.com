@@ -8,9 +8,9 @@ class District
         $sql = 'SELECT id, chamber, number, description, notes, boundaries
                 FROM districts
                 WHERE
-                    date_ended = "0000-00-00"
-                    AND chamber= :chamber
-                    AND number= :number';
+                    date_ended IS NOT NULL AND
+                    chamber= :chamber AND
+                    number= :number';
 
         $stmt = $GLOBALS['dbh']->prepare($sql);
         $stmt->bindParam(':chamber', $chamber);
