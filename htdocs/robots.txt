@@ -118,6 +118,9 @@ Disallow: /
 User-agent: adbeat_bot
 Disallow: /
 
+User-agent: FriendlyCrawler
+Disallow: /
+
 User-agent: msnbot
 Crawl-delay: 5
 
