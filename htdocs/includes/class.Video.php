@@ -501,6 +501,14 @@ class Video
         $i=1;
         while ($i<$this->total_screenshots)
         {
+            if (!isset($this->screenshots))
+            {
+                $this->screenshots = new stdClass();
+            }
+            if (!isset($this->screenshots->{$j}))
+            {
+                $this->screenshots->{$j} = new stdClass();
+            }
             $this->screenshots->{$j}->number = $j;
             $this->screenshots->{$j}->seconds = round($j * $this->frequency);
             $this->screenshots->{$j}->filename = str_replace('/video/', 'https://s3.amazonaws.com/video.richmondsunlight.com/', $this->capture_directory)
