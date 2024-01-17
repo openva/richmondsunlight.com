@@ -9,7 +9,7 @@ class Video
     {
         if (!isset($this->id))
         {
-            return FALSE;
+            return false;
         }
 
         $database = new Database;
@@ -40,7 +40,7 @@ class Video
     {
         if (!isset($this->video))
         {
-            return FALSE;
+            return false;
         }
 
         $database = new Database;
@@ -156,7 +156,7 @@ class Video
         # If the query fails, complain,
         if (!$result)
         {
-            return FALSE;
+            return false;
         }
 
         # Grab the DB ID to use in the HTTP redirect below.
@@ -169,7 +169,7 @@ class Video
             $this->id = mysqli_insert_id($GLOBALS['db']);
         }
 
-        return TRUE;
+        return true;
     }
 
 
@@ -180,7 +180,7 @@ class Video
 
         foreach ($mplayer as $option)
         {
-            if (mb_strpos($option, '=') !== FALSE)
+            if (mb_strpos($option, '=') !== false)
             {
                 $tmp = explode('=', $option);
                 $tmp[0] = mb_strtolower($tmp[0]);
@@ -207,7 +207,7 @@ class Video
             $this->capture_rate = round(($mplayer['id_length'] * $mplayer['id_video_fps']) / $largest);
         }
 
-        return TRUE;
+        return true;
     }
 
 
@@ -217,9 +217,9 @@ class Video
     {
         if (!isset($this->legislator_id))
         {
-            return FALSE;
+            return false;
         }
-        $start = microtime(TRUE);
+        $start = microtime(true);
 
         $database = new Database;
         $database->connect_mysqli();
@@ -256,7 +256,7 @@ class Video
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
-            return FALSE;
+            return false;
         }
         $clips = array();
         while ($clip = mysqli_fetch_array($result))
@@ -274,7 +274,7 @@ class Video
     {
         if (!isset($this->legislator_id))
         {
-            return FALSE;
+            return false;
         }
 
         $database = new Database;
@@ -292,7 +292,7 @@ class Video
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
-            return FALSE;
+            return false;
         }
         else
         {
@@ -321,7 +321,7 @@ class Video
     {
         if (!isset($this->bill_id))
         {
-            return FALSE;
+            return false;
         }
 
         $database = new Database;
@@ -337,7 +337,7 @@ class Video
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
-            return FALSE;
+            return false;
         }
         else
         {
@@ -378,7 +378,7 @@ class Video
             # In the unlikely event that we have nothing left.
             if (count($index2) == 0)
             {
-                return FALSE;
+                return false;
             }
 
             # If we've saved an odd number of frames, then drop the last one. We really shouldn't
@@ -425,7 +425,7 @@ class Video
     {
         if (!isset($this->id))
         {
-            return FALSE;
+            return false;
         }
 
         $database = new Database;
@@ -449,7 +449,7 @@ class Video
         # Unless we have ten tags, we just don't have enough data to continue.
         if (mysqli_num_rows($result) < 10)
         {
-            return FALSE;
+            return false;
         }
 
         # Build up an array of tags, with the key being the tag and the value being the count.
@@ -475,7 +475,7 @@ class Video
     {
         if (!isset($this->id))
         {
-            return FALSE;
+            return false;
         }
         if (!isset($this->frequency))
         {
@@ -533,7 +533,7 @@ class Video
         # We must have a file ID.
         if (!isset($this->id))
         {
-            return FALSE;
+            return false;
         }
 
         # Are we seeking clips based on bills or legislators?
@@ -593,7 +593,7 @@ class Video
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
-            return FALSE;
+            return false;
         }
 
         # Build up an array of "moments" -- each moment deriving from a single screenshot with
@@ -643,7 +643,7 @@ class Video
         # In the unlikely event that we've iteratively reduced $moments to nothing at all.
         if (count($index) == 0)
         {
-            return FALSE;
+            return false;
         }
 
         # If we've saved an odd number of frames, then drop the last one. We really shouldn't
@@ -702,7 +702,7 @@ class Video
             $j++;
         }
 
-        return TRUE;
+        return true;
     }
 
     # Indexes and stores clips.
@@ -715,7 +715,7 @@ class Video
         # We must have a file ID.
         if (!isset($this->id))
         {
-            return FALSE;
+            return false;
         }
 
         $database = new Database;
@@ -733,7 +733,7 @@ class Video
         # If there no clips were identified by index_clips(), then we're done here.
         if (!isset($this->clips) || count($this->clips) == 0)
         {
-            return FALSE;
+            return false;
         }
 
         # Increment our counter.
@@ -796,7 +796,7 @@ class Video
             mysqli_query($GLOBALS['db'], $sql);
         }
 
-        return TRUE;
+        return true;
     }
 
 
@@ -810,7 +810,7 @@ class Video
          */
         if (!isset($this->id) && !isset($this->hash))
         {
-            return FALSE;
+            return false;
         }
 
         $database = new Database;
@@ -838,9 +838,9 @@ class Video
 
         $result = mysqli_query($GLOBALS['db'], $sql);
 
-        if (($result == FALSE) || (mysqli_num_rows($result) == 0))
+        if (($result == false) || (mysqli_num_rows($result) == 0))
         {
-            return FALSE;
+            return false;
         }
 
         $this->clip = mysqli_fetch_object($result);
@@ -854,7 +854,7 @@ class Video
             $this->clip->screenshot = 'https:' . $this->clip->screenshot;
         }
 
-        return TRUE;
+        return true;
     }
 
 
@@ -863,7 +863,7 @@ class Video
     {
         if (!isset($this->id) || !isset($this->clip_type))
         {
-            return FALSE;
+            return false;
         }
 
         # If a fuzz time has not been established, set it at 5 seconds.
@@ -912,7 +912,7 @@ class Video
 
         if (mysqli_num_rows($result) < 1)
         {
-            return FALSE;
+            return false;
         }
 
         # Create a new, empty object to store these clips in.
@@ -929,7 +929,7 @@ class Video
             $i++;
         }
 
-        return TRUE;
+        return true;
     }
 
 
@@ -939,7 +939,7 @@ class Video
     {
         if (!isset($this->sbv) || empty($this->sbv))
         {
-            return FALSE;
+            return false;
         }
 
         # Intialize a variable to store our complete transcript.
@@ -978,7 +978,7 @@ class Video
         $this->sbv = $this->sbv_raw;
         unset($this->sbv_raw);
 
-        return TRUE;
+        return true;
     }
 
 
@@ -990,7 +990,7 @@ class Video
     {
         if (empty($this->webvtt))
         {
-            return FALSE;
+            return false;
         }
 
         /*
@@ -1014,7 +1014,7 @@ class Video
             /*
              * If there's no time range, skip this one.
              */
-            if (mb_strpos($caption, '-->') === FALSE)
+            if (mb_strpos($caption, '-->') === false)
             {
                 continue;
             }
@@ -1030,7 +1030,7 @@ class Video
             $i++;
         }
 
-        return TRUE;
+        return true;
     }
 
 
@@ -1041,7 +1041,7 @@ class Video
     {
         if (!isset($this->file_id) || !isset($this->webvtt))
         {
-            return FALSE;
+            return false;
         }
 
         $database = new Database;
@@ -1051,12 +1051,12 @@ class Video
 				SET webvtt = "' . mysqli_real_escape_string($GLOBALS['db'], $this->webvtt) . '"
 				WHERE id=' . $this->file_id;
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if ($result === FALSE)
+        if ($result === false)
         {
-            return FALSE;
+            return false;
         }
 
-        return TRUE;
+        return true;
     }
 
     # Generate a merged array of transcript text and clips.
@@ -1066,7 +1066,7 @@ class Video
     {
         if (!isset($this->id))
         {
-            return FALSE;
+            return false;
         }
 
         $database = new Database;
@@ -1112,7 +1112,7 @@ class Video
         ksort($this->transcript);
         $this->transcript = (object) $this->transcript;
 
-        return TRUE;
+        return true;
     }
 
 
@@ -1130,7 +1130,7 @@ class Video
      *
      * @param string $this->webvtt, the WebVTT file
      *
-     * @return TRUE or FALSE
+     * @return true or false
      */
     public function normalize_line_endings()
     {
@@ -1140,12 +1140,12 @@ class Video
          */
         if (!isset($this->webvtt))
         {
-            return FALSE;
+            return false;
         }
 
         $this->webvtt = preg_replace('~\R~u', "\n", $this->webvtt);
 
-        return TRUE;
+        return true;
     }
 
     /**
@@ -1156,7 +1156,7 @@ class Video
      * @param int    $this->offset, in seconds, defaults to 10
      * @param string $this->captions, the captions
      *
-     * @return TRUE or FALSE
+     * @return true or false
      */
     public function time_shift_srt()
     {
@@ -1166,7 +1166,7 @@ class Video
          */
         if (!isset($this->captions))
         {
-            return FALSE;
+            return false;
         }
 
         /*
@@ -1209,7 +1209,7 @@ class Video
             }
         }
 
-        return TRUE;
+        return true;
     }
 
     /**
@@ -1232,7 +1232,7 @@ class Video
          */
         if (!isset($this->captions))
         {
-            return FALSE;
+            return false;
         }
 
         /*
@@ -1240,7 +1240,7 @@ class Video
          */
         if (!isset($this->file_id))
         {
-            return FALSE;
+            return false;
         }
 
         /*
@@ -1248,7 +1248,7 @@ class Video
          */
         if (count((array)$this->captions) <= 1)
         {
-            return FALSE;
+            return false;
         }
 
         $database = new Database;
@@ -1276,12 +1276,12 @@ class Video
             {
                 if (mb_substr($caption->text, 0, 3) == '>> ')
                 {
-                    $caption->new_speaker = TRUE;
+                    $caption->new_speaker = true;
                     $caption->text = mb_substr($caption->text, 3);
                 }
                 elseif (mb_substr($caption->text, 0, 4) == '>>> ')
                 {
-                    $caption->new_speaker = TRUE;
+                    $caption->new_speaker = true;
                     $caption->text = mb_substr($caption->text, 4);
                 }
             }
@@ -1309,13 +1309,13 @@ class Video
             }
 
             $result = mysqli_query($GLOBALS['db'], $sql);
-            if ($result === FALSE)
+            if ($result === false)
             {
-                return FALSE;
+                return false;
             }
         }
 
-        return TRUE;
+        return true;
     }
 
     /**
@@ -1337,7 +1337,7 @@ class Video
          */
         if (!isset($this->file_id))
         {
-            return FALSE;
+            return false;
         }
 
         $database = new Database;
@@ -1352,7 +1352,7 @@ class Video
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
-            return FALSE;
+            return false;
         }
 
         /*
@@ -1489,7 +1489,7 @@ class Video
             {
                 foreach ($phrases['speaker'] as $phrase)
                 {
-                    if (mb_stripos($transcript, $phrase) !== FALSE)
+                    if (mb_stripos($transcript, $phrase) !== false)
                     {
                         foreach ($caption as &$line)
                         {
@@ -1675,7 +1675,7 @@ class Video
             }
         }
 
-        return TRUE;
+        return true;
     }
 
     /**
@@ -1693,7 +1693,7 @@ class Video
         }
         if (!isset($this->file_id))
         {
-            return FALSE;
+            return false;
         }
 
         $database = new Database;
@@ -1714,7 +1714,7 @@ class Video
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0)
         {
-            return FALSE;
+            return false;
         }
 
         /*
@@ -1751,7 +1751,7 @@ class Video
             $line['text'] = $this->sentence_case(mb_strtolower($line['text']));
         }
 
-        return TRUE;
+        return true;
     }
 
     /*
@@ -1767,7 +1767,7 @@ class Video
      */
     public function sentence_case($str)
     {
-        $cap = TRUE;
+        $cap = true;
         $return = '';
 
         for ($x = 0; $x < mb_strlen($str); $x++)
@@ -1776,12 +1776,12 @@ class Video
 
             if ($letter == '.' || $letter == '!' || $letter == '?')
             {
-                $cap = TRUE;
+                $cap = true;
             }
-            elseif ($letter != ' ' && $cap == TRUE)
+            elseif ($letter != ' ' && $cap == true)
             {
                 $letter = mb_strtoupper($letter);
-                $cap = FALSE;
+                $cap = false;
             }
 
             $return .= $letter;
@@ -1953,7 +1953,7 @@ class Video
         rename($container_directory.$file, $new_container_directory.$video[$file]);
 
         # Rename the video directory (if it exists), making it the ID.
-        if (file_exists($screenshot_directory) !== FALSE)
+        if (file_exists($screenshot_directory) !== false)
         {
             rename($screenshot_directory, $new_container_directory.$video[$file]);
         }
