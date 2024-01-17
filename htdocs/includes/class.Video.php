@@ -197,6 +197,10 @@ class Video
         if (empty($this->capture_rate) && !empty($this->capture_directory))
         {
             $dir = scandir(CLI_ROOT . $this->capture_directory, 1);
+            if ($dir == false)
+            {
+                return false;
+            }
             $largest = $dir[0];
             $largest = explode('.', $largest);
             $largest = round($largest[0]);
