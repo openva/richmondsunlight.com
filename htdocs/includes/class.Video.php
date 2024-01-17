@@ -59,11 +59,13 @@ class Video
         }
 
         # Check whether we have this exact video saved already. If so, we'll just update it.
-        $sql = 'SELECT id
+        $sql = 'SELECT
+                    id
 				FROM files
-				WHERE chamber="' . $this->video['chamber'] . '" AND
-				date="' . $this->video['date'] . '" AND
-				length="' . $this->video['length'] . ' "';
+				WHERE
+                    chamber="' . $this->video['chamber'] . '" AND
+				    date="' . $this->video['date'] . '" AND
+				    length="' . $this->video['length'] . ' "';
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0)
         {
@@ -81,11 +83,12 @@ class Video
             $sql = 'INSERT INTO files';
         }
         $sql .= '
-				SET chamber="' . $this->video['chamber'] . '",
-				title="' . $this->video['title'] . '",
-				type="video",
-				date="' . $this->video['date'] . '",
-				length="' . $this->video['length'] . '"';
+				SET
+                    chamber="' . $this->video['chamber'] . '",
+				    title="' . $this->video['title'] . '",
+				    type="video",
+				    date="' . $this->video['date'] . '",
+				    length="' . $this->video['length'] . '"';
         if (!empty($this->video['committee_id']))
         {
             $sql .= ', committee_id=' . $this->video['committee_id'];
