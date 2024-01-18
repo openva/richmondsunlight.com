@@ -16,10 +16,10 @@ define('SESSION_ID', 22);
 define('SESSION_SUFFIX', '');
 
 # As defined by the GA LIS' database.
-define('SESSION_LIS_ID', '191');
+define('SESSION_LIS_ID', '241');
 
 # As defined by the year.
-define('SESSION_YEAR', 2019);
+define('SESSION_YEAR', 2024);
 
 # Is the GA currently in session?
 define('IN_SESSION', true);
