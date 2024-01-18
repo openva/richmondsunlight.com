@@ -31,6 +31,25 @@ $date = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['year']) . '-' . mys
 $page_title = date('m/d/Y', strtotime($date)) . ' ' . ucfirst($chamber) . ' Proceedings';
 $site_section = 'minutes';
 
+$html_head = '
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Get the link and video elements
+    var link = document.getElementByClass("marker");
+    var video = document.getElementById("player");
+
+    // Listen for click on the link
+    link.addEventListener("click", function(event) {
+        // Prevent the default action of the anchor tag
+        event.preventDefault();
+
+        // Get the time from the data-seek attribute and seek the video to that time
+        var time = link.getAttribute("data-time");
+        video.currentTime = time;
+    });
+});
+</script>';
+
 # RETRIEVE THE MINUTES FROM THE DATABASE
 $sql = 'SELECT text
 		FROM minutes
@@ -116,36 +135,23 @@ else
                     . '/" class="legislator">' . $line['name'] . '</a>';
             }
             $video['transcript'] .= '</dt>
-				<dd data-time-start="' . $line['time_start'] . '" data-time-end="' . $line['time_end'] . '">' . $line['text'] . '</dd>';
+				<dd data-time="' . $line['time_start'] . '" data-time-end="' . $line['time_end'] . '">' . $line['text'] . '</dd>';
             $i++;
         }
         $video['transcript'] .= '</dl>';
     }
 
     # If we have a path, use that.
-    if (mb_substr($video['path'], -3) == 'mp4')
-    {
-        $html_head = '
-			<script src="//releases.flowplayer.org/5.2.1/flowplayer.min.js"></script>
-			<link rel="stylesheet" type="text/css" href="//releases.flowplayer.org/5.2.1/skin/minimalist.css" />
-			<script>
-				$(document).ready(function() {
-					$("div.marker").click(function() {
-						var api = flowplayer();
-						api.seek($(this).attr("data-time"));
-					})
-				});
-			</script>';
+    if (mb_substr($video['path'], -3) == 'mp4') {
 
         $video['html'] = '
 		<style>
 			#player, video {
-				width: 500px;
-				height: 375px;
+				width: 100%;
 			}
 		</style>
-		<div class="flowplayer player" id="player">
-			<video src="' . $video['path'] . '" controls="controls"></video>
+		<div class="player" id="player">
+			<video src="' . $video['path'] . '" controls></video>
 		</div>';
     }
 
