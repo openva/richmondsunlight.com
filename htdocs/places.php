@@ -70,7 +70,8 @@ $places = new Places($db);
 if (!empty($place))
 {
 
-    $legislator_ids = $places->legislators($place);
+    $place_shortened = str_replace(' County', '', $place);
+    $legislator_ids = $places->legislators($place_shortened);
     if ($legislator_ids !== false)
     {
         $legislators = [];
