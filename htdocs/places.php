@@ -51,11 +51,11 @@ else
  */
 if (!empty($place))
 {
-    $page_title = $year . ' Bills Affecting ' . $place;
+    $page_title = $place . ' Legislators and Legislation';
 }
 else
 {
-    $page_title = $year . ' Bills Affecting Places Throughout Virginia';
+    $page_title = 'Bills Affecting Places Throughout Virginia';
 }
 $site_section = 'bills';
 
