@@ -80,10 +80,29 @@ if (!empty($place))
             $legislators[] = $leg->info($legislator_id);
         }
         
+        $page_body .= '<style>
+            div.legislator-box {
+                width: 250px;
+                border: 2px solid #c6a952;
+                background: #f4eee5;
+                border: 1px solid #000;
+                margin: 5px; float: left;
+            }
+            div.legislator-box img {
+                float: left;
+                padding: 0 .5em 0 0;
+                height: 100px;
+            }
+        </style>';
         foreach ($legislators as $legislator)
         {
-            $page_body .= '<li>' . $legislator['name_formatted'] . '</li>';
+            $page_body .= '
+                <div class="legislator-box">
+                    <img src="/images/legislators/thumbnails/' . $legislator['shortname'] . '.jpg">
+                    <a href="/legislator/' . $legislator['shortname'] . '/">'. $legislator['name_formatted'] . '</a>
+                </div>';
         }
+        $page_body .= '<br clear="left">';
 
     }
 
@@ -174,11 +193,13 @@ else
 {
 
     $place_list = $places->list_all();
+    $page_body .= '<ul>';
     foreach ($place_list as $place)
     {
         $page_body .= '<li><a href="/places/'. urlencode($place['name']) . '/">' . $place['name']
             . '</a></li>';
     }
+    $page_body .= '</ul>';
 
 }
 
