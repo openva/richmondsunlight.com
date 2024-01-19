@@ -18,7 +18,7 @@ session_start();
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # PAGE METADATA
@@ -27,20 +27,17 @@ $browser_title = 'Tracking the Virginia General Assembly';
 $site_section = 'home';
 
 # PAGE CONTENT
-if (strtotime(SESSION_START) > time())
-{
-	$page_body = '<p>The ' . SESSION_YEAR . ' Virginia General Assembly session will begin on '
-		. date('F j', strtotime(SESSION_START)) . ', scheduled to continue until '
-		. date('F j', strtotime(SESSION_END)) . '. Here you can read <a href="/bills/">the '
-		. 'bills are proposed</a>.</p>';
-}
-else
-{
-	$page_body = '<p>The ' . SESSION_YEAR . ' Virginia General Assembly session began on '
-		. date('F j', strtotime(SESSION_START)) . ' and continued through '
-		. date('F j', strtotime(SESSION_END)) . '. Here you can read <a href="/bills/">the '
-		. 'bills were proposed</a> and <a href="/bills/passed/">the bills that passed into '
-		. 'law.</p>';
+if (strtotime(SESSION_START) > time()) {
+    $page_body = '<p>The ' . SESSION_YEAR . ' Virginia General Assembly session will begin on '
+        . date('F j', strtotime(SESSION_START)) . ', scheduled to continue until '
+        . date('F j', strtotime(SESSION_END)) . '. Here you can read <a href="/bills/">the '
+        . 'bills are proposed</a>.</p>';
+} else {
+    $page_body = '<p>The ' . SESSION_YEAR . ' Virginia General Assembly session began on '
+        . date('F j', strtotime(SESSION_START)) . ' and continued through '
+        . date('F j', strtotime(SESSION_END)) . '. Here you can read <a href="/bills/">the '
+        . 'bills were proposed</a> and <a href="/bills/passed/">the bills that passed into '
+        . 'law.</p>';
 }
 
 $sql = 'SELECT COUNT(*) AS count, tags.tag
@@ -53,14 +50,12 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 		ORDER BY tag ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
 $tag_count = mysqli_num_rows($result);
-if ($tag_count > 0)
-{
+if ($tag_count > 0) {
     $page_body .= '
 	<h2>Bill Topics</h2>
 	<div class="tags">';
     # Build up an array of tags, with the key being the tag and the value being the count.
-    while ($tag = mysqli_fetch_array($result))
-    {
+    while ($tag = mysqli_fetch_array($result)) {
         $tag = array_map('stripslashes', $tag);
         $tags[$tag{'tag'}] = $tag['count'];
     }
@@ -75,20 +70,16 @@ if ($tag_count > 0)
     # moving up and down from there.
     $multiple = 1.25 / (array_sum($tags) / count($tags));
 
-    foreach ($tags as $tag => $count)
-    {
+    foreach ($tags as $tag => $count) {
         $size = round(($count * $multiple), 1);
-        if ($size > 4)
-        {
+        if ($size > 4) {
             $size = 4;
-        }
-        elseif ($size < .75)
-        {
+        } elseif ($size < .75) {
             $size = .75;
         }
 
         $page_body .= '<span style="font-size: ' . $size . 'em;"><a href="/bills/tags/'
-			. urlencode($tag) . '/">' . $tag . '</a></span> ';
+            . urlencode($tag) . '/">' . $tag . '</a></span> ';
     }
     $page_body .= '
 	</div>';
@@ -116,17 +107,15 @@ $sql = 'SELECT
 		AND interestingness >= 100
 		ORDER BY DATE DESC';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     $page_body .= '<div id="updates">
 					<h2>Interesting Bill Updates</h2>
 					<table>';
-    while ($bill = mysqli_fetch_array($result))
-    {
+    while ($bill = mysqli_fetch_array($result)) {
         $bill['url'] = '/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/';
         $page_body .= '<tr>
 						<td><a href="' . $bill['url'] . '" class="balloon">'
-							. mb_strtoupper($bill['number']) . '</td>
+                            . mb_strtoupper($bill['number']) . '</td>
 						<td>' . $bill['catch_line'] . '</td>
 						<td>' . $bill['status_translation'] . '</td>
 					</tr>';
@@ -147,44 +136,41 @@ $sql = 'SELECT
 		WHERE
 			bills.session_id=' . SESSION_ID;
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
-
-	$places = [];
-	while ($place = mysqli_fetch_array($result, MYSQLI_ASSOC))
-	{
-		$place_json = [];
-		$place_json['latitude'] = $place['latitude'];
-		$place_json['longitude'] = $place['longitude'];
-		$place_json['place'] = $place['placename'];
-		$place_json['description'] = strtoupper($place['number']) . ': ' . $place['catch_line'];
-		$place_json['url'] = '/bill/' . SESSION_YEAR . '/' . $place['number'] . '/';
+if (mysqli_num_rows($result) > 0) {
+    $places = [];
+    while ($place = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+        $place_json = [];
+        $place_json['latitude'] = $place['latitude'];
+        $place_json['longitude'] = $place['longitude'];
+        $place_json['place'] = $place['placename'];
+        $place_json['description'] = strtoupper($place['number']) . ': ' . $place['catch_line'];
+        $place_json['url'] = '/bill/' . SESSION_YEAR . '/' . $place['number'] . '/';
         $places[] = $place_json;
-	}
-	
+    }
+
     $geojson = [
-		'type' => 'FeatureCollection',
-		'features' => array_map(function ($item) {
-			return [
-				'type' => 'Feature',
-				'geometry' => [
-					'type' => 'Point',
-					'coordinates' => [(float)$item['longitude'], (float)$item['latitude']]
-				],
-				'properties' => [
-					'description' => $item['description'],
-					'url' => $item['url'],
-					'place' => $item['place']
-				]
-			];
-		}, $places)
-	];
-	$geojson = json_encode($geojson);
-	
-	$html_head .= '<script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
+        'type' => 'FeatureCollection',
+        'features' => array_map(function ($item) {
+            return [
+                'type' => 'Feature',
+                'geometry' => [
+                    'type' => 'Point',
+                    'coordinates' => [(float)$item['longitude'], (float)$item['latitude']]
+                ],
+                'properties' => [
+                    'description' => $item['description'],
+                    'url' => $item['url'],
+                    'place' => $item['place']
+                ]
+            ];
+        }, $places)
+    ];
+    $geojson = json_encode($geojson);
+
+    $html_head .= '<script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
     <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet" />';
 
-	$page_body .= '<h2>Places Mentioned in Bills</h2>
+    $page_body .= '<h2>Places Mentioned in Bills</h2>
 	<script>
 		
 		$( document ).ready(function() {
@@ -290,7 +276,6 @@ if (mysqli_num_rows($result) > 0)
 		});
 	</script>
 	<div id="map" style="height:250px; width: 100%;"></div>';
-
 }
 
 # Newest Comments
@@ -321,21 +306,18 @@ $sql = 'SELECT
 		ORDER BY comments.date_created DESC
 		LIMIT 6';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     $page_body .= '
 	<div id="newest-comments">
 		<h2>Newest Comments</h2>';
-    while ($comment = mysqli_fetch_array($result))
-    {
+    while ($comment = mysqli_fetch_array($result)) {
         $comment = array_map('stripslashes', $comment);
-        if (mb_strlen($comment['comment']) > 200)
-        {
+        if (mb_strlen($comment['comment']) > 200) {
             $comment['comment'] = preg_replace('#<blockquote>(.*)</blockquote>#D', '', $comment['comment']);
             $comment['comment'] = strip_tags($comment['comment']);
         }
         $page_body .= '<a href="/bill/' . $comment['year'] . '/' . $comment['bill_number']
-			. '/#comment-' . $comment['number'] . '">
+            . '/#comment-' . $comment['number'] . '">
 			<div><strong>' . $comment['bill_catch_line'] . '</strong><br />
 			' . $comment['name'] . ' writes:
 			' . $comment['comment'] . '</div></a>';
@@ -352,14 +334,10 @@ $sql = 'SELECT chamber, COUNT(*) AS count
 		WHERE session_id=' . SESSION_ID . '
 		GROUP BY chamber';
 $result = mysqli_query($GLOBALS['db'], $sql);
-while ($stats = mysqli_fetch_array($result))
-{
-    if ($stats['chamber'] == 'house')
-    {
+while ($stats = mysqli_fetch_array($result)) {
+    if ($stats['chamber'] == 'house') {
         $session['house_count'] = $stats['count'];
-    }
-    elseif ($stats['chamber'] == 'senate')
-    {
+    } elseif ($stats['chamber'] == 'senate') {
         $session['senate_count'] = $stats['count'];
     }
 }
@@ -391,19 +369,17 @@ $sql = 'SELECT bills.number, bills.catch_line,
 		ORDER BY bills.hotness DESC
 		LIMIT 5';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     $page_sidebar .= '
 		<h3>Today’s Most Interesting Bills</h3>
 		<div class="box" id="interesting">
 			<ul>';
-    while ($bill = mysqli_fetch_array($result))
-    {
+    while ($bill = mysqli_fetch_array($result)) {
         $bill = array_map('stripslashes', $bill);
         $page_sidebar .= '
 			<li><a href="/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/" class="balloon">'
-				. mb_strtoupper($bill['number']) . balloon($bill, 'bill') . '</a>: '
-				. $bill['catch_line'] . '</li>
+                . mb_strtoupper($bill['number']) . balloon($bill, 'bill') . '</a>: '
+                . $bill['catch_line'] . '</li>
 		';
     }
     $page_sidebar .= '
@@ -412,8 +388,7 @@ if (mysqli_num_rows($result) > 0)
 }
 
 # Newest Bills
-if (LEGISLATIVE_SEASON == true)
-{
+if (LEGISLATIVE_SEASON == true) {
     $sql = 'SELECT
 				bills.number,
 				bills.catch_line,
@@ -439,20 +414,18 @@ if (LEGISLATIVE_SEASON == true)
 				bills.id DESC
 			LIMIT 5';
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) > 0)
-    {
+    if (mysqli_num_rows($result) > 0) {
         $page_sidebar .= '
 			<h3>Newest Bills</h3>
 			<div class="box" id="newest">
 				<ul>';
-        while ($bill = mysqli_fetch_array($result))
-        {
+        while ($bill = mysqli_fetch_array($result)) {
             $bill = array_map('stripslashes', $bill);
             $bill['summary'] = mb_substr($bill['summary'], 0, 175) . '...';
             $page_sidebar .= '
 				<li><a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number'])
-					. '/" class="balloon">' . mb_strtoupper($bill['number'])
-					. balloon($bill, 'bill') . '</a>: ' . $bill['catch_line'] . '</li>
+                    . '/" class="balloon">' . mb_strtoupper($bill['number'])
+                    . balloon($bill, 'bill') . '</a>: ' . $bill['catch_line'] . '</li>
 			';
         }
         $page_sidebar .= '
@@ -475,7 +448,7 @@ $html_head .= '
 }
 </script>';
 
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

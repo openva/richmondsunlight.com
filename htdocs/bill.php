@@ -10,7 +10,7 @@
 
 # Store debug information.
 $debug_timing = array();
-$debug_timing['start'] = microtime(TRUE);
+$debug_timing['start'] = microtime(true);
 
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
@@ -21,20 +21,19 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
-$log = new Log;
+$log = new Log();
 
 # INITIALIZE SESSION
 session_start();
 
 # Grab the user data.
-if (logged_in() === TRUE)
-{
+if (logged_in() === true) {
     $user = get_user();
 }
 
-$debug_timing['logged in'] = microtime(TRUE);
+$debug_timing['logged in'] = microtime(true);
 
 # LOCALIZE AND CLEAN UP VARIABLES
 $year = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['year']);
@@ -50,15 +49,14 @@ $page_header = '';
 $json_url = API_URL . '1.1/bill/' . $year . '/' . $bill . '.json?' . time();
 $json = get_content($json_url);
 
-$debug_timing['JSON retrieved'] = microtime(TRUE);
+$debug_timing['JSON retrieved'] = microtime(true);
 
 $bill = json_decode($json);
 
 /*
  * This bill does not exist, so return a 404
  */
-if ($json === FALSE || $bill == FALSE || isset($bill->error))
-{
+if ($json === false || $bill == false || isset($bill->error)) {
     header("Status: 404 Not Found\n\r");
     include '404.php';
     exit();
@@ -77,51 +75,42 @@ $bill['summary'] = str_replace('\u00a0', ' ', $bill['summary']);
  * Retrieve from Virginia Decoded all defined terms that apply to the text that this bill proposes
  * to amend (if, indeed, it is amending the Code).
  */
-$bill_text = new Bill2;
+$bill_text = new Bill2();
 $bill_text->bill_id = $bill['id'];
-if ($bill_text->get_terms() === TRUE)
-{
+if ($bill_text->get_terms() === true) {
     /* Send a bit of JavaScript to the browser, which we use in each API call. */
     $html_head .= $bill_text->javascript;
     $term_pcres = $bill_text->term_pcres;
-    if (is_array($term_pcres))
-    {
+    if (is_array($term_pcres)) {
         $bill['summary'] = preg_replace_callback($term_pcres, 'replace_terms', $bill['summary']);
     }
 }
 
-$debug_timing['definitions retrieved'] = microtime(TRUE);
+$debug_timing['definitions retrieved'] = microtime(true);
 
 # We want to record a view count hit for this bill, but only if this is a real user, not a
 # search engine. Start by defining a list of bots.
 $bots = array('Googlebot', 'msnbot', 'Gigabot', 'Slurp', 'Teoma', 'ia_archiver', 'Yandex',
             'Heritrix', 'twiceler', 'bingbot', 'bot', 'updown.io');
 # Check to see if the current user agent is a known bot.
-foreach ($bots as $bot)
-{
-    if (mb_stripos($_SERVER['HTTP_USER_AGENT'], $bot) !== FALSE)
-    {
-        $is_bot = TRUE;
+foreach ($bots as $bot) {
+    if (mb_stripos($_SERVER['HTTP_USER_AGENT'], $bot) !== false) {
+        $is_bot = true;
         break;
     }
 }
 # Update bills_views to reflect this view, provided that this visitor hasn't been defined
 # as a bot.
-if (!isset($is_bot))
-{
-    if (filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP))
-    {
-        
+if (!isset($is_bot)) {
+    if (filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP)) {
         # Increment the view counter for this bill.
         $sql = 'INSERT DELAYED INTO bills_views
                 SET bill_id = ' . $bill['id'] . ', ip="' . $_SERVER['REMOTE_ADDR'] . '"';
-        if (isset($user) && !empty($user['id']))
-        {
+        if (isset($user) && !empty($user['id'])) {
             $sql .= ', user_id = ' . $user['id'];
         }
-        
-        mysqli_query($GLOBALS['db'], $sql);
 
+        mysqli_query($GLOBALS['db'], $sql);
     }
 }
 
@@ -169,8 +158,7 @@ $html_head .= '
         . $bill['session_lis_id'] . '+ful+' . mb_strtoupper($bill['number']) . '+pdf" title="PDF of ' . $bill['number'] . '" />';
 
 # Come up with a meta description.
-if (!empty($bill['summary']))
-{
+if (!empty($bill['summary'])) {
     $tmp = str_replace("\n", ' ', $bill['summary']);
     $tmp = strip_tags($tmp);
     $tmp = str_replace($bill['catch_line'], '', $tmp);
@@ -186,11 +174,8 @@ $page_sidebar = '';
 # If the user has a type (either "free" or "paid") then they're a Photosynthesis user.
 # Determine whether they're tracking the bill, show the appropriate text, and save it to
 # a variable to be displayed later.
-if ($bill['session_id'] == SESSION_ID)
-{
-    if (isset($user['type']) && !empty($user['type']))
-    {
-
+if ($bill['session_id'] == SESSION_ID) {
+    if (isset($user['type']) && !empty($user['type'])) {
         # Find out if this bill is being tracked by this user.
         $sql = 'SELECT DISTINCT dashboard_portfolios.name, dashboard_portfolios.hash,
 				dashboard_bills.id AS dashboard_bills_id, dashboard_bills.notes
@@ -202,42 +187,34 @@ if ($bill['session_id'] == SESSION_ID)
         $result = mysqli_query($GLOBALS['db'], $sql);
 
         # If this bill is being tracked, notify this user.
-        if (mysqli_num_rows($result) > 0)
-        {
+        if (mysqli_num_rows($result) > 0) {
             $portfolio = mysqli_fetch_array($result);
             $portfolio = array_map('stripslashes', $portfolio);
-            if (count($_SESSION['portfolios'] == 1))
-            {
+            if (count($_SESSION['portfolios'] == 1)) {
                 $ps_status = '
 				<p><a href="/photosynthesis/">You are tracking this bill</a>.</p>';
-            }
-            else
-            {
+            } else {
                 $ps_status = '<p>You are tracking this bill in in
 				<a href="/photosynthesis/#' . $portfolio['hash'] . '">' . $portfolio['name'] . '</a>.</p>';
             }
             # Set a tracked flag so we don't double-count this later.
-            $tracked = TRUE;
+            $tracked = true;
         }
 
         # If this bill isn't being tracked, but user has portfolios to which this bill
         # could be added.
-        elseif (isset($_SESSION['portfolios']))
-        {
+        elseif (isset($_SESSION['portfolios'])) {
             $ps_status = '<form method="post" action="/photosynthesis/process-actions.php">';
             # If there's just one portfolio.
-            if (count($_SESSION['portfolios'] == 1))
-            {
+            if (count($_SESSION['portfolios'] == 1)) {
                 $ps_status .= '<input type="hidden" name="portfolio" value="' . $_SESSION['portfolios'][0]['hash'] . '" />';
             }
 
             # Or, if there's multiple portfolios.
-            else
-            {
+            else {
                 $ps_status .= '<label for="portfolio-selector">Select a Portfolio</label>
                 <select name="portfolio" id="portfolio-selector">';
-                foreach ($_SESSION['portfolios'] as $portfolio)
-                {
+                foreach ($_SESSION['portfolios'] as $portfolio) {
                     $ps_status .= '<option value="' . $portfolio['hash'] . '">' . $portfolio['name'] . '</option>';
                 }
                 $ps_status .= '</select>';
@@ -262,8 +239,7 @@ if ($bill['session_id'] == SESSION_ID)
 				ON dashboard_user_data.user_id = users.id
 			WHERE dashboard_bills.bill_id =' . $bill['id'] . '
 			AND dashboard_portfolios.public = "y"';
-    if (!empty($user['id']))
-    {
+    if (!empty($user['id'])) {
         $sql .= ' AND users.id != ' . $user['id'];
     }
     $sql .= ' ORDER BY RAND()';
@@ -271,43 +247,33 @@ if ($bill['session_id'] == SESSION_ID)
     $portfolio_count = mysqli_num_rows($result);
 
     # If we've found anything, list them.
-    if ($portfolio_count > 0)
-    {
+    if ($portfolio_count > 0) {
         $ps_portfolios = '<p>This bill is being tracked by ';
-        if ($portfolio_count == 1)
-        {
+        if ($portfolio_count == 1) {
             $ps_portfolios .= 'one member, ';
         }
-        $i=2;
-        while ($portfolio = mysqli_fetch_array($result))
-        {
+        $i = 2;
+        while ($portfolio = mysqli_fetch_array($result)) {
             $portfolio = array_map('stripslashes', $portfolio);
 
             # Quasi-anonymize the user.
             $tmp = explode(' ', $portfolio['user_name']);
-            if (count($tmp) > 1)
-            {
+            if (count($tmp) > 1) {
                 $portfolio['user_name'] = $tmp[0] . ' ' . $tmp[1][0] . '.';
-            }
-            else
-            {
+            } else {
                 $portfolio['user_name'] = $tmp[0];
             }
 
             $ps_portfolios .= '<a href="/photosynthesis/' . $portfolio['hash'] . '/">' .
                 (!empty($portfolio['organization']) ? $portfolio['organization'] : $portfolio['user_name']) . '</a>';
-            if ($i < $portfolio_count)
-            {
+            if ($i < $portfolio_count) {
                 $ps_portfolios .= ', ';
-            }
-            elseif ($i == $portfolio_count)
-            {
+            } elseif ($i == $portfolio_count) {
                 $ps_portfolios .= ' and ';
             }
             $i++;
         }
-        if (mb_substr($ps_portfolios, -5) != '.</a>')
-        {
+        if (mb_substr($ps_portfolios, -5) != '.</a>') {
             $ps_portfolios .= '.';
         }
         $ps_portfolios .= '</p>';
@@ -315,17 +281,14 @@ if ($bill['session_id'] == SESSION_ID)
 
 
     # If we have Photosynthesis status or portfolio data, display it in the sidebar.
-    if (isset($ps_status) || isset($ps_portfolios))
-    {
+    if (isset($ps_status) || isset($ps_portfolios)) {
         $page_sidebar .= '
 		<div class="box">
 			<h3>Photosynthesis</h3>';
-        if (isset($ps_portfolios))
-        {
+        if (isset($ps_portfolios)) {
             $page_sidebar .= $ps_portfolios;
         }
-        if (isset($ps_status))
-        {
+        if (isset($ps_status)) {
             $page_sidebar .= $ps_status;
         }
         $page_sidebar .= '
@@ -333,18 +296,17 @@ if ($bill['session_id'] == SESSION_ID)
     }
 }
 
-$debug_timing['portfolio data retrieved'] = microtime(TRUE);
+$debug_timing['portfolio data retrieved'] = microtime(true);
 
 # Instantiate our poll functionality.
-$poll = new Poll;
+$poll = new Poll();
 $poll->bill_id = $bill['id'];
 
 $page_sidebar .= '<div class="box">';
 
 # Display the poll voting form, but only if this user hasn't voted on this bill and
 # this bill is from the current session.
-if (($bill['session_id'] == SESSION_ID) && ($poll->has_voted() === FALSE))
-{
+if (($bill['session_id'] == SESSION_ID) && ($poll->has_voted() === false)) {
     $page_sidebar .= '
 		<h3>Cast Your Vote</h3>
 		<p>Do you think this bill should become law?</p>
@@ -357,32 +319,24 @@ if (($bill['session_id'] == SESSION_ID) && ($poll->has_voted() === FALSE))
 			<input type="submit" name="submit" value="Vote"><br />
 			<p><a id="show-poll-results" style="cursor: pointer;">View Results</a></p>
 		</form>';
-}
-else
-{
+} else {
     $has_voted = 'yes';
     $page_sidebar .= '
 	<h3>Poll Results</h3>';
 }
 
 # Get poll results.
-if ($poll->get_results() !== FALSE)
-{
-    $debug_timing['poll results retrieved'] = microtime(TRUE);
+if ($poll->get_results() !== false) {
+    $debug_timing['poll results retrieved'] = microtime(true);
 
     $page_sidebar .= '<div id="poll-results"';
-    if (!isset($has_voted))
-    {
+    if (!isset($has_voted)) {
         $page_sidebar .= ' style="display: none;">';
-    }
-    else
-    {
+    } else {
         $page_sidebar .= '>';
     }
 
-    if ($poll->results['total'] > 0)
-    {
-
+    if ($poll->results['total'] > 0) {
         # Do the math to determine the percentage for each.
         $poll->results['no'] = round((($poll->results['total'] - $poll->results['yes']) / $poll->results['total']) * 100);
         $poll->results['yes'] = round(($poll->results['yes'] / $poll->results['total']) * 100);
@@ -400,15 +354,10 @@ if ($poll->get_results() !== FALSE)
             (($poll->results['no']) ? $poll->results['no_text'] : '')
             . '&amp;chf=bg,s,f4eee5&amp;chts=333333,9" />
 			<p>' . $poll->results['total'] . ' vote' . ($poll->results['total'] > 1 ? 's' : '') . '</p>';
-    }
-    else
-    {
-        if ($bill['session_id'] == SESSION_ID)
-        {
+    } else {
+        if ($bill['session_id'] == SESSION_ID) {
             $page_sidebar .= '<p>No Richmond Sunlight visitors have voted on this bill yet.</p>';
-        }
-        else
-        {
+        } else {
             $page_sidebar .= '<p>No Richmond Sunlight visitors voted on this bill while voting was open.</p>';
         }
     }
@@ -421,9 +370,7 @@ $page_sidebar .= '
         <h3>Tags</h3>
         <ul class="tags" id="tags_list">';
 
-if (isset($bill['tags']) && (count($bill['tags']) > 0))
-{
-    
+if (isset($bill['tags']) && (count($bill['tags']) > 0)) {
     $page_header .= "
         $('.delete').click(function(e) {
             e.preventDefault();
@@ -432,22 +379,18 @@ if (isset($bill['tags']) && (count($bill['tags']) > 0))
             $.post(url, { delete: tagId }, function(data){ console.log('deleted');} );
         });";
 
-    foreach ($bill['tags'] as $tag_id => $tag)
-    {
+    foreach ($bill['tags'] as $tag_id => $tag) {
         # We're saving this list for use below, in the list of related bills.
         $tags[] = $tag;
         $page_sidebar .= '<li><a href="/bills/tags/' . urlencode($tag) . '/">' . $tag . '</a>';
-        if (isset($user) && ($user['trusted'] == 'y'))
-        {
+        if (isset($user) && ($user['trusted'] == 'y')) {
             $page_sidebar .= ' [<a data-id="' . $tag_id . '" class="delete">x</a>]';
         }
         $page_sidebar .= '</li>';
     }
 
     $page_sidebar .= '</ul>';
-}
-else
-{
+} else {
     $page_sidebar .= '</ul><p id="tag_admonition"><em>Hey! This bill has no tags! Why not add some
     so that other people can find it?</em></p>';
 }
@@ -455,12 +398,9 @@ else
 
 # Provide a much longer maxlength for the tag input field for trusted users than for
 # the general public.
-if (isset($user) && ($user['trusted'] == 'y'))
-{
+if (isset($user) && ($user['trusted'] == 'y')) {
     $maxlength = '200';
-}
-else
-{
+} else {
     $maxlength = '40';
 }
 # Allow people to add tags.
@@ -572,8 +512,7 @@ $page_sidebar .= '
 			<li><a href="http://lis.virginia.gov/cgi-bin/legp604.exe?' . $bill['session_lis_id'] . '+sum+' . mb_strtoupper($bill['number']) . '">View on the Legislature’s Site</a></li>
 			<li><a href="' . API_URL . '1.1/bill/' . $bill['year'] . '/' . $bill['number'] . '.json">View as JSON</a></li>';
 
-if (!empty($bill['impact_statement_id']))
-{
+if (!empty($bill['impact_statement_id'])) {
     $page_sidebar .= '
 			<li><a href="https://lis.virginia.gov/cgi-bin/legp604.exe?' . $bill['session_lis_id'] . '+oth+' . mb_strtoupper($bill['number']) . 'F' . $bill['impact_statement_id'] . '+PDF">Fiscal Impact Statement</a></li>';
 }
@@ -581,14 +520,12 @@ if (!empty($bill['impact_statement_id']))
 $page_sidebar .= '</ul></div>';
 
 # Only display this DIV if we actually have some data.
-if (isset($bill['related']) && ($bill['related'] > 0))
-{
+if (isset($bill['related']) && ($bill['related'] > 0)) {
     $page_sidebar .= '
 		<div class="box">
 			<h3>Related Bills</h3>
 			<ul>';
-    foreach ($bill['related'] as $related_bill)
-    {
+    foreach ($bill['related'] as $related_bill) {
         $related_bill = (array) $related_bill;
         $page_sidebar .= '
 			<li><a href="/bill/' . $related_bill['year'] . '/' . $related_bill['number']
@@ -609,32 +546,23 @@ $page_body .= '
     $bill['patron_name_formatted'] . '</a>';
 
 # If this bill has any copatrons, list them.
-if (isset($bill['copatron']) && (count($bill['copatron']) > 0))
-{
-
+if (isset($bill['copatron']) && (count($bill['copatron']) > 0)) {
     # If there are a small number (5 or less) display them right on the screen.
-    if (count($bill['copatron']) <= 5)
-    {
+    if (count($bill['copatron']) <= 5) {
         $page_body .= ' with support from co-patron';
-        if (count($bill['copatron']) > 1)
-        {
+        if (count($bill['copatron']) > 1) {
             $page_body .= 's';
         }
         $page_body .= ' ';
-        $i=1;
-        foreach ($bill['copatron'] as $copatron)
-        {
+        $i = 1;
+        foreach ($bill['copatron'] as $copatron) {
             $copatron = (array) $copatron;
             $page_body .= '<a href="/legislator/' . $copatron['shortname'] . '/" class="legislator">' . $copatron['name_formatted'] . '</a>';
 
-            if ($i < count($bill['copatron']))
-            {
-                if ($i == (count($bill['copatron']) - 1))
-                {
+            if ($i < count($bill['copatron'])) {
+                if ($i == (count($bill['copatron']) - 1)) {
                     $page_body .= ', and ';
-                }
-                else
-                {
+                } else {
                     $page_body .= ', ';
                 }
             }
@@ -643,13 +571,10 @@ if (isset($bill['copatron']) && (count($bill['copatron']) > 0))
     }
     # If there are more than five copatrons, we want to provide a link to reveal them,
     # rather than displaying them all on-screen.
-    else
-    {
-
+    else {
         # Calculate the average partisanship rating.
         $partisanship = array();
-        foreach ($bill['copatron'] as $copatron)
-        {
+        foreach ($bill['copatron'] as $copatron) {
             $partisanship[] = $copatron->partisanship;
         }
         $partisanship = array_sum($partisanship) / count($partisanship);
@@ -662,8 +587,7 @@ if (isset($bill['copatron']) && (count($bill['copatron']) > 0))
 			</div>
 			<p style="clear: left;">Those copatrons are ';
 
-        foreach ($bill['copatron'] as $copatron)
-        {
+        foreach ($bill['copatron'] as $copatron) {
             $page_body .= '<a href="/legislator/' . $copatron->shortname . '/" class="legislator">'
                 . $copatron->name_formatted . '</a>, ';
         }
@@ -675,13 +599,10 @@ $page_body .= '</p>';
 
 
 # The status table.
-if (isset($bill['status_history']))
-{
+if (isset($bill['status_history'])) {
     $bill['history'] = '';
 
-    foreach ($bill['status_history'] as $status)
-    {
-
+    foreach ($bill['status_history'] as $status) {
         # Cast this object as an array.
         $status = (array) $status;
 
@@ -689,9 +610,10 @@ if (isset($bill['status_history']))
         # action (obviously), and only if the LIS vote ID is 8 characters or less. That second
         # requirement is because longer IDs are for subcommittee votes, and subcommittee votes
         # aren't included in the vote data that's syndicated from the legislature in vote.csv.
-        if (!empty($status['lis_vote_id']) && ($status['vote_count'] > 0)
-            && mb_strlen($status['lis_vote_id'] <= 8))
-        {
+        if (
+            !empty($status['lis_vote_id']) && ($status['vote_count'] > 0)
+            && mb_strlen($status['lis_vote_id'] <= 8)
+        ) {
             $tmp = $status['status'] . ' (<a href="/bill/' . $bill['year'] . '/'
                 . mb_strtolower($bill['number']) . '/' . mb_strtolower($status['lis_vote_id']) . '/">'
                 . 'see vote tally</a>)';
@@ -700,16 +622,14 @@ if (isset($bill['status_history']))
         $bill['history'] = '<tr><td>' . $status['date'] . '</td><td>' . $status['status'] . '</td></tr>' . $bill['history'];
 
         # Build up an array of status translations to use to create our checkbox list.
-        if (!empty($status['translation']))
-        {
+        if (!empty($status['translation'])) {
             $statuses[] = $status['translation'];
         }
 
         # If the bill's status is blank, according to the bills table, take this
         # opportunity to give it a status, using the first non-blank status
         # translation available.
-        if (empty($bill['status']) && !empty($status['translation']))
-        {
+        if (empty($bill['status']) && !empty($status['translation'])) {
             $bill['status'] = $status['translation'];
         }
     }
@@ -732,16 +652,11 @@ if (isset($bill['status_history']))
 			</tr>
 			<tr>
 				<td>';
-    if ((in_array('failed committee', $statuses)) || (in_array('failed subcommittee', $statuses)))
-    {
+    if ((in_array('failed committee', $statuses)) || (in_array('failed subcommittee', $statuses))) {
         $page_body .= $failed;
-    }
-    elseif (in_array('passed committee', $statuses))
-    {
+    } elseif (in_array('passed committee', $statuses)) {
         $page_body .= $passed;
-    }
-    else
-    {
+    } else {
         $page_body .= $neither;
     }
     $page_body .= '</td>
@@ -749,18 +664,12 @@ if (isset($bill['status_history']))
 			</tr>
 			<tr class="alt">
 				<td>';
-    if (mb_substr($bill['number'], 0, 2) != 'SR')
-    {
-        if (in_array('passed house', $statuses))
-        {
+    if (mb_substr($bill['number'], 0, 2) != 'SR') {
+        if (in_array('passed house', $statuses)) {
             $page_body .= $passed;
-        }
-        elseif (in_array('failed house', $statuses))
-        {
+        } elseif (in_array('failed house', $statuses)) {
             $page_body .= $failed;
-        }
-        else
-        {
+        } else {
             $page_body .= $neither;
         }
         $page_body .= '</td>
@@ -769,18 +678,12 @@ if (isset($bill['status_history']))
 				<tr>
 					<td>';
     }
-    if (mb_substr($bill['number'], 0, 2) != 'HR')
-    {
-        if (in_array('passed senate', $statuses))
-        {
+    if (mb_substr($bill['number'], 0, 2) != 'HR') {
+        if (in_array('passed senate', $statuses)) {
             $page_body .= $passed;
-        }
-        elseif (in_array('failed senate', $statuses))
-        {
+        } elseif (in_array('failed senate', $statuses)) {
             $page_body .= $failed;
-        }
-        else
-        {
+        } else {
             $page_body .= $neither;
         }
         $page_body .= '</td>
@@ -788,24 +691,19 @@ if (isset($bill['status_history']))
                 </tr>';
     }
 
-    if ($bill['type'] != 'resolution')
-    {
+    if ($bill['type'] != 'resolution') {
         $page_body .= '
             <tr class="alt">
             <td>';
-        if (((mb_substr($bill['number'], 0, 2) != 'HR') && (mb_substr($bill['number'], 0, 2) != 'SR'))
-            && (mb_substr($bill['number'], 0, 2) != 'SJ') && (mb_substr($bill['number'], 0, 2) != 'HJ'))
-        {
-            if (in_array('vetoed by governor', $statuses))
-            {
+        if (
+            ((mb_substr($bill['number'], 0, 2) != 'HR') && (mb_substr($bill['number'], 0, 2) != 'SR'))
+            && (mb_substr($bill['number'], 0, 2) != 'SJ') && (mb_substr($bill['number'], 0, 2) != 'HJ')
+        ) {
+            if (in_array('vetoed by governor', $statuses)) {
                 $page_body .= $failed;
-            }
-            elseif (in_array('signed by governor', $statuses))
-            {
+            } elseif (in_array('signed by governor', $statuses)) {
                 $page_body .= $passed;
-            }
-            else
-            {
+            } else {
                 $page_body .= $neither;
             }
             $page_body .= '</td>
@@ -813,16 +711,11 @@ if (isset($bill['status_history']))
                     </tr>
                     <tr>
                         <td>';
-            if (in_array('enacted', $statuses))
-            {
+            if (in_array('enacted', $statuses)) {
                 $page_body .= $passed;
-            }
-            elseif (in_array('vetoed by governor', $statuses))
-            {
+            } elseif (in_array('vetoed by governor', $statuses)) {
                 $page_body .= $failed;
-            }
-            else
-            {
+            } else {
                 $page_body .= $neither;
             }
             $page_body .= '</td>
@@ -843,15 +736,12 @@ $page_body .= '<h2>Description</h2>
 # Display a list of the sections of the Code of Virginia affected by this bill.
 $code_sections = bill_sections($bill['id']);
 
-if (($code_sections !== FALSE) && (count($code_sections) > 0))
-{
+if (($code_sections !== false) && (count($code_sections) > 0)) {
     $page_body .= ' <em>Amends ';
-    foreach ($code_sections as $section)
-    {
+    foreach ($code_sections as $section) {
         $page_body .= '<a href="' . $section['url'] . '" class="code">§&nbsp;'
             . $section['section_number'] . '</a>';
-        if (next($code_sections) != $section)
-        {
+        if (next($code_sections) != $section) {
             $page_body .= ', ';
         }
     }
@@ -859,8 +749,7 @@ if (($code_sections !== FALSE) && (count($code_sections) > 0))
 }
 
 # Show a link to the view full text, but only if we *have* the full text.
-if ($bill['word_count'] > 0)
-{
+if ($bill['word_count'] > 0) {
     $page_body .= ' <a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number']) . '/fulltext/">Read&nbsp;the&nbsp;Bill&nbsp;»</a></p>';
 }
 
@@ -869,17 +758,15 @@ if ($bill['word_count'] > 0)
  */
 if (
         in_array('vaccine', array_values((array)$bill['tags']))
-        || 
-        in_array('vaccines', array_values((array)$bill['tags']))
-        || 
-        in_array('COVID', array_values((array)$bill['tags']))
-        || 
-        stripos($bill['summary'], ' vaccin') !== FALSE
         ||
-        stripos($bill['summary'], ' COVID') !== FALSE
-    )
-{
-
+        in_array('vaccines', array_values((array)$bill['tags']))
+        ||
+        in_array('COVID', array_values((array)$bill['tags']))
+        ||
+        stripos($bill['summary'], ' vaccin') !== false
+        ||
+        stripos($bill['summary'], ' COVID') !== false
+) {
     $page_body .= '<div id="disinformation">
         <h2>Looking for Vaccine Info?</h2>
 
@@ -893,12 +780,10 @@ if (
         COVID vaccines. We will promptly delete any claims that COVID isn’t serious, or
         claims that vaccines are unsafe or ineffective.</p>
     </div>';
-
 }
 
 # If we have any notes about this bill.
-if (!empty($bill['notes']))
-{
+if (!empty($bill['notes'])) {
     $page_body .= '
 		<div id="notes">
 		<h2>Notes</h2>
@@ -913,64 +798,51 @@ if (!empty($bill['notes']))
 $page_body .= '<!--legislator_statement-->';
 
 # If this bill is no longer alive.
-if (!empty($bill['outcome']))
-{
+if (!empty($bill['outcome'])) {
     $page_body .= '
 		<h2>Outcome</h2>';
-    if ($bill['outcome'] == 'failed')
-    {
+    if ($bill['outcome'] == 'failed') {
         $page_body .= '
 		<div class="bill-outcome failed">Bill Has Failed</div>';
-    }
-    elseif ($bill['outcome'] == 'passed')
-    {
+    } elseif ($bill['outcome'] == 'passed') {
         $page_body .= '
 		<div class="bill-outcome passed">Bill Has Passed</div>';
     }
 }
 
 # If this bill remains alive.
-else
-{
+else {
     $page_body .= '<h2>Status</h2>
 	<p>';
 
     # If we have any status data, use that as the date of the last action. If not, just use
     # today's date, since that's better than nothing.
-    if (!empty($bill['status_detail_date']))
-    {
+    if (!empty($bill['status_detail_date'])) {
         $page_body .= $bill['status_detail_date'] . ': ';
-    }
-    else
-    {
+    } else {
         $page_body .= date('m/d/Y') . ': ';
     }
 
     # If this bill has become part of another bill, then that's its final status.
-    if (!empty($bill['incorporated_into']))
-    {
+    if (!empty($bill['incorporated_into'])) {
         $page_body .= 'Merged into <a href="/bill/' . $bill['year'] . '/'
             . $bill['incorporated_into'] . '/">' . mb_strtoupper($bill['incorporated_into']) . '</a>';
     }
 
     # If it's assigned to a committee, but the committee has not yet acted on it, then we can
     # say that it's going to be voted on by that committee soon.
-    elseif (!empty($bill['committee']) && !in_array('passed senate', $statuses) && !in_array('passed house', $statuses)
+    elseif (
+        !empty($bill['committee']) && !in_array('passed senate', $statuses) && !in_array('passed house', $statuses)
         && !in_array('passed committee', $statuses) && !in_array('failed committee', $statuses)
-        && !in_array('failed subcommittee', $statuses) && !in_array('incorporated', $statuses))
-    {
+        && !in_array('failed subcommittee', $statuses) && !in_array('incorporated', $statuses)
+    ) {
         $page_body .=
             'Awaiting a Vote in the <a href="/committee/' . $bill['committee_chamber'] . '/' . $bill['committee_shortname'] . '/">'
             . $bill['committee'] . '</a> Committee';
-    }
-    else
-    {
-        if (count($statuses) > 0)
-        {
+    } else {
+        if (count($statuses) > 0) {
             $page_body .= explain_status(reset($statuses));
-        }
-        else
-        {
+        } else {
             $page_body .= 'Introduced';
         }
     }
@@ -980,8 +852,7 @@ else
  * When a bill is brand-new, there's no history data. Only show the history section if we've got
  * history data.
  */
-if (!empty($bill['history']))
-{
+if (!empty($bill['history'])) {
     $page_body .= '
 	<h2 id="history">History</h2>
 	<div id="status-history">
@@ -1003,8 +874,7 @@ $sql = 'SELECT DATE_FORMAT(dockets.date, "%m/%d/%Y") AS date, committees.name AS
 		WHERE dockets.bill_id=' . $bill['id'] . ' AND dockets.date > now()
 		LIMIT 1';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     $docket = mysqli_fetch_array($result);
     $docket = array_map('stripslashes', $docket);
 
@@ -1012,13 +882,10 @@ if (mysqli_num_rows($result) > 0)
 		<div class="docket">
 			<h2>Hearing Scheduled</h2>
 			This bill is scheduled to be heard in the ';
-    if (!empty($docket['parent_committee']))
-    {
+    if (!empty($docket['parent_committee'])) {
         $page_body .= '<a href="/committee/' . $docket['chamber'] . '/' . $docket['parent_shortname'] . '/">' . ucfirst($docket['chamber'])
                 . ' ' . $docket['parent_committee'] . '</a>&rsquo;s ' . $docket['committee'] . ' subcommittee';
-    }
-    else
-    {
+    } else {
         $page_body .= '<a href="/committee/' . $docket['chamber'] . '/' . $docket['shortname'] . '/">' . ucfirst($docket['chamber']) .
             ' ' . $docket['committee'] . '</a> committee';
     }
@@ -1026,20 +893,17 @@ if (mysqli_num_rows($result) > 0)
 		</div>';
 }
 
-$debug_timing['hearings retrieved'] = microtime(TRUE);
+$debug_timing['hearings retrieved'] = microtime(true);
 
 /*
  * If places are mentioned in this bill, map them.
  */
-if (isset($bill['places']) && (count($bill['places']) > 0))
-{
-
+if (isset($bill['places']) && (count($bill['places']) > 0)) {
     $page_body .= '
 		<h2>Map</h2>
 		<p>This bill mentions';
 
-    foreach ($bill['places'] as $place)
-    {
+    foreach ($bill['places'] as $place) {
         $place = (array) $place;
         $page_body .= ' ' . $place['name'] . ',';
     }
@@ -1062,10 +926,9 @@ if (isset($bill['places']) && (count($bill['places']) > 0))
                 center: [-78.57,37.8],
                 zoom: 5
             });';
-    
+
     $markers = [];
-    foreach ($bill['places'] as $place)
-    {
+    foreach ($bill['places'] as $place) {
         $place->lng = $place->longitude;
         $place->lat = $place->latitude;
         unset($place->longitude);
@@ -1095,18 +958,15 @@ if (isset($bill['places']) && (count($bill['places']) > 0))
         });
     </script>';
 
-	$page_body .= '<div id="map"></div>';
+    $page_body .= '<div id="map"></div>';
 }
 
-if (($bill['video'] !== FALSE) && (count($bill['video']) > 0))
-{
-
+if (($bill['video'] !== false) && (count($bill['video']) > 0)) {
     /*
      * Generate a text transcript of these clips.
      */
     $transcript = array();
-    foreach ($bill['video'] as $video)
-    {
+    foreach ($bill['video'] as $video) {
         $sql = 'SELECT representatives.name_formatted AS speaker, video_transcript.text
 				FROM video_transcript
 				LEFT JOIN representatives
@@ -1116,12 +976,10 @@ if (($bill['video'] !== FALSE) && (count($bill['video']) > 0))
 					AND time_end <= " ' . seconds_to_time($video->end) . ' "
 				ORDER BY video_transcript.time_start ASC';
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) > 0)
-        {
+        if (mysqli_num_rows($result) > 0) {
             $transcript[$video->file_id] = array();
 
-            while ($line = mysqli_fetch_assoc($result))
-            {
+            while ($line = mysqli_fetch_assoc($result)) {
                 $transcript[$video->file_id][] = $line;
             }
         }
@@ -1129,8 +987,7 @@ if (($bill['video'] !== FALSE) && (count($bill['video']) > 0))
 
     # Determine the cumulative duration of these clips.
     $duration = 0;
-    foreach ($bill['video'] as $clip)
-    {
+    foreach ($bill['video'] as $clip) {
         $clip = (array) $clip;
         $duration = $duration + $clip['duration'];
     }
@@ -1162,8 +1019,7 @@ if (($bill['video'] !== FALSE) && (count($bill['video']) > 0))
 		<script>
 			/* Create the playlist. */
 			var allVideos = [';
-    foreach ($bill['video'] as $num => $clip)
-    {
+    foreach ($bill['video'] as $num => $clip) {
         $clip = (array) $clip;
         $page_body .= '
 			{
@@ -1210,26 +1066,19 @@ if (($bill['video'] !== FALSE) && (count($bill['video']) > 0))
 
 		</script>";
 
-    if (count($transcript) > 0)
-    {
+    if (count($transcript) > 0) {
         $page_body .= '<h3>Transcript</h3>
 			<div style="height: 15em; overflow: scroll;">
 			<p>This is a transcript of the video clips in which this bill is discussed.</p>';
         $prior_speaker = '';
 
-        foreach ($transcript as $file)
-        {
-            foreach ($file as $line)
-            {
-                if ($prior_speaker != $line['speaker'])
-                {
+        foreach ($transcript as $file) {
+            foreach ($file as $line) {
+                if ($prior_speaker != $line['speaker']) {
                     $page_body .=  '<br><br>';
-                    if (!empty($line['speaker']))
-                    {
+                    if (!empty($line['speaker'])) {
                         $page_body .=  '<strong>' . $line['speaker'] . ':</strong> ';
-                    }
-                    else
-                    {
+                    } else {
                         $page_body .=  '<strong>[Unknown]:</strong> ';
                     }
                     $prior_speaker = $line['speaker'];
@@ -1247,8 +1096,7 @@ if (($bill['video'] !== FALSE) && (count($bill['video']) > 0))
 
 # DUPLICATES OF THIS BILL
 
-if (isset($bill['duplicates']))
-{
+if (isset($bill['duplicates'])) {
     $page_body .= '
 	<div id="identical">
 		<a name="identical"></a>
@@ -1256,19 +1104,15 @@ if (isset($bill['duplicates']))
 		<p>The following bills are identical to this one: ';
 
     # Iterate through the duplicates and display them as a list.
-    $i=0;
-    foreach ($bill['duplicates'] as $duplicate)
-    {
+    $i = 0;
+    foreach ($bill['duplicates'] as $duplicate) {
         $duplicate = (array) $duplicate;
 
         $page_body .= '<a href="/bill/' . $duplicate['year'] . '/' . $duplicate['number'] . '/">'
             . mb_strtoupper($duplicate['number']) . '</a>';
-        if ((count($bill['duplicates']) - 2) == $i)
-        {
+        if ((count($bill['duplicates']) - 2) == $i) {
             $page_body .= ' and ';
-        }
-        elseif (count($bill['duplicates']) > ($i+1))
-        {
+        } elseif (count($bill['duplicates']) > ($i + 1)) {
             $page_body .= ', ';
         }
         $i++;
@@ -1290,48 +1134,40 @@ $page_body .= '
 /*
  * Get any comments on this bill.
  */
-if (MEMCACHED_SERVER != '')
-{
-
+if (MEMCACHED_SERVER != '') {
     $mc = new Memcached();
     $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
     $comments_raw = $mc->get('comments-' . $bill['id']);
-    if ($mc->getResultCode() == 0)
-    {
+    if ($mc->getResultCode() == 0) {
         $comments = unserialize($comments_raw);
     }
 }
 
-if (!isset($comments))
-{
-    $comm = new Comments;
+if (!isset($comments)) {
+    $comm = new Comments();
     $comm->bill_id = $bill['id'];
     $comments = $comm->get();
 
-    if (MEMCACHED_SERVER != '')
-    {
+    if (MEMCACHED_SERVER != '') {
         $mc->set('comments-' . $bill['id'], serialize($comments), (60 * 60 * 24 * 7));
     }
 }
 
-$debug_timing['comments retrieved'] = microtime(TRUE);
+$debug_timing['comments retrieved'] = microtime(true);
 
 /*
  * Make sure that we a) have comments, and b) that the variable doesn't equal FALSE. (We actually
  * store FALSE in Memcached, so that we can cache the fact that there are no comments.)
  */
-if (isset($comments) && is_array($comments))
-{
+if (isset($comments) && is_array($comments)) {
     $page_body .= '<h2>Comments</h2>';
-    $i=1;
+    $i = 1;
 
     # Our two comments array keys are timestamps. Resort them and then reindex them.
     ksort($comments);
     $comments = array_values($comments);
 
-    foreach ($comments as $comment)
-    {
-
+    foreach ($comments as $comment) {
         # Provide an anchor tag for this comment.
         $page_body .= '<a name="comment-' . $i . '"></a>';
 
@@ -1340,14 +1176,10 @@ if (isset($comments) && is_array($comments))
 
         # If this is a comment posted by the legislator who introduced this bill, give it special
         # treatment
-        if ($comment['representative_id'] === $bill['chief_patron_id'])
-        {
-
+        if ($comment['representative_id'] === $bill['chief_patron_id']) {
             # If this is a comment, as opposed to a Photosynthesis bill note, then display it
             # inline with the other comments, but format it differently.
-            if ($comment['type'] == 'comment')
-            {
-
+            if ($comment['type'] == 'comment') {
                 $page_body .= ' legislator';
 
                 # Replace the provided URL with the legislator's Richmond Sunlight page.
@@ -1360,26 +1192,20 @@ if (isset($comments) && is_array($comments))
                 # Display the legislator's photograph.
                 $badge = '<img src="/images/legislators/thumbnails/'
                     . $bill['patron_shortname'] . '.jpg" width="50" class="photo" />';
-
             }
 
             # If this is a Photosynthesis bill note, then display it on the page earlier, as a
             # statement by the legislator.
-            if ($comment['type'] == 'photosynthesis')
-            {
-
+            if ($comment['type'] == 'photosynthesis') {
                 $legislator_statement = '<h2>Legislator’s Statement</h2>';
                 $legislator_statement .= $comment['comment'];
 
                 $page_body = str_ireplace('<!--legislator_statement-->', $legislator_statement, $page_body);
-
             }
-
         }
 
         # If this comment is an editor's pick, apply a special style and add a note.
-        elseif ($comment['editors_pick'] == 'y')
-        {
+        elseif ($comment['editors_pick'] == 'y') {
             $page_body .= ' editors-pick';
             $badge = '<div class="notice">Editor’s Pick</div>';
         }
@@ -1387,23 +1213,20 @@ if (isset($comments) && is_array($comments))
         $page_body .= '">';
 
         # If we've got a badge to apply to this DIV (a photo, a label, whatever), now's the time.
-        if (isset($badge))
-        {
+        if (isset($badge)) {
             $page_body .= "\r\t\t\t" . $badge;
             # We don't want to retain this for subsequent comments.
             unset($badge);
         }
 
         # If this is a Photosynthesis comment, rather than a comment directly on the bill.
-        if (isset($comment['type']) && ($comment['type'] == 'photosynthesis'))
-        {
+        if (isset($comment['type']) && ($comment['type'] == 'photosynthesis')) {
             $page_body .= '
 			<a href="/photosynthesis/' . $comment['hash'] . '/"><cite>' . $comment['name'] . '</cite><strong>, tracking this bill in Photosynthesis</a>, notes</strong>:<br />';
         }
 
         # Otherwise, credit it as a comment.
-        else
-        {
+        else {
             $page_body .= '
 			<cite>' . (!empty($comment['url']) ? '<a href="' . $comment['url'] . '">' : '')
             . $comment['name'] . (!empty($comment['url']) ? '</a>' : '')
@@ -1426,12 +1249,11 @@ if (isset($comments) && is_array($comments))
  */
 $page_body .= '</div>';
 
-$debug_timing['comments displayed'] = microtime(TRUE);
+$debug_timing['comments displayed'] = microtime(true);
 
 # Only let the user add a new comment if this bill is from the current session and, if
 # the session is over, if the bill has passed.
-if (($bill['session_id'] == SESSION_ID))
-{
+if (($bill['session_id'] == SESSION_ID)) {
     $page_body .= '
 	<h2>Post a Public Comment About this Bill</h2>
 	<form method="post" action="/process-comments.php" id="comment-form">
@@ -1443,7 +1265,7 @@ if (($bill['session_id'] == SESSION_ID))
 		<small>(Limited HTML is OK: &lt;a&gt;, &lt;em&gt;, &lt;strong&gt;, &lt;s&gt)</small><br />';
 
     # Create a new instance of the comments-subscription class
-    $subscription = new CommentSubscription;
+    $subscription = new CommentSubscription();
     # Give it the user's ID and the bill's ID.
     $subscription->user_id = $user['id'];
     $subscription->bill_id = $bill['id'];
@@ -1452,19 +1274,17 @@ if (($bill['session_id'] == SESSION_ID))
     # subscription ID.
     $subscription_status = $subscription->is_subscribed();
 
-    $debug_timing['subscription determined'] = microtime(TRUE);
+    $debug_timing['subscription determined'] = microtime(true);
 
     # If the person isn't already subscribed to this bill's comments.
-    if ($subscription_status === false)
-    {
+    if ($subscription_status === false) {
         $page_body .= '<input type="checkbox" value="y" name="comment[subscribe]"'
         . ' id="subscribe" /> <label for="subscribe"><strong>Subscribe</strong> <small>get future'
         . ' comments by e-mail</small></label><br />';
     }
 
     # Otherwise, if the person is subscribed to this bill's comments.
-    else
-    {
+    else {
         $page_body .= '<strong>You are subscribed</strong> to be e-mailed future comments
 			to this bill. <a href="/unsubscribe/' . $subscription_status . '/">Unsubscribe?</a><br />';
     }
@@ -1533,32 +1353,29 @@ $page_body .= '
 	</div>';
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
 $page->html_head = $html_head;
-$debug_timing['contents prepped for output'] = microtime(TRUE);
+$debug_timing['contents prepped for output'] = microtime(true);
 $page->process();
 
-$debug_timing['contents sent for output'] = microtime(TRUE);
+$debug_timing['contents sent for output'] = microtime(true);
 
 /*
  * Show me debugging information.
  */
-if (isset($user) && ($user['id'] == '5059'))
-{
+if (isset($user) && ($user['id'] == '5059')) {
     echo '<div style="background-color: white; width: 200px; border: 1px solid #000; padding: 5px;
 			font-size: .75em; text-align: left; opacity: .8; position: absolute; right: 0; top: 0;">
 		<table>';
     $start_time = reset($debug_timing);
     $cumulative_time = 0;
 
-    foreach ($debug_timing as $description => $time)
-    {
-        if ($description == 'start')
-        {
+    foreach ($debug_timing as $description => $time) {
+        if ($description == 'start') {
             continue;
         }
 
@@ -1571,7 +1388,7 @@ if (isset($user) && ($user['id'] == '5059'))
         $cumulative_time = $time;
     }
 
-    echo '<tr><td>Total</td><td>' . round(microtime(TRUE) - $start_time, 3) . '</td></tr>';
+    echo '<tr><td>Total</td><td>' . round(microtime(true) - $start_time, 3) . '</td></tr>';
 
     echo '</table></div>';
 }
