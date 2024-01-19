@@ -75,7 +75,7 @@ EOD;
 EOD;
 
     # OUTPUT THE PAGE
-    $page = new Page;
+    $page = new Page();
     $page->page_title = $page_title;
     $page->page_body = $page_body;
     $page->page_sidebar = $page_sidebar;

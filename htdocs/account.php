@@ -17,7 +17,7 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # PAGE METADATA
@@ -35,16 +35,14 @@ $html_head = '<script src="/js/vendor/zxcvbn/dist/zxcvbn.js"></script>
 			<script src="/js/password-test.js"></script>';
 
 # See if the user is logged in.
-if (@logged_in() === false)
-{
+if (@logged_in() === false) {
     # If the user isn't logged in, have the user create an account (or log in).
-    header('Location: https://'. $_SERVER['SERVER_NAME'] .'/account/login/');
+    header('Location: https://' . $_SERVER['SERVER_NAME'] . '/account/login/');
     exit;
 }
 
 # If the user is logged in, get the user data.
-else
-{
+else {
     $user = @get_user();
 }
 
@@ -124,35 +122,26 @@ function display_form($form_data)
     return $returned_data;
 }
 
-if (isset($_POST['submit']))
-{
+if (isset($_POST['submit'])) {
     $form_data = array_map('stripslashes', $_POST['form_data']);
     $form_data = array_map('trim', $_POST['form_data']);
 
     # Alert users to mistakes.
-    if (empty($form_data['email']))
-    {
+    if (empty($form_data['email'])) {
         $errors[] = 'your e-mail address';
-    }
-    elseif (!validate_email($form_data['email']))
-    {
+    } elseif (!validate_email($form_data['email'])) {
         $errors[] = 'a valid e-mail address';
     }
-    if (!empty($form_data['password']) || !empty($form_data['password_2']))
-    {
-        if ($form_data['password'] != $form_data['password_2'])
-        {
+    if (!empty($form_data['password']) || !empty($form_data['password_2'])) {
+        if ($form_data['password'] != $form_data['password_2']) {
             $errors[] = 'the <em>same</em> password twice';
-        }
-        elseif (mb_strlen($form_data['password']) < 7)
-        {
+        } elseif (mb_strlen($form_data['password']) < 7) {
             $errors[] = 'a password that\'s at least seven characters long';
         }
     }
 
     # If we find any mistakes, stop the account update process and alert the user.
-    if (isset($errors))
-    {
+    if (isset($errors)) {
         $error_text = implode('</li><li>', $errors);
         $page_body = '
 			<div id="messages" class="errors">
@@ -161,24 +150,19 @@ if (isset($_POST['submit']))
 					<li>' . $error_text . '</li>
 				</ul>
 			</div>';
-    }
-    else
-    {
-
+    } else {
         # Clean up the data to be inserted into the database.
         $form_data = array_map(function ($field) {
             return mysqli_real_escape_string($GLOBALS['db'], $field);
         }, $_POST['form_data']);
 
         # A blank mailing list variable is a "no."
-        if (empty($form_data['mailing_list']))
-        {
+        if (empty($form_data['mailing_list'])) {
             $form_data['mailing_list'] = 'n';
         }
 
         # MD5 the password.
-        if (!empty($form_data['password']))
-        {
+        if (!empty($form_data['password'])) {
             $form_data['password'] = md5($form_data['password']);
         }
 
@@ -186,40 +170,29 @@ if (isset($_POST['submit']))
         $sql = 'UPDATE users
 				SET name="' . $form_data['name'] . '", email="' . $form_data['email'] . '"';
         $sql .= ', url=';
-        if (empty($form_data['url']))
-        {
+        if (empty($form_data['url'])) {
             $sql .= 'NULL';
-        }
-        else
-        {
+        } else {
             $sql .= '"' . $form_data['url'] . '"';
         }
         $sql .= ', zip=';
-        if (empty($form_data['zip']))
-        {
+        if (empty($form_data['zip'])) {
             $sql .= 'NULL';
-        }
-        else
-        {
+        } else {
             $sql .= '"' . $form_data['zip'] . '"';
         }
         $sql .= ', mailing_list=';
-        if (empty($form_data['mailing_list']))
-        {
+        if (empty($form_data['mailing_list'])) {
             $sql .= 'NULL';
-        }
-        else
-        {
+        } else {
             $sql .= '"' . $form_data['mailing_list'] . '"';
         }
-        if (!empty($form_data['password']))
-        {
+        if (!empty($form_data['password'])) {
             $sql .= ', password="' . $form_data['password'] . '"';
         }
         $sql .= ' WHERE id=' . $user['id'];
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if ($result === FALSE)
-        {
+        if ($result === false) {
             die('Your account could not be updated.');
         }
 
@@ -229,14 +202,13 @@ if (isset($_POST['submit']))
 				WHERE user_id=' . $user['id'];
         $result = mysqli_query($GLOBALS['db'], $sql);
 
-        header('Location: http://'. $_SERVER['SERVER_NAME'] .'/account/?updated');
+        header('Location: http://' . $_SERVER['SERVER_NAME'] . '/account/?updated');
         exit();
     }
 }
 
 
-if (!isset($_POST['submit']))
-{
+if (!isset($_POST['submit'])) {
     $page_body .= '
 	<div class="tabs">
 	<ul>
@@ -247,20 +219,15 @@ if (!isset($_POST['submit']))
 
 	<div id="settings">';
 
-    if (isset($_GET['updated']))
-    {
+    if (isset($_GET['updated'])) {
         $page_body .= '
 			<div id="messages" class="updated">Your account has been updated.</div>';
-    }
-    elseif (isset($_GET['reset']))
-    {
+    } elseif (isset($_GET['reset'])) {
         $page_body .= '
 			<div id="messages" class="updated">
 				You are logged into your account. It would be smart to set a new password now.
 			</div>';
-    }
-    else
-    {
+    } else {
         $page_body .= '
 			<p>You may change any of your account settings here.</p>';
     }
@@ -273,8 +240,7 @@ if (!isset($_POST['submit']))
 			ON users.id=dashboard_user_data.user_id
 			WHERE id=' . $user['id'];
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) == 0)
-    {
+    if (mysqli_num_rows($result) == 0) {
         die('No user data found.');
     }
     $user_data = mysqli_fetch_array($result);
@@ -291,10 +257,8 @@ if (!isset($_POST['submit']))
 
     $user_data = new User();
     $stats = $user_data->tagging_stats();
-    if ($stats !== false)
-    {
-        if ($stats->tags == 0)
-        {
+    if ($stats !== false) {
+        if ($stats->tags == 0) {
             $page_body .= '
 			<h2>Bill Tagging Stats</h2>
 			<p>You haven’t tagged <em>any</em> bills! When looking at bills on the site,
@@ -311,15 +275,11 @@ if (!isset($_POST['submit']))
 		</div>
 		<div id="comments">';
     $comments = $user_data->list_comments();
-    if ($comments === false)
-    {
+    if ($comments === false) {
         $page_body .= '<p>You have not posted any comments to the site.</p>';
-    }
-    else
-    {
+    } else {
         $page_body .= '<p>The following are the ten comments that you have made most recently.</p>';
-        foreach ($comments as $comment)
-        {
+        foreach ($comments as $comment) {
             $page_body .= '<h3><a href="/bill/' . $comment['bill_year'] . '/' . $comment['bill_number'] . '/">'
                 . mb_strtoupper($comment['bill_number']) . '</a>: ' . $comment['catch_line']
                 . ' (' . $comment['date'] . ')</h3>
@@ -333,7 +293,7 @@ if (!isset($_POST['submit']))
 
 # OUTPUT THE PAGE
 
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

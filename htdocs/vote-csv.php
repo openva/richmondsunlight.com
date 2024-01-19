@@ -21,7 +21,7 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # LOCALIZE VARIABLES
@@ -43,9 +43,7 @@ $sql = 'SELECT bills.number AS bill_number, bills.catch_line, representatives_vo
 		AND votes.session_id=sessions.id
 		ORDER BY date ASC, committee ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
-
+if (mysqli_num_rows($result) > 0) {
     # Send the headers to have the data downloaded as a CSV file.
     header('Content-Type: application/octet-stream');
     header('Content-Disposition: attachment; filename=' . $shortname . '-' . $year . '.csv');
@@ -53,8 +51,7 @@ if (mysqli_num_rows($result) > 0)
     echo 'Please note that votes are not necessarily for or against a bill. Many are' . "\n" .
         'procedural votes. Verify the context of votes at richmondsunlight.com' . "\n" .
         'when in doubt.' . "\n\n" . 'Bill #, Title, Vote, Outcome, Committee, Date' . "\n";
-    while ($vote = mysqli_fetch_array($result))
-    {
+    while ($vote = mysqli_fetch_array($result)) {
         $vote = array_map('stripslashes', $vote);
         $vote['catch_line'] = str_replace('"', '""', $vote['catch_line']);
         echo mb_strtoupper($vote['bill_number']) . ',"' . $vote['catch_line'] . '",' . $vote['vote'] . ',' .

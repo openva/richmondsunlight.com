@@ -2,49 +2,41 @@
 
 class Vote
 {
-
     # Take an LIS ID, return a vote tally.
     public function get_aggregate()
     {
 
         # Make sure we've got the information that we need.
-        if (empty($this->lis_id))
-        {
-            return FALSE;
+        if (empty($this->lis_id)) {
+            return false;
         }
 
-        if (empty($this->session_id) && empty($this->session_year))
-        {
-            return FALSE;
+        if (empty($this->session_id) && empty($this->session_year)) {
+            return false;
         }
 
         # Check that the data is clean.
-        if (mb_strlen($this->lis_id) > 12)
-        {
-            return FALSE;
+        if (mb_strlen($this->lis_id) > 12) {
+            return false;
         }
-        if ( isset($this->session_id) && mb_strlen($this->session_id) > 4 )
-        {
-            return FALSE;
+        if (isset($this->session_id) && mb_strlen($this->session_id) > 4) {
+            return false;
         }
-        if ( isset($this->session_year) && mb_strlen($this->session_year) <> 4 )
-        {
-            return FALSE;
+        if (isset($this->session_year) && mb_strlen($this->session_year) <> 4) {
+            return false;
         }
 
-        $database = new Database;
+        $database = new Database();
         $database->connect_mysqli();
 
         # If we have a session year, but not a session ID, look up the session ID.
-        if (empty($this->session_id) && !empty($this->session_year))
-        {
+        if (empty($this->session_id) && !empty($this->session_year)) {
             $sql = 'SELECT id
 					FROM sessions
 					WHERE year="' . $this->session_year . '"
 					AND suffix IS NULL';
             $result = mysqli_query($GLOBALS['db'], $sql);
-            if (mysqli_num_rows($result) == 0)
-            {
+            if (mysqli_num_rows($result) == 0) {
                 die('No such vote found.');
             }
             $session_info = mysqli_fetch_assoc($result);
@@ -59,8 +51,7 @@ class Vote
 				WHERE lis_id="' . $this->lis_id . '"
 				AND session_id = ' . $this->session_id;
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) == 0)
-        {
+        if (mysqli_num_rows($result) == 0) {
             die('No such vote found.');
         }
 
@@ -76,27 +67,23 @@ class Vote
     {
 
         # Make sure we've got the information that we need.
-        if (!isset($this->lis_id) || empty($this->lis_id))
-        {
-            return FALSE;
+        if (!isset($this->lis_id) || empty($this->lis_id)) {
+            return false;
         }
 
-        if (!isset($this->session_id) || empty($this->session_id))
-        {
-            return FALSE;
+        if (!isset($this->session_id) || empty($this->session_id)) {
+            return false;
         }
 
         # Check that the data is clean.
-        if (mb_strlen($this->lis_id) > 12)
-        {
-            return FALSE;
+        if (mb_strlen($this->lis_id) > 12) {
+            return false;
         }
-        if (mb_strlen($this->session_id) > 3)
-        {
-            return FALSE;
+        if (mb_strlen($this->session_id) > 3) {
+            return false;
         }
 
-        $database = new Database;
+        $database = new Database();
         $database->connect_mysqli();
 
         // The following bit was commented out of the WHERE portion of this query:
@@ -121,15 +108,13 @@ class Vote
 				WHERE votes.lis_id="' . $this->lis_id . '" AND votes.session_id="' . $this->session_id . '"
 				ORDER BY vote ASC, name ASC';
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) < 1)
-        {
-            return FALSE;
+        if (mysqli_num_rows($result) < 1) {
+            return false;
         }
 
         # Store all of the resulting data in an array, since we have to reuse it a couple of times.
         $legislators = array();
-        while ($legislator = mysqli_fetch_assoc($result))
-        {
+        while ($legislator = mysqli_fetch_assoc($result)) {
             $legislators[] = $legislator;
         }
 

@@ -28,12 +28,10 @@
     # PAGE CONTENT
 
     # Use the $topic variable to determine which help information to provide.
-    switch ($topic)
-    {
-
-        # How to use tags.
-        case 'tags':
-            $page_body = <<<EOD
+switch ($topic) {
+    # How to use tags.
+    case 'tags':
+        $page_body = <<<EOD
 				<p>Tags are simple, objective words that describe a bill. The purpose of
 				them is to describe bills in a way using plainer, more accessible
 				language than the legalese employed by lawmakers.  It makes it easier
@@ -83,12 +81,12 @@
 				<p>In summary: keep it simple, be objective, and try to follow existing
 				standards.</p>
 EOD;
-            break;
+        break;
 
 
-        # How to interpret a tag cloud.
-        case 'tag-clouds':
-            $page_body = <<<EOD
+    # How to interpret a tag cloud.
+    case 'tag-clouds':
+        $page_body = <<<EOD
 				<p>A “tag cloud” is a visual description of what a group of
 				bills tend to be about, with the size of each word indicating how common
 				each word is.  The tags are entered on each bill’s page, entered
@@ -126,9 +124,9 @@ EOD;
         break;
 
 
-        # How to read the status checkboxes.
-        case 'status-checkboxes':
-            $page_body = <<<EOD
+    # How to read the status checkboxes.
+    case 'status-checkboxes':
+        $page_body = <<<EOD
 				<p>The bill status checkboxes provide an at-a-glance indication of
 				where a bill is in its path between being proposed and becoming law.
 				It's very simplified. No bill actually follows such straightforward
@@ -143,9 +141,9 @@ EOD;
         break;
 
 
-        # How to read the status checkboxes.
-        case 'poll':
-            $page_body = <<<EOD
+    # How to read the status checkboxes.
+    case 'poll':
+        $page_body = <<<EOD
 				<p>The interactive voting system on every bill’s page (“Do you
 				support this bill in its current form?”) is a <em>public</em>
 				vote. That is to say that it has nothing at all to do with the actual vote
@@ -156,9 +154,9 @@ EOD;
         break;
 
 
-        # How to read the status checkboxes.
-        case 'aggregated-poll':
-            $page_body = <<<EOD
+    # How to read the status checkboxes.
+    case 'aggregated-poll':
+        $page_body = <<<EOD
 				<p>This is the collective result of the per-bill polls offered on
 				each bill’s page.</p>
 
@@ -178,8 +176,8 @@ EOD;
 
         # How to read the partisanship graph.
         // no break
-        case 'partisanship':
-            $page_body = <<<EOD
+    case 'partisanship':
+        $page_body = <<<EOD
 				<p>This is a measure of where a legislator is on the left-to-right political
 				spectrum.</p>
 
@@ -196,10 +194,9 @@ EOD;
 				<p>Those three numbers are averaged, and the resulting rate is displayed
 				graphically.</p>
 EOD;
+}
 
-    }
-
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

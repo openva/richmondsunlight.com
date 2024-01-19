@@ -17,7 +17,7 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
@@ -55,12 +55,9 @@ $sql = 'SELECT text
 		FROM minutes
 		WHERE date="' . $date . '" AND chamber="' . $chamber . '"';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) == 0)
-{
+if (mysqli_num_rows($result) == 0) {
     $page_body = '<p>No minutes are available for that date.</p>';
-}
-else
-{
+} else {
     $minutes = mysqli_fetch_array($result);
     $minutes = stripslashes($minutes['text']);
 
@@ -83,8 +80,7 @@ else
 			AND chamber="' . $chamber . '"
 			LIMIT 1';
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) > 0)
-    {
+    if (mysqli_num_rows($result) > 0) {
         $video = mysqli_fetch_array($result);
         $video = array_map('stripslashes', $video);
     }
@@ -97,8 +93,7 @@ else
     /*
      * Retrieve a transcript.
      */
-    if ($video2->generate_transcript() === TRUE)
-    {
+    if ($video2->generate_transcript() === true) {
         $video['transcript'] = '
 		<style>
 			dl.transcript dt {
@@ -117,20 +112,15 @@ else
 		</style>
 		<dl class="transcript">';
         $i = 1;
-        foreach ($video2->transcript as $line)
-        {
-            if (empty($line['name']))
-            {
+        foreach ($video2->transcript as $line) {
+            if (empty($line['name'])) {
                 $line['name'] = '[Unknown]';
             }
             $video['transcript'] .= '
 				<dt id="line-' . $i . '">';
-            if (!isset($line['shortname']))
-            {
+            if (!isset($line['shortname'])) {
                 $video['transcript'] .= $line['name'];
-            }
-            else
-            {
+            } else {
                 $video['transcript'] .= '<a href="/legislator/' . $line['shortname']
                     . '/" class="legislator">' . $line['name'] . '</a>';
             }
@@ -143,7 +133,6 @@ else
 
     # If we have a path, use that.
     if (mb_substr($video['path'], -3) == 'mp4') {
-
         $video['html'] = '
 		<style>
 			#player, video {
@@ -165,26 +154,21 @@ else
 			clerk, for ' . date('m/d/Y', strtotime($date)) . ', presented verbatim. They’re
 			pretty dry, but they are the best way to see what the ' . ucfirst($chamber) . ' did on
 			a given day.</p>';
-    if ($video['license'] == 'public domain')
-    {
+    if ($video['license'] == 'public domain') {
         $page_sidebar .= '
 			<p>Thankfully, there’s video. The video is the official video recording of the
 			chamber for the same date. It’s is in the public domain, and may be freely
 			copied, edited, or incorporated into other works.</p>';
     }
 
-    if (!empty($video['sponsor']))
-    {
-        if (mb_strpos($video['sponsor'], 'img src') !== false)
-        {
+    if (!empty($video['sponsor'])) {
+        if (mb_strpos($video['sponsor'], 'img src') !== false) {
             $page_sidebar .= '
 			<p>This video appears courtesy of:</p>
 			' . $video['sponsor'] . '
 			<p>They purchased this video from the General Assembly for Richmond Sunlight, so that
 			it may be freely available to everybody.</p>';
-        }
-        else
-        {
+        } else {
             $page_sidebar .= '
 			<p>This video appears courtesy of ' . $video['sponsor'] . ', who purchased this video
 			from the General Assembly for Richmond Sunlight, so that it may be freely available
@@ -197,8 +181,7 @@ else
 
     # Get a list of tags for this video.
     $tags = $video2->file_tags();
-    if ($tags !== false)
-    {
+    if ($tags !== false) {
         $page_sidebar .= '
 			<div class="box">
 				<h3>What The ' . ucfirst($chamber) . ' Dealt with Today</h3>
@@ -210,8 +193,7 @@ else
     }
 
     # If we can't gather time-based tags, then display topic-based tags.
-    else
-    {
+    else {
         # Determine the most popular tags for today's actions.
         $sql = 'SELECT tags.tag, COUNT(*) AS count
 				FROM bills_status
@@ -221,11 +203,9 @@ else
 				GROUP BY tag
 				ORDER BY count DESC';
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) > 0)
-        {
+        if (mysqli_num_rows($result) > 0) {
             # Build up an array of tags, with the key being the tag and the value being the count.
-            while ($tag = mysqli_fetch_array($result))
-            {
+            while ($tag = mysqli_fetch_array($result)) {
                 $tag = array_map('stripslashes', $tag);
                 $tags[$tag{tag}] = $tag['count'];
             }
@@ -251,22 +231,18 @@ else
     $page_body = '
 		<div id="sources" class="tabs">
 		<ul>';
-    if (!empty($video['html']))
-    {
+    if (!empty($video['html'])) {
         $page_body .= '<li><a href="#video">Video</a><li>';
     }
-    if (!empty($video['transcript']))
-    {
+    if (!empty($video['transcript'])) {
         $page_body .= '<li><a href="#transcript">Transcript</a><li>';
     }
-    if (!empty($minutes))
-    {
+    if (!empty($minutes)) {
         $page_body .= '<li><a href="#minutes">Minutes</a><li>';
     }
     $page_body .= '</ul>';
 
-    if (!empty($video['html']) || !empty($video2->path))
-    {
+    if (!empty($video['html']) || !empty($video2->path)) {
         $page_body .= '
 			<div id="video">
 				<div class="video" style="width: 100%;">
@@ -277,35 +253,31 @@ else
 
         $video2->clip_type = 'bills';
         $video2->get_clips();
-        if (isset($video2->clips))
-        {
+        if (isset($video2->clips)) {
             $bill_clips = $video2->clips;
         }
 
         $video2->clip_type = 'legislators';
         $video2->index_clips();
-        if (isset($video2->clips))
-        {
+        if (isset($video2->clips)) {
             $legislator_clips = $video2->clips;
         }
 
-        if (isset($video2->path))
-        {
+        if (isset($video2->path)) {
             $page_body .= '<p><a href="' . $video2->path . '">Download this Video</a></p>';
         }
 
-        if (isset($video['html']) &&
+        if (
+            isset($video['html']) &&
             (count($bill_clips) > 0 || count($legislator_clips) > 0 || count($video2->screenshots) > 0)
-            ) {
+        ) {
             $page_body .= '<h3>Index</h3>
 				<div id="video-index" class="tabs">
 				<ul>';
-            if (count($bill_clips) > 0)
-            {
+            if (count($bill_clips) > 0) {
                 $page_body .= '<li><a href="#bill">By Bill</a></li>';
             }
-            if (count($legislator_clips) > 0)
-            {
+            if (count($legislator_clips) > 0) {
                 $page_body .= '<li><a href="#legislator">By Legislator</a></li>';
             }
 
@@ -314,16 +286,14 @@ else
 
 				<div id="bill">';
 
-            foreach ($bill_clips as $clip)
-            {
+            foreach ($bill_clips as $clip) {
                 $page_body .= '<div class="marker" data-time="' . $clip->start . '" style="background-image: url(' . $clip->screenshot . ')">
 					<span>' . mb_strtoupper($clip->bill_number) . '—' . seconds_to_time($clip->duration) . '</span></div>';
             }
             $page_body .= '</div>
 
 				<div id="legislator">';
-            foreach ($legislator_clips as $clip)
-            {
+            foreach ($legislator_clips as $clip) {
                 $page_body .= '<div class="marker" data-time="' . $clip->start . '" style="background-image: url(' . $clip->screenshot . ')">
 				<span>' . $clip->legislator_name . '—' . mb_substr(seconds_to_time($clip->duration), 3) . '</span></div>';
             }
@@ -331,8 +301,7 @@ else
 
             $video2->screenshots();
             $page_body .= '<div id="time">';
-            foreach ($video2->screenshots as $screenshot)
-            {
+            foreach ($video2->screenshots as $screenshot) {
                 $page_body .= '<div class="marker" data-time="' . $screenshot->seconds . '" style="background-image: url(' . $screenshot->filename . ')">
 				<span>' . mb_substr(seconds_to_time($screenshot->seconds), 0, 5) . '</span></div>';
             }
@@ -352,8 +321,7 @@ else
 		</div>';
 
     # Show the transcript.
-    if (!empty($video['transcript']))
-    {
+    if (!empty($video['transcript'])) {
         $page_body .= '
 
 			<div id="transcript">
@@ -376,7 +344,7 @@ else
 
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->html_head = $html_head;
 $page->page_body = $page_body;

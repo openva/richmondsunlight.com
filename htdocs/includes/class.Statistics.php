@@ -2,7 +2,6 @@
 
 class Statistics
 {
-
     /*
      * Return the number of bill actions occuring daily over time
      *
@@ -16,7 +15,7 @@ class Statistics
     public function daily_activity()
     {
 
-        $database = new Database;
+        $database = new Database();
         $db = $database->connect();
         global $db;
 
@@ -28,9 +27,8 @@ class Statistics
         $stmt = $GLOBALS['db']->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll();
-        if (count($result) == 0)
-        {
-            return FALSE;
+        if (count($result) == 0) {
+            return false;
         }
 
         return $result;
@@ -47,7 +45,7 @@ class Statistics
      */
     public function bills_filed_daily()
     {
-        $database = new Database;
+        $database = new Database();
         $db = $database->connect();
 
         $sql = 'SELECT date_introduced AS date, COUNT(*) AS number
@@ -58,9 +56,8 @@ class Statistics
         $stmt = $GLOBALS['db']->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll();
-        if (count($result) == 0)
-        {
-            return FALSE;
+        if (count($result) == 0) {
+            return false;
         }
 
         return $result;
@@ -78,12 +75,11 @@ class Statistics
      */
     public function bill_views()
     {
-        if ( !isset($bill) && empty($bill->id) )
-        {
-            return FALSE;
+        if (!isset($bill) && empty($bill->id)) {
+            return false;
         }
 
-        $database = new Database;
+        $database = new Database();
         $db = $database->connect();
 
         $sql = 'SELECT DATE_FORMAT(date, "%Y-%m-%d") AS day, COUNT(*) AS number
@@ -94,9 +90,8 @@ class Statistics
         $stmt = $GLOBALS['db']->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll();
-        if (count($result) == 0)
-        {
-            return FALSE;
+        if (count($result) == 0) {
+            return false;
         }
 
         return $result;

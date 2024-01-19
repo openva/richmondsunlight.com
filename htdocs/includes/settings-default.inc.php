@@ -89,8 +89,7 @@ define('AWS_SECRET_KEY', '');
 # The list of words that, when used, will lead to instant blacklisting. They're rot 13ed here.
 $GLOBALS['banned_words'] = array('fuvg','shpx','nffubyr','chffl','phag','shpxre','zbgureshpxre',
     'shpxvat','pbpxfhpxre','gjng','qvpxurnq');
-foreach ($GLOBALS['banned_words'] as &$word)
-{
+foreach ($GLOBALS['banned_words'] as &$word) {
     $word = str_rot13($word);
 }
 
@@ -103,22 +102,17 @@ date_default_timezone_set('America/New_York');
 /*
  * Dynamically determine whether the legislature is in session and whether it's legislative season.
  */
-if (time() >= strtotime(SESSION_START)
+if (
+    time() >= strtotime(SESSION_START)
     &&
     time() <= strtotime(SESSION_END)
-)
-{
+) {
     define('IN_SESSION', true);
-}
-else
-{
+} else {
     define('IN_SESSION', false);
 }
-if (date('n') >= 11 || date('n') <= 4)
-{
+if (date('n') >= 11 || date('n') <= 4) {
     define('LEGISLATIVE_SEASON', true);
-}
-else
-{
+} else {
     define('LEGISLATIVE_SEASON', false);
 }

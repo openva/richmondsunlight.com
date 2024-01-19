@@ -19,7 +19,7 @@ include_once '../includes/photosynthesis.inc.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
@@ -28,8 +28,7 @@ session_start();
 # LOCALIZE VARIABLES
 
 # SEE IF HE'S LOGGED IN AND DEAL WITH HIM ACCORDINGLY
-if (@logged_in() === FALSE)
-{
+if (@logged_in() === false) {
     header('Location: ' . $_SERVER['HTTP_REFERER']);
     exit;
 }
@@ -40,8 +39,7 @@ $user = @get_user();
 # Add a new bill to a portfolio.
 // A real problem with this is is that if the bill addition fails, no error message
 // is generated. People should be informed why it has failed.
-if (isset($_POST['add-bill']))
-{
+if (isset($_POST['add-bill'])) {
     $bill_number = mysqli_real_escape_string($GLOBALS['db'], $_POST['add-bill']);
     $portfolio_hash = mysqli_real_escape_string($GLOBALS['db'], $_POST['portfolio']);
 
@@ -69,8 +67,7 @@ if (isset($_POST['add-bill']))
 
 
 # Delete a bill from a portfolio.
-if (isset($_GET['delete-bill']))
-{
+if (isset($_GET['delete-bill'])) {
     $tmp = mysqli_real_escape_string($GLOBALS['db'], $_GET['delete-bill']);
     $tmp = explode('-', $tmp);
     $portfolio_hash = $tmp[0];
@@ -88,8 +85,7 @@ if (isset($_GET['delete-bill']))
         * Clear the Memcached cache of comments on this bill, since Photosynthesis comments are
         * among them.
         */
-    if (MEMCACHED_SERVER != '')
-    {
+    if (MEMCACHED_SERVER != '') {
         $sql = 'SELECT bill_id AS id
                 FROM dashboard_bills
                 WHERE id=' . record_id;
@@ -109,9 +105,7 @@ if (isset($_GET['delete-bill']))
 
 
 # Delete a portfolio.
-if (isset($_GET['delete-portfolio']))
-{
-
+if (isset($_GET['delete-portfolio'])) {
     # Localize and make safe the portfolio hash.
     $portfolio_hash = mysqli_real_escape_string($GLOBALS['db'], $_GET['delete-portfolio']);
 
@@ -121,8 +115,7 @@ if (isset($_GET['delete-portfolio']))
             FROM dashboard_portfolios
             WHERE hash="' . $portfolio_hash . '"';
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) == 0)
-    {
+    if (mysqli_num_rows($result) == 0) {
         die('Error: No portfolio found. Could not delete it.');
     }
     $portfolio = mysqli_fetch_array($result);
@@ -138,8 +131,7 @@ if (isset($_GET['delete-portfolio']))
     mysqli_query($GLOBALS['db'], $sql);
 
     # Finally, if this is a smart portfolio, remove the watch list entry.
-    if (!empty($portfolio['watch_list_id']))
-    {
+    if (!empty($portfolio['watch_list_id'])) {
         $sql = 'DELETE FROM dashboard_watch_lists
                 WHERE id = ' . $portfolio['watch_list_id'];
         mysqli_query($GLOBALS['db'], $sql);
@@ -151,19 +143,15 @@ if (isset($_GET['delete-portfolio']))
 
 
 # Create a portfolio.
-if (isset($_POST['add-portfolio']))
-{
-
+if (isset($_POST['add-portfolio'])) {
     # Localize $form_data and clean it up.
-    if (!array($_POST['form_data']))
-    {
-        return FALSE;
+    if (!array($_POST['form_data'])) {
+        return false;
     }
     $form_data = array_map('addslashes', $_POST['form_data']);
 
     # Don't allow a nameless portfolio.
-    if (empty($form_data['name']))
-    {
+    if (empty($form_data['name'])) {
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         exit;
     }
@@ -182,16 +170,13 @@ if (isset($_POST['add-portfolio']))
     $sql = 'INSERT INTO dashboard_portfolios
             SET name = "' . $_POST['form_data']['name'] . '", hash = "' . $hash . '",
             user_id=' . $user['id'] . ', date_created=now()';
-    if (!empty($form_data['notes']))
-    {
+    if (!empty($form_data['notes'])) {
         $sql .= ', notes="' . $form_data['notes'] . '"';
     }
-    if (!empty($form_data['public']))
-    {
+    if (!empty($form_data['public'])) {
         $sql .= ', public="' . $form_data['public'] . '"';
     }
-    if (!empty($form_data['notify']))
-    {
+    if (!empty($form_data['notify'])) {
         $sql .= ', notify="' . $form_data['notify'] . '"';
     }
     mysqli_query($GLOBALS['db'], $sql);
@@ -200,28 +185,25 @@ if (isset($_POST['add-portfolio']))
 }
 
 # Create a smart portfolio.
-if (isset($_POST['add-smart-portfolio']))
-{
-
+if (isset($_POST['add-smart-portfolio'])) {
     # Localize $form_data and clean it up.
-    if (!array($_POST['form_data']))
-    {
-        return FALSE;
+    if (!array($_POST['form_data'])) {
+        return false;
     }
     $form_data = array_map('addslashes', $_POST['form_data']);
 
     # Don't allow a watch list with no criteria.
-    if (empty($form_data['tag']) && empty($form_data['patron_id'])
-    && empty($form_data['committee_id']) && empty($form_data['keyword']) && empty($form_data['status'])
-    && empty($form_data['current_chamber']))
-    {
+    if (
+        empty($form_data['tag']) && empty($form_data['patron_id'])
+        && empty($form_data['committee_id']) && empty($form_data['keyword']) && empty($form_data['status'])
+        && empty($form_data['current_chamber'])
+    ) {
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         exit;
     }
 
     # Don't allow a nameless portfolio.
-    if (empty($form_data['name']))
-    {
+    if (empty($form_data['name'])) {
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         exit;
     }
@@ -237,28 +219,22 @@ if (isset($_POST['add-smart-portfolio']))
             SET';
 
     # For each watch list field, create the SQL insert stanza.
-    if (!empty($form_data['tag']))
-    {
+    if (!empty($form_data['tag'])) {
         $sql .= ' tag="' . $form_data['tag'] . '",';
     }
-    if (!empty($form_data['patron_id']))
-    {
+    if (!empty($form_data['patron_id'])) {
         $sql .= ' patron_id="' . $form_data['patron_id'] . '",';
     }
-    if (!empty($form_data['committee_id']))
-    {
+    if (!empty($form_data['committee_id'])) {
         $sql .= ' committee_id="' . $form_data['committee_id'] . '",';
     }
-    if (!empty($form_data['keyword']))
-    {
+    if (!empty($form_data['keyword'])) {
         $sql .= ' keyword="' . $form_data['keyword'] . '",';
     }
-    if (!empty($form_data['status']))
-    {
+    if (!empty($form_data['status'])) {
         $sql .= ' status="' . $form_data['status'] . '",';
     }
-    if (!empty($form_data['current_chamber']))
-    {
+    if (!empty($form_data['current_chamber'])) {
         $sql .= ' current_chamber="' . $form_data['current_chamber'] . '",';
     }
 
@@ -277,16 +253,13 @@ if (isset($_POST['add-smart-portfolio']))
     $sql = 'INSERT INTO dashboard_portfolios
             SET name = "' . $form_data['name'] . '", watch_list_id = ' . $watch_list_id . ',
             user_id=' . $user['id'] . ', hash="' . $hash . '", date_created=now()';
-    if (!empty($form_data['notes']))
-    {
+    if (!empty($form_data['notes'])) {
         $sql .= ', notes="' . $form_data['notes'] . '"';
     }
-    if (!empty($form_data['public']))
-    {
+    if (!empty($form_data['public'])) {
         $sql .= ', public="' . $form_data['public'] . '"';
     }
-    if (!empty($form_data['notify']))
-    {
+    if (!empty($form_data['notify'])) {
         $sql .= ', notify="' . $form_data['notify'] . '"';
     }
     $result = mysqli_query($GLOBALS['db'], $sql);
@@ -299,7 +272,7 @@ if (isset($_POST['add-smart-portfolio']))
 }
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

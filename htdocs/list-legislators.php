@@ -17,7 +17,7 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
@@ -67,14 +67,12 @@ $sql = 'SELECT shortname, name, party, place
 		AND (date_ended IS NULL OR date_ended > now())
 		ORDER BY name ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     $page_body .= '
 	<div class="left_side">
 		<h2>House of Delegates</h2>
 		<ul>';
-    while ($legislator = mysqli_fetch_array($result))
-    {
+    while ($legislator = mysqli_fetch_array($result)) {
         $legislator = array_map('stripslashes', $legislator);
         $page_body .= '<li><a href="/legislator/' . $legislator['shortname'] . '/">' . $legislator['name'] .
             ' (' . $legislator['party'] . '-' . $legislator['place'] . ')</a></li>';
@@ -90,13 +88,11 @@ $sql = 'SELECT shortname, name, party, place
 		AND (date_ended IS NULL OR date_ended > now())
 		ORDER BY name ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     $page_body .= '<div class="right_side">
 		<h2>Senate</h2>
 		<ul>';
-    while ($legislator = mysqli_fetch_array($result))
-    {
+    while ($legislator = mysqli_fetch_array($result)) {
         $page_body .= '<li><a href="/legislator/' . $legislator['shortname'] . '/">' . $legislator['name'] .
             ' (' . $legislator['party'] . '-' . $legislator['place'] . ')</a></li>';
     }
@@ -169,7 +165,7 @@ $page_body .= '
 
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

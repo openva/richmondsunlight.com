@@ -9,60 +9,49 @@ class Log
          * Set the minimum threshold of the messages we want (on a scale of 1–8, 1
          * being debug, 8 being an emergency).
          */
-        if (defined('LOG_VERBOSITY'))
-        {
+        if (defined('LOG_VERBOSITY')) {
             $this->verbosity = LOG_VERBOSITY;
-        }
-        else
-        {
+        } else {
             $this->verbosity = 5;
         }
 
         /*
          * Where we store our logs.
          */
-        if (defined('LOG_OUTPUT'))
-        {
+        if (defined('LOG_OUTPUT')) {
             $this->output = LOG_OUTPUT;
-        }
-        else
-        {
+        } else {
             $this->output = 'slack';
         }
     }
 
     public function put($message, $level)
     {
-        if (!isset($message))
-        {
-            return FALSE;
+        if (!isset($message)) {
+            return false;
         }
-        if (!isset($level))
-        {
+        if (!isset($level)) {
             $level = 3;
         }
 
         /*
          * If this is being invoked at the CLI, display all messages.
          */
-        if (PHP_SAPI === 'cli')
-        {
+        if (PHP_SAPI === 'cli') {
             echo $message . "\n";
         }
 
         /*
          * If the level of this message is below our verbosity level, ignore it.
          */
-        if ($level < $this->verbosity)
-        {
-            return TRUE;
+        if ($level < $this->verbosity) {
+            return true;
         }
 
         /*
          * Send our log entry to Slack.
          */
-        if ($this->output == 'slack')
-        {
+        if ($this->output == 'slack') {
             $emoji = array(
                 1 => ':white_large_square:',
                 2 => ':white_large_square:',
@@ -79,12 +68,11 @@ class Log
         /*
          * If this is a top-level error, send it via Pushover, too.
          */
-        if ($level == 8)
-        {
+        if ($level == 8) {
             $this->pushover('RS: Serious Error', $message);
         }
 
-        return TRUE;
+        return true;
     }
 
     public function slack($message, $room = 'rs', $icon = ':longbox:')
@@ -121,20 +109,16 @@ class Log
         /*
          * Keep logs in different locations, depending on how this has been invoked.
          */
-        if (PHP_SAPI === 'cli')
-        {
+        if (PHP_SAPI === 'cli') {
             $file = __DIR__ . '../logs/site.log';
-        }
-        else
-        {
+        } else {
             $file = __DIR__ . '../../logs/site.log';
         }
 
-        if (file_put_contents($file, $message) === FALSE)
-        {
-            return FALSE;
+        if (file_put_contents($file, $message) === false) {
+            return false;
         }
-        return TRUE;
+        return true;
     }
 
     /**
@@ -142,24 +126,21 @@ class Log
      */
     public function pushover($title, $message)
     {
-        if (!defined('PUSHOVER_KEY') || !isset($title) || !isset($message))
-        {
-            return FALSE;
+        if (!defined('PUSHOVER_KEY') || !isset($title) || !isset($message)) {
+            return false;
         }
 
-        if (mb_strlen($title) > 100)
-        {
+        if (mb_strlen($title) > 100) {
             $title = mb_substr($title, 0, 100);
         }
 
-        if (mb_strlen($message) > 412)
-        {
+        if (mb_strlen($message) > 412) {
             $message = mb_substr($message, 0, 412);
         }
 
         curl_setopt_array($ch = curl_init(), array(
             CURLOPT_URL => "https://api.pushover.net/1/messages.json",
-            CURLOPT_RETURNTRANSFER => TRUE,
+            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POSTFIELDS => array(
                 "token" => PUSHOVER_KEY,
                 "user" => "unBH1CeWWY4F5JL2TzhUodQASDUAUG",
@@ -171,6 +152,6 @@ class Log
         curl_exec($ch);
         curl_close($ch);
 
-        return TRUE;
+        return true;
     }
 }

@@ -17,26 +17,22 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();
 
 # Grab the user data.
-if (logged_in() === TRUE)
-{
+if (logged_in() === true) {
     $user = get_user();
 }
 
 # LOCALIZE VARIABLES
 $days = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['days']);
-if (empty($days))
-{
+if (empty($days)) {
     $days = 7;
-}
-elseif (!is_numeric($days))
-{
+} elseif (!is_numeric($days)) {
     $days = 7;
 }
 
@@ -67,18 +63,14 @@ $sql = 'SELECT bills.number, sessions.year, representatives.name AS patron,
 
 $result = mysqli_query($GLOBALS['db'], $sql);
 $num_results = mysqli_num_rows($result);
-if ($num_results > 0)
-{
+if ($num_results > 0) {
     $page_body .= '<p>' . $num_results . ' bill' . ($num_results > 1 ? 's' : '') . ' found.</p>';
     $date = '';
-    $i=0;
-    while ($bill = mysqli_fetch_assoc($result))
-    {
+    $i = 0;
+    while ($bill = mysqli_fetch_assoc($result)) {
         $bill = array_map('stripslashes', $bill);
-        if ($bill['date_introduced'] != $date)
-        {
-            if ($i > 0)
-            {
+        if ($bill['date_introduced'] != $date) {
+            if ($i > 0) {
                 $page_body .= '</ul>';
             }
             $date = $bill['date_introduced'];
@@ -115,7 +107,7 @@ $page_sidebar = '
 	</div>';
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

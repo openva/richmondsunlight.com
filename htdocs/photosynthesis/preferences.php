@@ -18,7 +18,7 @@ include_once '../includes/photosynthesis.inc.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # PAGE METADATA
@@ -47,8 +47,7 @@ function show_form($form_data)
                 <tr><td><input type="password" size="20" maxlength="30" id="password" name="form_data[password]" value="' . (!empty($form_data['password']) ? $form_data['password'] : '') . '" /></td></tr>
                 <tr><td><small>Enter a password to switch to a new one.</small></td>';
 
-    if ($user['type'] == 'paid')
-    {
+    if ($user['type'] == 'paid') {
         $content .= '
                 <tr><td>
                     <fieldset id="email-active">
@@ -71,49 +70,40 @@ function show_form($form_data)
 # Grab the user data. Bail if none is available.
 $user = get_user();
 
-if (isset($_POST['submit']))
-{
+if (isset($_POST['submit'])) {
     $form_data = array_map(function ($field) {
         return mysqli_real_escape_string($GLOBALS['db'], $field);
     }, $_POST['form_data']);
 
     # Error correction.
-    if (empty($form_data['name']))
-    {
+    if (empty($form_data['name'])) {
         $errors[] = 'your name';
     }
-    if (empty($form_data['email']))
-    {
+    if (empty($form_data['email'])) {
         $errors[] = 'your e-mail address';
     }
-    if ($user['type'] == 'paid')
-    {
-        if (empty($form_data['email_active']))
-        {
+    if ($user['type'] == 'paid') {
+        if (empty($form_data['email_active'])) {
             $form_data['email_active'] = 'n';
         }
     }
 
     # Alert the user if any of these errors are show-stoppers.
-    if (isset($errors))
-    {
+    if (isset($errors)) {
         $error_text = implode('</li><li>', $errors);
         $message = '<div id="messages" class="errors">
                 <ul>
                     <li>' . $error_text . '</li>
                 </ul>
             </div>';
-    }
-    else
-    {
+    } else {
         # Clean up the data.
         $form_data = array_map(function ($field) {
             return mysqli_real_escape_string($GLOBALS['db'], $field);
         }, $_POST['form_data']);
 
         # Create a password hash from the password and store that.
-        if (!empty($form_data['password']))
-        {
+        if (!empty($form_data['password'])) {
             $form_data['password_hash'] = md5($form_data['password']);
         }
 
@@ -126,20 +116,16 @@ if (isset($_POST['submit']))
         $result = mysqli_query($GLOBALS['db'], $sql);
 
         # Report on the results.
-        if (!$result)
-        {
+        if (!$result) {
             $message = '<div id="messages" class="errors">Your preferences could not be saved.</div>';
-        }
-        else
-        {
+        } else {
             $message = '<div id="messages" class="updated">Preferences updated successfully.</div>';
         }
     }
 }
 
 # Display the result of the query, if there was one.
-if (isset($message))
-{
+if (isset($message)) {
     $page_body = $message;
 }
 
@@ -148,8 +134,7 @@ $sql = 'SELECT users.id, users.name, users.email, dashboard_user_data.email_acti
         FROM users LEFT JOIN dashboard_user_data ON users.id = dashboard_user_data.user_id
         WHERE users.cookie_hash="' . $_SESSION['id'] . '"';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) == 0)
-{
+if (mysqli_num_rows($result) == 0) {
     login_redirect();
 }
 $preferences = mysqli_fetch_array($result);
@@ -159,7 +144,7 @@ $preferences = array_map('stripslashes', $preferences);
 $page_body .= @show_form($preferences);
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

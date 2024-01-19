@@ -5,16 +5,16 @@
  */
 class Places
 {
-
     protected $db;
 
-    public function __construct($db) {
+    public function __construct($db)
+    {
         $this->db = $db;
     }
 
     /**
      * List places that we have a record of.
-     * 
+     *
      * This is not just a list of every entry in the gazetteer. That would not be useful. Instead,
      * it's a list of every place name that has been mentioned in legislation.
      *
@@ -41,7 +41,6 @@ class Places
         $places = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return $places;
-
     }
 
     /**
@@ -57,16 +56,14 @@ class Places
         /*
          * If the place isn't specified, there's nothing for us to do
          */
-        if (empty($place))
-        {
+        if (empty($place)) {
             return false;
         }
 
         /*
          * If the session ID hasn't been specified, default to the current session ID.
          */
-        if (empty($session_id))
-        {
+        if (empty($session_id)) {
             $session_id = SESSION_ID;
         }
 
@@ -100,7 +97,6 @@ class Places
         $bills = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         return $bills;
-
     }
 
     /**
@@ -124,15 +120,12 @@ class Places
         $stmt->bindParam(':place', $place_sql, PDO::PARAM_STR);
         $stmt->execute();
         $representatives_array = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
+
         $representatives = [];
-        foreach ($representatives_array as $rep)
-        {
+        foreach ($representatives_array as $rep) {
             $representatives[] = $rep['id'];
         }
 
         return $representatives;
-
     }
-
 }

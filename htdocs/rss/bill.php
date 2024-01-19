@@ -11,8 +11,8 @@
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
-include_once $_SERVER['DOCUMENT_ROOT'].'/includes/settings.inc.php';
-include_once $_SERVER['DOCUMENT_ROOT'].'/includes/functions.inc.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/settings.inc.php';
+include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/functions.inc.php';
 
 # LOCALIZE VARIABLES
 $bill['number'] = strtolower($_REQUEST['number']);
@@ -25,8 +25,7 @@ if (
         (file_exists('cache/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml'))
         &&
         ((filemtime('cache/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml') + 1800) > time())
-    )
-{
+) {
     header('Content-Type: application/xml');
     header('Last-Modified: ' . date('r', filemtime('cache/bill-' . SESSION_YEAR . '-'
         . $bill['number'] . '.xml')));
@@ -36,7 +35,7 @@ if (
 }
 
 # Open a database connection.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # Query the database for all bills by that bill number.
@@ -56,20 +55,16 @@ $sql = 'SELECT
 
 $result = mysqli_query($GLOBALS['db'], $sql);
 
-if (mysqli_num_rows($result) > 0)
-{
-
+if (mysqli_num_rows($result) > 0) {
     $rss_content = '';
 
     # Generate the RSS.
-    while ($status = mysqli_fetch_array($result))
-    {
-
+    while ($status = mysqli_fetch_array($result)) {
         $status = array_map('stripslashes', $status);
 
         # Aggregate the variables into their RSS components.
         $title = '<![CDATA[' . $status['status'] . ']]>';
-        $link = 'https://www.richmondsunlight.com/bill/' . SESSION_YEAR . '/' . $bill['number'].'/';
+        $link = 'https://www.richmondsunlight.com/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/';
         $description = '<![CDATA[' . $status['status'] . ']]>';
 
         # Now assemble those RSS components into an XML fragment.
@@ -100,14 +95,11 @@ $rss = '<?xml version="1.0" encoding="utf-8"?>
 # Cache the RSS file.
 $fp = file_put_contents('cache/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml', $rss);
 
-if ($fp !== false)
-{
+if ($fp !== false) {
     $last_modified = date('r', filemtime('cache/bill-' . SESSION_YEAR . '-' . $bill['number']
         . '.xml'));
     $md5 = md5_file('cache/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml');
-}
-else
-{
+} else {
     $last_modified = date('r', time());
     $md5 = md5($rss);
 }

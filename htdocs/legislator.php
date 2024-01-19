@@ -17,7 +17,7 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
@@ -31,10 +31,9 @@ $shortname = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['shortname']);
 $json_url = API_URL . '1.1/legislator/' . $shortname . '.json?' . time();
 $json = get_content($json_url);
 
-$debug_timing['JSON retrieved'] = microtime(TRUE);
+$debug_timing['JSON retrieved'] = microtime(true);
 
-if ($json === FALSE)
-{
+if ($json === false) {
     header("Status: 404 Not Found\n\r");
     include '404.php';
     exit();
@@ -87,14 +86,12 @@ $page_sidebar .= '
 	<span style="display: none;" class="fn">' . $legislator['name'] . '</span>';
 
 # District Office
-if (!empty($legislator['address_district']))
-{
+if (!empty($legislator['address_district'])) {
     $page_sidebar .= '
 	<p class="adr"><strong>District Office</strong><br />
 	' . $legislator['address_district'];
 }
-if (!empty($legislator['phone_district']))
-{
+if (!empty($legislator['phone_district'])) {
     $page_sidebar .= '<br /><span class="tel">' . $legislator['phone_district'] . '</span>';
 }
 $page_sidebar .= '</p>';
@@ -103,30 +100,24 @@ $page_sidebar .= '</p>';
 $page_sidebar .= '
 	<p class="adr"><strong>Richmond Office</strong> (during session)<br />
 	P.O. Box ';
-if ($legislator['chamber'] == 'house')
-{
+if ($legislator['chamber'] == 'house') {
     $page_sidebar .= '406';
-}
-elseif ($legislator['chamber'] == 'senate')
-{
+} elseif ($legislator['chamber'] == 'senate') {
     $page_sidebar .= '396';
 }
 $page_sidebar .= '<br />
 	Richmond, Virginia 23218';
-if (!empty($legislator['phone_richmond']))
-{
+if (!empty($legislator['phone_richmond'])) {
     $page_sidebar .= '<br /><span class="tel">' . $legislator['phone_richmond'] . '</span>';
 }
 $page_sidebar .= '</p>';
-if (!empty($legislator['address_richmond']))
-{
+if (!empty($legislator['address_richmond'])) {
     $page_sidebar .= '
 	<p>Room ' . $legislator['address_richmond'] . ' of the General Assembly Building</p>';
 }
 
 # E-Mail
-if (!empty($legislator['email']))
-{
+if (!empty($legislator['email'])) {
     $page_sidebar .= '
 	<p><strong>Email</strong><br />
 	<a href="mailto:' . spam_proof($legislator['email']) . '" class="email">' . spam_proof($legislator['email']) . '</a></p>';
@@ -136,9 +127,7 @@ if (!empty($legislator['email']))
  * Display a map of the district boundaries.
  */
 
-if ($legislator['district_boundaries'] != FALSE)
-{
-
+if ($legislator['district_boundaries'] != false) {
     /*
      * Pull out the relevant bit from the GeoJSON
      */
@@ -223,17 +212,14 @@ $sql = 'SELECT comments.id, comments.bill_id, comments.date_created AS date,
 		ORDER BY comments.date_created DESC
 		LIMIT 5';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     $page_sidebar .= '
 		<div class="box" id="newest-comments">
 			<h3>Newest Comments</h3>
 			<ul>';
-    while ($comment = mysqli_fetch_array($result))
-    {
+    while ($comment = mysqli_fetch_array($result)) {
         $comment = array_map('stripslashes', $comment);
-        if (mb_strlen($comment['comment']) > 175)
-        {
+        if (mb_strlen($comment['comment']) > 175) {
             $comment['comment'] = preg_replace('#<blockquote>(.*)</blockquote>#D', '', $comment['comment']);
             $comment['comment'] = strip_tags($comment['comment']);
             $comment['comment'] = mb_substr($comment['comment'], 0, 120) . '...';
@@ -256,43 +242,30 @@ $page_sidebar .= '
 		' . $legislator['prefix'] . ' ' . $legislator['name'] . '’s voting record for ';
 
 # Figure out when to start listing years. We don't have voting data prior to 2006.
-if (!empty($legislator['year_started']))
-{
-    if ($legislator['year_started'] < 2006)
-    {
+if (!empty($legislator['year_started'])) {
+    if ($legislator['year_started'] < 2006) {
         $start = 2006;
-    }
-    else
-    {
+    } else {
         $start = $legislator['year_started'];
     }
-}
-else
-{
+} else {
     $start = 2006;
 }
 
 # Figure out when to stop listing years.
-if (!empty($legislator['year_ended']))
-{
+if (!empty($legislator['year_ended'])) {
     $end = $legislator['year_ended'];
-}
-else
-{
+} else {
     $end = date('Y');
 }
 
 # Iterate through the years and provide links.
-for ($i=$start; $i<=$end; $i++)
-{
+for ($i = $start; $i <= $end; $i++) {
     $page_sidebar .= '<a href="/legislator/' . $legislator['shortname'] . '/votes/' . $i . '/">'
         . $i . '</a>';
-    if (($i + 1) == $end)
-    {
+    if (($i + 1) == $end) {
         $page_sidebar .= ', and ';
-    }
-    elseif ($i != $end)
-    {
+    } elseif ($i != $end) {
         $page_sidebar .= ', ';
     }
 }
@@ -315,13 +288,11 @@ $page_body = '
 	<li><a href="#bio">Bio</a></li>';
 $page_body .= '
 	<li><a href="#media">Media</a></li>';
-if (!empty($legislator['rss_url']))
-{
+if (!empty($legislator['rss_url'])) {
     $page_body .= '
 	<li><a href="#news">News</a></li>';
 }
-if (!empty($legislator['videos']))
-{
+if (!empty($legislator['videos'])) {
     $page_body .= '
 	<li><a href="#video">Video</a></li>';
 }
@@ -332,12 +303,9 @@ $page_body .= '
 
 # Get the batting average data.  Use the current session's year if the session
 # is finished.  Otherwise, use the prior year.
-if (IN_SESSION == true)
-{
+if (IN_SESSION == true) {
     $batting_year = SESSION_YEAR - 1;
-}
-else
-{
+} else {
     $batting_year = SESSION_YEAR;
 }
 $sql = 'SELECT COUNT(*) AS passed,
@@ -367,8 +335,7 @@ $sql = 'SELECT COUNT(*) AS passed,
             bills.number LIKE "sb%")';
 $result = mysqli_query($GLOBALS['db'], $sql);
 $legislator['batting'] = mysqli_fetch_array($result);
-if ($legislator['batting']['total'] == 0)
-{
+if ($legislator['batting']['total'] == 0) {
     unset($legislator['batting']);
 }
 
@@ -380,46 +347,33 @@ $page_body .= '
 		<dd>' . $legislator['party_name'] . '</dd>
 		<dt>District</dt>
 		<dd>' . $legislator['district'];
-if (!empty($legislator['district_description']))
-{
+if (!empty($legislator['district_description'])) {
     $page_body .= ': ' . $legislator['district_description'];
 }
 $page_body .= '</dd>';
-if (!empty($legislator['date_started']))
-{
+if (!empty($legislator['date_started'])) {
     $page_body .= '
 		<dt>Took Office</dt>
 		<dd>' . $legislator['date_started'] . '</dd>';
 }
-if (!empty($legislator['date_ended']))
-{
+if (!empty($legislator['date_ended'])) {
     $page_body .= '
 		<dt>Left Office</dt>
 		<dd>' . $legislator['date_ended'] . '</dd>';
-}
-else
-{
+} else {
     $elections = [];
     $elections['house'] = [2025, 2027, 2029, 2031, 2033, 2035, 2037, 2039];
     $elections['senate'] = [2027, 2031, 2035, 2039];
-    if ($legislator['chamber'] == 'house')
-    {
-        foreach ($elections['house'] as $election)
-        {
-            if (strtotime($election. '-11-15') > time())
-            {
+    if ($legislator['chamber'] == 'house') {
+        foreach ($elections['house'] as $election) {
+            if (strtotime($election . '-11-15') > time()) {
                 $next_election = 'November ' . $election;
                 break;
             }
         }
-        
-    }
-    elseif ($legislator['chamber'] == 'senate')
-    {
-        foreach ($elections['senate'] as $election)
-        {
-            if (strtotime($election. '-11-15') > time())
-            {
+    } elseif ($legislator['chamber'] == 'senate') {
+        foreach ($elections['senate'] as $election) {
+            if (strtotime($election . '-11-15') > time()) {
                 $next_election = 'November ' . $election;
                 break;
             }
@@ -429,52 +383,42 @@ else
 		<dt>Next Election</dt>
 		<dd>' . $next_election . '</dd>';
 }
-if (is_array($legislator['committees']) && (count($legislator['committees']) > 0))
-{
+if (is_array($legislator['committees']) && (count($legislator['committees']) > 0)) {
     $page_body .= '
 		<dt>Committees</dt>
 		<dd>';
-    $i=0;
-    foreach ($legislator['committees'] as $committee)
-    {
+    $i = 0;
+    foreach ($legislator['committees'] as $committee) {
         $page_body .= '<a href="/committee/' . $legislator['chamber'] . '/'
             . $committee->shortname . '/">' . $committee->name . '</a>';
-        if ($committee->position == 'chair')
-        {
+        if ($committee->position == 'chair') {
             $page_body .= ' (Chair)';
-        }
-        elseif ($committee->position == 'vice chair')
-        {
+        } elseif ($committee->position == 'vice chair') {
             $page_body .= ' (Vice Chair)';
         }
-        if ($i < count($legislator['committees'])-1)
-        {
+        if ($i < count($legislator['committees']) - 1) {
             $page_body .= ', ';
         }
         $i++;
     }
     $page_body .= '</dd>';
 }
-if (($legislator['age'] != date('Y')) && !empty($legislator['age']))
-{
+if (($legislator['age'] != date('Y')) && !empty($legislator['age'])) {
     $page_body .= '<dt>Age</dt>
 		<dd>' . $legislator['age'] . '</dd>';
 }
-if (!empty($legislator['website']))
-{
+if (!empty($legislator['website'])) {
     $page_body .= '
 		<dt>Website</dt>
 		<dd><a href="' . $legislator['website'] . '">' . $legislator['website_name'] . '</a></dd>';
 }
-if (!empty($legislator['twitter']))
-{
+if (!empty($legislator['twitter'])) {
     $page_body .= '
 		<dt>Twitter</dt>
 		<dd><a href="https://twitter.com/' . $legislator['twitter'] . '">@' . $legislator['twitter'] . '</a></dd>';
 }
 
-if (!empty($legislator['activity']) && IN_SESSION == true)
-{
+if (!empty($legislator['activity']) && IN_SESSION == true) {
     $page_body .= '
 		<dt>Daily Activity</dt>
 		<dd id="activity">
@@ -499,32 +443,26 @@ $sql = 'SELECT representatives.party, COUNT(*) AS number
 
 $result = mysqli_query($GLOBALS['db'], $sql);
 $tmp = array();
-while ($copatron = mysqli_fetch_array($result))
-{
+while ($copatron = mysqli_fetch_array($result)) {
     $tmp[$copatron{'party'}] = $copatron['number'];
 }
 $total = array_sum($tmp);
-if ($total > 0)
-{
+if ($total > 0) {
     arsort($tmp);
 
     # Create the text that we'll use below in the copatroning stats.
-    $introduced = round((current($tmp)/$total)*100) . '% of bills ' . $legislator['pronoun']
-    . ' copatroned were introduced by ' . ((key($tmp)=='R') ? 'Republicans' : 'Democrats') . '. ';
+    $introduced = round((current($tmp) / $total) * 100) . '% of bills ' . $legislator['pronoun']
+    . ' copatroned were introduced by ' . ((key($tmp) == 'R') ? 'Republicans' : 'Democrats') . '. ';
 
     # Populate an array that we use to determine overall partisanship. 0 = Democratic and 100 =
     # Republican. Because our number is based on the majority support, we need to rescale it.
-    if (key($tmp)=='D')
-    {
-        $tmp = round((current($tmp)/$total)*100);
-        if ($tmp > 50)
-        {
+    if (key($tmp) == 'D') {
+        $tmp = round((current($tmp) / $total) * 100);
+        if ($tmp > 50) {
             $tmp = 50 - ($tmp - 50);
         }
-    }
-    else
-    {
-        $tmp = round((current($tmp)/$total)*100);
+    } else {
+        $tmp = round((current($tmp) / $total) * 100);
     }
 }
 
@@ -544,33 +482,27 @@ $sql = 'SELECT representatives.party, COUNT(*) AS number
 		GROUP BY representatives.party';
 $result = mysqli_query($GLOBALS['db'], $sql);
 $tmp = array();
-while ($copatron = mysqli_fetch_array($result))
-{
+while ($copatron = mysqli_fetch_array($result)) {
     $tmp[$copatron{'party'}] = $copatron['number'];
 }
 $total = array_sum($tmp);
-if ($total > 0)
-{
+if ($total > 0) {
     arsort($tmp);
 
     # Create the text that we'll use below in the copatroning stats.
     $supporters = 'Of all of the copatrons of ' . (($legislator['sex'] == 'male') ? 'his' : 'her')
-        . ' bills, ' . round((current($tmp)/$total)*100) . '% of them are '
-    . ((key($tmp)=='R') ? 'Republicans' : 'Democrats') . '. ';
+        . ' bills, ' . round((current($tmp) / $total) * 100) . '% of them are '
+    . ((key($tmp) == 'R') ? 'Republicans' : 'Democrats') . '. ';
 
     # Populate an array that we use to determine overall partisanship. 0 = Democratic and 100 =
     # Republican. Because our number is based on the majority support, we need to rescale it.
-    if (key($tmp)=='D')
-    {
-        $tmp = round((current($tmp)/$total)*100);
-        if ($tmp > 50)
-        {
+    if (key($tmp) == 'D') {
+        $tmp = round((current($tmp) / $total) * 100);
+        if ($tmp > 50) {
             $tmp = 50 - ($tmp - 50);
         }
-    }
-    else
-    {
-        $tmp = round((current($tmp)/$total)*100);
+    } else {
+        $tmp = round((current($tmp) / $total) * 100);
     }
 }
 
@@ -592,67 +524,55 @@ $sql = 'SELECT representatives.party, COUNT(*) AS number
 		GROUP BY representatives.party';
 $result = mysqli_query($GLOBALS['db'], $sql);
 $tmp = array();
-while ($copatron = mysqli_fetch_array($result))
-{
+while ($copatron = mysqli_fetch_array($result)) {
     $tmp[$copatron{'party'}] = $copatron['number'];
 }
 $total = array_sum($tmp);
-if ($total > 0)
-{
+if ($total > 0) {
     arsort($tmp);
     # Create the text that we'll use below in the copatroning stats.
     $pool = 'Of all of the copatrons of all of the bills that '
         . (($legislator['sex'] == 'male') ? 'he' : 'she') . ' also copatroned, '
-        . round((current($tmp)/$total)*100) . '% of them are '
-    . ((key($tmp)=='R') ? 'Republicans' : 'Democrats') . '. ';
+        . round((current($tmp) / $total) * 100) . '% of them are '
+    . ((key($tmp) == 'R') ? 'Republicans' : 'Democrats') . '. ';
 
     # Populate an array that we use to determine overall partisanship. 0 = Democratic and 100 =
     # Republican. Because our number is based on the majority support, we need to rescale it.
-    if (key($tmp)=='D')
-    {
-        $tmp = round((current($tmp)/$total)*100);
-        if ($tmp > 50)
-        {
+    if (key($tmp) == 'D') {
+        $tmp = round((current($tmp) / $total) * 100);
+        if ($tmp > 50) {
             $tmp = 50 - ($tmp - 50);
         }
-    }
-    else
-    {
-        $tmp = round((current($tmp)/$total)*100);
+    } else {
+        $tmp = round((current($tmp) / $total) * 100);
     }
 }
 
 
 # Display how partisan that this legislator's record is, in light of his copatroning habits.
 # We've calculated these copatroning habits via a cron job already.
-if (!empty($legislator['partisanship']))
-{
+if (!empty($legislator['partisanship'])) {
     $partisanship = '
 		<div id="partisanship-graph">
 			<div style="width: ' . $legislator['partisanship'] . '%;"></div>
 		</div>';
 }
 
-if (isset($introduced) || isset($supporters) || isset($pool))
-{
+if (isset($introduced) || isset($supporters) || isset($pool)) {
     $page_body .= '<dt>Copatroning Habits</dt>
 			<dd id="copatron">';
-    if (isset($introduced))
-    {
+    if (isset($introduced)) {
         $page_body .= $introduced;
     }
-    if (isset($supporters))
-    {
+    if (isset($supporters)) {
         $page_body .= $supporters;
     }
-    if (isset($pool))
-    {
+    if (isset($pool)) {
         $page_body .= $pool;
     }
     $page_body .= '</dd>';
 }
-if (isset($partisanship))
-{
+if (isset($partisanship)) {
     $page_body .= '
 			<dt>Partisanship</dt>
 			<dd id="partisanship">
@@ -672,15 +592,13 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 		ORDER BY count DESC';
 $result = mysqli_query($GLOBALS['db'], $sql);
 $tag_count = mysqli_num_rows($result);
-if ($tag_count > 0)
-{
+if ($tag_count > 0) {
     $page_body .= '
 		<dt>Tag Cloud <a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-f4eee5.gif" class="help-icon" alt="?" /></a></dt>
 		<dd>
 			<div class="tags">';
     # Build up an array of tags, with the key being the tag and the value being the count.
-    while ($tag = mysqli_fetch_array($result))
-    {
+    while ($tag = mysqli_fetch_array($result)) {
         $tag = array_map('stripslashes', $tag);
         $tags[$tag{'tag'}] = $tag['count'];
     }
@@ -688,22 +606,18 @@ if ($tag_count > 0)
     # Sort the tags in reverse order by key (their count), shave off the top 30, and then
     # resort alphabetically.
     arsort($tags);
-    $tags = array_slice($tags, 0, 30, TRUE);
+    $tags = array_slice($tags, 0, 30, true);
     ksort($tags);
 
     # Establish a scale -- the average size in this list should be 1.25em, with the scale
     # moving up and down from there.
     $multiple = 1.25 / (array_sum($tags) / count($tags));
 
-    foreach ($tags as $tag => $count)
-    {
+    foreach ($tags as $tag => $count) {
         $size = round(($count * $multiple), 1);
-        if ($size > 4)
-        {
+        if ($size > 4) {
             $size = 4;
-        }
-        elseif ($size < .75)
-        {
+        } elseif ($size < .75) {
             $size = .75;
         }
 
@@ -713,8 +627,7 @@ if ($tag_count > 0)
 		</dd>';
 }
 
-if (!empty($legislator['batting']))
-{
+if (!empty($legislator['batting'])) {
     $page_body .= '<dt>Bills Passed</dt>
 		<dd>' . round(($legislator['batting']['passed'] / $legislator['batting']['total'] * 100), 1) . '%
 		in ' . $batting_year . '</dd>';
@@ -730,8 +643,7 @@ if (!empty($legislator['batting']))
         . ' report)</a></dd>';
 }*/
 
-if (!empty($legislator['bio']))
-{
+if (!empty($legislator['bio'])) {
     $page_body .= '
 		<dt>Bio</dt>
 		<dd>' . nl2p($legislator['bio']) . '</dd>';
@@ -807,19 +719,13 @@ $newsfeed->handle_content_type();
  * Iterate through the returned feed, limited to 5 items.
  */
 $rss_count = 0;
-foreach ($newsfeed->get_items() as $item)
-{
-
+foreach ($newsfeed->get_items() as $item) {
     $tmp = explode(' - ', $item->get_title());
     $title = '';
-    for ($i=0; $i<count($tmp); $i++)
-    {
-        if ($i < (count($tmp) - 1))
-        {
+    for ($i = 0; $i < count($tmp); $i++) {
+        if ($i < (count($tmp) - 1)) {
             $title .= $tmp[$i];
-        }
-        else
-        {
+        } else {
             $source = $tmp[$i];
         }
     }
@@ -837,7 +743,7 @@ foreach ($newsfeed->get_items() as $item)
     $summary = preg_replace('/([0-9]*) hour(s*) ago/Di', '', $summary);
     # Hack off the state that often leads off the article.
     $summary = preg_replace('/,&nbsp;([A-Z]{2})&nbsp;- /D', '', $summary);
-    
+
     $page_body .= '
         <tr>
         <td>
@@ -847,11 +753,9 @@ foreach ($newsfeed->get_items() as $item)
         </tr>';
 
     $rss_count++;
-    if ($rss_count == 5)
-    {
+    if ($rss_count == 5) {
         break;
     }
-
 }
 
 # Provide a link to read more.
@@ -864,9 +768,7 @@ $page_body .= '
 $page_body .= '</tbody></table></div>';
 
 # News from the legislator's website.
-if (!empty($legislator['rss_url']))
-{
-
+if (!empty($legislator['rss_url'])) {
     $newsfeed->set_feed_url($legislator['rss_url']);
     $newsfeed->init();
     $newsfeed->handle_content_type();
@@ -877,18 +779,15 @@ if (!empty($legislator['rss_url']))
 		<table style="width: 100%">
             <tbody>
             <caption>From the Legislator’s Website</caption>';
-   
+
     $rss_count = 0;
-    foreach ($newsfeed->get_items() as $item)
-    {
-        
+    foreach ($newsfeed->get_items() as $item) {
         $page_body .= '
             <tr><td>
             <h3><a href="' . $item->get_permalink() . '">' . $item->get_title() . '</a></h3>' .
             '<p>';
         $page_body .= $item->get_date('F j, Y') . '<br />';
         $page_body .= strip_tags($item->get_description()) . '</p></td></tr>';
-    
     }
     # End the DIV for news mentions.
     $page_body .= '
@@ -897,9 +796,8 @@ if (!empty($legislator['rss_url']))
 	</div>';
 }
 
-if ($legislator['videos'] !== FALSE)
-{
-    $video = new Video;
+if ($legislator['videos'] !== false) {
+    $video = new Video();
     $video->legislator_id = $legislator['id'];
     $video->by_legislator();
 
@@ -923,8 +821,7 @@ if ($legislator['videos'] !== FALSE)
 			/* Create the playlist. */
 			var allVideos = [';
 
-    foreach ($video->clips as $clip)
-    {
+    foreach ($video->clips as $clip) {
         $clip = (array) $clip;
         $page_body .= '
 			{
@@ -970,15 +867,13 @@ if ($legislator['videos'] !== FALSE)
 $page_body .= '</div>';
 
 # List the legislator's bills
-if (count($legislator['bills']) > 0)
-{
+if (count($legislator['bills']) > 0) {
     $page_body .= '<div style="clear: both;" id="bills" class="tabs">
 		<h2>Bills</h2>';
 
     $year = 0;
-    $i=0;
-    foreach ($legislator['bills'] as $bill)
-    {
+    $i = 0;
+    foreach ($legislator['bills'] as $bill) {
         $bill = (array) $bill;
         $bills[$bill{'year'}][] = $bill;
     }
@@ -988,15 +883,11 @@ if (count($legislator['bills']) > 0)
 		<ul>';
 
     # Step through each year and generate a tab.
-    foreach ($bills as $year => $bill)
-    {
-        if (count($bills) > 9)
-        {
+    foreach ($bills as $year => $bill) {
+        if (count($bills) > 9) {
             $page_body .= '
 				<li><a href="#' . $year . '">' . preg_replace('/^20/', "‘", $year) . '</a></li>';
-        }
-        else
-        {
+        } else {
             $page_body .= '
 				<li><a href="#' . $year . '">' . $year . '</a></li>';
         }
@@ -1007,14 +898,12 @@ if (count($legislator['bills']) > 0)
 		</ul>';
 
     # Now step through each year, and each bill within each year, and generate the tab's data.
-    foreach ($bills as $year => $year_bills)
-    {
+    foreach ($bills as $year => $year_bills) {
         $page_body .= '
 			<div id="' . $year . '" class="bills">
 				<ul>';
 
-        foreach ($year_bills as $bill)
-        {
+        foreach ($year_bills as $bill) {
             $page_body .= '
             <li><a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number']) . '/" class="balloon">' . mb_strtoupper($bill['number']) . balloon($bill, 'bill-noleg') . '</a>: ' . $bill['catch_line'] . '</li>';
         }
@@ -1029,7 +918,7 @@ if (count($legislator['bills']) > 0)
 }
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

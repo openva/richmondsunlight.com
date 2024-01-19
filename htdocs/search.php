@@ -18,7 +18,7 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
@@ -35,8 +35,7 @@ $p = $_REQUEST['p'];
 
 # Clean up the variables.
 $per_page = 10;
-if (empty($p) || !is_numeric($p))
-{
+if (empty($p) || !is_numeric($p)) {
     $p = 1;
 }
 
@@ -44,8 +43,7 @@ if (empty($p) || !is_numeric($p))
 # rather than empty, because an empty variable signifies all years, whereas *no*
 # variable means a year has not been selected, and thus the current year is defaulted
 # to.
-if (!isset($year) || !is_numeric($p))
-{
+if (!isset($year) || !is_numeric($p)) {
     $year = SESSION_YEAR;
 }
 
@@ -58,8 +56,7 @@ $page_sidebar = '
 		<form method="get" action="/search/">
 			<fieldset name="year">
 				<legend name="year">Year</legend>';
-for ($i=2006; $i<=SESSION_YEAR; $i++)
-{
+for ($i = 2006; $i <= SESSION_YEAR; $i++) {
     $page_sidebar .= '<input type="radio" name="year" id="year-' . $i . ' " value="' . $i . ' "' . ($year == $i ? ' checked="checked"' : '') . ' /><label for="year-' . $i . ' ">' . $i . ' </label><br />';
 }
 
@@ -73,16 +70,14 @@ $page_sidebar .= '
 
 # PAGE CONTENT
 
-if (!empty($q))
-{
+if (!empty($q)) {
     # Clean up the query.
     $q = trim($q);
 
     # If it's a bill, just redirect to the bill page.
-    if (preg_match('/([hs]{1})([bjr]{1})([[:space:]]?)([0-9]+)/Di', $q))
-    {
+    if (preg_match('/([hs]{1})([bjr]{1})([[:space:]]?)([0-9]+)/Di', $q)) {
         $q = str_replace(' ', '', $q);
-        header('Location: http://'. $_SERVER['SERVER_NAME'] .'/bill/' . SESSION_YEAR . '/' . mb_strtolower($q) . '/');
+        header('Location: http://' . $_SERVER['SERVER_NAME'] . '/bill/' . SESSION_YEAR . '/' . mb_strtolower($q) . '/');
         exit;
     }
 
@@ -92,7 +87,7 @@ if (!empty($q))
     # Connect to Sphinx and issue a query.
     $sphinx = new SphinxClient();
     $sphinx->SetServer('localhost', 9312);
-    $sphinx->SetLimits((($p-1)*$per_page), $per_page);
+    $sphinx->SetLimits((($p - 1) * $per_page), $per_page);
     $sphinx->SetFieldWeights(
         array(
             'catch_line' => 50,
@@ -103,8 +98,7 @@ if (!empty($q))
     );
 
     # If a year has been specified in which to search, filter against that.
-    if (!empty($year))
-    {
+    if (!empty($year)) {
         $sphinx->SetFilter('year', array($year));
     }
 
@@ -112,30 +106,26 @@ if (!empty($q))
     $result = $sphinx->Query($q, 'bills');
 
     # If there's an error, return a warning and bail.
-    if ($result === false)
-    {
+    if ($result === false) {
         $page_body .= '<p>An error occurred, so no results could be found.</p>';
     }
     # If everything is A-OK, then list the results.
-    else
-    {
+    else {
         $page_body .= '<p>' . number_format($result['total_found']) . ' results found.</p>
 		<div class="results">';
 
         # Iterate through the results and build up a list of IDs.
-        foreach ($result['matches'] as $law_id => $details)
-        {
+        foreach ($result['matches'] as $law_id => $details) {
             $ids[] = $law_id;
         }
 
         # Feed the resulting list of IDs to the function that will retrieve them.
-        $bills = new Bill2;
+        $bills = new Bill2();
         $bill_list = new stdClass();
-        $i=0;
+        $i = 0;
         $documents = array();
 
-        foreach ($ids as $bills->id)
-        {
+        foreach ($ids as $bills->id) {
             $tmp = $bills->info();
             $bill_list->$i = $tmp;
             $documents[] = strip_tags($tmp['summary']);
@@ -144,20 +134,19 @@ if (!empty($q))
 
         # Define the options that we'll use for our excerption query.
         $options = array(
-            'before_match'		=> '<strong>',
-            'after_match'		=> '</strong>',
-            'chunk_separator'	=> ' .&thinsp;.&thinsp;. ',
-            'limit'				=> 250,
-            'around'			=> 25,
-            'single_passage'	=> true,
+            'before_match'      => '<strong>',
+            'after_match'       => '</strong>',
+            'chunk_separator'   => ' .&thinsp;.&thinsp;. ',
+            'limit'             => 250,
+            'around'            => 25,
+            'single_passage'    => true,
         );
 
         # Ask Sphinx to provide us with excerpts for each of these results.
         $excerpts = $sphinx->BuildExcerpts($documents, 'bills', $q, $options);
 
-        $i=0;
-        foreach ($bill_list as $search_result)
-        {
+        $i = 0;
+        foreach ($bill_list as $search_result) {
             $page_body .= '<h2><a href="' . $search_result['url'] . '">' . $search_result['catch_line']
                 . ' (' . mb_strtoupper($search_result['number']) . ')</a></h2>
 				<p class="excerpt">' . $excerpts[$i] . '</p>
@@ -167,30 +156,23 @@ if (!empty($q))
         }
 
         # List the page numbers.
-        if ($result['total_found'] > $per_page)
-        {
+        if ($result['total_found'] > $per_page) {
             $page_body .= '<ul class="paging">';
 
-            for ($i=1; ($i * $per_page) <= (ceil($result['total_found']/10)*10); $i++)
-            {
-
+            for ($i = 1; ($i * $per_page) <= (ceil($result['total_found'] / 10) * 10); $i++) {
                 # Assemble the URL for this page link.
                 $url = '/search/?q=' . urlencode($q) . '&amp;p=' . $i;
-                if (isset($year))
-                {
+                if (isset($year)) {
                     $url .= '&amp;year=' . urlencode($year);
                 }
-                if (isset($sort))
-                {
+                if (isset($sort)) {
                     $url .= '&amp;sort=' . urlencode($sort);
                 }
-                if (isset($per_page))
-                {
+                if (isset($per_page)) {
                     $url .= '&amp;per_page=' . urlencode($per_page);
                 }
                 $page_body .= '<li><a href="' . $url . '"';
-                if ($i == $p)
-                {
+                if ($i == $p) {
                     $page_body .= ' class="current"';
                 }
                 $page_body .= '>' . $i . '</a></li>';
@@ -205,14 +187,13 @@ if (!empty($q))
 }
 
 # If the page is being loaded straight.
-else
-{
+else {
     # Display a blank form.
     $page_body = search_form();
 }
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

@@ -12,19 +12,15 @@
 # Any function that isn't included here will be included if it is requested.
 function __autoload_libraries($name)
 {
-    if (php_sapi_name() == 'cli')
-    {
+    if (php_sapi_name() == 'cli') {
         $includes_dir = __DIR__ . '/';
-    }
-    else
-    {
+    } else {
         $includes_dir = realpath($_SERVER['DOCUMENT_ROOT']) . '/includes/';
     }
 
-    if (file_exists($includes_dir . 'class.' . $name . '.php') === TRUE)
-    {
+    if (file_exists($includes_dir . 'class.' . $name . '.php') === true) {
         include 'class.' . $name . '.php';
-        return TRUE;
+        return true;
     }
 }
 
@@ -34,19 +30,15 @@ spl_autoload_register('__autoload_libraries');
 function connect_to_db($type = 'old')
 {
 
-    if ($type == 'old')
-    {
-        $database = new Database;
+    if ($type == 'old') {
+        $database = new Database();
         $database->connect_old();
-    }
-    elseif ($type == 'pdo')
-    {
-        $database = new Database;
+    } elseif ($type == 'pdo') {
+        $database = new Database();
         $database->connect();
     }
 
     return false;
-
 }
 
 
@@ -54,16 +46,14 @@ function connect_to_db($type = 'old')
 # Makes sure that an e-mail address has a valid format.
 function validate_email($email)
 {
-    if (empty($email))
-    {
-        return FALSE;
+    if (empty($email)) {
+        return false;
     }
 
-    if (filter_var($email, FILTER_VALIDATE_EMAIL))
-    {
+    if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
         return true;
     }
-    return FALSE;
+    return false;
 }
 
 
@@ -73,12 +63,10 @@ function validate_email($email)
 # as can be.  If there's no text, then it returns false.
 function pivot($text)
 {
-    if (empty($text))
-    {
-        return FALSE;
+    if (empty($text)) {
+        return false;
     }
-    if (mb_strpos($text, ', ') !== false)
-    {
+    if (mb_strpos($text, ', ') !== false) {
         $str = explode(",", $text);
         $text = $str[1] . ' ' . $str[0];
         return trim($text);
@@ -89,8 +77,7 @@ function pivot($text)
 function array_map_multi($func, $arr)
 {
     $newArr = array();
-    foreach ($arr as $key => $value)
-    {
+    foreach ($arr as $key => $value) {
         $newArr[$key] = (is_array($value) ? array_map_multi($func, $value) : $func($value));
     }
     return $newArr;
@@ -103,8 +90,7 @@ function search_form($q)
     $returned_data = '
 		<form method="get" action="/search/">
 		<input type="text" name="q" class="search" size="50" ';
-    if (!empty($q))
-    {
+    if (!empty($q)) {
         $q = htmlspecialchars($q);
         $returned_data .= 'value="' . $q . '" ';
     }
@@ -115,9 +101,8 @@ function search_form($q)
 # Spam-proof an e-mail address.
 function spam_proof($email)
 {
-    if (empty($email))
-    {
-        return FALSE;
+    if (empty($email)) {
+        return false;
     }
     $email = str_replace('@', '&#064;', $email);
     return $email;
@@ -127,35 +112,22 @@ function spam_proof($email)
 # comments, which uses a Flickr-style time-elapsed-since-posting datestamp.
 function seconds_to_units($seconds)
 {
-    if ($seconds == 0)
-    {
+    if ($seconds == 0) {
         $returned_data = 'just now';
-    }
-    else
-    {
-        if ($seconds < 60)
-        {
+    } else {
+        if ($seconds < 60) {
             $returned_data = $seconds . ' second';
-        }
-        elseif ($seconds < 3600)
-        {
+        } elseif ($seconds < 3600) {
             $returned_data = round($seconds / 60) . ' minute';
-        }
-        elseif ($seconds < 86400)
-        {
+        } elseif ($seconds < 86400) {
             $returned_data = round($seconds / 60 / 60) . ' hour';
-        }
-        elseif ($seconds < 2592000)
-        {
+        } elseif ($seconds < 2592000) {
             $returned_data = round($seconds / 60 / 60 / 24) . ' day';
-        }
-        elseif ($seconds >= 2592000)
-        {
+        } elseif ($seconds >= 2592000) {
             $returned_data = round($seconds / 60 / 60 / 24 / 30) . ' month';
         }
 
-        if (mb_substr($returned_data, 0, 2) != '1 ')
-        {
+        if (mb_substr($returned_data, 0, 2) != '1 ') {
             $returned_data .= 's';
         }
         $returned_data .= ' ago';
@@ -181,8 +153,7 @@ function seconds_to_time($seconds, $lpad = false)
 # Create a new user. We wrap the function in function_exists() because WordPress 2.6 turns out
 # to use exactly the same function name, thus preventing the Richmond Sunlight blog from
 # working. So here's the solution. We don't need create_user() on the blog, anyway.
-if (!function_exists('create_user'))
-{
+if (!function_exists('create_user')) {
     function create_user($options)
     {
         # Turn the URL-style options into an array.
@@ -191,20 +162,14 @@ if (!function_exists('create_user'))
         $options = array_map('urldecode', $options);
 
         # If this isn't a Dashboard user, parse the variables in the standard way.
-        if ($options['dashboard'] != 'y')
-        {
-            if (count($options) > 0)
-            {
+        if ($options['dashboard'] != 'y') {
+            if (count($options) > 0) {
                 $sql_inserts = '';
-                foreach ($options as $key => $value)
-                {
+                foreach ($options as $key => $value) {
                     $value = mysqli_real_escape_string($GLOBALS['db'], $value);
-                    if (empty($value))
-                    {
+                    if (empty($value)) {
                         $sql_inserts .= ', ' . $key . ' = NULL';
-                    }
-                    else
-                    {
+                    } else {
                         $sql_inserts .= ', ' . $key . ' = "' . $value . '"';
                     }
                 }
@@ -212,45 +177,32 @@ if (!function_exists('create_user'))
         }
 
         # But if this is a Dashboard user, parse the variables out into two separate SQL inserts.
-        elseif ($options['dashboard'] == 'y')
-        {
-            if (count($options) > 0)
-            {
+        elseif ($options['dashboard'] == 'y') {
+            if (count($options) > 0) {
                 $users_inserts = '';
                 $dashboard_inserts = '';
-                foreach ($options as $key => $value)
-                {
+                foreach ($options as $key => $value) {
                     # Make the data safe for the database.
                     $value = mysqli_real_escape_string($GLOBALS['db'], $value);
 
                     # Determine which SQL string this data should be appended to.
-                    if (($key == 'organization') || ($key == 'type') || ($key == 'expires'))
-                    {
+                    if (($key == 'organization') || ($key == 'type') || ($key == 'expires')) {
                         $dashboard_inserts .= ', ' . $key . ' = "' . $value . '"';
-                    }
-                    elseif ($key == 'dashboard')
-                    {
+                    } elseif ($key == 'dashboard') {
                         while (false);
-                    }
-                    else
-                    {
-
+                    } else {
                         /*
                          * Handle passwords differently, since they need to be hashed.
                          */
-                        if ($key == 'password')
-                        {
+                        if ($key == 'password') {
                             /*
                              * Sometimes we're getting blank passwords. I'm not sure what that's
                              * about. So make sure they're not empty.
                              */
-                            if (trim($value) != '')
-                            {
+                            if (trim($value) != '') {
                                 $users_inserts .= ', ' . $key . ' = MD5("' . $value . '")';
                             }
-                        }
-                        else
-                        {
+                        } else {
                             $users_inserts .= ', ' . $key . ' = "' . $value . '"';
                         }
                     }
@@ -265,22 +217,17 @@ if (!function_exists('create_user'))
         $sql = 'INSERT INTO users
 				SET cookie_hash="' . $_SESSION['id'] . '",
 				ip="' . $_SERVER['REMOTE_ADDR'] . '", date_created=now()';
-        if (!empty($users_inserts))
-        {
+        if (!empty($users_inserts)) {
             $sql .= $users_inserts;
         }
-        if (!empty($sql_inserts))
-        {
+        if (!empty($sql_inserts)) {
             $sql .= $sql_inserts;
         }
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (!$result)
-        {
-            return FALSE;
+        if (!$result) {
+            return false;
         }
-        if ($options['dashboard'] == 'y')
-        {
-
+        if ($options['dashboard'] == 'y') {
             # Get the user's ID.
             $user_id = mysqli_insert_id($GLOBALS['db']);
 
@@ -293,8 +240,7 @@ if (!function_exists('create_user'))
             $sql = 'INSERT INTO dashboard_user_data
 					SET user_id = ' . $user_id . ', email_active="y", last_access=now(),
 					date_created=now(), unsub_hash="' . $hash . '"';
-            if (!empty($dashboard_inserts))
-            {
+            if (!empty($dashboard_inserts)) {
                 $sql .= $dashboard_inserts;
             }
             mysqli_query($GLOBALS['db'], $sql);
@@ -305,27 +251,21 @@ if (!function_exists('create_user'))
 # Retrieve a user's data, returning an array.
 function get_user()
 {
-    if (!isset($_SESSION['id']))
-    {
-        return FALSE;
+    if (!isset($_SESSION['id'])) {
+        return false;
     }
 
-    
-    # If we have a record of this user cached in Memcached, use that instead.
-    if (MEMCACHED_SERVER != '')
-    {
 
+    # If we have a record of this user cached in Memcached, use that instead.
+    if (MEMCACHED_SERVER != '') {
         $mc = new Memcached();
         $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
         $result = $mc->get('user-' . $_SESSION['id']);
-        if ($mc->getResultCode() === 0)
-        {
-            if ($result != FALSE)
-            {
+        if ($mc->getResultCode() === 0) {
+            if ($result != false) {
                 return $result;
             }
         }
-
     }
 
     $sql = 'SELECT users.id, users.name, users.password, users.email, users.url,
@@ -338,16 +278,14 @@ function get_user()
 				ON users.id=dashboard_user_data.user_id
 			WHERE users.cookie_hash="' . mysqli_real_escape_string($GLOBALS['db'], $_SESSION['id']) . '"';
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) == 0)
-    {
-        return FALSE;
+    if (mysqli_num_rows($result) == 0) {
+        return false;
     }
     $user = mysqli_fetch_array($result, MYSQL_ASSOC);
     $user = array_map('stripslashes', $user);
 
     # Cache this user's data, and save it for one hour. (User sessions are unlikely to last longer.)
-    if (MEMCACHED_SERVER != '')
-    {
+    if (MEMCACHED_SERVER != '') {
         $mc->set('user-' . $_SESSION['id'], $user, (60 * 60));
     }
 
@@ -358,42 +296,34 @@ function get_user()
 function update_user($options)
 {
     parse_str($options, $options);
-    if (count($options) < 1)
-    {
-        return FALSE;
+    if (count($options) < 1) {
+        return false;
     }
-    if (empty($_SESSION['id']))
-    {
-        return FALSE;
+    if (empty($_SESSION['id'])) {
+        return false;
     }
 
     # If this user's data is cached in APC, delete it, since it's now out of date.
-    if (apc_exists('user-' . $_SESSION['id']) !== false)
-    {
+    if (apc_exists('user-' . $_SESSION['id']) !== false) {
         apc_delete('user-' . $_SESSION['id']);
     }
 
     # Assemble the SQL string.
     $sql = 'UPDATE users SET ';
     $first = 'yes';
-    foreach ($options as $key => $value)
-    {
+    foreach ($options as $key => $value) {
         $value = mysqli_real_escape_string($GLOBALS['db'], $value);
-        if (!isset($first))
-        {
+        if (!isset($first)) {
             $sql .= ', ';
-        }
-        else
-        {
+        } else {
             unset($first);
         }
         $sql .= $key . ' = "' . $value . '"';
     }
     $sql .= ' WHERE cookie_hash="' . mysqli_real_escape_string($GLOBALS['db'], $_SESSION['id']) . '"';
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (!$result)
-    {
-        return FALSE;
+    if (!$result) {
+        return false;
     }
     return true;
 }
@@ -417,33 +347,27 @@ function logged_in($registered = '')
     /*
      * If there's no session ID, they can't be registered.
      */
-    if (empty($_SESSION['id']))
-    {
-        return FALSE;
+    if (empty($_SESSION['id'])) {
+        return false;
     }
 
     /*
      * If this session ID is stored in Memcached, then we don't need to query the database.
      */
-    if (MEMCACHED_SERVER != '')
-    {
-
+    if (MEMCACHED_SERVER != '') {
         $mc = new Memcached();
         $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
         $result = $mc->get('user-session-' . $_SESSION['id']);
-        if ($mc->getResultCode() === 0)
-        {
-            return TRUE;
+        if ($mc->getResultCode() === 0) {
+            return true;
         }
-    
     }
 
     /*
      * If this is a registered visitor (as opposed to somebody who has posted comments,
      * voted, etc., but hasn't created an account).
      */
-    if ($registered == 'registered')
-    {
+    if ($registered == 'registered') {
         $sql = 'SELECT id
 				FROM users
 				WHERE cookie_hash="' . mysqli_real_escape_string($GLOBALS['db'], $_SESSION['id']) . '"
@@ -453,8 +377,7 @@ function logged_in($registered = '')
     /*
      * If this is not a registered user.
      */
-    else
-    {
+    else {
         $sql = 'SELECT id
 				FROM users
 				WHERE cookie_hash="' . mysqli_real_escape_string($GLOBALS['db'], $_SESSION['id']) . '"';
@@ -464,29 +387,23 @@ function logged_in($registered = '')
     /*
      * If one result is returned, then this user does have an account.
      */
-    if (mysqli_num_rows($result) == 1)
-    {
-        if ($registered == 'registered')
-        {
-            $is_registered = TRUE;
-        }
-        else
-        {
-            $is_registered = FALSE;
+    if (mysqli_num_rows($result) == 1) {
+        if ($registered == 'registered') {
+            $is_registered = true;
+        } else {
+            $is_registered = false;
         }
         /*
          * Store this session in Memcached for the next 30 minutes.
          */
-        if (MEMCACHED_SERVER != '')
-        {
+        if (MEMCACHED_SERVER != '') {
             $mc->set('user-session-' . $_SESSION['id'], $is_registered, (60 * 30));
         }
-        
-        return true;
 
+        return true;
     }
 
-    return FALSE;
+    return false;
 }
 
 # Determine whether the current user is blacklisted from participating, by looking at his cumulative
@@ -502,13 +419,10 @@ function blacklisted()
     $result = mysqli_query($GLOBALS['db'], $sql);
     $data = mysqli_fetch_array($result);
     $score = $data['score'];
-    if ($score >= 20)
-    {
+    if ($score >= 20) {
         return true;
-    }
-    else
-    {
-        return FALSE;
+    } else {
+        return false;
     }
 }
 
@@ -522,8 +436,7 @@ function blacklist($word)
 				WHERE cookie_hash = "' . $_SESSION['id'] . '"),
 			date_created=now(),
 			score=20';
-    if (isset($word))
-    {
+    if (isset($word)) {
         $sql .= ', reason="dirty word - ' . $word . '"';
     }
 
@@ -535,7 +448,7 @@ function balloon($bill, $type)
 {
     // We don't use this anymore, but there are still calls to it.
     // DON'T return true. Due to an evaluation problem, it will insert a "1"!
-    return FALSE;
+    return false;
 }
 
 
@@ -543,78 +456,60 @@ function balloon($bill, $type)
 # status into meaningful description.
 function explain_status($status)
 {
-    if (empty($status))
-    {
-        return FALSE;
+    if (empty($status)) {
+        return false;
     }
-    if ($status == 'continued')
-    {
+    if ($status == 'continued') {
         return 'Continued to Next Session';
     }
-    if ($status == 'introduced')
-    {
+    if ($status == 'introduced') {
         return 'Introduced';
     }
-    if ($status == 'committee')
-    {
+    if ($status == 'committee') {
         return 'In Committee';
     }
-    if ($status == 'in committee')
-    {
+    if ($status == 'in committee') {
         return 'In Committee';
     }
-    if ($status == 'in subcommittee')
-    {
+    if ($status == 'in subcommittee') {
         return 'In Subcommittee';
     }
-    if ($status == 'failed subcommittee')
-    {
+    if ($status == 'failed subcommittee') {
         return 'Subcommittee Recommends Killing the Bill';
     }
-    if ($status == 'passed subcommittee')
-    {
+    if ($status == 'passed subcommittee') {
         return 'Subcommittee Recommends Passing the Bill';
     }
-    if ($status == 'failed committee')
-    {
+    if ($status == 'failed committee') {
         return 'Failed to Pass in Committee';
     }
-    if ($status == 'stricken')
-    {
+    if ($status == 'stricken') {
         return 'Bill Killed at Sponsor’s Request';
     }
-    if ($status == 'passed house')
-    {
+    if ($status == 'passed house') {
         return 'Passed the House';
     }
-    if ($status == 'passed senate')
-    {
+    if ($status == 'passed senate') {
         return 'Passed the Senate';
     }
-    if ($status == 'passed')
-    {
+    if ($status == 'passed') {
         return 'Passed the General Assembly';
     }
-    if ($status == 'failed')
-    {
+    if ($status == 'failed') {
         return 'Failed to Advance';
     }
-    if ($status == 'approved')
-    {
+    if ($status == 'approved') {
         return 'Signed into Law';
     }
-    if ($status == 'incorporated')
-    {
+    if ($status == 'incorporated') {
         return 'Incorporated into Another Bill';
-    }
-    else
-    {
+    } else {
         return $status;
     }
 }
 
 # A simple wrapper for CURL.
-function get_content($url, $timeout=10)
+function get_content($url, $timeout = 10)
 {
     $ch = curl_init();
 
@@ -623,16 +518,15 @@ function get_content($url, $timeout=10)
     curl_setopt($ch, CURLOPT_TIMEOUT, 60);
     curl_setopt($ch, CURLOPT_MAXREDIRS, 10);
     curl_setopt($ch, CURLOPT_AUTOREFERER, true);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true); 
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     curl_setopt($ch, CURLOPT_ENCODING, 'gzip,deflate');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
     $string = curl_exec($ch);
     curl_close($ch);
 
-    if (empty($string))
-    {
-        return FALSE;
+    if (empty($string)) {
+        return false;
     }
 
     return $string;
@@ -641,9 +535,8 @@ function get_content($url, $timeout=10)
 # Given a district number and a chamber, returns its database ID.
 function district_to_id($number, $chamber)
 {
-    if (!isset($number) || !isset($chamber))
-    {
-        return FALSE;
+    if (!isset($number) || !isset($chamber)) {
+        return false;
     }
 
     # Select the information from the database.
@@ -654,207 +547,207 @@ function district_to_id($number, $chamber)
     $result = mysqli_query($GLOBALS['db'], $sql);
 
     # Continue if we've got a match.
-    if (mysqli_num_rows($result) > 0)
-    {
+    if (mysqli_num_rows($result) > 0) {
         # Return the database ID.
         $district = mysqli_fetch_array($result);
         return $district['id'];
     }
 
-    return FALSE;
+    return false;
 }
 
 # nl2p is WordPress' wpautop(), renamed
 function nl2p($pee, $br = true)
 {
-    
-	$pre_tags = array();
 
-	if ( trim( $pee ) === '' ) {
-		return '';
-	}
+    $pre_tags = array();
 
-	// Just to make things a little easier, pad the end.
-	$pee = $pee . "\n";
+    if (trim($pee) === '') {
+        return '';
+    }
 
-	/*
-	 * Pre tags shouldn't be touched by autop.
-	 * Replace pre tags with placeholders and bring them back after autop.
-	 */
-	if ( strpos( $pee, '<pre' ) !== false ) {
-		$pee_parts = explode( '</pre>', $pee );
-		$last_pee  = array_pop( $pee_parts );
-		$pee       = '';
-		$i         = 0;
+    // Just to make things a little easier, pad the end.
+    $pee = $pee . "\n";
 
-		foreach ( $pee_parts as $pee_part ) {
-			$start = strpos( $pee_part, '<pre' );
+    /*
+     * Pre tags shouldn't be touched by autop.
+     * Replace pre tags with placeholders and bring them back after autop.
+     */
+    if (strpos($pee, '<pre') !== false) {
+        $pee_parts = explode('</pre>', $pee);
+        $last_pee  = array_pop($pee_parts);
+        $pee       = '';
+        $i         = 0;
 
-			// Malformed html?
-			if ( $start === false ) {
-				$pee .= $pee_part;
-				continue;
-			}
+        foreach ($pee_parts as $pee_part) {
+            $start = strpos($pee_part, '<pre');
 
-			$name              = "<pre wp-pre-tag-$i></pre>";
-			$pre_tags[ $name ] = substr( $pee_part, $start ) . '</pre>';
+            // Malformed html?
+            if ($start === false) {
+                $pee .= $pee_part;
+                continue;
+            }
 
-			$pee .= substr( $pee_part, 0, $start ) . $name;
-			$i++;
-		}
+            $name              = "<pre wp-pre-tag-$i></pre>";
+            $pre_tags[ $name ] = substr($pee_part, $start) . '</pre>';
 
-		$pee .= $last_pee;
-	}
-	// Change multiple <br>s into two line breaks, which will turn into paragraphs.
-	$pee = preg_replace( '|<br\s*/?>\s*<br\s*/?>|', "\n\n", $pee );
+            $pee .= substr($pee_part, 0, $start) . $name;
+            $i++;
+        }
 
-	$allblocks = '(?:table|thead|tfoot|caption|col|colgroup|tbody|tr|td|th|div|dl|dd|dt|ul|ol|li|pre|form|map|area|blockquote|address|math|style|p|h[1-6]|hr|fieldset|legend|section|article|aside|hgroup|header|footer|nav|figure|figcaption|details|menu|summary)';
+        $pee .= $last_pee;
+    }
+    // Change multiple <br>s into two line breaks, which will turn into paragraphs.
+    $pee = preg_replace('|<br\s*/?>\s*<br\s*/?>|', "\n\n", $pee);
 
-	// Add a double line break above block-level opening tags.
-	$pee = preg_replace( '!(<' . $allblocks . '[\s/>])!', "\n\n$1", $pee );
+    $allblocks = '(?:table|thead|tfoot|caption|col|colgroup|tbody|tr|td|th|div|dl|dd|dt|ul|ol|li|pre|form|map|area|blockquote|address|math|style|p|h[1-6]|hr|fieldset|legend|section|article|aside|hgroup|header|footer|nav|figure|figcaption|details|menu|summary)';
 
-	// Add a double line break below block-level closing tags.
-	$pee = preg_replace( '!(</' . $allblocks . '>)!', "$1\n\n", $pee );
+    // Add a double line break above block-level opening tags.
+    $pee = preg_replace('!(<' . $allblocks . '[\s/>])!', "\n\n$1", $pee);
 
-	// Standardize newline characters to "\n".
-	$pee = str_replace( array( "\r\n", "\r" ), "\n", $pee );
+    // Add a double line break below block-level closing tags.
+    $pee = preg_replace('!(</' . $allblocks . '>)!', "$1\n\n", $pee);
 
-	// Find newlines in all elements and add placeholders.
-	$pee = wp_replace_in_html_tags( $pee, array( "\n" => ' <!-- wpnl --> ' ) );
+    // Standardize newline characters to "\n".
+    $pee = str_replace(array( "\r\n", "\r" ), "\n", $pee);
 
-	// Collapse line breaks before and after <option> elements so they don't get autop'd.
-	if ( strpos( $pee, '<option' ) !== false ) {
-		$pee = preg_replace( '|\s*<option|', '<option', $pee );
-		$pee = preg_replace( '|</option>\s*|', '</option>', $pee );
-	}
+    // Find newlines in all elements and add placeholders.
+    $pee = wp_replace_in_html_tags($pee, array( "\n" => ' <!-- wpnl --> ' ));
 
-	/*
-	 * Collapse line breaks inside <object> elements, before <param> and <embed> elements
-	 * so they don't get autop'd.
-	 */
-	if ( strpos( $pee, '</object>' ) !== false ) {
-		$pee = preg_replace( '|(<object[^>]*>)\s*|', '$1', $pee );
-		$pee = preg_replace( '|\s*</object>|', '</object>', $pee );
-		$pee = preg_replace( '%\s*(</?(?:param|embed)[^>]*>)\s*%', '$1', $pee );
-	}
+    // Collapse line breaks before and after <option> elements so they don't get autop'd.
+    if (strpos($pee, '<option') !== false) {
+        $pee = preg_replace('|\s*<option|', '<option', $pee);
+        $pee = preg_replace('|</option>\s*|', '</option>', $pee);
+    }
 
-	/*
-	 * Collapse line breaks inside <audio> and <video> elements,
-	 * before and after <source> and <track> elements.
-	 */
-	if ( strpos( $pee, '<source' ) !== false || strpos( $pee, '<track' ) !== false ) {
-		$pee = preg_replace( '%([<\[](?:audio|video)[^>\]]*[>\]])\s*%', '$1', $pee );
-		$pee = preg_replace( '%\s*([<\[]/(?:audio|video)[>\]])%', '$1', $pee );
-		$pee = preg_replace( '%\s*(<(?:source|track)[^>]*>)\s*%', '$1', $pee );
-	}
+    /*
+     * Collapse line breaks inside <object> elements, before <param> and <embed> elements
+     * so they don't get autop'd.
+     */
+    if (strpos($pee, '</object>') !== false) {
+        $pee = preg_replace('|(<object[^>]*>)\s*|', '$1', $pee);
+        $pee = preg_replace('|\s*</object>|', '</object>', $pee);
+        $pee = preg_replace('%\s*(</?(?:param|embed)[^>]*>)\s*%', '$1', $pee);
+    }
 
-	// Collapse line breaks before and after <figcaption> elements.
-	if ( strpos( $pee, '<figcaption' ) !== false ) {
-		$pee = preg_replace( '|\s*(<figcaption[^>]*>)|', '$1', $pee );
-		$pee = preg_replace( '|</figcaption>\s*|', '</figcaption>', $pee );
-	}
+    /*
+     * Collapse line breaks inside <audio> and <video> elements,
+     * before and after <source> and <track> elements.
+     */
+    if (strpos($pee, '<source') !== false || strpos($pee, '<track') !== false) {
+        $pee = preg_replace('%([<\[](?:audio|video)[^>\]]*[>\]])\s*%', '$1', $pee);
+        $pee = preg_replace('%\s*([<\[]/(?:audio|video)[>\]])%', '$1', $pee);
+        $pee = preg_replace('%\s*(<(?:source|track)[^>]*>)\s*%', '$1', $pee);
+    }
 
-	// Remove more than two contiguous line breaks.
-	$pee = preg_replace( "/\n\n+/", "\n\n", $pee );
+    // Collapse line breaks before and after <figcaption> elements.
+    if (strpos($pee, '<figcaption') !== false) {
+        $pee = preg_replace('|\s*(<figcaption[^>]*>)|', '$1', $pee);
+        $pee = preg_replace('|</figcaption>\s*|', '</figcaption>', $pee);
+    }
 
-	// Split up the contents into an array of strings, separated by double line breaks.
-	$pees = preg_split( '/\n\s*\n/', $pee, -1, PREG_SPLIT_NO_EMPTY );
+    // Remove more than two contiguous line breaks.
+    $pee = preg_replace("/\n\n+/", "\n\n", $pee);
 
-	// Reset $pee prior to rebuilding.
-	$pee = '';
+    // Split up the contents into an array of strings, separated by double line breaks.
+    $pees = preg_split('/\n\s*\n/', $pee, -1, PREG_SPLIT_NO_EMPTY);
 
-	// Rebuild the content as a string, wrapping every bit with a <p>.
-	foreach ( $pees as $tinkle ) {
-		$pee .= '<p>' . trim( $tinkle, "\n" ) . "</p>\n";
-	}
+    // Reset $pee prior to rebuilding.
+    $pee = '';
 
-	// Under certain strange conditions it could create a P of entirely whitespace.
-	$pee = preg_replace( '|<p>\s*</p>|', '', $pee );
+    // Rebuild the content as a string, wrapping every bit with a <p>.
+    foreach ($pees as $tinkle) {
+        $pee .= '<p>' . trim($tinkle, "\n") . "</p>\n";
+    }
 
-	// Add a closing <p> inside <div>, <address>, or <form> tag if missing.
-	$pee = preg_replace( '!<p>([^<]+)</(div|address|form)>!', '<p>$1</p></$2>', $pee );
+    // Under certain strange conditions it could create a P of entirely whitespace.
+    $pee = preg_replace('|<p>\s*</p>|', '', $pee);
 
-	// If an opening or closing block element tag is wrapped in a <p>, unwrap it.
-	$pee = preg_replace( '!<p>\s*(</?' . $allblocks . '[^>]*>)\s*</p>!', '$1', $pee );
+    // Add a closing <p> inside <div>, <address>, or <form> tag if missing.
+    $pee = preg_replace('!<p>([^<]+)</(div|address|form)>!', '<p>$1</p></$2>', $pee);
 
-	// In some cases <li> may get wrapped in <p>, fix them.
-	$pee = preg_replace( '|<p>(<li.+?)</p>|', '$1', $pee );
+    // If an opening or closing block element tag is wrapped in a <p>, unwrap it.
+    $pee = preg_replace('!<p>\s*(</?' . $allblocks . '[^>]*>)\s*</p>!', '$1', $pee);
 
-	// If a <blockquote> is wrapped with a <p>, move it inside the <blockquote>.
-	$pee = preg_replace( '|<p><blockquote([^>]*)>|i', '<blockquote$1><p>', $pee );
-	$pee = str_replace( '</blockquote></p>', '</p></blockquote>', $pee );
+    // In some cases <li> may get wrapped in <p>, fix them.
+    $pee = preg_replace('|<p>(<li.+?)</p>|', '$1', $pee);
 
-	// If an opening or closing block element tag is preceded by an opening <p> tag, remove it.
-	$pee = preg_replace( '!<p>\s*(</?' . $allblocks . '[^>]*>)!', '$1', $pee );
+    // If a <blockquote> is wrapped with a <p>, move it inside the <blockquote>.
+    $pee = preg_replace('|<p><blockquote([^>]*)>|i', '<blockquote$1><p>', $pee);
+    $pee = str_replace('</blockquote></p>', '</p></blockquote>', $pee);
 
-	// If an opening or closing block element tag is followed by a closing <p> tag, remove it.
-	$pee = preg_replace( '!(</?' . $allblocks . '[^>]*>)\s*</p>!', '$1', $pee );
+    // If an opening or closing block element tag is preceded by an opening <p> tag, remove it.
+    $pee = preg_replace('!<p>\s*(</?' . $allblocks . '[^>]*>)!', '$1', $pee);
 
-	// Optionally insert line breaks.
-	if ( $br ) {
-		// Replace newlines that shouldn't be touched with a placeholder.
-		$pee = preg_replace_callback( '/<(script|style).*?<\/\\1>/s', '_autop_newline_preservation_helper', $pee );
+    // If an opening or closing block element tag is followed by a closing <p> tag, remove it.
+    $pee = preg_replace('!(</?' . $allblocks . '[^>]*>)\s*</p>!', '$1', $pee);
 
-		// Normalize <br>
-		$pee = str_replace( array( '<br>', '<br/>' ), '<br />', $pee );
+    // Optionally insert line breaks.
+    if ($br) {
+        // Replace newlines that shouldn't be touched with a placeholder.
+        $pee = preg_replace_callback('/<(script|style).*?<\/\\1>/s', '_autop_newline_preservation_helper', $pee);
 
-		// Replace any new line characters that aren't preceded by a <br /> with a <br />.
-		$pee = preg_replace( '|(?<!<br />)\s*\n|', "<br />\n", $pee );
+        // Normalize <br>
+        $pee = str_replace(array( '<br>', '<br/>' ), '<br />', $pee);
 
-		// Replace newline placeholders with newlines.
-		$pee = str_replace( '<WPPreserveNewline />', "\n", $pee );
-	}
+        // Replace any new line characters that aren't preceded by a <br /> with a <br />.
+        $pee = preg_replace('|(?<!<br />)\s*\n|', "<br />\n", $pee);
 
-	// If a <br /> tag is after an opening or closing block tag, remove it.
-	$pee = preg_replace( '!(</?' . $allblocks . '[^>]*>)\s*<br />!', '$1', $pee );
+        // Replace newline placeholders with newlines.
+        $pee = str_replace('<WPPreserveNewline />', "\n", $pee);
+    }
 
-	// If a <br /> tag is before a subset of opening or closing block tags, remove it.
-	$pee = preg_replace( '!<br />(\s*</?(?:p|li|div|dl|dd|dt|th|pre|td|ul|ol)[^>]*>)!', '$1', $pee );
-	$pee = preg_replace( "|\n</p>$|", '</p>', $pee );
+    // If a <br /> tag is after an opening or closing block tag, remove it.
+    $pee = preg_replace('!(</?' . $allblocks . '[^>]*>)\s*<br />!', '$1', $pee);
 
-	// Replace placeholder <pre> tags with their original content.
-	if ( ! empty( $pre_tags ) ) {
-		$pee = str_replace( array_keys( $pre_tags ), array_values( $pre_tags ), $pee );
-	}
+    // If a <br /> tag is before a subset of opening or closing block tags, remove it.
+    $pee = preg_replace('!<br />(\s*</?(?:p|li|div|dl|dd|dt|th|pre|td|ul|ol)[^>]*>)!', '$1', $pee);
+    $pee = preg_replace("|\n</p>$|", '</p>', $pee);
 
-	// Restore newlines in all elements.
-	if ( false !== strpos( $pee, '<!-- wpnl -->' ) ) {
-		$pee = str_replace( array( ' <!-- wpnl --> ', '<!-- wpnl -->' ), "\n", $pee );
-	}
+    // Replace placeholder <pre> tags with their original content.
+    if (! empty($pre_tags)) {
+        $pee = str_replace(array_keys($pre_tags), array_values($pre_tags), $pee);
+    }
 
-	return $pee;
+    // Restore newlines in all elements.
+    if (false !== strpos($pee, '<!-- wpnl -->')) {
+        $pee = str_replace(array( ' <!-- wpnl --> ', '<!-- wpnl -->' ), "\n", $pee);
+    }
+
+    return $pee;
 }
 
 /*
  * A helper function for nl2p.
  */
-function wp_replace_in_html_tags( $haystack, $replace_pairs ) {
+function wp_replace_in_html_tags($haystack, $replace_pairs)
+{
     // Find all elements.
-    $textarr = wp_html_split( $haystack );
+    $textarr = wp_html_split($haystack);
     $changed = false;
- 
+
     // Optimize when searching for one item.
-    if ( 1 === count( $replace_pairs ) ) {
+    if (1 === count($replace_pairs)) {
         // Extract $needle and $replace.
-        foreach ( $replace_pairs as $needle => $replace ) {
+        foreach ($replace_pairs as $needle => $replace) {
         }
- 
+
         // Loop through delimiters (elements) only.
-        for ( $i = 1, $c = count( $textarr ); $i < $c; $i += 2 ) {
-            if ( false !== strpos( $textarr[ $i ], $needle ) ) {
-                $textarr[ $i ] = str_replace( $needle, $replace, $textarr[ $i ] );
+        for ($i = 1, $c = count($textarr); $i < $c; $i += 2) {
+            if (false !== strpos($textarr[ $i ], $needle)) {
+                $textarr[ $i ] = str_replace($needle, $replace, $textarr[ $i ]);
                 $changed       = true;
             }
         }
     } else {
         // Extract all $needles.
-        $needles = array_keys( $replace_pairs );
- 
+        $needles = array_keys($replace_pairs);
+
         // Loop through delimiters (elements) only.
-        for ( $i = 1, $c = count( $textarr ); $i < $c; $i += 2 ) {
-            foreach ( $needles as $needle ) {
-                if ( false !== strpos( $textarr[ $i ], $needle ) ) {
-                    $textarr[ $i ] = strtr( $textarr[ $i ], $replace_pairs );
+        for ($i = 1, $c = count($textarr); $i < $c; $i += 2) {
+            foreach ($needles as $needle) {
+                if (false !== strpos($textarr[ $i ], $needle)) {
+                    $textarr[ $i ] = strtr($textarr[ $i ], $replace_pairs);
                     $changed       = true;
                     // After one strtr() break out of the foreach loop and look at next element.
                     break;
@@ -862,88 +755,88 @@ function wp_replace_in_html_tags( $haystack, $replace_pairs ) {
             }
         }
     }
- 
-    if ( $changed ) {
-        $haystack = implode( $textarr );
+
+    if ($changed) {
+        $haystack = implode($textarr);
     }
- 
+
     return $haystack;
 }
 
 /*
  * A helper function for nl2p.
  */
-function wp_html_split( $input ) {
-	return preg_split( get_html_split_regex(), $input, -1, PREG_SPLIT_DELIM_CAPTURE );
+function wp_html_split($input)
+{
+    return preg_split(get_html_split_regex(), $input, -1, PREG_SPLIT_DELIM_CAPTURE);
 }
 
 /*
  * A helper function for nl2p.
  */
-function _autop_newline_preservation_helper( $matches ) {
-	return str_replace( "\n", '<WPPreserveNewline />', $matches[0] );
+function _autop_newline_preservation_helper($matches)
+{
+    return str_replace("\n", '<WPPreserveNewline />', $matches[0]);
 }
 
 /*
  * A helper function for nl2p.
  */
-function get_html_split_regex() {
-	static $regex;
+function get_html_split_regex()
+{
+    static $regex;
 
-	if ( ! isset( $regex ) ) {
+    if (! isset($regex)) {
 		// phpcs:disable Squiz.Strings.ConcatenationSpacing.PaddingFound -- don't remove regex indentation
-		$comments =
-			'!'             // Start of comment, after the <.
-			. '(?:'         // Unroll the loop: Consume everything until --> is found.
-			.     '-(?!->)' // Dash not followed by end of comment.
-			.     '[^\-]*+' // Consume non-dashes.
-			. ')*+'         // Loop possessively.
-			. '(?:-->)?';   // End of comment. If not found, match all input.
+        $comments =
+            '!'             // Start of comment, after the <.
+            . '(?:'         // Unroll the loop: Consume everything until --> is found.
+            .     '-(?!->)' // Dash not followed by end of comment.
+            .     '[^\-]*+' // Consume non-dashes.
+            . ')*+'         // Loop possessively.
+            . '(?:-->)?';   // End of comment. If not found, match all input.
 
-		$cdata =
-			'!\[CDATA\['    // Start of comment, after the <.
-			. '[^\]]*+'     // Consume non-].
-			. '(?:'         // Unroll the loop: Consume everything until ]]> is found.
-			.     '](?!]>)' // One ] not followed by end of comment.
-			.     '[^\]]*+' // Consume non-].
-			. ')*+'         // Loop possessively.
-			. '(?:]]>)?';   // End of comment. If not found, match all input.
+        $cdata =
+            '!\[CDATA\['    // Start of comment, after the <.
+            . '[^\]]*+'     // Consume non-].
+            . '(?:'         // Unroll the loop: Consume everything until ]]> is found.
+            .     '](?!]>)' // One ] not followed by end of comment.
+            .     '[^\]]*+' // Consume non-].
+            . ')*+'         // Loop possessively.
+            . '(?:]]>)?';   // End of comment. If not found, match all input.
 
-		$escaped =
-			'(?='             // Is the element escaped?
-			.    '!--'
-			. '|'
-			.    '!\[CDATA\['
-			. ')'
-			. '(?(?=!-)'      // If yes, which type?
-			.     $comments
-			. '|'
-			.     $cdata
-			. ')';
+        $escaped =
+            '(?='             // Is the element escaped?
+            .    '!--'
+            . '|'
+            .    '!\[CDATA\['
+            . ')'
+            . '(?(?=!-)'      // If yes, which type?
+            .     $comments
+            . '|'
+            .     $cdata
+            . ')';
 
-		$regex =
-			'/('                // Capture the entire match.
-			.     '<'           // Find start of element.
-			.     '(?'          // Conditional expression follows.
-			.         $escaped  // Find end of escaped element.
-			.     '|'           // ... else ...
-			.         '[^>]*>?' // Find end of normal element.
-			.     ')'
-			. ')/';
+        $regex =
+            '/('                // Capture the entire match.
+            .     '<'           // Find start of element.
+            .     '(?'          // Conditional expression follows.
+            .         $escaped  // Find end of escaped element.
+            .     '|'           // ... else ...
+            .         '[^>]*>?' // Find end of normal element.
+            .     ')'
+            . ')/';
 		// phpcs:enable
-	}
+    }
 
-	return $regex;
+    return $regex;
 }
 
 function login_form()
 {
-    if (isset($_GET['return_uri']))
-    {
+    if (isset($_GET['return_uri'])) {
         $return_uri = $_GET['return_uri'];
-    }
-    elseif ( isset($form_data) && isset($form_data['return_uri']) )
-    {
+    } elseif (isset($form_data) && isset($form_data['return_uri'])) {
         $return_uri = $_GET['return_uri'];
     }
     $returned_data = '
@@ -956,8 +849,7 @@ function login_form()
                 <input type="password" size="20" maxlength="255" id="password" name="form_data[password]"><br>
                 <input type="submit" name="submit" value="Log In" />
             </fieldset>';
-    if (isset($return_uri))
-    {
+    if (isset($return_uri)) {
         $returned_data .= '
 			<input type="hidden" name="form_data[return_uri]" value="' . $return_uri . '" />';
     }
@@ -969,7 +861,7 @@ function login_form()
 
 function login_redirect()
 {
-    header('Location: http://'. $_SERVER['SERVER_NAME'] .'/login/?return_uri=' . $_SERVER['REQUEST_URI']);
+    header('Location: http://' . $_SERVER['SERVER_NAME'] . '/login/?return_uri=' . $_SERVER['REQUEST_URI']);
     exit();
 }
 
@@ -977,16 +869,14 @@ function login_redirect()
 # Create a random string of lowercased letters and numbers of a given length.
 function generate_hash($length)
 {
-    if (empty($length))
-    {
+    if (empty($length)) {
         $length = 5;
     }
     // define a corpus of letters and numbers
     $corpus = 'abcdefghijklmnopqrstuvwxyz1234567890';
     $hash = '';
 
-    for ($i=0; $i<$length; $i++)
-    {
+    for ($i = 0; $i < $length; $i++) {
         $corpus = str_shuffle($corpus);
         $hash .= mb_substr($corpus, 0, 1);
     }
@@ -996,21 +886,17 @@ function generate_hash($length)
 # Create a tag cloud.
 function tag_cloud($tags)
 {
-    if (!isset($tags) || !is_array($tags))
-    {
-        return FALSE;
+    if (!isset($tags) || !is_array($tags)) {
+        return false;
     }
 
     $html = '';
 
     # Determine if we're going to use a logarithmic or a square root scale for this tag cloud.
     # That's based on the disparity between the smallest and the largest tags.
-    if (reset($tags) / end($tags) > 10)
-    {
+    if (reset($tags) / end($tags) > 10) {
         $scale = 'log';
-    }
-    else
-    {
+    } else {
         $scale = 'sqrt';
     }
 
@@ -1019,15 +905,11 @@ function tag_cloud($tags)
     $multiple = 1.25 / (array_sum($tags) / count($tags));
 
     # Step through every tag and adjust the size downward, normalizing at 1em.
-    foreach ($tags as $tag => &$count)
-    {
+    foreach ($tags as $tag => &$count) {
         $size = round(($count * $multiple), 1);
-        if ($size > 4)
-        {
+        if ($size > 4) {
             $size = 4;
-        }
-        elseif ($size < .75)
-        {
+        } elseif ($size < .75) {
             $size = .75;
         }
 
@@ -1040,40 +922,27 @@ function tag_cloud($tags)
 # As of this writing, the server is running PHP 5.1.8. So here's a function to substitute for
 # json_encode, which wasn't added until 5.2, courtesy of Anonymous, found at
 # http://www.php.net/manual/en/function.json-decode.php#100740.
-if (!function_exists('json_decode'))
-{
+if (!function_exists('json_decode')) {
     function json_decode($json)
     {
         $comment = false;
         $out = '$x=';
 
-        for ($i=0; $i<mb_strlen($json); $i++)
-        {
-            if (!$comment)
-            {
-                if (($json[$i] == '{') || ($json[$i] == '['))
-                {
+        for ($i = 0; $i < mb_strlen($json); $i++) {
+            if (!$comment) {
+                if (($json[$i] == '{') || ($json[$i] == '[')) {
                     $out .= ' array(';
-                }
-                elseif (($json[$i] == '}') || ($json[$i] == ']'))
-                {
+                } elseif (($json[$i] == '}') || ($json[$i] == ']')) {
                     $out .= ')';
-                }
-                elseif ($json[$i] == ':')
-                {
+                } elseif ($json[$i] == ':') {
                     $out .= '=>';
-                }
-                else
-                {
+                } else {
                     $out .= $json[$i];
                 }
-            }
-            else
-            {
+            } else {
                 $out .= $json[$i];
             }
-            if ($json[$i] == '"' && $json[($i-1)]!="\\")
-            {
+            if ($json[$i] == '"' && $json[($i - 1)] != "\\") {
                 $comment = !$comment;
             }
         }
@@ -1087,9 +956,8 @@ if (!function_exists('json_decode'))
 # question.
 function bill_sections($bill_id)
 {
-    if (!isset($bill_id))
-    {
-        return FALSE;
+    if (!isset($bill_id)) {
+        return false;
     }
 
     $sql = 'SELECT vacode.section_number, vacode.section_name AS catch_line
@@ -1101,23 +969,18 @@ function bill_sections($bill_id)
 			ORDER BY vacode.section_number ASC';
 
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) < 1)
-    {
-        return FALSE;
-    }
-    else
-    {
-        while ($section = mysqli_fetch_array($result))
-        {
+    if (mysqli_num_rows($result) < 1) {
+        return false;
+    } else {
+        while ($section = mysqli_fetch_array($result)) {
             $section['url'] = 'https://vacode.org/' . $section['section_number'] . '/';
             $sections[] = $section;
         }
     }
 
     # In case we wound up with no viable sections.
-    if (count($section) == 0)
-    {
-        return FALSE;
+    if (count($section) == 0) {
+        return false;
     }
 
     return $sections;
@@ -1142,9 +1005,8 @@ function sort_by_length($a, $b)
 # This is used as the preg_replace_callback function that inserts dictionary links into text.
 function replace_terms($term)
 {
-    if (!isset($term))
-    {
-        return FALSE;
+    if (!isset($term)) {
+        return false;
     }
 
     /*
@@ -1152,8 +1014,7 @@ function replace_terms($term)
      * but note that this function is written to be used within preg_replace_callback(), the
      * PCRE provides an array-based word listing, and we only want the first one.
      */
-    if (is_array($term))
-    {
+    if (is_array($term)) {
         $term = $term[0];
     }
 
@@ -1161,8 +1022,7 @@ function replace_terms($term)
      * If we have already marked this term as blacklisted -- that is, as a word that is a subset
      * of a longer term -- then just return the term without marking it as a dictionary term.
      */
-    if (isset($term_blacklist) && (in_array(mb_strtolower($term), $term_blacklist)))
-    {
+    if (isset($term_blacklist) && (in_array(mb_strtolower($term), $term_blacklist))) {
         return $term;
     }
 
@@ -1174,9 +1034,7 @@ function replace_terms($term)
      */
     $num_spaces = mb_substr_count($term, ' ');
 
-    if ($num_spaces > 0)
-    {
-
+    if ($num_spaces > 0) {
         /*
          * Use that separator to break the term up into an array of words.
          */
@@ -1186,8 +1044,7 @@ function replace_terms($term)
          * Step through each the the words that make up this phrase, and add each of them to
          * the blacklist, so that we can skip this word next time it appears in this law.
          */
-        foreach ($term_components as $word)
-        {
+        foreach ($term_components as $word) {
             $term_blacklist[] = mb_strtolower($word);
         }
 
@@ -1195,11 +1052,9 @@ function replace_terms($term)
          * Now step through each two-word sub-phrase that make up this 3+-word phrase (assuming
          * that there are any) and add each of them to the blacklist.
          */
-        if ($num_spaces > 1)
-        {
-            for ($i=0; $i<$num_spaces; $i++)
-            {
-                $term_blacklist[] = mb_strtolower($term_components[$i] . ' ' . $term_components[$i+1]);
+        if ($num_spaces > 1) {
+            for ($i = 0; $i < $num_spaces; $i++) {
+                $term_blacklist[] = mb_strtolower($term_components[$i] . ' ' . $term_components[$i + 1]);
             }
         }
     }
@@ -1210,11 +1065,10 @@ function replace_terms($term)
 /**
  * Send an error message formatted as JSON. This requires the text of an error message.
  */
-function json_error($text, $status_code='400 OK')
+function json_error($text, $status_code = '400 OK')
 {
-    if (!isset($text))
-    {
-        return FALSE;
+    if (!isset($text)) {
+        return false;
     }
 
     $error = array('error',
@@ -1243,24 +1097,21 @@ function json_error($text, $status_code='400 OK')
  */
 function pushover_alert($title, $message)
 {
-    if (!defined('PUSHOVER_KEY') || !isset($title) || !isset($message))
-    {
-        return FALSE;
+    if (!defined('PUSHOVER_KEY') || !isset($title) || !isset($message)) {
+        return false;
     }
 
-    if (mb_strlen($title) > 100)
-    {
+    if (mb_strlen($title) > 100) {
         $title = mb_substr($title, 0, 100);
     }
 
-    if (mb_strlen($message) > 412)
-    {
+    if (mb_strlen($message) > 412) {
         $message = mb_substr($message, 0, 412);
     }
 
     curl_setopt_array($ch = curl_init(), array(
         CURLOPT_URL => "https://api.pushover.net/1/messages.json",
-        CURLOPT_RETURNTRANSFER => TRUE,
+        CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POSTFIELDS => array(
             "token" => PUSHOVER_KEY,
             "user" => "unBH1CeWWY4F5JL2TzhUodQASDUAUG",
@@ -1272,5 +1123,5 @@ function pushover_alert($title, $message)
     curl_exec($ch);
     curl_close($ch);
 
-    return TRUE;
+    return true;
 }

@@ -13,7 +13,7 @@ include_once 'includes/settings.inc.php';
 include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
@@ -24,24 +24,18 @@ $page_body = '';
 $page_sidebar = '';
 
 # LOCALIZE VARIABLES
-if (!empty($_GET['year']))
-{
+if (!empty($_GET['year'])) {
     $year = mysqli_real_escape_string($GLOBALS['db'], $_GET['year']);
-}
-elseif (!empty($_GET['party']))
-{
+} elseif (!empty($_GET['party'])) {
     $party = mysqli_real_escape_string($GLOBALS['db'], $_GET['committee']);
-}
-else
-{
+} else {
     $year = SESSION_YEAR;
     $session_suffix = SESSION_SUFFIX;
 }
 
 # PAGE METADATA
 $page_title = $year . ' Bills by Topic';
-if (!empty($party))
-{
+if (!empty($party)) {
     $page_title .= ', Introduced by ' . ucfirst($party);
 }
 $site_section = 'bills';
@@ -58,13 +52,11 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 		ORDER BY tag ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
 $tag_count = mysqli_num_rows($result);
-if ($tag_count > 0)
-{
+if ($tag_count > 0) {
     $page_body .= '
 	<div class="tags">';
     # Build up an array of tags, with the key being the tag and the value being the count.
-    while ($tag = mysqli_fetch_array($result))
-    {
+    while ($tag = mysqli_fetch_array($result)) {
         $tag = array_map('stripslashes', $tag);
         $tags[$tag{'tag'}] = $tag['count'];
     }
@@ -73,20 +65,16 @@ if ($tag_count > 0)
     # resort alphabetically.
     ksort($tags);
 
-    foreach ($tags as $tag => $count)
-    {
+    foreach ($tags as $tag => $count) {
         $font_size = round(log($count), 2);
-        if ($font_size < 1)
-        {
+        if ($font_size < 1) {
             $font_size = 1;
         }
         $page_body .= '<span style="font-size: ' . $font_size . 'em;"><a href="/bills/tags/' . urlencode($tag) . '/">' . $tag . '</a></span> ';
     }
     $page_body .= '
 	</div>';
-}
-else
-{
+} else {
     $page_body = '<p>No bills have yet been filed for the ' . $year . ' session.</p>';
 }
 
@@ -104,7 +92,7 @@ $page_sidebar .= '
 	</div>';
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

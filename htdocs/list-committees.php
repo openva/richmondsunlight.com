@@ -17,7 +17,7 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
@@ -68,18 +68,15 @@ $sql = 'SELECT id, shortname, name, chamber, meeting_time,
 		WHERE chamber="senate" AND parent_id IS NULL
 		ORDER BY name ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     $page_body .= '
 					<div class="right_side">
 						<h2>Senate</h2>
 						<ul>';
-    while ($committee = mysqli_fetch_array($result))
-    {
+    while ($committee = mysqli_fetch_array($result)) {
         $committee = array_map('stripslashes', $committee);
         $page_body .= '<li><a href="/committee/senate/' . $committee['shortname'] . '/">' . $committee['name'] . '</a>';
-        if ($committee['count'] > 0)
-        {
+        if ($committee['count'] > 0) {
             $page_body .= ' (<a href="/bills/committee/' . $committee['chamber'] . '/' . $committee['shortname'] . '/"
 			title="Bills before this committee">' . $committee['count'] . '</a>)';
         }
@@ -104,18 +101,15 @@ $sql = 'SELECT id, shortname, name, chamber, meeting_time,
 		WHERE chamber="house" AND parent_id IS NULL
 		ORDER BY name ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     $page_body .= '
 					<div class="left_side">
 						<h2>House</h2>
 						<ul>';
-    while ($committee = mysqli_fetch_array($result))
-    {
+    while ($committee = mysqli_fetch_array($result)) {
         $committee = array_map('stripslashes', $committee);
         $page_body .= '<li><a href="/committee/house/' . $committee['shortname'] . '/">' . $committee['name'] . '</a>';
-        if ($committee['count'] > 0)
-        {
+        if ($committee['count'] > 0) {
             $page_body .= ' (<a href="/bills/committee/' . $committee['chamber'] . '/' . $committee['shortname'] . '/"
 			title="Bills before this committee">' . $committee['count'] . '</a>)';
         }
@@ -127,7 +121,7 @@ if (mysqli_num_rows($result) > 0)
 }
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

@@ -23,7 +23,7 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
@@ -44,40 +44,31 @@ $comment['url']     = $_POST['age'];
 # If any of these form fields have obviously been filled out based on the
 # field name, rather than the label, reject them as spam.  If the bait
 # field (state) has been filled out, reject the comment as spam.
-if (preg_match("#([0-9]{2})/([0-9]{2})#D", $comment['name']))
-{
+if (preg_match("#([0-9]{2})/([0-9]{2})#D", $comment['name'])) {
     exit();
 }
-if (preg_match("/([0-9]{6}/", $comment['name']))
-{
+if (preg_match("/([0-9]{6}/", $comment['name'])) {
     exit();
 }
-if ((mb_strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})/D", $comment['email'])))
-{
+if ((mb_strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})/D", $comment['email']))) {
     exit();
 }
-if ((mb_strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})-([0-9]{4})/D", $comment['email'])))
-{
+if ((mb_strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})-([0-9]{4})/D", $comment['email']))) {
     exit();
 }
-if (preg_match("/([0-9]{2})/D", $comment['age']))
-{
+if (preg_match("/([0-9]{2})/D", $comment['age'])) {
     exit();
 }
-if (!empty($comment['state']))
-{
+if (!empty($comment['state'])) {
     exit();
 }
-if (mb_strlen($_SERVER['HTTP_USER_AGENT']) <= 1)
-{
+if (mb_strlen($_SERVER['HTTP_USER_AGENT']) <= 1) {
     exit();
 }
-if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'curl') === TRUE)
-{
+if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'curl') === true) {
     exit();
 }
-if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === TRUE)
-{
+if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === true) {
     exit();
 }
 
@@ -87,18 +78,15 @@ $spam_strings = array('ciprofloxacin', 'viagra', 'cialis', ' topiramate', 'prope
     'prednizone', ' sildenafil', 'tadalafil', 'accutane', 'tadalafil', 'topamax', 'amoxicillin',
     '[/URL]', 'stolen bitcoin', 'bitcoin wallet', 'cryptocurrency scam', 'bitcoin recovery',
     'telegram', 'whatsapp' ,'recover', 'Craker');
-foreach ($spam_strings as $spam_string)
-{
-    if (mb_stristr($comment['comment'], $spam_string) !== FALSE)
-    {
+foreach ($spam_strings as $spam_string) {
+    if (mb_stristr($comment['comment'], $spam_string) !== false) {
         exit();
     }
 }
 
 # We don't allow comments from Fairfax County Public Schools, because 99% of the comments from
 # there are garbage, and 75% of garbage comments come from there.
-if ($_SERVER['REMOTE_ADDR'] == '151.188.97.205')
-{
+if ($_SERVER['REMOTE_ADDR'] == '151.188.97.205') {
     echo '<p>We do not allow comments from Fairfax County Public Schools, because it means that
     every time a teacher has a class go to the website on their computers, the site is temporarily
     drowned in garbage comments. Maybe <em>you</em> just tried to post a reasonable comment, but
@@ -114,32 +102,28 @@ $comment = array_map('trim', $comment);
 $comment['comment'] = strip_tags($comment['comment'], '<a><em><strong><i><b><s><blockquote>');
 $comment = array_map('addslashes', $comment);
 
-if (empty($comment['comment']))
-{
+if (empty($comment['comment'])) {
     header('HTTP/1.0 500 Internal Server Error');
     $message = array('error' => 'No comment provided.');
     echo json_encode($message);
     exit();
 }
 
-if (empty($comment['name']))
-{
+if (empty($comment['name'])) {
     header('HTTP/1.0 500 Internal Server Error');
     $message = array('error' => 'No name provided.');
     echo json_encode($message);
     exit();
 }
 
-if (empty($comment['email']))
-{
+if (empty($comment['email'])) {
     header('HTTP/1.0 500 Internal Server Error');
     $message = array('error' => 'No email address provided.');
     echo json_encode($message);
     exit();
 }
 
-if (filter_var($comment['email'], FILTER_VALIDATE_EMAIL) === FALSE)
-{
+if (filter_var($comment['email'], FILTER_VALIDATE_EMAIL) === false) {
     header('HTTP/1.0 500 Internal Server Error');
     $message = array('error' => 'Invalid email address.');
     echo json_encode($message);
@@ -147,29 +131,24 @@ if (filter_var($comment['email'], FILTER_VALIDATE_EMAIL) === FALSE)
 }
 
 # Validate any provided URL, and silently drop it if it's invalid.
-if (!empty($comment['url']))
-{
+if (!empty($comment['url'])) {
     # If we've got content, but no schema, prepend that.
-    if (!mb_stristr($comment['url'], 'http://') && !mb_stristr($comment['url'], 'https://'))
-    {
+    if (!mb_stristr($comment['url'], 'http://') && !mb_stristr($comment['url'], 'https://')) {
         # If there's an at sign in there, then somebody has entered their e-mail address as
         # their URL.
-        if (mb_strstr($comment['url'], '@'))
-        {
+        if (mb_strstr($comment['url'], '@')) {
             $comment['email'] = $comment['url'];
             unset($comment['url']);
         }
 
         # Otherwise, just figure somebody neglected the prefix.
-        else
-        {
+        else {
             $comment['url'] = 'http://' . $comment['url'];
         }
     }
 
     # If the URL still isn't valid, drop it.
-    if (filter_var($comment['url'], FILTER_VALIDATE_URL) === false)
-    {
+    if (filter_var($comment['url'], FILTER_VALIDATE_URL) === false) {
         $comment['url'] = '';
     }
 }
@@ -181,12 +160,9 @@ if (!empty($comment['url']))
 //$comment['comment'] = $purifier->purify($comment['comment']);
 
 # See if they're logged in and deal with them accordingly.
-if (logged_in() === TRUE)
-{
+if (logged_in() === true) {
     update_user('name=' . $comment['name'] . '&email=' . $comment['email'] . '&url=' . $comment['url']);
-}
-else
-{
+} else {
     create_user('name=' . $comment['name'] . '&email=' . $comment['email'] . '&url=' . $comment['url']);
     $user = @get_user();
 }
@@ -216,8 +192,7 @@ $sql = 'SELECT id
 		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(SECOND, date_created, now()) < 5)';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     header('HTTP/1.0 409 Conflict');
     $message = array('error' => 'Slow down, cowboy: Only one comment is allowed every five seconds. That’s pretty reasonable.');
     echo json_encode($message);
@@ -230,8 +205,7 @@ $sql = 'SELECT *
 		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 5)';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 10)
-{
+if (mysqli_num_rows($result) > 10) {
     header('HTTP/1.0 409 Conflict');
     $message = array('error' => 'Slow down, cowboy: You’re posting way too many comments too fast. Relax, think, then write.');
     echo json_encode($message);
@@ -245,8 +219,7 @@ $sql = 'SELECT id
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 60)
 		AND comment="' . $comment['comment'] . '"';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     header('HTTP/1.0 409 Conflict');
     $message = array('error' => 'You’ve already posted that exact comment. You may not post it again. And, no, don’t '
         . 'just change it a little bit and repost it—a moderator will just delete it. If you’re '
@@ -263,17 +236,14 @@ $sql = 'INSERT INTO comments
 		email="' . $comment['email'] . '", ip="' . $_SERVER['REMOTE_ADDR'] . '",
 		comment="' . $comment['comment'] . '", status="published",
 		date_created=now()';
-if (!empty($comment['url']))
-{
+if (!empty($comment['url'])) {
     $sql .= ', url="' . $comment['url'] . '"';
 }
-if (!empty($user['id']))
-{
+if (!empty($user['id'])) {
     $sql .= ', user_id=' . $user['id'];
 }
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (!$result)
-{
+if (!$result) {
     header('HTTP/1.0 500 Internal Server Error');
     $message = array('error' => 'Your comment could not be added, though for no good reason. Richmond Sunlight has
 		been alerted to the problem, and somebody will fix this and get back to you. Sorry
@@ -298,7 +268,7 @@ $comment['id'] = mysqli_insert_id($GLOBALS['db']);
 # If this thread has subscribers, e-mail a this comment to those subscribers.
 
 # Create a new instance of the comments-subscription class
-$subscription = new CommentSubscription;
+$subscription = new CommentSubscription();
 
 # Pass this bill's ID to $subscription, and have it return a listing of subscriptions
 # to the discussion of this bill (if any).
@@ -307,9 +277,7 @@ $subscriptions = $subscription->listing();
 
 # If there are any subscriptions to this discussion, we want to send an e-mail to those
 # subscribers.
-if ($subscriptions !== FALSE)
-{
-
+if ($subscriptions !== false) {
     # Pass the comment data to $subscriptions, first removing the HTML and any slashes.
     $comment['name'] = strip_tags(stripslashes($comment['name']));
     $comment['comment'] = strip_tags(stripslashes($comment['comment']));
@@ -323,11 +291,9 @@ if ($subscriptions !== FALSE)
 }
 
 # If the user has asked to be subscribed to this bill's comments, do so.
-if (isset($comment['subscribe']) && ($comment['subscribe'] == 'y'))
-{
-
+if (isset($comment['subscribe']) && ($comment['subscribe'] == 'y')) {
     # create a new instance of the comments-subscription class
-    $subscription = new CommentSubscription;
+    $subscription = new CommentSubscription();
 
     # pass the user ID and the bill ID
     $subscription->user_id = $user['id'];
@@ -340,14 +306,13 @@ if (isset($comment['subscribe']) && ($comment['subscribe'] == 'y'))
 /*
  * Clear the Memcached cache for comments on this bill.
  */
-if (MEMCACHED_SERVER != '')
-{
+if (MEMCACHED_SERVER != '') {
     $mc = new Memcached();
     $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
     $comments = $mc->delete('comments-' . $comment['bill_id']);
 }
 
-$log = new Log;
+$log = new Log();
 $log->put('New comment posted, by ' . stripslashes($comment['name']) . ':'
     . "\n\n" . str_replace("\r\n", ' ¶ ', stripslashes($comment['comment']))
     . ' https://' . $_SERVER['HTTP_HOST'] . '/admin/comments/#comment-' . $comment['id'], 3);

@@ -17,15 +17,14 @@ require_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();
 
 # Grab the user data.
-if (logged_in() === TRUE)
-{
+if (logged_in() === true) {
     $user = get_user();
 }
 
@@ -132,7 +131,7 @@ $page_body = <<<EOD
 EOD;
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

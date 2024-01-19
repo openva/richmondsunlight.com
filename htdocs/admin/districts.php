@@ -16,7 +16,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/settings.inc.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # PAGE METADATA
@@ -38,22 +38,19 @@ $page_body .= '
         </thead>
         <tbody>';
 
-while ($district = mysqli_fetch_array($result))
-{
-
+while ($district = mysqli_fetch_array($result)) {
     $page_body .= '
         <tr>
             <td>' . $district['chamber'] . '</td>
             <td>' . $district['number'] . '</td>
             <td>' . $district['id'] . '</td>
         </tr>';
-
 }
 
 $page_body .= '</tbody></table>';
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

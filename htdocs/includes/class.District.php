@@ -23,7 +23,5 @@ class District
         $district = array_map('stripslashes', $district);
 
         return $district;
-
     }
-
 }

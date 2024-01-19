@@ -6,28 +6,23 @@
  */
 class Bill2
 {
-
     # Take a year and a bill number, return a bill ID.
     public function getid($year, $number)
     {
 
         # Make sure we've got the information that we need.
-        if (!isset($number) || empty($number))
-        {
+        if (!isset($number) || empty($number)) {
             return false;
         }
-        if (!isset($year) || empty($year))
-        {
+        if (!isset($year) || empty($year)) {
             return false;
         }
 
         # Check that the data is clean.
-        if (mb_strlen($year) != 4)
-        {
+        if (mb_strlen($year) != 4) {
             return false;
         }
-        if (mb_strlen($number) > 7)
-        {
+        if (mb_strlen($number) > 7) {
             return false;
         }
         $number = mb_strtolower($number);
@@ -35,18 +30,16 @@ class Bill2
         /*
          * If this bill is from the present year, try to retrieve the bill ID from Memcached.
          */
-        if ($year == SESSION_YEAR && MEMCACHED_SERVER != '')
-        {
+        if ($year == SESSION_YEAR && MEMCACHED_SERVER != '') {
             $mc = new Memcached();
             $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
             $result = $mc->get('bill-' . $number);
-            if ($mc->getResultCode() == 0)
-            {
+            if ($mc->getResultCode() == 0) {
                 return $result;
             }
         }
 
-        $database = new Database;
+        $database = new Database();
         $database->connect_mysqli();
 
         /*
@@ -60,8 +53,7 @@ class Bill2
 				AND sessions.year= ' . mysqli_real_escape_string($GLOBALS['db'], $year) . '
                 ORDER BY sessions.date_started DESC';
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) < 1)
-        {
+        if (mysqli_num_rows($result) < 1) {
             return false;
         }
         $bill = mysqli_fetch_array($result);
@@ -72,22 +64,19 @@ class Bill2
     {
 
         # We'll accept the ID in either format.
-        if (isset($this->id))
-        {
+        if (isset($this->id)) {
             $id = $this->id;
         }
 
         # Don't proceed unless we have a bill ID.
-        if (!isset($id))
-        {
-            return FALSE;
+        if (!isset($id)) {
+            return false;
         }
 
         /*
          * Connect to Memcached.
          */
-        if (MEMCACHED_SERVER != '')
-        {
+        if (MEMCACHED_SERVER != '') {
             $mc = new Memcached();
             $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
 
@@ -95,13 +84,12 @@ class Bill2
             * If this bill is cached in Memcached, retrieve it from there.
             */
             $bill = $mc->get('bill-' . $id);
-            if ($mc->getResultCode() === 1)
-            {
+            if ($mc->getResultCode() === 1) {
                 return unserialize($bill);
             }
         }
 
-        $database = new Database;
+        $database = new Database();
         $database->connect_mysqli();
 
         # RETRIEVE THE BILL INFO FROM THE DATABASE
@@ -152,8 +140,7 @@ class Bill2
 					ON bills.incorporated_into=bills2.id
 				WHERE bills.id=' . $id;
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) == 0)
-        {
+        if (mysqli_num_rows($result) == 0) {
             return false;
         }
         $bill = mysqli_fetch_array($result, MYSQL_ASSOC);
@@ -162,12 +149,9 @@ class Bill2
         # Data conversions
         $bill['word_count'] = str_word_count($bill['full_text']);
         $bill['patron_suffix'] = '(' . $bill['patron_party'] . '-' . $bill['patron_place'] . ')';
-        if ($bill['patron_chamber'] == 'house')
-        {
+        if ($bill['patron_chamber'] == 'house') {
             $bill['patron_prefix'] = 'Del.';
-        }
-        elseif ($bill['patron_chamber'] == 'senate')
-        {
+        } elseif ($bill['patron_chamber'] == 'senate') {
             $bill['patron_prefix'] = 'Sen.';
         }
         $bill['url'] = 'https://www.richmondsunlight.com/bill/' . $bill['year'] . '/'
@@ -176,18 +160,15 @@ class Bill2
         /*
          * Flag this as either a bill or a resolution.
          */
-        if (in_array(preg_replace('/[0-9]/', '', $bill['number']), array('sr', 'hr', 'hj', 'sj') ) )
-        {
+        if (in_array(preg_replace('/[0-9]/', '', $bill['number']), array('sr', 'hr', 'hj', 'sj'))) {
             $bill['type'] = 'resolution';
-        }
-        else {
+        } else {
             $bill['type'] = 'bill';
         }
 
         # If this bill has any copatrons, we want to gather up all of them and include them in the bill
         # array.
-        if ($bill['copatron_count'] > 0)
-        {
+        if ($bill['copatron_count'] > 0) {
             $sql = 'SELECT representatives.shortname, representatives.name_formatted,
 					representatives.partisanship
 					FROM bills_copatrons
@@ -196,8 +177,7 @@ class Bill2
 					WHERE bills_copatrons.bill_id=' . $bill['id'] . '
 					ORDER BY representatives.chamber ASC, representatives.name ASC';
             $bill_result = mysqli_query($GLOBALS['db'], $sql);
-            while ($copatron = mysqli_fetch_assoc($bill_result))
-            {
+            while ($copatron = mysqli_fetch_assoc($bill_result)) {
                 $copatron = array_map('stripslashes', $copatron);
                 $bill['copatron'][] = $copatron;
             }
@@ -210,10 +190,8 @@ class Bill2
         $result = mysqli_query($GLOBALS['db'], $sql);
 
         # If there are any tags, display them.
-        if (mysqli_num_rows($result) > 0)
-        {
-            while ($tag = mysqli_fetch_array($result))
-            {
+        if (mysqli_num_rows($result) > 0) {
+            while ($tag = mysqli_fetch_array($result)) {
                 $tag['tag'] = stripslashes($tag['tag']);
                 # Save the tags.
                 $bill['tags'][$tag{'id'}] = $tag['tag'];
@@ -231,13 +209,11 @@ class Bill2
 				WHERE bills_status.bill_id = ' . $bill['id'] . '
 				ORDER BY date_raw DESC, bills_status.id DESC';
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) > 0)
-        {
+        if (mysqli_num_rows($result) > 0) {
             # Initialize this array.
             $bill['status_history'] = array();
             # Iterate through the status history.
-            while ($status = mysqli_fetch_array($result, MYSQL_ASSOC))
-            {
+            while ($status = mysqli_fetch_array($result, MYSQL_ASSOC)) {
                 # Clean it up.
                 $status = array_map('stripslashes', $status);
 
@@ -251,11 +227,9 @@ class Bill2
 				FROM bills_places
 				WHERE bill_id=' . $bill['id'] . '';
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) > 0)
-        {
+        if (mysqli_num_rows($result) > 0) {
             $bill['places'] = array();
-            while ($place = mysqli_fetch_array($result))
-            {
+            while ($place = mysqli_fetch_array($result)) {
                 $bill['places'][] = array_map('stripslashes', $place);
             }
         }
@@ -273,20 +247,17 @@ class Bill2
 				AND bills.summary_hash = "' . $bill['summary_hash'] . '" AND bills.id != ' . $bill['id'] . '
 				ORDER BY bills.date_introduced ASC, bills.chamber DESC';
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) > 0)
-        {
+        if (mysqli_num_rows($result) > 0) {
             $bill['duplicates'] = array();
 
             # Build up an array of duplicates.
-            while ($duplicate = mysqli_fetch_array($result))
-            {
+            while ($duplicate = mysqli_fetch_array($result)) {
                 $duplicate = array_map('stripslashes', $duplicate);
                 $bill['duplicates'][] = $duplicate;
             }
         }
 
-        if (isset($bill['tags']))
-        {
+        if (isset($bill['tags'])) {
             # Display a list of related bills, by finding the bills that share the most tags with this
             # one.
             $sql = 'SELECT DISTINCT bills.id, bills.number, bills.catch_line,
@@ -309,12 +280,10 @@ class Bill2
             # though slightly differently, later on in the SQL query, hence the str_replace.
             $tags_sql = '';
 
-            $i=0;
-            foreach ($bill['tags'] as $tag)
-            {
+            $i = 0;
+            foreach ($bill['tags'] as $tag) {
                 $tags_sql .= 'tags2.tag = "' . $tag . '"';
-                if ($i < (count($bill['tags']) - 1))
-                {
+                if ($i < (count($bill['tags']) - 1)) {
                     $tags_sql .= ' OR ';
                 }
                 $i++;
@@ -339,19 +308,15 @@ class Bill2
 
             $result = mysqli_query($GLOBALS['db'], $sql);
 
-            if (mysqli_num_rows($result) > 0)
-            {
+            if (mysqli_num_rows($result) > 0) {
                 $bill['related'] = array();
-                while ($related = mysqli_fetch_array($result, MYSQL_ASSOC))
-                {
+                while ($related = mysqli_fetch_array($result, MYSQL_ASSOC)) {
                     $bill['related'][] = $related;
                 }
             }
         }
 
-        if (MEMCACHED_SERVER != '')
-        {
-            
+        if (MEMCACHED_SERVER != '') {
             /*
             * Cache this bill in Memcached, for one week.
             */
@@ -361,11 +326,9 @@ class Bill2
             * And cache the bill's number in Memcached, indefinitely, if the bill is from this
             * year.
             */
-            if ($bill['year'] == SESSION_YEAR)
-            {
+            if ($bill['year'] == SESSION_YEAR) {
                 $mc->set('bill-' . $bill['number'], $bill['id']);
             }
-            
         }
 
         return $bill;
@@ -381,9 +344,8 @@ class Bill2
         /*
          * We must have a bill ID.
          */
-        if (!isset($this->bill_id))
-        {
-            return FALSE;
+        if (!isset($this->bill_id)) {
+            return false;
         }
 
         /*
@@ -391,9 +353,7 @@ class Bill2
          */
         $code_sections = bill_sections($this->bill_id);
 
-        if ($code_sections !== FALSE)
-        {
-
+        if ($code_sections !== false) {
             /*
              * We need to include the section number in Javascript, since our API request (on
              * hover over each term) relies on it.
@@ -403,9 +363,7 @@ class Bill2
             /*
              * Connect to Memcached.
              */
-            if (MEMCACHED_SERVER != '')
-            {
-
+            if (MEMCACHED_SERVER != '') {
                 $mc = new Memcached();
                 $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
 
@@ -413,11 +371,9 @@ class Bill2
                 * See if these terms are cached in Memcached.
                 */
                 $this->term_pcres = $mc->get('definitions-' . $this->bill_id);
-                if ($mc->getResultCode() === 0)
-                {
-                    return TRUE;
+                if ($mc->getResultCode() === 0) {
+                    return true;
                 }
-
             }
 
             /*
@@ -432,17 +388,14 @@ class Bill2
             $url .= $code_sections[0]['section_number'];
             $terms = get_content(urldecode($url), 1);
             $terms = (array) json_decode($terms);
-            if (count($terms) == 0)
-            {
-                return FALSE;
+            if (count($terms) == 0) {
+                return false;
             }
 
             /*
              * If we now have terms, put them to work.
              */
-            if ($terms !== FALSE)
-            {
-
+            if ($terms !== false) {
                 /*
                  * Arrange our terms from longest to shortest. This is to ensure that the most specific
                  * terms are defined (e.g. "person of interest") rather than the broadest terms (e.g.
@@ -455,22 +408,18 @@ class Bill2
                  * preg_replace_callback, the function that we use to insert the definitions.
                  */
                 $term_pcres = array();
-                foreach ($terms as $term)
-                {
-
+                foreach ($terms as $term) {
                     /*
                      * Step through each character in this word.
                      */
-                    for ($i=0; $i<mb_strlen($term); $i++)
-                    {
+                    for ($i = 0; $i < mb_strlen($term); $i++) {
                         /*
                          * If there are any uppercase characters, then make this PCRE string case
                          * sensitive.
                          */
-                        if ((ord($term{$i}) >= 65) && (ord($term{$i}) <= 90))
-                        {
+                        if ((ord($term{$i}) >= 65) && (ord($term{$i}) <= 90)) {
                             $term_pcres[] = '/\b' . $term . '(s?)\b(?![^<]*>)/';
-                            $caps = TRUE;
+                            $caps = true;
                             break;
                         }
                     }
@@ -479,16 +428,14 @@ class Bill2
                      * If we have determined that this term does not contain capitalized letters, then
                      * create a case-insensitive PCRE string.
                      */
-                    if (!isset($caps))
-                    {
+                    if (!isset($caps)) {
                         $term_pcres[] = '/\b' . $term . '(s?)\b(?![^<]*>)/i';
                     }
 
                     /*
                      * Unset our flag -- we don't want to have it set the next time through.
                      */
-                    if (isset($caps))
-                    {
+                    if (isset($caps)) {
                         unset($caps);
                     }
                 }
@@ -502,15 +449,14 @@ class Bill2
             /*
              * Save this list of definitions.
              */
-            if (MEMCACHED_SERVER != '')
-            {
+            if (MEMCACHED_SERVER != '') {
                 $mc->set('definitions-' . $this->bill_id, $this->term_pcres);
             }
 
-            return TRUE;
+            return true;
         }
 
-        return FALSE;
+        return false;
     } // end method get_Terms
 
 
@@ -525,9 +471,8 @@ class Bill2
         /*
          * We must have bill text.
          */
-        if (!isset($this->text))
-        {
-            return FALSE;
+        if (!isset($this->text)) {
+            return false;
         }
 
         /*
@@ -546,8 +491,7 @@ class Bill2
         $mc = new Memcached();
         $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
         $this->changes = $mc->get('bill-changes-' . $this->text_hash);
-        if ($mc->getResultCode() == 0)
-        {
+        if ($mc->getResultCode() == 0) {
             return $this->changes;
         }
         unset($this->changes);
@@ -556,18 +500,16 @@ class Bill2
          * If the phrase "A BILL to amend and reenact" is found in the first 500 characters of this
          * bill, then it's amending an existing law.
          */
-        if (mb_strpos(mb_substr($this->text, 0, 500), 'A BILL to amend and reenact') === FALSE)
-        {
-            return FALSE;
+        if (mb_strpos(mb_substr($this->text, 0, 500), 'A BILL to amend and reenact') === false) {
+            return false;
         }
 
         /*
          * Figure out where the law actually starts.
          */
         $parts = preg_split('/(:{1})(\s+)(§{1})(\s{1})/', $this->text);
-        if (($parts === FALSE) || count($parts) < 2)
-        {
-            return FALSE;
+        if (($parts === false) || count($parts) < 2) {
+            return false;
         }
         $start = mb_strlen($parts[0]);
 
@@ -612,19 +554,14 @@ class Bill2
         /*
          * Iterate through every insertion and deletion.
          */
-        $i=0;
-        foreach ($matches[2] as $key => $type)
-        {
-
+        $i = 0;
+        foreach ($matches[2] as $key => $type) {
             /*
              * Verbosely specify what type of change this is.
              */
-            if ($type == 'ins')
-            {
+            if ($type == 'ins') {
                 $type = 'insert';
-            }
-            else
-            {
+            } else {
                 $type = 'delete';
             }
             $this->changes[$i]['type'] = $type;
@@ -644,13 +581,10 @@ class Bill2
              * Include both the original and the new text, which is to say that we apply the
              * transformation.
              */
-            if ($type == 'insert')
-            {
+            if ($type == 'insert') {
                 $this->changes[$i]['original'] = $this->changes[$i]['preceded_by'] . $this->changes[$i]['followed_by'];
                 $this->changes[$i]['new'] = $this->changes[$i]['preceded_by'] . $this->changes[$i]['text'] . $this->changes[$i]['followed_by'];
-            }
-            elseif ($type == 'delete')
-            {
+            } elseif ($type == 'delete') {
                 $this->changes[$i]['original'] = $this->changes[$i]['preceded_by'] . $this->changes[$i]['text'] . $this->changes[$i]['followed_by'];
                 $this->changes[$i]['new'] = $this->changes[$i]['preceded_by'] . $this->changes[$i]['followed_by'];
             }
@@ -669,16 +603,14 @@ class Bill2
         /*
          * If we failed to identify any changes.
          */
-        if (count($this->changes) == 0)
-        {
-            $this->changes = FALSE;
+        if (count($this->changes) == 0) {
+            $this->changes = false;
         }
 
         /*
          * Cache the results for three days.
          */
-        if (MEMCACHED_SERVER != '')
-        {
+        if (MEMCACHED_SERVER != '') {
             $mc->set('bill-changes-' . $this->text_hash, $this->changes, (60 * 60 * 24 * 3));
         }
 

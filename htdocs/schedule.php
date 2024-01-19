@@ -18,29 +18,23 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();
 
 # LOCALIZE VARIABLES
-if (isset($_GET['date']))
-{
+if (isset($_GET['date'])) {
     $date = $_GET['date'];
     $tmp = explode('-', $date);
     $date_formatted = date('m/d/Y', mktime(0, 0, 0, $tmp[1], $tmp[2], $tmp[0]));
-}
-else
-{
+} else {
     # If it's later 4 PM or later, show tomorrow's docket.
-    if (date('H') >= 16)
-    {
-        $date = date('Y-m-d', (time()+(60*60*12)));
-        $date_formatted = date('l, F d, Y', (time()+(60*60*12)));
-    }
-    else
-    {
+    if (date('H') >= 16) {
+        $date = date('Y-m-d', (time() + (60 * 60 * 12)));
+        $date_formatted = date('l, F d, Y', (time() + (60 * 60 * 12)));
+    } else {
         $date = date('Y-m-d');
         $date_formatted = date('m/d/Y');
     }
@@ -61,20 +55,15 @@ $sql = 'SELECT DISTINCT meetings.time AS time_raw, DATE_FORMAT(meetings.time, "%
 		WHERE date="' . $date . '"
 		ORDER BY timedesc DESC, time_raw ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     $page_body .= '
 		<h2 id="calendar">The Day’s Calendar</h2>';
-    while ($meeting = mysqli_fetch_array($result))
-    {
+    while ($meeting = mysqli_fetch_array($result)) {
         $meeting = array_map('stripslashes', $meeting);
         $page_body .= '<p><strong>';
-        if (!empty($meeting['timedesc']))
-        {
+        if (!empty($meeting['timedesc'])) {
             $page_body .= $meeting['timedesc'];
-        }
-        else
-        {
+        } else {
             $page_body .= $meeting['time'];
         }
         $page_body .= '</strong> ' . $meeting['location'] . ' ' . $meeting['description'] . '</p>';
@@ -99,17 +88,11 @@ $sql = 'SELECT dockets.date, committees.id AS committee_id, committees.chamber,
 		GROUP BY dockets.committee_id
 		ORDER BY committees.chamber DESC, committees.name ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) < 1)
-{
+if (mysqli_num_rows($result) < 1) {
     $page_body .= '<p>No committee or subcommittee meetings are currently scheduled for today.</p>';
-}
-else
-{
-
+} else {
     # Step through each scheduled meeting.
-    while ($meeting = mysqli_fetch_array($result))
-    {
-
+    while ($meeting = mysqli_fetch_array($result)) {
         # Clean up the data.
         $meeting = array_map('stripslashes', $meeting);
 
@@ -132,13 +115,11 @@ else
 				SUBSTRING(bills.number FROM 1 FOR 2) ASC,
 				CAST(LPAD(SUBSTRING(bills.number FROM 3), 4, "0") AS unsigned) ASC';
         $result2 = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result2) > 0)
-        {
+        if (mysqli_num_rows($result2) > 0) {
             # Initialize the array.
             $bills = array();
 
-            while ($bill = mysqli_fetch_array($result2))
-            {
+            while ($bill = mysqli_fetch_array($result2)) {
                 # Save the bills into an array to use later.
                 $bill = array_map('stripslashes', $bill);
                 $bills[] = $bill;
@@ -147,18 +128,15 @@ else
 
         # If no bills are found, we want to unset the variable, if it was used last time, to
         # avoid listing bills from a prior-listed committee in this one.
-        else
-        {
-            if (isset($bills))
-            {
+        else {
+            if (isset($bills)) {
                 unset($bills);
             }
         }
 
         # If this a subcommittee, rather than a committee, shuffle around the names of the array
         # elements.
-        if (!empty($meeting['parent_committee']))
-        {
+        if (!empty($meeting['parent_committee'])) {
             $meeting['subcommittee'] = $meeting['committee'];
             $meeting['committee'] = $meeting['parent_committee'];
         }
@@ -168,16 +146,12 @@ else
 				<caption>';
         # Display the committee name, and optionally the subcommittee name.
         $page_body .= ucfirst($meeting['chamber']) . ' ' . $meeting['committee'];
-        if (!empty($meeting['subcommittee']))
-        {
+        if (!empty($meeting['subcommittee'])) {
             $page_body .= ' Committee, ' . $meeting['subcommittee'] . ' Subcommittee';
         }
-        if (!empty($meeting['time']))
-        {
+        if (!empty($meeting['time'])) {
             $page_body .= ' (' . $meeting['time'] . ')';
-        }
-        elseif (!empty($meeting['timedesc']))
-        {
+        } elseif (!empty($meeting['timedesc'])) {
             $page_body .= ' (' . $meeting['timedesc'] . ')';
         }
         $page_body .= '</caption>
@@ -190,11 +164,9 @@ else
 			<tbody>';
 
         # If we know the bills that will be in this committee, list them.
-        if (isset($bills))
-        {
+        if (isset($bills)) {
             $page_body .= '<p>';
-            foreach ($bills as $bill)
-            {
+            foreach ($bills as $bill) {
                 $page_body .= '
 						<tr>
 							<td><a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number']) . '/" class="balloon">' . mb_strtoupper($bill['number']) . balloon($bill, 'bill') . '</a></td>
@@ -216,14 +188,12 @@ $sql = 'SELECT DISTINCT DATE_FORMAT(date, "%m/%d/%Y") AS date_formatted, date
 		ORDER BY date ASC
 		LIMIT 10';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     $page_sidebar = '
 	<div class="box">
 		<h3>Upcoming Dates</h3>
 		<ul>';
-    while ($upcoming = mysqli_fetch_array($result))
-    {
+    while ($upcoming = mysqli_fetch_array($result)) {
         # Create the URL for this day's link.
         $upcoming['url'] = '/schedule/' . str_replace('-', '/', $upcoming['date']) . '/';
         $page_sidebar .= '
@@ -235,7 +205,7 @@ if (mysqli_num_rows($result) > 0)
 }
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

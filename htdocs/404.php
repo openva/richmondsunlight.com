@@ -44,7 +44,7 @@ $page_body = <<<EOD
 
 EOD;
 
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->site_section = $site_section;

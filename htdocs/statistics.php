@@ -18,7 +18,7 @@
     # DECLARATIVE FUNCTIONS
     # Run those functions that are necessary prior to loading this specific
     # page.
-    $database = new Database;
+    $database = new Database();
     $database->connect_mysqli();
 
     # PAGE METADATA
@@ -48,26 +48,21 @@
 			WHERE session_id=' . SESSION_ID . '
 			GROUP BY chamber';
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) > 0)
-    {
-        $page_sidebar .= '
+if (mysqli_num_rows($result) > 0) {
+    $page_sidebar .= '
 			<div class="box">
 				<h3>By Chamber</h3>';
-        while ($chamber = mysqli_fetch_array($result))
-        {
-            if ($chamber['chamber'] == 'house')
-            {
-                $house['count'] = number_format($chamber['count']);
-                $house['avg'] = round(($chamber['count'] / 100), 1);
-            }
-            elseif ($chamber['chamber'] == 'senate')
-            {
-                $senate['count'] = number_format($chamber['count']);
-                $senate['avg'] = round(($chamber['count'] / 40), 1);
-            }
+    while ($chamber = mysqli_fetch_array($result)) {
+        if ($chamber['chamber'] == 'house') {
+            $house['count'] = number_format($chamber['count']);
+            $house['avg'] = round(($chamber['count'] / 100), 1);
+        } elseif ($chamber['chamber'] == 'senate') {
+            $senate['count'] = number_format($chamber['count']);
+            $senate['avg'] = round(($chamber['count'] / 40), 1);
         }
+    }
 
-        $page_sidebar .= '
+    $page_sidebar .= '
 				<strong>Senate</strong>
 				<ul>
 					<li>' . $senate['count'] . ' total bills</li>
@@ -78,9 +73,9 @@
 					<li>' . $house['count'] . ' total bills</li>
 					<li>' . $house['avg'] . ' bills per legislator</li>
 				</ul>';
-        $page_sidebar .= '
+    $page_sidebar .= '
 			</div>';
-    }
+}
 
 
     # Select the total number of bills introduced in each chamber.
@@ -102,26 +97,21 @@
 			WHERE bills.session_id=' . SESSION_ID . '
 			GROUP BY party';
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) > 0)
-    {
-        $page_sidebar .= '
+if (mysqli_num_rows($result) > 0) {
+    $page_sidebar .= '
 			<div class="box">
 				<h3>By Party</h3>';
-        while ($party = mysqli_fetch_array($result))
-        {
-            if ($party['party'] == 'R')
-            {
-                $republican['count'] = number_format($party['count']);
-                $republican['avg'] = round(($party['count'] / $party['republicans_count']), 1);
-            }
-            elseif ($party['party'] == 'D')
-            {
-                $democratic['count'] = number_format($party['count']);
-                $democratic['avg'] = round(($party['count'] / $party['democrats_count']), 1);
-            }
+    while ($party = mysqli_fetch_array($result)) {
+        if ($party['party'] == 'R') {
+            $republican['count'] = number_format($party['count']);
+            $republican['avg'] = round(($party['count'] / $party['republicans_count']), 1);
+        } elseif ($party['party'] == 'D') {
+            $democratic['count'] = number_format($party['count']);
+            $democratic['avg'] = round(($party['count'] / $party['democrats_count']), 1);
         }
+    }
 
-        $page_sidebar .= '
+    $page_sidebar .= '
 				<strong>Republican</strong>
 				<ul>
 					<li>' . $republican['count'] . ' total bills</li>
@@ -132,9 +122,9 @@
 					<li>' . $democratic['count'] . ' total bills</li>
 					<li>' . $democratic['avg'] . ' bills per legislator</li>
 				</ul>';
-        $page_sidebar .= '
+    $page_sidebar .= '
 			</div>';
-    }
+}
 
     # Republican Tag Cloud
     $sql = 'SELECT COUNT(*) AS count, tags.tag
@@ -148,34 +138,30 @@
 			HAVING count > 5
 			ORDER BY tags.tag ASC';
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) > 0)
-    {
-        $page_sidebar .= '
+if (mysqli_num_rows($result) > 0) {
+    $page_sidebar .= '
 		<a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-beige.gif" class="help-icon" alt="?" /></a>
 
 		<div class="box">
 			<h3>Republican Tag Cloud</h3>
 			<div class="tags">';
-        while ($tag = mysqli_fetch_array($result))
-        {
-            $tags[] = array_map('stripslashes', $tag);
+    while ($tag = mysqli_fetch_array($result)) {
+        $tags[] = array_map('stripslashes', $tag);
+    }
+    for ($i = 0; $i < count($tags); $i++) {
+        $font_size = round((log($tags[$i]['count']) / 2), 2);
+        if ($font_size < '.75') {
+            $font_size = '.75';
         }
-        for ($i=0; $i<count($tags); $i++)
-        {
-            $font_size = round((log($tags[$i]['count']) / 2), 2);
-            if ($font_size < '.75')
-            {
-                $font_size = '.75';
-            }
-            $page_sidebar .= '<span style="font-size: ' . $font_size . 'em;">
+        $page_sidebar .= '<span style="font-size: ' . $font_size . 'em;">
 					<a href="/bills/tags/' . urlencode($tags[$i]['tag']) . '/">' . $tags[$i]['tag'] . '</a>
 				</span>';
-        }
-        $page_sidebar .= '
+    }
+    $page_sidebar .= '
 			</div>
 		</div>';
-        unset($tags);
-    }
+    unset($tags);
+}
 
     # Democratic Tag Cloud
     $sql = 'SELECT COUNT(*) AS count, tags.tag
@@ -189,33 +175,29 @@
 			HAVING count > 3
 			ORDER BY tags.tag ASC';
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) > 0)
-    {
-        $page_sidebar .= '
+if (mysqli_num_rows($result) > 0) {
+    $page_sidebar .= '
 		<a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-beige.gif" class="help-icon" alt="?" /></a>
 
 		<div class="box">
 			<h3>Democratic Tag Cloud</h3>
 			<div class="tags">';
-        while ($tag = mysqli_fetch_array($result))
-        {
-            $tags[] = array_map('stripslashes', $tag);
+    while ($tag = mysqli_fetch_array($result)) {
+        $tags[] = array_map('stripslashes', $tag);
+    }
+    for ($i = 0; $i < count($tags); $i++) {
+        $font_size = round((log($tags[$i]['count']) / 2), 2);
+        if ($font_size < '.75') {
+            $font_size = '.75';
         }
-        for ($i=0; $i<count($tags); $i++)
-        {
-            $font_size = round((log($tags[$i]['count']) / 2), 2);
-            if ($font_size < '.75')
-            {
-                $font_size = '.75';
-            }
-            $page_sidebar .= '<span style="font-size: ' . $font_size . 'em;">
+        $page_sidebar .= '<span style="font-size: ' . $font_size . 'em;">
 					<a href="/bills/tags/' . urlencode($tags[$i]['tag']) . '/">' . $tags[$i]['tag'] . '</a>
 				</span>';
-        }
-        $page_sidebar .= '
+    }
+    $page_sidebar .= '
 			</div>
 		</div>';
-    }
+}
 
     # OUTPUT THE PAGE
     display_page('page_title=' . $page_title . '&page_body=' . urlencode($page_body) . '&page_sidebar=' . urlencode($page_sidebar) .
