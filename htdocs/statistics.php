@@ -45,11 +45,45 @@ if (mysqli_num_rows($result) > 0) {
         <p><a href="/bills/activity/">Actions are taken on bills each day</a>—they’re voted on, sent
         to committees, assessed, etc. Here is how many such actions were taken each day.</p>
         <ul>';
-    while ($day = mysqli_fetch_assoc($result)) {
+    $days = mysqli_fetch_all($result, MYSQLI_ASSOC);
+    foreach ($days as $day) {
         $page_body .= '<li>' . date('M. d', strtotime($day['date'])) . ': '
             . number_format($day['actions']) . ' actions</li>';
     }
     $page_body .= '</ul>';
+
+    $labels = json_encode(array_column($days, 'date'));
+    $data = json_encode(array_column($days, 'actions'));
+    $page_body .=
+    <<<EOD
+<div>
+  <canvas id="daily-bill-actions-chart"></canvas>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const ctx = document.getElementById('daily-bill-actions-chart');
+
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: $labels,
+      datasets: [{
+        label: '# of Actions',
+        data: $data,
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+EOD;
 }
 
 $sql = 'SELECT
