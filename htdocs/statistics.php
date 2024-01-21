@@ -1,47 +1,45 @@
 <?php
 
-    ###
-    # Statistics
-    #
-    # PURPOSE
-    # Lists misc. statistics about bills.
-    #
-    ###
+###
+# Statistics
+#
+# PURPOSE
+# Lists misc. statistics about bills.
+#
+###
 
-    # INCLUDES
-    # Include any files or libraries that are necessary for this specific
-    # page to function.
-    include_once 'includes/settings.inc.php';
-    include_once 'vendor/autoload.php';
+# INCLUDES
+# Include any files or libraries that are necessary for this specific page to function.
+include_once 'includes/settings.inc.php';
+include_once 'vendor/autoload.php';
 
-    # DECLARATIVE FUNCTIONS
-    # Run those functions that are necessary prior to loading this specific
-    # page.
-    $database = new Database();
-    $database->connect_mysqli();
+# DECLARATIVE FUNCTIONS
+# Run those functions that are necessary prior to loading this specific page.
+$database = new Database();
+$database->connect_mysqli();
 
-    # PAGE METADATA
-    $page_title = 'Statistics';
-    $site_section = 'statistics';
+# PAGE METADATA
+$page_title = 'Statistics';
+$site_section = 'statistics';
 
-    $html_head = '<style>
-        ol {
-            list-style: decimal;
-            margin-left: 2em;
-        }
-    </style>';
+$html_head = '<style>
+    ol {
+        list-style: decimal;
+        margin-left: 2em;
+    }
+</style>';
 
-    # PAGE CONTENT
-    $sql = 'SELECT
-                date,
-                COUNT(*) actions
-            FROM bills_status
-            WHERE
-                date >= "' . SESSION_START . '" AND
-                DATE <= "' . SESSION_END . '"
-            GROUP BY date
-            ORDER BY date ASC';
-    $result = mysqli_query($GLOBALS['db'], $sql);
+# PAGE CONTENT
+$sql = 'SELECT
+            date,
+            COUNT(*) actions
+        FROM bills_status
+        WHERE
+            date >= "' . SESSION_START . '" AND
+            DATE <= "' . SESSION_END . '"
+        GROUP BY date
+        ORDER BY date ASC';
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_body = '<h2>Daily Bill Actions</h2>
         <p><a href="/bills/activity/">Actions are taken on bills each day</a>—they’re voted on, sent
@@ -54,15 +52,15 @@ if (mysqli_num_rows($result) > 0) {
     $page_body .= '</ul>';
 }
 
-    $sql = 'SELECT
-                date_introduced AS date,
-                COUNT(*) as number
-            FROM bills
-            WHERE
-                session_id=30
-            GROUP BY date_introduced
-            ORDER BY date_introduced ASC';
-    $result = mysqli_query($GLOBALS['db'], $sql);
+$sql = 'SELECT
+            date_introduced AS date,
+            COUNT(*) as number
+        FROM bills
+        WHERE
+            session_id=30
+        GROUP BY date_introduced
+        ORDER BY date_introduced ASC';
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_body .= '<h2>Number of Bills Introduced Daily for ' . SESSION_YEAR . '</h2><ul>';
     while ($day = mysqli_fetch_assoc($result)) {
@@ -73,18 +71,18 @@ if (mysqli_num_rows($result) > 0) {
 }
 
 
-    $sql = 'SELECT
-                representatives.name_formatted AS name,
-                representatives.shortname,
-                COUNT(*) AS number
-            FROM representatives
-            LEFT JOIN bills
-                ON representatives.id=bills.chief_patron_id
-            WHERE bills.session_id=30
-            GROUP BY representatives.id
-            ORDER BY number DESC, name ASC
-            LIMIT 10';
-    $result = mysqli_query($GLOBALS['db'], $sql);
+$sql = 'SELECT
+            representatives.name_formatted AS name,
+            representatives.shortname,
+            COUNT(*) AS number
+        FROM representatives
+        LEFT JOIN bills
+            ON representatives.id=bills.chief_patron_id
+        WHERE bills.session_id=30
+        GROUP BY representatives.id
+        ORDER BY number DESC, name ASC
+        LIMIT 10';
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_body .= '<h2>Top 10 Bill Filers in ' . SESSION_YEAR . '</h2><ol>';
     $total = 0;
@@ -95,13 +93,13 @@ if (mysqli_num_rows($result) > 0) {
     $page_body .= '</ol>';
 }
 
-    $sql = 'SELECT
-                number,
-                catch_line
-            FROM bills
-            ORDER BY view_count ASC
-            LIMIT 10';
-    $result = mysqli_query($GLOBALS['db'], $sql);
+$sql = 'SELECT
+            number,
+            catch_line
+        FROM bills
+        ORDER BY view_count ASC
+        LIMIT 10';
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_body .= '<h2>Top 10 Most-Viewed Bills for ' . SESSION_YEAR . '</h2><ol>';
     $total = 0;
@@ -114,15 +112,15 @@ if (mysqli_num_rows($result) > 0) {
 
     # SIDEBAR
 
-    # Select the total number of bills introduced in each chamber.
-    $sql = 'SELECT
-                chamber,
-                COUNT(*) AS count
-			FROM bills
-			WHERE
-                session_id=' . SESSION_ID . '
-			GROUP BY chamber';
-    $result = mysqli_query($GLOBALS['db'], $sql);
+# Select the total number of bills introduced in each chamber.
+$sql = 'SELECT
+            chamber,
+            COUNT(*) AS count
+        FROM bills
+        WHERE
+            session_id=' . SESSION_ID . '
+        GROUP BY chamber';
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_sidebar .= '
                 <div class="box">
@@ -152,29 +150,29 @@ if (mysqli_num_rows($result) > 0) {
                 </div>';
 }
 
-    # Select the total number of bills introduced in each chamber.
-    $sql = 'SELECT
-                representatives.party,
-                COUNT(*) AS count,
-                (
-                    SELECT COUNT(*)
-                    FROM representatives
-                    WHERE party="D"
-                    AND date_ended IS NULL
-                ) AS democrats_count,
-                (
-                    SELECT COUNT(*)
-                    FROM representatives
-                    WHERE party="R"
-                    AND date_ended IS NULL
-                ) AS republicans_count
-			FROM bills
-			LEFT JOIN representatives
-                ON bills.chief_patron_id=representatives.id
-			WHERE
-                bills.session_id=' . SESSION_ID . '
-			GROUP BY party';
-    $result = mysqli_query($GLOBALS['db'], $sql);
+# Select the total number of bills introduced in each chamber.
+$sql = 'SELECT
+            representatives.party,
+            COUNT(*) AS count,
+            (
+                SELECT COUNT(*)
+                FROM representatives
+                WHERE party="D"
+                AND date_ended IS NULL
+            ) AS democrats_count,
+            (
+                SELECT COUNT(*)
+                FROM representatives
+                WHERE party="R"
+                AND date_ended IS NULL
+            ) AS republicans_count
+        FROM bills
+        LEFT JOIN representatives
+            ON bills.chief_patron_id=representatives.id
+        WHERE
+            bills.session_id=' . SESSION_ID . '
+        GROUP BY party';
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_sidebar .= '
 			<div class="box">
@@ -204,22 +202,22 @@ if (mysqli_num_rows($result) > 0) {
 			</div>';
 }
 
-    # Republican Tag Cloud
-    $sql = 'SELECT
-                COUNT(*) AS count,
-                tags.tag
-			FROM tags
-			LEFT JOIN bills
-			    ON tags.bill_id = bills.id
-			LEFT JOIN representatives
-			    ON bills.chief_patron_id = representatives.id
-			WHERE
-                representatives.party = "R" AND
-                bills.session_id = ' . SESSION_ID . '
-			GROUP BY tags.tag
-			HAVING count > 20
-			ORDER BY tags.tag ASC';
-    $result = mysqli_query($GLOBALS['db'], $sql);
+# Republican Tag Cloud
+$sql = 'SELECT
+            COUNT(*) AS count,
+            tags.tag
+        FROM tags
+        LEFT JOIN bills
+            ON tags.bill_id = bills.id
+        LEFT JOIN representatives
+            ON bills.chief_patron_id = representatives.id
+        WHERE
+            representatives.party = "R" AND
+            bills.session_id = ' . SESSION_ID . '
+        GROUP BY tags.tag
+        HAVING count > 20
+        ORDER BY tags.tag ASC';
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_sidebar .= '
 		<a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-beige.gif" class="help-icon" alt="?" /></a>
@@ -245,22 +243,22 @@ if (mysqli_num_rows($result) > 0) {
     unset($tags);
 }
 
-    # Democratic Tag Cloud
-    $sql = 'SELECT
-                COUNT(*) AS count,
-                tags.tag
-			FROM tags
-			LEFT JOIN bills
-			    ON tags.bill_id = bills.id
-			LEFT JOIN representatives
-			    ON bills.chief_patron_id = representatives.id
-			WHERE
-                representatives.party = "D" AND
-                bills.session_id = ' . SESSION_ID . '
-			GROUP BY tags.tag
-			HAVING count > 20
-			ORDER BY tags.tag ASC';
-    $result = mysqli_query($GLOBALS['db'], $sql);
+# Democratic Tag Cloud
+$sql = 'SELECT
+            COUNT(*) AS count,
+            tags.tag
+        FROM tags
+        LEFT JOIN bills
+            ON tags.bill_id = bills.id
+        LEFT JOIN representatives
+            ON bills.chief_patron_id = representatives.id
+        WHERE
+            representatives.party = "D" AND
+            bills.session_id = ' . SESSION_ID . '
+        GROUP BY tags.tag
+        HAVING count > 20
+        ORDER BY tags.tag ASC';
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_sidebar .= '
 		<a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-beige.gif" class="help-icon" alt="?" /></a>
