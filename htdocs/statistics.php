@@ -42,8 +42,8 @@ $sql = 'SELECT
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_body = '<h2>Daily Bill Actions</h2>
-        <p><a href="/bills/activity/">Actions are taken on bills each day</a>—they’re voted on, sent
-        to committees, assessed, etc. Here is how many such actions were taken each day.</p>
+        <p><a href="/bills/activity/">Actions are taken on bills each day</a>—they’re voted on,
+        sent to committees, assessed, etc. Here is how many such actions were taken each day.</p>
         <ul>';
     $days = mysqli_fetch_all($result, MYSQLI_ASSOC);
     foreach ($days as $day) {
@@ -254,7 +254,8 @@ $sql = 'SELECT
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_sidebar .= '
-		<a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-beige.gif" class="help-icon" alt="?" /></a>
+		<a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img
+            src="/images/help-beige.gif" class="help-icon" alt="?" /></a>
 
 		<div class="box">
 			<h3>Republican Tag Cloud</h3>
@@ -268,7 +269,8 @@ if (mysqli_num_rows($result) > 0) {
             $font_size = '.75';
         }
         $page_sidebar .= '<span style="font-size: ' . $font_size . 'em;">
-					<a href="/bills/tags/' . urlencode($tags[$i]['tag']) . '/">' . $tags[$i]['tag'] . '</a>
+					<a href="/bills/tags/' . urlencode($tags[$i]['tag']) . '/">' . $tags[$i]['tag']
+                    . '</a>
 				</span>';
     }
     $page_sidebar .= '
@@ -295,7 +297,8 @@ $sql = 'SELECT
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_sidebar .= '
-		<a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-beige.gif" class="help-icon" alt="?" /></a>
+		<a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img
+        src="/images/help-beige.gif" class="help-icon" alt="?" /></a>
 
 		<div class="box">
 			<h3>Democratic Tag Cloud</h3>
@@ -309,7 +312,8 @@ if (mysqli_num_rows($result) > 0) {
             $font_size = '.75';
         }
         $page_sidebar .= '<span style="font-size: ' . $font_size . 'em;">
-					<a href="/bills/tags/' . urlencode($tags[$i]['tag']) . '/">' . $tags[$i]['tag'] . '</a>
+					<a href="/bills/tags/' . urlencode($tags[$i]['tag']) . '/">' . $tags[$i]['tag']
+                    . '</a>
 				</span>';
     }
     $page_sidebar .= '
