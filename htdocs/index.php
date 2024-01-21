@@ -27,7 +27,12 @@ $browser_title = 'Tracking the Virginia General Assembly';
 $site_section = 'home';
 
 # PAGE CONTENT
-if (strtotime(SESSION_START) > time()) {
+if (strtotime(SESSION_START) < time() && strtotime(SESSION_END) > time()) {
+    $page_body = '<p>The ' . SESSION_YEAR . ' Virginia General Assembly session began on '
+        . date('F j', strtotime(SESSION_START)) . ', and is scheduled to continue until '
+        . date('F j', strtotime(SESSION_END)) . '. Here you can read <a href="/bills/">the '
+        . 'bills are proposed</a>.</p>';
+} elseif (strtotime(SESSION_START) > time()) {
     $page_body = '<p>The ' . SESSION_YEAR . ' Virginia General Assembly session will begin on '
         . date('F j', strtotime(SESSION_START)) . ', scheduled to continue until '
         . date('F j', strtotime(SESSION_END)) . '. Here you can read <a href="/bills/">the '
