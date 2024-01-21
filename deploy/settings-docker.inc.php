@@ -77,9 +77,6 @@ define('LOG_VERBOSITY', 3);
 # Slack API URL
 define('SLACK_WEBHOOK', '');
 
-# Pushover API key
-define('PUSHOVER_KEY', '');
-
 # AWS auth info
 # This is only used in some RS instances.
 define('AWS_ACCESS_KEY', '');

@@ -120,38 +120,4 @@ class Log
         }
         return true;
     }
-
-    /**
-     * Send an alert to the Pushover iOS app.
-     */
-    public function pushover($title, $message)
-    {
-        if (!defined('PUSHOVER_KEY') || !isset($title) || !isset($message)) {
-            return false;
-        }
-
-        if (mb_strlen($title) > 100) {
-            $title = mb_substr($title, 0, 100);
-        }
-
-        if (mb_strlen($message) > 412) {
-            $message = mb_substr($message, 0, 412);
-        }
-
-        curl_setopt_array($ch = curl_init(), array(
-            CURLOPT_URL => "https://api.pushover.net/1/messages.json",
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POSTFIELDS => array(
-                "token" => PUSHOVER_KEY,
-                "user" => "unBH1CeWWY4F5JL2TzhUodQASDUAUG",
-                "title" => $title,
-                "message" => $message,
-            ),
-            CURLOPT_SAFE_UPLOAD => true,
-        ));
-        curl_exec($ch);
-        curl_close($ch);
-
-        return true;
-    }
 }

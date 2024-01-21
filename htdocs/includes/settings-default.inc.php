@@ -75,9 +75,6 @@ define('LOG_VERBOSITY', 3);
 # Slack API URL
 define('SLACK_WEBHOOK', '');
 
-# Pushover API key
-define('PUSHOVER_KEY', '');
-
 # OpenAI API key
 define('OPENAI_KEY', '');
 
