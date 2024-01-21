@@ -38,18 +38,25 @@ $site_section = 'bills';
 # PAGE CONTENT
 
 # Select the status of the bills.
-$sql = 'SELECT bills.number, sessions.year, bills.catch_line, bills_status.status,
-		DATE_FORMAT(bills_status.date, "%M %d, %Y") AS date, representatives.name AS patron,
-		bills.date_introduced, bills_status.lis_vote_id, votes.total AS vote_count,
+$sql = 'SELECT
+			bills.number,
+			sessions.year,
+			bills.catch_line,
+			bills_status.status,
+			DATE_FORMAT(bills_status.date, "%M %d, %Y") AS date,
+			representatives.name AS patron,
+			bills.date_introduced,
+			bills_status.lis_vote_id,
+			votes.total AS vote_count
 		FROM bills_status
 		LEFT JOIN bills
-		ON bills.id = bills_status.bill_id
+			ON bills.id = bills_status.bill_id
 		LEFT JOIN sessions
-		ON bills.session_id = sessions.id
+			ON bills.session_id = sessions.id
 		LEFT JOIN representatives
-		ON bills.chief_patron_id = representatives.id
+			ON bills.chief_patron_id = representatives.id
 		LEFT JOIN votes
-		ON bills_status.lis_vote_id=votes.lis_id
+			ON bills_status.lis_vote_id=votes.lis_id
 		WHERE DATE_SUB(CURDATE(), INTERVAL ' . $days . ' DAY) <= bills_status.date
 		ORDER BY bills_status.date DESC';
 
