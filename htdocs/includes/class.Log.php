@@ -42,6 +42,11 @@ class Log
         }
 
         /*
+         * Always write all messages to the filesystem log
+         */
+        $this->filesystem($message);
+
+        /*
          * If the level of this message is below our verbosity level, ignore it.
          */
         if ($level < $this->verbosity) {
@@ -115,7 +120,7 @@ class Log
             $file = __DIR__ . '../../logs/site.log';
         }
 
-        if (file_put_contents($file, $message) === false) {
+        if (file_put_contents($file, $message, FILE_APPEND) === false) {
             return false;
         }
         return true;
