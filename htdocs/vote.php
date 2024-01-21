@@ -69,7 +69,7 @@ $sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber, bills.ca
         WHERE bills.number="' . $bill . '" AND sessions.year=' . $year;
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) == 0) {
-    header("Status: 404 Not Found\n\r") ;
+    http_response_code(404);
     include '404.php';
     exit();
 }

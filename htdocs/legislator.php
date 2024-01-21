@@ -34,7 +34,7 @@ $json = get_content($json_url);
 $debug_timing['JSON retrieved'] = microtime(true);
 
 if ($json === false) {
-    header("Status: 404 Not Found\n\r");
+    http_response_code(404);
     include '404.php';
     exit();
 }

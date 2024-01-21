@@ -214,7 +214,7 @@ if (isset($_POST['form_data'])) {
          * This is spam. End silently.
          */
         if ($is_spam) {
-            header("HTTP/1.0 404 Not Found");
+            http_response_code(404);
             die();
         }
 

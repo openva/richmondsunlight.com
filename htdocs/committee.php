@@ -31,7 +31,7 @@ $committee = new Committee();
 $committee->chamber = $chamber;
 $committee->shortname = $shortname;
 if (!$committee->info() || !$committee->members()) {
-    header('Status: 404 Not Found');
+    http_response_code(404);
     include '404.php';
     exit();
 }

@@ -46,7 +46,7 @@ $leg = new Legislator();
 # Get the ID for this shortname.
 $leg_id = $leg->getid($shortname);
 if ($leg_id === false) {
-    header("Status: 404 Not Found\n\r") ;
+    http_response_code(404);
     include '404.php';
     exit();
 }

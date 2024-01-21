@@ -34,7 +34,7 @@ $bill = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['bill']);
 $json_url = API_URL . '1.1/bill/' . $year . '/' . $bill . '.json?' . time();
 $json = get_content($json_url);
 if ($json === false) {
-    header("Status: 404 Not Found\n\r") ;
+    http_response_code(404);
     include '404.php';
     exit();
 }
