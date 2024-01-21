@@ -28,6 +28,11 @@ session_start();
 if (isset($_GET['date'])) {
     $date = $_GET['date'];
     $tmp = explode('-', $date);
+    if (checkdate($tmp[1], $tmp[2], $tmp[0]) == false) {
+        http_response_code(404);
+        include '404.php';
+        exit();
+    }
     $date_formatted = date('m/d/Y', mktime(0, 0, 0, $tmp[1], $tmp[2], $tmp[0]));
 } else {
     # If it's later 4 PM or later, show tomorrow's docket.
