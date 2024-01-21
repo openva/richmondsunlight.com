@@ -33,13 +33,13 @@ $json = get_content($json_url);
 
 $debug_timing['JSON retrieved'] = microtime(true);
 
-if ($json === false) {
+$legislator = json_decode($json);
+
+if ($json == false || $legislator == false || isset($legislator->error)) {
     http_response_code(404);
     include '404.php';
     exit();
 }
-
-$legislator = json_decode($json);
 
 # Cast this bill as an array, rather than an object, in which the array is wrapped as a result of
 # being stored in JSON.
