@@ -63,11 +63,15 @@ $sql = 'SELECT
 $result = mysqli_query($GLOBALS['db'], $sql);
 $num_results = mysqli_num_rows($result);
 if ($num_results > 0) {
-    $page_body .= '<p>' . number_format($num_results) . ' action' . ($num_results > 1 ? 's' : '') . ' found.</p>';
+    $page_body .= '<p>' . number_format($num_results) . ' action'
+        . ($num_results > 1 ? 's' : '') . ' found.</p>';
     $date = '';
+    $last_bill = '';
     $i = 0;
-    while ($bill = mysqli_fetch_array($result)) {
+
+    while ($bill = mysqli_fetch_assoc($result)) {
         $bill = array_map('stripslashes', $bill);
+
         if ($bill['date'] != $date) {
             $date = $bill['date'];
             if ($i > 0) {
@@ -77,33 +81,33 @@ if ($num_results > 0) {
 			<ul>';
         }
 
-		// If we're starting a new bill
+        // If we're starting a new bill
         if ($bill['number'] != $last_bill) {
-			$page_body .= '</ul>
+            $page_body .= '</ul>
 					<li><a href="/bill/' . $bill['year'] . '/' . $bill['number']
-					. '/" class="balloon">' . mb_strtoupper($bill['number'])
-					. balloon($bill, 'bill') . '</a>: ' . $bill['catch_line'] . '</li>
+                    . '/" class="balloon">' . mb_strtoupper($bill['number'])
+                    . balloon($bill, 'bill') . '</a>: ' . $bill['catch_line'] . '</li>
 					<ul>';
-		}
+        }
 
-		$page_body .= '<li>';
+        $page_body .= '<li>';
 
-		// If this action was a vote, link to it
-		if (!empty($bill['lis_vote_id']) && $bill['vote_count'] > 0) {
-			$page_body .= '<a href="/bill/'. $bill['year'] . '/' . $bill['number'] . '/'
-					. mb_strtolower($bill['lis_vote_id']) . '/">';
-		}	
-		
-		// Display the actual status
-		$page_body .= $bill['status'];
+        // If this action was a vote, link to it
+        if (!empty($bill['lis_vote_id']) && $bill['vote_count'] > 0) {
+            $page_body .= '<a href="/bill/' . $bill['year'] . '/' . $bill['number'] . '/'
+                    . mb_strtolower($bill['lis_vote_id']) . '/">';
+        }
 
-		// If this action was a vote, close the link
-		if (!empty($bill['lis_vote_id']) && $bill['vote_count'] > 0) {
-			$page_body .= '</a>';
-		}
-		$page_body .= '</li>';
+        // Display the actual status
+        $page_body .= $bill['status'];
 
-		$last_bill = $bill['number'];
+        // If this action was a vote, close the link
+        if (!empty($bill['lis_vote_id']) && $bill['vote_count'] > 0) {
+            $page_body .= '</a>';
+        }
+        $page_body .= '</li>';
+
+        $last_bill = $bill['number'];
         $i++;
     }
     $page_body .= '</ul>';
@@ -127,10 +131,10 @@ $page_sidebar = '
 	<div class="box">
 		<h3>Explanation</h3>
 		<p>There are many steps between the introduction of a bill and when (if) it becomes law.
-		At left is every individual step taken by all bills in the past ' . $days . ' days.  This also
-		gives an idea of what the General Assembly is up to every day, even when they\'re not in
-		session.  Some days no committees or subcommittees meet, some days there\'s a lot
-		going on.</p>
+		At left is every individual step taken by all bills in the past ' . $days . ' days.  This
+		also gives an idea of what the General Assembly is up to every day, even when they’re not
+		in session.  Some days no committees or subcommittees meet, some days there’s a lot going
+		on.</p>
 	</div>';
 
 # OUTPUT THE PAGE
