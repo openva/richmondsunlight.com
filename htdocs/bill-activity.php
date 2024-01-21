@@ -41,13 +41,6 @@ $site_section = 'bills';
 $sql = 'SELECT bills.number, sessions.year, bills.catch_line, bills_status.status,
 		DATE_FORMAT(bills_status.date, "%M %d, %Y") AS date, representatives.name AS patron,
 		bills.date_introduced, bills_status.lis_vote_id, votes.total AS vote_count,
-		(
-			SELECT status
-			FROM bills_status
-			WHERE bill_id=bills.id
-			ORDER BY date DESC, id DESC
-			LIMIT 1
-		) AS status
 		FROM bills_status
 		LEFT JOIN bills
 		ON bills.id = bills_status.bill_id
@@ -76,12 +69,34 @@ if ($num_results > 0) {
             $page_body .= '<h2>' . $date . '</h2>
 			<ul>';
         }
-        $page_body .= '
-				<li><a href="/bill/' . $bill['year'] . '/' . $bill['number'] . '/" class="balloon">' . mb_strtoupper($bill['number']) . balloon($bill, 'bill') . '</a>: ' .
-             $bill['catch_line'] . '</li>
-				<ul>
-					<li>' . ((!empty($bill['lis_vote_id']) && ($bill['vote_count'] > 0)) ? '<a href="/bill/' . $bill['year'] . '/' . $bill['number'] . '/' . mb_strtolower($bill['lis_vote_id']) . '/">' : '') . $bill['status'] . ((!empty($bill['lis_vote_id']) && ($bill['vote_count'] > 0)) ? '</a>' : '') . '</li>
-				</ul>';
+
+		// If we're starting a new bill
+        if ($bill['number'] != $last_bill) {
+			$page_body .= '</ul>
+					<li><a href="/bill/' . $bill['year'] . '/' . $bill['number']
+					. '/" class="balloon">' . mb_strtoupper($bill['number'])
+					. balloon($bill, 'bill') . '</a>: ' . $bill['catch_line'] . '</li>
+					<ul>';
+		}
+
+		$page_body .= '<li>';
+
+		// If this action was a vote, link to it
+		if (!empty($bill['lis_vote_id']) && $bill['vote_count'] > 0) {
+			$page_body .= '<a href="/bill/'. $bill['year'] . '/' . $bill['number'] . '/'
+					. mb_strtolower($bill['lis_vote_id']) . '/">';
+		}	
+		
+		// Display the actual status
+		$page_body .= $bill['status'];
+
+		// If this action was a vote, close the link
+		if (!empty($bill['lis_vote_id']) && $bill['vote_count'] > 0) {
+			$page_body .= '</a>';
+		}
+		$page_body .= '</li>';
+
+		$last_bill = $bill['number'];
         $i++;
     }
     $page_body .= '</ul>';
