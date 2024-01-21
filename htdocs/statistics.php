@@ -12,7 +12,6 @@
     # Include any files or libraries that are necessary for this specific
     # page to function.
     include_once 'includes/settings.inc.php';
-    include_once 'includes/charts.php';
     include_once 'vendor/autoload.php';
 
     # DECLARATIVE FUNCTIONS
@@ -25,33 +24,109 @@
     $page_title = 'Statistics';
     $site_section = 'statistics';
 
+    $html_head = '<style>
+        ol {
+            list-style: decimal;
+            margin-left: 2em;
+        }
+    </style>';
+
     # PAGE CONTENT
+    $sql = 'SELECT
+                date,
+                COUNT(*) actions
+            FROM bills_status
+            WHERE
+                date >= "' . SESSION_START . '" AND
+                DATE <= "' . SESSION_END . '"
+            GROUP BY date
+            ORDER BY date ASC';
+    $result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0) {
+    $page_body = '<h2>Daily Bill Actions</h2>
+        <p><a href="/bills/activity/">Actions are taken on bills each day</a>—they’re voted on, sent
+        to committees, assessed, etc. Here is how many such actions were taken each day.</p>
+        <ul>';
+    while ($day = mysqli_fetch_assoc($result)) {
+        $page_body .= '<li>' . date('M. d', strtotime($day['date'])) . ': '
+            . number_format($day['actions']) . ' actions</li>';
+    }
+    $page_body .= '</ul>';
+}
 
-    $page_body = '<h2>Daily Activity</h2>
-	' . InsertChart('/images/charts.swf', '/images/charts_library', '/charts/statistics.php?id=daily-activity', 400, 250);
+    $sql = 'SELECT
+                date_introduced AS date,
+                COUNT(*) as number
+            FROM bills
+            WHERE
+                session_id=30
+            GROUP BY date_introduced
+            ORDER BY date_introduced ASC';
+    $result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0) {
+    $page_body .= '<h2>Number of Bills Introduced Daily for ' . SESSION_YEAR . '</h2><ul>';
+    while ($day = mysqli_fetch_assoc($result)) {
+        $page_body .= '<li>' . date('M. d', strtotime($day['date'])) . ': '
+            . $day['number'] . '</li>';
+    }
+    $page_body .= '</ul>';
+}
 
-    $page_body .= '<h2>Cumulative Bills Introduced</h2>
-	' . InsertChart('/images/charts.swf', '/images/charts_library', '/charts/statistics.php?id=cum-introduced', 400, 250);
 
-    $page_body .= '<h2>Top 10 Bill Filers</h2>
-	' . InsertChart('/images/charts.swf', '/images/charts_library', '/charts/statistics.php?id=top-filers', 400, 250);
+    $sql = 'SELECT
+                representatives.name_formatted AS name,
+                representatives.shortname,
+                COUNT(*) AS number
+            FROM representatives
+            LEFT JOIN bills
+                ON representatives.id=bills.chief_patron_id
+            WHERE bills.session_id=30
+            GROUP BY representatives.id
+            ORDER BY number DESC, name ASC
+            LIMIT 10';
+    $result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0) {
+    $page_body .= '<h2>Top 10 Bill Filers in ' . SESSION_YEAR . '</h2><ol>';
+    $total = 0;
+    while ($legislator = mysqli_fetch_assoc($result)) {
+        $page_body .= '<li><a href="/legislator/' . $legislator['shortname'] . '/">'
+            . $legislator['name'] . '</a>: ' . $legislator['number'] . ' bills</li>';
+    }
+    $page_body .= '</ol>';
+}
 
-    $page_body .= '<h2>Top 10 Most-Viewed Bills</h2>
-	' . InsertChart('/images/charts.swf', '/images/charts_library', '/charts/statistics.php?id=most-viewed', 400, 250);
-
+    $sql = 'SELECT
+                number,
+                catch_line
+            FROM bills
+            ORDER BY view_count ASC
+            LIMIT 10';
+    $result = mysqli_query($GLOBALS['db'], $sql);
+if (mysqli_num_rows($result) > 0) {
+    $page_body .= '<h2>Top 10 Most-Viewed Bills for ' . SESSION_YEAR . '</h2><ol>';
+    $total = 0;
+    while ($bill = mysqli_fetch_assoc($result)) {
+        $page_body .= '<li><a href="/bill/ ' . SESSION_YEAR . '/' . $bill['number'] . '/">'
+            . strtoupper($bill['number']) . '</a>: ' . $bill['catch_line'] . '</li>';
+    }
+    $page_body .= '</ol>';
+}
 
     # SIDEBAR
 
     # Select the total number of bills introduced in each chamber.
-    $sql = 'SELECT chamber, COUNT(*) AS count
+    $sql = 'SELECT
+                chamber,
+                COUNT(*) AS count
 			FROM bills
-			WHERE session_id=' . SESSION_ID . '
+			WHERE
+                session_id=' . SESSION_ID . '
 			GROUP BY chamber';
     $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_sidebar .= '
-			<div class="box">
-				<h3>By Chamber</h3>';
+                <div class="box">
+                    <h3>By Chamber</h3>';
     while ($chamber = mysqli_fetch_array($result)) {
         if ($chamber['chamber'] == 'house') {
             $house['count'] = number_format($chamber['count']);
@@ -63,38 +138,41 @@ if (mysqli_num_rows($result) > 0) {
     }
 
     $page_sidebar .= '
-				<strong>Senate</strong>
-				<ul>
-					<li>' . $senate['count'] . ' total bills</li>
-					<li>' . $senate['avg'] . ' bills per legislator</li>
-				</ul>
-				<strong>House</strong>
-				<ul>
-					<li>' . $house['count'] . ' total bills</li>
-					<li>' . $house['avg'] . ' bills per legislator</li>
-				</ul>';
+                    <strong>Senate</strong>
+                    <ul>
+                        <li>' . $senate['count'] . ' total bills</li>
+                        <li>' . $senate['avg'] . ' bills per legislator</li>
+                    </ul>
+                    <strong>House</strong>
+                    <ul>
+                        <li>' . $house['count'] . ' total bills</li>
+                        <li>' . $house['avg'] . ' bills per legislator</li>
+                    </ul>';
     $page_sidebar .= '
-			</div>';
+                </div>';
 }
 
-
     # Select the total number of bills introduced in each chamber.
-    $sql = 'SELECT representatives.party, COUNT(*) AS count,
-			(
-				SELECT COUNT(*)
-				FROM representatives
-				WHERE party="D"
-				AND date_ended IS NULL
-			) AS democrats_count,
-			(
-				SELECT COUNT(*)
-				FROM representatives
-				WHERE party="R"
-				AND date_ended IS NULL
-			) AS republicans_count
+    $sql = 'SELECT
+                representatives.party,
+                COUNT(*) AS count,
+                (
+                    SELECT COUNT(*)
+                    FROM representatives
+                    WHERE party="D"
+                    AND date_ended IS NULL
+                ) AS democrats_count,
+                (
+                    SELECT COUNT(*)
+                    FROM representatives
+                    WHERE party="R"
+                    AND date_ended IS NULL
+                ) AS republicans_count
 			FROM bills
-			LEFT JOIN representatives ON bills.chief_patron_id=representatives.id
-			WHERE bills.session_id=' . SESSION_ID . '
+			LEFT JOIN representatives
+                ON bills.chief_patron_id=representatives.id
+			WHERE
+                bills.session_id=' . SESSION_ID . '
 			GROUP BY party';
     $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
@@ -127,15 +205,19 @@ if (mysqli_num_rows($result) > 0) {
 }
 
     # Republican Tag Cloud
-    $sql = 'SELECT COUNT(*) AS count, tags.tag
+    $sql = 'SELECT
+                COUNT(*) AS count,
+                tags.tag
 			FROM tags
 			LEFT JOIN bills
-			ON tags.bill_id = bills.id
+			    ON tags.bill_id = bills.id
 			LEFT JOIN representatives
-			ON bills.chief_patron_id = representatives.id
-			WHERE representatives.party = "R" AND bills.session_id = ' . SESSION_ID . '
+			    ON bills.chief_patron_id = representatives.id
+			WHERE
+                representatives.party = "R" AND
+                bills.session_id = ' . SESSION_ID . '
 			GROUP BY tags.tag
-			HAVING count > 5
+			HAVING count > 20
 			ORDER BY tags.tag ASC';
     $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
@@ -149,7 +231,7 @@ if (mysqli_num_rows($result) > 0) {
         $tags[] = array_map('stripslashes', $tag);
     }
     for ($i = 0; $i < count($tags); $i++) {
-        $font_size = round((log($tags[$i]['count']) / 2), 2);
+        $font_size = round((log($tags[$i]['count']) / 3), 2);
         if ($font_size < '.75') {
             $font_size = '.75';
         }
@@ -164,15 +246,19 @@ if (mysqli_num_rows($result) > 0) {
 }
 
     # Democratic Tag Cloud
-    $sql = 'SELECT COUNT(*) AS count, tags.tag
+    $sql = 'SELECT
+                COUNT(*) AS count,
+                tags.tag
 			FROM tags
 			LEFT JOIN bills
-			ON tags.bill_id = bills.id
+			    ON tags.bill_id = bills.id
 			LEFT JOIN representatives
-			ON bills.chief_patron_id = representatives.id
-			WHERE representatives.party = "D" AND bills.session_id = ' . SESSION_ID . '
+			    ON bills.chief_patron_id = representatives.id
+			WHERE
+                representatives.party = "D" AND
+                bills.session_id = ' . SESSION_ID . '
 			GROUP BY tags.tag
-			HAVING count > 3
+			HAVING count > 20
 			ORDER BY tags.tag ASC';
     $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
@@ -186,7 +272,7 @@ if (mysqli_num_rows($result) > 0) {
         $tags[] = array_map('stripslashes', $tag);
     }
     for ($i = 0; $i < count($tags); $i++) {
-        $font_size = round((log($tags[$i]['count']) / 2), 2);
+        $font_size = round((log($tags[$i]['count']) / 3), 2);
         if ($font_size < '.75') {
             $font_size = '.75';
         }
@@ -199,6 +285,11 @@ if (mysqli_num_rows($result) > 0) {
 		</div>';
 }
 
-    # OUTPUT THE PAGE
-    display_page('page_title=' . $page_title . '&page_body=' . urlencode($page_body) . '&page_sidebar=' . urlencode($page_sidebar) .
-        '&site_section=' . urlencode($site_section));
+# OUTPUT THE PAGE
+$page = new Page();
+$page->page_title = $page_title;
+$page->page_body = $page_body;
+$page->page_sidebar = $page_sidebar;
+$page->site_section = $site_section;
+$page->html_head = $html_head;
+$page->process();

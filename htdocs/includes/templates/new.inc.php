@@ -362,6 +362,7 @@ if (
                         </ul>
                     </li>
                     <li id="t-schedule"><a href="/schedule/" accesskey="s">Schedule</a></li>
+                    <li id="t-stats"><a href="/statistics/" accesskey="t">Stats</a></li>
                     <li id="t-about"><a href="/about/" accesskey="a">About</a>
                     <ul>
                         <li><a href="/about/">The General Assembly »</a>
