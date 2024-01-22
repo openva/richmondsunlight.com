@@ -1099,7 +1099,7 @@ class Import
             }
 
             /*
-             * Get the legislator's party affiliation.
+             * Get the senator's party affiliation.
              */
             $tmp = $dom->find('h3.subttl');
             if (preg_match('/\(([DIR]{1})\)/', $tmp[0], $matches) == 1) {
@@ -1108,10 +1108,12 @@ class Import
             }
 
             /*
-             * Put together the email address.
+             * Get the senator's email address.
              */
-            $legislator['email'] = 'district' . $legislator['district_number']
-                . '@senate.virginia.gov';
+            if (preg_match('/senator(.+)@senate.virginia.gov/U', $html, $matches) == 1) {
+                $legislator['email'] = $matches[0];
+                unset($matches);
+            }
 
             /*
              * Get district address.
