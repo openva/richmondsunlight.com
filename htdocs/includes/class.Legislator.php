@@ -102,11 +102,6 @@ class Legislator
 				representatives.race, representatives.sex, representatives.notes,
 				representatives.email, representatives.url AS website,
 				representatives.latitude, representatives.longitude,
-					(SELECT total
-					FROM representatives_fundraising
-					WHERE representatives_fundraising.representative_id = representatives.id
-					ORDER BY year DESC
-					LIMIT 1) AS total_raised,
 				representatives.contributions, representatives.place
 				FROM representatives
 				LEFT JOIN districts
