@@ -27,7 +27,8 @@ $html_head = '<style>
         list-style: decimal;
         margin-left: 2em;
     }
-</style>';
+</style>
+<script src="/js/vendor/chart.js/dist/chart.umd.js"></script>';
 
 # PAGE CONTENT
 $sql = 'SELECT
@@ -60,7 +61,6 @@ if (mysqli_num_rows($result) > 0) {
   <canvas id="daily-bill-actions-chart"></canvas>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
   const ctx = document.getElementById('daily-bill-actions-chart');
 
