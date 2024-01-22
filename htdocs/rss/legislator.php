@@ -87,7 +87,7 @@ if ($legislator['chamber'] == 'house') {
 while ($bill = mysqli_fetch_array($result)) {
     # Aggregate the variables into their RSS components.
     $title = '<![CDATA[' . $bill['catch_line'] . '(' . strtoupper($bill['number']) . ')]]>';
-    $link = 'http://www.richmondsunlight.com/bill/' . $bill['year'] . '/' . $bill['number'] . '/';
+    $link = 'https://www.richmondsunlight.com/bill/' . $bill['year'] . '/' . $bill['number'] . '/';
     $description = '<![CDATA[<p>' . $bill['summary'] . '</p><p><strong>Status: ' . $bill['status'] . '</strong></p>]]>';
 
     # Now assemble those RSS components into an XML fragment.
@@ -109,7 +109,7 @@ while ($bill = mysqli_fetch_array($result)) {
 <rss version="0.91">
 	<channel>
 		<title>' . $legislator['prefix'] . ' ' . pivot($legislator['name']) . ' ' . $legislator['suffix'] . '</title>
-		<link>http://www.richmondsunlight.com/bills/' . SESSION_YEAR . '/</link>
+		<link>https://www.richmondsunlight.com/bills/' . SESSION_YEAR . '/</link>
 		<description>The bills filed by ' . pivot($legislator['name']) . ' in the ' . SESSION_YEAR . ' Virginia General Assembly session.</description>
 		<language>en-us</language>
 		' . $rss_content . '

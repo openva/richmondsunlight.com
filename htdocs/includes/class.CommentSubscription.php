@@ -141,7 +141,7 @@ class CommentSubscription
             $body = 'In response to "' . $bill['catch_line'] . '" (' . mb_strtoupper($bill['number']) . '), '
                 . $this->comment['name'] . ' wrote:' . "\r\r" . $this->comment['comment'] . "\r\r"
                 . $bill['url'] . "\r\rUnsubscribe from this Discussion \r"
-                . 'http://www.richmondsunlight.com/unsubscribe/' . $subscriber['hash'] . '/';
+                . 'https://www.richmondsunlight.com/unsubscribe/' . $subscriber['hash'] . '/';
 
             # Send the e-mail.
             // THIS SHOULD REALLY BE DONE AS A BASE-64 E-MAIL. 7-bit e-mails are limited to 998

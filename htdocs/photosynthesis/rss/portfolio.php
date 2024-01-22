@@ -64,7 +64,7 @@ $sql = 'SELECT bills.number, bills.catch_line, bills.summary,
 		AND bills.session_id='.SESSION_ID;
 $result = mysqli_query($GLOBALS['db'], $sql);
 
-#Don't check to make sure the query was successful -- we want to make sure that people can
+# Don't check to make sure the query was successful -- we want to make sure that people can
 # even subscribe to feeds for tags that have introduced nothing yet.
 
 $rss_content = '';
@@ -89,19 +89,14 @@ while ($bill = mysqli_fetch_array($result))
     # Unset those variables for reuse.
     unset($item_completed, $title, $link, $description);
 
-
-
-
 }
-
-
 
 $rss = '<?xml version="1.0" encoding=\'iso-8859-1\'?>
 <!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN" "https://emacspeak.googlecode.com/svn/tags/release-social-dog/html/rss-0.91.dtd">
 <rss version="0.91">
 <channel>
 	<title>'.$portfolio['name'].'</title>
-	<link>http://www.richmondsunlight.com/photosynthesis/'.$hash.'/</link>
+	<link>https://www.richmondsunlight.com/photosynthesis/'.$hash.'/</link>
 	<description>Bills you\'re tracking in the "'.$portfolio['name'].'" portfolio.</description>
 	<language>en-us</language>
 	'.$rss_content.'

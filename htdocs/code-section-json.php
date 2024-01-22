@@ -47,7 +47,7 @@ $bill = mysqli_fetch_array($result, MYSQL_ASSOC);
 # The MYSQL_ASSOC variable indicates that we want just the associated array, not both associated
 # and indexed arrays.
 while ($bill = mysqli_fetch_array($result, MYSQL_ASSOC)) {
-    $bill['url'] = 'http://www.richmondsunlight.com/bill/' . $bill['year'] . '/' . $bill['number'] . '/';
+    $bill['url'] = 'https://www.richmondsunlight.com/bill/' . $bill['year'] . '/' . $bill['number'] . '/';
     $bill['number'] = mb_strtoupper($bill['number']);
     $bills[] = array_map('stripslashes', $bill);
 }

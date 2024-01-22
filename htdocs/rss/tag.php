@@ -56,7 +56,7 @@ if ((file_exists('cache/tag-' . $tag . '.xml')) && ((filemtime('cache/tag-' . $t
 while ($bill = mysqli_fetch_array($result)) {
     # Aggregate the variables into their RSS components.
     $title = '<![CDATA[' . $bill['catch_line'] . ' (' . strtoupper($bill['number']) . ')]]>';
-    $link = 'http://www.richmondsunlight.com/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/';
+    $link = 'https://www.richmondsunlight.com/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/';
     $description = '<![CDATA[<p>' . $bill['summary'] . '</p><p><strong>Status: ' . $bill['status'] . '</strong></p>]]>';
 
     # Now assemble those RSS components into an XML fragment.
@@ -78,7 +78,7 @@ while ($bill = mysqli_fetch_array($result)) {
 <rss version="0.91">
 	<channel>
 		<title>Bills Tagged "' . $tag . '"</title>
-		<link>http://www.richmondsunlight.com/bills/tags/' . $tag . '/</link>
+		<link>https://www.richmondsunlight.com/bills/tags/' . $tag . '/</link>
 		<description>The bills filed in the ' . SESSION_YEAR . ' Virginia General Assembly session that have been tagged with "' . $tag . '".</description>
 		<language>en-us</language>
 		' . $rss_content . '

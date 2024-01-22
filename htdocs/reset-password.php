@@ -70,7 +70,7 @@ if (!empty($_POST['email'])) {
             $email_body = $user_data['name'] . ",\n\n" .
                 'As you requested, here is a link to a page where you can reset your password ' .
                 "on Richmond Sunlight.\n\n" .
-                'http://www.richmondsunlight.com/account/reset-password/' . $user_data['private_hash'] . "\n\n" .
+                'https://www.richmondsunlight.com/account/reset-password/' . $user_data['private_hash'] . "\n\n" .
                 'If you didn\'t request that your password be reset, don\'t worry -- you can just ' .
                 'ignore this e-mail. No harm done.' . "\n\n" .
                 "Best wishes,\nRichmond Sunlight";

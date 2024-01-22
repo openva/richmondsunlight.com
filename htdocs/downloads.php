@@ -167,7 +167,7 @@
   bill_number: "SB287",
   bill_catch_line: "Prescription Monitoring Program; reports by dispensers shall be made within 24 hours or next day.",
   law: "54.1-2525",
-  url: "http://www.richmondsunlight.com/bill/2016/sb287/"
+  url: "https://www.richmondsunlight.com/bill/2016/sb287/"
 }
 </code></pre>
 
