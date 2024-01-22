@@ -44,14 +44,8 @@ $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_body = '<h2>Daily Bill Actions</h2>
         <p><a href="/bills/activity/">Actions are taken on bills each day</a>—they’re voted on,
-        sent to committees, assessed, etc. Here is how many such actions were taken each day.</p>
-        <ul>';
+        sent to committees, assessed, etc. Here is how many such actions were taken each day.</p>';
     $days = mysqli_fetch_all($result, MYSQLI_ASSOC);
-    foreach ($days as $day) {
-        $page_body .= '<li>' . date('M. d', strtotime($day['date'])) . ': '
-            . number_format($day['actions']) . ' actions</li>';
-    }
-    $page_body .= '</ul>';
 
     $labels = json_encode(array_column($days, 'date'));
     $data = json_encode(array_column($days, 'actions'));
@@ -62,15 +56,16 @@ if (mysqli_num_rows($result) > 0) {
 </div>
 
 <script>
-  const ctx = document.getElementById('daily-bill-actions-chart');
+  const ctx1 = document.getElementById('daily-bill-actions-chart');
 
-  new Chart(ctx, {
+  new Chart(ctx1, {
     type: 'bar',
     data: {
       labels: $labels,
       datasets: [{
         label: '# of Actions',
         data: $data,
+        backgroundColor: '#dccbaf',
         borderWidth: 1
       }]
     },
@@ -78,6 +73,11 @@ if (mysqli_num_rows($result) > 0) {
       scales: {
         y: {
           beginAtZero: true
+        }
+      },
+      plugins: {
+        legend: {
+            display: false
         }
       }
     }
