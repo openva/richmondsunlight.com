@@ -70,13 +70,6 @@ class Log
             $this->slack($message, 'rs', $emoji[$level]);
         }
 
-        /*
-         * If this is a top-level error, send it via Pushover, too.
-         */
-        if ($level == 8) {
-            $this->pushover('RS: Serious Error', $message);
-        }
-
         return true;
     }
 
