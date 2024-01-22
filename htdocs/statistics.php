@@ -87,7 +87,7 @@ EOD;
 }
 
 $sql = 'SELECT
-            date_introduced AS date,
+            DATE_FORMAT(date_introduced, "%M %d") AS date,
             COUNT(*) as number
         FROM bills
         WHERE
@@ -96,12 +96,47 @@ $sql = 'SELECT
         ORDER BY date_introduced ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
-    $page_body .= '<h2>Number of Bills Introduced Daily for ' . SESSION_YEAR . '</h2><ul>';
-    while ($day = mysqli_fetch_assoc($result)) {
-        $page_body .= '<li>' . date('M. d', strtotime($day['date'])) . ': '
-            . $day['number'] . '</li>';
+    $page_body .= '<h2>Number of Bills Introduced Daily for ' . SESSION_YEAR . '</h2>';
+    $days = mysqli_fetch_all($result, MYSQLI_ASSOC);
+
+    $labels = json_encode(array_column($days, 'date'));
+    $data = json_encode(array_column($days, 'number'));
+
+    $page_body .=
+    <<<EOD
+<div>
+  <canvas id="daily-bills-introduced-chart"></canvas>
+</div>
+
+<script>
+  const ctx2 = document.getElementById('daily-bills-introduced-chart');
+
+  new Chart(ctx2, {
+    type: 'bar',
+    data: {
+      labels: $labels,
+      datasets: [{
+        label: '# of Bills',
+        data: $data,
+        backgroundColor: '#dccbaf',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      },
+      plugins: {
+        legend: {
+            display: false
+        }
+      }
     }
-    $page_body .= '</ul>';
+  });
+</script>
+EOD;
 }
 
 
