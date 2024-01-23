@@ -108,9 +108,9 @@ class Log
          * Keep logs in different locations, depending on how this has been invoked.
          */
         if (PHP_SAPI === 'cli') {
-            $file = __DIR__ . '../logs/site.log';
+            $file = __DIR__ . '/../logs/site.log';
         } else {
-            $file = __DIR__ . '../../logs/site.log';
+            $file = __DIR__ . '/../../logs/site.log';
         }
 
         if (file_put_contents($file, $message, FILE_APPEND) === false) {
