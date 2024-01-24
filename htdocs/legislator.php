@@ -193,22 +193,32 @@ $page_sidebar .= '
 </div>';
 
 # Newest Comments
-$sql = 'SELECT comments.id, comments.bill_id, comments.date_created AS date,
-		comments.name, comments.email, comments.url, comments.comment,
-		comments.type, bills.number AS bill_number, bills.catch_line AS bill_catch_line,
-		sessions.year,
-			(
-			SELECT COUNT(*)
-			FROM comments
-			WHERE bill_id=bills.id AND status="published"
-			AND date_created <= date
-			) AS number
+$sql = 'SELECT
+            comments.id,
+            comments.bill_id,
+            comments.date_created AS date,
+		    comments.name,
+            comments.email,
+            comments.url,
+            comments.comment,
+		    comments.type,
+            bills.number AS bill_number,
+            bills.catch_line AS bill_catch_line,
+            sessions.year,
+                (
+                SELECT COUNT(*)
+                FROM comments
+                WHERE bill_id=bills.id AND status="published"
+                AND date_created <= date
+                ) AS number
 		FROM comments
 		LEFT JOIN bills
-		ON bills.id=comments.bill_id
+		    ON bills.id=comments.bill_id
 		LEFT JOIN sessions
-		ON bills.session_id=sessions.id
-		WHERE comments.status="published" AND bills.chief_patron_id=' . $legislator['id'] . '
+		    ON bills.session_id=sessions.id
+		WHERE
+            comments.status="published" AND
+            bills.chief_patron_id=' . $legislator['id'] . '
 		ORDER BY comments.date_created DESC
 		LIMIT 5';
 $result = mysqli_query($GLOBALS['db'], $sql);
@@ -308,9 +318,11 @@ if (IN_SESSION == true) {
 } else {
     $batting_year = SESSION_YEAR;
 }
-$sql = 'SELECT COUNT(*) AS passed,
+$sql = 'SELECT
+            COUNT(*) AS passed,
 		(
-			SELECT COUNT(*)
+			SELECT
+                COUNT(*)
 			FROM bills
                 LEFT JOIN sessions
                     ON bills.session_id = sessions.id
@@ -432,7 +444,9 @@ if (!empty($legislator['activity']) && IN_SESSION == true) {
 # COPATRONING STATS
 # Calculate the percentage of the bills copatroned by this legislator that were introduced by
 # each party.
-$sql = 'SELECT representatives.party, COUNT(*) AS number
+$sql = 'SELECT
+            representatives.party,
+            COUNT(*) AS number
 		FROM bills_copatrons
 		LEFT JOIN bills
 			ON bills_copatrons.bill_id=bills.id
@@ -470,10 +484,12 @@ if ($total > 0) {
 # introduced by this legislator.
 // Using this "IN" clause is just ridiculous. The query takes a good .2 seconds, which is way
 // too long. There's got to be a faster way to do this.
-$sql = 'SELECT representatives.party, COUNT(*) AS number
+$sql = 'SELECT
+            representatives.party,
+            COUNT(*) AS number
 		FROM bills_copatrons
-			LEFT JOIN representatives
-				ON bills_copatrons.legislator_id = representatives.id
+		LEFT JOIN representatives
+			ON bills_copatrons.legislator_id = representatives.id
 		WHERE bills_copatrons.bill_id
 		IN
 			(SELECT id
@@ -510,9 +526,9 @@ if ($total > 0) {
 # of bills copatroned by this legislator. Meaning, look at every bill that this legislator has
 # copatroned, and look at every other copatron of those bills, and calculate the percentage of
 # those copatrons that are Democrats, Republicans, and independents.
-// Using this "IN" clause is just ridiculous. The query takes a good .1 seconds, which is way
-// too long. There's got to be a faster way to do this.
-$sql = 'SELECT representatives.party, COUNT(*) AS number
+$sql = 'SELECT
+            representatives.party,
+            COUNT(*) AS number
 		FROM bills_copatrons
 			LEFT JOIN representatives
 				ON bills_copatrons.legislator_id=representatives.id
