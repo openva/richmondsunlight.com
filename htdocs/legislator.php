@@ -444,7 +444,7 @@ $sql = 'SELECT representatives.party, COUNT(*) AS number
 $result = mysqli_query($GLOBALS['db'], $sql);
 $tmp = array();
 while ($copatron = mysqli_fetch_array($result)) {
-    $tmp[$copatron{'party'}] = $copatron['number'];
+    $tmp[$copatron['party']] = $copatron['number'];
 }
 $total = array_sum($tmp);
 if ($total > 0) {
@@ -483,7 +483,7 @@ $sql = 'SELECT representatives.party, COUNT(*) AS number
 $result = mysqli_query($GLOBALS['db'], $sql);
 $tmp = array();
 while ($copatron = mysqli_fetch_array($result)) {
-    $tmp[$copatron{'party'}] = $copatron['number'];
+    $tmp[$copatron['party']] = $copatron['number'];
 }
 $total = array_sum($tmp);
 if ($total > 0) {
@@ -525,7 +525,7 @@ $sql = 'SELECT representatives.party, COUNT(*) AS number
 $result = mysqli_query($GLOBALS['db'], $sql);
 $tmp = array();
 while ($copatron = mysqli_fetch_array($result)) {
-    $tmp[$copatron{'party'}] = $copatron['number'];
+    $tmp[$copatron['party']] = $copatron['number'];
 }
 $total = array_sum($tmp);
 if ($total > 0) {
@@ -600,7 +600,7 @@ if ($tag_count > 0) {
     # Build up an array of tags, with the key being the tag and the value being the count.
     while ($tag = mysqli_fetch_array($result)) {
         $tag = array_map('stripslashes', $tag);
-        $tags[$tag{'tag'}] = $tag['count'];
+        $tags[$tag['tag']] = $tag['count'];
     }
 
     # Sort the tags in reverse order by key (their count), shave off the top 30, and then
@@ -865,7 +865,7 @@ if (count($legislator['bills']) > 0) {
     $i = 0;
     foreach ($legislator['bills'] as $bill) {
         $bill = (array) $bill;
-        $bills[$bill{'year'}][] = $bill;
+        $bills[$bill['year']][] = $bill;
     }
 
     # Start the tab header code
