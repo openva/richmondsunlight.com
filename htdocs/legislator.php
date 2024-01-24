@@ -633,16 +633,6 @@ if (!empty($legislator['batting'])) {
 		in ' . $batting_year . '</dd>';
 }
 
-/*if (!empty($legislator['contributions']))
-{
-    $legislator['contributions'] = (array) $legislator['contributions'];
-    $page_body .= '<dt>Campaign Contributions</dt>
-        <dd>' . $legislator['contributions']['Reports']->{0}->EndingBalance . ' cash on hand '
-        . '(<a href="' . $legislator['contributions']['Reports']->{0}->Url . '">'
-        . date('F Y', strtotime($legislator['contributions']['Reports']->{0}->PeriodEnd))
-        . ' report)</a></dd>';
-}*/
-
 if (!empty($legislator['bio'])) {
     $page_body .= '
 		<dt>Bio</dt>
