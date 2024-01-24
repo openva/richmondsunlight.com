@@ -9,7 +9,9 @@
 		"jeditable": "NicolasCARPi/jquery_jeditable#1.8.0",
 		"zxcvbn": "dropbox/zxcvbn",
 		"jquery.tabSlideOut.js": "microneer/jquery.tabSlideOut.js",
-		"chart.js": "4.x"
+		"chart.js": "4.x",
+		"turf": "6.x",
+		"mapbox-gl": "3.x"
 	},
 	"scripts": {
 		"build": "yarn install && cp -r node_modules/* . && rm -Rf node_modules/ && mv jquery-ui-dist jquery-ui"
