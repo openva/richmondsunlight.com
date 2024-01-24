@@ -594,7 +594,7 @@ $result = mysqli_query($GLOBALS['db'], $sql);
 $tag_count = mysqli_num_rows($result);
 if ($tag_count > 0) {
     $page_body .= '
-		<dt>Tag Cloud <a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-f4eee5.gif" class="help-icon" alt="?" /></a></dt>
+		<dt>Bill Topics <a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-f4eee5.gif" class="help-icon" alt="?" /></a></dt>
 		<dd>
 			<div class="tags">';
     # Build up an array of tags, with the key being the tag and the value being the count.
