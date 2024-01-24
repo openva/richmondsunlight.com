@@ -874,7 +874,7 @@ if (count($legislator['bills']) > 0) {
 
     # Step through each year and generate a tab.
     foreach ($bills as $year => $bill) {
-        if (count($bills) > 9) {
+        if (count($bills) > 8) {
             $page_body .= '
 				<li><a href="#' . $year . '">' . preg_replace('/^20/', "‘", $year) . '</a></li>';
         } else {
