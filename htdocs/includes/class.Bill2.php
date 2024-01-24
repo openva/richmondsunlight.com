@@ -219,7 +219,7 @@ class Bill2
             while ($tag = mysqli_fetch_array($result)) {
                 $tag['tag'] = stripslashes($tag['tag']);
                 # Save the tags.
-                $bill['tags'][$tag{'id'}] = $tag['tag'];
+                $bill['tags'][$tag['id']] = $tag['tag'];
             }
         }
 
@@ -468,7 +468,7 @@ class Bill2
                          * If there are any uppercase characters, then make this PCRE string case
                          * sensitive.
                          */
-                        if ((ord($term{$i}) >= 65) && (ord($term{$i}) <= 90)) {
+                        if ((ord($term[$i]) >= 65) && (ord($term[$i]) <= 90)) {
                             $term_pcres[] = '/\b' . $term . '(s?)\b(?![^<]*>)/';
                             $caps = true;
                             break;
