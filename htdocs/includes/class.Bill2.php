@@ -45,12 +45,14 @@ class Bill2
         /*
          * Query the DB.
          */
-        $sql = 'SELECT bills.id
+        $sql = 'SELECT
+                    bills.id
 				FROM bills
 				LEFT JOIN sessions
 					ON bills.session_id=sessions.id
-				WHERE bills.number="' . mysqli_real_escape_string($GLOBALS['db'], $number) . '"
-				AND sessions.year= ' . mysqli_real_escape_string($GLOBALS['db'], $year) . '
+				WHERE
+                    bills.number="' . mysqli_real_escape_string($GLOBALS['db'], $number) . '" AND
+				    sessions.year= ' . mysqli_real_escape_string($GLOBALS['db'], $year) . '
                 ORDER BY sessions.date_started DESC';
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) < 1) {
@@ -93,52 +95,70 @@ class Bill2
         $database->connect_mysqli();
 
         # RETRIEVE THE BILL INFO FROM THE DATABASE
-        $sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber,
-				bills.catch_line, bills.chief_patron_id, bills.summary, bills.summary_hash,
-				bills.full_text, bills.notes, bills.status, bills.impact_statement_id,
-				bills.date_introduced, bills.outcome, bills2.number AS incorporated_into,
-				bills.copatrons AS copatron_count, representatives.name AS patron,
-				districts.number AS patron_district, sessions.year, sessions.lis_id AS session_lis_id,
-				representatives.party AS patron_party, representatives.chamber AS patron_chamber,
-				representatives.shortname AS patron_shortname, representatives.place AS patron_place,
-				DATE_FORMAT(representatives.date_started, "%Y") AS patron_started,
-				representatives.name_formatted as patron_name_formatted,
-				representatives.address_district AS patron_address,
-				committees.name AS committee, committees.shortname AS committee_shortname,
-				committees.chamber AS committee_chamber,
-				(
-					SELECT translation
-					FROM bills_status
-					WHERE bill_id=bills.id AND translation IS NOT NULL
-					ORDER BY date DESC, id DESC
-					LIMIT 1
-				) AS status_detail,
-				(
-					SELECT DATE_FORMAT(date, "%m/%d/%Y")
-					FROM bills_status
-					WHERE bill_id=bills.id AND translation IS NOT NULL
-					ORDER BY date DESC, id DESC
-					LIMIT 1
-				) AS status_detail_date,
-				(
-					SELECT number
-					FROM bills_full_text
-					WHERE bill_id = bills.id
-					ORDER BY date_introduced DESC
-					LIMIT 1
-				) AS version
-				FROM bills
-				LEFT JOIN sessions
-					ON sessions.id=bills.session_id
-				LEFT JOIN representatives
-					ON representatives.id=bills.chief_patron_id
-				LEFT JOIN districts
-					ON representatives.district_id=districts.id
-				LEFT JOIN committees
-					ON bills.last_committee_id=committees.id
-				LEFT JOIN bills AS bills2
-					ON bills.incorporated_into=bills2.id
-				WHERE bills.id=' . $id;
+        $sql = 'SELECT
+                    bills.id,
+                    bills.number,
+                    bills.session_id,
+                    bills.chamber,
+				    bills.catch_line,
+                    bills.chief_patron_id,
+                    bills.summary,
+                    bills.summary_hash,
+				    bills.full_text,
+                    bills.notes,
+                    bills.status,
+                    bills.impact_statement_id,
+				    bills.date_introduced,
+                    bills.outcome,
+                    bills2.number AS incorporated_into,
+				    bills.copatrons AS copatron_count,
+                    representatives.name AS patron,
+				    districts.number AS patron_district,
+                    sessions.year,
+                    sessions.lis_id AS session_lis_id,
+				    representatives.party AS patron_party,
+                    representatives.chamber AS patron_chamber,
+				    representatives.shortname AS patron_shortname,
+                    representatives.place AS patron_place,
+				    DATE_FORMAT(representatives.date_started, "%Y") AS patron_started,
+				    representatives.name_formatted as patron_name_formatted,
+				    representatives.address_district AS patron_address,
+				    committees.name AS committee,
+                    committees.shortname AS committee_shortname,
+				    committees.chamber AS committee_chamber,
+                    (
+                        SELECT translation
+                        FROM bills_status
+                        WHERE bill_id=bills.id AND translation IS NOT NULL
+                        ORDER BY date DESC, id DESC
+                        LIMIT 1
+                    ) AS status_detail,
+                    (
+                        SELECT DATE_FORMAT(date, "%m/%d/%Y")
+                        FROM bills_status
+                        WHERE bill_id=bills.id AND translation IS NOT NULL
+                        ORDER BY date DESC, id DESC
+                        LIMIT 1
+                    ) AS status_detail_date,
+                    (
+                        SELECT number
+                        FROM bills_full_text
+                        WHERE bill_id = bills.id
+                        ORDER BY date_introduced DESC
+                        LIMIT 1
+                    ) AS version
+                FROM bills
+                LEFT JOIN sessions
+                    ON sessions.id=bills.session_id
+                LEFT JOIN representatives
+                    ON representatives.id=bills.chief_patron_id
+                LEFT JOIN districts
+                    ON representatives.district_id=districts.id
+                LEFT JOIN committees
+                    ON bills.last_committee_id=committees.id
+                LEFT JOIN bills AS bills2
+                    ON bills.incorporated_into=bills2.id
+                WHERE bills.id=' . $id;
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0) {
             return false;
@@ -169,13 +189,18 @@ class Bill2
         # If this bill has any copatrons, we want to gather up all of them and include them in the bill
         # array.
         if ($bill['copatron_count'] > 0) {
-            $sql = 'SELECT representatives.shortname, representatives.name_formatted,
-					representatives.partisanship
+            $sql = 'SELECT
+                        representatives.shortname,
+                        representatives.name_formatted,
+					    representatives.partisanship
 					FROM bills_copatrons
 					LEFT JOIN representatives
 						ON bills_copatrons.legislator_id=representatives.id
-					WHERE bills_copatrons.bill_id=' . $bill['id'] . '
-					ORDER BY representatives.chamber ASC, representatives.name ASC';
+					WHERE
+                        bills_copatrons.bill_id=' . $bill['id'] . '
+					ORDER BY
+                        representatives.chamber ASC,
+                        representatives.name ASC';
             $bill_result = mysqli_query($GLOBALS['db'], $sql);
             while ($copatron = mysqli_fetch_assoc($bill_result)) {
                 $copatron = array_map('stripslashes', $copatron);
@@ -199,15 +224,21 @@ class Bill2
         }
 
         # The status history.
-        $sql = 'SELECT bills_status.status, bills_status.translation,
-				DATE_FORMAT(bills_status.date, "%m/%d/%Y") AS date, bills_status.date AS date_raw,
-				bills_status.lis_vote_id, votes.total AS vote_count
+        $sql = 'SELECT
+                    bills_status.status,
+                    bills_status.translation,
+				    DATE_FORMAT(bills_status.date, "%m/%d/%Y") AS date,
+                    bills_status.date AS date_raw,
+				    bills_status.lis_vote_id,
+                    votes.total AS vote_count
 				FROM bills_status
 				LEFT JOIN votes
 					ON bills_status.lis_vote_id = votes.lis_id
-				AND bills_status.session_id=votes.session_id
+				    AND bills_status.session_id=votes.session_id
 				WHERE bills_status.bill_id = ' . $bill['id'] . '
-				ORDER BY date_raw DESC, bills_status.id DESC';
+				ORDER BY
+                    date_raw DESC,
+                    bills_status.id DESC';
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0) {
             # Initialize this array.
@@ -223,7 +254,10 @@ class Bill2
         }
 
         # Place names mentioned.
-        $sql = 'SELECT placename AS name, latitude, longitude
+        $sql = 'SELECT
+                    placename AS name,
+                    latitude,
+                    longitude
 				FROM bills_places
 				WHERE bill_id=' . $bill['id'] . '';
         $result = mysqli_query($GLOBALS['db'], $sql);
@@ -236,16 +270,26 @@ class Bill2
 
         # Duplicates of this bill.
         # Select all bills that share this summary.
-        $sql = 'SELECT bills.number, bills.chamber, bills.catch_line, bills.status,
-				representatives.name AS patron, sessions.year, bills.date_introduced
+        $sql = 'SELECT
+                    bills.number,
+                    bills.chamber,
+                    bills.catch_line,
+                    bills.status,
+				    representatives.name AS patron,
+                    sessions.year,
+                    bills.date_introduced
 				FROM bills
 				LEFT JOIN representatives
 					ON bills.chief_patron_id = representatives.id
 				LEFT JOIN sessions
 					ON bills.session_id = sessions.id
-				WHERE bills.session_id = ' . $bill['session_id'] . '
-				AND bills.summary_hash = "' . $bill['summary_hash'] . '" AND bills.id != ' . $bill['id'] . '
-				ORDER BY bills.date_introduced ASC, bills.chamber DESC';
+				WHERE
+                    bills.session_id = ' . $bill['session_id'] . ' AND
+				    bills.summary_hash = "' . $bill['summary_hash'] . '" AND
+                    bills.id != ' . $bill['id'] . '
+				ORDER BY
+                    bills.date_introduced ASC,
+                    bills.chamber DESC';
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0) {
             $bill['duplicates'] = array();
@@ -260,21 +304,26 @@ class Bill2
         if (isset($bill['tags'])) {
             # Display a list of related bills, by finding the bills that share the most tags with this
             # one.
-            $sql = 'SELECT DISTINCT bills.id, bills.number, bills.catch_line,
-					DATE_FORMAT(bills.date_introduced, "%M %d, %Y") AS date_introduced,
-					committees.name, sessions.year,
-
-						(SELECT translation
-						FROM bills_status
-						WHERE bill_id=bills.id AND translation IS NOT NULL
-						ORDER BY date DESC, id DESC
-						LIMIT 1) AS status,
-
-						(SELECT COUNT(*)
-						FROM bills AS bills2
-						LEFT JOIN tags AS tags2
-							ON bills2.id=tags2.bill_id
-						WHERE (';
+            $sql = 'SELECT DISTINCT
+                        bills.id,
+                        bills.number,
+                        bills.catch_line,
+					    DATE_FORMAT(bills.date_introduced, "%M %d, %Y") AS date_introduced,
+					    committees.name,
+                        sessions.year,
+						(
+                            SELECT translation
+                            FROM bills_status
+                            WHERE bill_id=bills.id AND translation IS NOT NULL
+                            ORDER BY date DESC, id DESC
+                            LIMIT 1
+                        ) AS status,
+						(
+                            SELECT COUNT(*)
+						    FROM bills AS bills2
+						    LEFT JOIN tags AS tags2
+							    ON bills2.id=tags2.bill_id
+						    WHERE (';
             # Using an array of tags established above, when listing the bill's tags, iterate
             # through them to create the SQL. The actual tag SQL is built up and then reused,
             # though slightly differently, later on in the SQL query, hence the str_replace.
@@ -300,9 +349,11 @@ class Bill2
 						ON bills.session_id=sessions.id
 					LEFT JOIN committees
 						ON bills.last_committee_id = committees.id
-					WHERE (' . $tags_sql . ') AND bills.id != ' . $bill['id'] . '
-					AND bills.session_id = ' . $bill['session_id'] . '
-					AND bills.summary_hash != "' . $bill['summary_hash'] . '"
+					WHERE
+                        (' . $tags_sql . ') AND
+                        bills.id != ' . $bill['id'] . ' AND
+					    bills.session_id = ' . $bill['session_id'] . ' AND
+					    bills.summary_hash != "' . $bill['summary_hash'] . '"
 					ORDER BY count DESC
 					LIMIT 5';
 
