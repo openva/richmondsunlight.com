@@ -10,7 +10,7 @@
 		"zxcvbn": "dropbox/zxcvbn",
 		"jquery.tabSlideOut.js": "microneer/jquery.tabSlideOut.js",
 		"chart.js": "4.x",
-		"turf": "6.x",
+		"@turf/turf": "6.x",
 		"mapbox-gl": "3.x"
 	},
 	"scripts": {
