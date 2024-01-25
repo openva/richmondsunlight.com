@@ -6,6 +6,7 @@ Disallow: /process-comments.php
 Disallow: /process-polls.php
 Disallow: /downloads/bills/
 Disallow: /rss/
+Crawl-delay: 10
 
 User-agent: GPTBot
 Disallow: /
