@@ -91,7 +91,7 @@ if ($bills !== false) {
             $bill['placename'] = trim($tmp[1]);
         }
 
-        $place[$bill{placename}][] = $bill;
+        $place[$bill['placename']][] = $bill;
     }
     ksort($place);
     foreach ($place as $name => $bills) {
