@@ -136,9 +136,9 @@ if ($legislator['district_boundaries'] != false) {
     $legislator['district_boundaries'] = $legislator['district_boundaries']->features[0];
     $legislator['district_boundaries'] = json_encode($legislator['district_boundaries']);
 
-    $html_head .= '<script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet" />
-    <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
+    $html_head .= '<script src="/js/vendor/mapbox-gl/dist/mapbox-gl.js"></script>
+    <link href="/js/vendor/mapbox-gl/dist/mapbox-gl.css" rel="stylesheet" />
+    <script src="/js/vendor/@turf/turf/turf.min.js"></script>
         <style>
             #district_map { height: 250px; }
         </style>
