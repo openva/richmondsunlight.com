@@ -125,3 +125,7 @@ Disallow: /
 User-agent: Barkrowler
 Disallow: /
 
+# This bot explicitly does not support crawl-delay and does not support robots meta tags, so
+# disallow it entirely.
+User-agent: Amazonbot
+Disallow: /
