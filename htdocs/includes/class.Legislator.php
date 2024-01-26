@@ -83,26 +83,42 @@ class Legislator
         /*
          * RETRIEVE THE LEGISLATOR'S INFO FROM THE DATABASE
          */
-        $sql = 'SELECT representatives.id, representatives.name, representatives.shortname,
-				representatives.name_formatted, representatives.chamber,
-				districts.number AS district, districts.id AS district_id,
-				districts.description AS district_description,
-				districts.boundaries AS district_boundaries,
-				representatives.partisanship,
-				DATE_FORMAT(representatives.date_started, "%M %Y") AS date_started,
-				DATE_FORMAT(representatives.date_ended, "%M %Y") AS date_ended,
-				DATE_FORMAT(representatives.date_started, "%Y") AS year_started,
-				DATE_FORMAT(representatives.date_ended, "%Y") AS year_ended,
-				representatives.party,
-				representatives.bio, representatives.rss_url, representatives.twitter,
-				(DATE_FORMAT(now(), "%Y") - DATE_FORMAT(representatives.birthday, "%Y") -
-				(DATE_FORMAT(now(), "00-%m-%d") < DATE_FORMAT(representatives.birthday, "00-%m-%d")))
-				AS age, representatives.address_district, representatives.address_richmond,
-				representatives.phone_district, representatives.phone_richmond,
-				representatives.race, representatives.sex, representatives.notes,
-				representatives.email, representatives.url AS website,
-				representatives.latitude, representatives.longitude,
-				representatives.contributions, representatives.place, representatives.lis_id
+        $sql = 'SELECT
+                    representatives.id,
+                    representatives.name,
+                    representatives.shortname,
+				    representatives.name_formatted,
+                    representatives.chamber,
+                    districts.number AS district,
+                    districts.id AS district_id,
+                    districts.description AS district_description,
+                    districts.boundaries AS district_boundaries,
+                    representatives.partisanship,
+                    DATE_FORMAT(representatives.date_started, "%M %Y") AS date_started,
+                    DATE_FORMAT(representatives.date_ended, "%M %Y") AS date_ended,
+                    DATE_FORMAT(representatives.date_started, "%Y") AS year_started,
+                    DATE_FORMAT(representatives.date_ended, "%Y") AS year_ended,
+                    representatives.party,
+                    representatives.bio,
+                    representatives.rss_url,
+                    representatives.twitter,
+                        (DATE_FORMAT(now(), "%Y") - DATE_FORMAT(representatives.birthday, "%Y") -
+                        (DATE_FORMAT(now(), "00-%m-%d") < DATE_FORMAT(representatives.birthday, "00-%m-%d")))
+                        AS age,
+                    representatives.address_district,
+                    representatives.address_richmond,
+                    representatives.phone_district,
+                    representatives.phone_richmond,
+                    representatives.race,
+                    representatives.sex,
+                    representatives.notes,
+                    representatives.email,
+                    representatives.url AS website,
+                    representatives.latitude,
+                    representatives.longitude,
+                    representatives.contributions,
+                    representatives.place,
+                    representatives.lis_id
 				FROM representatives
 				LEFT JOIN districts
 					ON representatives.district_id = districts.id
