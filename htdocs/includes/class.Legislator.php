@@ -119,15 +119,11 @@ class Legislator
         # Convert some data.
         $legislator['suffix'] = '(' . $legislator['party'] . '-' . $legislator['place'] . ')';
         $legislator['name'] = pivot($legislator['name']);
-        $legislator['cash_on_hand'] = '$' . number_format($legislator['cash_on_hand']);
         $legislator['address_district'] = preg_replace('/^(.*),(.*),(.*)$/D', '\\1<br />\\2, \\3', $legislator['address_district']);
         if ($legislator['chamber'] == 'house') {
             $legislator['prefix'] = 'Del.';
         } elseif ($legislator['chamber'] == 'senate') {
             $legislator['prefix'] = 'Sen.';
-        }
-        if (!empty($legislator['contributions'])) {
-            $legislator['contributions'] = unserialize($legislator['contributions']);
         }
 
         # Set the pronoun to use for this legislator.
