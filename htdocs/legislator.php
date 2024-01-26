@@ -282,6 +282,17 @@ for ($i = $start; $i <= $end; $i++) {
 $page_sidebar .= ' is available to view or download.
 	</div>';
 
+# More info
+$page_sidebar .= '
+    <div class="box">
+        <h3>More Info</h3>
+        <ul>
+            <li><a href="http://leg1.state.va.us/cgi-bin/legp504.exe?' . SESSION_LIS_ID . '+mbr+'
+                . $legislator['lis_id'] . '">View on the Legislature’s Site</li>
+            <li><a href="https://api.richmondsunlight.com/1.1/legislator/'
+                . $legislator['shortname'] . '.json">View as JSON</a></li>
+        </ul>
+    </div>';
 
 # Corrections
 $page_sidebar .= '
