@@ -102,7 +102,7 @@ class Legislator
 				representatives.race, representatives.sex, representatives.notes,
 				representatives.email, representatives.url AS website,
 				representatives.latitude, representatives.longitude,
-				representatives.contributions, representatives.place
+				representatives.contributions, representatives.place, representatives.lis_id
 				FROM representatives
 				LEFT JOIN districts
 					ON representatives.district_id = districts.id
@@ -145,6 +145,13 @@ class Legislator
             $legislator['party_name'] = 'Democratic';
         } else {
             $legislator['party_name'] = 'Independent';
+        }
+
+        # Prepend the right prefix to the LIS ID
+        if ($legislator['chamber'] == 'senate') {
+            $legislator['lis_id'] = 'S' . $legislator['lis_id'];
+        } elseif ($legislator['chamber'] == 'house') {
+            $legislator['lis_id'] = 'H' . $legislator['lis_id'];
         }
 
         # Create a visually friendly version of the legislator's website URL.
