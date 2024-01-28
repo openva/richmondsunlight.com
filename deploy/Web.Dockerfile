@@ -18,7 +18,8 @@ RUN apt-get install -y apt-transport-https ca-certificates gnupg2
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 RUN apt-get update
-RUN apt-get install -y git zip zlib1g-dev yarn
+# We use the most recent Yarn 1.X release (still quite old) to deal with our old environment.
+RUN apt-get install -y git zip zlib1g-dev yarn=1.22.19-1
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
@@ -29,6 +30,6 @@ COPY . deploy/
 
 EXPOSE 80
 
-RUN deploy/docker-setup-server.sh 
+RUN /var/www/deploy/docker-setup-server.sh 
 
 ENTRYPOINT ["apache2ctl", "-D", "FOREGROUND"]

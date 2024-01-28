@@ -25,6 +25,16 @@ cd ..
 # Install Composer dependencies
 composer install
 
+# Install Node
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+source ~/.bashrc
+export NVM_DIR="$HOME/.nvm"
+# Node 10 will run on this old release, while still supporting our libraries
+nvm install 10
+
+# Install Node dependencies
+cd htdocs/js/vendor; yarn build; cd ../../..
+
 # Move over the settings file.
 cp deploy/settings-docker.inc.php htdocs/includes/settings.inc.php
 
