@@ -184,9 +184,9 @@ class Import
         }
 
         # Determine if this was introduced in the House or the Senate.
-        if ($bill['number']{0} == 'h') {
+        if ($bill['number'][0] == 'h') {
             $bill['chamber'] = 'house';
-        } elseif ($bill['number']{0} == 's') {
+        } elseif ($bill['number'][0] == 's') {
             $bill['chamber'] = 'senate';
         }
 
@@ -317,9 +317,9 @@ class Import
     {
 
         # Determine the chamber.
-        if ($lis_id{0} == 'H') {
+        if ($lis_id[0] == 'H') {
             $chamber = 'house';
-        } elseif ($lis_id{0} == 'S') {
+        } elseif ($lis_id[0] == 'S') {
             $chamber = 'senate';
         }
 
@@ -353,9 +353,9 @@ class Import
     {
 
         # Determine the chamber.
-        if ($lis_id{0} == 'H') {
+        if ($lis_id[0] == 'H') {
             $chamber = 'house';
-        } elseif ($lis_id{0} == 'S') {
+        } elseif ($lis_id[0] == 'S') {
             $chamber = 'senate';
         }
 
@@ -1380,7 +1380,7 @@ class Import
         );
         if (!empty($legislator['race'])) {
             if (array_key_exists($legislator['race'], $race_map)) {
-                $legislator['race'] = $race_map[$legislator{'race'}];
+                $legislator['race'] = $race_map[$legislator['race']];
             }
             // If multiple races are listed, don't record anything
             elseif (stristr($legislator['race'], ',')) {
