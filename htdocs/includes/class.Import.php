@@ -639,7 +639,56 @@ class Import
         return true;
     } // add_legislator()
 
+    /**
+     * Generate shortnames for a given name
+     */
+    function create_legislator_shortname($casual, $full)
+    {
+        // Break up any initialisms (e.g., "J.D." becomes "J. D.")
+        $full = preg_replace('/(([A-Z]{1}\.)([A-Z]{1}\.))/', '$2 $3', $full);
 
+        // Remove any nicknames
+        $full = preg_replace('/("[A-Za-z]+")/', '', $full);
+
+        // Remove any character that isn't a letter, hyphen, or a space
+        $full = preg_replace('/[^A-Za-z- ]+/', '', $full);
+
+        // Break the name up into each component
+        preg_match_all('([A-Za-z-.]+)', $full, $matches);
+        $components = $matches[0];
+
+        // Iterate through and remove suffixes
+        $suffixes = ['II', 'III', 'IV', 'V', 'Jr', 'Sr', 'Jr.', 'Sr.', 'Junior', 'Senior'];
+        $i = 1;
+        while ($i < count($components)) {
+            if ($i + 1 == count($components)) {
+                if (in_array($components[$i], $suffixes)) {
+                    unset($components[$i]);
+                }
+            }
+            $i++;
+        }
+
+        // Iterate through through each component and build up the shortname, omitting the final
+        // one, because that's the last name.
+        $shortname = '';
+        $i = 1;
+        foreach ($components as $component) {
+            if ($i < count($components)) {
+                $shortname .= $component[0];
+            }
+            $i++;
+        }
+
+        // Append the last name to the end, after stripping out anything that isn't a letter or a
+        // hyphen.
+        $tmp = explode(', ', $casual);
+        $tmp[0] = preg_replace('/[^A-Za-z-]+/', '', $tmp[0]);
+        $shortname .= $tmp[0];
+        $shortname = strtolower($shortname);
+
+        return $shortname;
+    }
 
     /*
      * update_legislator()
@@ -848,16 +897,10 @@ class Import
             /*
              * Format delegate's shortname.
              */
-            preg_match_all('([A-Za-z-]+)', $shortname, $matches);
-            $legislator['shortname'] = '';
-            $i = 0;
-            while ($i + 1 < count($matches[0])) {
-                $legislator['shortname'] .= $matches[0][$i][0];
-                $i++;
-            }
-            $tmp = explode(', ', $legislator['name']);
-            $legislator['shortname'] .= $tmp[0];
-            $legislator['shortname'] = strtolower($legislator['shortname']);
+            $legislator['shortname'] = create_legislator_shortname(
+                $shortname,
+                $legislator['name']
+            );
 
             /*
              * Get email address.
