@@ -24,29 +24,28 @@ mkdir -p mysql
 
 # Export the structural data
 truncate --size 0 mysql/structure.sql
-for TABLE in ${STRUCTURE[*]}; do
-    mysqldump {MYSQL_DATABASE} -d --routines --triggers -u "$USERNAME" \
-        --host "$HOST" --tables "$TABLE" >> mysql/structure.sql
-done
+STRUCTURE_LIST=$(printf "%s " "${STRUCTURE[@]}")
+mysqldump -d --routines --triggers --set-gtid-purged=OFF -u "$USERNAME" \
+    --host "$HOST" {MYSQL_DATABASE} $STRUCTURE_LIST > mysql/structure.sql
 
 # Export the tables for which we want complete contents
 truncate --size 0 mysql/basic-contents.sql
-for TABLE in ${ALL_CONTENTS[*]}; do
-    mysqldump {MYSQL_DATABASE} --no-create-info --lock-all-tables -u "$USERNAME" \
-        --host "$HOST" --tables "$TABLE" >> mysql/basic-contents.sql
-done
+ALL_CONTENTS_LIST=$(printf "%s " "${ALL_CONTENTS[@]}")
+mysqldump --no-create-info --skip-lock-tables --set-gtid-purged=OFF -u "$USERNAME" \
+    --host "$HOST" {MYSQL_DATABASE} $ALL_CONTENTS_LIST > mysql/basic-contents.sql
 
 # Export selected contents from the remaining tables
 truncate --size 0 mysql/test-records.sql
 for BILL_ID in "${BILL_IDS[@]}"; do
-    mysqldump {MYSQL_DATABASE} --no-create-info --lock-all-tables -u "$USERNAME" \
-        --host "$HOST" bills --where "id=$BILL_ID" >> mysql/test-records.sql
+    mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables -u "$USERNAME" \
+        --set-gtid-purged=OFF --host "$HOST" bills --where "id=$BILL_ID" >> mysql/test-records.sql
 done
 
 for TABLE in ${SOME_CONTENTS[*]}; do
     for BILL_ID in "${BILL_IDS[@]}"; do
         # Genericize all IP addresses and email addresses, to maintain privacy.
-        mysqldump {MYSQL_DATABASE} --no-create-info --lock-all-tables -u "$USERNAME" --host "$HOST" "$TABLE" \
+        mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables --set-gtid-purged=OFF \
+            -u "$USERNAME" --host "$HOST" "$TABLE" \
             --where "bill_id=$BILL_ID" |perl -pe 's{[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}}{ sprintf "127.%01d.%01d.%01d", int(255*rand()), int(255*rand()), int(255*rand()) }ge' \
             |sed -E "s/\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/example@example.com/g" \
             >> mysql/test-records.sql
