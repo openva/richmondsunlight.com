@@ -7,7 +7,7 @@ PASSWORD="{PDO_PASSWORD}"
 export MYSQL_PWD="$PASSWORD"
 
 # All database tables that we want to export the structure of
-STRUCTURE=(bills bills_copatrons bills_full_text bills_places bills_places_test bills_section_numbers bills_status bills_views blacklist chamber_status comments comments_subscriptions committees committee_members dashboard_bills dashboard_portfolios dashboard_user_data dashboard_watch_lists districts dockets files gazetteer lobbyists meetings minutes petitions petition_signers polls representatives representatives_districts representatives_terms representatives_votes sessions tags users vacode video_clips video_index video_index_faces video_transcript votes)
+STRUCTURE=(bills bills_copatrons bills_full_text bills_places bills_places_test bills_section_numbers bills_status bills_views blacklist chamber_status comments comments_subscriptions committees committee_members dashboard_bills dashboard_portfolios dashboard_user_data dashboard_watch_lists districts dockets files gazetteer lobbyists meetings minutes polls representatives representatives_districts representatives_terms representatives_votes sessions tags users vacode video_clips video_index video_index_faces video_transcript votes)
 
 # All database tables that we want to export the contents of
 ALL_CONTENTS=(committees committee_members districts files representatives representatives_districts sessions)
