@@ -271,7 +271,8 @@ if (isset($_POST['submit'])) {
         $result = create_user($user_query);
 
         if ($result === false) {
-            $log->put('Somebody tried to create an account, and it failed entirely. They are frustrated now. Input: ' . $user_query, 5);
+            $log->put('Somebody tried to create an account, and it failed entirely. They are '
+                . 'frustrated now. Input: ' . $user_query, 6);
             $page_body = '<p>Your registration has failed mysteriously, in a way that indicates
 				that some sort of a bug is at work. Please do us a favor and <a
 				href="/contact/">contact us</a> to report that you got this error. We’ll figure
