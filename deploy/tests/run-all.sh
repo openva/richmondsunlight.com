@@ -5,8 +5,8 @@ pushd .
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "$DIR" || exit
 
-# Run the front-end tests
-if ! ./front-end.sh; then
+# Run the page-scan tests
+if ! php ./page-scan.php; then
     ERRORED=true
 fi
 
