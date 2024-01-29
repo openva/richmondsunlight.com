@@ -539,11 +539,13 @@ class Bill2
         /*
          * See if we have this cached.
          */
-        $mc = new Memcached();
-        $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-        $this->changes = $mc->get('bill-changes-' . $this->text_hash);
-        if ($mc->getResultCode() == 0) {
-            return $this->changes;
+        if (MEMCACHED_SERVER != '') {
+            $mc = new Memcached();
+            $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+            $this->changes = $mc->get('bill-changes-' . $this->text_hash);
+            if ($mc->getResultCode() == 0) {
+                return $this->changes;
+            }
         }
         unset($this->changes);
 

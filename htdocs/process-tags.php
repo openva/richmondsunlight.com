@@ -53,9 +53,11 @@ if (empty($tags)) {
         mysqli_query($GLOBALS['db'], $sql);
 
         # Delete the bill from Memcached.
-        $mc = new Memcached();
-        $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-        $result = $mc->delete('bill-' . $bill_id);
+        if (MEMCACHED_SERVER != '') {
+            $mc = new Memcached();
+            $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+            $result = $mc->delete('bill-' . $bill_id);
+        }
 
         header('HTTP/1.0 201 Created');
         exit();
@@ -143,9 +145,11 @@ if (!empty($_SESSION['id'])) {// && !blacklisted())
 
 
     # Delete the bill from Memcached.
-    $mc = new Memcached();
-    $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-    $result = $mc->delete('bill-' . $tags['bill_id']);
+    if (MEMCACHED_SERVER != '') {
+        $mc = new Memcached();
+        $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+        $result = $mc->delete('bill-' . $tags['bill_id']);
+    }
 
     $log = new Log();
     $result = $log->put('New tags added: ' . implode(', ', $tag) . ' ' . $_SERVER['HTTP_REFERER'], 3);
