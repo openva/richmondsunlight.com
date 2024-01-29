@@ -1,6 +1,6 @@
 <?php
 
-$url_prefix = 'https://www.richmondsunlight.com';
+$url_prefix = 'http://localhost';
 
 $failures = [];
 
