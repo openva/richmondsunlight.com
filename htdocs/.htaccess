@@ -68,11 +68,11 @@ RewriteCond %{HTTP_HOST} ^richmondsunlight.com [NC]
 RewriteRule ^(.*)$ https://www.richmondsunlight.com/$1 [L,R=301,NC]
 
 # Individual Bill
-RewriteRule ^bill/([0-9]{4})/([HS][BJR]{1,2}[0-9]{1,4})?/?$ /bill/$1/${tolower:$2}/ [R=301]
-RewriteRule ^bill/([0-9]{4})/([HS][BJR]{1,2}[0-9]{1,4})?/?$ /bill.php?year=$1&bill=$2 [QSA]
-RewriteRule ^bill/([0-9]{4})/([HS][BJR]{1,2}[0-9]{1,4})/fulltext?/?$ /bill-fulltext.php?year=$1&bill=$2 [QSA]
-RewriteRule ^bill/([0-9]{4})/([HS][BJR]{1,2}[0-9]{1,4})/history?/?$ /bill-history.php?year=$1&bill=$2 [QSA]
-RewriteRule ^bill/([0-9]{4})/([HS][BJR]{1,2}[0-9]{1,4})/([A-Za-z0-9]{6,8})?/?$ /vote.php?year=$1&bill=$2&lis_id=$3 [QSA]
+RewriteRule ^bill/([0-9]{4})/([HS][BJR]]{1,2}[0-9]{1,4})?/?$ /bill/$1/${tolower:$2}/ [R=301]
+RewriteRule ^bill/([0-9]{4})/([hs][bjr]{1,2}[0-9]{1,4})?/?$ /bill.php?year=$1&bill=$2 [QSA]
+RewriteRule ^bill/([0-9]{4})/([hs][bjr]{1,2}[0-9]{1,4})/fulltext?/?$ /bill-fulltext.php?year=$1&bill=$2 [QSA]
+RewriteRule ^bill/([0-9]{4})/([hs][bjr]{1,2}[0-9]{1,4})/history?/?$ /bill-history.php?year=$1&bill=$2 [QSA]
+RewriteRule ^bill/([0-9]{4})/([hs][bjr]{1,2}[0-9]{1,4})/([A-Za-z0-9]{6,8})?/?$ /vote.php?year=$1&bill=$2&lis_id=$3 [QSA]
 
 # Bill Listing
 RewriteRule ^bills/topic/([0-9]{4})?/?([0-9]+)?/?$ /list-tags.php?year=$1&session_suffix=$2 [QSA]
