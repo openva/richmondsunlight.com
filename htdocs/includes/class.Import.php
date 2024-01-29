@@ -897,7 +897,7 @@ class Import
             /*
              * Format delegate's shortname.
              */
-            $legislator['shortname'] = create_legislator_shortname(
+            $legislator['shortname'] = $this->create_legislator_shortname(
                 $shortname,
                 $legislator['name']
             );
