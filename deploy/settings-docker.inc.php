@@ -10,7 +10,7 @@
 
 # THE CURRENT SESSION
 # As defined by Richmond Sunlight's database
-define('SESSION_ID', 22);
+define('SESSION_ID', 30);
 
 # Is this the main session or a special session? As defined by Richmond Sunlight's database.
 define('SESSION_SUFFIX', '');
@@ -21,11 +21,9 @@ define('SESSION_LIS_ID', '241');
 # As defined by the year.
 define('SESSION_YEAR', 2024);
 
-# Is the GA currently in session?
-define('IN_SESSION', true);
-
-# Is it a time of year when the legislature is doing anything at all?
-define('LEGISLATIVE_SEASON', true);
+# Start and end of this session.
+define('SESSION_START', '2024-01-10');
+define('SESSION_END', '2024-03-09');
 
 # Set the FTP auth pair for legislative data.
 define('LIS_FTP_USERNAME', '');
@@ -47,10 +45,10 @@ define('MEMCACHED_PORT', '');
 
 # The House Speaker's IDs. This is used in update_vote.php to translate votes credited to
 # "H0000," which bizarrely indicates the speaker, to that legislator's ID, and in
-# Video::identify_speakers to match the speaker to his identity. Here, H0021 and 24 indicate
-# Kirk Cox.
-define('HOUSE_SPEAKER_LIS_ID', 'H0021');
-define('HOUSE_SPEAKER_ID', '24');
+# Video::identify_speakers to match the speaker to her identity. Here, H322 and 455 indicate
+# Don Scott.
+define('HOUSE_SPEAKER_LIS_ID', 'H322');
+define('HOUSE_SPEAKER_ID', '455');
 
 # Set the directory to look to for cache data.
 define('CACHE_DIR', '/vol/www/richmondsunlight.com/html/cache/');
@@ -76,6 +74,9 @@ define('LOG_VERBOSITY', 3);
 
 # Slack API URL
 define('SLACK_WEBHOOK', '');
+
+# OpenAI API key
+define('OPENAI_KEY', '');
 
 # AWS auth info
 # This is only used in some RS instances.
