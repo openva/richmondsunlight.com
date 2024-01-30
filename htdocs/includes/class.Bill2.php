@@ -301,75 +301,15 @@ class Bill2
             }
         }
 
-        if (isset($bill['tags'])) {
-            # Display a list of related bills, by finding the bills that share the most tags with this
-            # one.
-            $sql = 'SELECT DISTINCT
-                        bills.id,
-                        bills.number,
-                        bills.catch_line,
-					    DATE_FORMAT(bills.date_introduced, "%M %d, %Y") AS date_introduced,
-					    committees.name,
-                        sessions.year,
-						(
-                            SELECT translation
-                            FROM bills_status
-                            WHERE bill_id=bills.id AND translation IS NOT NULL
-                            ORDER BY date DESC, id DESC
-                            LIMIT 1
-                        ) AS status,
-						(
-                            SELECT COUNT(*)
-						    FROM bills AS bills2
-						    LEFT JOIN tags AS tags2
-							    ON bills2.id=tags2.bill_id
-						    WHERE (';
-            # Using an array of tags established above, when listing the bill's tags, iterate
-            # through them to create the SQL. The actual tag SQL is built up and then reused,
-            # though slightly differently, later on in the SQL query, hence the str_replace.
-            $tags_sql = '';
-
-            $i = 0;
-            foreach ($bill['tags'] as $tag) {
-                $tags_sql .= 'tags2.tag = "' . $tag . '"';
-                if ($i < (count($bill['tags']) - 1)) {
-                    $tags_sql .= ' OR ';
-                }
-                $i++;
-            }
-            $sql .= $tags_sql;
-            $tags_sql = str_replace('tags2', 'tags', $tags_sql);
-            $sql .= ')
-						AND bills2.id = bills.id
-						) AS count
-					FROM bills
-					LEFT JOIN tags
-						ON bills.id=tags.bill_id
-					LEFT JOIN sessions
-						ON bills.session_id=sessions.id
-					LEFT JOIN committees
-						ON bills.last_committee_id = committees.id
-					WHERE
-                        (' . $tags_sql . ') AND
-                        bills.id != ' . $bill['id'] . ' AND
-					    bills.session_id = ' . $bill['session_id'] . ' AND
-					    bills.summary_hash != "' . $bill['summary_hash'] . '"
-					ORDER BY count DESC
-					LIMIT 5';
-
-            $result = mysqli_query($GLOBALS['db'], $sql);
-
-            if (mysqli_num_rows($result) > 0) {
-                $bill['related'] = array();
-                while ($related = mysqli_fetch_array($result, MYSQL_ASSOC)) {
-                    $bill['related'][] = $related;
-                }
-            }
-        }
+        /*
+         * Get related bills
+         */
+        $this->related();
+        $bill['related'] = $this->related;
 
         if (MEMCACHED_SERVER != '') {
             /*
-            * Cache this bill in Memcached, for one week.
+            * Cache this bill in Memcached for one week.
             */
             $mc->set('bill-' . $id, serialize($bill), (60 * 60 * 24 * 7));
 
@@ -669,4 +609,147 @@ class Bill2
 
         return $this->changes;
     }
+    
+    /**
+     * List bills related to a given bill
+     *
+     * @return array
+     */
+    public function related()
+    {
+
+        /*
+         * Make sure that the whole bill object has been passed along.
+         */
+        if (!isset($bill) || !isset($bill['tags']) || !isset($bill['id']) || !isset($bill['number'])
+            || !isset($bill['summary_hash'])|| !isset($bill['session_id'])) {
+            return false;
+        }
+
+        /*
+         * If the bill is from the current session, query the recordedvote.org API.
+         */
+        if ($bill['session_id'] == SESSION_ID)
+        {
+            $this->related = $this->related_recordedvote($bill);
+        }
+
+        /*
+         * If it's not from the current session, or if the recordedvote.org API returns false, then
+         * query the internal related-bill system.
+         */
+        if ($bill['session_id'] == SESSION_ID || $this->related == false)
+        {
+            $this->related = $this->related_internal($bill);
+        }
+
+        return $this->related;
+
+    }
+
+    private function related_internal($bill)
+    {
+
+        # Display a list of related bills, by finding the bills that share the most tags with this
+        # one.
+        $sql = 'SELECT DISTINCT
+                    bills.id,
+                    bills.number,
+                    bills.catch_line,
+                    DATE_FORMAT(bills.date_introduced, "%M %d, %Y") AS date_introduced,
+                    committees.name,
+                    sessions.year,
+                    (
+                        SELECT translation
+                        FROM bills_status
+                        WHERE bill_id=bills.id AND translation IS NOT NULL
+                        ORDER BY date DESC, id DESC
+                        LIMIT 1
+                    ) AS status,
+                    (
+                        SELECT COUNT(*)
+                        FROM bills AS bills2
+                        LEFT JOIN tags AS tags2
+                            ON bills2.id=tags2.bill_id
+                        WHERE (';
+        # Using an array of tags established above, when listing the bill's tags, iterate
+        # through them to create the SQL. The actual tag SQL is built up and then reused,
+        # though slightly differently, later on in the SQL query, hence the str_replace.
+        $tags_sql = '';
+
+        $i = 0;
+        foreach ($bill['tags'] as $tag) {
+            $tags_sql .= 'tags2.tag = "' . $tag . '"';
+            if ($i < (count($bill['tags']) - 1)) {
+                $tags_sql .= ' OR ';
+            }
+            $i++;
+        }
+        $sql .= $tags_sql;
+        $tags_sql = str_replace('tags2', 'tags', $tags_sql);
+        $sql .= ')
+                    AND bills2.id = bills.id
+                    ) AS count
+                FROM bills
+                LEFT JOIN tags
+                    ON bills.id=tags.bill_id
+                LEFT JOIN sessions
+                    ON bills.session_id=sessions.id
+                LEFT JOIN committees
+                    ON bills.last_committee_id = committees.id
+                WHERE
+                    (' . $tags_sql . ') AND
+                    bills.id != ' . $bill['id'] . ' AND
+                    bills.session_id = ' . $bill['session_id'] . ' AND
+                    bills.summary_hash != "' . $bill['summary_hash'] . '"
+                ORDER BY count DESC
+                LIMIT 5';
+
+        $result = mysqli_query($GLOBALS['db'], $sql);
+
+        if (mysqli_num_rows($result) > 0) {
+            $this->related = array();
+            while ($related = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+                $this->related[] = $related;
+            }
+        }
+
+        return true;
+    }
+
+    private function related_recordedvote()
+    {
+
+        $url = 'https://api.recordedvote.org/v1/bill/similarity/' . $bill['number'];
+
+        // Initialize cURL session
+        $curl = curl_init($url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HEADER, false);
+        $result = curl_exec($curl);
+        
+        if ($result === false) {
+            curl_close($curl);
+            return false;
+        }
+
+        curl_close($curl);
+
+        $related_bills = json_decode($result, true);
+
+        if ($related_bills === false) {
+            return false;
+        }
+
+        $this->related = [];
+        foreach ($related_bills as $related_bill)
+        {
+            $bill['number'] = $related_bill->bill_id;
+            $bill['catch_line'] = $related_bill->bill_description;
+            $this->related[] = $bill;
+        }
+
+        return true;
+    }
+
 } // end class "Bill2"
