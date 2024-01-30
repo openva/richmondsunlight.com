@@ -304,8 +304,8 @@ class Bill2
         /*
          * Get related bills
          */
-        $this->related();
-        $bill['related'] = $this->related;
+        $this->related($bill);
+        $bill['related'] = $this->related_bills;
 
         if (MEMCACHED_SERVER != '') {
             /*
@@ -615,7 +615,7 @@ class Bill2
      *
      * @return array
      */
-    public function related()
+    public function related($bill)
     {
 
         /*
@@ -632,18 +632,18 @@ class Bill2
          * If the bill is from the current session, query the recordedvote.org API.
          */
         if ($bill['session_id'] == SESSION_ID) {
-            $this->related = $this->related_recordedvote($bill);
+            $result = $this->related_recordedvote($bill);
         }
 
         /*
          * If it's not from the current session, or if the recordedvote.org API returns false, then
          * query the internal related-bill system.
          */
-        if ($bill['session_id'] == SESSION_ID || $this->related == false) {
-            $this->related = $this->related_internal($bill);
+        if ($bill['session_id'] != SESSION_ID || $result == false) {
+            $this->related_internal($bill);
         }
 
-        return $this->related;
+        return $this->related_bills;
     }
 
     private function related_internal($bill)
@@ -707,16 +707,16 @@ class Bill2
         $result = mysqli_query($GLOBALS['db'], $sql);
 
         if (mysqli_num_rows($result) > 0) {
-            $this->related = array();
+            $this->related_bills = array();
             while ($related = mysqli_fetch_array($result, MYSQL_ASSOC)) {
-                $this->related[] = $related;
+                $this->related_bills[] = $related;
             }
         }
 
         return true;
     }
 
-    private function related_recordedvote()
+    private function related_recordedvote($bill)
     {
 
         $url = 'https://api.recordedvote.org/v1/bill/similarity/' . $bill['number'];
@@ -725,26 +725,32 @@ class Bill2
         $curl = curl_init($url);
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HEADER, false);
-        $result = curl_exec($curl);
+        $json = curl_exec($curl);
 
-        if ($result === false) {
+        if ($json === false) {
             curl_close($curl);
             return false;
         }
 
         curl_close($curl);
 
-        $related_bills = json_decode($result, true);
+        $related_bills = json_decode($json, true);
 
         if ($related_bills === false) {
             return false;
         }
 
-        $this->related = [];
+        $this->related_bills = [];
+        $i = 0;
         foreach ($related_bills as $related_bill) {
-            $bill['number'] = $related_bill->bill_id;
-            $bill['catch_line'] = $related_bill->bill_description;
-            $this->related[] = $bill;
+            $tmp['number'] = strtolower($related_bill['bill_id']);
+            $tmp['catch_line'] = $related_bill['bill_description'];
+            $tmp['year'] = SESSION_YEAR;
+            $this->related_bills[] = $tmp;
+            $i++;
+            if ($i == 5) {
+                break;
+            }
         }
 
         return true;
