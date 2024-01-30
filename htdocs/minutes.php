@@ -67,7 +67,7 @@ if (mysqli_num_rows($result) == 0) {
     // links using the existing case (upper), and should be linking in lower, but preg_replace
     // lacks a mechanism by which to make changes mid-replacement.
     // CORRECTION TO ABOVE: It can make changes -- use preg_replace_callback();
-    $minutes = preg_replace('/(HR|HB|SJR|SB) ([0-9A-Z]+)/', '<a href="/bill/' . $_REQUEST['year'] . '/$1$2/">$1 $2</a>', $minutes);
+    $minutes = preg_replace('/(HR|HB|SJR|SB|HJ|HJR) ([0-9]+)/', '<a href="/bill/' . $_REQUEST['year'] . '/$1$2/">$1 $2</a>', $minutes);
 
     # Retrieve a single video, if it's available.
     $sql = 'SELECT id, author_name, title, html, path, description, license, length, sponsor,
