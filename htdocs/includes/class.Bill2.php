@@ -609,7 +609,7 @@ class Bill2
 
         return $this->changes;
     }
-    
+
     /**
      * List bills related to a given bill
      *
@@ -621,16 +621,17 @@ class Bill2
         /*
          * Make sure that the whole bill object has been passed along.
          */
-        if (!isset($bill) || !isset($bill['tags']) || !isset($bill['id']) || !isset($bill['number'])
-            || !isset($bill['summary_hash'])|| !isset($bill['session_id'])) {
+        if (
+            !isset($bill) || !isset($bill['tags']) || !isset($bill['id']) || !isset($bill['number'])
+            || !isset($bill['summary_hash']) || !isset($bill['session_id'])
+        ) {
             return false;
         }
 
         /*
          * If the bill is from the current session, query the recordedvote.org API.
          */
-        if ($bill['session_id'] == SESSION_ID)
-        {
+        if ($bill['session_id'] == SESSION_ID) {
             $this->related = $this->related_recordedvote($bill);
         }
 
@@ -638,13 +639,11 @@ class Bill2
          * If it's not from the current session, or if the recordedvote.org API returns false, then
          * query the internal related-bill system.
          */
-        if ($bill['session_id'] == SESSION_ID || $this->related == false)
-        {
+        if ($bill['session_id'] == SESSION_ID || $this->related == false) {
             $this->related = $this->related_internal($bill);
         }
 
         return $this->related;
-
     }
 
     private function related_internal($bill)
@@ -727,7 +726,7 @@ class Bill2
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HEADER, false);
         $result = curl_exec($curl);
-        
+
         if ($result === false) {
             curl_close($curl);
             return false;
@@ -742,8 +741,7 @@ class Bill2
         }
 
         $this->related = [];
-        foreach ($related_bills as $related_bill)
-        {
+        foreach ($related_bills as $related_bill) {
             $bill['number'] = $related_bill->bill_id;
             $bill['catch_line'] = $related_bill->bill_description;
             $this->related[] = $bill;
@@ -751,5 +749,4 @@ class Bill2
 
         return true;
     }
-
 } // end class "Bill2"
