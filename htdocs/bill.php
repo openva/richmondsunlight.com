@@ -533,8 +533,12 @@ if (isset($bill['related']) && ($bill['related'] > 0)) {
             . '</a>: ' . $related_bill['catch_line'] . '</li>';
     }
     $page_sidebar .= '
-			</ul>
-		</div>';
+			</ul>';
+    // If there's no in-house metadata, this is from the Recorded Vote API
+    if (!isset($bill['related'][0]->id)) {
+        $page_sidebar .= '<p style="margin-top: 1em;">Related Bills from <a href="https://recordedvote.org/">Recorded Vote</a></p>';
+    }
+	$page_sidebar .= '</div>';
 }
 
 # PAGE CONTENT
