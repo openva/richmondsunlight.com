@@ -538,7 +538,7 @@ if (isset($bill['related']) && ($bill['related'] > 0)) {
     if (!isset($bill['related'][0]->id)) {
         $page_sidebar .= '<p style="margin-top: 1em;">Related Bills from <a href="https://recordedvote.org/">Recorded Vote</a></p>';
     }
-	$page_sidebar .= '</div>';
+    $page_sidebar .= '</div>';
 }
 
 # PAGE CONTENT
