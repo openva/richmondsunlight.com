@@ -83,8 +83,8 @@ class Bill2
             $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
 
             /*
-            * If this bill is cached in Memcached, retrieve it from there.
-            */
+             * If this bill is cached in Memcached, retrieve it from there.
+             */
             $bill = $mc->get('bill-' . $id);
             if ($mc->getResultCode() === 1) {
                 return unserialize($bill);
