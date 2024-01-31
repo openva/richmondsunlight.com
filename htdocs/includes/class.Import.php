@@ -237,12 +237,16 @@ class Import
             $bill['status'] = 'introduced';
         }
 
-        # Create an instance of HTML Purifier to clean up the text.
-        //$config = HTMLPurifier_Config::createDefault();
-        //$purifier = new HTMLPurifier($config);
+        /*
+         * Deal with sporadic character encoding problems with catch lines.
+         */
+        $bill['catch_line'] = iconv('windows-1252', 'UTF-8', $bill['catch_line']);
 
-        # Purify the HTML and trim off the surrounding whitespace.
-        //$bill['catch_line'] = trim($purifier->purify($bill['catch_line']));
+        /*
+         * Run the catch line through HTML Purifier.
+         */
+        $purifier = new HTMLPurifier();
+        $bill['catch_line'] = trim($purifier->purify($bill['catch_line']));
 
         return $bill;
     }
