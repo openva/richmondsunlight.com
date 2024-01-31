@@ -719,7 +719,8 @@ class Bill2
     private function related_recordedvote($bill)
     {
 
-        $url = 'https://api.recordedvote.org/v1/bill/similarity/' . $bill['number'];
+        $url = 'https://api.recordedvote.org/v1/bill/similarity/' . $bill['number']
+            . '?remove_duplicates=1';
 
         // Initialize cURL session
         $curl = curl_init($url);
