@@ -118,7 +118,7 @@ class User
         # Build up an array of tags, with the key being the tag and the value being the count.
         while ($tag = mysqli_fetch_array($result)) {
             $tag = array_map('stripslashes', $tag);
-            $tags[$tag{'tag'}] = $tag['count'];
+            $tags[$tag['tag']] = $tag['count'];
         }
 
         # Sort the tags in reverse order by key (their count), shave off the top 30, and then
@@ -178,7 +178,7 @@ class User
         if (mysqli_num_rows($result) > 0) {
             $bills_seen = array();
             while ($bill = mysqli_fetch_assoc($result)) {
-                $bills_seen[$bill{'id'}] = true;
+                $bills_seen[$bill['id']] = true;
             }
         }
 
@@ -235,7 +235,7 @@ class User
         } else {
             while ($bill = mysqli_fetch_assoc($result)) {
                 $bill = array_map('stripslashes', $bill);
-                if (!isset($bills_seen[$bill{'id'}])) {
+                if (!isset($bills_seen[$bill['id']])) {
                     $bills[] = $bill;
                 }
             }
