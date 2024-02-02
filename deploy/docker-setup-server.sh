@@ -19,6 +19,6 @@ if [ ! -f "/usr/local/etc/php/php.ini" ]; then
 fi
 
 # Enable Sphinx's server
-echo "START=yes" | sudo tee /etc/default/sphinxsearch
+echo "START=yes" | tee /etc/default/sphinxsearch
 cp /etc/sphinxsearch/sphinx.conf.sample /etc/sphinxsearch/sphinx.conf
 /etc/init.d/sphinxsearch start
