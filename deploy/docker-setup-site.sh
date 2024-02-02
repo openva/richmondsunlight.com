@@ -38,13 +38,7 @@ cd htdocs/js/vendor; yarn build; cd ../../..
 # Move over the settings file.
 cp deploy/settings-docker.inc.php htdocs/includes/settings.inc.php
 
-# Load database contents
-apt-get install -y mysql-client
-mysql -h db -u root -ppassword richmondsunlight < /var/www/deploy/mysql/structure.sql \
-    && mysql -h db -u root -ppassword richmondsunlight < /var/www/deploy/mysql/basic-contents.sql \
-    && mysql -h db -u root -ppassword richmondsunlight < /var/www/deploy/mysql/test-records.sql
-
-# Copy over the Sphinx configuration, restart Sphinx
+# Copy over the Sphinx configuration, start Sphinx
 cp deploy/sphinx.conf /etc/sphinxsearch/sphinx.conf
 sed -i -e "s|{PDO_SERVER}|db|g" /etc/sphinxsearch/sphinx.conf
 sed -i -e "s|{PDO_USERNAME}|ricsun|g" /etc/sphinxsearch/sphinx.conf
