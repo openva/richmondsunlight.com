@@ -44,7 +44,7 @@ sed -i -e "s|{PDO_SERVER}|db|g" /etc/sphinxsearch/sphinx.conf
 sed -i -e "s|{PDO_USERNAME}|ricsun|g" /etc/sphinxsearch/sphinx.conf
 sed -i -e "s|{PDO_PASSWORD}|password|g" /etc/sphinxsearch/sphinx.conf
 sed -i -e "s|{MYSQL_DATABASE}|richmondsunlight|g" /etc/sphinxsearch/sphinx.conf
-/etc/init.d/sphinxsearch restart
+/etc/init.d/sphinxsearch start
 
 # If we have an existing index, update it
 if [[ -f /var/lib/sphinxsearch/data/bills.sph ]]; then
