@@ -19,7 +19,7 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 RUN apt-get update
 # We use the most recent Yarn 1.X release (still quite old) to deal with our old environment.
-RUN apt-get install -y git zip zlib1g-dev jq yarn=1.22.19-1
+RUN apt-get install -y git zip sphinxsearch zlib1g-dev jq yarn=1.22.19-1
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer

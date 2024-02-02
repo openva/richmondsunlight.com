@@ -40,6 +40,25 @@ cp deploy/settings-docker.inc.php htdocs/includes/settings.inc.php
 
 # Load database contents
 apt-get install -y mysql-client
-mysql -h rs_db -u root -ppassword richmondsunlight < /var/www/deploy/mysql/structure.sql \
-    && mysql -h rs_db -u root -ppassword richmondsunlight < /var/www/deploy/mysql/basic-contents.sql \
-    && mysql -h rs_db -u root -ppassword richmondsunlight < /var/www/deploy/mysql/test-records.sql
+mysql -h db -u root -ppassword richmondsunlight < /var/www/deploy/mysql/structure.sql \
+    && mysql -h db -u root -ppassword richmondsunlight < /var/www/deploy/mysql/basic-contents.sql \
+    && mysql -h db -u root -ppassword richmondsunlight < /var/www/deploy/mysql/test-records.sql
+
+# Copy over the Sphinx configuration, restart Sphinx
+cp deploy/sphinx.conf /etc/sphinxsearch/sphinx.conf
+sed -i -e "s|{PDO_SERVER}|db|g" /etc/sphinxsearch/sphinx.conf
+sed -i -e "s|{PDO_USERNAME}|ricsun|g" /etc/sphinxsearch/sphinx.conf
+sed -i -e "s|{PDO_PASSWORD}|password|g" /etc/sphinxsearch/sphinx.conf
+sed -i -e "s|{MYSQL_DATABASE}|richmondsunlight|g" /etc/sphinxsearch/sphinx.conf
+/etc/init.d/sphinxsearch restart
+
+# If we have an existing index, update it
+if [[ -f /var/lib/sphinxsearch/data/bills.sph ]]; then
+
+    # Reindex
+    indexer --all --rotate
+
+# If there is no index, create a new one
+else
+    indexer --all
+fi
