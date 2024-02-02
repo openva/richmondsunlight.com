@@ -1142,7 +1142,7 @@ if (MEMCACHED_SERVER != '') {
     $mc = new Memcached();
     $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
     $comments_raw = $mc->get('comments-' . $bill['id']);
-    if ($mc->getResultCode() == 0) {
+    if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
         $comments = unserialize($comments_raw);
     }
 }

@@ -261,7 +261,7 @@ function get_user()
         $mc = new Memcached();
         $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
         $result = $mc->get('user-' . $_SESSION['id']);
-        if ($mc->getResultCode() === 0) {
+        if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
             if ($result != false) {
                 return $result;
             }
@@ -358,7 +358,7 @@ function logged_in($registered = '')
         $mc = new Memcached();
         $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
         $result = $mc->get('user-session-' . $_SESSION['id']);
-        if ($mc->getResultCode() === 0) {
+        if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
             return true;
         }
     }

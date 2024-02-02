@@ -34,7 +34,7 @@ class Bill2
             $mc = new Memcached();
             $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
             $result = $mc->get('bill-' . $number);
-            if ($mc->getResultCode() == 0) {
+            if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
                 return $result;
             }
         }
@@ -86,7 +86,7 @@ class Bill2
              * If this bill is cached in Memcached, retrieve it from there.
              */
             $bill = $mc->get('bill-' . $id);
-            if ($mc->getResultCode() === 1) {
+            if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
                 return unserialize($bill);
             }
         }
@@ -362,7 +362,7 @@ class Bill2
                 * See if these terms are cached in Memcached.
                 */
                 $this->term_pcres = $mc->get('definitions-' . $this->bill_id);
-                if ($mc->getResultCode() === 0) {
+                if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
                     return true;
                 }
             }
@@ -483,7 +483,7 @@ class Bill2
             $mc = new Memcached();
             $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
             $this->changes = $mc->get('bill-changes-' . $this->text_hash);
-            if ($mc->getResultCode() == 0) {
+            if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
                 return $this->changes;
             }
         }

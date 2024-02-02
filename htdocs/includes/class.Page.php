@@ -23,7 +23,7 @@ class Page
 
             # Try to retrieve this template from Memcached.
             $result = $mc->get('template-' . $this->template);
-            if ($mc->getResultCode() == 0) {
+            if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
                 $page = unserialize($result);
             }
         }

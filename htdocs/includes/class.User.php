@@ -37,7 +37,7 @@ class User
             $mc = new Memcached();
             $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
             $result = $mc->get('user-session-' . $_SESSION['id']);
-            if ($mc->getResultCode() === 0) {
+            if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
                 /*
                 * Indicate whether this is a registered user -- that is, somebody who has actually
                 * created an account. (That's the value of "user-session-[id]" -- true or false.)
@@ -151,7 +151,7 @@ class User
 
             # Get a list of recommended bills for this user.
             $result = $mc->get('recommendations-' . $user['id']);
-            if ($mc->getResultCode() === 0) {
+            if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
                 $bills = unserialize($result);
                 if ($bills !== false) {
                     return $bills;
