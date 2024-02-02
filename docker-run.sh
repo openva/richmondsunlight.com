@@ -49,4 +49,10 @@ cd ../../
 # Return to the original directory
 cd "$CWD" || exit
 
-echo "Site available at http://localhost:5000/"
+# Check if the site is running
+SITE_URL="http://localhost:5000/"
+if curl --output /dev/null --silent --head --fail "$SITE_URL"; then
+    echo "Site is up and running at $SITE_URL"
+else
+    echo "Site is not running or not reachable at $SITE_URL"
+fi
