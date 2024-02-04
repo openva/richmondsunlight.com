@@ -29,7 +29,7 @@ $pages =
     [
         'url' => '/bills/tags/abortion/',
         'http_status' => '200',
-        'string' => 'bills found',
+        'string' => 'bill found',
     ],
     [
         'url' => '/bill/2024/hb0/',
@@ -45,14 +45,14 @@ $pages =
         'string' => 'Cat Management',
     ],
     [
-        'url' => '/bills/introduced/',
+        'url' => '/bills/introduced/1000/',
         'http_status' => '200',
-        'string' => 'bills found',
+        'string' => 'Home instruction',
     ],
     [
-        'url' => '/bills/activity/',
+        'url' => '/bills/activity/1000/',
         'http_status' => '200',
-        'string' => 'actions found',
+        'string' => 'Rereferred',
     ],
     [
         'url' => '/legislators/',
@@ -89,9 +89,9 @@ $pages =
         'string' => 'Metadata',
     ],
     [
-        'url' => '/schedule/2024/01/22/',
+        'url' => '/schedule/2024/01/31/',
         'http_status' => '200',
-        'string' => '',
+        'string' => 'Health Care',
     ],
     [
         'url' => '/schedule/2024/01/32/',
@@ -123,9 +123,9 @@ $pages =
         'string' => 'SB278',
     ],
     [
-        'url' => '/search/?q=tax&year=',
+        'url' => '/search/?q=cat&year=',
         'http_status' => '200',
-        'string' => 'SB278',
+        'string' => 'HB221',
     ],
     [
         'url' => '/search/?q=nosuchresult',
