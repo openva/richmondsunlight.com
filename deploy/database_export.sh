@@ -26,13 +26,13 @@ mkdir -p mysql
 truncate --size 0 mysql/structure.sql
 STRUCTURE_LIST=$(printf "%s " "${STRUCTURE[@]}")
 mysqldump -d --routines --triggers --set-gtid-purged=OFF -u "$USERNAME" \
-    --host "$HOST" {MYSQL_DATABASE} $STRUCTURE_LIST > mysql/structure.sql
+    --host "$HOST" {MYSQL_DATABASE} "$STRUCTURE_LIST" > mysql/structure.sql
 
 # Export the tables for which we want complete contents
 truncate --size 0 mysql/basic-contents.sql
 ALL_CONTENTS_LIST=$(printf "%s " "${ALL_CONTENTS[@]}")
 mysqldump --no-create-info --skip-lock-tables --set-gtid-purged=OFF -u "$USERNAME" \
-    --host "$HOST" {MYSQL_DATABASE} $ALL_CONTENTS_LIST > mysql/basic-contents.sql
+    --host "$HOST" {MYSQL_DATABASE} "$ALL_CONTENTS_LIST" > mysql/basic-contents.sql
 
 # Export selected contents from the remaining tables
 truncate --size 0 mysql/test-records.sql
@@ -41,7 +41,7 @@ for BILL_ID in "${BILL_IDS[@]}"; do
         --set-gtid-purged=OFF --host "$HOST" bills --where "id=$BILL_ID" >> mysql/test-records.sql
 done
 
-for TABLE in ${SOME_CONTENTS[*]}; do
+for TABLE in "${SOME_CONTENTS[@]}"; do
     for BILL_ID in "${BILL_IDS[@]}"; do
         # Genericize all IP addresses and email addresses, to maintain privacy.
         mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables --set-gtid-purged=OFF \
