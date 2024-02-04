@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 # Is the bill's catch line included?
-OUTPUT="$(curl --silent http://localhost:5001/1.1/bill/2019/sb1604.json | jq '.catch_line')"
-EXPECTED='"Virginia Abortion Care & Gender-Affirming Health Care Protection Act; established, civil penalties."';
+OUTPUT="$(curl --silent http://api/1.1/bill/2024/sb278.json | jq '.catch_line')"
+EXPECTED='"Virginia Abortion Care &amp; Gender-Affirming Health Care Protection Act; established, civil penalties."';
 if [ "$OUTPUT" != "$EXPECTED" ]
 then
     echo "ERROR: Bill's catch line isn't included"
@@ -10,7 +10,7 @@ then
 fi
 
 # Is the bill's patron shortname correct?
-OUTPUT="$(curl --silent http://localhost:5001/1.1/bill/2019/sb1604.json | jq '.patron_shortname')"
+OUTPUT="$(curl --silent http://api/1.1/bill/2024/sb278.json | jq '.patron_shortname')"
 EXPECTED='"gfhashmi"';
 if [ "$OUTPUT" != "$EXPECTED" ]
 then
@@ -19,7 +19,7 @@ then
 fi
 
 # Is the legislator's formatted name correct?
-OUTPUT="$(curl --silent http://localhost:5001/1.1/legislator/rcdeeds.json | jq '.name_formatted')"
+OUTPUT="$(curl --silent http://api/1.1/legislator/rcdeeds.json | jq '.name_formatted')"
 EXPECTED='"Sen. Creigh Deeds (D-Charlottesville)"';
 if [ "$OUTPUT" != "$EXPECTED" ]
 then
