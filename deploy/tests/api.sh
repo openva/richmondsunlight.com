@@ -5,7 +5,7 @@ OUTPUT="$(curl --silent http://api/1.1/bill/2024/sb278.json | jq '.catch_line')"
 EXPECTED='"Virginia Abortion Care &amp; Gender-Affirming Health Care Protection Act; established, civil penalties."';
 if [ "$OUTPUT" != "$EXPECTED" ]
 then
-    echo "ERROR: Bill's catch line isn't included"
+    echo "ERROR: Bill's catch line isn't included (expected $EXPECTED, got $OUTPUT)"
     ERRORED=true
 fi
 
@@ -14,7 +14,7 @@ OUTPUT="$(curl --silent http://api/1.1/bill/2024/sb278.json | jq '.patron_shortn
 EXPECTED='"gfhashmi"';
 if [ "$OUTPUT" != "$EXPECTED" ]
 then
-    echo "ERROR: Bill's patron shortname isn't correct"
+    echo "ERROR: Bill's patron shortname isn't correct (expected $EXPECTED, got $OUTPUT)"
     ERRORED=true
 fi
 
@@ -23,7 +23,7 @@ OUTPUT="$(curl --silent http://api/1.1/legislator/rcdeeds.json | jq '.name_forma
 EXPECTED='"Sen. Creigh Deeds (D-Charlottesville)"';
 if [ "$OUTPUT" != "$EXPECTED" ]
 then
-    echo "ERROR: Legislator's formatted name isn't correct"
+    echo "ERROR: Legislator's formatted name isn't correct (expected $EXPECTED, got $OUTPUT)"
     ERRORED=true
 fi
 
