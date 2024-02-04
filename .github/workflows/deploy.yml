@@ -22,16 +22,28 @@ jobs:
           php-version: '5.6'
       - name: Make branch name available as Bash variable
         run: echo "GITHUB_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - run: >-
+      - name: Install packages with APT
+        run: >-
           sudo apt-get update && 
           sudo apt-get install -y awscli php5.6-cli php5.6-curl php5.6-memcached php5.6-mysql yarn zip
       - uses: actions/checkout@v3
       - run: sudo apt-get update -qq
-      - run: composer install
-      - run: cd htdocs/js/vendor; yarn build
+      - name: Install Composer dependencies
+        run: composer install
+      - name: Install Node dependencies
+        run: cd htdocs/js/vendor; yarn build
       - run: cd ../../..
       - run: find htdocs/*.php -print0 |xargs -0 -n1 -P8 php5.6 -l
-      - run: >-
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v1
+      - name: Run Docker
+        run: ./docker-run.sh
+      - name: Run tests
+        run: docker exec -it rs_web /var/www/deploy/tests/run-all.sh
+      - name: Stop Docker
+        run: ./docker-stop.sh
+      - name: Populate secrets and ZIP
+        run: >-
           ./deploy/branch_deploy.sh && ./deploy/config_variables.sh &&
           ./deploy/aws_credentials.sh && zip -qr rs-web-deploy . --exclude
           *.git* *.scannerwork* && mkdir -p upload && mv rs-web-deploy.zip
