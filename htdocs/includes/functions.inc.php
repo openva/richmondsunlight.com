@@ -225,6 +225,8 @@ if (!function_exists('create_user')) {
         }
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (!$result) {
+            $log = new Log();
+            $log->put('A user registration failed: ' . $sql, 6);
             return false;
         }
         if ($options['dashboard'] == 'y') {
