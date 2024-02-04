@@ -39,7 +39,7 @@ jobs:
       - name: Run Docker
         run: ./docker-run.sh
       - name: Run tests
-        run: docker exec -it rs_web /var/www/deploy/tests/run-all.sh
+        run: docker exec -i rs_web /var/www/deploy/tests/run-all.sh
       - name: Stop Docker
         run: ./docker-stop.sh
       - name: Populate secrets and ZIP
