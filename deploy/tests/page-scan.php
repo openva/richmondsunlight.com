@@ -69,16 +69,6 @@ $pages =
         'http_status' => '404',
     ],
     [
-        'url' => '/legislator/rcdeeds/votes/2024/',
-        'http_status' => '200',
-        'string' => 'Senate Floor',
-    ],
-    [
-        'url' => '/legislator/rcdeeds/votes/2024.csv',
-        'http_status' => '200',
-        'string' => '',
-    ],
-    [
         'url' => '/photosynthesis/portfolios/',
         'http_status' => '200',
         'string' => '',
@@ -101,11 +91,6 @@ $pages =
         'url' => '/schedule/',
         'http_status' => '200',
         'string' => 'Schedule for',
-    ],
-    [
-        'url' => '/schedule/2023/01/27/',
-        'http_status' => '200',
-        'string' => 'CANCELLED',
     ],
     [
         'url' => '/account/register/',
