@@ -16,7 +16,7 @@ ALL_CONTENTS=(committees committee_members districts files representatives repre
 SOME_CONTENTS=(bills_copatrons bills_full_text bills_places bills_section_numbers bills_status bills_views comments dockets polls tags video_clips votes)
 
 # The ID of the bills to use to generate test data
-BILL_IDS=(73202 73894 73202 74728 74513 73272)
+BILL_IDS=(73202 73894 74728 74513 73272)
 
 # Change to the directory this script is in
 cd "$(dirname "$0")"
