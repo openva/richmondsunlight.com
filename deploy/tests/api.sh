@@ -2,7 +2,7 @@
 
 # Is the bill's catch line included?
 OUTPUT="$(curl --silent http://localhost:5001/1.1/bill/2019/sb1604.json | jq '.catch_line')"
-EXPECTED='"Cruelty to animals; increases penalty."';
+EXPECTED='"Virginia Abortion Care & Gender-Affirming Health Care Protection Act; established, civil penalties."';
 if [ "$OUTPUT" != "$EXPECTED" ]
 then
     echo "ERROR: Bill's catch line isn't included"
@@ -11,7 +11,7 @@ fi
 
 # Is the bill's patron shortname correct?
 OUTPUT="$(curl --silent http://localhost:5001/1.1/bill/2019/sb1604.json | jq '.patron_shortname')"
-EXPECTED='"wrdesteph"';
+EXPECTED='"gfhashmi"';
 if [ "$OUTPUT" != "$EXPECTED" ]
 then
     echo "ERROR: Bill's patron shortname isn't correct"
@@ -19,8 +19,8 @@ then
 fi
 
 # Is the legislator's formatted name correct?
-OUTPUT="$(curl --silent http://localhost:5001/1.1/legislator/rbbell.json | jq '.name_formatted')"
-EXPECTED='"Del. Rob Bell (R-Charlottesville)"';
+OUTPUT="$(curl --silent http://localhost:5001/1.1/legislator/rcdeeds.json | jq '.name_formatted')"
+EXPECTED='"Sen. Creigh Deeds (D-Charlottesville)"';
 if [ "$OUTPUT" != "$EXPECTED" ]
 then
     echo "ERROR: Legislator's formatted name isn't correct"

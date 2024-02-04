@@ -17,17 +17,17 @@ $pages =
         'string' => 'bills found',
     ],
     [
-        'url' => '/bills/2023/',
+        'url' => '/bills/2024/',
         'http_status' => '200',
-        'string' => 'HB53',
+        'string' => 'SB278',
     ],
     [
-        'url' => '/bills/2020/1/',
+        'url' => '/bills/2024/1/',
         'http_status' => '200',
-        'string' => '488 bills found',
+        'string' => 'No bills',
     ],
     [
-        'url' => '/bills/tags/education/',
+        'url' => '/bills/tags/abortion/',
         'http_status' => '200',
         'string' => 'bills found',
     ],
@@ -40,9 +40,9 @@ $pages =
         'http_status' => '404',
     ],
     [
-        'url' => '/bill/2024/hb1/',
+        'url' => '/bill/2024/hb221/',
         'http_status' => '200',
-        'string' => 'Minimum wage',
+        'string' => 'Cat Management',
     ],
     [
         'url' => '/bills/introduced/',
@@ -118,14 +118,14 @@ $pages =
         'string' => '',
     ],
     [
-        'url' => '/search/?q=tax&year=2024',
+        'url' => '/search/?q=abortion&year=2024',
         'http_status' => '200',
-        'string' => 'HB261',
+        'string' => 'SB278',
     ],
     [
         'url' => '/search/?q=tax&year=',
         'http_status' => '200',
-        'string' => 'HJ56',
+        'string' => 'SB278',
     ],
     [
         'url' => '/search/?q=nosuchresult',
