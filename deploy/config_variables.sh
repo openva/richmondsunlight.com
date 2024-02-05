@@ -39,7 +39,7 @@ do
 done
 
 # Duplicate the default setting file to populate our settings file
-cp htdocs/includes/settings-default.inc.php htdocs/includes/settings.inc.php
+cp -f htdocs/includes/settings-default.inc.php htdocs/includes/settings.inc.php
 
 # If this is our staging site
 if [ "$GITHUB_BRANCH" = "master" ]
