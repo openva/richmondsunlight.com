@@ -6,7 +6,7 @@ $failures = [];
 
 /*
  // These tests have been pulled out because Sphinx isn't starting up properly in GitHub Actions.
-$pages = 
+$pages =
 [
 
     [
