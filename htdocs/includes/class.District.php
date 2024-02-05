@@ -8,7 +8,7 @@ class District
         $sql = 'SELECT id, chamber, number, description, notes, boundaries
                 FROM districts
                 WHERE
-                    date_ended IS NOT NULL AND
+                    date_ended IS NULL AND
                     chamber= :chamber AND
                     number= :number';
 
