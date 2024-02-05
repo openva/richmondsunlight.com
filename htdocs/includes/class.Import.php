@@ -923,7 +923,7 @@ class Import
             /*
              * Get delegate's district number.
              */
-            preg_match('/([0-9]{1,2})([a-z]{2}) District/', $html, $matches);
+            preg_match('/([0-9]{1,3})([a-z]{2}) District/', $html, $matches);
             $legislator['district_number'] = $matches[1];
             unset($matches);
 
