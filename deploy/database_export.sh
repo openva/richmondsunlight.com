@@ -1,4 +1,6 @@
-#!/bin/bash -e
+#!/bin/bash
+
+set -e
 
 HOST="{PDO_SERVER}"
 USERNAME="{PDO_USERNAME}"
