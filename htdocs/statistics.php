@@ -166,20 +166,21 @@ $sql = 'SELECT
             number,
             catch_line
         FROM bills
-        ORDER BY view_count ASC
+        WHERE session_id = ' .SESSION_ID . '
+        ORDER BY view_count DESC
         LIMIT 10';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_body .= '<h2>Top 10 Most-Viewed Bills for ' . SESSION_YEAR . '</h2><ol>';
     $total = 0;
     while ($bill = mysqli_fetch_assoc($result)) {
-        $page_body .= '<li><a href="/bill/ ' . SESSION_YEAR . '/' . $bill['number'] . '/">'
+        $page_body .= '<li><a href="/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/">'
             . strtoupper($bill['number']) . '</a>: ' . $bill['catch_line'] . '</li>';
     }
     $page_body .= '</ol>';
 }
 
-    # SIDEBAR
+# SIDEBAR
 
 # Select the total number of bills introduced in each chamber.
 $sql = 'SELECT
