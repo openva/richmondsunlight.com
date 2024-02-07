@@ -164,7 +164,7 @@ if (mysqli_num_rows($result) > 0) {
 
 $sql = 'SELECT
             bills.number,
-            bills.catch_line
+            bills.catch_line,
             COUNT(*) AS views
         FROM bills_views
         LEFT JOIN bills
