@@ -914,9 +914,9 @@ if (isset($bill['places']) && (count($bill['places']) > 0)) {
     $page_body = rtrim($page_body, ',');
     $page_body .= '.</p>';
 
-    $html_head .= '<script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet" />
-    <script src="https://npmcdn.com/@turf/turf/turf.min.js"></script>
+    $html_head .= '<script src="/js/vendor/mapbox-gl/mapbox-gl.js"></script>
+    <link href="/js/vendor/mapbox-gl/mapbox-gl.css" rel="stylesheet" />
+    <script src="/js/vendor/@turf/turf/turf.min.js"></script>
     <style>
         #map { height: 250px; width:100%; margin-bottom: 1.5em; }
     </style>
