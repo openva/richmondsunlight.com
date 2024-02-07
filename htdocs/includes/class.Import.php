@@ -951,6 +951,13 @@ class Import
             if (stripos($legislator['address_district'], 'Office:') !== false) {
                 $legislator['address_district'] = trim(substr($legislator['address_district'], 0, stripos($legislator['address_district'], 'Office:')));
             }
+            // Deal with multiple addresses in this segment, getting only the physical address
+            if (stripos($legislator['address_district'], 'Mailing Address:') !== false) {
+                $end = stripos($legislator['address_district'], 'Mailing Address:');
+                $legislator['address_district'] = substr($legislator['address_district'], 0, $end);
+                $legislator['address_district'] = str_replace('Physical Address:', '', $legislator['address_district']);
+            }
+
             $legislator['address_district'] = trim($legislator['address_district']);
             if ($legislator['address_district'] == ',') {
                 unset($legislator['address_district']);
