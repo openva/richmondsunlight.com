@@ -514,7 +514,7 @@ $page_sidebar .= '
 
 if (!empty($bill['impact_statement_id'])) {
     $page_sidebar .= '
-			<li><a href="https://lis.virginia.gov/cgi-bin/legp604.exe?' . $bill['session_lis_id'] . '+oth+' . mb_strtoupper($bill['number']) . 'F' . $bill['impact_statement_id'] . '+PDF">Fiscal Impact Statement</a></li>';
+			<li><a href="https://lis.virginia.gov/cgi-bin/legp604.exe?' . $bill['session_lis_id'] . '+oth+' . mb_strtoupper($bill['number']) . $bill['impact_statement_id'] . '+PDF">Fiscal Impact Statement</a></li>';
 }
 
 $page_sidebar .= '</ul></div>';
