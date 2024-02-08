@@ -171,7 +171,8 @@ $sql = 'SELECT
             ON bills_views.bill_id=bills.id
         WHERE bills.session_id= ' . SESSION_ID . '
         GROUP BY bills_views.bill_id
-        ORDER BY views DESC';
+        ORDER BY views DESC
+        LIMIT 10';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_body .= '<h2>Top 10 Most-Viewed Bills for ' . SESSION_YEAR . '</h2><ol>';
