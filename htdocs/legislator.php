@@ -494,8 +494,6 @@ if ($total > 0) {
 
 # Calculate the percentages of the legislators' party memberships who have cosponsored any bill
 # introduced by this legislator.
-// Using this "IN" clause is just ridiculous. The query takes a good .2 seconds, which is way
-// too long. There's got to be a faster way to do this.
 $sql = 'SELECT
             representatives.party,
             COUNT(*) AS number
