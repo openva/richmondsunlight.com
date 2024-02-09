@@ -219,7 +219,7 @@ if (mysqli_num_rows($result) > 0) {
 				return Object.values(groupedByCoordinates).flat();
 			}
 			
-			const adjustedFeatures = fanOutCoordinates(markers.features, 0.0001);
+			const adjustedFeatures = fanOutCoordinates(markers.features, 0.1);
 			markers.features = adjustedFeatures;
 
 			map.on("load", function () {
