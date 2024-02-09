@@ -239,6 +239,8 @@ if (mysqli_num_rows($result) > 0) {
 					}
 				});
 
+				map.addControl(new mapboxgl.NavigationControl());
+
 				var popup = new mapboxgl.Popup({
 					closeButton: false,
 					closeOnClick: false
