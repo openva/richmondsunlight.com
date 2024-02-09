@@ -48,7 +48,7 @@ $sql = 'SELECT representatives.shortname, representatives.name, representatives.
 		representatives.place AS location,
 		ROUND( DATEDIFF(now(),representatives.birthday) / 365 ) AS age,
 		DATE_FORMAT(representatives.date_started, "%Y") AS year_started,
-		representatives.partisanship, representatives.sex, representatives.race
+		representatives.partisanship, representatives.sex
 		FROM representatives
 		LEFT JOIN districts
 		ON representatives.district_id = districts.id
@@ -101,11 +101,6 @@ if (mysqli_num_rows($result) > 0) {
             '/>
 			<label for="sex">Sex</label>
 
-			<input type="checkbox" name="options[race]" value="y" id="race" '
-            . (isset($options['race']) ? $checked : '') .
-            '/>
-			<label for="race">Race</label>
-
 			<input type="checkbox" name="options[year_started]" value="y" id="year_started" '
             . (isset($options['year_started']) ? $checked : '') .
             '/>
@@ -146,10 +141,6 @@ if (mysqli_num_rows($result) > 0) {
     if (isset($options['sex'])) {
         $page_body .= '
 				<th>Sex</th>';
-    }
-    if (isset($options['race'])) {
-        $page_body .= '
-				<th>Race</th>';
     }
     if (isset($options['year_started'])) {
         $page_body .= '
@@ -207,10 +198,6 @@ if (mysqli_num_rows($result) > 0) {
         if (isset($options['sex'])) {
             $page_body .= '
 				<td>' . $legislator['sex'] . '</td>';
-        }
-        if (isset($options['race'])) {
-            $page_body .= '
-				<td>' . $legislator['race'] . '</td>';
         }
         if (isset($options['year_started'])) {
             $page_body .= '
