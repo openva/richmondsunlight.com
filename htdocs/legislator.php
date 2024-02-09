@@ -477,7 +477,8 @@ if ($total > 0) {
 
     # Create the text that we'll use below in the copatroning stats.
     $introduced = round((current($tmp) / $total) * 100) . '% of bills ' . $legislator['pronoun']
-    . ' copatroned were introduced by ' . ((key($tmp) == 'R') ? 'Republicans' : 'Democrats') . '. ';
+    . ' has copatroned were introduced by ' . ((key($tmp) == 'R') ? 'Republicans' : 'Democrats')
+    . '. ';
 
     # Populate an array that we use to determine overall partisanship. 0 = Democratic and 100 =
     # Republican. Because our number is based on the majority support, we need to rescale it.
@@ -558,9 +559,9 @@ $total = array_sum($tmp);
 if ($total > 0) {
     arsort($tmp);
     # Create the text that we'll use below in the copatroning stats.
-    $pool = 'Of all of the copatrons of all of the bills that '
-        . (($legislator['sex'] == 'male') ? 'he' : 'she') . ' also copatroned, '
-        . round((current($tmp) / $total) * 100) . '% of them are '
+    $pool = 'Of all of ' . (($legislator['sex'] == 'male') ? 'his' : 'her')
+        . ' fellow copatrons of the bills that ' . (($legislator['sex'] == 'male') ? 'he' : 'she')
+        . ' copatroned, ' . round((current($tmp) / $total) * 100) . '% of them are '
     . ((key($tmp) == 'R') ? 'Republicans' : 'Democrats') . '. ';
 
     # Populate an array that we use to determine overall partisanship. 0 = Democratic and 100 =
