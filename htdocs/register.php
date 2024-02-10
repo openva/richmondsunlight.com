@@ -260,7 +260,9 @@ if (isset($_POST['submit'])) {
             $location = new Location();
             $location->zip = $form_data['zip'];
             $coordinates = $location->get_coordinates();
-            $user_query .= '&latitude=' . $coordinates['lat'] . '&longitude=' . $coordinates['lng'];
+            if (is_numeric($coordinates['lat']) && is_numeric($coordinates['lng'])) {
+                $user_query .= '&latitude=' . $coordinates['lat'] . '&longitude=' . $coordinates['lng'];
+            }
         }
         if (!empty($form_data['mailing_list'])) {
             $user_query .= '&mailing_list=' . $form_data['mailing_list'];
