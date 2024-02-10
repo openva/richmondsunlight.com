@@ -320,7 +320,23 @@ if (!empty($legislator['videos'])) {
 $page_body .= '
 </ul>
 
-<div id="bio">';
+<div id="bio">
+<div>
+<img src="/images/legislators/thumbnails/' . $legislator['shortname'] . '.jpg" alt="Photo of '
+    . $legislator['name'] . '" width="250" id="legislator" />
+    <div class="text">
+        <div class="pair">
+            <div class="label">Party</div>
+            <div class="content">' . $legislator['party_name'] . '</div>
+        </div>
+        <div class="pair">
+            <div class="label">District</div>
+            <div class="content">' . $legislator['district'];
+if (!empty($legislator['district_description'])) {
+    $page_body .= ': ' . $legislator['district_description'];
+}
+$page_body .= '</div>
+        </div>';
 
 # Get the batting average data.  Use the current session's year if the session
 # is finished.  Otherwise, use the prior year.
@@ -362,27 +378,19 @@ if ($legislator['batting']['total'] == 0) {
     unset($legislator['batting']);
 }
 
-$page_body .= '
-	<img src="/images/legislators/thumbnails/' . $legislator['shortname'] . '.jpg" alt="Photo of '
-        . $legislator['name'] . '" width="150" id="legislator" />
-	<dl>
-		<dt>Party</dt>
-		<dd>' . $legislator['party_name'] . '</dd>
-		<dt>District</dt>
-		<dd>' . $legislator['district'];
-if (!empty($legislator['district_description'])) {
-    $page_body .= ': ' . $legislator['district_description'];
-}
-$page_body .= '</dd>';
 if (!empty($legislator['date_started'])) {
     $page_body .= '
-		<dt>Took Office</dt>
-		<dd>' . $legislator['date_started'] . '</dd>';
+    <div class="pair">
+		<div class="label">Took Office</div>
+		<div class="content">' . $legislator['date_started'] . '</div>
+    </div>';
 }
 if (!empty($legislator['date_ended'])) {
     $page_body .= '
-		<dt>Left Office</dt>
-		<dd>' . $legislator['date_ended'] . '</dd>';
+    <div class="pair">
+		<div class="label">Left Office</div>
+		<div class="content">' . $legislator['date_ended'] . '</div>
+    </div>';
 } else {
     $elections = [];
     $elections['house'] = [2025, 2027, 2029, 2031, 2033, 2035, 2037, 2039];
@@ -403,13 +411,16 @@ if (!empty($legislator['date_ended'])) {
         }
     }
     $page_body .= '
-		<dt>Next Election</dt>
-		<dd>' . $next_election . '</dd>';
+    <div class="pair">
+		<div class="label">Next Election</div>
+		<div class="content">' . $next_election . '</div>
+    </div>';
 }
 if (is_array($legislator['committees']) && (count($legislator['committees']) > 0)) {
     $page_body .= '
-		<dt>Committees</dt>
-		<dd>';
+    <div class="pair">
+		<div class="label">Committees</div>
+		<div class="content">';
     $i = 0;
     foreach ($legislator['committees'] as $committee) {
         $page_body .= '<a href="/committee/' . $legislator['chamber'] . '/'
@@ -424,32 +435,40 @@ if (is_array($legislator['committees']) && (count($legislator['committees']) > 0
         }
         $i++;
     }
-    $page_body .= '</dd>';
+    $page_body .= '</div></div>';
 }
 if (($legislator['age'] != date('Y')) && !empty($legislator['age'])) {
-    $page_body .= '<dt>Age</dt>
-		<dd>' . $legislator['age'] . '</dd>';
+    $page_body .= '<div class="pair">
+        <div class="label">Age</div>
+		<div class="content">' . $legislator['age'] . '</div>
+        </div>';
 }
 if (!empty($legislator['website'])) {
     $page_body .= '
-		<dt>Website</dt>
-		<dd><a href="' . $legislator['website'] . '">' . $legislator['website_name'] . '</a></dd>';
+    <div class="pair">
+		<div class="label">Website</div>
+		<div class="content"><a href="' . $legislator['website'] . '">' . $legislator['website_name'] . '</a></div>
+    </div>';
 }
 if (!empty($legislator['twitter'])) {
     $page_body .= '
-		<dt>Twitter</dt>
-		<dd><a href="https://twitter.com/' . $legislator['twitter'] . '">@' . $legislator['twitter'] . '</a></dd>';
+    <div class="pair">
+		<div class="label">Twitter</div>
+		<div class="content"><a href="https://twitter.com/' . $legislator['twitter'] . '">@' . $legislator['twitter'] . '</a></div>
+    </div>';
 }
 
 if (!empty($legislator['activity']) && IN_SESSION == true) {
     $page_body .= '
-		<dt>Daily Activity</dt>
-		<dd id="activity">
+    <div class="pair">
+		<div class="label">Daily Activity</div>
+		<div class="content" id="activity">
 			<img src="'
             . '//chart.googleapis.com/chart?cht=ls&chs=400x70&chco=243a51&chf=bg,s,f4eee5'
             . '&chm=B,dccbaf,0,0,0&chds=0,' . $legislator['activity_peak'] . '&chd=t:'
             . ($legislator['activity']) . '" />
-		</dd>';
+		</div>
+    </div>';
 }
 
 # COPATRONING STATS
@@ -579,14 +598,15 @@ if ($total > 0) {
 # We've calculated these copatroning habits via a cron job already.
 if (!empty($legislator['partisanship'])) {
     $partisanship = '
-		<div id="partisanship-graph">
+		<div class="content" id="partisanship-graph">
 			<div style="width: ' . $legislator['partisanship'] . '%;"></div>
 		</div>';
 }
 
 if (isset($introduced) || isset($supporters) || isset($pool)) {
-    $page_body .= '<dt>Copatroning Habits</dt>
-			<dd id="copatron">';
+    $page_body .= '<div class="pair">
+        <div class="label">Copatroning Habits</div>
+			<div class="content" id="copatron">';
     if (isset($introduced)) {
         $page_body .= $introduced;
     }
@@ -596,14 +616,16 @@ if (isset($introduced) || isset($supporters) || isset($pool)) {
     if (isset($pool)) {
         $page_body .= $pool;
     }
-    $page_body .= '</dd>';
+    $page_body .= '</div></div>';
 }
 if (isset($partisanship)) {
     $page_body .= '
-			<dt>Partisanship</dt>
-			<dd id="partisanship">
+        <div class="pair">
+			<div class="label">Partisanship</div>
+			<div class="content" id="partisanship">
 			' . $partisanship . '   <a href="javascript:openpopup(\'/help/partisanship/\')" title="Help"><img src="/images/help-f4eee5.gif" class="help-icon" alt="?" /></a>
-			</dd>';
+			</div>
+        </div>';
 }
 
 # Tag Cloud
@@ -620,8 +642,9 @@ $result = mysqli_query($GLOBALS['db'], $sql);
 $tag_count = mysqli_num_rows($result);
 if ($tag_count > 0) {
     $page_body .= '
-		<dt>Bill Topics <a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-f4eee5.gif" class="help-icon" alt="?" /></a></dt>
-		<dd>
+        <div class="pair">
+		<div class="label">Bill Topics <a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-f4eee5.gif" class="help-icon" alt="?" /></a></div>
+		<div class="content">
 			<div class="tags">';
     # Build up an array of tags, with the key being the tag and the value being the count.
     while ($tag = mysqli_fetch_array($result)) {
@@ -649,24 +672,29 @@ if ($tag_count > 0) {
 
         $page_body .= '<span style="font-size: ' . $size . 'em;"><a href="/bills/tags/' . urlencode($tag) . '/">' . $tag . '</a></span> ';
     }
-    $page_body .= '</div>
-		</dd>';
+    $page_body .= '</div></div>
+		</div>';
 }
 
 if (!empty($legislator['batting'])) {
-    $page_body .= '<dt>Bills Passed</dt>
-		<dd>' . round(($legislator['batting']['passed'] / $legislator['batting']['total'] * 100), 1) . '%
-		in ' . $batting_year . '</dd>';
+    $page_body .= '<div class="pair">
+    <div class="label">Bills Passed</div>
+		<div class="content">' . round(($legislator['batting']['passed'] / $legislator['batting']['total'] * 100), 1) . '%
+		in ' . $batting_year . '</div>
+    </div>';
 }
 
 if (!empty($legislator['bio'])) {
     $page_body .= '
-		<dt>Bio</dt>
-		<dd>' . nl2p($legislator['bio']) . '</dd>';
+    <div class="pair">
+		<div class="label">Bio</div>
+		<div class="content">' . nl2p($legislator['bio']) . '</div>
+    </div>';
 }
 
 # Close the table and this tab's DIV.
-$page_body .= '</dl>
+$page_body .= '</div>
+    </div>
 	</div>';
 
 # Start a new DIV for top contributions.
