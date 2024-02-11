@@ -17,14 +17,13 @@ class Statistics
 
         $database = new Database();
         $db = $database->connect();
-        global $db;
 
         $sql = 'SELECT date, COUNT(*) as number
 				FROM bill_status
 				WHERE session_id = ' . SESSION_ID . '
 				GROUP BY date
 				ORDER BY date ASC';
-        $stmt = $GLOBALS['db']->prepare($sql);
+        $stmt = $db->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll();
         if (count($result) == 0) {
@@ -53,7 +52,7 @@ class Statistics
 				WHERE session_id = ' . SESSION_ID . '
 				GROUP BY date_introduced
 				ORDER BY date_introduced ASC';
-        $stmt = $GLOBALS['db']->prepare($sql);
+        $stmt = $db->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll();
         if (count($result) == 0) {
@@ -87,7 +86,7 @@ class Statistics
 				WHERE bill_id= ' . $this->bill_id . '
 				GROUP BY day
 				ORDER BY day ASC';
-        $stmt = $GLOBALS['db']->prepare($sql);
+        $stmt = $db->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll();
         if (count($result) == 0) {
@@ -112,7 +111,6 @@ class Statistics
 
         $database = new Database();
         $db = $database->connect();
-        global $db;
 
         $sql = 'SELECT votes.date, COUNT(*) AS number
                 FROM votes
@@ -123,7 +121,7 @@ class Statistics
                     votes.session_id = ' . SESSION_ID . '
                 GROUP BY votes.date
                 ORDER BY date DESC';
-        $stmt = $GLOBALS['db']->prepare($sql);
+        $stmt = $db->prepare($sql);
         $stmt->execute();
         $result = $stmt->fetchAll();
         if (count($result) == 0) {
