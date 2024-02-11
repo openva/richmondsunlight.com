@@ -17,26 +17,22 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();
 
 # LOCALIZE VARIABLES
-if ( isset($_REQUEST['year']) && strlen($_REQUEST['year']) == 4 && is_numeric($_REQUEST['year']) )
-{
+if (isset($_REQUEST['year']) && strlen($_REQUEST['year']) == 4 && is_numeric($_REQUEST['year'])) {
     $year = $_REQUEST['year'];
-}
-else
-{
+} else {
     $year = SESSION_YEAR;
 }
 
 # PAGE METADATA
 $page_title = 'Minutes';
-if (!empty($year))
-{
+if (!empty($year)) {
     $page_title .= '» ' . $year;
 }
 $site_section = 'minutes';
@@ -58,8 +54,7 @@ $page_sidebar = '
 	<div class="box">
 		<h3>Years</h3>
 		<ul>';
-for ($i=2008; $i<=SESSION_YEAR; $i++)
-{
+for ($i = 2008; $i <= SESSION_YEAR; $i++) {
     $page_sidebar .= '<li><a href="/minutes/' . $i . '/">' . $i . '</a></li>';
 }
 $page_sidebar .= '
@@ -74,22 +69,16 @@ $page_sidebar .= '
 		which are a lot more informative than the minutes.</p>
 	</div>';
 
-if (mysqli_num_rows($result) == 0)
-{
+if (mysqli_num_rows($result) == 0) {
     $page_body = '<p>No minutes are yet available for ' . SESSION_YEAR . ', but you may select minutes
 		from past years using the menu at right.</p>';
-}
-elseif (mysqli_num_rows($result) > 0)
-{
-
+} elseif (mysqli_num_rows($result) > 0) {
     # PAGE CONTENT
 
     # Iterate through the query results.
-    while ($minutes = mysqli_fetch_array($result))
-    {
+    while ($minutes = mysqli_fetch_array($result)) {
         $minutes = array_map('stripslashes', $minutes);
-        if (!isset($chamber))
-        {
+        if (!isset($chamber)) {
             $chamber = $minutes['chamber'];
             $page_body .= '
 			<div class="tabs">
@@ -99,9 +88,7 @@ elseif (mysqli_num_rows($result) > 0)
 			</ul>
 			<div id="' . $chamber . '">
 				<ul id="minutes-listing">';
-        }
-        elseif ($chamber != $minutes['chamber'])
-        {
+        } elseif ($chamber != $minutes['chamber']) {
             $chamber = $minutes['chamber'];
             $page_body .= '
 				</ul>
@@ -124,7 +111,7 @@ elseif (mysqli_num_rows($result) > 0)
 
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

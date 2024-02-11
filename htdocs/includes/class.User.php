@@ -2,7 +2,6 @@
 
 class User
 {
-
     /*
      * A wrapper around get_user(), in functions.inc.php.
      */
@@ -10,12 +9,11 @@ class User
     {
         $this->data = get_user();
 
-        if ($this->data == FALSE)
-        {
-            return FALSE;
+        if ($this->data == false) {
+            return false;
         }
 
-        return TRUE;
+        return true;
     }
 
     /*
@@ -28,22 +26,18 @@ class User
         /*
          * If there's no session ID, they can't be registered.
          */
-        if (empty($_SESSION['id']))
-        {
-            return FALSE;
+        if (empty($_SESSION['id'])) {
+            return false;
         }
 
         /*
          * If this session ID is stored in Memcached, then we don't need to query the database.
          */
-        if (MEMCACHED_SERVER != '')
-        {
+        if (MEMCACHED_SERVER != '') {
             $mc = new Memcached();
             $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
             $result = $mc->get('user-session-' . $_SESSION['id']);
-            if ($mc->getResultCode() === 0)
-            {
-
+            if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
                 /*
                 * Indicate whether this is a registered user -- that is, somebody who has actually
                 * created an account. (That's the value of "user-session-[id]" -- true or false.)
@@ -53,13 +47,11 @@ class User
                 /*
                 * Report that this is a user.
                 */
-                return TRUE;
-
+                return true;
             }
-        
         }
 
-        $database = new Database;
+        $database = new Database();
         $database->connect_mysqli();
 
         $sql = 'SELECT id, password
@@ -67,47 +59,40 @@ class User
 				WHERE cookie_hash="' . mysqli_real_escape_string($GLOBALS['db'], $_SESSION['id']) . '"';
         $result = mysqli_query($GLOBALS['db'], $sql);
 
-        if (mysqli_num_rows($result) == 1)
-        {
+        if (mysqli_num_rows($result) == 1) {
             $registered = mysqli_fetch_assoc($result);
 
             /*
              * The presence of a password indicates that it's a user who has created an account.
              */
-            if (!empty($registered['password']))
-            {
-                $this->registered = TRUE;
-            }
-            else
-            {
-                $this->registered = FALSE;
+            if (!empty($registered['password'])) {
+                $this->registered = true;
+            } else {
+                $this->registered = false;
             }
 
             /*
              * Store this session in Memcached for the next 30 minutes.
              */
-            if (MEMCACHED_SERVER != '')
-            {
+            if (MEMCACHED_SERVER != '') {
                 $mc->set('user-session-' . $_SESSION['id'], $this->registered, (60 * 30));
             }
 
-            return TRUE;
-
+            return true;
         }
 
-        return FALSE;
+        return false;
     }
 
     public function views_cloud()
     {
 
         # The user must be logged in.
-        if (logged_in() !== TRUE)
-        {
-            return FALSE;
+        if (logged_in() !== true) {
+            return false;
         }
 
-        $database = new Database;
+        $database = new Database();
         $database->connect_mysqli();
 
         # Get the user's account data.
@@ -126,16 +111,14 @@ class User
         $result = mysqli_query($GLOBALS['db'], $sql);
 
         # Unless we have ten tags, we just don't have enough data to continue.
-        if (mysqli_num_rows($result) < 10)
-        {
-            return FALSE;
+        if (mysqli_num_rows($result) < 10) {
+            return false;
         }
 
         # Build up an array of tags, with the key being the tag and the value being the count.
-        while ($tag = mysqli_fetch_array($result))
-        {
+        while ($tag = mysqli_fetch_array($result)) {
             $tag = array_map('stripslashes', $tag);
-            $tags[$tag{'tag'}] = $tag['count'];
+            $tags[$tag['tag']] = $tag['count'];
         }
 
         # Sort the tags in reverse order by key (their count), shave off the top 30, and then
@@ -162,18 +145,15 @@ class User
         /*
          * Connect to Memcached.
          */
-        if (MEMCACHED_SERVER != '')
-        {
+        if (MEMCACHED_SERVER != '') {
             $mc = new Memcached();
             $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
 
             # Get a list of recommended bills for this user.
             $result = $mc->get('recommendations-' . $user['id']);
-            if ($mc->getResultCode() === 0)
-            {
+            if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
                 $bills = unserialize($result);
-                if ($bills !== FALSE)
-                {
+                if ($bills !== false) {
                     return $bills;
                 }
             }
@@ -181,12 +161,11 @@ class User
 
         $tags = User::views_cloud();
 
-        if ($tags === FALSE)
-        {
-            return FALSE;
+        if ($tags === false) {
+            return false;
         }
 
-        $database = new Database;
+        $database = new Database();
         $database->connect_mysqli();
 
         # Get a list of every bill that this user has looked at.
@@ -196,12 +175,10 @@ class User
 					ON bills_views.bill_id = bills.id
 				WHERE bills.session_id = ' . SESSION_ID . ' AND user_id = ' . $user['id'];
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) > 0)
-        {
+        if (mysqli_num_rows($result) > 0) {
             $bills_seen = array();
-            while ($bill = mysqli_fetch_assoc($result))
-            {
-                $bills_seen[$bill{'id'}] = true;
+            while ($bill = mysqli_fetch_assoc($result)) {
+                $bills_seen[$bill['id']] = true;
             }
         }
 
@@ -228,8 +205,7 @@ class User
         # through them to create the SQL. The actual tag SQL is built up and then reused,
         # though slightly differently, later on in the SQL query, hence the str_replace.
         $tags_sql = '';
-        foreach ($tags as $tag=>$tmp)
-        {
+        foreach ($tags as $tag => $tmp) {
             $tags_sql .= 'tags2.tag = "' . $tag . '" OR ';
         }
         # Hack off the final " OR "
@@ -254,17 +230,12 @@ class User
 				LIMIT 100';
 
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) == 0)
-        {
-            return FALSE;
-        }
-        else
-        {
-            while ($bill = mysqli_fetch_assoc($result))
-            {
+        if (mysqli_num_rows($result) == 0) {
+            return false;
+        } else {
+            while ($bill = mysqli_fetch_assoc($result)) {
                 $bill = array_map('stripslashes', $bill);
-                if (!isset($bills_seen[$bill{'id'}]))
-                {
+                if (!isset($bills_seen[$bill['id']])) {
                     $bills[] = $bill;
                 }
             }
@@ -277,8 +248,7 @@ class User
         # because user sessions are unlikely to last longer than this and to allow their
         # recommendations to be updated as new bills are filed, as they view their recommended
         # bills, and as they view bills that cause their recommendations to change.
-        if (MEMCACHED_SERVER != '')
-        {
+        if (MEMCACHED_SERVER != '') {
             $mc->set('recommendations-' . $user['id'], serialize($bills), (60 * 30));
         }
 
@@ -296,12 +266,11 @@ class User
         # Get the user's account data.
         $user = get_user();
 
-        if (!isset($user['latitude']) || !isset($user['longitude']))
-        {
-            return FALSE;
+        if (!isset($user['latitude']) || !isset($user['longitude'])) {
+            return false;
         }
 
-        $database = new Database;
+        $database = new Database();
         $database->connect_mysqli();
 
         $sql = 'SELECT bills.id, bills.number, bills.catch_line, sessions.year,
@@ -313,22 +282,20 @@ class User
 					ON bills_places.bill_id = bills.id
 				LEFT JOIN sessions
 					ON bills.session_id=sessions.id
-				WHERE (latitude >= ' . (round($user['latitude'], 1)-.25) . '
-				AND latitude <=' . (round($user['latitude'], 1)+.25) . ')
-				AND (longitude <= ' . (round($user['longitude'], 1)+.25) . '
-				AND longitude >= ' . (round($user['longitude'], 1)-.25) . ')
+				WHERE (latitude >= ' . (round($user['latitude'], 1) - .25) . '
+				AND latitude <=' . (round($user['latitude'], 1) + .25) . ')
+				AND (longitude <= ' . (round($user['longitude'], 1) + .25) . '
+				AND longitude >= ' . (round($user['longitude'], 1) - .25) . ')
 				AND bills.session_id = ' . SESSION_ID . '
 				ORDER BY ( lat_diff + lon_diff ) DESC';
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) == 0)
-        {
-            return FALSE;
+        if (mysqli_num_rows($result) == 0) {
+            return false;
         }
 
         $bills = array();
 
-        while ($bill = mysqli_fetch_array($result))
-        {
+        while ($bill = mysqli_fetch_array($result)) {
             $bills[] = array_map('stripslashes', $bill);
         }
 
@@ -340,15 +307,14 @@ class User
     {
 
         # The user must be logged in.
-        if (logged_in() !== TRUE)
-        {
-            return FALSE;
+        if (logged_in() !== true) {
+            return false;
         }
 
         # Get the user's account data.
         $user = get_user();
 
-        $database = new Database;
+        $database = new Database();
         $database->connect_mysqli();
 
         $sql = 'SELECT
@@ -361,9 +327,8 @@ class User
 					WHERE user_id=' . $user['id'] . ') AS bills';
 
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) == 0)
-        {
-            return FALSE;
+        if (mysqli_num_rows($result) == 0) {
+            return false;
         }
         $stats = mysqli_fetch_object($result);
         return $stats;
@@ -374,15 +339,14 @@ class User
     {
 
         # The user must be logged in.
-        if (logged_in() !== TRUE)
-        {
-            return FALSE;
+        if (logged_in() !== true) {
+            return false;
         }
 
         # Get the user's account data.
         $user = get_user();
 
-        $database = new Database;
+        $database = new Database();
         $database->connect_mysqli();
 
         $sql = 'SELECT sessions.year AS bill_year, bills.number AS bill_number,
@@ -398,12 +362,10 @@ class User
 				ORDER BY comments.date_created DESC
 				LIMIT 10';
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) == 0)
-        {
-            return FALSE;
+        if (mysqli_num_rows($result) == 0) {
+            return false;
         }
-        while ($comment = mysqli_fetch_assoc($result))
-        {
+        while ($comment = mysqli_fetch_assoc($result)) {
             $comments[] = $comment;
         }
         return $comments;
@@ -415,21 +377,17 @@ class User
     public function delete()
     {
 
-        if (!isset($this->id))
-        {
-            return FALSE;
+        if (!isset($this->id)) {
+            return false;
         }
 
         $sql = 'DELETE FROM users
                 WHERE id=' . $this->id;
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if ($result != TRUE)
-        {
-            return FALSE;
+        if ($result != true) {
+            return false;
         }
 
-        return TRUE;
-
+        return true;
     }
-
 }

@@ -3,25 +3,22 @@
 # Allow people to subscribe to (or cease subscribing to) comments to particular bills via e-mail.
 class CommentSubscription
 {
-
     # Save a new subscription for a given user for a given bill.
     public function save()
     {
-        if (!isset($this->user_id) || !isset($this->bill_id))
-        {
-            return FALSE;
+        if (!isset($this->user_id) || !isset($this->bill_id)) {
+            return false;
         }
 
-        $database = new Database;
+        $database = new Database();
         $database->connect_mysqli();
 
         $sql = 'INSERT INTO comments_subscriptions
 				SET user_id=' . $this->user_id . ', bill_id=' . $this->bill_id . ',
 				hash="' . generate_hash(8) . '", date_created=now()';
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if ($result === FALSE)
-        {
-            return FALSE;
+        if ($result === false) {
+            return false;
         }
 
         return true;
@@ -30,20 +27,18 @@ class CommentSubscription
     # Terminate an existing subscription. Requires the unique hash.
     public function delete()
     {
-        if (!isset($this->hash))
-        {
-            return FALSE;
+        if (!isset($this->hash)) {
+            return false;
         }
 
-        $database = new Database;
+        $database = new Database();
         $database->connect_mysqli();
 
         $sql = 'DELETE FROM comments_subscriptions
                 WHERE hash="' . $this->hash . '"';
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if ($result === FALSE)
-        {
-            return FALSE;
+        if ($result === false) {
+            return false;
         }
 
         return true;
@@ -53,12 +48,11 @@ class CommentSubscription
     # because list() is an existing PHP function.
     public function listing()
     {
-        if (!isset($this->bill_id))
-        {
-            return FALSE;
+        if (!isset($this->bill_id)) {
+            return false;
         }
 
-        $database = new Database;
+        $database = new Database();
         $database->connect_mysqli();
 
         $sql = 'SELECT users.name, users.email, comments_subscriptions.hash
@@ -66,17 +60,15 @@ class CommentSubscription
 				ON comments_subscriptions.user_id=users.id
 				WHERE comments_subscriptions.bill_id=' . $this->bill_id;
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (($result === FALSE) || (mysqli_num_rows($result) < 1))
-        {
-            return FALSE;
+        if (($result === false) || (mysqli_num_rows($result) < 1)) {
+            return false;
         }
 
         # Initialize the array that will store a list of the subscribers for this bill.
         $subscriptions = array();
 
         # Build up that array.
-        while ($subscriber = mysqli_fetch_array($result))
-        {
+        while ($subscriber = mysqli_fetch_array($result)) {
             $subscriber = array_map('stripslashes', $subscriber);
             $subscriptions[] = $subscriber;
         }
@@ -88,21 +80,19 @@ class CommentSubscription
     # if so, returns the subscription hash.
     public function is_subscribed()
     {
-        if (!isset($this->user_id) || !isset($this->bill_id))
-        {
-            return FALSE;
+        if (!isset($this->user_id) || !isset($this->bill_id)) {
+            return false;
         }
 
-        $database = new Database;
+        $database = new Database();
         $database->connect_mysqli();
 
         $sql = 'SELECT hash
 				FROM comments_subscriptions
 				WHERE user_id=' . $this->user_id . ' AND bill_id=' . $this->bill_id;
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) < 1)
-        {
-            return FALSE;
+        if (mysqli_num_rows($result) < 1) {
+            return false;
         }
         $subscription = mysqli_fetch_array($result);
 
@@ -114,18 +104,16 @@ class CommentSubscription
     public function send_email()
     {
         # Make sure that we have a list of subscriptions to this bill.
-        if (!isset($this->subscriptions) || !array($this->subscriptions) || (count($this->subscriptions) < 1))
-        {
-            return FALSE;
+        if (!isset($this->subscriptions) || !array($this->subscriptions) || (count($this->subscriptions) < 1)) {
+            return false;
         }
 
         # And make sure that we have an array containing the comment, its author, etc.
-        if (!isset($this->comment) || !array($this->comment) || (count($this->comment) < 1))
-        {
-            return FALSE;
+        if (!isset($this->comment) || !array($this->comment) || (count($this->comment) < 1)) {
+            return false;
         }
 
-        $tmp = new Bill2;
+        $tmp = new Bill2();
         $tmp->id = $this->bill_id;
         $bill = $tmp->info();
 
@@ -136,9 +124,7 @@ class CommentSubscription
         # Iterate through every subscriber and e-mail them.
         // I have to suspect that PEAR::Mail can handle this without iterating through, in one
         // fell swoop.
-        foreach ($this->subscriptions as $subscriber)
-        {
-
+        foreach ($this->subscriptions as $subscriber) {
             # Put together the headers for our e-mail.
             $headers['Content-Type'] = "text/plain; charset=\"UTF-8\"";
             $headers['Content-Transfer-Encoding'] = "8bit";
@@ -155,7 +141,7 @@ class CommentSubscription
             $body = 'In response to "' . $bill['catch_line'] . '" (' . mb_strtoupper($bill['number']) . '), '
                 . $this->comment['name'] . ' wrote:' . "\r\r" . $this->comment['comment'] . "\r\r"
                 . $bill['url'] . "\r\rUnsubscribe from this Discussion \r"
-                . 'http://www.richmondsunlight.com/unsubscribe/' . $subscriber['hash'] . '/';
+                . 'https://www.richmondsunlight.com/unsubscribe/' . $subscriber['hash'] . '/';
 
             # Send the e-mail.
             // THIS SHOULD REALLY BE DONE AS A BASE-64 E-MAIL. 7-bit e-mails are limited to 998
@@ -168,6 +154,6 @@ class CommentSubscription
              */
         } // end foreach
 
-        return TRUE;
+        return true;
     } // end send_email
 }

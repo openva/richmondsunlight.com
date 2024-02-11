@@ -13,20 +13,17 @@ include_once '../../includes/functions.inc.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
-if (count($_POST) == 0)
-{
-
+if (count($_POST) == 0) {
     # Generate pulldown
     $sql = 'SELECT id, name
 			FROM representatives
 			ORDER BY name ASC';
     $result = mysqli_query($GLOBALS['db'], $sql);
     $legislator_select = '<option value=""></option><option value="ignore">Ignore</option>';
-    while ($legislator = mysqli_fetch_array($result))
-    {
+    while ($legislator = mysqli_fetch_array($result)) {
         $legislator_select .= '<option value="' . $legislator['id'] . '">' .  stripslashes($legislator['name'])
             . '</option>';
     }
@@ -55,8 +52,7 @@ if (count($_POST) == 0)
 			ORDER BY number DESC
 			LIMIT 50';
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) < 1)
-    {
+    if (mysqli_num_rows($result) < 1) {
         die('No orphaned chyrons found.');
     }
 
@@ -79,9 +75,7 @@ if (count($_POST) == 0)
 					<th>Legislator</th>
 				</tr>
 			<tbody>';
-    while ($chyron = mysqli_fetch_array($result))
-    {
-
+    while ($chyron = mysqli_fetch_array($result)) {
         $chyron['url'] = str_replace(
             '/video/',
             'http://s3.amazonaws.com/video.richmondsunlight.com/',
@@ -94,7 +88,6 @@ if (count($_POST) == 0)
 			<td><select name="chyron[' . md5($chyron['raw_text']) . ']">' . $legislator_select
                 . '</select></td>
 			</tr>';
-
     }
 
     echo '</tbody></table>
@@ -103,20 +96,14 @@ if (count($_POST) == 0)
 }
 
 # If $_POST is set.
-else
-{
-
-    foreach ($_POST['chyron'] as $chyron_md5 => $legislator_id)
-    {
-
-        if (empty($legislator_id))
-        {
+else {
+    foreach ($_POST['chyron'] as $chyron_md5 => $legislator_id) {
+        if (empty($legislator_id)) {
             continue;
         }
 
         # Ignore this chyron.
-        if ($legislator_id == 'ignore')
-        {
+        if ($legislator_id == 'ignore') {
             $sql = 'UPDATE video_index
 					SET ignored = "y"
 					WHERE linked_id IS NULL
@@ -125,8 +112,7 @@ else
         }
 
         # Associate this chyron with a given legislator.
-        else
-        {
+        else {
             $sql = 'UPDATE video_index
 					SET linked_id = ' . $legislator_id . '
 					WHERE linked_id IS NULL
@@ -135,15 +121,12 @@ else
         }
 
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if ($result === FALSE)
-        {
+        if ($result === false) {
             echo '<p>Error: Query failed. ' . $sql . '</p>';
         }
 
         echo '.';
-
     }
 
     echo '<p>Done.</p>';
-
 }

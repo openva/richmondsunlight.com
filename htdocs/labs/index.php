@@ -26,7 +26,7 @@
 		That’s found by appending <code>votes/yyyy.csv/</code> to the legislator’s page
 		on Richmond Sunlight. For instance, <a href="/legislator/psticer/">Sen. Patsy Ticer’s</a>
 		CSV voting data for 2008 is found at
-		<code><a href="/legislator/psticer/votes/2008/csv/">http://www.richmondsunlight.com/legislator/psticer/votes/2008.csv</a></code>.
+		<code><a href="/legislator/psticer/votes/2008/csv/">https://www.richmondsunlight.com/legislator/psticer/votes/2008.csv</a></code>.
 		Legislator voting CSV data provides the following, for which sample data for Sen. Ticer is
 		included parenthetically:</p>
 
@@ -44,7 +44,7 @@
 
 		<h2>Bulk Downloads</h2>
 		<p>An increasingly large amount of data is being provided at
-		<a href="http://www.richmondsunlight.com/downloads/">http://www.richmondsunlight.com/downloads/</a>.
+		<a href="https://www.richmondsunlight.com/downloads/">https://www.richmondsunlight.com/downloads/</a>.
 		This is simply a directory with files that we hope sport self-evident names. Right now you
 		can download CSV files of all bills and legislators for the current session, or the full
 		text of any bill (as HTML) of any bill from 2006–today. Bill text is also available on a
@@ -75,7 +75,7 @@ EOD;
 EOD;
 
     # OUTPUT THE PAGE
-    $page = new Page;
+    $page = new Page();
     $page->page_title = $page_title;
     $page->page_body = $page_body;
     $page->page_sidebar = $page_sidebar;

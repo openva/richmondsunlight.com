@@ -16,8 +16,7 @@ include_once 'vendor/autoload.php';
 session_start();
 
 # Delete the session from Memcached.
-if (MEMCACHED_SERVER != '')
-{
+if (MEMCACHED_SERVER != '') {
     $mc = new Memcached();
     $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
     $result = $mc->delete('user-session-' . $_SESSION['id']);
@@ -34,12 +33,9 @@ $_SESSION = array();
 session_destroy();
 
 # Redirect the user back to the prior page or the homepage.
-if (!empty($_SERVER['HTTP_REFERER']))
-{
+if (!empty($_SERVER['HTTP_REFERER'])) {
     header('Location: ' . $_SERVER['HTTP_REFERER']);
-}
-else
-{
-    header('Location: http://'. $_SERVER['SERVER_NAME'] .'/');
+} else {
+    header('Location: http://' . $_SERVER['SERVER_NAME'] . '/');
 }
 exit;

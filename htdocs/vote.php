@@ -17,27 +17,22 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();
 
 # LOCALIZE AND CLEAN UP VARIABLES
-if (isset($_GET['lis_id']))
-{
+if (isset($_GET['lis_id'])) {
     $lis_id = mb_strtoupper($_GET['lis_id']);
-}
-else
-{
+} else {
     die();
 }
-if ( isset($_GET['year']) && (strlen($_GET['year']) == 4) && is_numeric($_GET['year']) )
-{
+if (isset($_GET['year']) && (strlen($_GET['year']) == 4) && is_numeric($_GET['year'])) {
     $year = $_GET['year'];
 }
-if ( isset($_GET['bill']) && strlen($_GET['bill'] <= 7) )
-{
+if (isset($_GET['bill']) && strlen($_GET['bill'] <= 7)) {
     $bill = $_GET['bill'];
 }
 
@@ -73,17 +68,20 @@ $sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber, bills.ca
 			ON votes.committee_id=committees.id
         WHERE bills.number="' . $bill . '" AND sessions.year=' . $year;
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
-    $bill = mysqli_fetch_assoc($result);
-    $bill = array_map('stripslashes', $bill);
-    $bill = array_map('trim', $bill);
+if (mysqli_num_rows($result) == 0) {
+    http_response_code(404);
+    include '404.php';
+    exit();
 }
+
+$bill = mysqli_fetch_assoc($result);
+$bill = array_map('stripslashes', $bill);
+$bill = array_map('trim', $bill);
 
 /*
  * Create a new instance of the Vote class, and get aggregate data about the outcome.
  */
-$vote_info = new Vote;
+$vote_info = new Vote();
 $vote_info->lis_id = $lis_id;
 $vote_info->session_id = $bill['session_id'];
 $vote = $vote_info->get_aggregate();
@@ -113,23 +111,18 @@ $sql = 'SELECT DISTINCT bills_status.status, bills_status.translation,
         AND (votes.session_id=bills_status.session_id OR votes.session_id IS NULL)
 		ORDER BY date_raw DESC, bills_status.id DESC';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     $bill['status_history'] = '';
-    while ($status = mysqli_fetch_array($result))
-    {
-
+    while ($status = mysqli_fetch_array($result)) {
         # Provide a link to view this vote, but only if it's not the vote that we're currently
         # viewing.
-        if (!empty($status['lis_vote_id']) && ($status['vote_count'] > 0) && ($status['lis_vote_id'] != $lis_id))
-        {
+        if (!empty($status['lis_vote_id']) && ($status['vote_count'] > 0) && ($status['lis_vote_id'] != $lis_id)) {
             $tmp = '<a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number']) . '/' . mb_strtolower($status['lis_vote_id']) . '/">' . $status['status'] . '</a>';
             $status['status'] = $tmp;
         }
 
         # If we've found this vote in the status history, save it for use in the page text.
-        elseif ($status['lis_vote_id'] == $lis_id)
-        {
+        elseif ($status['lis_vote_id'] == $lis_id) {
             $vote_description = trim(preg_replace('/\((.+)\)/', '', $status['status']));
         }
 
@@ -146,20 +139,16 @@ if (mysqli_num_rows($result) > 0)
 
 $page_title = mb_strtoupper($bill['number']) . ': ' . $bill['catch_line'];
 $page_body = '<p>';
-if (!empty($bill['committee_name']))
-{
+if (!empty($bill['committee_name'])) {
     $page_body .= 'This vote on <a href="/bill/' . $year . '/' . $bill['number'] . '/">' . mb_strtoupper($bill['number']) . '</a>
 	was held in the <a href="/committee/' . $vote['chamber'] . '/' . $bill['committee_shortname'] . '/">' . ucfirst($vote['chamber']) . '
 	' . $bill['committee_name'] . '</a> committee.  ';
-}
-else
-{
+} else {
     $page_body .= 'This vote on <a href="/bill/' . $year . '/' . $bill['number'] . '/">'
         . mb_strtoupper($bill['number']) . '</a> was held in the ' . ucfirst($vote['chamber']) . '.  ';
 }
 
-if (isset($vote_description))
-{
+if (isset($vote_description)) {
     $page_body .= 'The vote was on this subject: “' . $vote_description . '”. ';
 }
 
@@ -172,8 +161,7 @@ $legislators = $vote_info->get_detailed();
 
 # Step through the legislators data to establish which party voted which way, building up
 # an array of data.
-foreach ($legislators as $legislator)
-{
+foreach ($legislators as $legislator) {
     $legislator['vote'] = mb_strtolower($legislator['vote']);
     $legislator['party'] = mb_strtolower($legislator['party']);
     $graph[$legislator{'vote'}][$legislator{'party'}]++;
@@ -184,32 +172,25 @@ foreach ($legislators as $legislator)
 # we list Democrats, Republicans, and Independents for a "yes" vote, but only Democrats
 # and Republicans for a "no" vote. So if any Independents voted anywhere, we need to make
 # sure that they're listed everywhere, with a "0".
-foreach ($parties as $party => $blargh)
-{
-    foreach ($graph as &$vote)
-    {
-        if (!isset($vote[$party]))
-        {
+foreach ($parties as $party => $blargh) {
+    foreach ($graph as &$vote) {
+        if (!isset($vote[$party])) {
             $vote[$party] = 0;
         }
     }
 }
 
 # Sort our parties in the same order. Otherwise they won't match up.
-if (isset($graph['y']))
-{
+if (isset($graph['y'])) {
     ksort($graph['y']);
 }
-if (isset($graph['n']))
-{
+if (isset($graph['n'])) {
     ksort($graph['n']);
 }
-if (isset($graph['x']))
-{
+if (isset($graph['x'])) {
     ksort($graph['x']);
 }
-if (isset($graph['a']))
-{
+if (isset($graph['a'])) {
     ksort($graph['a']);
 }
 
@@ -218,8 +199,7 @@ ksort($parties);
 
 # Only bother displaying a graph if this vote wasn't unanimous. (Most votes are unanimous,
 # so this is a real time-saver.)
-if (count($graph) > 1)
-{
+if (count($graph) > 1) {
     $html_head .= '
     <script src="https://www.gstatic.com/charts/loader.js"></script>
 	<script>
@@ -228,18 +208,12 @@ if (count($graph) > 1)
 		function drawChart() {
 			var data = new google.visualization.DataTable();
 			data.addColumn("string", "Vote");';
-    foreach ($parties as $party => $blargh)
-    {
-        if ($party == 'r')
-        {
+    foreach ($parties as $party => $blargh) {
+        if ($party == 'r') {
             $party = 'Rep.';
-        }
-        elseif ($party == 'd')
-        {
+        } elseif ($party == 'd') {
             $party = 'Dem.';
-        }
-        elseif ($party == 'i')
-        {
+        } elseif ($party == 'i') {
             $party = 'Ind.';
         }
         $html_head .= '
@@ -247,33 +221,24 @@ if (count($graph) > 1)
     }
     $html_head .= '
 			data.addRows(' . count($graph) . ');';
-    $i=0;
+    $i = 0;
 
-    foreach ($graph as $outcome => $tally)
-    {
-        if ($outcome == 'y')
-        {
+    foreach ($graph as $outcome => $tally) {
+        if ($outcome == 'y') {
             $outcome = 'Voted Yes';
-        }
-        elseif ($outcome == 'n')
-        {
+        } elseif ($outcome == 'n') {
             $outcome = 'Voted No';
-        }
-        elseif ($outcome == 'x')
-        {
+        } elseif ($outcome == 'x') {
             $outcome = 'Didn\'t Vote';
-        }
-        elseif ($outcome == 'a')
-        {
+        } elseif ($outcome == 'a') {
             $outcome = 'Abstained';
         }
 
         $html_head .= '
 				data.setValue(' . $i . ', 0, "' . $outcome . '");';
-        $j=1;
+        $j = 1;
 
-        foreach ($tally as $party => $count)
-        {
+        foreach ($tally as $party => $count) {
             $html_head .= '
 				data.setValue(' . $i . ', ' . $j . ', ' . $count . ');';
             $j++;
@@ -286,15 +251,13 @@ if (count($graph) > 1)
 
     # Specify the three colors that will color our graph, that correlate (alphabetically)
     # to Democrats, independents, and Republicans.
-    if (count($parties) == 3)
-    {
+    if (count($parties) == 3) {
         $html_head .= '
 			colors:["blue", "green", "red"]});';
     }
     # Unless no independents voted, in which case we just want to define colors for Democrats
     # and Republicans.
-    else
-    {
+    else {
         $html_head .= '
 			colors:["blue", "red"]});';
     }
@@ -306,47 +269,29 @@ if (count($graph) > 1)
 
 # Display the actual vote results.
 $page_body .= '<div>';
-foreach ($legislators as $legislator)
-{
-    if (!isset($vote))
-    {
+foreach ($legislators as $legislator) {
+    if (!isset($vote)) {
         $vote = $legislator['vote'];
-        if ($vote == 'Y')
-        {
+        if ($vote == 'Y') {
             $display_vote = 'Yes';
-        }
-        elseif ($vote == 'N')
-        {
+        } elseif ($vote == 'N') {
             $display_vote = 'No';
-        }
-        elseif ($vote == 'X')
-        {
+        } elseif ($vote == 'X') {
             $display_vote = 'Didn’t Vote';
-        }
-        elseif ($vote == 'A')
-        {
+        } elseif ($vote == 'A') {
             $display_vote = 'Abstain';
         }
         $page_body .= '<h2>' . $display_vote . '</h2>
 		<ul>';
-    }
-    elseif ($vote != $legislator['vote'])
-    {
+    } elseif ($vote != $legislator['vote']) {
         $vote = $legislator['vote'];
-        if ($vote == 'Y')
-        {
+        if ($vote == 'Y') {
             $display_vote = 'Yes';
-        }
-        elseif ($vote == 'N')
-        {
+        } elseif ($vote == 'N') {
             $display_vote = 'No';
-        }
-        elseif ($vote == 'X')
-        {
+        } elseif ($vote == 'X') {
             $display_vote = 'Didn’t Vote';
-        }
-        elseif ($vote == 'A')
-        {
+        } elseif ($vote == 'A') {
             $display_vote = 'Abstain';
         }
         $page_body .= '
@@ -372,7 +317,7 @@ $page_body .= '
 
 # OUTPUT THE PAGE
 
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

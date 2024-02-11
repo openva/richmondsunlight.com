@@ -17,18 +17,16 @@ fi
 # Set permissions properly, since appspec.yml gets this wrong.
 chown -R ubuntu:ubuntu "$SITE_PATH"
 chmod -R g+w "$SITE_PATH"
-chown -R www-data:www-data "$SITE_PATH"/htdocs/matomo
-chmod -R 777 "$SITE_PATH"/htdocs/matomo/tmp/
 
-# Set up Matomo, if need be.
-if [ ! -d "$SITE_PATH"/htdocs/matomo ]; then
-    cd /tmp || exit
-    wget https://builds.matomo.org/piwik.zip
-    unzip piwik.zip
-    sudo cp -r piwik "$SITE_PATH"/htdocs/matomo
-    sudo chown -R www-data:www-data "$SITE_PATH"/htdocs/matomo
-    sudo chmod -R 755 "$SITE_PATH"/htdocs/matomo
-fi
+# Make the cache directories writeable
+chmod o+w "$SITE_PATH"/htdocs/cache/
+chmod o+w "$SITE_PATH"/htdocs/rss/cache/
+
+# Set Memcached to start every time
+sudo systemctl enable memcached
+
+# Ensure that Memcached will listen to other RS servers.
+sudo sed -i 's/-l 127.0.0.1/-l 0.0.0.0/' /etc/memcached.conf
 
 # Set up Apache, if need be.
 SITE_SET_UP="$(sudo apache2ctl -S 2>&1 |grep -c " $SITE_URL ")"
@@ -59,7 +57,7 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
 
 fi
 
-# If this is for production, then reindex the data.
+# If this is for production, then reindex the data and start Memcached
 if [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Fleet" ]
 then
     # Copy over the Sphinx configuration, restart Sphinx
@@ -68,11 +66,17 @@ then
     
     # If we have an existing index, update it
     if [[ -f /var/lib/sphinxsearch/data/bills.sph ]]; then
+
         # Reindex, continuing after logout, because it takes ~40 minutes to run
         nohup sudo indexer --all --rotate > /dev/null 2>&1 &
+
     # If there is no index, create a new one
     else
         nohup sudo indexer --all > /dev/null 2>&1 &
+    fi
+
+    if ! systemctl is-active --quiet memcached; then
+        sudo systemctl start memcached
     fi
     
 fi

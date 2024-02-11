@@ -17,57 +17,42 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();
 
 # LOCALIZE VARIABLES
-if (!empty($_GET['tag']))
-{
+if (!empty($_GET['tag'])) {
     $tag = mysqli_real_escape_string($GLOBALS['db'], urldecode($_GET['tag']));
-}
-elseif (!empty($_GET['year']))
-{
+} elseif (!empty($_GET['year'])) {
     $year = mysqli_real_escape_string($GLOBALS['db'], $_GET['year']);
-}
-elseif (!empty($_GET['committee']) && !empty($_GET['chamber']))
-{
+} elseif (!empty($_GET['committee']) && !empty($_GET['chamber'])) {
     $committee = mysqli_real_escape_string($GLOBALS['db'], $_GET['committee']);
     $chamber = mysqli_real_escape_string($GLOBALS['db'], $_GET['chamber']);
-}
-else
-{
+} else {
     $year = SESSION_YEAR;
     $session_suffix = SESSION_SUFFIX;
 }
-if (!empty($_GET['status']))
-{
-    if (($_GET['status'] == 'passed') || ($_GET['status'] == 'failed'))
-    {
+if (!empty($_GET['status'])) {
+    if (($_GET['status'] == 'passed') || ($_GET['status'] == 'failed')) {
         $status = mysqli_real_escape_string($GLOBALS['db'], $_GET['status']);
     }
 }
-if (!empty($_GET['session_suffix']))
-{
-    $session_suffix = $_GET['session_suffix']+0;
+if (!empty($_GET['session_suffix'])) {
+    $session_suffix = $_GET['session_suffix'] + 0;
 }
-if (!empty($_GET['tagless']))
-{
-    $tagless = TRUE;
+if (!empty($_GET['tagless'])) {
+    $tagless = true;
 }
 
 # PAGE METADATA
-if (!empty($tag))
-{
+if (!empty($tag)) {
     $page_title = SESSION_YEAR . ' Bills Tagged with “' . ucwords($tag) . '”';
-}
-else
-{
+} else {
     $page_title = $year . ' Bills';
-    if (!empty($status))
-    {
+    if (!empty($status)) {
         $page_title .= ' That ' . ucfirst($status);
     }
 }
@@ -76,9 +61,7 @@ $site_section = 'bills';
 # PAGE CONTENT
 
 # If we're searching by tag.
-if (!empty($tag))
-{
-
+if (!empty($tag)) {
     # Select all bills from the database.
     $sql = 'SELECT bills.number, bills.chamber, bills.status AS status_raw,
 			bills.catch_line, representatives.name AS patron, sessions.year,
@@ -91,12 +74,9 @@ if (!empty($tag))
 			LEFT JOIN tags
 				ON bills.id = tags.bill_id
 			WHERE sessions.id = bills.session_id';
-    if ($tag == 'untagged')
-    {
+    if ($tag == 'untagged') {
         $sql .= ' AND tags.tag IS NULL';
-    }
-    else
-    {
+    } else {
         $sql .= ' AND tags.tag = "' . $tag . '"';
     }
     $sql .= '
@@ -107,9 +87,7 @@ if (!empty($tag))
 }
 
 # If we're searching by committee.
-elseif (!empty($committee))
-{
-
+elseif (!empty($committee)) {
     # Select all bills from the database.
     $sql = 'SELECT bills.number, bills.chamber, bills.catch_line, representatives.name AS patron,
 			bills.status AS status_raw, sessions.year, committees.name, committees.chamber,
@@ -134,25 +112,18 @@ elseif (!empty($committee))
 }
 
 # If we're searching by year.
-else
-{
-
+else {
     # If we're also searching by status.
-    if (!empty($status))
-    {
-        if ($status == 'passed')
-        {
+    if (!empty($status)) {
+        if ($status == 'passed') {
             $where_sql = 'AND outcome="passed"';
-        }
-        elseif ($status == 'failed')
-        {
+        } elseif ($status == 'failed') {
             $where_sql = 'AND outcome="failed"';
         }
     }
 
     # If we're also searching by the presence of tags
-    if (!empty($tagless))
-    {
+    if (!empty($tagless)) {
         $where_sql = '
 			AND
 				(SELECT COUNT(*)
@@ -162,8 +133,7 @@ else
     }
 
     # If we're also searching by session ID suffix.
-    if (!empty($session_suffix))
-    {
+    if (!empty($session_suffix)) {
         $where_sql = 'AND sessions.suffix="' . $session_suffix . '"';
     }
 
@@ -183,13 +153,11 @@ else
 
 $result = mysqli_query($GLOBALS['db'], $sql);
 $num_results = mysqli_num_rows($result);
-if ($num_results > 0)
-{
+if ($num_results > 0) {
     $page_body .= '<p>' . number_format($num_results) . ' bill' . ($num_results > 1 ? 's' : '') . ' found.</p>';
 
     # If this is a listing of bills currently in a given committee.
-    if (!empty($committee) && !empty($chamber))
-    {
+    if (!empty($committee) && !empty($chamber)) {
         $page_body .= '
 			<table id="' . $committee . '" class="bill-listing sortable">
 				<thead>
@@ -203,20 +171,17 @@ if ($num_results > 0)
     }
 
     # Loop through the bill results.
-    while ($bill = mysqli_fetch_array($result))
-    {
+    while ($bill = mysqli_fetch_array($result)) {
         $bill = array_map('stripslashes', $bill);
 
         # Simplify the status text.
-        if (mb_stristr($bill['status'], 'failed') !== FALSE)
-        {
+        if (mb_stristr($bill['status'], 'failed') !== false) {
             $bill['status'] = 'dead';
         }
 
         # We want to display the house bills, then the senate bills. But we need some way to
         # know when we've crossed that boundary, and that's what we use the $chamber flag for.
-        if (!isset($chamber))
-        {
+        if (!isset($chamber)) {
             $chamber = $bill['chamber'];
             $page_body .= '
 			<div class="tabs">
@@ -234,9 +199,7 @@ if ($num_results > 0)
 						</tr>
 					</thead>
 					<tbody>';
-        }
-        elseif ($chamber != $bill['chamber'])
-        {
+        } elseif ($chamber != $bill['chamber']) {
             $chamber = $bill['chamber'];
             $page_body .= '</tbody>
 				</table>
@@ -261,15 +224,12 @@ if ($num_results > 0)
 					</tr>';
     }
     $page_body .= '</tbody></table></div></div>';
-}
-else
-{
+} else {
     $page_body = '<p>No bills have yet been filed for the ' . $year . ' session.</p>';
 }
 
 # PAGE SIDEBAR
-if (!empty($year))
-{
+if (!empty($year)) {
     $page_sidebar = '
 	<div class="box" id="options">
 		<h3>Options</h3>
@@ -337,29 +297,20 @@ if (!empty($year))
 		<h3>Explanation</h3>
 		<p>These are all of the bills proposed for ' . $year;
 
-    if (isset($status))
-    {
-        if ($status == 'passed')
-        {
+    if (isset($status)) {
+        if ($status == 'passed') {
             $page_sidebar .= ' that passed into law.';
-        }
-        elseif ($status == 'failed')
-        {
+        } elseif ($status == 'failed') {
             $page_sidebar .= ' that failed to become law. They may have simply
 			never made it out of committee, they could have been vetoed by the
 			governor, or they could have run into trouble anywhere in the long
 			path between those two points.';
         }
-    }
-    else
-    {
-        if ($year < SESSION_YEAR)
-        {
+    } else {
+        if ($year < SESSION_YEAR) {
             $page_sidebar .= '. Some of these bills passed,
 		becoming a part of Virginia’s laws, but most of them failed.</p>';
-        }
-        else
-        {
+        } else {
             $page_sidebar .= '. Some of these bills will pass, becoming a part of
 		Virginia law, but the overwhelming majority will not make it. It’s
 		kind of like sea turtle hatchlings: out of dozens and dozens of eggs,
@@ -380,20 +331,17 @@ if (!empty($year))
 			LEFT JOIN sessions
 				ON sessions.id=bills.session_id
 			WHERE sessions.year=' . $year;
-    if (!empty($session_suffix))
-    {
+    if (!empty($session_suffix)) {
         $sql .= ' AND sessions.suffix="' . $session_suffix . '"';
     }
     $sql .= '
 		GROUP BY tags.tag';
-    if ($year >= 2007)
-    {
+    if ($year >= 2007) {
         $sql .= ' HAVING count > 5';
     }
     $sql .= ' ORDER BY tags.tag ASC';
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) > 0)
-    {
+    if (mysqli_num_rows($result) > 0) {
         $page_sidebar .= '
 	<a href="javascript:openpopup(\'/help/tag-clouds/\')"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
 
@@ -402,24 +350,18 @@ if (!empty($year))
 		<div class="tags">';
         $top_tag = 1;
         $top_tag_size = 3;
-        while ($tag = mysqli_fetch_array($result))
-        {
+        while ($tag = mysqli_fetch_array($result)) {
             $tags[] = array_map('stripslashes', $tag);
-            if (($tag['count'] > $top_tag) && ($tag['tag'] != 'commendation'))
-            {
+            if (($tag['count'] > $top_tag) && ($tag['tag'] != 'commendation')) {
                 $top_tag = $tag['count'];
             }
         }
 
-        for ($i=0; $i<count($tags); $i++)
-        {
+        for ($i = 0; $i < count($tags); $i++) {
             $font_size = $tags[$i]['count'] / $top_tag * $top_tag_size;
-            if ($font_size < '.75')
-            {
+            if ($font_size < '.75') {
                 $font_size = '.75';
-            }
-            elseif ($font_size > $top_tag_size)
-            {
+            } elseif ($font_size > $top_tag_size) {
                 $font_size = $top_tag_size;
             }
             $page_sidebar .= '<span style="font-size: ' . $font_size . 'em;">
@@ -432,9 +374,7 @@ if (!empty($year))
     }
 }
 
-if (!empty($tag))
-{
-
+if (!empty($tag)) {
     # Tag Cloud
     # Show every tag cloud of all tags related to this tag.
     $sql = 'SELECT COUNT(*) AS count, tags2.tag
@@ -448,23 +388,19 @@ if (!empty($tag))
 			GROUP BY tags2.tag
 			ORDER BY tag ASC';
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) > 0)
-    {
+    if (mysqli_num_rows($result) > 0) {
         $page_sidebar .= '
 	<a href="javascript:openpopup(\'/help/tag-clouds/\')"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
 
 	<div class="box">
 		<h3>Related Tag Cloud</h3>
 		<div class="tags">';
-        while ($tag_data = mysqli_fetch_array($result))
-        {
+        while ($tag_data = mysqli_fetch_array($result)) {
             $tags[] = array_map('stripslashes', $tag_data);
         }
-        for ($i=0; $i<count($tags); $i++)
-        {
+        for ($i = 0; $i < count($tags); $i++) {
             $font_size = round(sqrt($tags[$i]['count']), 2);
-            if ($font_size < '.75')
-            {
+            if ($font_size < '.75') {
                 $font_size = '.75';
             }
             $page_sidebar .= '<span style="font-size: ' . $font_size . 'em;">
@@ -491,23 +427,21 @@ if (!empty($tag))
 <link rel="alternate" type="application/rss+xml" title="RSS 0.92" href="/rss/tag/' . urlencode($tag) . '/" />';
 }
 
-if (!empty($committee) && !empty($chamber))
-{
+if (!empty($committee) && !empty($chamber)) {
     # Get the committee's name and chamber.
     $sql = 'SELECT name, chamber
 			FROM committees
 			WHERE shortname="' . $committee . '"
 			AND chamber="' . $chamber . '"';
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) > 0)
-    {
+    if (mysqli_num_rows($result) > 0) {
         $committee = mysqli_fetch_array($result);
         $page_title = ucfirst($committee['chamber']) . ' ' . $committee['name'] . ' Bills';
     }
 }
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

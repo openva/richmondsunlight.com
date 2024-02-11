@@ -18,23 +18,20 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();
 
 # LOCALIZE AND CLEAN UP VARIABLES
-if (isset($_GET['shortname']))
-{
+if (isset($_GET['shortname'])) {
     $shortname = $_GET['shortname'];
 }
-if (isset($_GET['year']))
-{
+if (isset($_GET['year'])) {
     $year = $_GET['year'];
 }
-if (isset($_GET['page']))
-{
+if (isset($_GET['page'])) {
     $page = $_GET['page'];
 }
 
@@ -48,9 +45,8 @@ $site_section = '';
 $leg = new Legislator();
 # Get the ID for this shortname.
 $leg_id = $leg->getid($shortname);
-if ($leg_id === false)
-{
-    header("Status: 404 Not Found\n\r") ;
+if ($leg_id === false) {
+    http_response_code(404);
     include '404.php';
     exit();
 }
@@ -77,8 +73,7 @@ $sql = 'SELECT bills.number AS bill_number, bills.catch_line, representatives_vo
 		AND bills_status.status NOT LIKE "Constitutional reading%"
 		ORDER BY date ASC, committee ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     $page_body = '
 		<p><a href="/legislator/' . $shortname . '/votes/' . $year . '.csv">Download List as a
 			Spreadsheet</a> <code>(' . $shortname . '-' . $year . '.csv)</code></p>
@@ -108,8 +103,7 @@ if (mysqli_num_rows($result) > 0)
 				</tr>
 			</thead>
 			<tbody>';
-    while ($vote = mysqli_fetch_array($result))
-    {
+    while ($vote = mysqli_fetch_array($result)) {
         $vote = array_map('stripslashes', $vote);
         $page_body .= '
 			<tr>
@@ -120,12 +114,9 @@ if (mysqli_num_rows($result) > 0)
 				<td><a href="/bill/' . $year . '/' . $vote['bill_number'] . '/'
                     . mb_strtolower($vote['lis_id']) . '/">' . $vote['outcome'] . '</td>
 				<td>';
-        if (empty($vote['committee']))
-        {
+        if (empty($vote['committee'])) {
             $page_body .= ucfirst($legislator['chamber']) . ' Floor';
-        }
-        else
-        {
+        } else {
             $page_body .= '<a href="/committee/' . $legislator['chamber'] . '/'
                 . $vote['committee_shortname'] . '/">' . $vote['committee'] . '</a>';
         }
@@ -139,7 +130,7 @@ if (mysqli_num_rows($result) > 0)
 }
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

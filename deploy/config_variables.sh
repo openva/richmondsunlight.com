@@ -21,7 +21,6 @@ variables=(
 	VA_DECODED_KEY
 	MAPBOX_TOKEN
 	MEMCACHED_SERVER
-	PUSHOVER_KEY
 	OPENAI_KEY
 	SLACK_WEBHOOK
 	API_URL
@@ -40,7 +39,7 @@ do
 done
 
 # Duplicate the default setting file to populate our settings file
-cp htdocs/includes/settings-default.inc.php htdocs/includes/settings.inc.php
+cp -f htdocs/includes/settings-default.inc.php htdocs/includes/settings.inc.php
 
 # If this is our staging site
 if [ "$GITHUB_BRANCH" = "master" ]

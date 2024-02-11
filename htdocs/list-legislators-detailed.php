@@ -17,7 +17,7 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
@@ -33,14 +33,12 @@ $html_head = '<script src="/js/sorttable.js" type="text/javascript"></script>';
 # PAGE CONTENT
 
 # Import the variables.
-if (isset($_GET['options']) && !empty($_GET['options']))
-{
+if (isset($_GET['options']) && !empty($_GET['options'])) {
     $options = $_GET['options'];
 }
 
 # Set some default options if the page is just being loaded or if no options have been chosen.
-if ((!isset($options)) || (isset($options) && (count($options) == 0)))
-{
+if ((!isset($options)) || (isset($options) && (count($options) == 0))) {
     $options = array('party' => 'y', 'chamber' => 'y');
 }
 
@@ -50,7 +48,7 @@ $sql = 'SELECT representatives.shortname, representatives.name, representatives.
 		representatives.place AS location,
 		ROUND( DATEDIFF(now(),representatives.birthday) / 365 ) AS age,
 		DATE_FORMAT(representatives.date_started, "%Y") AS year_started,
-		representatives.partisanship, representatives.sex, representatives.race
+		representatives.partisanship, representatives.sex
 		FROM representatives
 		LEFT JOIN districts
 		ON representatives.district_id = districts.id
@@ -58,9 +56,7 @@ $sql = 'SELECT representatives.shortname, representatives.name, representatives.
 			OR representatives.date_ended > now())
 		ORDER BY representatives.chamber ASC, representatives.name ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
-
+if (mysqli_num_rows($result) > 0) {
     # This is the code we'll use to specify that a checkbox should be checked by default.
     $checked = ' checked="checked"';
 
@@ -105,11 +101,6 @@ if (mysqli_num_rows($result) > 0)
             '/>
 			<label for="sex">Sex</label>
 
-			<input type="checkbox" name="options[race]" value="y" id="race" '
-            . (isset($options['race']) ? $checked : '') .
-            '/>
-			<label for="race">Race</label>
-
 			<input type="checkbox" name="options[year_started]" value="y" id="year_started" '
             . (isset($options['year_started']) ? $checked : '') .
             '/>
@@ -123,48 +114,35 @@ if (mysqli_num_rows($result) > 0)
 		<thead>
 			<tr>
 				<th>Name</th>';
-    if (isset($options['age']))
-    {
+    if (isset($options['age'])) {
         $page_body .= '
 				<th>Age</th>';
     }
-    if (isset($options['location']))
-    {
+    if (isset($options['location'])) {
         $page_body .= '
 				<th>Location</th>';
     }
-    if (isset($options['chamber']))
-    {
+    if (isset($options['chamber'])) {
         $page_body .= '
 				<th>Chamber</th>';
     }
-    if (isset($options['party']))
-    {
+    if (isset($options['party'])) {
         $page_body .= '
 				<th>Party</th>';
     }
-    if (isset($options['cash']))
-    {
+    if (isset($options['cash'])) {
         $page_body .= '
 				<th>$ on Hand</th>';
     }
-    if (isset($options['partisanship']))
-    {
+    if (isset($options['partisanship'])) {
         $page_body .= '
 				<th>Partisanship</th>';
     }
-    if (isset($options['sex']))
-    {
+    if (isset($options['sex'])) {
         $page_body .= '
 				<th>Sex</th>';
     }
-    if (isset($options['race']))
-    {
-        $page_body .= '
-				<th>Race</th>';
-    }
-    if (isset($options['year_started']))
-    {
+    if (isset($options['year_started'])) {
         $page_body .= '
 				<th>Started</th>';
     }
@@ -172,12 +150,10 @@ if (mysqli_num_rows($result) > 0)
 			</tr>
 		</thead>
 		<tbody>';
-    while ($legislator = mysqli_fetch_array($result))
-    {
+    while ($legislator = mysqli_fetch_array($result)) {
         $legislator = array_map('stripslashes', $legislator);
 
-        if (!empty($legislator['cash']))
-        {
+        if (!empty($legislator['cash'])) {
             $legislator['cash'] = '$' . number_format($legislator['cash']);
         }
 
@@ -186,60 +162,44 @@ if (mysqli_num_rows($result) > 0)
 				<td><a href="/legislator/' . $legislator['shortname'] . '/">'
                     . pivot($legislator['name']) . '</a></td>';
 
-        if (isset($options['age']))
-        {
+        if (isset($options['age'])) {
             $page_body .= '
 				<td>' . $legislator['age'] . '</td>';
         }
-        if (isset($options['location']))
-        {
+        if (isset($options['location'])) {
             $page_body .= '
 				<td>' . $legislator['location'] . '</td>';
         }
-        if (isset($options['chamber']))
-        {
+        if (isset($options['chamber'])) {
             $page_body .= '
 				<td>' . $legislator['chamber'] . '</td>';
         }
-        if (isset($options['party']))
-        {
+        if (isset($options['party'])) {
             $page_body .= '
 				<td>' . $legislator['party'] . '</td>';
         }
-        if (isset($options['cash']))
-        {
+        if (isset($options['cash'])) {
             $page_body .= '
 				<td>' . $legislator['cash'] . '</td>';
         }
-        if (isset($options['partisanship']))
-        {
-            if (!empty($legislator['partisanship']))
-            {
+        if (isset($options['partisanship'])) {
+            if (!empty($legislator['partisanship'])) {
                 $page_body .= '
 					<td sorttable_customkey="' . $legislator['partisanship'] . '">
 						<div id="partisanship-graph" style="height: 10px;">
 							<div style="height: 12px; width: ' . $legislator['partisanship'] . '%;"></div>
 						</div>
 					</td>';
-            }
-            else
-            {
+            } else {
                 $page_body .= '
 					<td></td>';
             }
         }
-        if (isset($options['sex']))
-        {
+        if (isset($options['sex'])) {
             $page_body .= '
 				<td>' . $legislator['sex'] . '</td>';
         }
-        if (isset($options['race']))
-        {
-            $page_body .= '
-				<td>' . $legislator['race'] . '</td>';
-        }
-        if (isset($options['year_started']))
-        {
+        if (isset($options['year_started'])) {
             $page_body .= '
 				<td>' . $legislator['year_started'] . '</td>';
         }
@@ -251,7 +211,7 @@ if (mysqli_num_rows($result) > 0)
 }
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

@@ -9,9 +9,6 @@ php_value include_path ".:includes/"
 #php_value session.save_handler redis
 #php_value session.save_path tcp://127.0.0.1:6379
 
-# For Matomo
-php_value always_populate_raw_post_data -1
-
 # Instruct browsers to cache and proxies not to cache, timing out cookies after a year. Affects only
 # PHP.
 #php_value session.cache_limiter private
@@ -28,7 +25,7 @@ Header always set X-Frame-Options "SAMEORIGIN"
 Header always set X-Xss-Protection "1; mode=block"
 Header always set X-Content-Type-Options "nosniff"
 Header always set Referrer-Policy "strict-origin-when-cross-origin"
-Header always set Content-Security-Policy "default-src: https: 'unsafe-inline'"
+Header always set Content-Security-Policy "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"
 Header always edit Set-Cookie (.*) "$1; SameSite=Lax"
 
 <IfModule mod_deflate.c>
@@ -71,11 +68,11 @@ RewriteCond %{HTTP_HOST} ^richmondsunlight.com [NC]
 RewriteRule ^(.*)$ https://www.richmondsunlight.com/$1 [L,R=301,NC]
 
 # Individual Bill
-RewriteRule ^bill/([0-9]{4})/([A-Z0-9]+)?/?$ /bill/$1/${tolower:$2}/ [R=301]
-RewriteRule ^bill/([0-9]{4})/([A-Za-z0-9]+)?/?$ /bill.php?year=$1&bill=$2 [QSA]
-RewriteRule ^bill/([0-9]{4})/([A-Za-z0-9]+)/fulltext?/?$ /bill-fulltext.php?year=$1&bill=$2 [QSA]
-RewriteRule ^bill/([0-9]{4})/([A-Za-z0-9]+)/history?/?$ /bill-history.php?year=$1&bill=$2 [QSA]
-RewriteRule ^bill/([0-9]{4})/([A-Za-z0-9]+)/([A-Za-z0-9]{6,8})?/?$ /vote.php?year=$1&bill=$2&lis_id=$3 [QSA]
+RewriteRule ^bill/([0-9]{4})/([HS][BJR]]{1,2}[0-9]{1,4})?/?$ /bill/$1/${tolower:$2}/ [R=301]
+RewriteRule ^bill/([0-9]{4})/([hs][bjr]{1,2}[0-9]{1,4})?/?$ /bill.php?year=$1&bill=$2 [QSA]
+RewriteRule ^bill/([0-9]{4})/([hs][bjr]{1,2}[0-9]{1,4})/fulltext?/?$ /bill-fulltext.php?year=$1&bill=$2 [QSA]
+RewriteRule ^bill/([0-9]{4})/([hs][bjr]{1,2}[0-9]{1,4})/history?/?$ /bill-history.php?year=$1&bill=$2 [QSA]
+RewriteRule ^bill/([0-9]{4})/([hs][bjr]{1,2}[0-9]{1,4})/([A-Za-z0-9]{6,8})?/?$ /vote.php?year=$1&bill=$2&lis_id=$3 [QSA]
 
 # Bill Listing
 RewriteRule ^bills/topic/([0-9]{4})?/?([0-9]+)?/?$ /list-tags.php?year=$1&session_suffix=$2 [QSA]
@@ -95,14 +92,6 @@ RewriteRule ^legislators?/?$ /list-legislators.php [QSA]
 RewriteRule ^legislators/detailed?/?$ /list-legislators-detailed.php [QSA]
 RewriteRule ^committee/([a-z]+)/([a-z-]+)?/?$ /committee.php?chamber=$1&committee=$2 [QSA]
 RewriteRule ^committees?/?$ /list-committees.php [QSA]
-
-# XML
-RewriteRule ^bill/([0-9]{4})/([A-Za-z0-9]+).xml$ /bill-xml.php?year=$1&bill=$2 [QSA]
-RewriteRule ^bills/([0-9]{4})-tags.xml$ /list-tags-xml.php?year=$1 [QSA]
-RewriteRule ^bills/([0-9]{4}).xml$ /list-bills-xml.php?year=$1 [QSA]
-RewriteRule ^bills/tags/([0-9]{4})/([A-Za-z0-9+]+).xml$ /tag-xml.php?year=$1&tag=$2 [QSA]
-RewriteRule ^bills/tags/([A-Za-z0-9+]+).xml$ /tag-xml.php?tag=$1 [QSA]
-RewriteRule ^legislator/([a-z-]+).xml$ /legislator-xml.php?shortname=$1 [QSA]
 
 # RSS
 RewriteRule ^rss/legislator/([a-z-]+)?/?$ /rss/legislator.php?shortname=$1 [QSA]
@@ -152,10 +141,8 @@ RewriteRule ^unsubscribe/([0-9a-z]{8})/$ /unsubscribe.php?hash=$1 [QSA]
 # Your Legislators
 RewriteRule ^your-legislators/$ /your-legislators.php [QSA]
 
-# Campaign Finance
-RewriteRule ^finance/([a-z0-9-]+)/$ /finance/committee.php?committee_id=$1 [QSA]
-RewriteRule ^finance/([a-z0-9-]+)/([a-z0-9-]+)/$ /finance/report.php?committee_id=$1&report_id=$2 [QSA]
-RewriteRule ^finance/([a-z0-9-]+)/([a-z0-9-]+)/([0-9]{5})/$ /finance/individual.php?committee_id=$1&report_id=$2&entry_id=$3 [QSA]
+# Places
+RewriteRule ^places/([A-Za-z+]+)?/?$ /places.php?place=$1 [QSA]
 
 # Downloads
 RewriteRule ^downloads/$ /downloads.php [QSA]
@@ -174,7 +161,27 @@ RewriteRule ^schedule$ /schedule/ [R]
 RewriteRule ^minutes$ /minutes/ [R]
 php_value error_reporting 2039
 
+# Photosynthesis
+RewriteRule ^photosynthesis/delete/([a-z0-9]{5})-([0-9]+)?/?$ /photosynthesis/process-actions.php?delete-bill=$1-$2 [QSA]
+RewriteRule ^photosynthesis/add/([A-Za-z0-9]+)?/?$ /photosynthesis/process-actions.php?add-bill=$1 [QSA]
+RewriteRule ^photosynthesis/edit/([a-z0-9]{5})-([0-9]+)?/?$ /photosynthesis/edit-bill.php?hash=$1&bill=$2 [QSA]
+RewriteRule ^photosynthesis/portfolios?/?$ /photosynthesis/list-portfolios.php [QSA]
+RewriteRule ^photosynthesis/portfolios/([a-z0-9]{5})?/?$ /photosynthesis/portfolio.php?hash=$1 [QSA]
+RewriteRule ^photosynthesis/portfolios/add/([A-Za-z0-9]+)?/?$ /photosynthesis/process-actions.php?add-portfolio=$1 [QSA]
+RewriteRule ^photosynthesis/portfolios/delete/([a-z0-9]{5})?/?$ /photosynthesis/process-actions.php?delete-portfolio=$1 [QSA]
+RewriteRule ^photosynthesis/portfolios/edit/([a-z0-9]{5})?/?$ /photosynthesis/edit-portfolio.php?hash=$1 [QSA]
+RewriteRule ^photosynthesis/notes/([a-z0-9]{5})-([0-9]+)?/?$ /photosynthesis/bill-notes.php?hash=$1&id=$2 [QSA]
+RewriteRule ^photosynthesis/notes-ajax/([a-z0-9]{5})-([0-9]+)?/?$ /photosynthesis/ajax-bill-notes.php?hash=$1&id=$2 [QSA]
+RewriteRule ^photosynthesis/preferences?/?$ /photosynthesis/preferences.php [QSA]
+RewriteRule ^photosynthesis/([a-z0-9]{5})/$ /photosynthesis/public-portfolio.php?hash=$1 [QSA]
+RewriteRule ^photosynthesis/unsubscribe/([a-z0-9]{8})/$ /photosynthesis/unsubscribe.php?hash=$1 [QSA]
+RewriteRule ^photosynthesis/pro?/?$ pro.php [QSA]
+RewriteRule ^photosynthesis/rss/portfolio/([a-z0-9]{5})?/?$ /photosynthesis/rss/portfolio.php?hash=$1 [QSA]
+
 # Block bandwidth abusers
+RewriteCond %{HTTP_USER_AGENT} BDBot/1.0 [NC,OR]
+RewriteCond %{HTTP_USER_AGENT} Amazonbot [NC]
+RewriteRule .* - [F,L]
 Order Deny,Allow
 Deny from 5.9.151.67
 Deny from 220.181.125.132

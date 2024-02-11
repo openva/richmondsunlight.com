@@ -18,7 +18,7 @@ include_once '../includes/photosynthesis.inc.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # PAGE METADATA
@@ -35,8 +35,7 @@ $html_head = '<link rel="alternate" type="application/rss+xml" title="RSS 0.92" 
 session_start();
 
 # If the user is logged in, get his data.
-if (@logged_in())
-{
+if (@logged_in()) {
     $user = @get_user();
 }
 
@@ -56,14 +55,12 @@ $sql = 'SELECT dashboard_portfolios.id, dashboard_portfolios.hash, dashboard_por
 $result = mysqli_query($GLOBALS['db'], $sql);
 
 # If this portfolio doesn't exist or isn't visible.
-if (mysqli_num_rows($result) == 0)
-{
+if (mysqli_num_rows($result) == 0) {
     die('Invalid ID.');
 }
 
 # If this portfolio does exist.
-else
-{
+else {
     $portfolio = mysqli_fetch_array($result);
     $portfolio = array_map('stripslashes', $portfolio);
 
@@ -75,22 +72,16 @@ else
 
     # Make the user closer to anonymous.
     $tmp = explode(' ', $portfolio['user_name']);
-    if (count($tmp) > 1)
-    {
+    if (count($tmp) > 1) {
         $portfolio['user_name'] = $tmp[0] . ' ' . $tmp[1]{0} . '.';
-    }
-    else
-    {
+    } else {
         $portfolio['user_name'] = $tmp[0];
     }
 
     # Set the page title to the user's name.
-    if (!empty($portfolio['organization']))
-    {
+    if (!empty($portfolio['organization'])) {
         $page_title .= ' » ' . $portfolio['organization'];
-    }
-    else
-    {
+    } else {
         $page_title .= ' » ' . $portfolio['user_name'];
     }
     $page_title .= '’s Portfolio';
@@ -103,24 +94,16 @@ else
 
     # Make the user's name the link, unless there's an organization, in which case it should
     # be on that.
-    if (empty($portfolio['url']))
-    {
+    if (empty($portfolio['url'])) {
         $page_sidebar .= $portfolio['user_name'] . ' ';
-    }
-    elseif (empty($portfolio['organization']))
-    {
+    } elseif (empty($portfolio['organization'])) {
         $page_sidebar .= '<a href="' . $portfolio['url'] . '">' . $portfolio['user_name'] . '</a>';
-    }
-    else
-    {
+    } else {
         $page_sidebar .= $portfolio['user_name'] . ' ';
     }
-    if (!empty($portfolio['url']) && !empty($portfolio['organization']))
-    {
+    if (!empty($portfolio['url']) && !empty($portfolio['organization'])) {
         $page_sidebar .= ' for <a href="' . $portfolio['url'] . '">' . $portfolio['organization'] . '</a>';
-    }
-    elseif (!empty($portfolio['organization']))
-    {
+    } elseif (!empty($portfolio['organization'])) {
         $page_sidebar .= ' for ' . $portfolio['organization'];
     }
     $page_sidebar .= ' using the Photosynthesis bill-tracking tool.</p>
@@ -147,8 +130,7 @@ else
 			GROUP BY tags.tag
 			ORDER BY tags.tag ASC';
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) > 0)
-    {
+    if (mysqli_num_rows($result) > 0) {
         $page_sidebar .= '
 		<a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
 		<h3>These Bills Are About .&thinsp;.&thinsp;.</h3>
@@ -156,23 +138,18 @@ else
 			<div class="tags">';
         $top_tag = 1;
         $top_tag_size = 3;
-        while ($tag = mysqli_fetch_array($result))
-        {
+        while ($tag = mysqli_fetch_array($result)) {
             $tags[] = array_map('stripslashes', $tag);
-            if ($tag['count'] > $top_tag)
-            {
+            if ($tag['count'] > $top_tag) {
                 $top_tag = $tag['count'];
             }
         }
-        if ($top_tag == 1)
-        {
+        if ($top_tag == 1) {
             $top_tag_size = 1;
         }
-        for ($i=0; $i<count($tags); $i++)
-        {
+        for ($i = 0; $i < count($tags); $i++) {
             $font_size = round(($tags[$i]['count'] / $top_tag * $top_tag_size), 2);
-            if ($font_size >= '.75')
-            {
+            if ($font_size >= '.75') {
                 $page_sidebar .= '<span style="font-size: ' . $font_size . 'em;">
 					<a href="/bills/tags/' . urlencode($tags[$i]['tag']) . '/">' . $tags[$i]['tag'] . '</a>
 				</span>';
@@ -206,26 +183,20 @@ else
 			CAST(LPAD(SUBSTRING(bills.number FROM 3), 4, "0") AS unsigned) ASC';
     $result = mysqli_query($GLOBALS['db'], $sql);
     $bill_count = mysqli_num_rows($result);
-    if ($bill_count == 0)
-    {
+    if ($bill_count == 0) {
         die('Empty portfolio.');
     }
 
     # We've found bills in this portfolio.
-    else
-    {
+    else {
         $page_body = '<div id="public-portfolio">';
-        if ($bill_count == 1)
-        {
+        if ($bill_count == 1) {
             $page_body .= '<p><em>Just one bill is being tracked.</em></p>';
-        }
-        else
-        {
+        } else {
             $page_body .= '<p><em>' . $bill_count . ' bills are being tracked.</em></p>';
         }
 
-        while ($bill = mysqli_fetch_array($result))
-        {
+        while ($bill = mysqli_fetch_array($result)) {
             $bill = array_map('stripslashes', $bill);
 
             # Remove the bit of the bill summary that just duplicates the catch line.
@@ -233,12 +204,9 @@ else
 
             # Optionally establish a modifying status that will affect the look of the whole
             # bill in the portfolio.
-            if ($bill['outcome'] == 'dead')
-            {
+            if ($bill['outcome'] == 'dead') {
                 $bill['status_class'] = ' dead';
-            }
-            else
-            {
+            } else {
                 $bill['status_class'] = '';
             }
 
@@ -251,26 +219,19 @@ else
 				Status: ' . $bill['status'] . '</p>';
 
             # If the portfolio creator has provided notes on this bill.
-            if (!empty($bill['notes']))
-            {
+            if (!empty($bill['notes'])) {
                 $page_body .= '
 				<div class="notes">
 					' . nl2p($bill['notes']) . '
 				</div>';
             }
             $page_body .= '<p class="comments">';
-            if ($bill['comments'] == 0)
-            {
+            if ($bill['comments'] == 0) {
                 $page_body .= 'Be the first to comment on this bill';
-            }
-            else
-            {
-                if ($bill['comments'] == 1)
-                {
+            } else {
+                if ($bill['comments'] == 1) {
                     $page_body .= 'One person has commented on this bill';
-                }
-                else
-                {
+                } else {
                     $page_body .= 'There are ' . $bill['comments'] . ' comments about this bill';
                 }
             }
@@ -284,7 +245,7 @@ else
 }
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

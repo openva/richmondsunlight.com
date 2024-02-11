@@ -17,15 +17,14 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
 session_start();
 
 # LOCALIZE AND CLEAN UP VARIABLES
-if (isset($_POST['form_data']))
-{
+if (isset($_POST['form_data'])) {
     $form_data = $_POST['form_data'];
 }
 
@@ -72,8 +71,8 @@ function show_form($form_data)
 		<div style="display: none;">
 			<input type="text" size="2" maxlength="2" name="form_data[zip]" id="message-zip" />
 			<label for="message-zip">Leave this field empty</label><br />
-            <input type="text" size="11" maxlength="11" name="form_data[secret]" id="message-secret" value="' . time() * 2 . '" />
-			<label for="message-secret">Leave this field empty</label><br />
+            <input type="text" size="10" maxlength="10" name="form_data[secret]" id="message-secret" value="' . time() * 2 . '" />
+			<label for="message-secret">Leave this field set to its default value</label><br />
 		</div>
 
 		<p><input type="submit" name="submit" value="Send Mail"></p>
@@ -82,37 +81,33 @@ function show_form($form_data)
 }
 
 # If the form has been submitted
-if (isset($_POST['form_data']))
-{
-
+if (isset($_POST['form_data'])) {
     /*
      * Block non-US IPs. (This is where most spam comes from.)
      */
     $url = 'http://ip-api.com/json/' . $_SERVER['REMOTE_ADDR'];
     $json = get_content($url);
-    if ($json !== FALSE)
-    {
+    if ($json !== false) {
         $ip_data = json_decode($json);
-        if ($ip_data !== FALSE)
-        {
-            if ($ip_data->countryCode != 'US')
-            {
+        if ($ip_data !== false) {
+            if ($ip_data->countryCode != 'US') {
                 die();
             }
         }
     }
 
     # Give spammers the boot.
-    if (!empty($form_data['zip']))
-    {
+    if (!empty($form_data['zip'])) {
         die();
     }
 
-    # Prohibit any emails sent suspiciously quickly. We double the timestamp
-    # value because spammers will plug in a timestamp value.
-    $time_elapsed = time() - ($form_data['secret']) / 2;
-    if ( $time_elapsed <= 10)
-    {
+    # Prohibit any emails sent suspiciously quickly. (We double the timestamp value because
+    # spammers will plug in a timestamp value.)
+    if (empty($form_data['secret'])) {
+        die();
+    }
+    $time_elapsed = time() - ($form_data['secret'] / 2);
+    if ($time_elapsed <= 10 || $time_elapsed > 604800) {
         die();
     }
     # Filter out newlines to block injection attacks.
@@ -129,53 +124,41 @@ if (isset($_POST['form_data']))
     $form_data['email'] = mb_substr($form_data['email'], 0, 50);
 
     # Make sure it's all good.
-    if (empty($form_data['name']))
-    {
+    if (empty($form_data['name'])) {
         $errors[] = 'your name is missing';
     }
-    if (empty($form_data['email']))
-    {
+    if (empty($form_data['email'])) {
         $errors[] = 'your email address is missing';
-    }
-    elseif (!validate_email($form_data['email']))
-    {
+    } elseif (!validate_email($form_data['email'])) {
         $errors[] = 'your email address is not a valid email address';
     }
-    if (empty($form_data['subject']))
-    {
+    if (empty($form_data['subject'])) {
         $errors[] = 'the subject of your message is missing';
     }
-    if (empty($form_data['comments']))
-    {
+    if (empty($form_data['comments'])) {
         $errors[] = 'the contents of your message are missing';
     }
 
     preg_match_all('/https?:/', $form_data['comments'], $matches);
-    if (count($matches[0]) >= 3)
-    {
+    if (count($matches[0]) >= 3) {
         $errors[] = 'there are ' . count($matches[0])  . ' website addresses in your email — ' .
             'that’s a hallmark of spam, so please drop it down to no more than 2';
     }
 
 
-    if (isset($errors))
-    {
+    if (isset($errors)) {
         $page_body = '
 		<div class="error">
 			<p>All is not well with your e-mail — please correct the following:</p>
 			<ul>';
-        foreach ($errors as $error)
-        {
+        foreach ($errors as $error) {
             $page_body .= '<li>' . $error . '</li>';
         }
         $page_body .= '
 			</ul>
 		</div>';
         $page_body .= show_form($form_data);
-    }
-    else
-    {
-
+    } else {
         /*
          * In which we reinvent Bayesian filtering but, like...badly.
          */
@@ -188,7 +171,6 @@ if (isset($_POST['form_data']))
             'content syndication' => 5,
             'growth hacking' => 5,
             'LinkedIn' => 3,
-            'marketing plan' => 5,
             'lead prospecting' => 5,
             ' SEO ' => 5,
             'low pricing' => 3,
@@ -208,20 +190,20 @@ if (isset($_POST['form_data']))
             'hacking' => 2,
             'opt out' => 3,
             'marketing' => 3,
+            'marketing plan' => 5,
+            'marketing messages' => 5,
+            'manifestation' => 4,
         );
 
         /*
          * Tally the message's spam score, to see if it exceeds the threshold of 5 points.
          */
         $score = 0;
-        foreach ($spam_strings as $spam_string => $points)
-        {
-            $present = substr_count($form_data['comments'], $spam_string);
-            if ($present != false)
-            {
+        foreach ($spam_strings as $spam_string => $points) {
+            $present = substr_count(strtolower($form_data['comments']), strtolower($spam_string));
+            if ($present != false) {
                 $score = $score + ($present * $points);
-                if ($score >= 5)
-                {
+                if ($score >= 5) {
                     $is_spam = true;
                     break;
                 }
@@ -231,9 +213,8 @@ if (isset($_POST['form_data']))
         /*
          * This is spam. End silently.
          */
-        if ($is_spam)
-        {
-            header("HTTP/1.0 404 Not Found");
+        if ($is_spam) {
+            http_response_code(404);
             die();
         }
 
@@ -244,39 +225,31 @@ if (isset($_POST['form_data']))
             'waldo@jaquith.org',
             $form_data['subject'],
             $form_data['comments'],
-        'From: waldo@jaquith.org' . "\n" .
-        'Reply-To: ' . $form_data['name'] . ' <' . $form_data['email'] . ">\n" .
-        'X-Originating-IP: ' . $_SERVER['REMOTE_ADDR'] . "\n" .
-        'X-Originating-URL: ' . $_SERVER['REQUEST_URI'] . "\n" .
-        'X-Time-Elapsed: ' . $time_elapsed . "\n" .
-        'X-Spam-Score: ' . $score
+            'From: waldo@jaquith.org' . "\n" .
+            'Reply-To: ' . $form_data['name'] . ' <' . $form_data['email'] . ">\n" .
+            'X-Originating-IP: ' . $_SERVER['REMOTE_ADDR'] . "\n" .
+            'X-Originating-URL: ' . $_SERVER['REQUEST_URI'] . "\n" .
+            'X-Time-Elapsed: ' . $time_elapsed . "\n" .
+            'X-Spam-Score: ' . $score
         );
         $page_body .= '<p>Email sent. Thanks for writing!</p>';
-
     }
-}
-else
-{
-
+} else {
     /*
      * Spammers have no referrer -- block them.
      */
-    if ( !isset($_SERVER['HTTP_REFERER']) || $_SERVER['HTTP_REFERER'] == '' )
-    {
+    if (!isset($_SERVER['HTTP_REFERER']) || $_SERVER['HTTP_REFERER'] == '') {
         die();
     }
 
     # Retrieve the user data to populate the comment form.
     # Grab the user data.
-    if (logged_in() === TRUE)
-    {
+    if (logged_in() === true) {
         $user = get_user();
-        if (!empty($user['name']))
-        {
+        if (!empty($user['name'])) {
             $form_data['name'] = $user['name'];
         }
-        if (!empty($user['email']))
-        {
+        if (!empty($user['email'])) {
             $form_data['email'] = $user['email'];
         }
     }
@@ -289,7 +262,7 @@ else
 
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

@@ -17,3 +17,8 @@ if [ ! -f "/usr/local/etc/php/php.ini" ]; then
     cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
     #echo "extension=memcached.so" >> /usr/local/etc/php/php.ini
 fi
+
+# Enable Sphinx's server
+echo "START=yes" | tee /etc/default/sphinxsearch
+cp /etc/sphinxsearch/sphinx.conf.sample /etc/sphinxsearch/sphinx.conf
+/etc/init.d/sphinxsearch start

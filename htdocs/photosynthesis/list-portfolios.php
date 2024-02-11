@@ -17,7 +17,7 @@
     # DECLARATIVE FUNCTIONS
     # Run those functions that are necessary prior to loading this specific
     # page.
-    $database = new Database;
+    $database = new Database();
     $database->connect_mysqli();
 
     # INITIALIZE SESSION
@@ -50,25 +50,21 @@
 				AND sessions.year = ' . SESSION_YEAR . ') > 0
 			ORDER BY dashboard_user_data.organization ASC';
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) == 0)
-    {
-        $page_body .= '<p>No organizations have yet added any bills to Photosynthesis for the current
+if (mysqli_num_rows($result) == 0) {
+    $page_body .= '<p>No organizations have yet added any bills to Photosynthesis for the current
 			General Assembly session.</p>';
+} else {
+    $page_body .= '<ul>';
+    while ($portfolio = mysqli_fetch_array($result)) {
+        $portfolio = array_map('stripslashes', $portfolio);
+        $page_body .= '<li><a href="/photosynthesis/' . $portfolio['hash'] . '/">'
+            . $portfolio['organization'] . '</a></li>';
     }
-    else
-    {
-        $page_body .= '<ul>';
-        while ($portfolio = mysqli_fetch_array($result))
-        {
-            $portfolio = array_map('stripslashes', $portfolio);
-            $page_body .= '<li><a href="/photosynthesis/' . $portfolio['hash'] . '/">'
-                . $portfolio['organization'] . '</a></li>';
-        }
-        $page_body .= '</ul>';
-    }
+    $page_body .= '</ul>';
+}
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

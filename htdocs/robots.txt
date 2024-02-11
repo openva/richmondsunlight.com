@@ -1,11 +1,12 @@
 User-agent: *
 Disallow: /bills/tags
 Disallow: /search
-Disallow: /charts
 Disallow: /process-tags.php
 Disallow: /process-comments.php
 Disallow: /process-polls.php
 Disallow: /downloads/bills/
+Disallow: /rss/
+Crawl-delay: 10
 
 User-agent: GPTBot
 Disallow: /
@@ -94,8 +95,37 @@ Disallow: /
 User-agent: discobot
 Disallow: /
 
-User-agent: msnbot
-Crawl-delay: 5
+User-agent: ImagesiftBot
+Disallow: /
 
-User-agent: bingbot
-Crawl-delay: 5
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+User-agent: magpie-crawler
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: Bytespider
+Disallow: /
+
+User-agent: proximic
+Disallow: /
+
+User-agent: adbeat_bot
+Disallow: /
+
+User-agent: FriendlyCrawler
+Disallow: /
+
+User-agent: Barkrowler
+Disallow: /
+
+# This bot explicitly does not support crawl-delay and does not support robots meta tags, so
+# disallow it entirely.
+User-agent: Amazonbot
+Disallow: /

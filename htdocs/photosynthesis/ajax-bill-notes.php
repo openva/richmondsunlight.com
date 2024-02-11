@@ -18,12 +18,11 @@ include_once '../includes/photosynthesis.inc.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $db = $database->connect_mysqli();
 
 # Make sure we have all of the appropriate data.
-if (!isset($_POST['user_hash']) || !isset($_POST['id']) || !isset($_POST['value']))
-{
+if (!isset($_POST['user_hash']) || !isset($_POST['id']) || !isset($_POST['value'])) {
     die(' ');
 }
 
@@ -41,21 +40,17 @@ $sql = 'UPDATE dashboard_bills
 			WHERE private_hash="' . mysqli_real_escape_string($GLOBALS['db'], $hash) . '"
 			LIMIT 1)';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if ($result === FALSE)
-{
+if ($result === false) {
     die(' ');
 }
 
 # If the query was successful, send the data back to the browser for display.
-else
-{
-
+else {
     /*
      * Clear the Memcached cache of comments on this bill, since Photosynthesis comments are
      * among them.
      */
-    if (MEMCACHED_SERVER != '')
-    {
+    if (MEMCACHED_SERVER != '') {
         $sql = 'SELECT bill_id AS id
                 FROM dashboard_bills
                 WHERE id=' . $_POST['id'];

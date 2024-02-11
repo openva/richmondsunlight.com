@@ -13,10 +13,4 @@
     AllowOverride All
   </Directory>
 
-  <Directory "/var/www/richmondsunlight.com/htdocs/matomo">
-    <FilesMatch \.php$>
-      SetHandler "proxy:unix:/run/php/php7.4-fpm.sock|fcgi://localhost"
-    </FilesMatch>
-  </Directory>
-
 </VirtualHost>

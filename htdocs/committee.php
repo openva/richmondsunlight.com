@@ -14,7 +14,7 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $db = $database->connect_mysqli();
 
 # INITIALIZE SESSION
@@ -27,12 +27,11 @@ $shortname = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['committee']);
 /*
  * Get basic data about this committee.
  */
-$committee = new Committee;
+$committee = new Committee();
 $committee->chamber = $chamber;
 $committee->shortname = $shortname;
-if (!$committee->info() || !$committee->members())
-{
-    header('Status: 404 Not Found');
+if (!$committee->info() || !$committee->members()) {
+    http_response_code(404);
     include '404.php';
     exit();
 }
@@ -42,8 +41,7 @@ $page_title = ucfirst($chamber) . ' ' . $committee->name . ' Committee';
 $site_section = 'committees';
 
 # PAGE SIDEBAR
-if (!empty($committee->url))
-{
+if (!empty($committee->url)) {
     $page_sidebar .= '
 		<div class="box">
 			<h3>About This Committee</h3>
@@ -70,17 +68,15 @@ $sql = 'SELECT date AS date_raw, DATE_FORMAT(date, "%W, %m/%d/%Y") AS date,
 		ORDER BY date_raw ASC
 		LIMIT 1';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) == 1)
-{
+if (mysqli_num_rows($result) == 1) {
     $tmp = mysqli_fetch_array($result);
-    $committee->meeting = new stdClass;
+    $committee->meeting = new stdClass();
     $committee->meeting->next = $tmp['date'];
     $committee->meeting->year = $tmp['year'];
     $committee->meeting->month = $tmp['month'];
     $committee->meeting->day = $tmp['day'];
     $committee->meeting->bill_count = $tmp['bill_count'];
-    if (!empty($tmp['time']))
-    {
+    if (!empty($tmp['time'])) {
         $committee->meeting->next .= ' at ' . $tmp['time'];
     }
     $committee->meeting->time = $committee->meeting_time;
@@ -91,8 +87,7 @@ $page_sidebar = '
 			<h3>Meeting Schedule</h3>
 			<p>The ' . $committee->name . ' committee meets when the ' . $committee->chamber . ' is '
             . 'in session, ' . $committee->meeting->time . '.</p>';
-if (isset($committee->meeting->next))
-{
+if (isset($committee->meeting->next)) {
     $page_sidebar .= '<p>The next scheduled meeting is on ' . $committee->meeting->next . '. '
         . number_format($committee->meeting->bill_count) . ' bills are on the agenda.
 		<a href="/schedule/' . $committee->meeting->year . '/' . $committee->meeting->month
@@ -113,13 +108,11 @@ $sql = 'SELECT COUNT(*) AS failed,
 
 $result = mysqli_query($GLOBALS['db'], $sql);
 
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     $stats = mysqli_fetch_array($result);
 
     # "We'll have no dividing by zero in this house, young man."
-    if (($stats['failed'] > 0) && ($stats['total'] > 0))
-    {
+    if (($stats['failed'] > 0) && ($stats['total'] > 0)) {
         $page_sidebar .= '
 	<div class="box">
 		<h3>Stats</h3>
@@ -149,28 +142,20 @@ $sql = 'SELECT representatives.party, representatives.party AS party1,
         GROUP BY party
             ORDER BY party DESC';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     $page_sidebar .= '<p>';
 
-    while ($stats = mysqli_fetch_array($result))
-    {
-        if ($stats['party'] == 'R')
-        {
+    while ($stats = mysqli_fetch_array($result)) {
+        if ($stats['party'] == 'R') {
             $stats['party'] = 'Republican';
-        }
-        elseif ($stats['party'] == 'D')
-        {
+        } elseif ($stats['party'] == 'D') {
             $stats['party'] = 'Democrat';
-        }
-        elseif ($stats['party'] == 'I')
-        {
+        } elseif ($stats['party'] == 'I') {
             $stats['party'] = 'Independent';
         }
 
         # "We'll have no dividing by zero in this house, young man."
-        if (($stats['failed'] > 0) && ($stats['total'] > 0))
-        {
+        if (($stats['failed'] > 0) && ($stats['total'] > 0)) {
             $page_sidebar .= (100 - round(($stats['failed'] / $stats['total'] * 100), 0)) . '% of
 			the ' . $stats['total'] . ' bills introduced by ' . $stats['party'] . 's have passed.  ';
         }
@@ -189,17 +174,13 @@ $sql = 'SELECT chamber, number, catch_line
 		AND status != "vetoed" AND status != "passed committee" AND status != "failed committee"
 		ORDER BY hotness';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     $total_bills = mysqli_num_rows($result);
 
     # List only the last five.
-    if ($total_bills < 5)
-    {
+    if ($total_bills < 5) {
         $listed_bills = $total_bills - 1;
-    }
-    else
-    {
+    } else {
         $listed_bills = 4;
     }
 
@@ -208,25 +189,20 @@ if (mysqli_num_rows($result) > 0)
 		<h3>Bills in this Committee</h3>
 		<p>There are currently <a href="/bills/committee/' . $committee->chamber . '/' . $committee->shortname . '/">'
             . $total_bills . ' bills</a> awaiting review by this committee.';
-    if ($total_bills > ($listed_bills + 1))
-    {
+    if ($total_bills > ($listed_bills + 1)) {
         $page_sidebar .= ' Of those bills, here are the five that have generated the most
 			interest:';
-    }
-    else
-    {
+    } else {
         $page_sidebar .= ' Those are:';
     }
     $page_sidebar .= '</p>
 		<ul>';
-    $i=0;
-    while ($bill = mysqli_fetch_array($result))
-    {
+    $i = 0;
+    while ($bill = mysqli_fetch_array($result)) {
         $bill = array_map('stripslashes', $bill);
         $page_sidebar .= '<li><a href="/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/" class="bill">'
             . mb_strtoupper($bill['number']) . '</a>: ' . $bill['catch_line'] . '</li>';
-        if ($i >= $listed_bills)
-        {
+        if ($i >= $listed_bills) {
             break;
         }
         $i++;
@@ -248,31 +224,25 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 		GROUP BY tags.tag
 		ORDER BY tags.tag ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
+if (mysqli_num_rows($result) > 0) {
     $page_sidebar .= '
 	<div class="box">
 		<h3>Tag Cloud</h3>
 		<div class="tags">';
     $top_tag = 1;
     $top_tag_size = 3;
-    while ($tag = mysqli_fetch_array($result))
-    {
+    while ($tag = mysqli_fetch_array($result)) {
         $tags[] = array_map('stripslashes', $tag);
-        if ($tag['count'] > $top_tag)
-        {
+        if ($tag['count'] > $top_tag) {
             $top_tag = $tag['count'];
         }
     }
-    if ($top_tag == 1)
-    {
+    if ($top_tag == 1) {
         $top_tag_size = 1;
     }
-    for ($i=0; $i<count($tags); $i++)
-    {
+    for ($i = 0; $i < count($tags); $i++) {
         $font_size = round(($tags[$i]['count'] / $top_tag * $top_tag_size), 2);
-        if ($font_size < '.75')
-        {
+        if ($font_size < '.75') {
             $font_size = '.75';
         }
         $page_sidebar .= '<span style="font-size: ' . $font_size . 'em;">
@@ -288,17 +258,14 @@ if (mysqli_num_rows($result) > 0)
 # PAGE CONTENT
 
 # Member Listing
-if (is_array($committee->members))
-{
+if (is_array($committee->members)) {
     $page_body = '
 			<h2>Members</h2>
 			<ul>';
-    foreach ($committee->members as $member)
-    {
+    foreach ($committee->members as $member) {
         $page_body .= '<li><a href="/legislator/' . $member['shortname'] . '/" class="legislator">' . $member['name']
             . '</a>';
-        if (!empty($member['position']))
-        {
+        if (!empty($member['position'])) {
             $page_body .= ' <strong>' . ucwords($member['position']) . '</strong>';
         }
         $page_body .= "</li>\n";
@@ -320,21 +287,17 @@ $sql = 'SELECT name, meeting_time
 $result = mysqli_query($GLOBALS['db'], $sql);
 
 # If there are no subcommittees.
-if (mysqli_num_rows($result) == 0)
-{
+if (mysqli_num_rows($result) == 0) {
     $page_body .= '<p>This committee has no subcommittees.</p>';
 }
 
 # If there are subcommittees.
-else
-{
+else {
     $page_body .= '<ul>';
-    while ($subcommittee = mysqli_fetch_array($result))
-    {
+    while ($subcommittee = mysqli_fetch_array($result)) {
         $subcommittee = array_map('stripslashes', $subcommittee);
         $page_body .= '<li>' . $subcommittee['name'];
-        if (!empty($subcommittee['meeting_time']))
-        {
+        if (!empty($subcommittee['meeting_time'])) {
             $page_body .= '<br /><small>' . $subcommittee['meeting_time'] . '</small>';
         }
         $page_body .= '</li>';
@@ -342,8 +305,7 @@ else
     $page_body .= '</ul>';
 }
 
-if (is_array($committee->members))
-{
+if (is_array($committee->members)) {
     # Generate a list of all e-mail addresses for the members of this committee.
     $page_body .= '
 			<h2>Email Contact List</h2>
@@ -351,14 +313,11 @@ if (is_array($committee->members))
 			of this committee.</p>
 			<textarea style="width: 100%; height: 12em; font-size: .85em;">';
     $num_members = count($committee->members);
-    $i=0;
-    foreach ($committee->members as $member)
-    {
-        if (!empty($member['email']))
-        {
+    $i = 0;
+    foreach ($committee->members as $member) {
+        if (!empty($member['email'])) {
             $page_body .= '&quot;' . $member['name_simple'] . '&quot; &lt;' . $member['email'] . '&gt;';
-            if ($i+1 < $num_members)
-            {
+            if ($i + 1 < $num_members) {
                 $page_body .= ', ';
             }
         }
@@ -367,7 +326,7 @@ if (is_array($committee->members))
     $page_body .= '</textarea>';
 }
 
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

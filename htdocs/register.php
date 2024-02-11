@@ -17,10 +17,10 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
-$log = new Log;
+$log = new Log();
 
 # PAGE METADATA
 $page_title = 'Register';
@@ -116,27 +116,23 @@ function display_form($form_data)
 
 $page_body = '';
 
-if (isset($_POST['submit']))
-{
+if (isset($_POST['submit'])) {
     $form_data = array_map('stripslashes', $_POST['form_data']);
     $form_data = array_map('trim', $form_data);
 
     # If somebody filled out this form in an implausibly short time (five seconds), then it's a
     # spammer.
-    if ((time() - $form_data['time']) <= 5)
-    {
+    if ((time() - $form_data['time']) <= 5) {
         die();
     }
 
     # Spammers tend to overload the ZIP field with an extra character.
-    if (mb_strlen($form_data['zip']) == 6)
-    {
+    if (mb_strlen($form_data['zip']) == 6) {
         die();
     }
 
     # Spammers also tend to provide a ZIP of "12345," "10001," and "30332."
-    if (($form_data['zip'] == '12345') || ($form_data['zip'] == '10001')  || ($form_data['zip'] == '30332'))
-    {
+    if (($form_data['zip'] == '12345') || ($form_data['zip'] == '10001')  || ($form_data['zip'] == '30332')) {
         die();
     }
 
@@ -146,19 +142,17 @@ if (isset($_POST['submit']))
     if (
         get_content($url) != 'US'
         &&
-        strpos($form_data['name'], ' ') == FALSE
+        strpos($form_data['name'], ' ') == false
         &&
         !empty($form_data['url'])
         &&
         ($form_data['zip'] < 20101 || $form_data['zip'] > 24700)
-    )
-    {
+    ) {
             die();
     }
 
     # If the email address ends with ".ru", this is a spammer.
-    if (mb_substr($form_data['email'], -3) == '.ru')
-    {
+    if (mb_substr($form_data['email'], -3) == '.ru') {
         die();
     }
 
@@ -173,53 +167,39 @@ if (isset($_POST['submit']))
     }
 
     # Spammers would also fill out the (hidden) age field.
-    if (!empty($form_data['age']))
-    {
+    if (!empty($form_data['age'])) {
         die();
     }
 
-    if (empty($form_data['name']))
-    {
+    if (empty($form_data['name'])) {
         $errors[] = 'your name';
     }
-    if (empty($form_data['password']))
-    {
+    if (empty($form_data['password'])) {
         $errors[] = 'your choice of password';
-    }
-    elseif ($form_data['password'] != $form_data['password_2'])
-    {
+    } elseif ($form_data['password'] != $form_data['password_2']) {
         $errors[] = 'the <em>same</em> password twice';
-    }
-    elseif (mb_strlen($form_data['password']) < 8)
-    {
+    } elseif (mb_strlen($form_data['password']) < 8) {
         $errors[] = 'a password that’s at least 8 characters long';
     }
-    if (empty($form_data['email']))
-    {
+    if (empty($form_data['email'])) {
         $errors[] = 'your e-mail address';
-    }
-    elseif (filter_var($form_data['email'], FILTER_VALIDATE_EMAIL) === FALSE)
-    {
+    } elseif (filter_var($form_data['email'], FILTER_VALIDATE_EMAIL) === false) {
         $errors[] = 'a valid e-mail address';
-    }
-    else
-    {
+    } else {
         # Make sure that this isn't a duplicate user account.
         $sql = 'SELECT *
 				FROM users
 				WHERE email = "' . mysqli_real_escape_string($GLOBALS['db'], $form_data['email']) . '"
 				AND password IS NOT NULL';
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) > 0)
-        {
+        if (mysqli_num_rows($result) > 0) {
             $errors[] = 'an e-mail address that’s not already in use; better yet,
 				<a href="/account/reset-password/">reset your password</a> and use your existing
 				account!';
         }
     }
 
-    if (isset($errors))
-    {
+    if (isset($errors)) {
         $error_text = implode('</li><li>', $errors);
         $page_body = '
 			<div id="messages" class="errors">
@@ -231,36 +211,26 @@ if (isset($_POST['submit']))
 
         # Display the registration form again.
         $page_body .= @display_form($form_data);
-    }
-    else
-    {
+    } else {
         $form_data['password_hash'] = md5($form_data['password']);
 
         # Validate any provided URL, and silently drop it if it's invalid.
-        if (!empty($form_data['url']))
-        {
-
+        if (!empty($form_data['url'])) {
             # If there's an at sign in this URL, then it's probably somebody entering an e-mail
             # address, thinking it's a URL.
-            if (mb_strstr($form_data['url'], '@') !== false)
-            {
+            if (mb_strstr($form_data['url'], '@') !== false) {
                 $form_data['url'] = '';
-            }
-            else
-            {
-
+            } else {
                 # Make URLs lowercase.
                 $form_data['url'] = mb_strtolower($form_data['url']);
 
                 # If we've got content, but no schema, prepend a schema.
-                if (!mb_stristr($form_data['url'], '://'))
-                {
+                if (!mb_stristr($form_data['url'], '://')) {
                     $form_data['url'] = 'http://' . $form_data['url'];
                 }
 
                 # Validate the URL.
-                if (filter_var($form_data['url'], FILTER_VALIDATE_URL) === FALSE)
-                {
+                if (filter_var($form_data['url'], FILTER_VALIDATE_URL) === false) {
                     $form_data['url'] = '';
                 }
             }
@@ -277,26 +247,24 @@ if (isset($_POST['submit']))
         # Assemble the URL-style account creation/update data.
         $user_query = 'dashboard=y&type=free&name=' . urlencode($form_data['name']) . '&email=' . $form_data['email'] .
             '&password=' . $form_data['password'] . '&private_hash=' . $hash;
-        if (!empty($form_data['organization']))
-        {
+        if (!empty($form_data['organization'])) {
             $user_query .= '&organization=' . urlencode($form_data['organization']);
         }
-        if (!empty($form_data['url']))
-        {
+        if (!empty($form_data['url'])) {
             $user_query .= '&url=' . $form_data['url'];
         }
-        if (!empty($form_data['zip']))
-        {
+        if (!empty($form_data['zip'])) {
             $user_query .= '&zip=' . $form_data['zip'];
 
             # Get this user's coordinates.
-            $location = new Location;
+            $location = new Location();
             $location->zip = $form_data['zip'];
             $coordinates = $location->get_coordinates();
-            $user_query .= '&latitude=' . $coordinates['lat'] . '&longitude=' . $coordinates['lng'];
+            if (is_numeric($coordinates['lat']) && is_numeric($coordinates['lng'])) {
+                $user_query .= '&latitude=' . $coordinates['lat'] . '&longitude=' . $coordinates['lng'];
+            }
         }
-        if (!empty($form_data['mailing_list']))
-        {
+        if (!empty($form_data['mailing_list'])) {
             $user_query .= '&mailing_list=' . $form_data['mailing_list'];
         }
 
@@ -304,17 +272,14 @@ if (isset($_POST['submit']))
         # any existing account data, it's really just more trouble than it's worth.
         $result = create_user($user_query);
 
-        if ($result === FALSE)
-        {
-            $log->put('Somebody tried to create an account, and it failed entirely. They are frustrated now. Input: ' . $user_query, 5);
+        if ($result === false) {
+            $log->put('Somebody tried to create an account, and it failed entirely. They are '
+                . 'frustrated now. Input: ' . $user_query, 6);
             $page_body = '<p>Your registration has failed mysteriously, in a way that indicates
 				that some sort of a bug is at work. Please do us a favor and <a
 				href="/contact/">contact us</a> to report that you got this error. We’ll figure
 				out what went wrong and get you set up with an account in no time.</p>';
-        }
-        else
-        {
-
+        } else {
             # Grab the user data.
             $user = get_user();
 
@@ -346,14 +311,13 @@ if (isset($_POST['submit']))
 }
 
 # If we're just loading the page.
-else
-{
+else {
     # Display the login form, checking off the "y" for the mailing list by default.
     $form_data['mailing_list'] = 'y';
     $page_body .= @display_form($form_data);
 }
 
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

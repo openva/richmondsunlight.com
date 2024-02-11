@@ -40,18 +40,18 @@ define('MYSQL_DATABASE', '');
 define('API_URL', '');
 
 # Specify how to connect to Memcached.
-define('MEMCACHED_SERVER', 'localhost');
+define('MEMCACHED_SERVER', '');
 define('MEMCACHED_PORT', '11211');
 
 # The House Speaker's IDs. This is used in update_vote.php to translate votes credited to
 # "H0000," which bizarrely indicates the speaker, to that legislator's ID, and in
-# Video::identify_speakers to match the speaker to her identity. Here, H181 and 34 indicate
-# Todd Gilbert.
-define('HOUSE_SPEAKER_LIS_ID', 'H181');
-define('HOUSE_SPEAKER_ID', '34');
+# Video::identify_speakers to match the speaker to her identity. Here, H322 and 455 indicate
+# Don Scott.
+define('HOUSE_SPEAKER_LIS_ID', 'H322');
+define('HOUSE_SPEAKER_ID', '455');
 
 # Set the directory to look to for cache data.
-define('CACHE_DIR', '/vol/www/richmondsunlight.com/html/cache/');
+define('CACHE_DIR', sys_get_temp_dir());
 
 # ESTABLISH API KEYS
 
@@ -75,9 +75,6 @@ define('LOG_VERBOSITY', 3);
 # Slack API URL
 define('SLACK_WEBHOOK', '');
 
-# Pushover API key
-define('PUSHOVER_KEY', '');
-
 # OpenAI API key
 define('OPENAI_KEY', '');
 
@@ -89,8 +86,7 @@ define('AWS_SECRET_KEY', '');
 # The list of words that, when used, will lead to instant blacklisting. They're rot 13ed here.
 $GLOBALS['banned_words'] = array('fuvg','shpx','nffubyr','chffl','phag','shpxre','zbgureshpxre',
     'shpxvat','pbpxfhpxre','gjng','qvpxurnq');
-foreach ($GLOBALS['banned_words'] as &$word)
-{
+foreach ($GLOBALS['banned_words'] as &$word) {
     $word = str_rot13($word);
 }
 
@@ -103,22 +99,17 @@ date_default_timezone_set('America/New_York');
 /*
  * Dynamically determine whether the legislature is in session and whether it's legislative season.
  */
-if (time() >= strtotime(SESSION_START)
+if (
+    time() >= strtotime(SESSION_START)
     &&
     time() <= strtotime(SESSION_END)
-)
-{
+) {
     define('IN_SESSION', true);
-}
-else
-{
+} else {
     define('IN_SESSION', false);
 }
-if (date('n') >= 11 || date('n') <= 4)
-{
+if (date('n') >= 11 || date('n') <= 4) {
     define('LEGISLATIVE_SEASON', true);
-}
-else
-{
+} else {
     define('LEGISLATIVE_SEASON', false);
 }

@@ -17,7 +17,7 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # PAGE METADATA
@@ -29,15 +29,13 @@ session_start();
 
 # If we're receiving a request for a reset -- that is, somebody actually clicking on a
 # link in an e-mail after completing the first half of the process.
-if (!empty($_GET['hash']))
-{
+if (!empty($_GET['hash'])) {
     $hash = mysqli_real_escape_string($GLOBALS['db'], $_GET['hash']);
     $sql = 'SELECT cookie_hash
 			FROM users
 			WHERE private_hash = "' . $hash . '"';
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) == 0)
-    {
+    if (mysqli_num_rows($result) == 0) {
         die('Your password reset link has failed mysteriously.');
     }
     $user_data = mysqli_fetch_array($result);
@@ -46,17 +44,14 @@ if (!empty($_GET['hash']))
     exit();
 }
 
-if (!empty($_POST['email']))
-{
+if (!empty($_POST['email'])) {
     $email = $_POST['email'];
-    if (!validate_email($email))
-    {
+    if (!validate_email($email)) {
         $error = 'That’s not a valid e-mail address.';
     }
 
     # If there are no errors so far, check the database.
-    if (!isset($error))
-    {
+    if (!isset($error)) {
         $sql = 'SELECT name, email, private_hash
 				FROM users
 				WHERE private_hash IS NOT NULL AND password IS NOT NULL
@@ -64,12 +59,9 @@ if (!empty($_POST['email']))
         $result = mysqli_query($GLOBALS['db'], $sql);
 
         # If we find nothing.
-        if (mysqli_num_rows($result) == 0)
-        {
+        if (mysqli_num_rows($result) == 0) {
             $error = 'You don’t have an account on Richmond Sunlight under that e-mail address.';
-        }
-        else
-        {
+        } else {
             $user_data = mysqli_fetch_array($result);
 
             $user_data = array_map('stripslashes', $user_data);
@@ -78,7 +70,7 @@ if (!empty($_POST['email']))
             $email_body = $user_data['name'] . ",\n\n" .
                 'As you requested, here is a link to a page where you can reset your password ' .
                 "on Richmond Sunlight.\n\n" .
-                'http://www.richmondsunlight.com/account/reset-password/' . $user_data['private_hash'] . "\n\n" .
+                'https://www.richmondsunlight.com/account/reset-password/' . $user_data['private_hash'] . "\n\n" .
                 'If you didn\'t request that your password be reset, don\'t worry -- you can just ' .
                 'ignore this e-mail. No harm done.' . "\n\n" .
                 "Best wishes,\nRichmond Sunlight";
@@ -101,8 +93,7 @@ if (!empty($_POST['email']))
         }
     }
 
-    if (isset($error))
-    {
+    if (isset($error)) {
         $page_body = '
 			<div id="messages" class="errors">
 				<p>' . $error . '</p>
@@ -123,7 +114,7 @@ $page_body .= '
 ';
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;

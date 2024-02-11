@@ -18,7 +18,7 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
@@ -29,43 +29,35 @@ $user = get_user();
 
 # LOCALIZE VARIABLES
 $tags = $_POST['tags'];
-if (isset($_GET['delete']) && is_numeric($_GET['delete']) && strlen($_GET['delete']) < 10 )
-{
+if (isset($_GET['delete']) && is_numeric($_GET['delete']) && strlen($_GET['delete']) < 10) {
     $delete = $_GET['delete'];
-}
-elseif (!isset($_POST['bill_id']))
-{
+} elseif (!isset($_POST['bill_id'])) {
     header('HTTP/1.0 500 Internal Server Error');
     $message = array('error' => 'No tags provided.');
     echo json_encode($message);
     exit();
 }
-if (isset($_POST['bill_id']) && is_numeric($_POST['bill_id']) && strlen($_POST['bill_id']) < 10 )
-{
+if (isset($_POST['bill_id']) && is_numeric($_POST['bill_id']) && strlen($_POST['bill_id']) < 10) {
     $bill_id = $_POST['bill_id'];
-}
-else
-{
+} else {
     die();
 }
 
 # REJECT MISSING TAGS
-if (empty($tags))
-{
-
+if (empty($tags)) {
     # But if the tags are missing because a trusted user is deleting one, that's fine.
-    if (!empty($delete) && ($user['trusted'] == 'y'))
-    {
-
+    if (!empty($delete) && ($user['trusted'] == 'y')) {
         # Delete the tag.
         $sql = 'DELETE FROM tags
 				WHERE id=' . $delete;
         mysqli_query($GLOBALS['db'], $sql);
 
         # Delete the bill from Memcached.
-        $mc = new Memcached();
-        $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-        $result = $mc->delete('bill-' . $bill_id);
+        if (MEMCACHED_SERVER != '') {
+            $mc = new Memcached();
+            $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+            $result = $mc->delete('bill-' . $bill_id);
+        }
 
         header('HTTP/1.0 201 Created');
         exit();
@@ -78,46 +70,37 @@ if (empty($tags))
 }
 
 # BAR SPAMMERS
-if (mb_strlen($_SERVER['HTTP_USER_AGENT']) <= 1)
-{
+if (mb_strlen($_SERVER['HTTP_USER_AGENT']) <= 1) {
     exit();
 }
-if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'curl') === TRUE)
-{
+if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'curl') === true) {
     exit();
 }
-if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === TRUE)
-{
+if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === true) {
     exit();
 }
 
 # Create a user record.
-if (!logged_in())
-{
+if (!logged_in()) {
     create_user();
 }
 
-if (!empty($_SESSION['id']))
-{// && !blacklisted())
-
+if (!empty($_SESSION['id'])) {// && !blacklisted())
     # Explode the tags into an array to be inserted individually.
     $tag = explode(',', $tags);
 
     /*
      * Permit no more than 10 tags in total.
      */
-    if (count($tag) > 10)
-    {
+    if (count($tag) > 10) {
         $tag = array_slice($tag, 0, 10);
     }
 
-    for ($i=0; $i<count($tag); $i++)
-    {
+    for ($i = 0; $i < count($tag); $i++) {
         $tag[$i] = mb_strtolower(trim($tag[$i]));
 
         # Check the tag against the dirty words.
-        if (in_array(str_rot13($tag[$i]), $GLOBALS['banned_words']))
-        {
+        if (in_array(str_rot13($tag[$i]), $GLOBALS['banned_words'])) {
             header('HTTP/1.0 403 Forbidden');
             $message = array('error' => 'Tag prohibited.');
             echo json_encode($message);
@@ -125,23 +108,18 @@ if (!empty($_SESSION['id']))
         }
 
         # Drop useless tags.
-        if ($tag[$i] === '1')
-        {
+        if ($tag[$i] === '1') {
             continue;
         }
 
         # Don't proceed if it's blank.
-        if (!empty($tag[$i]))
-        {
-
+        if (!empty($tag[$i])) {
             # Make sure it's safe.
             $tag[$i] = preg_replace("/[[:punct:]]/D", '', $tag[$i]);
             $tag[$i] = trim(mysqli_real_escape_string($GLOBALS['db'], $tag[$i]));
 
             # Check one more time to make sure it's not empty.
-            if (!empty($tag[$i]))
-            {
-
+            if (!empty($tag[$i])) {
                 # Assemble the insertion SQL
                 $sql = 'INSERT INTO tags
 						SET bill_id=' . $bill_id . ', tag="' . $tag[$i] . '",
@@ -155,8 +133,7 @@ if (!empty($_SESSION['id']))
                 /*
                  * If there was a database-insertion error.
                  */
-                if (!$result)
-                {
+                if (!$result) {
                     header('HTTP/1.0 500 Internal Server Error');
                     $message = array('error' => 'Tags could not be saved.');
                     echo json_encode($message);
@@ -168,11 +145,13 @@ if (!empty($_SESSION['id']))
 
 
     # Delete the bill from Memcached.
-    $mc = new Memcached();
-    $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-    $result = $mc->delete('bill-' . $tags['bill_id']);
+    if (MEMCACHED_SERVER != '') {
+        $mc = new Memcached();
+        $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+        $result = $mc->delete('bill-' . $tags['bill_id']);
+    }
 
-    $log = new Log;
+    $log = new Log();
     $result = $log->put('New tags added: ' . implode(', ', $tag) . ' ' . $_SERVER['HTTP_REFERER'], 3);
 
     /*
@@ -183,8 +162,7 @@ if (!empty($_SESSION['id']))
 }
 
 # If the user didn't accept a cookie or is blacklisted.
-else
-{
+else {
     header('HTTP/1.0 403 Forbidden');
     $message = array('error' => 'You do not have permission to add tags.');
     echo json_encode($message);

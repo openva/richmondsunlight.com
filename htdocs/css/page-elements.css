@@ -13,26 +13,32 @@ table.sortable span.sortarrow {
 }
 
 /* Legislators' Bio Table */
-div#bio {
+#bio {
 	background-color: #f4eee5;
 }
-	div#bio dl {
-		background-color: #f4eee5;
+	#bio .pair {
+		display: flex;
+		padding: .1em;
 	}
-	div#bio dt, div#bio dd {
-		padding: 2px 4px;
-		line-height: 1.5em;
-	}
-	div#bio dt {
-		clear: left;
-		float: left;
-		width: 100px;
-		text-align: right;
-		font-weight: bold;
-	}
-	div#bio dd {
-		max-width: 350px;
-		overflow: hidden;
+		#bio .label, #bio .content {
+			display: inline-block;
+			vertical-align: top;
+		}
+		#bio .label {
+			width: 10em;
+			flex-shrink: 0;
+			font-weight: bold;
+			text-align: right;
+		}
+		#bio .content {
+			flex-grow: 1;
+			margin-left: 1em;
+		}
+	img#legislator {
+		border: 2px solid #000;
+		float: right;
+		width: 30%;
+		margin-left: 2em;
 	}
 
 #body-legislators div.bills {
@@ -82,11 +88,6 @@ div#history {
 
 
 /* IMAGES */
-img#legislator {
-	margin: 0 auto;
-	border: 2px solid #000;
-	float: right;
-}
 a img {
 	border: 0;
 }

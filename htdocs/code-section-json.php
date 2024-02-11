@@ -20,13 +20,12 @@ include_once 'vendor/autoload.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # LOCALIZE VARIABLES
 $section = mysqli_real_escape_string($GLOBALS['db'], urldecode($_REQUEST['section']));
-if (isset($_REQUEST['callback']) && !empty($_REQUEST['callback']))
-{
+if (isset($_REQUEST['callback']) && !empty($_REQUEST['callback'])) {
     $callback = $_REQUEST['callback'];
 }
 
@@ -47,9 +46,8 @@ $bill = mysqli_fetch_array($result, MYSQL_ASSOC);
 # Build up a listing of all bills.
 # The MYSQL_ASSOC variable indicates that we want just the associated array, not both associated
 # and indexed arrays.
-while ($bill = mysqli_fetch_array($result, MYSQL_ASSOC))
-{
-    $bill['url'] = 'http://www.richmondsunlight.com/bill/' . $bill['year'] . '/' . $bill['number'] . '/';
+while ($bill = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+    $bill['url'] = 'https://www.richmondsunlight.com/bill/' . $bill['year'] . '/' . $bill['number'] . '/';
     $bill['number'] = mb_strtoupper($bill['number']);
     $bills[] = array_map('stripslashes', $bill);
 }
@@ -59,12 +57,10 @@ header('Content-type: application/json');
 
 # Send the JSON. If a callback has been specified, prefix the JSON with that callback and wrap the
 # JSON in parentheses.
-if (isset($callback))
-{
+if (isset($callback)) {
     echo $callback . ' (';
 }
 echo json_encode($bills);
-if (isset($callback))
-{
+if (isset($callback)) {
     echo ');';
 }

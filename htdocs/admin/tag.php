@@ -16,7 +16,7 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/settings.inc.php';
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
 # page.
-$database = new Database;
+$database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
@@ -27,66 +27,52 @@ $page_title = 'Tag Bills';
 $site_section = 'admin';
 
 # PAGE CONTENT
-if (!empty($_POST))
-{
-
+if (!empty($_POST)) {
     $bills = $_POST['bill'];
 
     # Connect to Memcached.
-    if (MEMCACHED_SERVER != '')
-    {
+    if (MEMCACHED_SERVER != '') {
         $mc = new Memcached();
         $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
     }
 
     # Iterate through every bill's tags.
-    foreach ($bills as $bill_id => $tags)
-    {
-
+    foreach ($bills as $bill_id => $tags) {
         # If we don't have any tags, just skip to the next bill.
-        if (count($tags) == 0)
-        {
+        if (count($tags) == 0) {
             next;
         }
 
         # Explode the tags into an array to be inserted individually.
         $tag = explode(' ', $tags);
 
-        for ($i=0; $i<count($tag); $i++)
-        {
+        for ($i = 0; $i < count($tag); $i++) {
             # Trim it down.
             $tag[$i] = trim($tag[$i]);
             $tag[$i] = strtolower($tag[$i]);
 
             # If the string contains a quotation mark, build up a multiple-word
             # tag using everything up until the terminating quotation mark.
-            if (stristr($tag[$i], '"'))
-            {
-                if (!isset($assembled_tag)) $assembled_tag = $tag[$i];
-                else {
-                    $tag[$i] = $assembled_tag.' '.$tag[$i];
+            if (stristr($tag[$i], '"')) {
+                if (!isset($assembled_tag)) {
+                    $assembled_tag = $tag[$i];
+                } else {
+                    $tag[$i] = $assembled_tag . ' ' . $tag[$i];
                     $tag[$i] = str_replace('"', '', $tag[$i]);
                     unset($assembled_tag);
                 }
-            }
-
-            elseif (isset($assembled_tag))
-            {
-                $assembled_tag .= ' '.$tag[$i];
+            } elseif (isset($assembled_tag)) {
+                $assembled_tag .= ' ' . $tag[$i];
             }
 
             # Don't proceed if it's blank.
-            if ((!empty($tag[$i])) && (!isset($assembled_tag)))
-            {
-
+            if ((!empty($tag[$i])) && (!isset($assembled_tag))) {
                 # Make sure it's safe.
                 $tag[$i] = preg_replace("/[[:punct:]]/D", '', $tag[$i]);
                 $tag[$i] = trim(mysqli_real_escape_string($GLOBALS['db'], $tag[$i]));
 
                 # Check one more time to make sure it's not empty.
-                if (!empty($tag[$i]))
-                {
-
+                if (!empty($tag[$i])) {
                     # Assemble the insertion SQL
                     $sql = 'INSERT INTO tags
 							SET bill_id=' . $bill_id . ', tag="' . $tag[$i] . '",
@@ -99,22 +85,15 @@ if (!empty($_POST))
                     mysqli_query($GLOBALS['db'], $sql);
 
                     # Delete this from the cache.
-                    if (MEMCACHED_SERVER != '')
-                    {
+                    if (MEMCACHED_SERVER != '') {
                         $mc->delete('bill-' . $bill_id);
                     }
-
                 }
             }
         }
     }
-}
-
-else
-{
-
-    if (empty($_SESSION['id']))
-    {
+} else {
+    if (empty($_SESSION['id'])) {
         die('Please log in before using this.');
     }
 
@@ -145,8 +124,7 @@ else
 			ORDER BY sessions.year DESC, RAND()
 			LIMIT 20';
     $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) == 0)
-    {
+    if (mysqli_num_rows($result) == 0) {
         die('Huzzah! There are no untagged bills!');
     }
 
@@ -154,13 +132,10 @@ else
 	<div id="bills">
 		<form method="post" action="/admin/tag.php">';
 
-    while ($bill = mysqli_fetch_array($result))
-    {
-
+    while ($bill = mysqli_fetch_array($result)) {
         # If this bill doesn't have any tags (as, indeed, it should not), then generate some
         # candidate tags, using other bills that amend the same law(s).
-        if (empty($bill['tags']))
-        {
+        if (empty($bill['tags'])) {
             $sql = 'SELECT COUNT( * ) AS number, tags.tag
 					FROM tags
 					LEFT JOIN bills AS b2
@@ -176,28 +151,19 @@ else
 					HAVING number > 2
 					ORDER BY number DESC';
             $tag_result = mysqli_query($GLOBALS['db'], $sql);
-            if (mysqli_num_rows($result) > 0)
-            {
+            if (mysqli_num_rows($result) > 0) {
                 $tags = array();
-                while ($tag = mysqli_fetch_array($tag_result))
-                {
-
-                    if (!isset($first_score))
-                    {
+                while ($tag = mysqli_fetch_array($tag_result)) {
+                    if (!isset($first_score)) {
                         $first_score = $tag['number'];
                     }
 
-                    if (($tag['number'] / $first_score) > .5)
-                    {
-
-                        if (stristr($tag['tag'], ' ') !== FALSE)
-                        {
+                    if (($tag['number'] / $first_score) > .5) {
+                        if (stristr($tag['tag'], ' ') !== false) {
                             $tag['tag'] = '"' . $tag['tag'] . '"';
                         }
                         $tags[] = $tag['tag'];
-
                     }
-
                 }
                 $bill['tags'] = implode(', ', $tags);
                 unset($first_score);
@@ -209,14 +175,13 @@ else
 				<div class="summary">
 					<h2><a href="/bill/' . $bill['year'] . '/' . $bill['number'] . '/">'
                         . strtoupper($bill['number']) . '</a>: ' . $bill['catch_line'] . '</h2>
-					'.nl2p($bill['summary']).'
+					' . nl2p($bill['summary']) . '
 				</div>
 				<div class="tags">
-					<textarea name="bill['.$bill['id'].']" style="width: 20em;">' . $bill['tags']
+					<textarea name="bill[' . $bill['id'] . ']" style="width: 20em;">' . $bill['tags']
                         . '</textarea>
 				</div>
 			</div>';
-
     }
 
     $page_body .= '
@@ -226,7 +191,7 @@ else
 }
 
 # OUTPUT THE PAGE
-$page = new Page;
+$page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;
