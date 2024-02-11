@@ -113,7 +113,7 @@ class Statistics
         $database = new Database();
         $db = $database->connect();
         global $db;
-        
+
         $sql = 'SELECT votes.date, COUNT(*) AS number
                 FROM votes
                 LEFT JOIN representatives_votes
