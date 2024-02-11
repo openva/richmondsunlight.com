@@ -466,7 +466,8 @@ if (
                     },
                     style: {
                         width: 300,
-                        tip: "bottom center"
+                        tip: "bottom center",
+                        classes: "qtip-bootstrap"
                     },
                     content: {
                         text: function(event, api) {
@@ -509,7 +510,8 @@ if (
                     },
                     style: {
                         width: 300,
-                        tip: "bottom center"
+                        tip: "bottom center",
+                        classes: "qtip-bootstrap"
                     },
                     content: {
                         text: function(event, api) {
@@ -554,7 +556,8 @@ if (
                     },
                     style: {
                         width: 300,
-                        tip: "bottom center"
+                        tip: "bottom center",
+                        classes: "qtip-bootstrap"
                     },
                     content: {
                         text: function(event, api) {
@@ -602,10 +605,9 @@ if (
                     },
                     style: {
                         width: 300,
-                        tip: "bottom center"
+                        tip: "bottom center",
+                        classes: "qtip-bootstrap"
                     },
-
-
                     content: {
                         text: function(event, api) {
                             $.ajax({
