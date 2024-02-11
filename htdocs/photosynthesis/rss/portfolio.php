@@ -25,11 +25,11 @@ if (empty($hash)) {
 
 # Check to see if there's any need to regenerate this RSS feed -- only do so if it's more than
 # three minutes old.
-if ((file_exists('cache/portfolio-' . $hash . '.xml')) && ((filemtime('cache/portfolio-' . $hash . '.xml') + 180) > time())) {
+if ((file_exists(CACHE_DIR . '/portfolio-' . $hash . '.xml')) && ((filemtime(CACHE_DIR . '/portfolio-' . $hash . '.xml') + 180) > time())) {
     header('Content-Type: application/rss+xml');
-    header('Last-Modified: ' . date('r', filemtime('cache/portfolio-' . $hash . '.xml')));
-    header('ETag: ' . md5_file('cache/portfolio-' . $hash . '.xml'));
-    readfile('cache/portfolio-' . $hash . '.xml');
+    header('Last-Modified: ' . date('r', filemtime(CACHE_DIR . '/portfolio-' . $hash . '.xml')));
+    header('ETag: ' . md5_file(CACHE_DIR . '/portfolio-' . $hash . '.xml'));
+    readfile(CACHE_DIR . '/portfolio-' . $hash . '.xml');
     exit();
 }
 
@@ -102,9 +102,9 @@ $rss = '<?xml version="1.0" encoding=\'iso-8859-1\'?>
 
 
 # Cache the RSS file.
-$fp = @file_put_contents('cache/portfolio-' . $hash . '.xml', $rss);
+$fp = @file_put_contents(CACHE_DIR . '/portfolio-' . $hash . '.xml', $rss);
 
 header('Content-Type: application/rss+xml');
-header('Last-Modified: ' . date('r', filemtime('cache/portfolio-' . $hash . '.xml')));
-header('ETag: ' . md5_file('cache/portfolio-' . $hash . '.xml'));
+header('Last-Modified: ' . date('r', filemtime(CACHE_DIR . '/portfolio-' . $hash . '.xml')));
+header('ETag: ' . md5_file(CACHE_DIR . '/portfolio-' . $hash . '.xml'));
 echo $rss;

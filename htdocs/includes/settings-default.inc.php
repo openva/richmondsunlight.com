@@ -51,7 +51,7 @@ define('HOUSE_SPEAKER_LIS_ID', 'H322');
 define('HOUSE_SPEAKER_ID', '455');
 
 # Set the directory to look to for cache data.
-define('CACHE_DIR', '/vol/www/richmondsunlight.com/html/cache/');
+define('CACHE_DIR', sys_get_temp_dir());
 
 # ESTABLISH API KEYS
 

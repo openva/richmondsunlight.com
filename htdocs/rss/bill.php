@@ -22,15 +22,15 @@ $bill['number'] = strtolower($_REQUEST['number']);
 # Check to see if there's any need to regenerate this RSS feed -- only do so
 # if it's more than a half hour old.
 if (
-        (file_exists('cache/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml'))
+        (file_exists(CACHE_DIR . '/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml'))
         &&
-        ((filemtime('cache/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml') + 1800) > time())
+        ((filemtime(CACHE_DIR . '/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml') + 1800) > time())
 ) {
     header('Content-Type: application/xml');
-    header('Last-Modified: ' . date('r', filemtime('cache/bill-' . SESSION_YEAR . '-'
+    header('Last-Modified: ' . date('r', filemtime(CACHE_DIR . '/bill-' . SESSION_YEAR . '-'
         . $bill['number'] . '.xml')));
-    header('ETag: ' . md5_file('cache/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml'));
-    readfile('cache/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml');
+    header('ETag: ' . md5_file(CACHE_DIR . '/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml'));
+    readfile(CACHE_DIR . '/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml');
     exit();
 }
 
@@ -93,12 +93,12 @@ $rss = '<?xml version="1.0" encoding="utf-8"?>
 
 
 # Cache the RSS file.
-$fp = file_put_contents('cache/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml', $rss);
+$fp = file_put_contents(CACHE_DIR . '/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml', $rss);
 
 if ($fp !== false) {
-    $last_modified = date('r', filemtime('cache/bill-' . SESSION_YEAR . '-' . $bill['number']
+    $last_modified = date('r', filemtime(CACHE_DIR . '/bill-' . SESSION_YEAR . '-' . $bill['number']
         . '.xml'));
-    $md5 = md5_file('cache/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml');
+    $md5 = md5_file(CACHE_DIR . '/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml');
 } else {
     $last_modified = date('r', time());
     $md5 = md5($rss);

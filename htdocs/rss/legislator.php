@@ -22,16 +22,16 @@
     # Check to see if there's any need to regenerate this RSS feed -- only do so if it's more than
     # a half hour old.
 if (
-        (file_exists('cache/' . $legislator['shortname'] . '.xml'))
+        (file_exists(CACHE_DIR . '/' . $legislator['shortname'] . '.xml'))
         &&
         (
-            (filemtime('cache/' . $legislator['shortname'] . '.xml') + 1800) > time()
+            (filemtime(CACHE_DIR . '/' . $legislator['shortname'] . '.xml') + 1800) > time()
         )
 ) {
     header('Content-Type: application/rss+xml');
-    header('Last-Modified: ' . date('r', filemtime('cache/' . $legislator['shortname'] . '.xml')));
-    header('ETag: ' . md5_file('cache/' . $legislator['shortname'] . '.xml'));
-    readfile('cache/' . $legislator['shortname'] . '.xml');
+    header('Last-Modified: ' . date('r', filemtime(CACHE_DIR . '/' . $legislator['shortname'] . '.xml')));
+    header('ETag: ' . md5_file(CACHE_DIR . '/' . $legislator['shortname'] . '.xml'));
+    readfile(CACHE_DIR . '/' . $legislator['shortname'] . '.xml');
     exit();
 }
 
@@ -118,9 +118,9 @@ while ($bill = mysqli_fetch_array($result)) {
 
 
     # Cache the RSS file.
-    $fp = @file_put_contents('cache/' . $legislator['shortname'] . '.xml', $rss);
+    $fp = @file_put_contents(CACHE_DIR . '/' . $legislator['shortname'] . '.xml', $rss);
 
     header('Content-Type: application/xml');
-    header('Last-Modified: ' . date('r', filemtime('cache/' . $legislator['shortname'] . '.xml')));
-    header('ETag: ' . md5_file('cache/' . $legislator['shortname'] . '.xml'));
+    header('Last-Modified: ' . date('r', filemtime(CACHE_DIR . '/' . $legislator['shortname'] . '.xml')));
+    header('ETag: ' . md5_file(CACHE_DIR . '/' . $legislator['shortname'] . '.xml'));
     echo $rss;

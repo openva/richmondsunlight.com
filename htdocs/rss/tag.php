@@ -21,11 +21,11 @@
 
     # Check to see if there's any need to regenerate this RSS feed -- only do so
     # if it's more than a half hour old.
-if ((file_exists('cache/tag-' . $tag . '.xml')) && ((filemtime('cache/tag-' . $tag . '.xml') + 1800) > time())) {
+if ((file_exists(CACHE_DIR . '/tag-' . $tag . '.xml')) && ((filemtime(CACHE_DIR . '/tag-' . $tag . '.xml') + 1800) > time())) {
     header('Content-Type: application/rss+xml');
-    header('Last-Modified: ' . date('r', filemtime('cache/tag-' . $tag . '.xml')));
-    header('ETag: ' . md5_file('cache/tag-' . $tag . '.xml'));
-    readfile('cache/tag-' . $tag . '.xml');
+    header('Last-Modified: ' . date('r', filemtime(CACHE_DIR . '/tag-' . $tag . '.xml')));
+    header('ETag: ' . md5_file(CACHE_DIR . '/tag-' . $tag . '.xml'));
+    readfile(CACHE_DIR . '/tag-' . $tag . '.xml');
     exit();
 }
 
@@ -87,9 +87,9 @@ while ($bill = mysqli_fetch_array($result)) {
 
 
     # Cache the RSS file.
-    $fp = @file_put_contents('cache/tag-' . $tag . '.xml', $rss);
+    $fp = @file_put_contents(CACHE_DIR . '/tag-' . $tag . '.xml', $rss);
 
     header('Content-Type: application/xml');
-    header('Last-Modified: ' . date('r', filemtime('cache/tag-' . $tag . '.xml')));
-    header('ETag: ' . md5_file('cache/tag-' . $tag . '.xml'));
+    header('Last-Modified: ' . date('r', filemtime(CACHE_DIR . '/tag-' . $tag . '.xml')));
+    header('ETag: ' . md5_file(CACHE_DIR . '/tag-' . $tag . '.xml'));
     echo $rss;
