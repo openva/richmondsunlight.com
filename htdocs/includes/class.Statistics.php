@@ -96,4 +96,40 @@ class Statistics
 
         return $result;
     }
+
+    /**
+     * Return the number of votes cast by a legislator daily
+     *
+     * Query the votes table to generate a daily count of the number of votes made by a
+     * given legislator
+     *
+     * @param legislator
+     * @access public
+     * @return array
+     */
+    public function legislator_activity($legislator_id)
+    {
+
+        $database = new Database();
+        $db = $database->connect();
+        global $db;
+        
+        $sql = 'SELECT votes.date, COUNT(*) AS number
+                FROM votes
+                LEFT JOIN representatives_votes
+                    ON votes.id=representatives_votes.vote_id
+                WHERE
+                    representatives_votes.representative_id=' . $legislator_id . ' AND
+                    votes.session_id = ' . SESSION_ID . '
+                GROUP BY votes.date
+                ORDER BY date DESC';
+        $stmt = $GLOBALS['db']->prepare($sql);
+        $stmt->execute();
+        $result = $stmt->fetchAll();
+        if (count($result) == 0) {
+            return false;
+        }
+
+        return $result;
+    }
 }
