@@ -309,7 +309,7 @@ $page_body = '
 	<li><a href="#bio">Bio</a></li>';
 $page_body .= '
 	<li><a href="#media">Media</a></li>';
-if (!empty($legislator['rss_url'])) {
+if (!empty($legislator['rss_url']) && empty($legislator['date_ended'])) {
     $page_body .= '
 	<li><a href="#news">News</a></li>';
 }
@@ -812,7 +812,7 @@ $page_body .= '
 $page_body .= '</tbody></table></div>';
 
 # News from the legislator's website.
-if (!empty($legislator['rss_url'])) {
+if (!empty($legislator['rss_url']) && empty($legislator['date_ended'])) {
     $newsfeed->set_feed_url($legislator['rss_url']);
     $newsfeed->init();
     $newsfeed->handle_content_type();
