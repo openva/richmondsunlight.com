@@ -461,13 +461,13 @@ if (!empty($legislator['twitter'])) {
 /*if (!empty($legislator['activity']) && IN_SESSION == true) {
     $page_body .= '
     <div class="pair">
-		<div class="label">Daily Activity</div>
-		<div class="content" id="activity">
-			<img src="'
+        <div class="label">Daily Activity</div>
+        <div class="content" id="activity">
+            <img src="'
             . '//chart.googleapis.com/chart?cht=ls&chs=400x70&chco=243a51&chf=bg,s,f4eee5'
             . '&chm=B,dccbaf,0,0,0&chds=0,' . $legislator['activity_peak'] . '&chd=t:'
             . ($legislator['activity']) . '" />
-		</div>
+        </div>
     </div>';
 }*/
 
