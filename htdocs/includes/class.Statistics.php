@@ -120,7 +120,8 @@ class Statistics
                     representatives_votes.representative_id=' . $legislator_id . ' AND
                     votes.session_id = ' . SESSION_ID . '
                 GROUP BY votes.date
-                ORDER BY date DESC';
+                ORDER BY date ASC';
+
         $stmt = $db->prepare($sql);
         $stmt->execute();
 
