@@ -123,7 +123,7 @@ class Statistics
                 ORDER BY date DESC';
         $stmt = $db->prepare($sql);
         $stmt->execute();
-        $result = $stmt->fetchAll();
+        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
         if (count($result) == 0) {
             return false;
         }
