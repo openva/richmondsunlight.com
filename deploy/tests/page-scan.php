@@ -87,6 +87,11 @@ $pages =
         'string' => 'Sen. Creigh Deeds',
     ],
     [
+        'url' => '/legislator/rlware/',
+        'http_status' => '200',
+        'string' => 'Del. Lee Ware',
+    ],
+    [
         'url' => '/legislator/jondoe/',
         'http_status' => '404',
     ],
