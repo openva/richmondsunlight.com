@@ -606,6 +606,8 @@ $page_body .= '</p>';
 if (isset($bill['status_history'])) {
     $bill['history'] = '';
 
+    $statuses = [];
+
     foreach ($bill['status_history'] as $status) {
         # Cast this object as an array.
         $status = (array) $status;
