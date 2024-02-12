@@ -458,7 +458,7 @@ if (!empty($legislator['twitter'])) {
     </div>';
 }
 
-if (!empty($legislator['activity']) && IN_SESSION == true) {
+/*if (!empty($legislator['activity']) && IN_SESSION == true) {
     $page_body .= '
     <div class="pair">
 		<div class="label">Daily Activity</div>
@@ -469,7 +469,7 @@ if (!empty($legislator['activity']) && IN_SESSION == true) {
             . ($legislator['activity']) . '" />
 		</div>
     </div>';
-}
+}*/
 
 # COPATRONING STATS
 # Calculate the percentage of the bills copatroned by this legislator that were introduced by
