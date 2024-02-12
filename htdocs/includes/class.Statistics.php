@@ -123,11 +123,12 @@ class Statistics
                 ORDER BY date DESC';
         $stmt = $db->prepare($sql);
         $stmt->execute();
-        $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        if (count($result) == 0) {
-            return false;
+
+        $activity = [];
+        while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $activity[$result['date']] = $result['number'];
         }
 
-        return $result;
+        return $activity;
     }
 }
