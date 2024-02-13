@@ -19,6 +19,13 @@ class Database
         }
 
         /*
+         * If we already have a database connection, reuse it.
+         */
+        if (isset($GLOBALS['db']) && $GLOBALS['db'] instanceof pdo) {
+            return $GLOBALS['db'];
+        }
+
+        /*
          * Connect
          */
         $this->db = new PDO(PDO_DSN, PDO_USERNAME, PDO_PASSWORD);
@@ -53,7 +60,7 @@ class Database
         /*
          * If we already have a database connection, reuse it.
          */
-        if (isset($GLOBALS['db']) && get_class($GLOBALS['db']) == 'mysqli') {
+        if (isset($GLOBALS['db']) && $GLOBALS['db'] instanceof mysqli) {
             return $GLOBALS['db'];
         }
 
