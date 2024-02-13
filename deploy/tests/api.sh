@@ -24,6 +24,7 @@ EXPECTED='"Sen. Creigh Deeds (D-Charlottesville)"';
 if [ "$OUTPUT" != "$EXPECTED" ]
 then
     echo "ERROR: Legislator's formatted name isn't correct (expected $EXPECTED, got $OUTPUT)"
+    curl --silent http://api/1.1/legislator/rcdeeds.json
     ERRORED=true
 fi
 
