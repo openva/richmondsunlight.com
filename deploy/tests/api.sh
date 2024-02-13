@@ -24,7 +24,6 @@ EXPECTED='"Sen. Creigh Deeds (D-Charlottesville)"';
 if [ "$OUTPUT" != "$EXPECTED" ]
 then
     echo "ERROR: Legislator's formatted name isn't correct (expected $EXPECTED, got $OUTPUT)"
-    docker exec -i rs_api cat /var/www/html/1.1/legislator.php
     ERRORED=true
 fi
 

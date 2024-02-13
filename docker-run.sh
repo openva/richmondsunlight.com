@@ -44,6 +44,7 @@ docker exec "$WEB_ID" /var/www/deploy/docker-setup-site.sh
 # Copy over the API includes
 cd api/htdocs/ || exit
 cp -R ../../htdocs/includes/ includes/
+cat 1.1/legislator.php
 cd ../../
 
 # Return to the original directory
