@@ -122,12 +122,14 @@ class Statistics
                 GROUP BY votes.date
                 ORDER BY date ASC';
 
-        $stmt = $db->prepare($sql);
-        $stmt->execute();
+        $result = mysqli_query($db, $sql);
+        if ($result === false) {
+            return false;
+        }
 
         $activity = [];
-        while ($result = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $activity[$result['date']] = $result['number'];
+        while ($action = mysqli_fetch_assoc($result)) {
+            $activity[$result['date']] = $action['number'];
         }
 
         return $activity;
