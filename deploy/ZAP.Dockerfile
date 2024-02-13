@@ -7,9 +7,6 @@ WORKDIR /zap
 # Copy your application's specific ZAP scripts or configurations if any
 # COPY zap-configs/ /zap/zap-configs/
 
-# You can also install additional tools, dependencies, etc.
-# RUN apk add --no-cache <your-dependencies>
-
 # Entrypoint to keep the container running and to use ZAP CLI as needed
 # This can be adjusted based on your specific use case
 ENTRYPOINT ["zap.sh"]
