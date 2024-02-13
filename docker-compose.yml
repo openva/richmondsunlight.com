@@ -37,5 +37,12 @@ services:
     ports:
       - "3306:3306"
     container_name: rs_db
+  owasp_zap:
+    build:
+      context: deploy/
+      dockerfile: ZAP.Dockerfile
+    ports:
+      - "5002:8080"
+    container_name: rs_zap
 volumes:
     db_data: {}
