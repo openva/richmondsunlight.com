@@ -44,7 +44,6 @@ docker exec "$WEB_ID" /var/www/deploy/docker-setup-site.sh
 # Copy over the API includes
 cd api/htdocs/ || exit
 cp -R ../../htdocs/includes/ includes/
-echo "<?php ini_set('display_errors', 1);" > temp_file.php && tail -n +2 1.1/legislator.php >> temp_file.php && mv temp_file.php 1.1/legislator.php
 cd ../../
 
 # Return to the original directory
