@@ -11,5 +11,7 @@ WORKDIR /zap
 # This can be adjusted based on your specific use case
 ENTRYPOINT ["zap.sh"]
 
+EXPOSE 8080
+
 # By default, run ZAP in daemon mode on a specific port if not overridden
 CMD ["-daemon", "-host", "0.0.0.0", "-port", "8080", "-config", "api.disablekey=true"]
