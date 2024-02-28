@@ -101,7 +101,7 @@ class Committee
                 LEVENSHTEIN("' . $this->name . '", name) AS distance
                 FROM committees
                 WHERE chamber="' . $this->chamber . '"
-                ORDER BY distance DESC
+                ORDER BY distance ASC
                 LIMIT 1';
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) == 0) {
