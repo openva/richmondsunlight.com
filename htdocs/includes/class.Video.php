@@ -163,7 +163,7 @@ class Video
         $this->length = seconds_to_time($mplayer['id_length']);
 
         if (empty($this->capture_rate) && !empty($this->capture_directory)) {
-            $dir = scandir(CLI_ROOT . $this->capture_directory, 1);
+            $dir = scandir(CLI_ROOT . '/video/' . $this->capture_directory, 1);
             if ($dir == false) {
                 return false;
             }
