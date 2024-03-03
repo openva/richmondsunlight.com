@@ -145,7 +145,7 @@ class Video
     # Get vital stats about this video via MPlayer and the filesystem.
     public function extract_file_data()
     {
-        exec('/usr/bin/mplayer -ao null -vo null -identify -frames 0 ' . CLI_ROOT . '/video/'
+        exec('/usr/bin/mplayer -ao null -vo null -identify -frames 0 ' . CLI_ROOT
             . $this->path, $mplayer);
 
         foreach ($mplayer as $option) {
