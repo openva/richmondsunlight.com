@@ -639,28 +639,10 @@ div#partisanship-graph {
 	background: url(/images/wait.gif) bottom right no-repeat;
 }
 
-/* The Facebook "Like" button */
-#facebook {
-	float: right;
-	width: 100px;
-}
-
 /* The list of sessions on sidebar of the the main listing of bills */
 body#body-bills div#options ul {
 	margin-left: 2em;
 }
-
-/* Display this to MobileSafari visitors. */
-#iphone-alert {
-	font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
-	font-size: 36px;
-	background: #fff;
-	height: 90px;
-}
-	#iphone-alert a {
-		color: #000;
-		text-decoration: none;
-	}
 
 
 /* A visual index to videos. */
