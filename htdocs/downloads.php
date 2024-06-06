@@ -87,6 +87,14 @@
 			<li><a href="https://downloads.richmondsunlight.com/bills/2014.zip">2014</a></li>
 			<li><a href="https://downloads.richmondsunlight.com/bills/2015.zip">2015</a></li>
 			<li><a href="https://downloads.richmondsunlight.com/bills/2016.zip">2016</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2017.zip">2017</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2018.zip">2018</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2019.zip">2019</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2020.zip">2020</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2021.zip">2021</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2022.zip">2022</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2023.zip">2023</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2024.zip">2024</a></li>
 		</ul>
 
 		<h2>Legislators</h2>
