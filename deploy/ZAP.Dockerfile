@@ -1,5 +1,5 @@
 # Use the OWASP ZAP Docker image as the base
-FROM owasp/zap2docker-stable:latest
+FROM zaproxy/zap-stable:latest
 
 # Set the working directory in the container
 WORKDIR /zap
