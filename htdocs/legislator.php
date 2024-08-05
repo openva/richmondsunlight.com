@@ -309,7 +309,7 @@ $page_body = '
 	<li><a href="#bio">Bio</a></li>';
 $page_body .= '
 	<li><a href="#media">Media</a></li>';
-if (!empty($legislator['rss_url'])) {
+if (!empty($legislator['rss_url']) && empty($legislator['date_ended'])) {
     $page_body .= '
 	<li><a href="#news">News</a></li>';
 }
@@ -458,18 +458,18 @@ if (!empty($legislator['twitter'])) {
     </div>';
 }
 
-if (!empty($legislator['activity']) && IN_SESSION == true) {
+/*if (!empty($legislator['activity']) && IN_SESSION == true) {
     $page_body .= '
     <div class="pair">
-		<div class="label">Daily Activity</div>
-		<div class="content" id="activity">
-			<img src="'
+        <div class="label">Daily Activity</div>
+        <div class="content" id="activity">
+            <img src="'
             . '//chart.googleapis.com/chart?cht=ls&chs=400x70&chco=243a51&chf=bg,s,f4eee5'
             . '&chm=B,dccbaf,0,0,0&chds=0,' . $legislator['activity_peak'] . '&chd=t:'
             . ($legislator['activity']) . '" />
-		</div>
+        </div>
     </div>';
-}
+}*/
 
 # COPATRONING STATS
 # Calculate the percentage of the bills copatroned by this legislator that were introduced by
@@ -812,7 +812,7 @@ $page_body .= '
 $page_body .= '</tbody></table></div>';
 
 # News from the legislator's website.
-if (!empty($legislator['rss_url'])) {
+if (!empty($legislator['rss_url']) && empty($legislator['date_ended'])) {
     $newsfeed->set_feed_url($legislator['rss_url']);
     $newsfeed->init();
     $newsfeed->handle_content_type();

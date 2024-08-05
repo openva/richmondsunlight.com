@@ -145,7 +145,8 @@ class Video
     # Get vital stats about this video via MPlayer and the filesystem.
     public function extract_file_data()
     {
-        exec('/usr/bin/mplayer -ao null -vo null -identify -frames 0 ' . CLI_ROOT . $this->path, $mplayer);
+        exec('/usr/bin/mplayer -ao null -vo null -identify -frames 0 ' . CLI_ROOT
+            . $this->path, $mplayer);
 
         foreach ($mplayer as $option) {
             if (mb_strpos($option, '=') !== false) {
@@ -162,7 +163,7 @@ class Video
         $this->length = seconds_to_time($mplayer['id_length']);
 
         if (empty($this->capture_rate) && !empty($this->capture_directory)) {
-            $dir = scandir(CLI_ROOT . $this->capture_directory, 1);
+            $dir = scandir(CLI_ROOT . '/video/' . $this->capture_directory, 1);
             if ($dir == false) {
                 return false;
             }

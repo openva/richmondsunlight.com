@@ -9,7 +9,7 @@ RUN echo "deb http://archive.debian.org/debian/ stretch main non-free contrib" >
 # Disable checking for valid signatures on the archived repositories
 RUN echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/90ignore-release-date
 
-RUN docker-php-ext-install mysqli && docker-php-ext-install mysql && a2enmod rewrite && a2enmod expires && a2enmod headers
+RUN docker-php-ext-install mysqli && a2enmod rewrite && a2enmod expires && a2enmod headers
 
 # Install our packages
 RUN apt --fix-broken install

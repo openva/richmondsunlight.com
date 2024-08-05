@@ -120,14 +120,18 @@ class Statistics
                     representatives_votes.representative_id=' . $legislator_id . ' AND
                     votes.session_id = ' . SESSION_ID . '
                 GROUP BY votes.date
-                ORDER BY date DESC';
-        $stmt = $db->prepare($sql);
-        $stmt->execute();
-        $result = $stmt->fetchAll();
-        if (count($result) == 0) {
+                ORDER BY date ASC';
+
+        $result = mysqli_query($db, $sql);
+        if ($result === false) {
             return false;
         }
 
-        return $result;
+        $activity = [];
+        while ($action = mysqli_fetch_assoc($result)) {
+            $activity[$result['date']] = $action['number'];
+        }
+
+        return $activity;
     }
 }

@@ -606,6 +606,8 @@ $page_body .= '</p>';
 if (isset($bill['status_history'])) {
     $bill['history'] = '';
 
+    $statuses = [];
+
     foreach ($bill['status_history'] as $status) {
         # Cast this object as an array.
         $status = (array) $status;
@@ -893,8 +895,11 @@ if (mysqli_num_rows($result) > 0) {
         $page_body .= '<a href="/committee/' . $docket['chamber'] . '/' . $docket['shortname'] . '/">' . ucfirst($docket['chamber']) .
             ' ' . $docket['committee'] . '</a> committee';
     }
-    $page_body .= ' on ' . $docket['date'] . '. It meets on ' . $docket['meeting_time'] . '.
-		</div>';
+    $page_body .= ' on ' . $docket['date'] . '.';
+    if (!empty($docket['meeting_time'])) {
+        $page_body .= ' It meets on ' . $docket['meeting_time'] . '.';
+    }
+    $page_body .= '</div>';
 }
 
 $debug_timing['hearings retrieved'] = microtime(true);

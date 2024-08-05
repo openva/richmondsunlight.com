@@ -32,7 +32,7 @@ if [ ! -d "api/" ]; then
 fi
 
 # Stand it up
-docker-compose build && docker-compose up -d
+docker compose build && docker compose up -d
 
 # Wait for MariaDB to be available
 while ! nc -z localhost 3306; do sleep 1; done
