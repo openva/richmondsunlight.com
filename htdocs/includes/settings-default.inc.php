@@ -10,20 +10,20 @@
 
 # THE CURRENT SESSION
 # As defined by Richmond Sunlight's database
-define('SESSION_ID', 30);
+define('SESSION_ID', 31);
 
 # Is this the main session or a special session? As defined by Richmond Sunlight's database.
 define('SESSION_SUFFIX', '');
 
 # As defined by the GA LIS' database.
-define('SESSION_LIS_ID', '241');
+define('SESSION_LIS_ID', '251');
 
 # As defined by the year.
-define('SESSION_YEAR', 2024);
+define('SESSION_YEAR', 2025);
 
 # Start and end of this session.
-define('SESSION_START', '2024-01-10');
-define('SESSION_END', '2024-03-09');
+define('SESSION_START', '2025-01-08');
+define('SESSION_END', '2025-02-21');
 
 # Set the FTP auth pair for legislative data.
 define('LIS_FTP_USERNAME', '');
