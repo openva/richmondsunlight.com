@@ -133,7 +133,7 @@ class Import
         # Provide friendlier array element names.
         $bill['number'] = strtolower(trim($bill[0]));
         $bill['catch_line'] = trim($bill[1]);
-        $bill['chief_patron_id'] = substr(trim($bill[2]), 1);
+        $bill['chief_patron_id'] = intval(substr(trim($bill[2]), 1));
         $bill['chief_patron'] = trim($bill[3]);
         $bill['last_house_committee'] = trim($bill[4]);
         $bill['last_house_date'] = strtotime(trim($bill[6]));
