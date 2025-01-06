@@ -69,6 +69,9 @@ define('VA_DECODED_KEY', '');
 # Mapbox API access token
 define('MAPBOX_TOKEN', '');
 
+# LIS API token
+define('LIS_KEY', '');
+
 # Logging verbosity, on a scale of 1–8
 define('LOG_VERBOSITY', 3);
 
