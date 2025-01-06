@@ -1,4 +1,4 @@
-FROM php:5-apache
+FROM php:7.2-apache
 
 # Replace sources.list with the archived repository URLs
 RUN echo "deb http://archive.debian.org/debian/ stretch main non-free contrib" > /etc/apt/sources.list \
@@ -13,8 +13,8 @@ RUN docker-php-ext-install mysqli && a2enmod rewrite && a2enmod expires && a2enm
 
 # Install our packages
 RUN apt --fix-broken install
-RUN apt-get update
-RUN apt-get install -y apt-transport-https ca-certificates gnupg2
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends apt-transport-https ca-certificates gnupg-agent libreadline7 libtinfo5 gnupg gnupg2
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 RUN apt-get update
