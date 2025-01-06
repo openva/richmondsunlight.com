@@ -154,7 +154,7 @@ $html_head .= '
         . $bill['number'] . '/" title="RSS for ' . $bill['number'] . '" />
 	<link rel="alternate" type="application/json" href="http://api.richmondsunlight.com/1.1/bill/'
         . $bill['year'] . '/' . $bill['number'] . '.json" title="JSON for ' . $bill['number'] . '" />
-	<link rel="alternate" type="application/pdf" href="http://lis.virginia.gov/cgi-bin/legp604.exe?'
+	<link rel="alternate" type="application/pdf" href="http://legacylis.virginia.gov/cgi-bin/legp604.exe?'
         . $bill['session_lis_id'] . '+ful+' . mb_strtoupper($bill['number']) . '+pdf" title="PDF of ' . $bill['number'] . '" />';
 
 # Come up with a meta description.
