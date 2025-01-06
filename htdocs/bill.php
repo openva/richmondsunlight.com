@@ -507,10 +507,15 @@ $page_sidebar .= '
 		<h3>More Information</h3>
 		<ul>';
 $page_sidebar .= '
-			<li><a href="http://lis.virginia.gov/cgi-bin/legp604.exe?' . $bill['session_lis_id'] . '+ful+' . mb_strtoupper($bill['number']) . '+pdf">View as PDF</a></li>';
+			<li><a href="https://legacylis.virginia.gov/cgi-bin/legp604.exe?'
+            . $bill['session_lis_id'] . '+ful+' . mb_strtoupper($bill['number'])
+            . '+pdf">View as PDF</a></li>';
 $page_sidebar .= '
-			<li><a href="http://lis.virginia.gov/cgi-bin/legp604.exe?' . $bill['session_lis_id'] . '+sum+' . mb_strtoupper($bill['number']) . '">View on the Legislature’s Site</a></li>
-			<li><a href="' . API_URL . '1.1/bill/' . $bill['year'] . '/' . $bill['number'] . '.json">View as JSON</a></li>';
+			<li><a href="https://lis.virginia.gov/bill-details/20' . $bill['session_lis_id']
+            . '/' . mb_strtoupper($bill['number'])
+            . '">View on the Legislature’s Site</a></li>
+			<li><a href="' . API_URL . '1.1/bill/' . $bill['year'] . '/' . $bill['number']
+            . '.json">View as JSON</a></li>';
 
 if (!empty($bill['impact_statement_id'])) {
     $page_sidebar .= '
