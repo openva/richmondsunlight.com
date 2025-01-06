@@ -342,18 +342,33 @@ if ($poll->get_results() !== false) {
         $poll->results['yes'] = round(($poll->results['yes'] / $poll->results['total']) * 100);
 
         # Establish the label text for the graph.
-        $poll->results['no_text'] = urlencode('no ' . $poll->results['no'] . '%');
-        $poll->results['yes_text'] = urlencode('yes ' . $poll->results['yes'] . '%');
+        $poll->results['no_text'] = 'No ' . $poll->results['no'] . '%';
+        $poll->results['yes_text'] = 'Yes ' . $poll->results['yes'] . '%';
 
-        # Assemble the URL for, and display, the chart for the voting percentage.
-        $page_sidebar .= '<img src="'
-            . '//chart.googleapis.com/chart?chs=215x115&amp;cht=p&amp;chd=t:'
-            . $poll->results['yes'] . ',' . $poll->results['no']
-            . '&amp;chl=' . (($poll->results['yes']) ? $poll->results['yes_text'] : '')
-            . ((isset($poll->results['yes'], $poll->results['no'])) ? '|' : '') .
-            (($poll->results['no']) ? $poll->results['no_text'] : '')
-            . '&amp;chf=bg,s,f4eee5&amp;chts=333333,9" />
-			<p>' . $poll->results['total'] . ' vote' . ($poll->results['total'] > 1 ? 's' : '') . '</p>';
+        # Add a canvas element for the chart.
+        $page_sidebar .= '<canvas id="pollChart" width="215" height="115"></canvas>';
+        $page_sidebar .= '<p>' . $poll->results['total'] . ' vote' . ($poll->results['total'] > 1 ? 's' : '') . '</p>';
+
+        # Add the Chart.js script and initialize the chart.
+        $page_header .= '<script src="/js/vendor/chart.js/dist/chart.umd.js"></script>';
+        $page_sidebar .= '
+        <script>
+            var ctx = document.getElementById("pollChart").getContext("2d");
+            var pollChart = new Chart(ctx, {
+                type: "pie",
+                data: {
+                    labels: ["' . $poll->results['yes_text'] . '", "' . $poll->results['no_text'] . '"],
+                    datasets: [{
+                        data: [' . $poll->results['yes'] . ', ' . $poll->results['no'] . '],
+                        backgroundColor: ["#4CAF50", "#F44336"]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        </script>';
     } else {
         if ($bill['session_id'] == SESSION_ID) {
             $page_sidebar .= '<p>No Richmond Sunlight visitors have voted on this bill yet.</p>';
