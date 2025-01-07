@@ -1,4 +1,4 @@
-FROM php:7.2-apache
+FROM php:7.4.33-apache
 
 # Replace sources.list with the archived repository URLs
 RUN echo "deb http://archive.debian.org/debian/ stretch main non-free contrib" > /etc/apt/sources.list \
