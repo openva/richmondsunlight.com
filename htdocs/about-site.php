@@ -28,26 +28,25 @@
 
 		<h2>The Data</h2>
 		<p>All data about bills—titles, numbers, patrons, text, status, etc.—comes from the <a
-		href="http://leg1.state.va.us/">General Assembly's Legislative Information System</a>, which
+		href="https://lis.virginia.gov/">General Assembly's Legislative Information System</a>, which
 		is the General Assembly's own service.  Some of the data comes in bulk from their <a
-		href="http://lis.virginia.gov/SiteInformation/ftp.html">FTP CSV service</a>, which is
-		provided for services just such as Richmond Sunlight.  Most legislative data is updated
-		hourly, but bill histories (the bill's progress—votes and the like) are updated daily around
+		href="https://lis.virginia.gov/data-files">data files</a> and
+		<a href="https://lis.virginia.gov/developers">their API</a>, which are provided for services
+		just such as Richmond Sunlight.  Most legislative data is updated hourly, but bill histories
+		(the bill's progress—votes and the like) are updated daily around
 		2:30pm, because that is when the General Assembly makes that data available.</p>
 
-		<p>The remainder of the data is gathered from a variety of resources. Fundraising data comes
-		from <a href="http://www.vpap.org/">the Virginia Public Access Project</a>, election history
-		data comes from <a href="http://www.sbe.state.va.us/">the State Board of Elections</a>, and
-		the remainder comes from a variety of resources.</p>
+		<p>The remainder of the data is gathered from a variety of resources. Election history
+		data comes from <a href="https://www.elections.virginia.gov">the State Board of
+		Elections</a>, and the remainder comes from a variety of resources.</p>
 
 		<h2>Thanks To</h2>
 		<ul class="classic">
 			<li>Frosty Landon of the <a href="http://www.opengovva.org/">Virginia Coalition for
 			Open Government</a>, for inspiration</li>
 			<li>Bill Wilson and Bert Morton, of
-			<a href="http://legis.state.va.us/SiteInformation/SiteInformation.htm">Division of
-			Legislative Automated Systems</a>, for going above and beyond traditional expectations of
-			government responsiveness</li>
+			<a href="https://dlas.virginia.gov">Division of Legislative Automated Systems</a>, for
+			going above and beyond traditional expectations of government responsiveness</li>
 			<li>David Poole, of <a href="http://www.vpap.org/">Virginia Public Access
 			Project</a>, for setting a good example, and</li>
 			<li>the nearly 100 people who alpha and beta tested the website, providing
