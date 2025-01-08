@@ -89,7 +89,7 @@ class Import
         }
 
         # Provide a domain name for all links.
-        $text = str_ireplace('href="/', 'href="http://leg1.state.va.us/', $text);
+        $text = str_ireplace('href="/', 'href="https://leg1.state.va.us/', $text);
 
         # Make the text available within the scope of the class.
         $this->text = $text;
