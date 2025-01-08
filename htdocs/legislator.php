@@ -287,8 +287,10 @@ $page_sidebar .= '
     <div class="box">
         <h3>More Info</h3>
         <ul>
-            <li><a href="http://leg1.state.va.us/cgi-bin/legp504.exe?' . SESSION_LIS_ID . '+mbr+'
-                . $legislator['lis_id'] . '">View on the Legislature’s Site</li>
+            <li><a href="https://lis.virginia.gov/session-details/20' . SESSION_LIS_ID
+                . '/member-information/0'
+                . ($legislator['chamber'] == 'house' ? 'H' : 'S') . $legislator['lis_id']
+                . '/member-details">View on the Legislature’s Site</li>
             <li><a href="https://api.richmondsunlight.com/1.1/legislator/'
                 . $legislator['shortname'] . '.json">View as JSON</a></li>
         </ul>
