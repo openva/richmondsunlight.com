@@ -1069,7 +1069,7 @@ class Import
             if ($lis_id[0] == 'S') {
                 $lis_id = substr($lis_id, 1);
             }
-            $url = 'https://lis.virginia.gov/cgi-bin/legp604.exe?' . SESSION_LIS_ID . '+mbr+S'
+            $url = 'https://legacylis.virginia.gov/cgi-bin/legp604.exe?' . SESSION_LIS_ID . '+mbr+S'
                 . $lis_id;
             $html = file_get_contents($url);
 
