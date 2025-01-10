@@ -765,7 +765,7 @@ class Import
             return false;
         }
 
-        $log->put('Refreshed the legislator record for ' . $legislator['name_formatted'] . '.', 3);
+        $log->put('Refreshed the legislator record for ' . $legislator['name_formatted'] . '.', 2);
 
         return true;
     } // update_legislator
