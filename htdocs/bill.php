@@ -42,7 +42,6 @@ $bill = mb_strtolower(mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['bill'
 # Initialize variables.
 $html_head = '';
 $page_body = '';
-$page_header = '';
 
 # Get the bill's content from the API.
 # We append a query string, containing the current time, to avoid getting a cached copy.
@@ -350,7 +349,7 @@ if ($poll->get_results() !== false) {
         $page_sidebar .= '<p>' . $poll->results['total'] . ' vote' . ($poll->results['total'] > 1 ? 's' : '') . '</p>';
 
         # Add the Chart.js script and initialize the chart.
-        $page_header .= '<script src="/js/vendor/chart.js/dist/chart.umd.js"></script>';
+        $html_head .= '<script src="/js/vendor/chart.js/dist/chart.umd.js"></script>';
         $page_sidebar .= '
         <script>
             var ctx = document.getElementById("pollChart").getContext("2d");
@@ -386,13 +385,15 @@ $page_sidebar .= '
         <ul class="tags" id="tags_list">';
 
 if (isset($bill['tags']) && (count($bill['tags']) > 0)) {
-    $page_header .= "
+    $html_head .= "
+        <script>
         $('.delete').click(function(e) {
             e.preventDefault();
             var tagId = $(this).attr('data-id');
             var url = '/process-tags.php';
             $.post(url, { delete: tagId }, function(data){ console.log('deleted');} );
-        });";
+        });
+        </script>";
 
     foreach ($bill['tags'] as $tag_id => $tag) {
         # We're saving this list for use below, in the list of related bills.
