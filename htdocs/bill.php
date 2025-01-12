@@ -364,7 +364,7 @@ if ($poll->get_results() !== false) {
                 },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false
+                    maintainAspectRatio: true
                 }
             });
         </script>';
