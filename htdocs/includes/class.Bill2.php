@@ -107,7 +107,6 @@ class Bill2
 				    bills.full_text,
                     bills.notes,
                     bills.status,
-                    bills.impact_statement_id,
 				    bills.date_introduced,
                     bills.outcome,
                     bills2.number AS incorporated_into,
@@ -608,6 +607,39 @@ class Bill2
         }
 
         return $this->changes;
+    }
+
+    /**
+     * Get the fiscal impact statements for a bill
+     */
+    public function impact_statements()
+    {
+        if (!isset($this->id)) {
+            return false;
+        }
+
+        $database = new Database();
+        $database->connect_mysqli();
+
+        $sql = 'SELECT
+                    lis_id,
+                    pdf_url,
+                    summary
+                FROM fiscal_impact_statements
+                WHERE bill_id=' . $this->id;
+        $result = mysqli_query($GLOBALS['db'], $sql);
+
+        if (mysqli_num_rows($result) == 0) {
+            return false;
+        }
+
+        $impact_statements = array();
+        while ($impact_statement = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+            $impact_statement = array_map('stripslashes', $impact_statement);
+            $impact_statements[] = $impact_statement;
+        }
+        
+        return $impact_statements;
     }
 
     /**

@@ -87,6 +87,16 @@ if ($bill_text->get_terms() === true) {
 
 $debug_timing['definitions retrieved'] = microtime(true);
 
+/*
+ * Retreive the impact statements, if any exist.
+ */
+$fis = new Bill2();
+$fis->id = $bill['id'];
+$impact_statements = $fis->impact_statements();
+if ($impact_statements === false) {
+    unset($impact_statements);
+}
+
 # We want to record a view count hit for this bill, but only if this is a real user, not a
 # search engine. Start by defining a list of bots.
 $bots = array('Googlebot', 'msnbot', 'Gigabot', 'Slurp', 'Teoma', 'ia_archiver', 'Yandex',
@@ -138,7 +148,6 @@ $html_head .= '
 	<meta property="twitter:title" content="' . mb_strtoupper($bill['number']) . ', introduced by ' . $bill['patron_name_formatted'] . '"/>
 	<meta property="twitter:image" content="https://www.richmondsunlight.com/images/legislators/thumbnails/'
         . $bill['patron_shortname'] . '.jpg"/>
-	<meta name="twitter:site" content="@richmond_sun" />
     <meta property="twitter:description" content="' . $bill['catch_line'] . '" />
     <meta name="twitter:label1" value="Introduced By" />
     <meta name="twitter:data1" value="' . $bill['patron_name_formatted'] . '" />
@@ -533,9 +542,19 @@ $page_sidebar .= '
 			<li><a href="' . API_URL . '1.1/bill/' . $bill['year'] . '/' . $bill['number']
             . '.json">View as JSON</a></li>';
 
-if (!empty($bill['impact_statement_id'])) {
-    $page_sidebar .= '
-			<li><a href="https://lis.virginia.gov/cgi-bin/legp604.exe?' . $bill['session_lis_id'] . '+oth+' . mb_strtoupper($bill['number']) . $bill['impact_statement_id'] . '+PDF">Fiscal Impact Statement</a></li>';
+// Display fiscal impact statements
+if (isset($impact_statements)) {
+    foreach ($impact_statements as $impact_statement) {
+        if (!empty($impact_statement['pdf_url'])) {
+            $url = $impact_statement['pdf_url'];
+        }
+        elseif (!empty($impact_statement['lis_id'])) {
+            $url = 'https://lis.virginia.gov/cgi-bin/legp604.exe?'
+                . $bill['lis_id'] . '+oth+' . mb_strtoupper($bill['number'])
+                . $impact_statement['lis_id'] . '+PDF';
+        }
+        $page_sidebar .= '<li><a href="' . $url . '">Fiscal Impact Statement</a></li>';
+    }
 }
 
 $page_sidebar .= '</ul></div>';
