@@ -827,13 +827,29 @@ if (
     </div>';
 }
 
-# If we have any notes about this bill.
+// If we have any notes about this bill.
 if (!empty($bill['notes'])) {
     $page_body .= '
 		<div id="notes">
 		<h2>Notes</h2>
 		' . $bill['notes'] . '
 		</div>';
+}
+
+// If we have any fiscal impact statement summaries for this bill
+// You're thinking "hey, what if there are notes AND fiscal impact summaries?" Well, that's not
+// wrong, but there are currently no bills that have both of these things, so let's burn that
+// bridge when we get to it.
+elseif (!empty($impact_statements)) {
+    foreach ($impact_statements as $impact_statement) {
+        if (isset($impact_statement['summary'])) {
+            $page_body .= '
+                    <div id="notes">
+                    <h2>Notes</h2>
+                    ' . $impact_statement['summary'] . '
+                    </div>';
+        }
+    }
 }
 
 /*
