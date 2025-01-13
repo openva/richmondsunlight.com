@@ -638,7 +638,7 @@ class Bill2
             $impact_statement = array_map('stripslashes', $impact_statement);
             $impact_statements[] = $impact_statement;
         }
-        
+
         return $impact_statements;
     }
 

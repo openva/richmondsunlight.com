@@ -547,8 +547,7 @@ if (isset($impact_statements)) {
     foreach ($impact_statements as $impact_statement) {
         if (!empty($impact_statement['pdf_url'])) {
             $url = $impact_statement['pdf_url'];
-        }
-        elseif (!empty($impact_statement['lis_id'])) {
+        } elseif (!empty($impact_statement['lis_id'])) {
             $url = 'https://lis.virginia.gov/cgi-bin/legp604.exe?'
                 . $bill['lis_id'] . '+oth+' . mb_strtoupper($bill['number'])
                 . $impact_statement['lis_id'] . '+PDF';
