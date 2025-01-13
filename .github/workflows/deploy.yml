@@ -25,6 +25,7 @@ jobs:
       - name: Install packages with APT
         run: >-
           sudo apt-get update && 
+          sudo apt-get install -y apt-transport-https ca-certificates gnupg-agent libreadline7 libtinfo5 gnupg gnup2 &&
           sudo apt-get install -y awscli php5.6-cli php5.6-curl php5.6-memcached php5.6-mysql yarn zip
       - uses: actions/checkout@v3
       - run: sudo apt-get update -qq
@@ -33,7 +34,7 @@ jobs:
       - name: Install Node dependencies
         run: cd htdocs/js/vendor; yarn build
       - run: cd ../../..
-      - run: find htdocs/*.php -print0 |xargs -0 -n1 -P8 php5.6 -l
+      - run: find htdocs/*.php -print0 | xargs -0 -n1 -P8 php5.6 -l
       - name: Set up Docker
         uses: docker/setup-buildx-action@v1
       - name: Run Docker
