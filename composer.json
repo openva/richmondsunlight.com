@@ -1,6 +1,6 @@
 {
     "config": {
-    	"vendor-dir": "htdocs/includes/vendor"
+        "vendor-dir": "htdocs/includes/vendor"
     },
     "repositories": {
         "sphinx-search-api-php-client": {
@@ -17,12 +17,13 @@
         }
     },
     "require": {
-        "phpmailer/phpmailer": "~6.5",
-        "ezyang/htmlpurifier":"~4.9",
-        "doctrine/instantiator":"1",
-        "simplepie/simplepie": "1.5.5",
+        "php": "^8.0",
+        "phpmailer/phpmailer": "^6.5",
+        "ezyang/htmlpurifier": "^4.13",
+        "doctrine/instantiator": "^1.4",
+        "simplepie/simplepie": "^1.7",
         "romainneutron/sphinx-search-api-php-client": "2.0.8.1",
-        "aws/aws-sdk-php": "~3.186"
+        "aws/aws-sdk-php": "^3.186"
     },
     "autoload": {
         "classmap": [
