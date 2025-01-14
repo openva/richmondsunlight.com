@@ -28,7 +28,6 @@ jobs:
       - name: Build and run Docker
         run: docker compose up -d
       - name: Run tests
-        run: ./vendor/bin/phpunit
         run: docker exec -i rs_web vendor/bin/phpunit
       - name: Stop Docker
         run: docker compose down
