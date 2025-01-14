@@ -1,0 +1,27 @@
+name: Build Process for PHP 8
+
+on:
+  push:
+    branches:
+      - php8
+  pull_request:
+    branches:
+      - php8
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.0'
+      - name: Install Composer dependencies
+        run: composer install
+      - name: Install Node dependencies
+        run: cd htdocs/js/vendor; yarn install
+      - run: cd ../../..
+      - run: find htdocs/*.php -print0 | xargs -0 -n1 -P8 php -l
+      - name: Run tests
+        run: ./vendor/bin/phpunit
