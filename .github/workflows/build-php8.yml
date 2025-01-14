@@ -23,5 +23,12 @@ jobs:
         run: cd htdocs/js/vendor; yarn install
       - run: cd ../../..
       - run: find htdocs/*.php -print0 | xargs -0 -n1 -P8 php -l
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v1
+      - name: Build and run Docker
+        run: docker compose up -d
       - name: Run tests
         run: ./vendor/bin/phpunit
+        run: docker exec -i rs_web vendor/bin/phpunit
+      - name: Stop Docker
+        run: docker compose down
