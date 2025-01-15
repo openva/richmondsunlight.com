@@ -9,8 +9,7 @@ RUN apt-get update && \
     git \
     zip \
     zlib1g-dev \
-    jq \
-    sphinxsearch
+    jq
 
 # Install PHP extensions and Apache modules
 RUN docker-php-ext-install mysqli && \
