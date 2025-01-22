@@ -4,9 +4,9 @@ services:
     build:
       context: deploy/
       dockerfile: Web.Dockerfile
-    links:
-      - api:api
-      - db:db
+    depends_on:
+      - api
+      - db
     ports:
       - "8000:80"
     volumes:
@@ -14,12 +14,14 @@ services:
         source: .
         target: /var/www
     container_name: rs_web
+    networks:
+      - rs_network
   api:
     build:
       context: api/deploy/
       dockerfile: API.Dockerfile
-    links:
-      - db:db
+    depends_on:
+      - db
     ports:
       - "5001:80"
     volumes:
@@ -27,6 +29,8 @@ services:
         source: ./api/htdocs/
         target: /var/www/html/
     container_name: rs_api
+    networks:
+      - rs_network
   db:
     build:
       context: api/deploy/
@@ -37,6 +41,8 @@ services:
     ports:
       - "3306:3306"
     container_name: rs_db
+    networks:
+      - rs_network
   owasp_zap:
     build:
       context: deploy/
@@ -44,5 +50,10 @@ services:
     ports:
       - "5002:8080"
     container_name: rs_zap
+    networks:
+      - rs_network
 volumes:
-    db_data: {}
+  db_data: {}
+networks:
+  rs_network:
+    driver: bridge
