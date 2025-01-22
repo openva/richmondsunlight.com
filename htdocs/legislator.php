@@ -906,7 +906,7 @@ if ($legislator['videos'] !== false) {
 $page_body .= '</div>';
 
 # List the legislator's bills
-if (count($legislator['bills']) > 0) {
+if (isset($legislator['bills']) && count($legislator['bills']) > 0) {
     $page_body .= '<div style="clear: both;" id="bills" class="tabs">
 		<h2>Bills</h2>';
 
