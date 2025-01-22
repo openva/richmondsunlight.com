@@ -579,7 +579,6 @@ class Import
             'date_started' => true,
             'party' => true,
             'lis_id' => true,
-            'lis_shortname' => true,
             'email' => true,
         );
 

@@ -69,6 +69,9 @@ define('VA_DECODED_KEY', '');
 # Mapbox API access token
 define('MAPBOX_TOKEN', '');
 
+# LIS API token
+define('LIS_KEY', '');
+
 # Logging verbosity, on a scale of 1–8
 define('LOG_VERBOSITY', 3);
 
@@ -95,3 +98,21 @@ setlocale(LC_MONETARY, 'en_US');
 
 # Set the timezone.
 date_default_timezone_set('America/New_York');
+
+/*
+ * Dynamically determine whether the legislature is in session and whether it's legislative season.
+ */
+if (
+    time() >= strtotime(SESSION_START)
+    &&
+    time() <= strtotime(SESSION_END)
+) {
+    define('IN_SESSION', true);
+} else {
+    define('IN_SESSION', false);
+}
+if (date('n') >= 11 || date('n') <= 4) {
+    define('LEGISLATIVE_SEASON', true);
+} else {
+    define('LEGISLATIVE_SEASON', false);
+}

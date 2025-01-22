@@ -397,7 +397,8 @@ class Video
         # Build up an array of tags, with the key being the tag and the value being the count.
         while ($tag = mysqli_fetch_array($result)) {
             $tag = array_map('stripslashes', $tag);
-            $tags[$tag{'tag'}] = $tag['number'];
+            $tag_text = $tag['tag'];
+            $tags[$tag_text] = $tag['number'];
         }
 
         # Sort the tags in reverse order by key (their count), shave off the top 30, and then

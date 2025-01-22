@@ -452,13 +452,6 @@ if (!empty($legislator['website'])) {
 		<div class="content"><a href="' . $legislator['website'] . '">' . $legislator['website_name'] . '</a></div>
     </div>';
 }
-if (!empty($legislator['twitter'])) {
-    $page_body .= '
-    <div class="pair">
-		<div class="label">Twitter</div>
-		<div class="content"><a href="https://twitter.com/' . $legislator['twitter'] . '">@' . $legislator['twitter'] . '</a></div>
-    </div>';
-}
 
 /*if (!empty($legislator['activity']) && IN_SESSION == true) {
     $page_body .= '
@@ -913,7 +906,7 @@ if ($legislator['videos'] !== false) {
 $page_body .= '</div>';
 
 # List the legislator's bills
-if (count($legislator['bills']) > 0) {
+if (isset($legislator['bills']) && count($legislator['bills']) > 0) {
     $page_body .= '<div style="clear: both;" id="bills" class="tabs">
 		<h2>Bills</h2>';
 

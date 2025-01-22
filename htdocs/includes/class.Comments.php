@@ -62,7 +62,8 @@ class Comments
                     $comment['comment'] = nl2p($comment['comment']);
 
                     # Add this comment to the comments array.
-                    $comments[$comment{'timestamp'}] = $comment;
+                    $comment_timestamp = $comment['timestamp'];
+                    $comments[$comment_timestamp] = $comment;
                 }
             }
         }
@@ -102,7 +103,7 @@ class Comments
                         # Make the user closer to anonymous.
                         $tmp = explode(' ', $comment['name']);
                         if (count($tmp) > 1) {
-                            $comment['name'] = $tmp[0] . ' ' . $tmp[1]{0} . '.';
+                            $comment['name'] = $tmp[0] . ' ' . $tmp[1][0] . '.';
                         } else {
                             $comment['name'] = $tmp[0];
                         }
@@ -112,7 +113,7 @@ class Comments
                     $comment['type'] = 'photosynthesis';
 
                     # Add this comment to the comments array.
-                    $comments[$comment{timestamp}] = $comment;
+                    $comments[$comment]['timestamp'] = $comment;
                 }
             }
         }

@@ -1,6 +1,6 @@
 <?php
 
-$url_prefix = 'http://localhost';
+$url_prefix = 'http://localhost:8000';
 
 $failures = [];
 

@@ -393,7 +393,7 @@ $page_sidebar .= '
         <h3>Tags</h3>
         <ul class="tags" id="tags_list">';
 
-if (isset($bill['tags']) && (count($bill['tags']) > 0)) {
+if (isset($bill['tags']) && (count((array)$bill['tags']) > 0)) {
     $html_head .= "
         <script>
         $('.delete').click(function(e) {
@@ -1328,29 +1328,31 @@ if (($bill['session_id'] == SESSION_ID)) {
 		<textarea rows="16" cols="60" name="comment[comment]" id="comment" required></textarea><br />
 		<small>(Limited HTML is OK: &lt;a&gt;, &lt;em&gt;, &lt;strong&gt;, &lt;s&gt)</small><br />';
 
-    # Create a new instance of the comments-subscription class
-    $subscription = new CommentSubscription();
-    # Give it the user's ID and the bill's ID.
-    $subscription->user_id = $user['id'];
-    $subscription->bill_id = $bill['id'];
+    if (isset($user)) {
+        # Create a new instance of the comments-subscription class
+        $subscription = new CommentSubscription();
+        # Give it the user's ID and the bill's ID.
+        $subscription->user_id = $user['id'];
+        $subscription->bill_id = $bill['id'];
 
-    # Get the user's subscription status. (Either false or, if true, we get a hash of the
-    # subscription ID.
-    $subscription_status = $subscription->is_subscribed();
+        # Get the user's subscription status. (Either false or, if true, we get a hash of the
+        # subscription ID.
+        $subscription_status = $subscription->is_subscribed();
 
-    $debug_timing['subscription determined'] = microtime(true);
+        $debug_timing['subscription determined'] = microtime(true);
 
-    # If the person isn't already subscribed to this bill's comments.
-    if ($subscription_status === false) {
-        $page_body .= '<input type="checkbox" value="y" name="comment[subscribe]"'
-        . ' id="subscribe" /> <label for="subscribe"><strong>Subscribe</strong> <small>get future'
-        . ' comments by e-mail</small></label><br />';
-    }
+        # If the person isn't already subscribed to this bill's comments.
+        if ($subscription_status === false) {
+            $page_body .= '<input type="checkbox" value="y" name="comment[subscribe]"'
+            . ' id="subscribe" /> <label for="subscribe"><strong>Subscribe</strong> <small>get future'
+            . ' comments by e-mail</small></label><br />';
+        }
 
-    # Otherwise, if the person is subscribed to this bill's comments.
-    else {
-        $page_body .= '<strong>You are subscribed</strong> to be e-mailed future comments
-			to this bill. <a href="/unsubscribe/' . $subscription_status . '/">Unsubscribe?</a><br />';
+        # Otherwise, if the person is subscribed to this bill's comments.
+        else {
+            $page_body .= '<strong>You are subscribed</strong> to be e-mailed future comments
+                to this bill. <a href="/unsubscribe/' . $subscription_status . '/">Unsubscribe?</a><br />';
+        }
     }
 
     $page_body .= '
