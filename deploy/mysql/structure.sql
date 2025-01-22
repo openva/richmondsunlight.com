@@ -535,6 +535,43 @@ CREATE TABLE `files` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `fiscal_impact_statements`
+--
+
+CREATE TABLE `fiscal_impact_statements` (
+  `id` mediumint(8) UNSIGNED NOT NULL,
+  `bill_id` mediumint(8) UNSIGNED NOT NULL,
+  `lis_id` varchar(32) NOT NULL,
+  `pdf_url` varchar(128) DEFAULT NULL,
+  `summary` text DEFAULT NULL,
+  `date_created` datetime NOT NULL,
+  `date_modified` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `fiscal_impact_statements`
+--
+ALTER TABLE `fiscal_impact_statements`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `bill_id_2` (`bill_id`,`lis_id`),
+  ADD KEY `bill_id` (`bill_id`) USING BTREE;
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `fiscal_impact_statements`
+--
+ALTER TABLE `fiscal_impact_statements`
+  MODIFY `id` mediumint(8) UNSIGNED NOT NULL AUTO_INCREMENT;
+COMMIT;
+
+--
 -- Table structure for table `gazetteer`
 --
 

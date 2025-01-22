@@ -20,7 +20,7 @@ The site can be run locally, in Docker:
 1. [Install Docker](https://www.docker.com/products/docker-desktop).
 1. Clone this repository. Make sure you’re using [the branch that you want](#branches).
 1. Run `./docker-run.sh`.
-1. In your browser, open `http://localhost:5000`.
+1. In your browser, open `http://localhost:8000`.
 
 When you are done, run `./docker-stop.sh` (or quit Docker).
 

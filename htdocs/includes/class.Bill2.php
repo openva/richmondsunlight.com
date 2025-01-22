@@ -162,7 +162,7 @@ class Bill2
         if (mysqli_num_rows($result) == 0) {
             return false;
         }
-        $bill = mysqli_fetch_array($result, MYSQL_ASSOC);
+        $bill = mysqli_fetch_assoc($result);
         $bill = array_map('stripslashes', $bill);
 
         # Data conversions
@@ -243,7 +243,7 @@ class Bill2
             # Initialize this array.
             $bill['status_history'] = array();
             # Iterate through the status history.
-            while ($status = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+            while ($status = mysqli_fetch_assoc($result)) {
                 # Clean it up.
                 $status = array_map('stripslashes', $status);
 

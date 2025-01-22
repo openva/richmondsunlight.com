@@ -50,7 +50,7 @@ cd ../../
 cd "$CWD" || exit
 
 # Check if the site is running
-SITE_URL="http://localhost:5000/"
+SITE_URL="http://localhost:8000/"
 if curl --output /dev/null --silent --head --fail "$SITE_URL"; then
     echo "Site is up and running at $SITE_URL"
 else
