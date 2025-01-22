@@ -116,4 +116,3 @@ if (date('n') >= 11 || date('n') <= 4) {
 } else {
     define('LEGISLATIVE_SEASON', false);
 }
-
