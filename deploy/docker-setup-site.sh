@@ -39,20 +39,20 @@ cd htdocs/js/vendor; yarn build; cd ../../..
 cp deploy/settings-docker.inc.php htdocs/includes/settings.inc.php
 
 # Copy over the Sphinx configuration, start Sphinx
-cp deploy/sphinx.conf /etc/sphinxsearch/sphinx.conf
-sed -i -e "s|{PDO_SERVER}|db|g" /etc/sphinxsearch/sphinx.conf
-sed -i -e "s|{PDO_USERNAME}|ricsun|g" /etc/sphinxsearch/sphinx.conf
-sed -i -e "s|{PDO_PASSWORD}|password|g" /etc/sphinxsearch/sphinx.conf
-sed -i -e "s|{MYSQL_DATABASE}|richmondsunlight|g" /etc/sphinxsearch/sphinx.conf
-/etc/init.d/sphinxsearch start
+#cp deploy/sphinx.conf /etc/sphinxsearch/sphinx.conf
+#sed -i -e "s|{PDO_SERVER}|db|g" /etc/sphinxsearch/sphinx.conf
+#sed -i -e "s|{PDO_USERNAME}|ricsun|g" /etc/sphinxsearch/sphinx.conf
+#sed -i -e "s|{PDO_PASSWORD}|password|g" /etc/sphinxsearch/sphinx.conf
+#sed -i -e "s|{MYSQL_DATABASE}|richmondsunlight|g" /etc/sphinxsearch/sphinx.conf
+#/etc/init.d/sphinxsearch start
 
 # If we have an existing index, update it
-if [[ -f /var/lib/sphinxsearch/data/bills.sph ]]; then
+#if [[ -f /var/lib/sphinxsearch/data/bills.sph ]]; then
 
     # Reindex
-    indexer --all --rotate
+#   indexer --all --rotate
 
 # If there is no index, create a new one
-else
-    indexer --all
-fi
+#else
+#    indexer --all
+#fi
