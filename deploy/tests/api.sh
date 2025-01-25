@@ -3,7 +3,7 @@
 echo "Running API tests..."
 
 # Is the bill's catch line included?
-URL="http://api/1.1/bill/2024/sb278.json"
+URL="http://localhost:5001/1.1/bill/2024/sb278.json"
 OUTPUT="$(curl --silent $URL | jq '.catch_line')"
 EXPECTED='"Virginia Abortion Care &amp; Gender-Affirming Health Care Protection Act; established, civil penalties."';
 if [ "$OUTPUT" != "$EXPECTED" ]
@@ -15,7 +15,7 @@ else
 fi
 
 # Is the bill's patron shortname correct?
-URL="http://api/1.1/bill/2024/sb278.json"
+URL="http://localhost:5001/1.1/bill/2024/sb278.json"
 OUTPUT="$(curl --silent $URL | jq '.patron_shortname')"
 EXPECTED='"gfhashmi"';
 if [ "$OUTPUT" != "$EXPECTED" ]
@@ -27,7 +27,7 @@ else
 fi
 
 # Is the legislator's formatted name correct?
-URL="http://api/1.1/legislator/rcdeeds.json"
+URL="http://localhost:5001/1.1/legislator/rcdeeds.json"
 OUTPUT="$(curl --silent $URL | jq '.name_formatted')"
 EXPECTED='"Sen. Creigh Deeds (D-Charlottesville)"';
 if [ "$OUTPUT" != "$EXPECTED" ]
