@@ -43,12 +43,6 @@ jobs:
             gnupg2 \
             zip
             
-      - name: Install AWS CLI
-        run: |
-          curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          unzip awscliv2.zip
-          sudo ./aws/install
-            
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist
       
