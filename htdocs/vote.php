@@ -164,8 +164,8 @@ $legislators = $vote_info->get_detailed();
 foreach ($legislators as $legislator) {
     $legislator['vote'] = mb_strtolower($legislator['vote']);
     $legislator['party'] = mb_strtolower($legislator['party']);
-    $graph[$legislator{'vote'}][$legislator{'party'}]++;
-    $parties[$legislator{'party'}] = 1;
+    $graph[$legislator['vote']][$legislator['party']]++;
+    $parties[$legislator['party']] = 1;
 }
 
 # Make sure that we don't have any missing data, party-wise. That is, Google gets sad if
