@@ -14,7 +14,7 @@ RUN docker-php-ext-install mysqli && a2enmod rewrite && a2enmod expires && a2enm
 # Install our packages
 RUN apt-get update && \
     apt-get upgrade -y && \
-    apt-get install -y gnupg2
+    apt-get install -y gnupg2 curl
 
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
