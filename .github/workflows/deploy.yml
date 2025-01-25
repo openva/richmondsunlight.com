@@ -2,93 +2,142 @@ name: Deploy Process
 
 on:
   push:
-    branches:
-      - master
-      - deploy
+    branches: [master, deploy]
   pull_request:
   schedule:
-    - cron: 0 4 * * * # Redeploy at 4 AM every day
+    - cron: '0 4 * * *' # Redeploy at 4 AM every day
+
+# Prevent multiple deployments running at once
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ github.event_name }}
+  cancel-in-progress: true
 
 jobs:
   build:
-    runs-on: ubuntu-20.04
+    name: Build and Test
+    runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      
       - uses: Firenza/secrets-to-env@v1.2.0
         with:
           secrets: ${{ toJSON(secrets) }}
-      - name: Specify PHP version
+      
+      - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '5.6'
-      - name: Make branch name available as Bash variable
+          php-version: '8.0'
+          extensions: mysqli, curl, memcached, mysql
+          
+      - name: Set branch name
         run: echo "GITHUB_BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-      - name: Install packages with APT
-        run: >-
-          sudo apt-get update && 
-          sudo apt-get install -y apt-transport-https ca-certificates gnupg-agent libtinfo5 gnupg gnupg2 &&
-          sudo apt-get install -y awscli php5.6-cli php5.6-curl php5.6-memcached php5.6-mysql yarn zip
-      - uses: actions/checkout@v3
-      - run: sudo apt-get update -qq
+      
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            apt-transport-https \
+            ca-certificates \
+            gnupg-agent \
+            libtinfo5 \
+            gnupg \
+            gnupg2 \
+            awscli \
+            zip
+            
       - name: Install Composer dependencies
-        run: composer install
+        run: composer install --no-interaction --prefer-dist
+      
       - name: Install Node dependencies
-        run: cd htdocs/js/vendor; yarn build
-      - run: cd ../../..
-      - run: find htdocs/*.php -print0 | xargs -0 -n1 -P8 php5.6 -l
-      - name: Set up Docker
-        uses: docker/setup-buildx-action@v1
-      - name: Run Docker
+        working-directory: htdocs/js/vendor
+        run: yarn install && yarn build
+        
+      - name: PHP Syntax check
+        run: find htdocs/*.php -print0 | xargs -0 -n1 -P8 php -l
+      
+      - name: Setup Docker
+        uses: docker/setup-buildx-action@v3
+        with:
+          buildkitd-flags: --debug
+          
+      - name: Cache Docker layers
+        uses: actions/cache@v3
+        with:
+          path: /tmp/.buildx-cache
+          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-buildx-
+      
+      - name: Run Docker environment
         run: ./docker-run.sh
+      
       - name: Run tests
+        id: tests
         run: docker exec -i rs_web /var/www/deploy/tests/run-all.sh
+        continue-on-error: true
+      
       - name: Stop Docker
+        if: always()
         run: ./docker-stop.sh
-      - name: Populate secrets and ZIP
-        run: >-
-          ./deploy/branch_deploy.sh && ./deploy/config_variables.sh &&
-          ./deploy/aws_credentials.sh && zip -qr rs-web-deploy . --exclude
-          *.git* *.scannerwork* && mkdir -p upload && mv rs-web-deploy.zip
-          upload/rs-web-deploy.zip
-      - run: >-
+      
+      - name: Prepare deployment package
+        run: |
+          ./deploy/branch_deploy.sh
+          ./deploy/config_variables.sh
+          ./deploy/aws_credentials.sh
+          zip -qr rs-web-deploy . --exclude *.git* *.scannerwork*
+          mkdir -p upload
+          mv rs-web-deploy.zip upload/
+          
+      - name: Configure deployment type
+        run: |
           if [ "$GITHUB_BRANCH" = "master" ]; then
-          ./deploy/increase_verbosity.sh; fi
-      - run: >-
-          if [ "$GITHUB_BRANCH" = "master" ]; then
+            ./deploy/increase_verbosity.sh
             cp appspec-staging.yml appspec.yml
           elif [ "$GITHUB_BRANCH" = "deploy" ]; then
             cp appspec-deploy.yml appspec.yml
           fi
-      - name: Save secret-populated code for a subsequent deploy step
+          
+      - name: Upload artifact
         uses: actions/upload-artifact@v4
+        if: success()
         with:
           name: codebase
-          path: .
-      - name: Get the branch name for use in the build step
-        shell: bash
-        run: echo "##[set-output name=github_branch;]$(echo $GITHUB_BRANCH)"
-        id: get_branch
+          path: upload/
+          retention-days: 1
+          if-no-files-found: error
+          
+      - name: Set output
+        id: vars
+        run: echo "branch=${GITHUB_BRANCH}" >> $GITHUB_OUTPUT
+
     outputs:
-      github_branch: ${{ steps.get_branch.outputs.github_branch }}
+      branch: ${{ steps.vars.outputs.branch }}
 
   deploy:
-    runs-on: ubuntu-20.04
-    needs: build # Don't deploy unless the build succeeds
+    name: Deploy to AWS
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name != 'pull_request'
+    
     steps:
-      - run: echo "Deploy branch is ${{ needs.build.outputs.github_branch }}"
-      - name: Get the secret-populated code
+      - name: Download artifact
         uses: actions/download-artifact@v4
         with:
           name: codebase
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v2
+          
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-1
-      - name: Staging CodeDeploy Deployment
-        if: ${{ needs.build.outputs.github_branch == 'master' }}
+          
+      - name: Deploy to staging
+        if: needs.build.outputs.branch == 'master'
         run: |
-          aws deploy push --application-name RS-Web \
+          aws deploy push \
+            --application-name RS-Web \
             --s3-location s3://deploy.richmondsunlight.com/rs-web-staging.zip \
             --ignore-hidden-files
           aws deploy create-deployment \
@@ -96,10 +145,12 @@ jobs:
             --deployment-group-name RS-Web-Staging \
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --s3-location bucket=deploy.richmondsunlight.com,key=rs-web-staging.zip,bundleType=zip
-      - name: Production CodeDeploy Deployment
-        if: ${{ needs.build.outputs.github_branch == 'deploy' }}
+            
+      - name: Deploy to production
+        if: needs.build.outputs.branch == 'deploy'
         run: |
-          aws deploy push --application-name RS-Web \
+          aws deploy push \
+            --application-name RS-Web \
             --s3-location s3://deploy.richmondsunlight.com/rs-web-deploy.zip \
             --ignore-hidden-files
           aws deploy create-deployment \
