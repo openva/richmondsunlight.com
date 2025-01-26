@@ -84,11 +84,11 @@ jobs:
       - name: Staging CodeDeploy Deployment
         if: ${{ needs.build.outputs.branch_name == 'php8' }}
         run: |
-          aws deploy push --application-name RS-Web-New \
+          aws deploy push --application-name RS-Web \
             --s3-location s3://deploy.richmondsunlight.com/rs-web-new.zip \
             --ignore-hidden-files
           aws deploy create-deployment \
-            --application-name RS-Web-New \
+            --application-name RS-Web \
             --deployment-group-name RS-Web-New \
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --s3-location bucket=deploy.richmondsunlight.com,key=rs-web-new.zip,bundleType=zip
