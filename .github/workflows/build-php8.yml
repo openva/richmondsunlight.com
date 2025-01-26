@@ -79,7 +79,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-1
       - name: Staging CodeDeploy Deployment
-        if: ${{ needs.build.outputs.github_branch == 'php8' }}
+        if: ${{ needs.build.outputs.branch_name == 'php8' }}
         run: |
           aws deploy push --application-name RS-Web-New \
             --s3-location s3://deploy.richmondsunlight.com/rs-web-new.zip \
