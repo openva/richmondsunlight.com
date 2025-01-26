@@ -38,17 +38,17 @@ jobs:
           *.git* *.scannerwork* && mkdir -p upload && mv rs-web-deploy.zip
           upload/rs-web-deploy.zip
       - run: >-
-          if [ "$GITHUB_BRANCH" = "master" ]; then
+          if [ "$GITHUB_REF_NAME" = "master" ]; then
             ./deploy/increase_verbosity.sh
           elif [ "$GITHUB_BRANCH" = "php8" ]; then
             ./deploy/increase_verbosity.sh
           fi
       - run: >-
-          if [ "$GITHUB_BRANCH" = "master" ]; then
+          if [ "$GITHUB_REF_NAME" = "master" ]; then
             cp appspec-staging.yml appspec.yml
-          elif [ "$GITHUB_BRANCH" = "deploy" ]; then
+          elif [ "$GITHUB_REF_NAME" = "deploy" ]; then
             cp appspec-deploy.yml appspec.yml
-          elif [ "$GITHUB_BRANCH" = "php8" ]; then
+          elif [ "$GITHUB_REF_NAME" = "php8" ]; then
             cp appspec-deploy.yml appspec.yml
           fi
       - run: ls appspec*
@@ -65,7 +65,7 @@ jobs:
         shell: bash
         id: branch
         run: |
-          echo "branch_name=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+          echo "$GITHUB_REF_NAME"
     outputs:
       branch_name: ${{ steps.branch.outputs.branch_name }}
 
