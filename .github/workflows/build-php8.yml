@@ -46,6 +46,8 @@ jobs:
       - run: >-
           if [ "$GITHUB_BRANCH" = "master" ]; then
             cp appspec-staging.yml appspec.yml
+          elif [ "$GITHUB_BRANCH" = "deploy" ]; then
+            cp appspec-deploy.yml appspec.yml
           elif [ "$GITHUB_BRANCH" = "php8" ]; then
             cp appspec-deploy.yml appspec.yml
           fi
