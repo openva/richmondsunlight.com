@@ -49,8 +49,9 @@ jobs:
           elif [ "$GITHUB_BRANCH" = "deploy" ]; then
             cp appspec-deploy.yml appspec.yml
           elif [ "$GITHUB_BRANCH" = "php8" ]; then
-            cp appspec-deploy.yml appspec.yml && ls appspec*
+            cp appspec-deploy.yml appspec.yml
           fi
+      - run: ls appspec*
       - name: Save secret-populated code for a subsequent deploy step
         uses: actions/upload-artifact@v4
         with:
