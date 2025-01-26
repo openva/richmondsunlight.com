@@ -61,7 +61,7 @@ jobs:
         shell: bash
         id: branch
         run: |
-          echo "$GITHUB_REF_NAME"
+          echo "##[set-output name=github_branch;]$(echo $GITHUB_REF_NAME)"
     outputs:
       branch_name: ${{ steps.branch.outputs.branch_name }}
 
@@ -80,7 +80,7 @@ jobs:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-1
-      - name: Staging CodeDeploy Deployment
+      - name: CodeDeploy Deployment
         if: ${{ needs.build.outputs.branch_name == 'php8' }}
         run: |
           aws deploy push --application-name RS-Web \
