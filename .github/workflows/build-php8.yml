@@ -31,3 +31,29 @@ jobs:
         run: docker exec -i rs_web /var/www/deploy/tests/run-all.sh
       - name: Stop Docker
         run: ./docker-stop.sh
+deploy:
+    runs-on: ubuntu-24.04
+    needs: build # Don't deploy unless the build succeeds
+    steps:
+      - run: echo "Deploy branch is ${{ needs.build.outputs.github_branch }}"
+      - name: Get the secret-populated code
+        uses: actions/download-artifact@v4
+        with:
+          name: codebase
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: us-east-1
+      - name: Staging CodeDeploy Deployment
+        if: ${{ needs.build.outputs.github_branch == 'php8' }}
+        run: |
+          aws deploy push --application-name RS-Web-New \
+            --s3-location s3://deploy.richmondsunlight.com/rs-web-new.zip \
+            --ignore-hidden-files
+          aws deploy create-deployment \
+            --application-name RS-Web-New \
+            --deployment-group-name RS-Web-New \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
+            --s3-location bucket=deploy.richmondsunlight.com,key=rs-web-new.zip,bundleType=zip
