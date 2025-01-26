@@ -1,4 +1,4 @@
-name: Build Process for PHP 8
+name: Build and Deploy Process for PHP 8
 
 on:
   push:
@@ -31,7 +31,34 @@ jobs:
         run: docker exec -i rs_web /var/www/deploy/tests/run-all.sh
       - name: Stop Docker
         run: ./docker-stop.sh
-deploy:
+      - name: Populate secrets and ZIP
+        run: >-
+          ./deploy/branch_deploy.sh && ./deploy/config_variables.sh &&
+          ./deploy/aws_credentials.sh && zip -qr rs-web-deploy . --exclude
+          *.git* *.scannerwork* && mkdir -p upload && mv rs-web-deploy.zip
+          upload/rs-web-deploy.zip
+      - run: >-
+          if [ "$GITHUB_BRANCH" = "master" ]; then
+          ./deploy/increase_verbosity.sh; fi
+      - run: >-
+          if [ "$GITHUB_BRANCH" = "master" ]; then
+            cp appspec-staging.yml appspec.yml
+          elif [ "$GITHUB_BRANCH" = "deploy" ]; then
+            cp appspec-deploy.yml appspec.yml
+          fi
+      - name: Save secret-populated code for a subsequent deploy step
+        uses: actions/upload-artifact@v4
+        with:
+          name: codebase
+          path: .
+      - name: Get the branch name for use in the build step
+        shell: bash
+        run: echo "##[set-output name=github_branch;]$(echo $GITHUB_BRANCH)"
+        id: get_branch
+    outputs:
+      github_branch: ${{ steps.get_branch.outputs.github_branch }}
+
+  deploy:
     runs-on: ubuntu-24.04
     needs: build # Don't deploy unless the build succeeds
     steps:
