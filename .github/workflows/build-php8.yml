@@ -44,11 +44,11 @@ jobs:
             ./deploy/increase_verbosity.sh
           fi
       - run: >-
-          if [ "$GITHUB_REF_NAME" = "master" ]; then
+          if [ "${{ github.ref_name }}" = "master" ]; then
             cp appspec-staging.yml appspec.yml
-          elif [ "$GITHUB_REF_NAME" = "deploy" ]; then
+          elif [ "${{ github.ref_name }}" = "deploy" ]; then
             cp appspec-deploy.yml appspec.yml
-          elif [ "$GITHUB_REF_NAME" = "php8" ]; then
+          elif [ "${{ github.ref_name }}" = "php8" ]; then
             cp appspec-deploy.yml appspec.yml
           fi
       - run: ls appspec*
@@ -57,19 +57,11 @@ jobs:
         with:
           name: codebase
           path: .
-      - name: Get the branch name for use in the build step
-        shell: bash
-        id: branch
-        run: |
-          echo "##[set-output name=github_branch;]$(echo $GITHUB_REF_NAME)"
-    outputs:
-      branch_name: ${{ steps.branch.outputs.branch_name }}
 
   deploy:
     runs-on: ubuntu-24.04
     needs: build # Don't deploy unless the build succeeds
     steps:
-      - run: echo "Deploy branch is ${{ needs.build.outputs.branch_name }}"
       - name: Get the secret-populated code
         uses: actions/download-artifact@v4
         with:
@@ -81,7 +73,7 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-1
       - name: CodeDeploy Deployment
-        if: ${{ needs.build.outputs.branch_name == 'php8' }}
+        if: ${{ github.ref_name }} == 'php8'
         run: |
           aws deploy push --application-name RS-Web \
             --s3-location s3://deploy.richmondsunlight.com/rs-web-new.zip \
