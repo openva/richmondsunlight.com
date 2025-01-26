@@ -61,16 +61,13 @@ jobs:
         run: |
           echo "branch_name=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
     outputs:
-      github_branch: ${{ steps.get_branch.outputs.github_branch }}
       branch_name: ${{ steps.branch.outputs.branch_name }}
 
   deploy:
     runs-on: ubuntu-24.04
     needs: build # Don't deploy unless the build succeeds
     steps:
-      - run: echo "Deploy branch is ${{ needs.build.outputs.github_branch }}"
-      - name: Check branch
-        run: echo "Deploying branch ${{ needs.build.outputs.branch_name }}"
+      - run: echo "Deploy branch is ${{ needs.build.outputs.branch_name }}"
       - name: Get the secret-populated code
         uses: actions/download-artifact@v4
         with:
