@@ -39,7 +39,10 @@ jobs:
           upload/rs-web-deploy.zip
       - run: >-
           if [ "$GITHUB_BRANCH" = "master" ]; then
-          ./deploy/increase_verbosity.sh; fi
+            ./deploy/increase_verbosity.sh
+          elif [ "$GITHUB_BRANCH" = "php8" ]; then
+            ./deploy/increase_verbosity.sh
+          fi
       - run: >-
           if [ "$GITHUB_BRANCH" = "master" ]; then
             cp appspec-staging.yml appspec.yml
