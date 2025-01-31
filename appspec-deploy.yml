@@ -18,5 +18,7 @@ permissions:
 hooks:
   BeforeInstall:
     - location: deploy/predeploy.sh
+      timeout: 300
+      runas: root
   AfterInstall:
     - location: deploy/postdeploy.sh
