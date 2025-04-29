@@ -351,7 +351,7 @@ if (
                         <ul>
                         <li><a href="/photosynthesis/" accesskey="p">Photosynthesis</a></li>
                         <li><a href="/photosynthesis/portfolios/">Public Portfolios</a></li>
-                        <li><a href="/about/api/">API</a></li>
+                        <li><a href="https://api.richmondsunlight.com/docs/">API</a></li>
                         <li><a href="/downloads/">Bulk Downloads</a></li>
                         </ul>
                     </li>
