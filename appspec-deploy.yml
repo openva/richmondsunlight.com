@@ -6,17 +6,19 @@ files:
 file_exists_behavior: OVERWRITE
 permissions:
     - object: /var/www/richmondsunlight.com/
-      owner: ubuntu
-      group: ubuntu
-      mode: 755
+      owner: www-data
+      group: www-data
+      mode: 775
       acls:
         - "d:u::rwx"
-        - "d:g::rwx"
-        - "d:o::rwx"
+        - "d:g::rx"
+        - "d:o::rx"
       type:
        - directory
 hooks:
   BeforeInstall:
     - location: deploy/predeploy.sh
+      timeout: 300
+      runas: root
   AfterInstall:
     - location: deploy/postdeploy.sh
