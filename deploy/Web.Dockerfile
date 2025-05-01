@@ -1,27 +1,25 @@
-FROM php:8.2-apache-bullseye
+FROM php:8-apache
 
-# Install system dependencies
+# Replace sources.list with the archived repository URLs
+RUN echo "deb http://archive.debian.org/debian/ stretch main non-free contrib" > /etc/apt/sources.list \
+    && echo "deb-src http://archive.debian.org/debian/ stretch main non-free contrib" >> /etc/apt/sources.list \
+    && echo "deb http://archive.debian.org/debian-security/ stretch/updates main" >> /etc/apt/sources.list \
+    && echo "deb-src http://archive.debian.org/debian-security/ stretch/updates main" >> /etc/apt/sources.list
+
+# Disable checking for valid signatures on the archived repositories
+RUN echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/90ignore-release-date
+
+RUN docker-php-ext-install mysqli && a2enmod rewrite && a2enmod expires && a2enmod headers
+
+# Install our packages
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    apt-transport-https \
-    ca-certificates \
-    gnupg \
-    git \
-    zip \
-    zlib1g-dev \
-    jq
+    apt-get upgrade -y && \
+    apt-get install -y gnupg2 curl
 
-# Install PHP extensions and Apache modules
-RUN docker-php-ext-install mysqli && \
-    a2enmod rewrite && \
-    a2enmod expires && \
-    a2enmod headers
-
-# Install Yarn
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - && \
-    echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list && \
-    apt-get update && \
-    apt-get install -y yarn
+RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
+RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
+RUN apt-get update
+RUN apt-get install -y git zip sphinxsearch zlib1g-dev jq yarn
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer

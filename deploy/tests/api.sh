@@ -1,30 +1,41 @@
 #!/usr/bin/env bash
 
+echo "Running API tests..."
+
 # Is the bill's catch line included?
-OUTPUT="$(curl --silent http://api/1.1/bill/2024/sb278.json | jq '.catch_line')"
+URL="http://localhost:5001/1.1/bill/2024/sb278.json"
+OUTPUT="$(curl --silent $URL | jq '.catch_line')"
 EXPECTED='"Virginia Abortion Care &amp; Gender-Affirming Health Care Protection Act; established, civil penalties."';
 if [ "$OUTPUT" != "$EXPECTED" ]
 then
-    echo "ERROR: Bill's catch line isn't included (expected $EXPECTED, got $OUTPUT)"
+    echo "❌: $URL Bill's catch line isn't included (expected $EXPECTED, got \"$OUTPUT\")"
     ERRORED=true
+else
+    echo "✅: $URL Bill's catch line is included"
 fi
 
 # Is the bill's patron shortname correct?
-OUTPUT="$(curl --silent http://api/1.1/bill/2024/sb278.json | jq '.patron_shortname')"
+URL="http://localhost:5001/1.1/bill/2024/sb278.json"
+OUTPUT="$(curl --silent $URL | jq '.patron_shortname')"
 EXPECTED='"gfhashmi"';
 if [ "$OUTPUT" != "$EXPECTED" ]
 then
-    echo "ERROR: Bill's patron shortname isn't correct (expected $EXPECTED, got $OUTPUT)"
+    echo "❌: $URL Bill's patron shortname isn't correct (expected $EXPECTED, got \"$OUTPUT\")"
     ERRORED=true
+else
+    echo "✅: $URL Bill's patron shortname is correct"
 fi
 
 # Is the legislator's formatted name correct?
-OUTPUT="$(curl --silent http://api/1.1/legislator/rcdeeds.json | jq '.name_formatted')"
+URL="http://localhost:5001/1.1/legislator/rcdeeds.json"
+OUTPUT="$(curl --silent $URL | jq '.name_formatted')"
 EXPECTED='"Sen. Creigh Deeds (D-Charlottesville)"';
 if [ "$OUTPUT" != "$EXPECTED" ]
 then
-    echo "ERROR: Legislator's formatted name isn't correct (expected $EXPECTED, got $OUTPUT)"
+    echo "❌: $URL Legislator's formatted name isn't correct (expected $EXPECTED, got \"$OUTPUT\")"
     ERRORED=true
+else
+    echo "✅: $URL Legislator's formatted name is correct"
 fi
 
 # If any tests failed, have this script return that failure

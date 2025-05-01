@@ -50,7 +50,7 @@ cp deploy/settings-docker.inc.php htdocs/includes/settings.inc.php
 #if [[ -f /var/lib/sphinxsearch/data/bills.sph ]]; then
 
     # Reindex
-    #indexer --all --rotate
+#   indexer --all --rotate
 
 # If there is no index, create a new one
 #else
