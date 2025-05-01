@@ -42,7 +42,6 @@ $bill = mb_strtolower(mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['bill'
 # Initialize variables.
 $html_head = '';
 $page_body = '';
-$page_header = '';
 
 # Get the bill's content from the API.
 # We append a query string, containing the current time, to avoid getting a cached copy.
@@ -87,6 +86,16 @@ if ($bill_text->get_terms() === true) {
 }
 
 $debug_timing['definitions retrieved'] = microtime(true);
+
+/*
+ * Retreive the impact statements, if any exist.
+ */
+$fis = new Bill2();
+$fis->id = $bill['id'];
+$impact_statements = $fis->impact_statements();
+if ($impact_statements === false) {
+    unset($impact_statements);
+}
 
 # We want to record a view count hit for this bill, but only if this is a real user, not a
 # search engine. Start by defining a list of bots.
@@ -139,7 +148,6 @@ $html_head .= '
 	<meta property="twitter:title" content="' . mb_strtoupper($bill['number']) . ', introduced by ' . $bill['patron_name_formatted'] . '"/>
 	<meta property="twitter:image" content="https://www.richmondsunlight.com/images/legislators/thumbnails/'
         . $bill['patron_shortname'] . '.jpg"/>
-	<meta name="twitter:site" content="@richmond_sun" />
     <meta property="twitter:description" content="' . $bill['catch_line'] . '" />
     <meta name="twitter:label1" value="Introduced By" />
     <meta name="twitter:data1" value="' . $bill['patron_name_formatted'] . '" />
@@ -154,7 +162,7 @@ $html_head .= '
         . $bill['number'] . '/" title="RSS for ' . $bill['number'] . '" />
 	<link rel="alternate" type="application/json" href="http://api.richmondsunlight.com/1.1/bill/'
         . $bill['year'] . '/' . $bill['number'] . '.json" title="JSON for ' . $bill['number'] . '" />
-	<link rel="alternate" type="application/pdf" href="http://lis.virginia.gov/cgi-bin/legp604.exe?'
+	<link rel="alternate" type="application/pdf" href="http://legacylis.virginia.gov/cgi-bin/legp604.exe?'
         . $bill['session_lis_id'] . '+ful+' . mb_strtoupper($bill['number']) . '+pdf" title="PDF of ' . $bill['number'] . '" />';
 
 # Come up with a meta description.
@@ -342,18 +350,33 @@ if ($poll->get_results() !== false) {
         $poll->results['yes'] = round(($poll->results['yes'] / $poll->results['total']) * 100);
 
         # Establish the label text for the graph.
-        $poll->results['no_text'] = urlencode('no ' . $poll->results['no'] . '%');
-        $poll->results['yes_text'] = urlencode('yes ' . $poll->results['yes'] . '%');
+        $poll->results['no_text'] = 'No ' . $poll->results['no'] . '%';
+        $poll->results['yes_text'] = 'Yes ' . $poll->results['yes'] . '%';
 
-        # Assemble the URL for, and display, the chart for the voting percentage.
-        $page_sidebar .= '<img src="'
-            . '//chart.googleapis.com/chart?chs=215x115&amp;cht=p&amp;chd=t:'
-            . $poll->results['yes'] . ',' . $poll->results['no']
-            . '&amp;chl=' . (($poll->results['yes']) ? $poll->results['yes_text'] : '')
-            . ((isset($poll->results['yes'], $poll->results['no'])) ? '|' : '') .
-            (($poll->results['no']) ? $poll->results['no_text'] : '')
-            . '&amp;chf=bg,s,f4eee5&amp;chts=333333,9" />
-			<p>' . $poll->results['total'] . ' vote' . ($poll->results['total'] > 1 ? 's' : '') . '</p>';
+        # Add a canvas element for the chart.
+        $page_sidebar .= '<canvas id="pollChart" width="215" height="115"></canvas>';
+        $page_sidebar .= '<p>' . $poll->results['total'] . ' vote' . ($poll->results['total'] > 1 ? 's' : '') . '</p>';
+
+        # Add the Chart.js script and initialize the chart.
+        $html_head .= '<script src="/js/vendor/chart.js/dist/chart.umd.js"></script>';
+        $page_sidebar .= '
+        <script>
+            var ctx = document.getElementById("pollChart").getContext("2d");
+            var pollChart = new Chart(ctx, {
+                type: "pie",
+                data: {
+                    labels: ["' . $poll->results['yes_text'] . '", "' . $poll->results['no_text'] . '"],
+                    datasets: [{
+                        data: [' . $poll->results['yes'] . ', ' . $poll->results['no'] . '],
+                        backgroundColor: ["#4CAF50", "#F44336"]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: true
+                }
+            });
+        </script>';
     } else {
         if ($bill['session_id'] == SESSION_ID) {
             $page_sidebar .= '<p>No Richmond Sunlight visitors have voted on this bill yet.</p>';
@@ -370,14 +393,16 @@ $page_sidebar .= '
         <h3>Tags</h3>
         <ul class="tags" id="tags_list">';
 
-if (isset($bill['tags']) && (count($bill['tags']) > 0)) {
-    $page_header .= "
+if (isset($bill['tags']) && (count((array)$bill['tags']) > 0)) {
+    $html_head .= "
+        <script>
         $('.delete').click(function(e) {
             e.preventDefault();
             var tagId = $(this).attr('data-id');
             var url = '/process-tags.php';
             $.post(url, { delete: tagId }, function(data){ console.log('deleted');} );
-        });";
+        });
+        </script>";
 
     foreach ($bill['tags'] as $tag_id => $tag) {
         # We're saving this list for use below, in the list of related bills.
@@ -507,14 +532,28 @@ $page_sidebar .= '
 		<h3>More Information</h3>
 		<ul>';
 $page_sidebar .= '
-			<li><a href="http://lis.virginia.gov/cgi-bin/legp604.exe?' . $bill['session_lis_id'] . '+ful+' . mb_strtoupper($bill['number']) . '+pdf">View as PDF</a></li>';
+			<li><a href="https://legacylis.virginia.gov/cgi-bin/legp604.exe?'
+            . $bill['session_lis_id'] . '+ful+' . mb_strtoupper($bill['number'])
+            . '+pdf">View as PDF</a></li>';
 $page_sidebar .= '
-			<li><a href="http://lis.virginia.gov/cgi-bin/legp604.exe?' . $bill['session_lis_id'] . '+sum+' . mb_strtoupper($bill['number']) . '">View on the Legislature’s Site</a></li>
-			<li><a href="' . API_URL . '1.1/bill/' . $bill['year'] . '/' . $bill['number'] . '.json">View as JSON</a></li>';
+			<li><a href="https://lis.virginia.gov/bill-details/20' . $bill['session_lis_id']
+            . '/' . mb_strtoupper($bill['number'])
+            . '">View on the Legislature’s Site</a></li>
+			<li><a href="' . API_URL . '1.1/bill/' . $bill['year'] . '/' . $bill['number']
+            . '.json">View as JSON</a></li>';
 
-if (!empty($bill['impact_statement_id'])) {
-    $page_sidebar .= '
-			<li><a href="https://lis.virginia.gov/cgi-bin/legp604.exe?' . $bill['session_lis_id'] . '+oth+' . mb_strtoupper($bill['number']) . $bill['impact_statement_id'] . '+PDF">Fiscal Impact Statement</a></li>';
+// Display fiscal impact statements
+if (isset($impact_statements)) {
+    foreach ($impact_statements as $impact_statement) {
+        if (!empty($impact_statement['pdf_url'])) {
+            $url = $impact_statement['pdf_url'];
+        } elseif (!empty($impact_statement['lis_id'])) {
+            $url = 'https://lis.virginia.gov/cgi-bin/legp604.exe?'
+                . $bill['lis_id'] . '+oth+' . mb_strtoupper($bill['number'])
+                . $impact_statement['lis_id'] . '+PDF';
+        }
+        $page_sidebar .= '<li><a href="' . $url . '">Fiscal Impact Statement</a></li>';
+    }
 }
 
 $page_sidebar .= '</ul></div>';
@@ -788,13 +827,29 @@ if (
     </div>';
 }
 
-# If we have any notes about this bill.
+// If we have any notes about this bill.
 if (!empty($bill['notes'])) {
     $page_body .= '
 		<div id="notes">
 		<h2>Notes</h2>
 		' . $bill['notes'] . '
 		</div>';
+}
+
+// If we have any fiscal impact statement summaries for this bill
+// You're thinking "hey, what if there are notes AND fiscal impact summaries?" Well, that's not
+// wrong, but there are currently no bills that have both of these things, so let's burn that
+// bridge when we get to it.
+elseif (!empty($impact_statements)) {
+    foreach ($impact_statements as $impact_statement) {
+        if (isset($impact_statement['summary'])) {
+            $page_body .= '
+                    <div id="notes">
+                    <h2>Notes</h2>
+                    ' . $impact_statement['summary'] . '
+                    </div>';
+        }
+    }
 }
 
 /*
@@ -1273,29 +1328,31 @@ if (($bill['session_id'] == SESSION_ID)) {
 		<textarea rows="16" cols="60" name="comment[comment]" id="comment" required></textarea><br />
 		<small>(Limited HTML is OK: &lt;a&gt;, &lt;em&gt;, &lt;strong&gt;, &lt;s&gt)</small><br />';
 
-    # Create a new instance of the comments-subscription class
-    $subscription = new CommentSubscription();
-    # Give it the user's ID and the bill's ID.
-    $subscription->user_id = $user['id'];
-    $subscription->bill_id = $bill['id'];
+    if (isset($user)) {
+        # Create a new instance of the comments-subscription class
+        $subscription = new CommentSubscription();
+        # Give it the user's ID and the bill's ID.
+        $subscription->user_id = $user['id'];
+        $subscription->bill_id = $bill['id'];
 
-    # Get the user's subscription status. (Either false or, if true, we get a hash of the
-    # subscription ID.
-    $subscription_status = $subscription->is_subscribed();
+        # Get the user's subscription status. (Either false or, if true, we get a hash of the
+        # subscription ID.
+        $subscription_status = $subscription->is_subscribed();
 
-    $debug_timing['subscription determined'] = microtime(true);
+        $debug_timing['subscription determined'] = microtime(true);
 
-    # If the person isn't already subscribed to this bill's comments.
-    if ($subscription_status === false) {
-        $page_body .= '<input type="checkbox" value="y" name="comment[subscribe]"'
-        . ' id="subscribe" /> <label for="subscribe"><strong>Subscribe</strong> <small>get future'
-        . ' comments by e-mail</small></label><br />';
-    }
+        # If the person isn't already subscribed to this bill's comments.
+        if ($subscription_status === false) {
+            $page_body .= '<input type="checkbox" value="y" name="comment[subscribe]"'
+            . ' id="subscribe" /> <label for="subscribe"><strong>Subscribe</strong> <small>get future'
+            . ' comments by e-mail</small></label><br />';
+        }
 
-    # Otherwise, if the person is subscribed to this bill's comments.
-    else {
-        $page_body .= '<strong>You are subscribed</strong> to be e-mailed future comments
-			to this bill. <a href="/unsubscribe/' . $subscription_status . '/">Unsubscribe?</a><br />';
+        # Otherwise, if the person is subscribed to this bill's comments.
+        else {
+            $page_body .= '<strong>You are subscribed</strong> to be e-mailed future comments
+                to this bill. <a href="/unsubscribe/' . $subscription_status . '/">Unsubscribe?</a><br />';
+        }
     }
 
     $page_body .= '

@@ -1,4 +1,4 @@
-FROM php:5-apache
+FROM php:8-apache
 
 # Replace sources.list with the archived repository URLs
 RUN echo "deb http://archive.debian.org/debian/ stretch main non-free contrib" > /etc/apt/sources.list \
@@ -12,14 +12,14 @@ RUN echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/90ignore-re
 RUN docker-php-ext-install mysqli && a2enmod rewrite && a2enmod expires && a2enmod headers
 
 # Install our packages
-RUN apt --fix-broken install
-RUN apt-get update
-RUN apt-get install -y apt-transport-https ca-certificates gnupg2
+RUN apt-get update && \
+    apt-get upgrade -y && \
+    apt-get install -y gnupg2 curl
+
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
 RUN apt-get update
-# We use the most recent Yarn 1.X release (still quite old) to deal with our old environment.
-RUN apt-get install -y git zip sphinxsearch zlib1g-dev jq yarn=1.22.19-1
+RUN apt-get install -y git zip sphinxsearch zlib1g-dev jq yarn
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer

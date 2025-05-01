@@ -27,16 +27,10 @@ function __autoload_libraries($name)
 spl_autoload_register('__autoload_libraries');
 
 # Connect to the database
-function connect_to_db($type = 'old')
+function connect_to_db()
 {
-
-    if ($type == 'old') {
-        $database = new Database();
-        $database->connect_old();
-    } elseif ($type == 'pdo') {
-        $database = new Database();
-        $database->connect();
-    }
+    $database = new Database();
+    $database->connect();
 
     return false;
 }

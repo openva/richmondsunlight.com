@@ -1,8 +1,10 @@
 <?php
 
-$url_prefix = 'http://localhost';
+$url_prefix = 'http://localhost:8000';
 
 $failures = [];
+
+echo 'Running front end tests...' . "\n";
 
 /*
  // These tests have been pulled out because Sphinx isn't starting up properly in GitHub Actions.
@@ -168,13 +170,17 @@ foreach ($pages as $page) {
 
     if (!empty($page['http_status']) && $page['http_status'] != $http_status) {
         $failures[] = ['page' => $page, 'error' => ['http_status' => $http_status]];
+        echo '❌ '  . $page['url'] . "\n";
         continue;
     }
 
     if (!empty($page['string']) && stristr($content, $page['string']) === false) {
         $failures[] = ['page' => $page, 'error' => ['string' => false]];
+        echo '❌ '  . $page['url'] . "\n";
         continue;
     }
+
+    echo '✅ '  . $page['url'] . "\n";
 
     curl_close($ch);
 }

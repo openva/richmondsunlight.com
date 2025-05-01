@@ -89,7 +89,7 @@ class Import
         }
 
         # Provide a domain name for all links.
-        $text = str_ireplace('href="/', 'href="http://leg1.state.va.us/', $text);
+        $text = str_ireplace('href="/', 'href="https://leg1.state.va.us/', $text);
 
         # Make the text available within the scope of the class.
         $this->text = $text;
@@ -133,7 +133,7 @@ class Import
         # Provide friendlier array element names.
         $bill['number'] = strtolower(trim($bill[0]));
         $bill['catch_line'] = trim($bill[1]);
-        $bill['chief_patron_id'] = substr(trim($bill[2]), 1);
+        $bill['chief_patron_id'] = intval(substr(trim($bill[2]), 1));
         $bill['chief_patron'] = trim($bill[3]);
         $bill['last_house_committee'] = trim($bill[4]);
         $bill['last_house_date'] = strtotime(trim($bill[6]));
@@ -764,7 +764,7 @@ class Import
             return false;
         }
 
-        $log->put('Refreshed the legislator record for ' . $legislator['name_formatted'] . '.', 3);
+        $log->put('Refreshed the legislator record for ' . $legislator['name_formatted'] . '.', 2);
 
         return true;
     } // update_legislator
@@ -1069,7 +1069,7 @@ class Import
             if ($lis_id[0] == 'S') {
                 $lis_id = substr($lis_id, 1);
             }
-            $url = 'https://lis.virginia.gov/cgi-bin/legp604.exe?' . SESSION_LIS_ID . '+mbr+S'
+            $url = 'https://legacylis.virginia.gov/cgi-bin/legp604.exe?' . SESSION_LIS_ID . '+mbr+S'
                 . $lis_id;
             $html = file_get_contents($url);
 

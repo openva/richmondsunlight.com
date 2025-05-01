@@ -1,25 +1,39 @@
-version: '3.2'
+version: '3.8'
 services:
+  # Primary web interface
   web:
     build:
       context: deploy/
       dockerfile: Web.Dockerfile
-    links:
-      - api:api
-      - db:db
+    depends_on:
+      api:
+        condition: service_healthy
+      db:
+        condition: service_healthy
     ports:
-      - "5000:80"
+      - "8000:80"
     volumes:
       - type: bind
         source: .
         target: /var/www
     container_name: rs_web
+    networks:
+      - rs_network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      start_period: 30s
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # API service
   api:
     build:
       context: api/deploy/
       dockerfile: API.Dockerfile
-    links:
-      - db:db
+    depends_on:
+      db:
+        condition: service_healthy
     ports:
       - "5001:80"
     volumes:
@@ -27,6 +41,16 @@ services:
         source: ./api/htdocs/
         target: /var/www/html/
     container_name: rs_api
+    networks:
+      - rs_network
+    healthcheck:
+      test: ["CMD", "apache2ctl", "-M"]
+      start_period: 30s
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # Database
   db:
     build:
       context: api/deploy/
@@ -37,6 +61,16 @@ services:
     ports:
       - "3306:3306"
     container_name: rs_db
+    networks:
+      - rs_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-ppassword"]
+      start_period: 30s
+      interval: 15s
+      timeout: 5s
+      retries: 3
+
+  # Security testing service
   owasp_zap:
     build:
       context: deploy/
@@ -44,5 +78,11 @@ services:
     ports:
       - "5002:8080"
     container_name: rs_zap
+    networks:
+      - rs_network
+
 volumes:
-    db_data: {}
+  db_data: {}
+networks:
+  rs_network:
+    driver: bridge

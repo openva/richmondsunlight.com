@@ -1,0 +1,84 @@
+name: Build and Deploy Process for PHP 8
+
+on:
+  push:
+    branches:
+      - php8
+  pull_request:
+    branches:
+      - php8
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+      - name: Install Composer dependencies
+        run: composer install
+      - name: Install Node dependencies
+        run: cd htdocs/js/vendor; yarn install
+      - run: cd ../../..
+      - run: find htdocs/*.php -print0 | xargs -0 -n1 -P8 php -l
+      - name: Set up Docker
+        uses: docker/setup-buildx-action@v1
+      - name: Run Docker
+        run: ./docker-run.sh
+      - name: Run tests
+        run: docker exec -i rs_web /var/www/deploy/tests/run-all.sh
+      - name: Stop Docker
+        run: ./docker-stop.sh
+      - name: Populate secrets and ZIP
+        run: >-
+          ./deploy/branch_deploy.sh && ./deploy/config_variables.sh &&
+          ./deploy/aws_credentials.sh && zip -qr rs-web-deploy . --exclude
+          *.git* *.scannerwork* && mkdir -p upload && mv rs-web-deploy.zip
+          upload/rs-web-deploy.zip
+      - run: >-
+          if [ "$GITHUB_REF_NAME" = "master" ]; then
+            ./deploy/increase_verbosity.sh
+          elif [ "$GITHUB_BRANCH" = "php8" ]; then
+            ./deploy/increase_verbosity.sh
+          fi
+      - run: >-
+          if [ "${{ github.ref_name }}" = "master" ]; then
+            cp appspec-staging.yml appspec.yml
+          elif [ "${{ github.ref_name }}" = "deploy" ]; then
+            cp appspec-deploy.yml appspec.yml
+          elif [ "${{ github.ref_name }}" = "php8" ]; then
+            cp appspec-deploy.yml appspec.yml
+          fi
+      - name: Save secret-populated code for a subsequent deploy step
+        uses: actions/upload-artifact@v4
+        with:
+          name: codebase
+          path: .
+
+  deploy:
+    runs-on: ubuntu-24.04
+    needs: build # Don't deploy unless the build succeeds
+    steps:
+      - name: Get the secret-populated code
+        uses: actions/download-artifact@v4
+        with:
+          name: codebase
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: us-east-1
+      - name: CodeDeploy Deployment
+        if: ${{ github.ref_name }} == 'php8'
+        run: |
+          aws deploy push --application-name RS-Web \
+            --s3-location s3://deploy.richmondsunlight.com/rs-web-new.zip \
+            --ignore-hidden-files
+          aws deploy create-deployment \
+            --application-name RS-Web \
+            --deployment-group-name RS-Web-New \
+            --deployment-config-name CodeDeployDefault.OneAtATime \
+            --s3-location bucket=deploy.richmondsunlight.com,key=rs-web-new.zip,bundleType=zip

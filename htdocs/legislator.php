@@ -287,8 +287,10 @@ $page_sidebar .= '
     <div class="box">
         <h3>More Info</h3>
         <ul>
-            <li><a href="http://leg1.state.va.us/cgi-bin/legp504.exe?' . SESSION_LIS_ID . '+mbr+'
-                . $legislator['lis_id'] . '">View on the Legislature’s Site</li>
+            <li><a href="https://lis.virginia.gov/session-details/20' . SESSION_LIS_ID
+                . '/member-information/0'
+                . ($legislator['chamber'] == 'house' ? 'H' : 'S') . $legislator['lis_id']
+                . '/member-details">View on the Legislature’s Site</li>
             <li><a href="https://api.richmondsunlight.com/1.1/legislator/'
                 . $legislator['shortname'] . '.json">View as JSON</a></li>
         </ul>
@@ -448,13 +450,6 @@ if (!empty($legislator['website'])) {
     <div class="pair">
 		<div class="label">Website</div>
 		<div class="content"><a href="' . $legislator['website'] . '">' . $legislator['website_name'] . '</a></div>
-    </div>';
-}
-if (!empty($legislator['twitter'])) {
-    $page_body .= '
-    <div class="pair">
-		<div class="label">Twitter</div>
-		<div class="content"><a href="https://twitter.com/' . $legislator['twitter'] . '">@' . $legislator['twitter'] . '</a></div>
     </div>';
 }
 
@@ -911,7 +906,7 @@ if ($legislator['videos'] !== false) {
 $page_body .= '</div>';
 
 # List the legislator's bills
-if (count($legislator['bills']) > 0) {
+if (isset($legislator['bills']) && count($legislator['bills']) > 0) {
     $page_body .= '<div style="clear: both;" id="bills" class="tabs">
 		<h2>Bills</h2>';
 
