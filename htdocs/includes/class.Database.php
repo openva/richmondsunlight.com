@@ -91,47 +91,4 @@ class Database
             return false;
         }
     }
-
-    /*
-     * Connect via PHP's old-school MySQL connector
-     */
-    public function connect_old()
-    {
-
-        /*
-         * If we already have a database connection, reuse it.
-         */
-        if (isset($GLOBALS['db_old'])) {
-            return $GLOBALS['db_old'];
-        } elseif (isset($GLOBALS['db']) && get_class($GLOBALS['db']) == 'mysql') {
-            return $GLOBALS['db'];
-        }
-
-        $this->db = mysql_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
-
-        /*
-         * If the connection succeeded.
-         */
-        if ($this->db !== false) {
-            mysql_select_db(MYSQL_DATABASE, $this->db);
-            mysql_query('SET NAMES "utf8"');
-            $GLOBALS['db'] = $this->db;
-            return $this->db;
-        }
-
-        /*
-         * If this is isn't a request to the API, send the browser to an error page.
-         */
-        if (mb_stristr($_GET['REQUEST_URI'], 'api.richmondsunlight.com') === false) {
-            header('Location: https://' . $_SERVER['SERVER_NAME'] . '/site-down/');
-            exit;
-        }
-
-        /*
-         * If this is a request to the API, just return false.
-         */
-        else {
-            return false;
-        }
-    }
 }
