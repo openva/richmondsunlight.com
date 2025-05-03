@@ -99,10 +99,8 @@ class Log
     public function filesystem($message)
     {
 
-    /*
-     * Prepend the message with a timestamp.
-     */
-        $message = date('Y-m-d H:i:s') . ' ' . $message;
+        // Prepend the message with a timestamp and follow it with a newline.
+        $message = date('Y-m-d H:i:s') . ' ' . $message . "\n";
 
         // Keep logs in different locations, depending on how this has been invoked.
         if (PHP_SAPI === 'cli') {
