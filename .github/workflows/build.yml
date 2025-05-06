@@ -2,11 +2,9 @@ name: Build and Deploy Process for PHP 8
 
 on:
   push:
-    branches:
-      - php8
+    branches: [master]
   pull_request:
-    branches:
-      - php8
+    branches: [master]
 
 jobs:
   build:
@@ -16,7 +14,7 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
+          php-version: '8.4'
       - name: Install Composer dependencies
         run: composer install
       - name: Install Node dependencies
