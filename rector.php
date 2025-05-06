@@ -25,7 +25,7 @@ return static function (RectorConfig $rectorConfig): void {
     // 3) If you had specific rules previously (like AddVoidReturnTypeWhereNoReturnRector),
     //    remove them or skip them because those rules add modern type hints:
     $rectorConfig->skip([
-	__DIR__ . '/htdocs/includes/vendor',
+    __DIR__ . '/htdocs/includes/vendor',
     ]);
 
     // 4) (Optional) Add additional sets for code quality/cleanup if they don't
