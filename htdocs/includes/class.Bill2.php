@@ -634,7 +634,7 @@ class Bill2
         }
 
         $impact_statements = array();
-        while ($impact_statement = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+        while ($impact_statement = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
             $impact_statement = array_map('stripslashes', $impact_statement);
             $impact_statements[] = $impact_statement;
         }
@@ -740,7 +740,7 @@ class Bill2
 
         if (mysqli_num_rows($result) > 0) {
             $this->related_bills = array();
-            while ($related = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+            while ($related = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
                 $this->related_bills[] = $related;
             }
         }

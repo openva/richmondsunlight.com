@@ -277,7 +277,7 @@ function get_user()
     if (mysqli_num_rows($result) == 0) {
         return false;
     }
-    $user = mysqli_fetch_array($result, MYSQL_ASSOC);
+    $user = mysqli_fetch_array($result, MYSQLI_ASSOC);
     $user = array_map('stripslashes', $user);
 
     # Cache this user's data, and save it for one hour. (User sessions are unlikely to last longer.)

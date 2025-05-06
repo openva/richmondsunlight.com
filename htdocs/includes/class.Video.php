@@ -294,7 +294,7 @@ class Video
         if (mysqli_num_rows($result) == 0) {
             return false;
         } else {
-            while ($moment = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+            while ($moment = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
                 $index[] = $moment;
             }
 
@@ -519,7 +519,7 @@ class Video
 
         # Build up an array of "moments" -- each moment deriving from a single screenshot with
         # a chyron.
-        while ($moment = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+        while ($moment = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
             $moments[] = $moment;
         }
 
