@@ -38,15 +38,12 @@ jobs:
       - run: >-
           if [ "$GITHUB_REF_NAME" = "master" ]; then
             ./deploy/increase_verbosity.sh
-          elif [ "$GITHUB_BRANCH" = "php8" ]; then
-            ./deploy/increase_verbosity.sh
           fi
       - run: >-
           if [ "${{ github.ref_name }}" = "master" ]; then
             cp appspec-staging.yml appspec.yml
           elif [ "${{ github.ref_name }}" = "deploy" ]; then
             cp appspec-deploy.yml appspec.yml
-          elif [ "${{ github.ref_name }}" = "php8" ]; then
             cp appspec-deploy.yml appspec.yml
           fi
       - name: Save secret-populated code for a subsequent deploy step
