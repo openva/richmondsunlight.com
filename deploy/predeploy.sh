@@ -36,7 +36,7 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
     unzip openssl mysql-client memcached \
     php php-mysql php-curl php-mbstring php-xml php-fpm php-memcached \
     python python-pip s3cmd sphinxsearch wget awscli certbot \
-    python-certbot-apache yarn \
+    python3-certbot-apache yarn \
 
     # Install mod_pagespeed
     dpkg -s mod-pagespeed-beta
