@@ -42,7 +42,7 @@ done
 cp -f htdocs/includes/settings-default.inc.php htdocs/includes/settings.inc.php
 
 # If this is our staging site
-if [ "$GITHUB_BRANCH" = "master" ]
+if [ "$GITHUB_REF_NAME" = "master" ]
 then
 
 	# Set the PDO_DSN value to that of our staging database
