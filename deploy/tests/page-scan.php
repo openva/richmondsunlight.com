@@ -201,13 +201,5 @@ if (count($failures) > 0) {
     exit(1);
 }
 
-# Temporary debugging step
-$ch = curl_init($url_prefix . '/legislators/');
-curl_setopt($ch, CURLOPT_HEADER, 1);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-$content = curl_exec($ch);
-echo $content . "\n";
-curl_close($ch);
-
 echo 'Tested ' . count($pages) . ' URLs, no errors found.' . "\n";
 exit(0);
