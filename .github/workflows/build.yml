@@ -26,6 +26,13 @@ jobs:
           php-version: '8.4'
       - name: Install Composer dependencies
         run: composer install
+      - name: Cache Yarn dependencies
+        uses: actions/cache@v3
+        with:
+          path: htdocs/js/vendor/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('htdocs/js/vendor/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
       - name: Install Node dependencies
         run: cd htdocs/js/vendor; yarn install
       - name: Change to project root
