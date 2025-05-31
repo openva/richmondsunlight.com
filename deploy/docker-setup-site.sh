@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x
-
 cd /var/www/
 
 # What this image calls html, we call htdocs
@@ -23,6 +21,9 @@ if [ $(grep 2039 .htaccess |grep -v "#" |wc -l |xargs) -eq 0 ]; then
 fi
 
 cd ..
+
+# This keeps Composer from balking at the permissions of the directory
+git config --global --add safe.directory /var/www
 
 # Install Composer dependencies
 composer install
