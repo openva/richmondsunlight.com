@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 cd /var/www/
 
 # What this image calls html, we call htdocs
