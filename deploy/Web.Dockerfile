@@ -18,16 +18,8 @@ RUN apt-get install -y git zip sphinxsearch zlib1g-dev jq yarn
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Copy over the deploy scripts
-#### HERE'S THE PROBLEM YOU'RE WORKING ON
-## docker-compose.yml establishes that deploy/ is the build context, and yet
-## this copy command is copying over the entire webroot. The file that we need
-## to run is in /var/www/deploy/deploy/, instead of /var/www/deploy/. Why?
+# Copy over the webroot
 COPY ./deploy/ /var/www/deploy/
-RUN ls -l .
-RUN ls -l /var/www/
-RUN ls -l /var/www/deploy/
-RUN ls -l /var/www/deploy/deploy/
 
 EXPOSE 80
 
