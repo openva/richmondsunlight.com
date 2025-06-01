@@ -21,6 +21,7 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 # Copy over the deploy scripts
 WORKDIR /var/www/
 COPY . deploy/
+RUN ls -l /var/www/deploy
 
 EXPOSE 80
 
