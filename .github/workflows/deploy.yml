@@ -80,7 +80,7 @@ jobs:
         if: always()
         run: ./docker-stop.sh
       
-      - name: Prepare deployment package
+      - name: Populate secrets and compress
         run: |
           ./deploy/branch_deploy.sh
           ./deploy/config_variables.sh
