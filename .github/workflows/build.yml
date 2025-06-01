@@ -67,6 +67,12 @@ jobs:
         run: ./docker-run.sh
       - name: Run tests
         run: deploy/tests/run-all.sh
+      - name: Debug - List Docker containers
+        run: docker ps -a
+      - name: Debug - Show logs for web container
+        run: docker logs rs_web
+      - name: Debug - Inspect web container
+        run: docker inspect rs_web
       - name: Stop Docker
         run: ./docker-stop.sh
       - name: Populate secrets and ZIP
