@@ -2,7 +2,7 @@ name: Deploy Process
 
 on:
   push:
-    branches: [master, deploy]
+    branches: [master]
   pull_request:
   schedule:
     - cron: '0 4 * * *' # Redeploy at 4 AM every day
