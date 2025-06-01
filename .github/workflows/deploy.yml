@@ -44,6 +44,9 @@ jobs:
             gnupg \
             gnupg2 \
             zip
+
+      - name: Ensure PHP syntax is valid
+        run: find htdocs -name '*.php' -print0 | xargs -0 -n1 -P8 php -l
             
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist
@@ -51,9 +54,6 @@ jobs:
       - name: Install Node dependencies
         working-directory: htdocs/js/vendor
         run: yarn install && yarn build
-        
-      - name: PHP Syntax check
-        run: find htdocs/*.php -print0 | xargs -0 -n1 -P8 php -l
       
       - name: Setup Docker
         uses: docker/setup-buildx-action@v3
