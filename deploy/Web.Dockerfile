@@ -18,10 +18,7 @@ RUN apt-get install -y git zip sphinxsearch zlib1g-dev jq yarn
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Do all of the debugging
-WORKDIR /var/www/
-RUN ls -l /var/www/
-RUN ls -l /var/www/deploy/
+# Copy over the deploy scripts
 COPY . deploy/
 RUN ls -l /var/www/
 RUN ls -l /var/www/deploy/
