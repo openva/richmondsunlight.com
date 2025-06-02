@@ -86,7 +86,7 @@ jobs:
       
       - name: Run tests
         id: tests
-        run: docker exec -i rs_web /var/www/deploy/tests/run-all.sh
+        run: deploy/tests/run-all.sh
         continue-on-error: true
       
       - name: Stop Docker
