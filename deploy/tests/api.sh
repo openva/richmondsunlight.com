@@ -39,7 +39,7 @@ else
 fi
 
 # DEBUG: Display the body of this response
-curl --silent --include http://localhost:5001/1.1/legislator/rcdeeds.json
+curl http://localhost:5001/1.1/legislator/rcdeeds.json
 
 # If any tests failed, have this script return that failure
 if [ "$ERRORED" == true ]; then
