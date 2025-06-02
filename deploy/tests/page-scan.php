@@ -201,5 +201,19 @@ if (count($failures) > 0) {
     exit(1);
 }
 
+// Additional test: fetch /legislator/rcdeeds/ and display the full response body
+$ch = curl_init($url_prefix . '/legislator/rcdeeds/');
+curl_setopt($ch, CURLOPT_HEADER, 1);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+$response = curl_exec($ch);
+if (curl_errno($ch)) {
+    echo 'cURL error: ' . curl_error($ch) . "\n";
+} else {
+    echo "\n--- Response body for /legislator/rcdeeds/ ---\n";
+    echo $response . "\n";
+    echo "--- End of response ---\n";
+}
+curl_close($ch);
+
 echo 'Tested ' . count($pages) . ' URLs, no errors found.' . "\n";
 exit(0);
