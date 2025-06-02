@@ -5,6 +5,9 @@ pushd .
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "$DIR" || exit
 
+# List the currently running Docker containers
+docker ps -a
+
 # Check if the site is running, polling for up to 30 seconds
 SITE_URL="http://localhost:8000/"
 TIMEOUT=30
