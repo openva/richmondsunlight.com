@@ -35,6 +35,7 @@ curl -sSL --fail --show-error http://localhost:5001/1.1/legislator/rcdeeds.json
 # If any tests failed, have this script return that failure
 if [ "$ERRORED" == true ]; then
     echo "Some tests failed"
+    popd || exit 1
     exit 1
 fi
 
