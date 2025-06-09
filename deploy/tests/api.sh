@@ -38,9 +38,6 @@ else
     echo "✅: $URL Legislator's formatted name is correct"
 fi
 
-# DEBUG: Display the body of this response
-curl http://localhost:5001/1.1/legislator/rcdeeds.json
-
 # If any tests failed, have this script return that failure
 if [ "$ERRORED" == true ]; then
     exit 1
