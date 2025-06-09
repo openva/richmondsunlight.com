@@ -129,7 +129,7 @@ class Statistics
 
         $activity = [];
         while ($action = mysqli_fetch_assoc($result)) {
-            $activity[$result['date']] = $action['number'];
+            $activity[$action['date']] = $action['number'];
         }
 
         return $activity;
