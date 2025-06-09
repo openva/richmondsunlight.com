@@ -22,6 +22,10 @@ if [ ! -d "api/" ]; then
 
     mv rs-api-master/ api/
 
+    # DEBUG: Set all PHP flags to on, so that we can see if any of them are causing issues
+    echo "Setting PHP flags to on in .htaccess"
+    sed -i 's/^\(php_flag\s\+\S\+\s\+\)off$/\1on/' api/htdocs/.htaccess
+
     # Concatenate the database dumps into a single file, for MariaDB to load
     cd deploy/
     cat mysql/structure.sql mysql/basic-contents.sql mysql/test-records.sql > ../api/deploy/database.sql
