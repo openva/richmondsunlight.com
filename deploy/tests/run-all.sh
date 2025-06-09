@@ -5,20 +5,6 @@ pushd .
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "$DIR" || exit
 
-# Check if the site is running, polling for up to 30 seconds
-SITE_URL="http://localhost:8000/"
-TIMEOUT=30
-ELAPSED=0
-until curl --output /dev/null --silent --head --fail "$SITE_URL"; do
-    if [ $ELAPSED -ge $TIMEOUT ]; then
-        echo "Site is not running or not reachable at $SITE_URL after $TIMEOUT seconds, abandoning tests"
-        exit 1
-    fi
-    sleep 1
-    ELAPSED=$((ELAPSED+1))
-done
-echo "Site is up and running at $SITE_URL"
-
 # Run the page-scan tests
 if ! php ./page-scan.php; then
     ERRORED=true
@@ -29,9 +15,6 @@ if ! ./api.sh; then
     ERRORED=true
 fi
 
-# DEBUG: Display the response to a legislator query (does it return a PHP error?)
-curl -sSL --fail --show-error http://localhost:5001/1.1/legislator/rcdeeds.json
-
 # If any tests failed, have this script return that failure
 if [ "$ERRORED" == true ]; then
     echo "Some tests failed"
@@ -41,3 +24,5 @@ fi
 
 # Switch back to the directory this was invoked from
 popd || exit
+
+echo "All tests passed successfully"
