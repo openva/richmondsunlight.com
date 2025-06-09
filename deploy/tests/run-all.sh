@@ -29,14 +29,14 @@ if ! ./api.sh; then
     ERRORED=true
 fi
 
+# DEBUG: Display the response to a legislator query (does it return a PHP error?)
+curl -sSL --fail --show-error http://localhost:5001/1.1/legislator/rcdeeds.json
+
 # If any tests failed, have this script return that failure
 if [ "$ERRORED" == true ]; then
     echo "Some tests failed"
     exit 1
 fi
-
-# DEBUG: Display the response to a legislator query (does it return a PHP error?)
-curl -sSL --fail --show-error http://localhost:5001/1.1/legislator/rcdeeds.json
 
 # Switch back to the directory this was invoked from
 popd || exit
