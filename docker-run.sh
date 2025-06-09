@@ -10,9 +10,9 @@ cd $(dirname "$0") || exit
 # Get the API repo.
 if [ ! -d "api/" ]; then
 
-    # Download the ZIP file, appending a timestamp to avoid caching issues
+    # Download the ZIP file
     echo "Downloading API repository..."
-    curl -s -L -o api.zip "https://github.com/openva/rs-api/archive/master.zip?$(date +%s)"
+    curl -s -L -o api.zip "https://github.com/openva/rs-api/archive/master.zip"
     if [ $? -ne 0 ]; then
         echo "Error: could not download API repository code. Quitting."
         exit 1;
