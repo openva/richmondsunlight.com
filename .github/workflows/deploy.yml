@@ -155,6 +155,8 @@ jobs:
       - name: Deploy to staging
         if: github.ref_name == 'master'
         run: |
+          ls -la
+          unzip -l rs-web-staging.zip
           aws deploy push \
             --application-name RS-Web \
             --s3-location s3://deploy.richmondsunlight.com/rs-web-staging.zip \
