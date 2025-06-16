@@ -92,20 +92,6 @@ jobs:
       - name: Stop Docker
         if: always()
         run: ./docker-stop.sh
-      
-      - name: Populate secrets and compress
-        run: |
-          if [ "$GITHUB_REF_NAME" = "master" ]; then
-            ZIPNAME=rs-web-staging.zip
-          elif [ "$GITHUB_REF_NAME" = "deploy" ]; then
-            ZIPNAME=rs-web-deploy.zip
-          fi
-          ./deploy/branch_deploy.sh
-          ./deploy/config_variables.sh
-          ./deploy/aws_credentials.sh
-          zip -qr "$ZIPNAME" . --exclude *.git* *.scannerwork*
-          mkdir -p upload
-          mv "$ZIPNAME" upload/
           
       - name: Configure deployment type
         run: |
@@ -122,6 +108,20 @@ jobs:
             exit 0
           fi
           ls appspec*
+      
+      - name: Populate secrets and compress
+        run: |
+          if [ "$GITHUB_REF_NAME" = "master" ]; then
+            ZIPNAME=rs-web-staging.zip
+          elif [ "$GITHUB_REF_NAME" = "deploy" ]; then
+            ZIPNAME=rs-web-deploy.zip
+          fi
+          ./deploy/branch_deploy.sh
+          ./deploy/config_variables.sh
+          ./deploy/aws_credentials.sh
+          zip -qr "$ZIPNAME" . --exclude *.git* *.scannerwork*
+          mkdir -p upload
+          mv "$ZIPNAME" upload/
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
