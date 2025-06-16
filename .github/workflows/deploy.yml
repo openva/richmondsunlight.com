@@ -111,6 +111,9 @@ jobs:
           elif [ "$GITHUB_REF_NAME" = "deploy" ]; then
             cp appspec-deploy.yml appspec.yml
             echo Deployment configured for production
+          else
+            echo "No deployment configuration for branch: $GITHUB_REF_NAME"
+            exit 0
           fi
 
       - name: Upload artifact
