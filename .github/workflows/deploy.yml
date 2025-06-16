@@ -107,8 +107,10 @@ jobs:
           if [ "$GITHUB_REF_NAME" = "master" ]; then
             ./deploy/increase_verbosity.sh
             cp appspec-staging.yml appspec.yml
+            echo Deployment configured for staging
           elif [ "$GITHUB_REF_NAME" = "deploy" ]; then
             cp appspec-deploy.yml appspec.yml
+            echo Deployment configured for production
           fi
 
       - name: Upload artifact
