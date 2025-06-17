@@ -119,17 +119,15 @@ jobs:
           ./deploy/config_variables.sh
           ./deploy/aws_credentials.sh
           zip -qr "$ZIPNAME" . --exclude *.git* *.scannerwork*
-          mkdir -p upload
-          mv "$ZIPNAME" upload/
 
       - name: Upload artifact
         run: |
           if [ "$GITHUB_REF_NAME" = "master" ]; then
             echo "Uploading rs-web-staging.zip"
-            gh run upload-artifact --name codebase upload/rs-web-staging.zip
+            gh run upload-artifact --name codebase rs-web-staging.zip
           elif [ "$GITHUB_REF_NAME" = "deploy" ]; then
             echo "Uploading rs-web-deploy.zip"
-            gh run upload-artifact --name codebase upload/rs-web-deploy.zip
+            gh run upload-artifact --name codebase rs-web-deploy.zip
           else
             echo "No artifact to upload for branch: $GITHUB_REF_NAME"
             exit 0
