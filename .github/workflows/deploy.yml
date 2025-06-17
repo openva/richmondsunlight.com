@@ -156,8 +156,6 @@ jobs:
       - name: Deploy to staging
         if: github.ref_name == 'master'
         run: |
-          # Make appspec.yml available for CodeDeploy
-          unzip -o rs-web-staging.zip appspec.yml
           aws deploy push \
             --application-name RS-Web \
             --s3-location s3://deploy.richmondsunlight.com/rs-web-staging.zip \
