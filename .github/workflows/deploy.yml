@@ -123,13 +123,17 @@ jobs:
           mv "$ZIPNAME" upload/
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        if: success()
-        with:
-          name: codebase
-          path: upload/rs-web-staging.zip
-          retention-days: 1
-          if-no-files-found: error
+        run: |
+          if [ "$GITHUB_REF_NAME" = "master" ]; then
+            echo "Uploading rs-web-staging.zip"
+            gh run upload-artifact --name codebase upload/rs-web-staging.zip
+          elif [ "$GITHUB_REF_NAME" = "deploy" ]; then
+            echo "Uploading rs-web-deploy.zip"
+            gh run upload-artifact --name codebase upload/rs-web-deploy.zip
+          else
+            echo "No artifact to upload for branch: $GITHUB_REF_NAME"
+            exit 0
+          fi
 
     outputs:
       branch: ${{ steps.vars.outputs.branch }}
