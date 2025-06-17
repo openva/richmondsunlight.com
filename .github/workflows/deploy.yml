@@ -127,7 +127,7 @@ jobs:
         if: success()
         with:
           name: codebase
-          path: upload/
+          path: upload/rs-web-staging.zip
           retention-days: 1
           if-no-files-found: error
 
