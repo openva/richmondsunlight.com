@@ -156,18 +156,12 @@ jobs:
       - name: Deploy to staging
         if: github.ref_name == 'master'
         run: |
-          echo 'Current directory:'
-          pwd
-          echo 'Directory listing:'
-          ls -la
-          echo 'Listing contents of rs-web-staging.zip:'
-          unzip -l rs-web-staging.zip
-          echo 'Running aws deploy push'
+          # Make appspec.yml available for CodeDeploy
+          unzip -o rs-web-staging.zip appspec.yml
           aws deploy push \
             --application-name RS-Web \
             --s3-location s3://deploy.richmondsunlight.com/rs-web-staging.zip \
             --ignore-hidden-files
-          echo 'Running aws deploy create-deployment'
           aws deploy create-deployment \
             --application-name RS-Web \
             --deployment-group-name RS-Web-Staging \
