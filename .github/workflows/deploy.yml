@@ -120,18 +120,19 @@ jobs:
           ./deploy/aws_credentials.sh
           zip -qr "$ZIPNAME" . --exclude *.git* *.scannerwork*
 
-      - name: Upload artifact
-        run: |
-          if [ "$GITHUB_REF_NAME" = "master" ]; then
-            echo "Uploading rs-web-staging.zip"
-            gh run upload-artifact --name codebase rs-web-staging.zip
-          elif [ "$GITHUB_REF_NAME" = "deploy" ]; then
-            echo "Uploading rs-web-deploy.zip"
-            gh run upload-artifact --name codebase rs-web-deploy.zip
-          else
-            echo "No artifact to upload for branch: $GITHUB_REF_NAME"
-            exit 0
-          fi
+      - name: Upload staging site
+        if: env.GITHUB_REF_NAME == 'master'
+        uses: actions/upload-artifact@v4
+        with:
+          name: codebase
+          path: rs-web-staging.zip
+
+      - name: Upload production site
+        if: env.GITHUB_REF_NAME == 'deploy'
+        uses: actions/upload-artifact@v4
+        with:
+          name: codebase
+          path: rs-web-deploy.zip
 
     outputs:
       branch: ${{ steps.vars.outputs.branch }}
