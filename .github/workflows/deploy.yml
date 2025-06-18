@@ -118,21 +118,20 @@ jobs:
           ./deploy/branch_deploy.sh
           ./deploy/config_variables.sh
           ./deploy/aws_credentials.sh
-          zip -qr "$ZIPNAME" . --exclude *.git* *.scannerwork*
 
       - name: Upload staging site
         if: env.GITHUB_REF_NAME == 'master'
         uses: actions/upload-artifact@v4
         with:
           name: codebase
-          path: rs-web-staging.zip
+          path: .
 
       - name: Upload production site
         if: env.GITHUB_REF_NAME == 'deploy'
         uses: actions/upload-artifact@v4
         with:
           name: codebase
-          path: rs-web-deploy.zip
+          path: .
 
     outputs:
       branch: ${{ steps.vars.outputs.branch }}
