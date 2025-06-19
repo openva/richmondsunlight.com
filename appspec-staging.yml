@@ -18,5 +18,6 @@ permissions:
 hooks:
   BeforeInstall:
     - location: deploy/predeploy.sh
+  Install: []
   AfterInstall:
     - location: deploy/postdeploy.sh
