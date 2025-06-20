@@ -10,10 +10,6 @@ permissions:
     owner: www-data
     group: www-data
     mode: 775
-    acls:
-      - d:u::rwx
-      - d:g::rwx
-      - d:o::rwx
     type:
       - directory
 hooks:
