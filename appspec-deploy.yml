@@ -1,24 +1,26 @@
-version: 0.0
+---
+version: 0
 os: linux
 files:
   - source: ./
     destination: /var/www/richmondsunlight.com/
 file_exists_behavior: OVERWRITE
 permissions:
-    - object: /var/www/richmondsunlight.com/
-      owner: www-data
-      group: www-data
-      mode: 775
-      acls:
-        - "d:u::rwx"
-        - "d:g::rx"
-        - "d:o::rx"
-      type:
-       - directory
+  - object: /var/www/richmondsunlight.com/
+    owner: www-data
+    group: www-data
+    mode: 775
+    acls:
+      - d:u::rwx
+      - d:g::rwx
+      - d:o::rwx
+    type:
+      - directory
 hooks:
   BeforeInstall:
     - location: deploy/predeploy.sh
       timeout: 300
       runas: root
+  Install: []
   AfterInstall:
     - location: deploy/postdeploy.sh
