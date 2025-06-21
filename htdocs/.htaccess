@@ -1,25 +1,25 @@
-#php_value apc.enabled 1
-#php_value error_reporting 2039
+php_value apc.enabled 1
+php_value upload_max_filesize 5M
+
+php_value display_errors Off
+php_value log_errors Off
 
 php_value include_path ".:includes/"
-#php_value session.gc_maxlifetime 31449600
-#php_value session_cache_expire 31449600
-#php_value display_errors Off
-#php_value log_errors Off
+
 #php_value session.save_handler redis
 #php_value session.save_path tcp://127.0.0.1:6379
 
 # Instruct browsers to cache and proxies not to cache, timing out cookies after a year. Affects only
 # PHP.
-#php_value session.cache_limiter private
-#php_value session.cache_limiter 525600
-#php_value session.gc_maxlifetime 525600
+php_value session.cache_limiter private
+php_value session.gc_maxlifetime 7776000
+php_value session_cache_expire 7776000
 
 # Security settings
 php_flag session.cookie_httponly on
 php_flag session.use_only_cookies on
 php_flag session.cookie_secure on
-Header always set Feature-Policy "push 'self'; fullscreen 'self'; geolocation 'self'; notifications 'self'; autoplay 'self'"
+Header always set Permissions-Policy "push=(self), fullscreen=(self), geolocation=(self), notifications=(self), autoplay=(self)"
 Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 Header always set X-Frame-Options "SAMEORIGIN"
 Header always set X-Xss-Protection "1; mode=block"
@@ -34,7 +34,6 @@ Header always edit Set-Cookie (.*) "$1; SameSite=Lax"
 
 <IfModule mod_expires.c>
 	ExpiresActive On
-	ExpiresDefault "access plus 10 days"
 	ExpiresByType image/jpg "access 1 month"
 	ExpiresByType image/jpeg "access 1 month"
 	ExpiresByType image/gif "access 1 month"
@@ -68,7 +67,7 @@ RewriteCond %{HTTP_HOST} ^richmondsunlight.com [NC]
 RewriteRule ^(.*)$ https://www.richmondsunlight.com/$1 [L,R=301,NC]
 
 # Individual Bill
-RewriteRule ^bill/([0-9]{4})/([HS][BJR]]{1,2}[0-9]{1,4})?/?$ /bill/$1/${tolower:$2}/ [R=301]
+RewriteRule ^bill/([0-9]{4})/([HS][BJR]{1,2}[0-9]{1,4})?/?$ /bill/$1/${tolower:$2}/ [R=301]
 RewriteRule ^bill/([0-9]{4})/([hs][bjr]{1,2}[0-9]{1,4})?/?$ /bill.php?year=$1&bill=$2 [QSA]
 RewriteRule ^bill/([0-9]{4})/([hs][bjr]{1,2}[0-9]{1,4})/fulltext?/?$ /bill-fulltext.php?year=$1&bill=$2 [QSA]
 RewriteRule ^bill/([0-9]{4})/([hs][bjr]{1,2}[0-9]{1,4})/history?/?$ /bill-history.php?year=$1&bill=$2 [QSA]
