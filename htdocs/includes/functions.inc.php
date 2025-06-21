@@ -78,7 +78,7 @@ function array_map_multi($func, $arr)
 }
 
 # Displays the search form. This is really only meant for use on the search page.
-function search_form($q)
+function search_form($q = '')
 {
     $q = trim($q);
     $returned_data = '
