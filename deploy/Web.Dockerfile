@@ -6,14 +6,14 @@ RUN echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/90ignore-re
 RUN docker-php-ext-install mysqli && a2enmod rewrite && a2enmod expires && a2enmod headers
 
 # Install our packages
-RUN apt-get update && \
-    apt-get upgrade -y && \
     apt-get install -y gnupg2 curl
+RUN apt update && \
+    apt upgrade -y && \
 
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-RUN apt-get update
-RUN apt-get install -y git zip sphinxsearch zlib1g-dev jq yarn
+RUN apt update
+RUN apt install -y git zip sphinxsearch zlib1g-dev jq yarn
 
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer

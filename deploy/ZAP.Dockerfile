@@ -6,9 +6,9 @@ WORKDIR /zap
 
 # Update and upgrade the system, then install necessary packages
 USER root
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y --no-install-recommends apt-transport-https ca-certificates gnupg-agent libreadline8 libtinfo5 gnupg gnupg2
+RUN apt update && \
+    apt upgrade -y && \
+    apt install -y --no-install-recommends apt-transport-https ca-certificates gnupg-agent libreadline8 libtinfo5 gnupg gnupg2
 
 # Copy your application's specific ZAP scripts or configurations if any
 # COPY zap-configs/ /zap/zap-configs/
