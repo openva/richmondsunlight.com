@@ -6,9 +6,9 @@ RUN echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/90ignore-re
 RUN docker-php-ext-install mysqli && a2enmod rewrite && a2enmod expires && a2enmod headers
 
 # Install our packages
-    apt-get install -y gnupg2 curl
 RUN apt update && \
     apt upgrade -y && \
+    apt install -y gnupg2 curl redis
 
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add -
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
