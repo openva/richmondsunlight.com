@@ -1,7 +1,7 @@
 php_value apc.enabled 1
 php_value upload_max_filesize 5M
 
-php_value display_errors Off
+php_value display_errors On
 php_value log_errors Off
 
 php_value include_path ".:includes/"
@@ -158,7 +158,7 @@ RewriteRule ^legislator$ /bills/ [R]
 RewriteRule ^search$ /search/
 RewriteRule ^schedule$ /schedule/ [R]
 RewriteRule ^minutes$ /minutes/ [R]
-php_value error_reporting 2039
+php_value error_reporting 7
 
 # Photosynthesis
 RewriteRule ^photosynthesis/delete/([a-z0-9]{5})-([0-9]+)?/?$ /photosynthesis/process-actions.php?delete-bill=$1-$2 [QSA]
