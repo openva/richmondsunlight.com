@@ -41,13 +41,14 @@ cd htdocs/js/vendor; yarn build; cd ../../..
 # Move over the settings file.
 cp deploy/settings-docker.inc.php htdocs/includes/settings.inc.php
 
-# Copy over the Sphinx configuration, start Sphinx
-#cp deploy/sphinx.conf /etc/sphinxsearch/sphinx.conf
-#sed -i -e "s|{PDO_SERVER}|db|g" /etc/sphinxsearch/sphinx.conf
-#sed -i -e "s|{PDO_USERNAME}|ricsun|g" /etc/sphinxsearch/sphinx.conf
-#sed -i -e "s|{PDO_PASSWORD}|password|g" /etc/sphinxsearch/sphinx.conf
-#sed -i -e "s|{MYSQL_DATABASE}|richmondsunlight|g" /etc/sphinxsearch/sphinx.conf
-#/etc/init.d/sphinxsearch start
+# Set up Sphinx and start it
+echo "START=yes" | tee /etc/default/sphinxsearch
+cp deploy/sphinx.conf /etc/sphinxsearch/sphinx.conf
+sed -i -e "s|{PDO_SERVER}|db|g" /etc/sphinxsearch/sphinx.conf
+sed -i -e "s|{PDO_USERNAME}|ricsun|g" /etc/sphinxsearch/sphinx.conf
+sed -i -e "s|{PDO_PASSWORD}|password|g" /etc/sphinxsearch/sphinx.conf
+sed -i -e "s|{MYSQL_DATABASE}|richmondsunlight|g" /etc/sphinxsearch/sphinx.conf
+service sphinxsearch start
 
 # If we have an existing index, update it
 #if [[ -f /var/lib/sphinxsearch/data/bills.sph ]]; then
