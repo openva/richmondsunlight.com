@@ -51,12 +51,10 @@ sed -i -e "s|{MYSQL_DATABASE}|richmondsunlight|g" /etc/sphinxsearch/sphinx.conf
 service sphinxsearch start
 
 # If we have an existing index, update it
-#if [[ -f /var/lib/sphinxsearch/data/bills.sph ]]; then
-
+if [[ -f /var/lib/sphinxsearch/data/bills.sph ]]; then
     # Reindex
-#   indexer --all --rotate
-
+    indexer --all --rotate
 # If there is no index, create a new one
-#else
-#    indexer --all
-#fi
+else
+    indexer --all
+fi
