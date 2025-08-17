@@ -27,6 +27,10 @@ session_start();
 $page_title = 'Detailed Legislator Listing';
 $site_section = 'legislators';
 
+# Initialize the page body and sidebar.
+$page_body = '';
+$page_sidebar = '';
+
 # Include the tabbing code.
 $html_head = '<script src="/js/sorttable.js" type="text/javascript"></script>';
 
@@ -216,6 +220,5 @@ $page->page_title = $page_title;
 $page->page_body = $page_body;
 $page->page_sidebar = $page_sidebar;
 $page->site_section = $site_section;
-$page->body_tag = $body_tag;
 $page->html_head = $html_head;
 $page->process();
