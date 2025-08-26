@@ -517,6 +517,7 @@ function get_content($url, $timeout = 10)
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
     curl_setopt($ch, CURLOPT_ENCODING, 'gzip,deflate');
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_USERAGENT, 'rs-bot');
 
     $string = curl_exec($ch);
     curl_close($ch);
