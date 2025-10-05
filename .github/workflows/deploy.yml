@@ -78,23 +78,28 @@ jobs:
         if: always()
         run: ./docker-stop.sh
       
-      - name: Prepare deployment package
-        run: |
-          ./deploy/branch_deploy.sh
-          ./deploy/config_variables.sh
-          ./deploy/aws_credentials.sh
-          zip -qr rs-web-deploy . --exclude *.git* *.scannerwork*
-          mkdir -p upload
-          mv rs-web-deploy.zip upload/
-          
       - name: Configure deployment type
         run: |
           if [ "$GITHUB_BRANCH" = "master" ]; then
             ./deploy/increase_verbosity.sh
             cp appspec-staging.yml appspec.yml
+            echo "PACKAGE_BASENAME=rs-web-staging" >> "$GITHUB_ENV"
           elif [ "$GITHUB_BRANCH" = "deploy" ]; then
             cp appspec-deploy.yml appspec.yml
+            echo "PACKAGE_BASENAME=rs-web-deploy" >> "$GITHUB_ENV"
+          else
+            cp appspec-staging.yml appspec.yml
+            echo "PACKAGE_BASENAME=rs-web-deploy" >> "$GITHUB_ENV"
           fi
+          
+      - name: Prepare deployment package
+        run: |
+          ./deploy/branch_deploy.sh
+          ./deploy/config_variables.sh
+          ./deploy/aws_credentials.sh
+          zip -qr "${PACKAGE_BASENAME}.zip" . --exclude *.git* *.scannerwork*
+          mkdir -p upload
+          mv "${PACKAGE_BASENAME}.zip" upload/
           
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -107,10 +112,13 @@ jobs:
           
       - name: Set output
         id: vars
-        run: echo "branch=${GITHUB_BRANCH}" >> $GITHUB_OUTPUT
+        run: |
+          echo "branch=${GITHUB_BRANCH}" >> $GITHUB_OUTPUT
+          echo "package=${PACKAGE_BASENAME}" >> $GITHUB_OUTPUT
 
     outputs:
       branch: ${{ steps.vars.outputs.branch }}
+      package: ${{ steps.vars.outputs.package }}
 
   deploy:
     name: Deploy to AWS
@@ -123,7 +131,6 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: codebase
-          path: codebase
           
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
@@ -138,13 +145,14 @@ jobs:
         run: |
           aws deploy push \
             --application-name RS-Web \
-            --s3-location s3://deploy.richmondsunlight.com/rs-web-staging.zip \
+            --source upload/${{ needs.build.outputs.package }}.zip \
+            --s3-location s3://deploy.richmondsunlight.com/${{ needs.build.outputs.package }}.zip \
             --ignore-hidden-files
           aws deploy create-deployment \
             --application-name RS-Web \
             --deployment-group-name RS-Web-Staging \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --s3-location bucket=deploy.richmondsunlight.com,key=rs-web-staging.zip,bundleType=zip
+            --s3-location bucket=deploy.richmondsunlight.com,key=${{ needs.build.outputs.package }}.zip,bundleType=zip
             
       - name: Deploy to production
         if: needs.build.outputs.branch == 'deploy'
@@ -152,10 +160,11 @@ jobs:
         run: |
           aws deploy push \
             --application-name RS-Web \
-            --s3-location s3://deploy.richmondsunlight.com/rs-web-deploy.zip \
+            --source upload/${{ needs.build.outputs.package }}.zip \
+            --s3-location s3://deploy.richmondsunlight.com/${{ needs.build.outputs.package }}.zip \
             --ignore-hidden-files
           aws deploy create-deployment \
             --application-name RS-Web \
             --deployment-group-name RS-Web-Fleet \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --s3-location bucket=deploy.richmondsunlight.com,key=rs-web-deploy.zip,bundleType=zip
+            --s3-location bucket=deploy.richmondsunlight.com,key=${{ needs.build.outputs.package }}.zip,bundleType=zip
