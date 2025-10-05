@@ -41,10 +41,11 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
     # Install mod_pagespeed
     dpkg -s mod-pagespeed-beta
     if [ $? -eq 1 ]; then
-        wget https://dl-ssl.google.com/dl/linux/direct/mod-pagespeed-beta_current_amd64.deb
-        sudo dpkg -i mod-pagespeed-*.deb
+        wget https://dl-ssl.google.com/dl/linux/direct/mod-pagespeed-stable_current_amd64.deb
+        sudo dpkg -i mod-pagespeed-stable_current_amd64.deb
         sudo apt -f install
-        rm mod-pagespeed-*.deb
+        rm mod-pagespeed-stable_current_amd64.deb
+        sudo service apache2 restart
     fi
 
     # Install Codedeploy
