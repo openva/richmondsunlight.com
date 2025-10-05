@@ -143,7 +143,10 @@ jobs:
             --deployment-group-name RS-Web-Staging \
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --s3-location bucket=deploy.richmondsunlight.com,key=rs-web-staging.zip,bundleType=zip
-            
+      
+      - run: pwd && ls -la
+      - run: test -f appspec.yml && echo "Found appspec.yml here" || echo "No appspec.yml here"
+
       - name: Deploy to production
         if: needs.build.outputs.branch == 'deploy'
         run: |
