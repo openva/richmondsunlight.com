@@ -133,6 +133,7 @@ jobs:
           
       - name: Deploy to staging
         if: needs.build.outputs.branch == 'master'
+        working-directory: codebase
         run: |
           aws deploy push \
             --application-name RS-Web \
@@ -146,6 +147,7 @@ jobs:
             
       - name: Deploy to production
         if: needs.build.outputs.branch == 'deploy'
+        working-directory: codebase
         run: |
           aws deploy push \
             --application-name RS-Web \
