@@ -123,6 +123,7 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: codebase
+          path: codebase
           
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
