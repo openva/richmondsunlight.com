@@ -11,13 +11,13 @@ require '../htdocs/includes/settings.inc.php';
 require '../htdocs/includes/class.Database.php';
 require '../htdocs/includes/vendor/autoload.php';
 
-$database = new Database;
+$database = new Database();
 $db = $database->connect_mysqli();
 
 /*
  * Get a list of all legislators.
  */
-$legislator = new Legislator;
+$legislator = new Legislator();
 $legislator_list = $legislator->get_list('current');
 
 $legislators = array('house' => array(), 'senate' => array());
@@ -25,12 +25,9 @@ $legislators = array('house' => array(), 'senate' => array());
 /*
  * Build up an HTML-formatted array of legislators by chamber.
  */
-foreach ($legislator_list as $legislator)
-{
-
+foreach ($legislator_list as $legislator) {
     $legislators[$legislator['chamber']][substr($legislator['name'], 0, 1)][] = '<a href="/legislator/' . $legislator['shortname']
         . '/">' . $legislator['name_formatted'] . '</a>';
-
 }
 
 /*
@@ -41,7 +38,7 @@ $house_categories = explode(',', 'A,I,D,M,S');
 $senate_categories = explode(',', 'A,J,S');
 
 ////////////////////////////////////////////////////////////////////////
-///// Redo this to be based on iterating through the alphabet, NOT 
+///// Redo this to be based on iterating through the alphabet, NOT
 ///// iterating through the list of legislators. Missing alphabetical
 ///// letters from legislators names is hobbling this.
 ////////////////////////////////////////////////////////////////////////
@@ -55,30 +52,24 @@ echo '
         <ul class="alphabetic">';
 
 $first = true;
-foreach ($legislators['house'] as $letter => $by_letter)
-{
-
-    if (in_array($letter, $house_categories) || $first == true)
-    {
-        echo 
+foreach ($legislators['house'] as $letter => $by_letter) {
+    if (in_array($letter, $house_categories) || $first == true) {
+        echo
             '<li>' . $letter . ' »
             <ul class="legislators">';
     }
 
-    foreach ($by_letter as $legislator)
-    {
+    foreach ($by_letter as $legislator) {
         echo '
                 <li>' . $legislator . '</li>';
     }
 
-    if (in_array($alphabet[array_search($letter, $alphabet)]+1, $house_categories))
-    {
+    if (in_array($alphabet[array_search($letter, $alphabet)] + 1, $house_categories)) {
         echo '
             </ul></li>';
     }
 
     $first = false;
-
 }
 
 echo '
@@ -87,30 +78,24 @@ echo '
         <ul class="alphabetic">';
 
 $first = true;
-foreach ($legislators['senate'] as $letter => $by_letter)
-{
-
-    if (in_array($letter, $senate_categories) || $first == true)
-    {
+foreach ($legislators['senate'] as $letter => $by_letter) {
+    if (in_array($letter, $senate_categories) || $first == true) {
         echo '
             <li>' . $letter . ' »
             <ul class="legislators">';
     }
 
-    foreach ($by_letter as $legislator)
-    {
+    foreach ($by_letter as $legislator) {
         echo '
                 <li>' . $legislator . '</li>';
     }
 
-    if (in_array($alphabet[array_search($letter, $alphabet)]+1, $senate_categories))
-    {
+    if (in_array($alphabet[array_search($letter, $alphabet)] + 1, $senate_categories)) {
         echo '
             </ul></li>';
     }
 
     $first = false;
-
 }
 
 echo '
