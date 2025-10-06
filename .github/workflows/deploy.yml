@@ -147,6 +147,9 @@ jobs:
       - name: Deploy to production
         if: needs.build.outputs.branch == 'deploy'
         run: |
+          pwd
+          ls -la
+          ls -la codebase/upload/
           aws deploy push \
             --application-name RS-Web \
             --source codebase/upload/rs-web-deploy.zip \
