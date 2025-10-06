@@ -150,10 +150,12 @@ jobs:
           pwd
           ls -la
           ls /home/runner/work/richmondsunlight.com/richmondsunlight.com/rs-web-deploy.zip
+          unzip rs-web-deploy.zip -d .
+          rm rs-web-deploy.zip
+          ls -la
           echo "Pushing code"
           aws deploy push \
             --application-name RS-Web \
-            --source /home/runner/work/richmondsunlight.com/richmondsunlight.com/rs-web-deploy.zip \
             --s3-location s3://deploy.richmondsunlight.com/rs-web-deploy.zip \
             --ignore-hidden-files
           echo "Creating deployment"
