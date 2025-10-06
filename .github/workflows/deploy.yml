@@ -150,11 +150,13 @@ jobs:
           pwd
           ls -la
           ls /home/runner/work/richmondsunlight.com/richmondsunlight.com/rs-web-deploy.zip
+          echo "Pushing code"
           aws deploy push \
             --application-name RS-Web \
             --source /home/runner/work/richmondsunlight.com/richmondsunlight.com/rs-web-deploy.zip \
             --s3-location s3://deploy.richmondsunlight.com/rs-web-deploy.zip \
             --ignore-hidden-files
+          echo "Creating deployment"
           aws deploy create-deployment \
             --application-name RS-Web \
             --deployment-group-name RS-Web-Fleet \
