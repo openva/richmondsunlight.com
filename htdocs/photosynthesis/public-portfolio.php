@@ -111,9 +111,6 @@ else {
 			<p><a href="/photosynthesis/">Create a Photosynthesis account today</a> and
 			keep track of the legislation that interests you!</p>
 
-			<script src="https://connect.facebook.net/en_US/all.js#xfbml=1"></script>
-			<fb:like layout="button_count" show_faces="false" width="100" action="recommend"></fb:like>
-
 		</div>';
 
     # Display a tag cloud.
