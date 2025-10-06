@@ -89,16 +89,14 @@ jobs:
           
       - name: Configure deployment type
         run: |
-          echo GitHub branch is "$GITHUB_BRANCH"
           if [ "$GITHUB_BRANCH" = "master" ]; then
             ./deploy/increase_verbosity.sh
             cp appspec-staging.yml appspec.yml
           elif [ "$GITHUB_BRANCH" = "deploy" ]; then
             cp appspec-deploy.yml appspec.yml
-          else
-            echo "Error: Deployment can only be run from 'master' or 'deploy' branches."
-            exit 1
           fi
+          pwd
+          ls -la
           
       - name: Upload artifact
         uses: actions/upload-artifact@v4
