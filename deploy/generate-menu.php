@@ -28,7 +28,7 @@ $legislators = array('house' => array(), 'senate' => array());
 foreach ($legislator_list as $legislator)
 {
 
-    $legislators[$legislator{'chamber'}][substr($legislator{'name'}, 0, 1)][] = '<a href="/legislator/' . $legislator['shortname']
+    $legislators[$legislator['chamber']][substr($legislator['name'], 0, 1)][] = '<a href="/legislator/' . $legislator['shortname']
         . '/">' . $legislator['name_formatted'] . '</a>';
 
 }

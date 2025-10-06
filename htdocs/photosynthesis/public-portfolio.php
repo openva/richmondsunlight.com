@@ -73,7 +73,7 @@ else {
     # Make the user closer to anonymous.
     $tmp = explode(' ', $portfolio['user_name']);
     if (count($tmp) > 1) {
-        $portfolio['user_name'] = $tmp[0] . ' ' . $tmp[1]{0} . '.';
+        $portfolio['user_name'] = $tmp[0] . ' ' . $tmp[1][0] . '.';
     } else {
         $portfolio['user_name'] = $tmp[0];
     }
