@@ -89,11 +89,24 @@ jobs:
           
       - name: Configure deployment type
         run: |
+          echo "Debug: GITHUB_REF=$GITHUB_REF"
+          echo "Debug: Derived GITHUB_BRANCH=$GITHUB_BRANCH"
+          echo "Debug: Listing appspec candidates before copy"
+          ls -la appspec*.yml || true
           if [ "$GITHUB_BRANCH" = "master" ]; then
             ./deploy/increase_verbosity.sh
             cp appspec-staging.yml appspec.yml
           elif [ "$GITHUB_BRANCH" = "deploy" ]; then
+            echo "Debug: Entered deploy branch condition"
+            if [ ! -f appspec-deploy.yml ]; then
+              echo "Debug: Missing appspec-deploy.yml" >&2
+            fi
+            echo "Debug: Copying appspec-deploy.yml to appspec.yml"
             cp appspec-deploy.yml appspec.yml
+            echo "Debug: Result of ls -la appspec.yml"
+            ls -la appspec.yml || true
+          else
+            echo "Debug: Branch did not match master or deploy; no copy performed"
           fi
           pwd
           ls -la
