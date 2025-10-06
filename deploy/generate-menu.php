@@ -2,7 +2,7 @@
 
 /**
  * Generate Legislators Menu
- * 
+ *
  * Query the database to generate a list of all legislators, to update the menu.
  * The resulting list is sent to stdout.
  **/
