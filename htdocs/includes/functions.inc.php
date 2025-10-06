@@ -299,11 +299,6 @@ function update_user($options)
         return false;
     }
 
-    # If this user's data is cached in APC, delete it, since it's now out of date.
-    if (apc_exists('user-' . $_SESSION['id']) !== false) {
-        apc_delete('user-' . $_SESSION['id']);
-    }
-
     # Assemble the SQL string.
     $sql = 'UPDATE users SET ';
     $first = 'yes';
