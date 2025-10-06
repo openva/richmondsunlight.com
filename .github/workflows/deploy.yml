@@ -78,29 +78,23 @@ jobs:
         if: always()
         run: ./docker-stop.sh
       
-      - name: Configure deployment package
-        run: |
-          if [ "$GITHUB_BRANCH" = "master" ]; then
-            ./deploy/increase_verbosity.sh
-            cp appspec-staging.yml appspec.yml
-            PACKAGE_NAME=rs-web-staging
-          elif [ "$GITHUB_BRANCH" = "deploy" ]; then
-            cp appspec-deploy.yml appspec.yml
-            PACKAGE_NAME=rs-web-deploy
-          else
-            cp appspec-staging.yml appspec.yml
-            PACKAGE_NAME="rs-web-${GITHUB_BRANCH}"
-          fi
-          echo "PACKAGE_NAME=${PACKAGE_NAME}" >> "$GITHUB_ENV"
-          
       - name: Prepare deployment package
         run: |
           ./deploy/branch_deploy.sh
           ./deploy/config_variables.sh
           ./deploy/aws_credentials.sh
-          zip -qr "${PACKAGE_NAME}.zip" . --exclude '*.git*' '*.scannerwork*'
+          zip -qr rs-web-deploy . --exclude *.git* *.scannerwork*
           mkdir -p upload
-          mv "${PACKAGE_NAME}.zip" upload/
+          mv rs-web-deploy.zip upload/
+          
+      - name: Configure deployment type
+        run: |
+          if [ "$GITHUB_BRANCH" = "master" ]; then
+            ./deploy/increase_verbosity.sh
+            cp appspec-staging.yml appspec.yml
+          elif [ "$GITHUB_BRANCH" = "deploy" ]; then
+            cp appspec-deploy.yml appspec.yml
+          fi
           
       - name: Upload artifact
         uses: actions/upload-artifact@v4
@@ -113,13 +107,10 @@ jobs:
           
       - name: Set output
         id: vars
-        run: |
-          echo "branch=${GITHUB_BRANCH}" >> $GITHUB_OUTPUT
-          echo "package=${PACKAGE_NAME}" >> $GITHUB_OUTPUT
+        run: echo "branch=${GITHUB_BRANCH}" >> $GITHUB_OUTPUT
 
     outputs:
       branch: ${{ steps.vars.outputs.branch }}
-      package: ${{ steps.vars.outputs.package }}
 
   deploy:
     name: Deploy to AWS
@@ -148,12 +139,18 @@ jobs:
       - name: Deploy to staging
         if: needs.build.outputs.branch == 'master'
         run: |
-          aws s3 cp codebase/upload/${{ needs.build.outputs.package }}.zip s3://deploy.richmondsunlight.com/${{ needs.build.outputs.package }}.zip
+          aws deploy push \
+            --application-name RS-Web \
+            --s3-location s3://deploy.richmondsunlight.com/rs-web-staging.zip \
+            --ignore-hidden-files
           aws deploy create-deployment \
             --application-name RS-Web \
             --deployment-group-name RS-Web-Staging \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --s3-location bucket=deploy.richmondsunlight.com,key=${{ needs.build.outputs.package }}.zip,bundleType=zip
+            --s3-location bucket=deploy.richmondsunlight.com,key=rs-web-staging.zip,bundleType=zip
+      
+      - run: pwd && ls -la
+      - run: test -f appspec.yml && echo "Found appspec.yml here" || echo "No appspec.yml here"
 
       - name: Deploy to production
         if: needs.build.outputs.branch == 'deploy'
@@ -163,4 +160,4 @@ jobs:
             --application-name RS-Web \
             --deployment-group-name RS-Web-Fleet \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --s3-location bucket=deploy.richmondsunlight.com,key=${{ needs.build.outputs.package }}.zip,bundleType=zip
+            --s3-location bucket=deploy.richmondsunlight.com,key=rs-web-deploy.zip,bundleType=zip
