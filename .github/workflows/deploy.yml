@@ -149,6 +149,7 @@ jobs:
         run: |
           pwd
           ls -la
+          ls /home/runner/work/richmondsunlight.com/richmondsunlight.com/rs-web-deploy.zip
           aws deploy push \
             --application-name RS-Web \
             --source /home/runner/work/richmondsunlight.com/richmondsunlight.com/rs-web-deploy.zip \
