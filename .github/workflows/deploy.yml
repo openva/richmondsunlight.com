@@ -149,10 +149,9 @@ jobs:
         run: |
           pwd
           ls -la
-          ls -la codebase/upload/
           aws deploy push \
             --application-name RS-Web \
-            --source codebase/upload/rs-web-deploy.zip \
+            --source /home/runner/work/richmondsunlight.com/richmondsunlight.com/rs-web-deploy.zip \
             --s3-location s3://deploy.richmondsunlight.com/rs-web-deploy.zip \
             --ignore-hidden-files
           aws deploy create-deployment \
