@@ -77,15 +77,6 @@ jobs:
       - name: Stop Docker
         if: always()
         run: ./docker-stop.sh
-      
-      - name: Prepare deployment package
-        run: |
-          ./deploy/branch_deploy.sh
-          ./deploy/config_variables.sh
-          ./deploy/aws_credentials.sh
-          zip -qr rs-web-deploy . --exclude *.git* *.scannerwork*
-          mkdir -p upload
-          mv rs-web-deploy.zip upload/
           
       - name: Configure deployment type
         run: |
@@ -110,6 +101,15 @@ jobs:
           fi
           pwd
           ls -la
+      
+      - name: Prepare deployment package
+        run: |
+          ./deploy/branch_deploy.sh
+          ./deploy/config_variables.sh
+          ./deploy/aws_credentials.sh
+          zip -qr rs-web-deploy . --exclude *.git* *.scannerwork*
+          mkdir -p upload
+          mv rs-web-deploy.zip upload/
           
       - name: Upload artifact
         uses: actions/upload-artifact@v4
