@@ -971,7 +971,7 @@ function bill_sections($bill_id)
     }
 
     # In case we wound up with no viable sections.
-    if (count($section) == 0) {
+    if (count($sections) == 0) {
         return false;
     }
 
