@@ -93,6 +93,7 @@ $debug_timing['definitions retrieved'] = microtime(true);
 $fis = new Bill2();
 $fis->id = $bill['id'];
 $impact_statements = $fis->impact_statements();
+
 if ($impact_statements === false) {
     unset($impact_statements);
 }
@@ -214,7 +215,7 @@ if ($bill['session_id'] == SESSION_ID) {
         elseif (isset($_SESSION['portfolios'])) {
             $ps_status = '<form method="post" action="/photosynthesis/process-actions.php">';
             # If there's just one portfolio.
-            if (count($_SESSION['portfolios'] == 1)) {
+            if (count($_SESSION['portfolios']) == 1) {
                 $ps_status .= '<input type="hidden" name="portfolio" value="' . $_SESSION['portfolios'][0]['hash'] . '" />';
             }
 
