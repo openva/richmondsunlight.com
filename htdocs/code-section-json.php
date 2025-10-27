@@ -39,14 +39,10 @@ $sql = 'SELECT sessions.year, bills.number, bills.catch_line
 		WHERE bills_section_numbers.section_number =  "' . $section . '"
 		ORDER BY year ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
-# The MYSQL_ASSOC variable indicates that we want just the associated array, not both associated
-# and indexed arrays.
-$bill = mysqli_fetch_array($result, MYSQL_ASSOC);
+$bill = mysqli_fetch_array($result, MYSQLI_ASSOC);
 
 # Build up a listing of all bills.
-# The MYSQL_ASSOC variable indicates that we want just the associated array, not both associated
-# and indexed arrays.
-while ($bill = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+while ($bill = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
     $bill['url'] = 'https://www.richmondsunlight.com/bill/' . $bill['year'] . '/' . $bill['number'] . '/';
     $bill['number'] = mb_strtoupper($bill['number']);
     $bills[] = array_map('stripslashes', $bill);

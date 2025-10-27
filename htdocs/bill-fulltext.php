@@ -109,7 +109,7 @@ if ($result == false) {
     die('Bill text not found.');
 }
 
-while ($version = mysqli_fetch_array($result, MYSQL_ASSOC)) {
+while ($version = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
     $version = array_map('stripslashes', $version);
 
     # The HTML for amended versions of bills is beastly. Clean it up.
