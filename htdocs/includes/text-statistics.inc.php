@@ -129,7 +129,7 @@ class TextStatistics
             }
             else
             {
-                $intTextLength = strlen($strText, $this->strEncoding);
+                $intTextLength = mb_strlen($strText, $this->strEncoding);
             }
         }
         catch (Exception $e)
@@ -152,11 +152,11 @@ class TextStatistics
         {
             if ($this->strEncoding == '')
             {
-                $intTextLength = strlen($strText);
+                $intTextLength = mb_strlen($strText);
             }
             else
             {
-                $intTextLength = strlen($strText, $this->strEncoding);
+                $intTextLength = mb_strlen($strText, $this->strEncoding);
             }
         }
         catch (Exception $e)
@@ -205,7 +205,7 @@ class TextStatistics
             }
             else
             {
-                $strLowerCaseText = strtolower($strText, $this->strEncoding);
+                $strLowerCaseText = mb_strtolower($strText, $this->strEncoding);
             }
         }
         catch (Exception $e)
@@ -230,7 +230,7 @@ class TextStatistics
             }
             else
             {
-                $strUpperCaseText = strtoupper($strText, $this->strEncoding);
+                $strUpperCaseText = mb_strtoupper($strText, $this->strEncoding);
             }
         }
         catch (Exception $e)
@@ -257,7 +257,7 @@ class TextStatistics
             }
             else
             {
-                $strSubstring = substr($strText, $intStart, $intLength, $this->strEncoding);
+                $strSubstring = mb_substr($strText, $intStart, $intLength, $this->strEncoding);
             }
         }
         catch (Exception $e)
