@@ -148,7 +148,7 @@ function seconds_to_time($seconds, $lpad = false)
 # to use exactly the same function name, thus preventing the Richmond Sunlight blog from
 # working. So here's the solution. We don't need create_user() on the blog, anyway.
 if (!function_exists('create_user')) {
-    function create_user($options)
+    function create_user($options = '')
     {
         # Turn the URL-style options into an array.
         parse_str($options, $options);
