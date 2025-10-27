@@ -110,7 +110,7 @@ class Statistics
     {
 
         $database = new Database();
-        $db = $database->connect();
+        $db = $database->connect_mysqli();
 
         $sql = 'SELECT votes.date, COUNT(*) AS number
                 FROM votes
