@@ -843,7 +843,7 @@ if (!empty($bill['notes'])) {
 // bridge when we get to it.
 elseif (!empty($impact_statements)) {
     foreach ($impact_statements as $impact_statement) {
-        if (isset($impact_statement['summary'])) {
+        if (isset($impact_statement['summary']) && $impact_statement['summary'] != '') {
             $page_body .= '
                     <div id="notes">
                     <h2>Notes</h2>
