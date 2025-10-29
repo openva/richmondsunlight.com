@@ -66,7 +66,7 @@ class Location
         # Assemble our URL.
         $url = 'https://v3.openstates.org/people.geo?apikey=' . OPENSTATES_KEY . '&lat='
                 . $this->latitude . '&lng=' . $this->longitude;
-
+        
         # Retrieve the resulting JSON..
         $district = get_content($url);
 
@@ -77,13 +77,21 @@ class Location
 
         $district = json_decode($district, true);
 
+        $district = array_values(array_filter(
+            isset($district['results']) ? $district['results'] : [],
+            static function ($item) {
+                return isset($item['jurisdiction']['classification'])
+                    && $item['jurisdiction']['classification'] === 'state';
+            }
+        ));
+
         # If this isn't an array with two elements (one for each legislator), bail.
-        if (count($district['results']) != 2) {
+        if (count($district) != 2) {
             return false;
         }
 
         $result = new stdClass();
-        foreach ($district['results'] as $legislator) {
+        foreach ($district as $legislator) {
             # If it's the house.
             if ($legislator['current_role']['org_classification'] == 'lower') {
                 $result->house = district_to_id($legislator['current_role']['district'], 'house');
