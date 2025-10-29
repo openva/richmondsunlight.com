@@ -7,7 +7,7 @@ file_exists_behavior: OVERWRITE
 permissions:
     - object: /var/www/staging.richmondsunlight.com/
       owner: ubuntu
-      group: ubuntu
+      group: www-data
       mode: 755
       acls:
         - "d:u::rwx"
@@ -15,6 +15,8 @@ permissions:
         - "d:o::rwx"
       type:
        - directory
+       - file
+       - symlink
 hooks:
   BeforeInstall:
     - location: deploy/predeploy.sh

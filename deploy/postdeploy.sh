@@ -14,10 +14,6 @@ else
     exit 1
 fi
 
-# Set permissions properly, since appspec.yml gets this wrong.
-chown -R ubuntu:ubuntu "$SITE_PATH"
-chmod -R g+w "$SITE_PATH"
-
 # Make the cache directories writeable
 chmod o+w "$SITE_PATH"/htdocs/cache/
 chmod o+w "$SITE_PATH"/htdocs/rss/cache/

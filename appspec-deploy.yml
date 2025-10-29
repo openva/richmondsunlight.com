@@ -6,15 +6,17 @@ files:
 file_exists_behavior: OVERWRITE
 permissions:
     - object: /var/www/richmondsunlight.com/
-      owner: www-data
+      owner: ubuntu
       group: www-data
-      mode: 775
+      mode: 755
       acls:
         - "d:u::rwx"
         - "d:g::rx"
         - "d:o::rx"
       type:
        - directory
+       - file
+       - symlink
 hooks:
   BeforeInstall:
     - location: deploy/predeploy.sh
