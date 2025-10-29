@@ -613,14 +613,14 @@ if (
                             $.ajax({
                                 url: 'https://vacode.org/api/dictionary/' + encodeURI(term) + '/',
                                 type: 'GET',
-                                data: { fields: 'catch_line,ancestry', key: 'zxo8k592ztiwbgre' },
+                                data: { fields: 'definition,url,section_number,source', key: 'zxo8k592ztiwbgre', section: section_number },
                                 dataType: 'jsonp',
                             })
                             .then(function(data) {
                                 // Set the tooltip content
                                 var content = data.definition;
                                 if (data.section_number != null) {
-                                    content = content + ' (<a href="' + data.url + '">§&nbsp;' + data.section_number + '</a>)';
+                                    content = content + ' (<a href="http://vacode.org' + data.url + '">§&nbsp;' + data.section_number + '</a>)';
                                 }
                                 else if (data.source) {
                                     content = content + ' (Source: <a href="' + data.url + '">' + data.source + '</a>)';
