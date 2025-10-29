@@ -66,7 +66,7 @@ class Location
         # Assemble our URL.
         $url = 'https://v3.openstates.org/people.geo?apikey=' . OPENSTATES_KEY . '&lat='
                 . $this->latitude . '&lng=' . $this->longitude;
-        
+
         # Retrieve the resulting JSON..
         $district = get_content($url);
 
