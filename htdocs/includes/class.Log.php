@@ -2,6 +2,9 @@
 
 class Log
 {
+    public $verbosity;
+    public $output;
+
     public function __construct()
     {
 
