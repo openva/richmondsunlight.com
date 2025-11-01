@@ -2,31 +2,21 @@
 
 use Sunra\PhpSimple\HtmlDomParser;
 
-/**
- * Handles ingestion and normalization of legislative data from external sources.
- */
 class Import
 {
     private $log;
+    private $pdo;
+    private $preferredNameCache = [];
 
-    public $bill_number;
-    public $lis_session_id;
-    public $text;
-
-    /**
-     * Instantiate the importer with a logger dependency.
-     *
-     * @param Log $log Logger used for recording issues during import.
-     */
     public function __construct(Log $log)
     {
         $this->log = $log;
     }
 
     /**
-     * Retrieve a bill's text from the legislature's website and store it on the instance.
+     * Retrieve a bill's text from the legislature's website.
      *
-     * @return bool|null False when the bill cannot be fetched, null on success.
+     * @return string
      */
     public function get_bill_text()
     {
@@ -108,9 +98,9 @@ class Import
     }
 
     /**
-     * Sanitize the previously fetched bill text with HTML Purifier.
+     * Take the legislature's HTML and make it less bad.
      *
-     * @return bool|null False when no text is loaded, null on success.
+     * @return string
      */
     public function clean_bill_text()
     {
@@ -130,11 +120,10 @@ class Import
     }
 
     /**
-     * Turn the CSV array into well-formatted, well-named bill fields.
+     * Turn the CSV array into well-formatted, well-named fields.
      *
-     * @param array $bill Raw CSV row parsed into an array.
-     *
-     * @return array|false Normalized bill data or false on failure.
+     * @param array $bill
+     * @return array
      */
     function prepare_bill($bill)
     {
@@ -265,9 +254,9 @@ class Import
     }
 
     /**
-     * Generate a list of all committees.
+     * Generate a list of all committees
      *
-     * @return array|false Array of committee records or false when none are found.
+     * @return array
      */
     function create_committee_list()
     {
@@ -295,9 +284,9 @@ class Import
     }
 
     /**
-     * Generate a list of all legislators.
+     * Generate a list of all legislators
      *
-     * @return array|false Array of legislator records or false when none exist.
+     * @return array
      */
     function create_legislator_list()
     {
@@ -324,12 +313,11 @@ class Import
     }
 
     /**
-     * Look up a legislator's internal ID.
+     * Look up a legislator's ID.
      *
-     * @param array  $legislators Array of legislator rows (id, lis_id, chamber).
-     * @param string $lis_id      Legislator LIS identifier.
-     *
-     * @return int|string|false Matching legislator ID or false when not found.
+     * @param object $legislators
+     * @param str $lis_id
+     * @return str
      */
     function lookup_legislator_id($legislators, $lis_id)
     {
@@ -361,12 +349,11 @@ class Import
     }
 
     /**
-     * Look up a committee's internal ID.
+     * Look up a committee's ID.
      *
-     * @param array  $committees Array of committee rows (id, lis_id, chamber).
-     * @param string $lis_id     Committee LIS identifier.
-     *
-     * @return int|string|false Matching committee ID or false when not found.
+     * @param array $committees
+     * @param string $lis_id
+     * @return string
      */
     function lookup_committee_id($committees, $lis_id)
     {
@@ -392,13 +379,12 @@ class Import
     }
 
     /**
-     * Turn committee member CSV into an array ready to be inserted into the database.
+     * Turn committee member CSV into an array ready to be inserted into the database
      *
-     * @param string $csv         CSV payload keyed by column headers.
-     * @param array  $committees  Committee lookup data.
-     * @param array  $legislators Legislator lookup data.
-     *
-     * @return array|false Parsed committee membership rows or false on failure.
+     * @param string $csv
+     * @param array $committees
+     * @param array $legislators
+     * @return array
      */
     function committee_members_csv_parse($csv, $committees, $legislators)
     {
@@ -429,13 +415,10 @@ class Import
         return $members;
     }
 
-    /**
-     * Retrieve a legislator photo from a provided URL and persist it locally.
+    /*
+     * fetch_photo()
      *
-     * @param string $url       Remote image URL.
-     * @param string $shortname Legislator shortname used for local storage.
-     *
-     * @return string|false Stored filename (with extension) or false on failure.
+     * Retrieves a legislator photo from a provided URL and stores it.
      */
     public function fetch_photo($url, $shortname)
     {
@@ -476,12 +459,10 @@ class Import
         return $filename;
     }
 
-    /**
-     * Flag a legislator as having left office.
+    /*
+     * deactivate_legislator()
      *
-     * @param string $id Legislator LIS identifier.
-     *
-     * @return bool True on success, false on failure.
+     * Sets a legislator as having left office.
      */
     public function deactivate_legislator($id)
     {
@@ -548,41 +529,50 @@ class Import
 
 
     /**
-     * Verify that a legislator appears in the legislative CSV listing.
+     * Verify that a legislator is still listed in the General Assembly roster via the LIS API.
      *
-     * @param string $lis_id Legislator LIS identifier.
-     *
-     * @return bool True when the legislator is present, false otherwise.
-     *
-     * @throws Exception When the LIS ID is invalid or the CSV cannot be loaded.
+     * @param string $lis_id
+     * @return boolean
      */
     public function legislator_in_csv($lis_id)
     {
 
-        if (substr($lis_id, 0, 1) !== 'H' &&  substr($lis_id, 0, 1) !== 'S') {
+        $lis_id = strtoupper(trim((string)$lis_id));
+        if (!preg_match('/^[HS][0-9]+$/', $lis_id)) {
             throw new Exception('LIS ID is invalid');
         }
 
-        global $csv_dir;
-        $csv_file = $csv_dir . '/members.csv';
-        $csv = file_get_contents($csv_file);
-        if ($csv === false) {
-            throw new Exception('CSV file could not be loaded from ' . $csv_file);
+        $chamber = ($lis_id[0] === 'S') ? 'senate' : 'house';
+        $member_number = $this->normalize_member_number($chamber, $lis_id);
+        if ($member_number === false) {
+            throw new Exception('Unable to normalize LIS ID: ' . $lis_id);
         }
 
-        if (stripos($csv, '"' . $lis_id . '"') !== false) {
-            return true;
+        $session_code = '20' . SESSION_LIS_ID;
+        $member = $this->fetch_member_record($member_number, $session_code);
+        if ($member === false) {
+            return false;
         }
 
-        return false;
+        if (isset($member['MemberStatus']) && strtolower($member['MemberStatus']) !== 'active') {
+            return false;
+        }
+
+        if (!empty($member['ServiceEndDate'])) {
+            $end_timestamp = strtotime($member['ServiceEndDate']);
+            if ($end_timestamp !== false && $end_timestamp < time()) {
+                return false;
+            }
+        }
+
+        return true;
     } //
 
-    /**
-     * Create a new legislator record with the provided data.
+    /*
+     * add_legislator()
      *
-     * @param array $legislator Associative array of legislator fields.
-     *
-     * @return bool True on success, false when validation fails or insert errors.
+     * Creates a new record for a legislator, requiring as input all data about the legislator to be
+     * added to the database. All array keys must have the same names as the database columns.
      */
     public function add_legislator($legislator)
     {
@@ -669,12 +659,7 @@ class Import
     } // add_legislator()
 
     /**
-     * Generate a shortname slug for a legislator.
-     *
-     * @param string $casual Casual name in "Lastname, Firstname" format.
-     * @param string $full   Full formal name.
-     *
-     * @return string Generated shortname.
+     * Generate shortnames for a given name
      */
     function create_legislator_shortname($casual, $full)
     {
@@ -724,12 +709,11 @@ class Import
         return $shortname;
     }
 
-    /**
-     * Update an existing legislator record with supplied fields.
+    /*
+     * update_legislator()
      *
-     * @param array $legislator Associative array containing an `id` key and allowed updates.
-     *
-     * @return bool|null True when updated, false on failure, null when nothing changes.
+     * Updates an existing record for a legislator. All array keys must have the same names as the
+     * database columns.
      */
     public function update_legislator($legislator)
     {
@@ -800,13 +784,11 @@ class Import
         return true;
     } // update_legislator
 
-    /**
-     * Retrieve legislator data from the General Assembly website.
+    /*
+     * fetch_legislator_data()
      *
-     * @param string $chamber Chamber identifier (`house` or `senate`).
-     * @param string $lis_id  Legislator LIS identifier.
-     *
-     * @return array|false Parsed legislator data or false on failure.
+     * Retrieves data about a legislator from the General Assembly's website, requiring as input the
+     * chamber name (house or senate) and the legislator's LIS ID.
      */
     public function fetch_legislator_data($chamber, $lis_id)
     {
@@ -1442,5 +1424,806 @@ class Import
         }
 
         return $legislator;
+    }
+
+    /*
+     * fetch_legislator_data_api()
+     *
+     * Retrieves data about a legislator from the General Assembly's public API.
+     */
+    public function fetch_legislator_data_api($chamber, $lis_id)
+    {
+        if (empty($chamber) || empty($lis_id)) {
+            return false;
+        }
+
+        $chamber_normalized = strtolower($chamber);
+        $member_number = $this->normalize_member_number($chamber_normalized, $lis_id);
+        if ($member_number === false) {
+            $this->log->put('Could not normalize member number for ' . $lis_id, 5);
+            return false;
+        }
+
+        $session_code = '20' . SESSION_LIS_ID;
+
+        $member = $this->fetch_member_record($member_number, $session_code);
+        if ($member === false) {
+            $this->log->put('No API member data returned for ' . $member_number, 5);
+            return false;
+        }
+
+        $contact_details = $this->extract_contact_details_from_api(
+            $this->lis_api_request(
+                '/Member/api/getmemberscontactinformationlistasync',
+                [
+                    'sessionCode' => $session_code
+                ]
+            ),
+            $member_number
+        );
+
+        return $this->map_member_to_legislator(
+            $member,
+            $contact_details,
+            $member_number,
+            $chamber_normalized
+        );
+    }
+
+    public function fetch_active_members($chamber = null)
+    {
+        $session_code = '20' . SESSION_LIS_ID;
+        $query = [
+            'sessionCode' => $session_code
+        ];
+
+        if (!empty($chamber)) {
+            $normalized = strtolower($chamber);
+            if ($normalized === 'house' || $normalized === 'h') {
+                $query['chamberCode'] = 'H';
+            } elseif ($normalized === 'senate' || $normalized === 's') {
+                $query['chamberCode'] = 'S';
+            } else {
+                return [];
+            }
+        }
+
+        $response = $this->lis_api_request('/Member/api/getactivemembersasync', $query);
+        $members = $this->extract_members_from_response($response);
+        if (empty($members)) {
+            return [];
+        }
+
+        $contacts_response = $this->lis_api_request(
+            '/Member/api/getmemberscontactinformationlistasync',
+            [
+                'sessionCode' => $session_code
+            ]
+        );
+
+        $legislators = [];
+        foreach ($members as $member) {
+            if (!is_array($member) || empty($member['MemberNumber'])) {
+                continue;
+            }
+
+            $contact_details = $this->extract_contact_details_from_api(
+                $contacts_response,
+                $member['MemberNumber']
+            );
+
+            $member_chamber_code = strtoupper($member['ChamberCode'] ?? '');
+            $member_chamber = ($member_chamber_code === 'S') ? 'senate' : 'house';
+            $member_number_normalized = $this->normalize_member_number(
+                $member_chamber,
+                $member['MemberNumber'] ?? ''
+            );
+            if ($member_number_normalized === false) {
+                continue;
+            }
+
+            $legislator = $this->map_member_to_legislator(
+                $member,
+                $contact_details,
+                $member_number_normalized,
+                $member_chamber
+            );
+            if (!empty($legislator)) {
+                $legislators[] = $legislator;
+            }
+        }
+
+        return $legislators;
+    }
+
+    private function fetch_member_record($member_number, $session_code)
+    {
+        $response = $this->lis_api_request(
+            '/Member/api/getmembersasync',
+            [
+                'memberNumber' => $member_number,
+                'sessionCode' => $session_code
+            ]
+        );
+
+        $member = $this->extract_member_from_response($response, $member_number);
+        if ($member !== false) {
+            return $member;
+        }
+
+        $response = $this->lis_api_request(
+            '/Member/api/getactivemembersasync',
+            [
+                'sessionCode' => $session_code
+            ]
+        );
+
+        return $this->extract_member_from_response($response, $member_number);
+    }
+
+    private function extract_member_from_response($response, $member_number)
+    {
+        $candidates = $this->extract_members_from_response($response);
+
+        foreach ($candidates as $candidate) {
+            if (!is_array($candidate)) {
+                continue;
+            }
+            if (
+                isset($candidate['MemberNumber'])
+                && strtoupper($candidate['MemberNumber']) === strtoupper($member_number)
+            ) {
+                return $candidate;
+            }
+        }
+
+        return false;
+    }
+
+    private function lis_api_request($path, array $query = [])
+    {
+        $base_url = 'https://lis.virginia.gov';
+        $query = array_filter($query, static function ($value) {
+            return $value !== null && $value !== '';
+        });
+
+        $url = $base_url . $path;
+        if (!empty($query)) {
+            $url .= '?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+        }
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FAILONERROR, false);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'WebAPIKey: ' . LIS_KEY,
+            'Accept: application/json'
+        ]);
+
+        $body = curl_exec($ch);
+        $error = curl_error($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($body === false || $status >= 400) {
+            $this->log->put('LIS API request failed for ' . $url . ' with status ' . $status . ' error ' . $error, 5);
+            return [];
+        }
+
+        $decoded = json_decode($body, true);
+        if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
+            $this->log->put('Invalid JSON returned from LIS API for ' . $url . ': ' . json_last_error_msg(), 5);
+            return [];
+        }
+
+        if (isset($decoded['Success']) && $decoded['Success'] === false) {
+            $this->log->put('LIS API request reported failure for ' . $url . ': ' . ($decoded['FailureMessage'] ?? ''), 5);
+            return [];
+        }
+
+        if (isset($decoded['ListItems']) && is_array($decoded['ListItems'])) {
+            return $decoded['ListItems'];
+        }
+
+        return $decoded;
+    }
+
+    private function normalize_member_number($chamber, $lis_id)
+    {
+        $digits = preg_replace('/[^0-9]/', '', $lis_id);
+        if ($digits === '') {
+            return false;
+        }
+
+        if (strtolower($chamber) === 'senate') {
+            return 'S' . str_pad($digits, 4, '0', STR_PAD_LEFT);
+        }
+
+        return 'H' . str_pad($digits, 4, '0', STR_PAD_LEFT);
+    }
+
+    private function extract_members_from_response($response)
+    {
+        if (!is_array($response)) {
+            return [];
+        }
+
+        if (isset($response['Members']) && is_array($response['Members'])) {
+            return $response['Members'];
+        }
+
+        if (isset($response['ListItems']) && is_array($response['ListItems'])) {
+            return $response['ListItems'];
+        }
+
+        if (isset($response[0]) && is_array($response[0])) {
+            return $response;
+        }
+
+        return [];
+    }
+
+    private function extract_contact_details_from_api($response, $member_number)
+    {   
+        $contacts = [];
+        if (is_array($response)) {
+            if (isset($response['MemberContactInformationList']) && is_array($response['MemberContactInformationList'])) {
+                $contacts = $response['MemberContactInformationList'];
+            } elseif (isset($response['ListItems']) && is_array($response['ListItems'])) {
+                $contacts = $response['ListItems'];
+            } elseif (is_array($response) && isset($response[0])) {
+                $contacts = $response;
+            }
+        }
+
+        $contacts = array_filter(
+            $contacts,
+            static function ($contact) use ($member_number) {
+                if (!is_array($contact)) {
+                    return false;
+                }
+                return isset($contact['MemberNumber']) && strtoupper($contact['MemberNumber']) === strtoupper($member_number);
+            }
+        );
+
+        $details = [
+            'address_richmond' => null,
+            'phone_richmond' => null,
+            'address_district' => null,
+            'phone_district' => null,
+            'email' => null,
+            'place' => null,
+        ];
+
+        foreach ($contacts as $contact) {
+            if (!is_array($contact)) {
+                continue;
+            }
+
+            $entries = [];
+            if (isset($contact['ContactInformation']) && is_array($contact['ContactInformation'])) {
+                $entries = $contact['ContactInformation'];
+            } else {
+                $entries[] = $contact;
+            }
+
+            foreach ($entries as $entry) {
+                if (!is_array($entry)) {
+                    continue;
+                }
+
+                $type = strtoupper($entry['ContactType'] ?? '');
+                $address = $this->buildAddress($entry);
+                $phone = $this->normalizePhone($entry['PhoneNumber'] ?? null);
+
+                if ($this->isCapitolContactType($type)) {
+                    if ($details['address_richmond'] === null) {
+                        $details['address_richmond'] = $address;
+                    }
+                    if ($details['phone_richmond'] === null) {
+                        $details['phone_richmond'] = $phone;
+                    }
+                } elseif ($this->isDistrictContactType($type)) {
+                    if ($details['address_district'] === null) {
+                        $details['address_district'] = $address;
+                    }
+                    if ($details['phone_district'] === null) {
+                        $details['phone_district'] = $phone;
+                    }
+                    if ($details['place'] === null && !empty($entry['City'])) {
+                        $details['place'] = $entry['City'];
+                    }
+                }
+
+                if ($details['email'] === null && !empty($entry['EmailAddress'])) {
+                    $details['email'] = $entry['EmailAddress'];
+                }
+            }
+
+            if ($details['phone_richmond'] === null && !empty($contact['GABPhoneNumber'])) {
+                $details['phone_richmond'] = $this->normalizePhone($contact['GABPhoneNumber']);
+            }
+            if ($details['email'] === null && !empty($contact['GABEmailAddress'])) {
+                $details['email'] = $contact['GABEmailAddress'];
+            }
+            if ($details['address_richmond'] === null && !empty($contact['RoomNumber'])) {
+                $details['address_richmond'] = 'Room ' . trim($contact['RoomNumber']) . ', General Assembly Building, Richmond, VA';
+            }
+        }
+
+        return array_filter($details, static function ($value) {
+            if (is_string($value)) {
+                return trim($value) !== '';
+            }
+            return $value !== null;
+        });
+    }
+
+    private function map_member_to_legislator(
+        array $member,
+        array $contact_details,
+        string $member_number,
+        string $chamber
+    ) {
+        $member_number = strtoupper($member_number);
+        $chamber_normalized = ($chamber === 'senate') ? 'senate' : 'house';
+        $party_code = strtoupper($member['PartyCode'] ?? '');
+
+        $preferred_first_name = $this->determine_preferred_first_name(
+            $member_number,
+            $member,
+            $chamber_normalized
+        );
+        $last_name = $this->extract_last_name($member);
+
+        $name_formal = trim((string)($member['MemberDisplayName'] ?? $member['ListDisplayName'] ?? ''));
+        if ($name_formal === '' && $preferred_first_name !== '' && $last_name !== '') {
+            $name_formal = $preferred_first_name . ' ' . $last_name;
+        }
+
+        $name_last_first = $this->format_name_last_first_from_api($last_name, $preferred_first_name);
+        $shortname = $this->build_shortname($preferred_first_name, $member, $last_name);
+
+        $district_id = $this->resolve_district_internal_id($chamber_normalized, $member);
+        $date_started = $this->format_service_begin_date($member['ServiceBeginDate'] ?? null);
+        $lis_id = $this->format_member_lis_id($chamber_normalized, $member_number);
+
+        $place = $contact_details['place'] ?? ($member['DistrictName'] ?? '');
+
+        $legislator = [
+            'lis_id' => $lis_id,
+            'chamber' => $chamber_normalized,
+            'name_formal' => $name_formal,
+            'name' => $name_last_first,
+            'name_formatted' => $this->format_name_formatted_from_api(
+                $chamber_normalized,
+                $preferred_first_name,
+                $last_name,
+                $party_code,
+                $place
+            ),
+            'shortname' => $shortname,
+            'district_id' => $district_id,
+            'party' => $party_code,
+            'date_started' => $date_started,
+            'email' => $contact_details['email'] ?? ($member['GABEmailAddress'] ?? null),
+            'address_richmond' => $contact_details['address_richmond'] ?? null,
+            'phone_richmond' => $contact_details['phone_richmond'] ?? null,
+            'address_district' => $contact_details['address_district'] ?? null,
+            'phone_district' => $contact_details['phone_district'] ?? null,
+            'place' => $contact_details['place'] ?? null,
+            'photo_url' => $this->build_photo_url($member_number),
+        ];
+
+        $location = new Location();
+        if (!empty($legislator['address_district'])) {
+            $location->address = $legislator['address_district'];
+        } elseif (!empty($legislator['place'])) {
+            $location->address = $legislator['place'] . ', VA';
+        }
+
+        if (
+            isset($location->address)
+            && !empty($legislator['place'])
+            && $location->get_coordinates() !== false
+        ) {
+            $legislator['latitude'] = round($location->latitude, 2);
+            $legislator['longitude'] = round($location->longitude, 2);
+        }
+
+        return array_filter($legislator, function ($value) {
+            if (is_string($value)) {
+                return trim($value) !== '';
+            }
+            return $value !== null;
+        });
+    }
+
+    private function determine_preferred_first_name(string $member_number, array $member, string $chamber)
+    {
+        $cache_key = $member_number . ':' . $chamber;
+        if (isset($this->preferredNameCache[$cache_key])) {
+            return $this->preferredNameCache[$cache_key];
+        }
+
+        $display_name = (string)($member['MemberDisplayName'] ?? '');
+        $preferred = '';
+        if (preg_match('/"([^"]+)"/', $display_name, $matches) === 1) {
+            $preferred = trim($matches[1]);
+        }
+
+        if ($preferred === '' && $chamber === 'house') {
+            $preferred = (string)$this->fetch_house_preferred_name($member_number);
+        }
+
+        if ($preferred === '') {
+            $list_display = (string)($member['ListDisplayName'] ?? '');
+            $preferred = (string)$this->extract_first_name_from_list_display($list_display);
+        }
+
+        if ($preferred === '') {
+            $parts = preg_split('/\s+/', trim($display_name));
+            foreach ($parts as $part) {
+                $token = $this->sanitize_name_token($part);
+                if ($token === '' || preg_match('/^[A-Z]\.?$/', $token)) {
+                    continue;
+                }
+                $preferred = $token;
+                break;
+            }
+        }
+
+        $preferred = $this->normalize_preferred_first_name($preferred, $member);
+        return $this->preferredNameCache[$cache_key] = $preferred;
+    }
+
+    private function fetch_house_preferred_name(string $member_number)
+    {
+        $member_number = strtoupper($member_number);
+        if (strpos($member_number, 'H') !== 0) {
+            return null;
+        }
+
+        $url = 'https://virginiageneralassembly.gov/house/members/members.php?id=' . $member_number;
+        $html = @file_get_contents($url);
+        if ($html === false) {
+            $this->log->put('Could not fetch House member page for ' . $member_number, 4);
+            return null;
+        }
+
+        if (preg_match('/Preferred Name:\s*([^<]+)/i', $html, $matches) === 1) {
+            return trim($matches[1]);
+        }
+
+        return null;
+    }
+
+    private function extract_first_name_from_list_display(string $list_display)
+    {
+        if ($list_display === '' || strpos($list_display, ',') === false) {
+            return null;
+        }
+
+        $after_comma = trim(substr($list_display, strpos($list_display, ',') + 1));
+        $parts = preg_split('/\s+/', $after_comma);
+        foreach ($parts as $part) {
+            $token = $this->sanitize_name_token($part);
+            if ($token === '' || preg_match('/^[A-Z]\.?$/', $token)) {
+                continue;
+            }
+            return $token;
+        }
+
+        return null;
+    }
+
+    private function sanitize_name_token(string $token)
+    {
+        return trim($token, ' "\',.');
+    }
+
+    private function normalize_preferred_first_name(string $name, array $member)
+    {
+        $name = trim($name);
+        if ($name === '') {
+            $display = (string)($member['MemberDisplayName'] ?? '');
+            if ($display !== '') {
+                $parts = preg_split('/\s+/', $display);
+                $name = $this->sanitize_name_token($parts[0] ?? '');
+            }
+        }
+
+        if ($name === '') {
+            return $name;
+        }
+
+        $overrides = [
+            'joshua' => 'Josh',
+        ];
+
+        $lower = strtolower($name);
+        if (isset($overrides[$lower])) {
+            return $overrides[$lower];
+        }
+
+        return $name;
+    }
+
+    private function build_shortname(string $preferred_first_name, array $member, string $last_name)
+    {
+        $first_initial = '';
+        $preferred_first_name = trim($preferred_first_name);
+        if ($preferred_first_name !== '') {
+            $first_initial = strtolower(mb_substr($preferred_first_name, 0, 1));
+        } else {
+            $display = trim((string)($member['MemberDisplayName'] ?? ''));
+            if ($display !== '') {
+                $parts = preg_split('/\s+/', $display);
+                $token = $this->sanitize_name_token($parts[0] ?? '');
+                if ($token !== '') {
+                    $first_initial = strtolower($token[0]);
+                }
+            }
+        }
+
+        $middle_initial = '';
+        $display_name = (string)($member['MemberDisplayName'] ?? '');
+        $parts = preg_split('/\s+/', trim($display_name));
+        if (count($parts) > 2) {
+            for ($i = 1; $i < count($parts) - 1; $i++) {
+                $token = $this->sanitize_name_token($parts[$i]);
+                if ($token === '' || preg_match('/^[A-Z]\.?$/i', $token) !== 1) {
+                    if ($token !== '' && preg_match('/^[A-Za-z]/', $token) === 1) {
+                        $middle_initial = strtolower($token[0]);
+                        break;
+                    }
+                    continue;
+                }
+                $middle_initial = strtolower($token[0]);
+                break;
+            }
+        }
+
+        $sanitized_last = strtolower(preg_replace('/[^A-Za-z-]+/', '', $last_name));
+        return $first_initial . $middle_initial . $sanitized_last;
+    }
+
+    private function extract_last_name(array $member)
+    {
+        $list_display = (string)($member['ListDisplayName'] ?? '');
+        if ($list_display !== '' && strpos($list_display, ',') !== false) {
+            return trim(substr($list_display, 0, strpos($list_display, ',')));
+        }
+
+        $display_name = (string)($member['MemberDisplayName'] ?? '');
+        $parts = preg_split('/\s+/', trim($display_name));
+        if (count($parts) === 0) {
+            return '';
+        }
+
+        return $this->sanitize_name_token(end($parts));
+    }
+
+    private function resolve_district_internal_id(string $chamber, array $member)
+    {
+        $district_number = null;
+        if (!empty($member['DistrictID'])) {
+            $district_number = (int)$member['DistrictID'];
+        } elseif (!empty($member['DistrictName'])) {
+            $district_number = $this->extract_district_number_from_name($member['DistrictName']);
+        }
+
+        if ($district_number === null) {
+            return null;
+        }
+
+        $pdo = $this->getPdo();
+        if (!$pdo instanceof PDO) {
+            return null;
+        }
+
+        $stmt = $pdo->prepare(
+            'SELECT id FROM districts WHERE date_ended IS NULL AND chamber = :chamber AND number = :number'
+        );
+        $stmt->bindValue(':chamber', $chamber);
+        $stmt->bindValue(':number', $district_number, PDO::PARAM_INT);
+        if ($stmt->execute() === false) {
+            return null;
+        }
+
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        return ($row !== false && isset($row['id'])) ? (int)$row['id'] : null;
+    }
+
+    private function format_service_begin_date($value)
+    {
+        if (empty($value)) {
+            return null;
+        }
+
+        $timestamp = strtotime($value);
+        if ($timestamp === false) {
+            return null;
+        }
+
+        return date('Y-m-d', $timestamp);
+    }
+
+    private function format_member_lis_id(string $chamber, string $member_number)
+    {
+        $digits = preg_replace('/[^0-9]/', '', $member_number);
+        if ($digits === '') {
+            return null;
+        }
+
+        if ($chamber === 'senate') {
+            $trimmed = ltrim($digits, '0');
+            return $trimmed === '' ? '0' : $trimmed;
+        }
+
+        return 'H' . str_pad($digits, 4, '0', STR_PAD_LEFT);
+    }
+
+    private function build_photo_url(string $member_number)
+    {
+        $member_number = strtoupper(trim($member_number));
+        if ($member_number === '') {
+            return null;
+        }
+
+        return 'https://memdata.virginiageneralassembly.gov/images/display_image/' . $member_number;
+    }
+
+    private function getPdo()
+    {
+        if ($this->pdo instanceof PDO) {
+            return $this->pdo;
+        }
+
+        try {
+            $database = new Database();
+            $connection = $database->connect();
+            if ($connection instanceof PDO) {
+                $this->pdo = $connection;
+                if (!isset($GLOBALS['dbh']) || !($GLOBALS['dbh'] instanceof PDO)) {
+                    $GLOBALS['dbh'] = $connection;
+                }
+                return $this->pdo;
+            }
+        } catch (Exception $e) {
+            $this->log->put('Database connection failed: ' . $e->getMessage(), 5);
+        }
+
+        return null;
+    }
+
+    private function format_name_last_first_from_api($last_name, $first_name)
+    {
+        $last_name = trim((string)$last_name);
+        $first_name = trim((string)$first_name);
+
+        if ($last_name === '') {
+            return $first_name;
+        }
+        if ($first_name === '') {
+            return $last_name;
+        }
+
+        return $last_name . ', ' . $first_name;
+    }
+
+    private function format_name_formatted_from_api(
+        $chamber,
+        $first_name,
+        $last_name,
+        $party,
+        $place_or_district
+    ) {
+        $prefix = ($chamber === 'senate') ? 'Sen.' : 'Del.';
+        $name = trim($first_name . ' ' . $last_name);
+        if ($name === '') {
+            return '';
+        }
+
+        $formatted = trim($prefix . ' ' . $name);
+
+        $party = strtoupper(trim((string)$party));
+        if ($party === '') {
+            $party = '?';
+        }
+
+        $suffix = trim((string)$place_or_district);
+        if ($suffix === '') {
+            $digits = $this->extract_district_number_from_name($place_or_district);
+            if ($digits !== null) {
+                $suffix = $digits;
+            }
+        }
+
+        $formatted .= ' (' . $party;
+        if ($suffix !== '') {
+            $formatted .= '-' . $suffix;
+        }
+        $formatted .= ')';
+
+        return $formatted;
+    }
+
+    private function extract_district_number_from_name($district_name)
+    {
+        $digits = preg_replace('/[^0-9]/', '', (string)$district_name);
+        if ($digits === '') {
+            return null;
+        }
+
+        return (int)$digits;
+    }
+
+    private function buildAddress(array $contact)
+    {
+        $segments = [];
+
+        foreach (['Address1', 'Address2', 'Address3'] as $line) {
+            if (!empty($contact[$line])) {
+                $segments[] = trim($contact[$line]);
+            }
+        }
+
+        $city_state = '';
+        if (!empty($contact['City'])) {
+            $city_state = $contact['City'];
+        }
+        if (!empty($contact['StateCode'])) {
+            $city_state = trim($city_state . ', ' . $contact['StateCode'], ', ');
+        }
+        if ($city_state !== '') {
+            $segments[] = $city_state;
+        }
+
+        if (!empty($contact['ZipCode'])) {
+            $segments[] = trim($contact['ZipCode']);
+        }
+
+        if (empty($segments)) {
+            return null;
+        }
+
+        return implode(', ', $segments);
+    }
+
+    private function normalizePhone($phone)
+    {
+        if (empty($phone)) {
+            return null;
+        }
+        $digits = preg_replace('/[^0-9]/', '', $phone);
+        if (strlen($digits) === 10) {
+            return substr($digits, 0, 3) . '-' . substr($digits, 3, 3) . '-' . substr($digits, 6);
+        }
+        return $phone;
+    }
+
+    private function isCapitolContactType($type)
+    {
+        $type = strtoupper($type);
+        $capitol_types = ['GA', 'GA OFFICE', 'GENERAL ASSEMBLY', 'SESSION', 'CAPITOL', 'LEGISLATIVE', 'RICHMOND'];
+        foreach ($capitol_types as $candidate) {
+            if (str_contains($type, $candidate)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private function isDistrictContactType($type)
+    {
+        $type = strtoupper($type);
+        $district_types = ['DISTRICT', 'MAILING', 'LOCAL', 'HOME', 'OFFICE'];
+        foreach ($district_types as $candidate) {
+            if (str_contains($type, $candidate)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
