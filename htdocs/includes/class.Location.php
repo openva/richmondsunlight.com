@@ -1,11 +1,22 @@
 <?php
 
-# For functions pertaining to geolocation of individuals and legislators.
+/**
+ * Provides geolocation utilities for addresses and coordinates within Virginia.
+ */
 class Location
 {
-    # When given an address (whether a ZIP code alone or a complete street address), returns the
-    # lat/lon pair for that location, querying the Virginia GIS server. Results return as an
-    # array, not an object.
+    public $street;
+    public $city;
+    public $zip;
+    public $address;
+    public $latitude;
+    public $longitude;
+
+    /**
+     * Resolve the latitude/longitude pair for the instance's address components.
+     *
+     * @return array|false Associative array with `latitude` and `longitude`, or false on failure.
+     */
     public function get_coordinates()
     {
 
@@ -55,7 +66,11 @@ class Location
         return $coordinates;
     }
 
-    # Convert coordinates into district IDs.
+    /**
+     * Convert the instance's latitude and longitude into Virginia district identifiers.
+     *
+     * @return stdClass|false Object containing `house` and/or `senate` IDs, or false on failure.
+     */
     public function coords_to_districts()
     {
 

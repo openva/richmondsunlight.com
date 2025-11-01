@@ -1,8 +1,17 @@
 <?php
 
+/**
+ * Supplies tag-related helpers such as autocomplete suggestions.
+ */
 class Tags
 {
-    # Take a fragment of a tag, get suggested autocompletions.
+    public $fragment;
+
+    /**
+     * Take a fragment of a tag string and return autocomplete suggestions.
+     *
+     * @return array|false Array of suggested tags, or false when no matches are found.
+     */
     public function get_suggestions()
     {
         if (!isset($this->fragment)) {

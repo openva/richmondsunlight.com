@@ -1,9 +1,23 @@
 <?php
 
-# Retrieval of comments for a bill.
+declare(strict_types=1);
+
+/**
+ * Aggregates published comments for a bill from direct posts and Photosynthesis notes.
+ */
 class Comments
 {
-    # Get all of this bill's comments, whether posted directly or as Photosynthesis comments.
+    /** @var int|string|null */
+    public $bill_id;
+
+    /** @var stdClass|null */
+    public $config;
+
+    /**
+     * Retrieve all comments related to the configured bill.
+     *
+     * @return array|false Array of comment data keyed by timestamp, or false when none exist.
+     */
     public function get()
     {
         if (empty($this->bill_id)) {
@@ -14,28 +28,28 @@ class Comments
             $this->config = new stdClass();
         }
 
-        if (!isset($this->config->get_all) || ($this->config->get_all === true)) {
+        if (!isset($this->config->get_all) || $this->config->get_all === true) {
             $this->config->get_comments = true;
             $this->config->get_photosynthesis = true;
         }
 
-        # We need to get the summary hash and bill ID to gather comments from identical bills.
+        // We need to get the summary hash and bill ID to gather comments from identical bills.
         $bill = new Bill2();
         $bill->id = $this->bill_id;
-        $bill_info = $bill->info();
-        if ($bill_info === false) {
+        $billInfo = $bill->info();
+        if ($billInfo === false) {
             return false;
         }
 
         $database = new Database();
         $database->connect_mysqli();
 
-        # Initliaze the array to store comments.
-        $comments = array();
+        // Initialize the array to store comments.
+        $comments = [];
 
-        # If instructed to retrieve directly posted comments.
+        // If instructed to retrieve directly posted comments.
         if ($this->config->get_comments === true) {
-            # Start with directly posted comments.
+            // Start with directly posted comments.
             $sql = 'SELECT comments.name, comments.date_created, comments.email, comments.url,
 					comments.comment, UNIX_TIMESTAMP(comments.date_created) AS timestamp,
 					comments.editors_pick, users.representative_id
@@ -47,30 +61,30 @@ class Comments
 					WHERE
 					(comments.bill_id=' . mysqli_real_escape_string($GLOBALS['db'], $this->bill_id) . '
 					OR
-						(bills.summary_hash = "' . $bill_info['summary_hash'] . '"
-						AND bills.session_id=' . $bill_info['session_id'] . ')
+						(bills.summary_hash = "' . $billInfo['summary_hash'] . '"
+						AND bills.session_id=' . $billInfo['session_id'] . ')
 					)
 					AND comments.status="published"
 					ORDER BY comments.date_created ASC';
             $result = mysqli_query($GLOBALS['db'], $sql);
             if (mysqli_num_rows($result) > 0) {
                 while ($comment = mysqli_fetch_array($result)) {
-                    # Clean up the data.
-                    $comment = array_map("stripslashes", $comment);
+                    // Clean up the data.
+                    $comment = array_map('stripslashes', $comment);
 
-                    # Convert newlines to paragraphs.
+                    // Convert newlines to paragraphs.
                     $comment['comment'] = nl2p($comment['comment']);
 
-                    # Add this comment to the comments array.
-                    $comment_timestamp = $comment['timestamp'];
-                    $comments[$comment_timestamp] = $comment;
+                    // Add this comment to the comments array.
+                    $commentTimestamp = $comment['timestamp'];
+                    $comments[$commentTimestamp] = $comment;
                 }
             }
         }
 
-        # If instructed to retrieve Photosynthesis comments.
+        // If instructed to retrieve Photosynthesis comments.
         if ($this->config->get_photosynthesis === true) {
-            # Get all of this bill's Photosynthesis notes.
+            // Get all of this bill's Photosynthesis notes.
             $sql = 'SELECT users.name, dashboard_bills.date_modified, users.email, users.url,
 					dashboard_bills.notes AS comment, dashboard_portfolios.hash,
 					dashboard_user_data.organization,
@@ -83,24 +97,24 @@ class Comments
 						ON dashboard_bills.portfolio_id = dashboard_portfolios.id
 					LEFT JOIN dashboard_user_data
 						ON dashboard_user_data.user_id = users.id
-					WHERE dashboard_bills.bill_id=' . $bill_info['id'] . ' AND dashboard_bills.notes IS NOT NULL
+					WHERE dashboard_bills.bill_id=' . $billInfo['id'] . ' AND dashboard_bills.notes IS NOT NULL
 					ORDER BY date_modified ASC';
             $result = mysqli_query($GLOBALS['db'], $sql);
             if (mysqli_num_rows($result) > 0) {
                 while ($comment = mysqli_fetch_array($result)) {
-                    # Clean up the data.
-                    $comment = array_map("stripslashes", $comment);
+                    // Clean up the data.
+                    $comment = array_map('stripslashes', $comment);
                     $comment['comment'] = nl2p($comment['comment']);
 
-                    # Convert $seconds_since to minutes, hours, days, weeks or months.
+                    // Convert $seconds_since to minutes, hours, days, weeks or months.
                     $comment['time_since'] = seconds_to_units($comment['seconds_since']);
 
-                    # Display the organization, if the portfolio is owned by one. Otherwise, display the
-                    # user's name.
+                    // Display the organization, if the portfolio is owned by one. Otherwise, display the
+                    // user's name.
                     if (!empty($comment['organization'])) {
                         $comment['name'] = $comment['organization'];
                     } else {
-                        # Make the user closer to anonymous.
+                        // Make the user closer to anonymous.
                         $tmp = explode(' ', $comment['name']);
                         if (count($tmp) > 1) {
                             $comment['name'] = $tmp[0] . ' ' . $tmp[1][0] . '.';
@@ -109,20 +123,21 @@ class Comments
                         }
                     }
 
-                    # Mark this as being a Photosynthesis.
+                    // Mark this as being a Photosynthesis.
                     $comment['type'] = 'photosynthesis';
 
-                    # Add this comment to the comments array.
+                    // Add this comment to the comments array.
                     $comments[$comment]['timestamp'] = $comment;
                 }
             }
         }
 
-        # If any comments have been found, return them.
-        if (count($comments) > 0) {
+        // If any comments have been found, return them.
+        if (!empty($comments)) {
             return $comments;
         }
 
         return false;
-    } // end method "get"
-} // end class "comments"
+    }
+}
+

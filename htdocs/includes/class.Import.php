@@ -2,19 +2,31 @@
 
 use Sunra\PhpSimple\HtmlDomParser;
 
+/**
+ * Handles ingestion and normalization of legislative data from external sources.
+ */
 class Import
 {
     private $log;
 
+    public $bill_number;
+    public $lis_session_id;
+    public $text;
+
+    /**
+     * Instantiate the importer with a logger dependency.
+     *
+     * @param Log $log Logger used for recording issues during import.
+     */
     public function __construct(Log $log)
     {
         $this->log = $log;
     }
 
     /**
-     * Retrieve a bill's text from the legislature's website.
+     * Retrieve a bill's text from the legislature's website and store it on the instance.
      *
-     * @return string
+     * @return bool|null False when the bill cannot be fetched, null on success.
      */
     public function get_bill_text()
     {
@@ -96,9 +108,9 @@ class Import
     }
 
     /**
-     * Take the legislature's HTML and make it less bad.
+     * Sanitize the previously fetched bill text with HTML Purifier.
      *
-     * @return string
+     * @return bool|null False when no text is loaded, null on success.
      */
     public function clean_bill_text()
     {
@@ -118,10 +130,11 @@ class Import
     }
 
     /**
-     * Turn the CSV array into well-formatted, well-named fields.
+     * Turn the CSV array into well-formatted, well-named bill fields.
      *
-     * @param array $bill
-     * @return array
+     * @param array $bill Raw CSV row parsed into an array.
+     *
+     * @return array|false Normalized bill data or false on failure.
      */
     function prepare_bill($bill)
     {
@@ -252,9 +265,9 @@ class Import
     }
 
     /**
-     * Generate a list of all committees
+     * Generate a list of all committees.
      *
-     * @return array
+     * @return array|false Array of committee records or false when none are found.
      */
     function create_committee_list()
     {
@@ -282,9 +295,9 @@ class Import
     }
 
     /**
-     * Generate a list of all legislators
+     * Generate a list of all legislators.
      *
-     * @return array
+     * @return array|false Array of legislator records or false when none exist.
      */
     function create_legislator_list()
     {
@@ -311,11 +324,12 @@ class Import
     }
 
     /**
-     * Look up a legislator's ID.
+     * Look up a legislator's internal ID.
      *
-     * @param object $legislators
-     * @param str $lis_id
-     * @return str
+     * @param array  $legislators Array of legislator rows (id, lis_id, chamber).
+     * @param string $lis_id      Legislator LIS identifier.
+     *
+     * @return int|string|false Matching legislator ID or false when not found.
      */
     function lookup_legislator_id($legislators, $lis_id)
     {
@@ -347,11 +361,12 @@ class Import
     }
 
     /**
-     * Look up a committee's ID.
+     * Look up a committee's internal ID.
      *
-     * @param array $committees
-     * @param string $lis_id
-     * @return string
+     * @param array  $committees Array of committee rows (id, lis_id, chamber).
+     * @param string $lis_id     Committee LIS identifier.
+     *
+     * @return int|string|false Matching committee ID or false when not found.
      */
     function lookup_committee_id($committees, $lis_id)
     {
@@ -377,12 +392,13 @@ class Import
     }
 
     /**
-     * Turn committee member CSV into an array ready to be inserted into the database
+     * Turn committee member CSV into an array ready to be inserted into the database.
      *
-     * @param string $csv
-     * @param array $committees
-     * @param array $legislators
-     * @return array
+     * @param string $csv         CSV payload keyed by column headers.
+     * @param array  $committees  Committee lookup data.
+     * @param array  $legislators Legislator lookup data.
+     *
+     * @return array|false Parsed committee membership rows or false on failure.
      */
     function committee_members_csv_parse($csv, $committees, $legislators)
     {
@@ -413,10 +429,13 @@ class Import
         return $members;
     }
 
-    /*
-     * fetch_photo()
+    /**
+     * Retrieve a legislator photo from a provided URL and persist it locally.
      *
-     * Retrieves a legislator photo from a provided URL and stores it.
+     * @param string $url       Remote image URL.
+     * @param string $shortname Legislator shortname used for local storage.
+     *
+     * @return string|false Stored filename (with extension) or false on failure.
      */
     public function fetch_photo($url, $shortname)
     {
@@ -457,10 +476,12 @@ class Import
         return $filename;
     }
 
-    /*
-     * deactivate_legislator()
+    /**
+     * Flag a legislator as having left office.
      *
-     * Sets a legislator as having left office.
+     * @param string $id Legislator LIS identifier.
+     *
+     * @return bool True on success, false on failure.
      */
     public function deactivate_legislator($id)
     {
@@ -527,10 +548,13 @@ class Import
 
 
     /**
-     * Verify that a legislator is listed in the legislative CSV listing
+     * Verify that a legislator appears in the legislative CSV listing.
      *
-     * @param string $lis_id
-     * @return boolean
+     * @param string $lis_id Legislator LIS identifier.
+     *
+     * @return bool True when the legislator is present, false otherwise.
+     *
+     * @throws Exception When the LIS ID is invalid or the CSV cannot be loaded.
      */
     public function legislator_in_csv($lis_id)
     {
@@ -553,11 +577,12 @@ class Import
         return false;
     } //
 
-    /*
-     * add_legislator()
+    /**
+     * Create a new legislator record with the provided data.
      *
-     * Creates a new record for a legislator, requiring as input all data about the legislator to be
-     * added to the database. All array keys must have the same names as the database columns.
+     * @param array $legislator Associative array of legislator fields.
+     *
+     * @return bool True on success, false when validation fails or insert errors.
      */
     public function add_legislator($legislator)
     {
@@ -644,7 +669,12 @@ class Import
     } // add_legislator()
 
     /**
-     * Generate shortnames for a given name
+     * Generate a shortname slug for a legislator.
+     *
+     * @param string $casual Casual name in "Lastname, Firstname" format.
+     * @param string $full   Full formal name.
+     *
+     * @return string Generated shortname.
      */
     function create_legislator_shortname($casual, $full)
     {
@@ -694,11 +724,12 @@ class Import
         return $shortname;
     }
 
-    /*
-     * update_legislator()
+    /**
+     * Update an existing legislator record with supplied fields.
      *
-     * Updates an existing record for a legislator. All array keys must have the same names as the
-     * database columns.
+     * @param array $legislator Associative array containing an `id` key and allowed updates.
+     *
+     * @return bool|null True when updated, false on failure, null when nothing changes.
      */
     public function update_legislator($legislator)
     {
@@ -769,11 +800,13 @@ class Import
         return true;
     } // update_legislator
 
-    /*
-     * fetch_legislator_data()
+    /**
+     * Retrieve legislator data from the General Assembly website.
      *
-     * Retrieves data about a legislator from the General Assembly's website, requiring as input the
-     * chamber name (house or senate) and the legislator's LIS ID.
+     * @param string $chamber Chamber identifier (`house` or `senate`).
+     * @param string $lis_id  Legislator LIS identifier.
+     *
+     * @return array|false Parsed legislator data or false on failure.
      */
     public function fetch_legislator_data($chamber, $lis_id)
     {

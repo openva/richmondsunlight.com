@@ -1,9 +1,17 @@
 <?php
 
+/**
+ * Provides helper methods for recording and reading poll participation on bills.
+ */
 class Poll
 {
-    /*
-     * Determine whether the current user has voted on this poll before.
+    public $bill_id;
+    public $results;
+
+    /**
+     * Check whether the current user has already cast a vote on the bill poll.
+     *
+     * @return bool True if a vote is on record, false otherwise.
      */
     public function has_voted()
     {
@@ -33,8 +41,10 @@ class Poll
         return true;
     } // end has_voted()
 
-    /*
-     * Retrieve the results for a given poll.
+    /**
+     * Load the poll results, using Memcached if available.
+     *
+     * @return bool True when results are available, false on failure.
      */
     public function get_results()
     {
