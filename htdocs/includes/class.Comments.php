@@ -140,4 +140,3 @@ class Comments
         return false;
     }
 }
-

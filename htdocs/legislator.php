@@ -1,33 +1,31 @@
 <?php
 
-###
-# Legislator Page
-#
-# PURPOSE
-# Information about each legislator.
-#
-###
+/*
+ * Legislator Page
+ * PURPOSE
+ * Information about each legislator.
+ */
 
-# INCLUDES
-# Include any files or libraries that are necessary for this specific
-# page to function.
+// INCLUDES
+// Include any files or libraries that are necessary for this specific
+// page to function.
 include_once 'settings.inc.php';
 include_once 'vendor/autoload.php';
 
-# DECLARATIVE FUNCTIONS
-# Run those functions that are necessary prior to loading this specific
-# page.
+// DECLARATIVE FUNCTIONS
+// Run those functions that are necessary prior to loading this specific
+// page.
 $database = new Database();
 $database->connect_mysqli();
 
-# INITIALIZE SESSION
+// INITIALIZE SESSION
 session_start();
 
-# LOCALIZE AND CLEAN UP VARIABLES
+// LOCALIZE AND CLEAN UP VARIABLES
 $shortname = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['shortname']);
 
-# Get the legislator's info. from the API.
-# We append a query string, containing the current time, to avoid getting a cached copy.
+// Get the legislator's info. from the API.
+// We append a query string, containing the current time, to avoid getting a cached copy.
 $json_url = API_URL . '1.1/legislator/' . $shortname . '.json?' . time();
 $json = get_content($json_url);
 
@@ -41,27 +39,27 @@ if ($json == false || $legislator == false || isset($legislator->error)) {
     exit();
 }
 
-# Cast this bill as an array, rather than an object, in which the array is wrapped as a result of
-# being stored in JSON.
+// Cast this bill as an array, rather than an object, in which the array is wrapped as a result of
+// being stored in JSON.
 $legislator = (array) $legislator;
 
-# Externally, we call the shortname the "id," so rename that so it'll make sense here.
+// Externally, we call the shortname the "id," so rename that so it'll make sense here.
 $legislator['id'] = $legislator['rs_id'];
 
-# Create a new video object.
+// Create a new video object.
 $video = new Video();
 
-# Get a list of videos for this legislator.
+// Get a list of videos for this legislator.
 $video->legislator_id = $legislator['id'];
 $legislator['videos'] = $video->legislator_sample();
 
-# Gin up a meta description for search engines.
+// Gin up a meta description for search engines.
 $html_head = '
 <meta name="description" content="Information about ' . $legislator['name_formatted']
     . ', including a list of ' . $legislator['possessive'] . ' bills, ' . $legislator['possessive']
     . ' full voting record, contact information, donors, recent media coverage, and more." />';
 
-# PAGE METADATA
+// PAGE METADATA
 $page_title = $legislator['name_formatted'];
 $site_section = 'legislators';
 
@@ -76,16 +74,16 @@ $html_head .= '<meta name="twitter:card" content="summary" />
         . ' District ' . $legislator['district'] . ', including ' . $legislator['district_description'] . ', '
         . 'since ' . date('Y', strtotime($legislator['date_started'])) . '." />';
 
-# PAGE SIDEBAR
+// PAGE SIDEBAR
 $page_sidebar = '';
 
-# Contact the rep.
+// Contact the rep.
 $page_sidebar .= '
 <div class="box vcard">
 	<h3>Contact ' . $legislator['name'] . '</h3>
 	<span style="display: none;" class="fn">' . $legislator['name'] . '</span>';
 
-# District Office
+// District Office
 if (!empty($legislator['address_district'])) {
     $page_sidebar .= '
 	<p class="adr"><strong>District Office</strong><br />
@@ -96,7 +94,7 @@ if (!empty($legislator['phone_district'])) {
 }
 $page_sidebar .= '</p>';
 
-# Richmond Office
+// Richmond Office
 $page_sidebar .= '
 	<p class="adr"><strong>Richmond Office</strong> (during session)<br />
 	P.O. Box ';
@@ -116,7 +114,7 @@ if (!empty($legislator['address_richmond'])) {
 	<p>Room ' . $legislator['address_richmond'] . ' of the General Assembly Building</p>';
 }
 
-# E-Mail
+// E-Mail
 if (!empty($legislator['email'])) {
     $page_sidebar .= '
 	<p><strong>Email</strong><br />
@@ -140,7 +138,7 @@ if ($legislator['district_boundaries'] != false) {
     <link href="/js/vendor/mapbox-gl/dist/mapbox-gl.css" rel="stylesheet" />
     <script src="/js/vendor/@turf/turf/turf.min.js"></script>
         <style>
-            #district_map { height: 250px; }
+            // district_map { height: 250px; }
         </style>
         <script>
             $( document ).ready(function() {
@@ -192,7 +190,7 @@ if ($legislator['district_boundaries'] != false) {
 $page_sidebar .= '
 </div>';
 
-# Newest Comments
+// Newest Comments
 $sql = 'SELECT
             comments.id,
             comments.bill_id,
@@ -245,13 +243,13 @@ if (mysqli_num_rows($result) > 0) {
 }
 
 
-# Voting Record
+// Voting Record
 $page_sidebar .= '
 	<div class="box">
 		<h3>Voting Record</h3>
 		' . $legislator['prefix'] . ' ' . $legislator['name'] . '’s voting record for ';
 
-# Figure out when to start listing years. We don't have voting data prior to 2006.
+// Figure out when to start listing years. We don't have voting data prior to 2006.
 if (!empty($legislator['year_started'])) {
     if ($legislator['year_started'] < 2006) {
         $start = 2006;
@@ -262,14 +260,14 @@ if (!empty($legislator['year_started'])) {
     $start = 2006;
 }
 
-# Figure out when to stop listing years.
+// Figure out when to stop listing years.
 if (!empty($legislator['year_ended'])) {
     $end = $legislator['year_ended'];
 } else {
     $end = date('Y');
 }
 
-# Iterate through the years and provide links.
+// Iterate through the years and provide links.
 for ($i = $start; $i <= $end; $i++) {
     $page_sidebar .= '<a href="/legislator/' . $legislator['shortname'] . '/votes/' . $i . '/">'
         . $i . '</a>';
@@ -282,7 +280,7 @@ for ($i = $start; $i <= $end; $i++) {
 $page_sidebar .= ' is available to view or download.
 	</div>';
 
-# More info
+// More info
 $page_sidebar .= '
     <div class="box">
         <h3>More Info</h3>
@@ -296,7 +294,7 @@ $page_sidebar .= '
         </ul>
     </div>';
 
-# Corrections
+// Corrections
 $page_sidebar .= '
 	<div class="box">
 		<h3>Corrections? Additions?</h3>
@@ -304,7 +302,7 @@ $page_sidebar .= '
 		please <a href="/contact/">correct it</a>.
 	</div>';
 
-# PAGE CONTENT
+// PAGE CONTENT
 $page_body = '
 <div class="tabs">
 <ul class="tabs">
@@ -340,8 +338,8 @@ if (!empty($legislator['district_description'])) {
 $page_body .= '</div>
         </div>';
 
-# Get the batting average data.  Use the current session's year if the session
-# is finished.  Otherwise, use the prior year.
+// Get the batting average data.  Use the current session's year if the session
+// is finished.  Otherwise, use the prior year.
 if (IN_SESSION == true) {
     $batting_year = SESSION_YEAR - 1;
 } else {
@@ -466,9 +464,9 @@ if (!empty($legislator['website'])) {
     </div>';
 }*/
 
-# COPATRONING STATS
-# Calculate the percentage of the bills copatroned by this legislator that were introduced by
-# each party.
+// COPATRONING STATS
+// Calculate the percentage of the bills copatroned by this legislator that were introduced by
+// each party.
 $sql = 'SELECT
             representatives.party,
             COUNT(*) AS number
@@ -489,13 +487,13 @@ $total = array_sum($tmp);
 if ($total > 0) {
     arsort($tmp);
 
-    # Create the text that we'll use below in the copatroning stats.
+    // Create the text that we'll use below in the copatroning stats.
     $introduced = round((current($tmp) / $total) * 100) . '% of bills ' . $legislator['pronoun']
     . ' has copatroned were introduced by ' . ((key($tmp) == 'R') ? 'Republicans' : 'Democrats')
     . '. ';
 
-    # Populate an array that we use to determine overall partisanship. 0 = Democratic and 100 =
-    # Republican. Because our number is based on the majority support, we need to rescale it.
+    // Populate an array that we use to determine overall partisanship. 0 = Democratic and 100 =
+    // Republican. Because our number is based on the majority support, we need to rescale it.
     if (key($tmp) == 'D') {
         $tmp = round((current($tmp) / $total) * 100);
         if ($tmp > 50) {
@@ -506,8 +504,8 @@ if ($total > 0) {
     }
 }
 
-# Calculate the percentages of the legislators' party memberships who have cosponsored any bill
-# introduced by this legislator.
+// Calculate the percentages of the legislators' party memberships who have cosponsored any bill
+// introduced by this legislator.
 $sql = 'SELECT
             representatives.party,
             COUNT(*) AS number
@@ -529,13 +527,13 @@ $total = array_sum($tmp);
 if ($total > 0) {
     arsort($tmp);
 
-    # Create the text that we'll use below in the copatroning stats.
+    // Create the text that we'll use below in the copatroning stats.
     $supporters = 'Of all of the copatrons of ' . (($legislator['sex'] == 'male') ? 'his' : 'her')
         . ' bills, ' . round((current($tmp) / $total) * 100) . '% of them are '
     . ((key($tmp) == 'R') ? 'Republicans' : 'Democrats') . '. ';
 
-    # Populate an array that we use to determine overall partisanship. 0 = Democratic and 100 =
-    # Republican. Because our number is based on the majority support, we need to rescale it.
+    // Populate an array that we use to determine overall partisanship. 0 = Democratic and 100 =
+    // Republican. Because our number is based on the majority support, we need to rescale it.
     if (key($tmp) == 'D') {
         $tmp = round((current($tmp) / $total) * 100);
         if ($tmp > 50) {
@@ -546,10 +544,10 @@ if ($total > 0) {
     }
 }
 
-# Calculate the percentages of the legislators' party memberships who are in the overall pool
-# of bills copatroned by this legislator. Meaning, look at every bill that this legislator has
-# copatroned, and look at every other copatron of those bills, and calculate the percentage of
-# those copatrons that are Democrats, Republicans, and independents.
+// Calculate the percentages of the legislators' party memberships who are in the overall pool
+// of bills copatroned by this legislator. Meaning, look at every bill that this legislator has
+// copatroned, and look at every other copatron of those bills, and calculate the percentage of
+// those copatrons that are Democrats, Republicans, and independents.
 $sql = 'SELECT
             representatives.party,
             COUNT(*) AS number
@@ -570,14 +568,14 @@ while ($copatron = mysqli_fetch_array($result)) {
 $total = array_sum($tmp);
 if ($total > 0) {
     arsort($tmp);
-    # Create the text that we'll use below in the copatroning stats.
+    // Create the text that we'll use below in the copatroning stats.
     $pool = 'Of all of ' . (($legislator['sex'] == 'male') ? 'his' : 'her')
         . ' fellow copatrons of the bills that ' . (($legislator['sex'] == 'male') ? 'he' : 'she')
         . ' copatroned, ' . round((current($tmp) / $total) * 100) . '% of them are '
     . ((key($tmp) == 'R') ? 'Republicans' : 'Democrats') . '. ';
 
-    # Populate an array that we use to determine overall partisanship. 0 = Democratic and 100 =
-    # Republican. Because our number is based on the majority support, we need to rescale it.
+    // Populate an array that we use to determine overall partisanship. 0 = Democratic and 100 =
+    // Republican. Because our number is based on the majority support, we need to rescale it.
     if (key($tmp) == 'D') {
         $tmp = round((current($tmp) / $total) * 100);
         if ($tmp > 50) {
@@ -589,8 +587,8 @@ if ($total > 0) {
 }
 
 
-# Display how partisan that this legislator's record is, in light of his copatroning habits.
-# We've calculated these copatroning habits via a cron job already.
+// Display how partisan that this legislator's record is, in light of his copatroning habits.
+// We've calculated these copatroning habits via a cron job already.
 if (!empty($legislator['partisanship'])) {
     $partisanship = '
 		<div class="content" id="partisanship-graph">
@@ -623,7 +621,7 @@ if (isset($partisanship)) {
         </div>';
 }
 
-# Tag Cloud
+// Tag Cloud
 $sql = 'SELECT COUNT(*) AS count, tags.tag
 		FROM tags
 		LEFT JOIN bills
@@ -641,20 +639,20 @@ if ($tag_count > 0) {
 		<div class="label">Bill Topics <a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-f4eee5.gif" class="help-icon" alt="?" /></a></div>
 		<div class="content">
 			<div class="tags">';
-    # Build up an array of tags, with the key being the tag and the value being the count.
+    // Build up an array of tags, with the key being the tag and the value being the count.
     while ($tag = mysqli_fetch_array($result)) {
         $tag = array_map('stripslashes', $tag);
         $tags[$tag['tag']] = $tag['count'];
     }
 
-    # Sort the tags in reverse order by key (their count), shave off the top 30, and then
-    # resort alphabetically.
+    // Sort the tags in reverse order by key (their count), shave off the top 30, and then
+    // resort alphabetically.
     arsort($tags);
     $tags = array_slice($tags, 0, 30, true);
     ksort($tags);
 
-    # Establish a scale -- the average size in this list should be 1.25em, with the scale
-    # moving up and down from there.
+    // Establish a scale -- the average size in this list should be 1.25em, with the scale
+    // moving up and down from there.
     $multiple = 1.25 / (array_sum($tags) / count($tags));
 
     foreach ($tags as $tag => $count) {
@@ -687,16 +685,16 @@ if (!empty($legislator['bio'])) {
     </div>';
 }
 
-# Close the table and this tab's DIV.
+// Close the table and this tab's DIV.
 $page_body .= '</div>
     </div>
 	</div>';
 
-# Start a new DIV for top contributions.
+// Start a new DIV for top contributions.
 /*if (isset($legislator['contributions']['List']))
 {
 
-    # Sort the list by total cumulative contributions, and keep only the top 10.
+    // Sort the list by total cumulative contributions, and keep only the top 10.
     function cmp($a, $b)
     {
         if ($a->cumulative_amount == $b->cumulative_amount) return 0;
@@ -733,14 +731,14 @@ $page_body .= '</div>
 
 }*/
 
-# Start a new DIV for news mentions.
+// Start a new DIV for news mentions.
 $page_body .= '
 <div id="media">
 	<table style="width: 100%">
 	<caption>Recent Mentions in the Media</caption>
 	<tbody>';
 
-# Assemble the Google News URL.
+// Assemble the Google News URL.
 $google_rss = 'https://news.google.com/news/rss/search/section/q/%22+' .
     urlencode($legislator['name']) . '%22+' . (($legislator['chamber'] == 'house') ? 'del+OR+delegate' : 'sen+OR+senator');
 $google_link = 'https://news.google.com/news/search/section/q/%22' . urlencode($legislator['name']) .
@@ -774,13 +772,13 @@ foreach ($newsfeed->get_items() as $item) {
      */
     $summary = strip_tags($item->get_description());
     $summary = str_replace($tmp, '', $summary);
-    # Don't trail off if we already have a period at the end.
+    // Don't trail off if we already have a period at the end.
     $summary = str_replace('. ...', '.', $summary);
-    # Hack off the dateline.
+    // Hack off the dateline.
     $summary = preg_replace('/([a-z]{3}) ([0-9]+), 20([0-9]{2})/Di', '', $summary);
-    # Remove the indication of how many hours ago this news item was written.
+    // Remove the indication of how many hours ago this news item was written.
     $summary = preg_replace('/([0-9]*) hour(s*) ago/Di', '', $summary);
-    # Hack off the state that often leads off the article.
+    // Hack off the state that often leads off the article.
     $summary = preg_replace('/,&nbsp;([A-Z]{2})&nbsp;- /D', '', $summary);
 
     $page_body .= '
@@ -797,22 +795,22 @@ foreach ($newsfeed->get_items() as $item) {
     }
 }
 
-# Provide a link to read more.
+// Provide a link to read more.
 $page_body .= '
     <tr><td><div style="float: right;">
         <a href="' . $google_link . '">More Media Mentions &gt;&gt;</a>
     </div></td></tr>';
 
-# End the DIV for news mentions.
+// End the DIV for news mentions.
 $page_body .= '</tbody></table></div>';
 
-# News from the legislator's website.
+// News from the legislator's website.
 if (!empty($legislator['rss_url']) && empty($legislator['date_ended'])) {
     $newsfeed->set_feed_url($legislator['rss_url']);
     $newsfeed->init();
     $newsfeed->handle_content_type();
 
-    # Start a new DIV for legislator's blogs, etc.
+    // Start a new DIV for legislator's blogs, etc.
     $page_body .= '
 	<div id="news">
 		<table style="width: 100%">
@@ -828,7 +826,7 @@ if (!empty($legislator['rss_url']) && empty($legislator['date_ended'])) {
         $page_body .= $item->get_date('F j, Y') . '<br />';
         $page_body .= strip_tags($item->get_description()) . '</p></td></tr>';
     }
-    # End the DIV for news mentions.
+    // End the DIV for news mentions.
     $page_body .= '
 				</tbody>
 			</table>
@@ -840,7 +838,7 @@ if ($legislator['videos'] !== false) {
     $video->legislator_id = $legislator['id'];
     $video->by_legislator();
 
-    # Start a new DIV for this legislator's highlights reel.
+    // Start a new DIV for this legislator's highlights reel.
     /*
      * Add the Flowplayer code.
      */
@@ -902,10 +900,10 @@ if ($legislator['videos'] !== false) {
 	</div>";
 }
 
-# Close the DIV that contains these tabs.
+// Close the DIV that contains these tabs.
 $page_body .= '</div>';
 
-# List the legislator's bills
+// List the legislator's bills
 if (isset($legislator['bills']) && count($legislator['bills']) > 0) {
     $page_body .= '<div style="clear: both;" id="bills" class="tabs">
 		<h2>Bills</h2>';
@@ -917,11 +915,11 @@ if (isset($legislator['bills']) && count($legislator['bills']) > 0) {
         $bills[$bill['year']][] = $bill;
     }
 
-    # Start the tab header code
+    // Start the tab header code
     $page_body .= '
 		<ul>';
 
-    # Step through each year and generate a tab.
+    // Step through each year and generate a tab.
     foreach ($bills as $year => $bill) {
         if (count($bills) > 8) {
             $page_body .= '
@@ -932,11 +930,11 @@ if (isset($legislator['bills']) && count($legislator['bills']) > 0) {
         }
     }
 
-    # End the tab header code.
+    // End the tab header code.
     $page_body .= '
 		</ul>';
 
-    # Now step through each year, and each bill within each year, and generate the tab's data.
+    // Now step through each year, and each bill within each year, and generate the tab's data.
     foreach ($bills as $year => $year_bills) {
         $page_body .= '
 			<div id="' . $year . '" class="bills">
@@ -952,11 +950,11 @@ if (isset($legislator['bills']) && count($legislator['bills']) > 0) {
 			</div>';
     }
 
-    # Close the Bills DIV
+    // Close the Bills DIV
     $page_body .= '</div>';
 }
 
-# OUTPUT THE PAGE
+// OUTPUT THE PAGE
 $page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;
