@@ -935,7 +935,6 @@ class Import
             $district = new District();
             $d = $district->info('house', $legislator['district_number']);
             $legislator['district_id'] = $d['id'];
-            
         } // fetch delegate
 
         /*
@@ -1019,7 +1018,7 @@ class Import
                     $legislator['photo_url'] = 'https://apps.senate.virginia.gov/' . trim($matches[0]);
                     unset($matches);
                 }
-                
+
                 /*
                  * Get legislator biography.
                  */
