@@ -1576,10 +1576,14 @@ class Import
         $shortname = $this->build_shortname($preferred_first_name, $member, $last_name);
 
         $district_id = $this->resolve_district_internal_id($chamber_normalized, $member);
+        $district_number = $this->extract_district_number_from_name($member['DistrictName'] ?? '');
         $date_started = $this->format_service_begin_date($member['ServiceBeginDate'] ?? null);
         $lis_id = $this->format_member_lis_id($chamber_normalized, $member_number);
 
         $place = $contact_details['place'] ?? ($member['DistrictName'] ?? '');
+        if ($district_number === null && $place !== '') {
+            $district_number = $this->extract_district_number_from_name($place);
+        }
 
         $legislator = [
             'lis_id' => $lis_id,
@@ -1595,6 +1599,7 @@ class Import
             ),
             'shortname' => $shortname,
             'district_id' => $district_id,
+            'district_number' => $district_number,
             'party' => $party_code,
             'date_started' => $date_started,
             'email' => $contact_details['email'] ?? ($member['GABEmailAddress'] ?? null),
@@ -1603,7 +1608,12 @@ class Import
             'address_district' => $contact_details['address_district'] ?? null,
             'phone_district' => $contact_details['phone_district'] ?? null,
             'place' => $contact_details['place'] ?? null,
-            'photo_url' => $this->build_photo_url($member_number),
+            'photo_url' => $this->build_photo_url([
+                'member_number' => $member_number,
+                'last_name' => $last_name,
+                'chamber' => $chamber_normalized,
+                'district_number' => $district_number,
+            ]),
         ];
 
         $location = new Location();
@@ -1939,14 +1949,35 @@ class Import
      *
      * @return string Absolute photo URL.
      */
-    private function build_photo_url(string $member_number)
+    private function build_photo_url(array $context)
     {
-        $member_number = strtoupper(trim($member_number));
-        if ($member_number === '') {
+        $member_number = $context['member_number'] ?? '';
+        $chamber = $context['chamber'] ?? '';
+        $member_lastname = $context['last_name'] ?? '';
+        $district_number = $context['district_number'] ?? '';
+
+        if ($chamber === '') {
             return null;
         }
+        if ($chamber === 'house') {
+            if ($member_number === '') {
+                return null;
+            }
+            return 'https://memdata.virginiageneralassembly.gov/images/display_image/' . $member_number;
+        }
+        if ($chamber === 'senate') {
+            $digits = preg_replace('/([A-Za-z])/', '', trim($member_number));
+            if ($digits === '') {
+                return null;
+            }
+            $member_lastname = trim($member_lastname);
+            if ($member_lastname === '' || $district_number === '') {
+                return null;
+            }
 
-        return 'https://memdata.virginiageneralassembly.gov/images/display_image/' . $member_number;
+            return 'https://apps.senate.virginia.gov/Senator/images/member_photos/' . $member_lastname . $district_number;
+        }
+        return null;
     }
 
     /**
