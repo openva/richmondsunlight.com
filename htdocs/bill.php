@@ -102,11 +102,13 @@ if ($impact_statements === false) {
 // search engine. Start by defining a list of bots.
 $bots = array('Googlebot', 'msnbot', 'Gigabot', 'Slurp', 'Teoma', 'ia_archiver', 'Yandex',
             'Heritrix', 'twiceler', 'bingbot', 'bot', 'updown.io');
-# Check to see if the current user agent is a known bot.
-foreach ($bots as $bot) {
-    if (mb_stripos($_SERVER['HTTP_USER_AGENT'], $bot) !== false) {
-        $is_bot = true;
-        break;
+// Check to see if the current user agent is a known bot.
+if (isset($_SERVER['HTTP_USER_AGENT'])) {
+    foreach ($bots as $bot) {
+        if (mb_stripos($_SERVER['HTTP_USER_AGENT'], $bot) !== false) {
+            $is_bot = true;
+            break;
+        }
     }
 }
 // Update bills_views to reflect this view, provided that this visitor hasn't been defined
