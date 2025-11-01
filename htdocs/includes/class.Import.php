@@ -11,6 +11,15 @@ class Import
     private $pdo;
     private $preferredNameCache = [];
 
+    /** @var string|null */
+    public $bill_number;
+
+    /** @var string|null */
+    public $lis_session_id;
+
+    /** @var string|null */
+    public $text;
+
     /**
      * Initialise the importer with a logger dependency.
      *
