@@ -2,12 +2,20 @@
 
 use Sunra\PhpSimple\HtmlDomParser;
 
+/**
+ * Imports, normalizes, and enriches bill and legislator data from external sources.
+ */
 class Import
 {
     private $log;
     private $pdo;
     private $preferredNameCache = [];
 
+    /**
+     * Initialise the importer with a logger dependency.
+     *
+     * @param Log $log Logger instance for recording warnings and errors.
+     */
     public function __construct(Log $log)
     {
         $this->log = $log;
@@ -16,7 +24,7 @@ class Import
     /**
      * Retrieve a bill's text from the legislature's website.
      *
-     * @return string
+     * @return bool|null False when retrieval fails; null on success after populating $this->text.
      */
     public function get_bill_text()
     {
@@ -98,9 +106,9 @@ class Import
     }
 
     /**
-     * Take the legislature's HTML and make it less bad.
+     * Sanitize the fetched bill text with HTML Purifier.
      *
-     * @return string
+     * @return bool|null False when no text is set; null after purification.
      */
     public function clean_bill_text()
     {
@@ -120,10 +128,11 @@ class Import
     }
 
     /**
-     * Turn the CSV array into well-formatted, well-named fields.
+     * Turn the CSV array into well-formatted, well-named bill fields.
      *
-     * @param array $bill
-     * @return array
+     * @param array $bill Raw CSV row indexed numerically.
+     *
+     * @return array|false Normalized bill data or false when input is empty.
      */
     function prepare_bill($bill)
     {
@@ -254,9 +263,9 @@ class Import
     }
 
     /**
-     * Generate a list of all committees
+     * Generate a list of all committees.
      *
-     * @return array
+     * @return array|false Array of committee rows or false when none are found.
      */
     function create_committee_list()
     {
@@ -284,9 +293,9 @@ class Import
     }
 
     /**
-     * Generate a list of all legislators
+     * Generate a list of all legislators.
      *
-     * @return array
+     * @return array|false Array of legislator rows or false when none exist.
      */
     function create_legislator_list()
     {
@@ -313,11 +322,12 @@ class Import
     }
 
     /**
-     * Look up a legislator's ID.
+     * Look up a legislator's internal ID.
      *
-     * @param object $legislators
-     * @param str $lis_id
-     * @return str
+     * @param array  $legislators Array of legislator rows containing lis_id and chamber.
+     * @param string $lis_id      LIS identifier.
+     *
+     * @return int|string|false Matching ID or false when not found.
      */
     function lookup_legislator_id($legislators, $lis_id)
     {
@@ -349,11 +359,12 @@ class Import
     }
 
     /**
-     * Look up a committee's ID.
+     * Look up a committee's internal ID.
      *
-     * @param array $committees
-     * @param string $lis_id
-     * @return string
+     * @param array  $committees Committee rows containing lis_id and chamber.
+     * @param string $lis_id     Committee LIS identifier.
+     *
+     * @return int|string|false Matching ID or false when not found.
      */
     function lookup_committee_id($committees, $lis_id)
     {
@@ -379,12 +390,13 @@ class Import
     }
 
     /**
-     * Turn committee member CSV into an array ready to be inserted into the database
+     * Turn committee member CSV into an array ready to be inserted into the database.
      *
-     * @param string $csv
-     * @param array $committees
-     * @param array $legislators
-     * @return array
+     * @param string $csv          Raw CSV payload keyed by column headers.
+     * @param array  $committees   Committee lookup data.
+     * @param array  $legislators  Legislator lookup data.
+     *
+     * @return array|false Normalized committee membership rows or false on failure.
      */
     function committee_members_csv_parse($csv, $committees, $legislators)
     {
@@ -415,10 +427,13 @@ class Import
         return $members;
     }
 
-    /*
-     * fetch_photo()
+    /**
+     * Retrieve a legislator photo from a provided URL and store it locally.
      *
-     * Retrieves a legislator photo from a provided URL and stores it.
+     * @param string $url       Remote image URL.
+     * @param string $shortname Legislator shortname used for local storage.
+     *
+     * @return string|false Stored filename (with extension) or false on failure.
      */
     public function fetch_photo($url, $shortname)
     {
@@ -459,10 +474,12 @@ class Import
         return $filename;
     }
 
-    /*
-     * deactivate_legislator()
+    /**
+     * Mark a legislator as having left office.
      *
-     * Sets a legislator as having left office.
+     * @param string $id Legislator LIS identifier.
+     *
+     * @return bool True on success, false on failure.
      */
     public function deactivate_legislator($id)
     {
@@ -531,8 +548,11 @@ class Import
     /**
      * Verify that a legislator is still listed in the General Assembly roster via the LIS API.
      *
-     * @param string $lis_id
-     * @return boolean
+     * @param string $lis_id Legislator LIS identifier.
+     *
+     * @return bool True when the legislator remains active, false otherwise.
+     *
+     * @throws Exception When the identifier cannot be normalized or is invalid.
      */
     public function legislator_in_csv($lis_id)
     {
@@ -568,11 +588,12 @@ class Import
         return true;
     } //
 
-    /*
-     * add_legislator()
+    /**
+     * Create a new legislator record with the provided data.
      *
-     * Creates a new record for a legislator, requiring as input all data about the legislator to be
-     * added to the database. All array keys must have the same names as the database columns.
+     * @param array $legislator Associative array of legislator fields.
+     *
+     * @return bool True on success, false when validation fails or insertion errors occur.
      */
     public function add_legislator($legislator)
     {
@@ -659,7 +680,12 @@ class Import
     } // add_legislator()
 
     /**
-     * Generate shortnames for a given name
+     * Generate a shortname slug for a legislator.
+     *
+     * @param string $casual Casual name in "Lastname, Firstname" format.
+     * @param string $full   Full formal name.
+     *
+     * @return string Generated lowercase shortname.
      */
     function create_legislator_shortname($casual, $full)
     {
@@ -709,11 +735,12 @@ class Import
         return $shortname;
     }
 
-    /*
-     * update_legislator()
+    /**
+     * Update an existing legislator record using the supplied data.
      *
-     * Updates an existing record for a legislator. All array keys must have the same names as the
-     * database columns.
+     * @param array $legislator Associative array containing an `id` key and any permitted fields.
+     *
+     * @return bool|null True when an update occurs, false on failure, null when no changes were provided.
      */
     public function update_legislator($legislator)
     {
@@ -784,11 +811,13 @@ class Import
         return true;
     } // update_legislator
 
-    /*
-     * fetch_legislator_data()
+    /**
+     * Retrieve legislator data by scraping the General Assembly website.
      *
-     * Retrieves data about a legislator from the General Assembly's website, requiring as input the
-     * chamber name (house or senate) and the legislator's LIS ID.
+     * @param string $chamber Chamber identifier (`house` or `senate`).
+     * @param string $lis_id  Legislator LIS identifier.
+     *
+     * @return array|false Parsed legislator data or false on failure.
      */
     public function fetch_legislator_data($chamber, $lis_id)
     {
@@ -1426,10 +1455,13 @@ class Import
         return $legislator;
     }
 
-    /*
-     * fetch_legislator_data_api()
+    /**
+     * Retrieve legislator data from the General Assembly public API.
      *
-     * Retrieves data about a legislator from the General Assembly's public API.
+     * @param string $chamber Chamber identifier (`house` or `senate`).
+     * @param string $lis_id  Legislator LIS identifier.
+     *
+     * @return array|false Parsed legislator data or false on failure.
      */
     public function fetch_legislator_data_api($chamber, $lis_id)
     {
@@ -1470,6 +1502,13 @@ class Import
         );
     }
 
+    /**
+     * Retrieve the list of active members from the LIS API.
+     *
+     * @param string|null $chamber Optional chamber filter (`house` or `senate`).
+     *
+     * @return array List of normalized legislator records.
+     */
     public function fetch_active_members($chamber = null)
     {
         $session_code = '20' . SESSION_LIS_ID;
@@ -1536,6 +1575,14 @@ class Import
         return $legislators;
     }
 
+    /**
+     * Fetch a single member record from the LIS API.
+     *
+     * @param string $member_number LIS member number.
+     * @param string $session_code  Session code (e.g. 2024).
+     *
+     * @return array|false Decoded member data or false on failure.
+     */
     private function fetch_member_record($member_number, $session_code)
     {
         $response = $this->lis_api_request(
@@ -1561,6 +1608,14 @@ class Import
         return $this->extract_member_from_response($response, $member_number);
     }
 
+    /**
+     * Extract a specific member from an API response payload.
+     *
+     * @param array|string $response      Raw API response.
+     * @param string        $member_number Member number to search for.
+     *
+     * @return array|false Matching member data or false when absent.
+     */
     private function extract_member_from_response($response, $member_number)
     {
         $candidates = $this->extract_members_from_response($response);
@@ -1580,6 +1635,14 @@ class Import
         return false;
     }
 
+    /**
+     * Issue an HTTP request to the LIS API.
+     *
+     * @param string $path  API path beginning with a slash.
+     * @param array  $query Query parameters to append.
+     *
+     * @return array|false Decoded JSON response or false on failure.
+     */
     private function lis_api_request($path, array $query = [])
     {
         $base_url = 'https://lis.virginia.gov';
@@ -1628,6 +1691,14 @@ class Import
         return $decoded;
     }
 
+    /**
+     * Normalize an LIS identifier into the numeric member number.
+     *
+     * @param string $chamber Chamber identifier (`house` or `senate`).
+     * @param string $lis_id  Raw LIS identifier.
+     *
+     * @return string|false Normalized member number or false on failure.
+     */
     private function normalize_member_number($chamber, $lis_id)
     {
         $digits = preg_replace('/[^0-9]/', '', $lis_id);
@@ -1642,6 +1713,13 @@ class Import
         return 'H' . str_pad($digits, 4, '0', STR_PAD_LEFT);
     }
 
+    /**
+     * Extract the member list array from an API response.
+     *
+     * @param array|string $response Raw API response payload.
+     *
+     * @return array Members array (possibly empty).
+     */
     private function extract_members_from_response($response)
     {
         if (!is_array($response)) {
@@ -1663,8 +1741,16 @@ class Import
         return [];
     }
 
+    /**
+     * Extract contact information for a specific member from an API response.
+     *
+     * @param array|string $response      Raw contact response payload.
+     * @param string        $member_number Member number to match.
+     *
+     * @return array Structured contact information.
+     */
     private function extract_contact_details_from_api($response, $member_number)
-    {   
+    {
         $contacts = [];
         if (is_array($response)) {
             if (isset($response['MemberContactInformationList']) && is_array($response['MemberContactInformationList'])) {
@@ -1759,6 +1845,16 @@ class Import
         });
     }
 
+    /**
+     * Map LIS member and contact data into the local legislator structure.
+     *
+     * @param array  $member          Member record from the LIS API.
+     * @param array  $contact_details Normalized contact details.
+     * @param string $member_number   Normalized member number.
+     * @param string $chamber         Chamber identifier.
+     *
+     * @return array Normalized legislator payload.
+     */
     private function map_member_to_legislator(
         array $member,
         array $contact_details,
@@ -1839,6 +1935,15 @@ class Import
         });
     }
 
+    /**
+     * Determine the preferred first name for a member.
+     *
+     * @param string $member_number Member number identifier.
+     * @param array  $member        Member data array.
+     * @param string $chamber       Chamber identifier.
+     *
+     * @return string Preferred first name.
+     */
     private function determine_preferred_first_name(string $member_number, array $member, string $chamber)
     {
         $cache_key = $member_number . ':' . $chamber;
@@ -1877,6 +1982,13 @@ class Import
         return $this->preferredNameCache[$cache_key] = $preferred;
     }
 
+    /**
+     * Scrape the House member page to discover the preferred first name.
+     *
+     * @param string $member_number Member number identifier.
+     *
+     * @return string|null Preferred name or null if unavailable.
+     */
     private function fetch_house_preferred_name(string $member_number)
     {
         $member_number = strtoupper($member_number);
@@ -1898,6 +2010,13 @@ class Import
         return null;
     }
 
+    /**
+     * Extract the first name token from a list display string.
+     *
+     * @param string $list_display Display string returned by the API.
+     *
+     * @return string|null Extracted first name or null when not found.
+     */
     private function extract_first_name_from_list_display(string $list_display)
     {
         if ($list_display === '' || strpos($list_display, ',') === false) {
@@ -1917,11 +2036,26 @@ class Import
         return null;
     }
 
+    /**
+     * Normalise a name token by stripping punctuation and trimming whitespace.
+     *
+     * @param string $token Raw token extracted from a name string.
+     *
+     * @return string Sanitised token.
+     */
     private function sanitize_name_token(string $token)
     {
         return trim($token, ' "\',.');
     }
 
+    /**
+     * Normalise the preferred first name using available member metadata.
+     *
+     * @param string $name   Preferred name candidate.
+     * @param array  $member Member data array.
+     *
+     * @return string Normalised preferred first name.
+     */
     private function normalize_preferred_first_name(string $name, array $member)
     {
         $name = trim($name);
@@ -1949,6 +2083,15 @@ class Import
         return $name;
     }
 
+    /**
+     * Build the legislator shortname from member data.
+     *
+     * @param string $preferred_first_name Preferred first name string.
+     * @param array  $member                Member data array.
+     * @param string $last_name             Last name string.
+     *
+     * @return string Generated shortname.
+     */
     private function build_shortname(string $preferred_first_name, array $member, string $last_name)
     {
         $first_initial = '';
@@ -1988,6 +2131,13 @@ class Import
         return $first_initial . $middle_initial . $sanitized_last;
     }
 
+    /**
+     * Extract the last name from member data.
+     *
+     * @param array $member Member data array.
+     *
+     * @return string Last name string.
+     */
     private function extract_last_name(array $member)
     {
         $list_display = (string)($member['ListDisplayName'] ?? '');
@@ -2004,6 +2154,14 @@ class Import
         return $this->sanitize_name_token(end($parts));
     }
 
+    /**
+     * Resolve the internal district ID for the given member.
+     *
+     * @param string $chamber Chamber identifier.
+     * @param array  $member  Member data array.
+     *
+     * @return int|null Internal district ID or null when not found.
+     */
     private function resolve_district_internal_id(string $chamber, array $member)
     {
         $district_number = null;
@@ -2035,6 +2193,13 @@ class Import
         return ($row !== false && isset($row['id'])) ? (int)$row['id'] : null;
     }
 
+    /**
+     * Format a service begin date value into Y-m-d format.
+     *
+     * @param mixed $value Raw date value from the API.
+     *
+     * @return string|null Normalised date string or null when unavailable.
+     */
     private function format_service_begin_date($value)
     {
         if (empty($value)) {
@@ -2049,6 +2214,14 @@ class Import
         return date('Y-m-d', $timestamp);
     }
 
+    /**
+     * Format a numeric member number into an LIS identifier.
+     *
+     * @param string $chamber       Chamber identifier.
+     * @param string $member_number Member number digits.
+     *
+     * @return string LIS identifier (e.g. H0001).
+     */
     private function format_member_lis_id(string $chamber, string $member_number)
     {
         $digits = preg_replace('/[^0-9]/', '', $member_number);
@@ -2064,6 +2237,13 @@ class Import
         return 'H' . str_pad($digits, 4, '0', STR_PAD_LEFT);
     }
 
+    /**
+     * Build the URL for a legislator photo given the member number.
+     *
+     * @param string $member_number Member number identifier.
+     *
+     * @return string Absolute photo URL.
+     */
     private function build_photo_url(string $member_number)
     {
         $member_number = strtoupper(trim($member_number));
@@ -2074,6 +2254,11 @@ class Import
         return 'https://memdata.virginiageneralassembly.gov/images/display_image/' . $member_number;
     }
 
+    /**
+     * Lazily obtain a PDO connection for read/write operations.
+     *
+     * @return PDO|null Active PDO connection or null on failure.
+     */
     private function getPdo()
     {
         if ($this->pdo instanceof PDO) {
@@ -2097,6 +2282,14 @@ class Import
         return null;
     }
 
+    /**
+     * Format a name into "Last, First" form.
+     *
+     * @param string $last_name  Last name string.
+     * @param string $first_name First name string.
+     *
+     * @return string Formatted name.
+     */
     private function format_name_last_first_from_api($last_name, $first_name)
     {
         $last_name = trim((string)$last_name);
@@ -2112,6 +2305,17 @@ class Import
         return $last_name . ', ' . $first_name;
     }
 
+    /**
+     * Build the formatted display name (e.g. "Del. Jane Doe (D-Richmond)").
+     *
+     * @param string      $chamber           Chamber identifier.
+     * @param string      $first_name        First name string.
+     * @param string      $last_name         Last name string.
+     * @param string|null $party             Party code.
+     * @param string|null $place_or_district Place name or district descriptor.
+     *
+     * @return string Formatted name string.
+     */
     private function format_name_formatted_from_api(
         $chamber,
         $first_name,
@@ -2149,6 +2353,13 @@ class Import
         return $formatted;
     }
 
+    /**
+     * Extract a numeric district identifier from a descriptive string.
+     *
+     * @param string $district_name District description string.
+     *
+     * @return int|null District number or null when not found.
+     */
     private function extract_district_number_from_name($district_name)
     {
         $digits = preg_replace('/[^0-9]/', '', (string)$district_name);
@@ -2159,6 +2370,13 @@ class Import
         return (int)$digits;
     }
 
+    /**
+     * Construct a single-line mailing address from a contact entry.
+     *
+     * @param array $contact Contact entry from the API.
+     *
+     * @return string|null Address string or null when insufficient data.
+     */
     private function buildAddress(array $contact)
     {
         $segments = [];
@@ -2191,6 +2409,13 @@ class Import
         return implode(', ', $segments);
     }
 
+    /**
+     * Normalise a phone number into (###) ###-#### format.
+     *
+     * @param string|null $phone Raw phone number string.
+     *
+     * @return string|null Normalised phone number or null when not parseable.
+     */
     private function normalizePhone($phone)
     {
         if (empty($phone)) {
@@ -2203,6 +2428,13 @@ class Import
         return $phone;
     }
 
+    /**
+     * Determine whether a contact type denotes Capitol contact information.
+     *
+     * @param string|null $type Contact type code.
+     *
+     * @return bool True when the contact represents Capitol details.
+     */
     private function isCapitolContactType($type)
     {
         $type = strtoupper($type);
@@ -2215,6 +2447,13 @@ class Import
         return false;
     }
 
+    /**
+     * Determine whether a contact type denotes district contact information.
+     *
+     * @param string|null $type Contact type code.
+     *
+     * @return bool True when the contact represents district details.
+     */
     private function isDistrictContactType($type)
     {
         $type = strtoupper($type);
