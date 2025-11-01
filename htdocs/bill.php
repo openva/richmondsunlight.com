@@ -55,7 +55,7 @@ $bill = json_decode($json);
 /*
  * This bill does not exist, so return a 404
  */
-if ($json === false || $bill == false || isset($bill->error)) {
+if ($json === null || $bill == false || isset($bill->error)) {
     http_response_code(404);
     include '404.php';
     exit();
