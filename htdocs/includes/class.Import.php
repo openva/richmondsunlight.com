@@ -168,10 +168,6 @@ class Import
             'IsActive' => 'true',
         ];
 
-        if (!empty($this->lis_session_id)) {
-            $query['sessionID'] = $this->lis_session_id;
-        }
-
         if (!empty($this->document_number)) {
             $query['documentNumber'] = mb_strtoupper($this->document_number);
         }
@@ -209,6 +205,20 @@ class Import
     {
         $items = $this->fetchLegislationTextItems();
 
+        if (empty($items) && !empty($this->document_number)) {
+            $originalDocumentNumber = $this->document_number;
+            $this->document_number = null;
+            $items = $this->fetchLegislationTextItems();
+            if (empty($items)) {
+                $this->document_number = $originalDocumentNumber;
+            }
+        }
+
+        $items = array_map([$this, 'normalizeLegislationTextEntry'], $items);
+        $items = array_values(array_filter($items, static function ($item) {
+            return is_array($item) && (isset($item['LegislationTextID']) || isset($item['LegislationNumber']));
+        }));
+
         if (empty($items)) {
             return false;
         }
@@ -218,12 +228,7 @@ class Import
             return false;
         }
 
-        $textId = isset($selected['LegislationTextID']) ? (int)$selected['LegislationTextID'] : 0;
-        if ($textId <= 0) {
-            return false;
-        }
-
-        $pdfBinary = $this->fetchLegislationPdf($textId);
+        $pdfBinary = $this->getPdfBinaryFromLegislationItem($selected);
         if ($pdfBinary === false) {
             return false;
         }
@@ -255,6 +260,75 @@ class Import
         ];
 
         return $this->lis_api_request_binary('/LegislationText/api/getdrafttextbylegislationtextidasync', $query, 'application/pdf');
+    }
+
+    private function normalizeLegislationTextEntry($item)
+    {
+        if (!is_array($item)) {
+            return [];
+        }
+
+        if (isset($item['LegislationTextID']) || isset($item['LegislationNumber'])) {
+            return $item;
+        }
+
+        if (isset($item[0])) {
+            return $this->normalizeLegislationTextEntry($item[0]);
+        }
+
+        return $item;
+    }
+
+    private function getPdfBinaryFromLegislationItem(array $item)
+    {
+        if (isset($item['PDFFile']) && is_array($item['PDFFile'])) {
+            foreach ($item['PDFFile'] as $entry) {
+                if (!is_array($entry)) {
+                    continue;
+                }
+                $fileUrl = trim((string)($entry['FileURL'] ?? ''));
+                if ($fileUrl === '') {
+                    continue;
+                }
+                $binary = $this->downloadBinaryFromUrl($fileUrl);
+                if ($binary !== false) {
+                    return $binary;
+                }
+            }
+        }
+
+        $textId = isset($item['LegislationTextID']) ? (int)$item['LegislationTextID'] : 0;
+        if ($textId > 0) {
+            return $this->fetchLegislationPdf($textId);
+        }
+
+        return false;
+    }
+
+    private function downloadBinaryFromUrl(string $url)
+    {
+        if ($url === '') {
+            return false;
+        }
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_FAILONERROR, false);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+
+        $body = curl_exec($ch);
+        $error = curl_error($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($body === false || $status >= 400) {
+            $this->log->put('Downloading legislation PDF from ' . $url . ' failed with status '
+                . $status . ' error ' . $error, 5);
+            return false;
+        }
+
+        return $body;
     }
 
 
@@ -1512,6 +1586,10 @@ class Import
             return [];
         }
 
+        if ($body === '' || trim($body) === '') {
+            return [];
+        }
+
         $decoded = json_decode($body, true);
         if ($decoded === null && json_last_error() !== JSON_ERROR_NONE) {
             $this->log->put('Invalid JSON returned from LIS API for ' . $url . ': ' . json_last_error_msg(), 5);
@@ -1699,6 +1777,10 @@ class Import
 
         if (isset($response['Members']) && is_array($response['Members'])) {
             return $response['Members'];
+        }
+
+        if (isset($response['TextsList']) && is_array($response['TextsList'])) {
+            return $response['TextsList'];
         }
 
         if (isset($response['ListItems']) && is_array($response['ListItems'])) {
