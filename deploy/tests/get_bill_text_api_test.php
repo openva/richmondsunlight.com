@@ -26,18 +26,27 @@ class TestLog extends Log
 class ImportTestDouble extends Import
 {
     private array $mockResponses;
+    private array $mockBinaryResponses;
     public array $requests = [];
+    public array $binaryRequests = [];
 
-    public function __construct(array $mockResponses)
+    public function __construct(array $mockResponses, array $mockBinaryResponses = [])
     {
         parent::__construct(new TestLog());
         $this->mockResponses = $mockResponses;
+        $this->mockBinaryResponses = $mockBinaryResponses;
     }
 
     protected function lis_api_request($path, array $query = [])
     {
         $this->requests[] = ['path' => $path, 'query' => $query];
         return $this->mockResponses[$path] ?? [];
+    }
+
+    protected function lis_api_request_binary($path, array $query = [], string $accept = 'application/octet-stream')
+    {
+        $this->binaryRequests[] = ['path' => $path, 'query' => $query, 'accept' => $accept];
+        return $this->mockBinaryResponses[$path] ?? false;
     }
 }
 
@@ -47,6 +56,7 @@ $mockResponse = [
             [
                 'DraftText' => '<p>Current version text</p>',
                 'TextFormat' => 'HTML',
+                'TextFormatID' => 2,
                 'DocumentCode' => 'HB1H1',
                 'VersionDate' => '2024-02-01T12:00:00',
                 'LegislationTextID' => 200,
@@ -54,15 +64,28 @@ $mockResponse = [
             [
                 'DraftText' => '<p>Older version text</p>',
                 'TextFormat' => 'HTML',
+                'TextFormatID' => 2,
                 'DocumentCode' => 'HB1',
                 'VersionDate' => '2024-01-01T12:00:00',
                 'LegislationTextID' => 100,
+            ],
+            [
+                'DraftText' => null,
+                'TextFormat' => 'PDF',
+                'TextFormatID' => 1,
+                'DocumentCode' => 'HB1H1',
+                'VersionDate' => '2024-02-01T12:30:00',
+                'LegislationTextID' => 201,
             ],
         ],
     ],
 ];
 
-$import = new ImportTestDouble($mockResponse);
+$mockBinaryResponses = [
+    '/LegislationText/api/getdrafttextbylegislationtextidasync' => 'PDFDATA',
+];
+
+$import = new ImportTestDouble($mockResponse, $mockBinaryResponses);
 $import->bill_number = 'HB1';
 $import->document_number = 'HB1H1';
 $import->get_bill_text_api();
@@ -83,5 +106,29 @@ if (($import->requests[0]['query']['legislationNumber'] ?? null) !== 'HB1') {
 if (empty($import->requests)) {
     throw new RuntimeException('Expected lis_api_request to be invoked');
 }
+
+$pdf = $import->get_bill_pdf_api();
+if ($pdf !== 'PDFDATA') {
+    throw new RuntimeException('PDF data not returned from get_bill_pdf_api');
+}
+
+if (($import->binaryRequests[0]['query']['legislationTextID'] ?? null) !== 201) {
+    throw new RuntimeException('legislationTextID not passed when requesting PDF');
+}
+
+if ($import->pdf !== 'PDFDATA') {
+    throw new RuntimeException('PDF content was not cached in Import::$pdf');
+}
+
+$import->binaryRequests = [];
+$tempFile = tempnam(sys_get_temp_dir(), 'bill-pdf-');
+$resultPath = $import->get_bill_pdf_api($tempFile);
+if ($resultPath !== $tempFile) {
+    throw new RuntimeException('Destination path not returned when saving PDF');
+}
+if (!is_file($tempFile) || file_get_contents($tempFile) !== 'PDFDATA') {
+    throw new RuntimeException('PDF file was not written as expected');
+}
+unlink($tempFile);
 
 echo "get_bill_text_api_test: ok\n";

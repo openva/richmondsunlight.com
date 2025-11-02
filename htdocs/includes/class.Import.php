@@ -23,6 +23,9 @@ class Import
     /** @var string|null Document code (e.g., HB1H1) used when requesting bill text. */
     public $document_number;
 
+    /** @var string|null Cached PDF binary for the last request. */
+    public $pdf;
+
     /**
      * Initialise the importer with a logger dependency.
      *
@@ -124,8 +127,39 @@ class Import
      */
     public function get_bill_text_api()
     {
-        if (empty($this->bill_number)) {
+        $items = $this->fetchLegislationTextItems();
+
+        if (empty($items)) {
             return false;
+        }
+
+        $selected = $this->selectLegislationTextItem($items, $this->document_number ?? null, 'html');
+        if ($selected === null) {
+            return false;
+        }
+
+        $draft_text = $selected['DraftText'] ?? '';
+        if (!is_string($draft_text) || trim($draft_text) === '') {
+            return false;
+        }
+
+        if (!empty($selected['DocumentCode'])) {
+            $this->document_number = trim((string)$selected['DocumentCode']);
+        }
+
+        $this->text = $draft_text;
+        return null;
+    }
+
+    /**
+     * Retrieve all available legislation text entries for the current bill.
+     *
+     * @return array List of LIS legislation text entries.
+     */
+    private function fetchLegislationTextItems(): array
+    {
+        if (empty($this->bill_number)) {
+            return [];
         }
 
         $query = [
@@ -144,7 +178,7 @@ class Import
 
         $response = $this->lis_api_request('/LegislationText/api/getlegislationtextbyidasync', $query);
         if (empty($response)) {
-            return false;
+            return [];
         }
 
         if (isset($response['ListItems']) && is_array($response['ListItems'])) {
@@ -159,17 +193,38 @@ class Import
             $items = [];
         }
 
+        return array_values(array_filter($items, static function ($item) {
+            return is_array($item);
+        }));
+    }
+
+    /**
+     * Retrieve the PDF rendition of a bill's text from the LIS API.
+     *
+     * @param string|null $destinationPath Optional filesystem path to save the PDF.
+     *
+     * @return string|bool|null Binary PDF data, destination path, or false on failure.
+     */
+    public function get_bill_pdf_api(?string $destinationPath = null)
+    {
+        $items = $this->fetchLegislationTextItems();
+
         if (empty($items)) {
             return false;
         }
 
-        $selected = $this->selectLegislationTextItem($items, $this->document_number ?? null);
+        $selected = $this->selectLegislationTextItem($items, $this->document_number ?? null, 'pdf');
         if ($selected === null) {
             return false;
         }
 
-        $draft_text = $selected['DraftText'] ?? '';
-        if (!is_string($draft_text) || trim($draft_text) === '') {
+        $textId = isset($selected['LegislationTextID']) ? (int)$selected['LegislationTextID'] : 0;
+        if ($textId <= 0) {
+            return false;
+        }
+
+        $pdfBinary = $this->fetchLegislationPdf($textId);
+        if ($pdfBinary === false) {
             return false;
         }
 
@@ -177,9 +232,31 @@ class Import
             $this->document_number = trim((string)$selected['DocumentCode']);
         }
 
-        $this->text = $draft_text;
-        return null;
+        $this->pdf = $pdfBinary;
+
+        if ($destinationPath !== null) {
+            if (@file_put_contents($destinationPath, $pdfBinary) === false) {
+                return false;
+            }
+            return $destinationPath;
+        }
+
+        return $pdfBinary;
     }
+
+    /**
+     * Retrieve the binary contents of a legislation text PDF.
+     */
+    private function fetchLegislationPdf(int $legislationTextId)
+    {
+        $query = [
+            'legislationTextID' => $legislationTextId,
+            'sessionCode' => '20' . SESSION_LIS_ID,
+        ];
+
+        return $this->lis_api_request_binary('/LegislationText/api/getdrafttextbylegislationtextidasync', $query, 'application/pdf');
+    }
+
 
     /**
      * Sanitize the fetched bill text with HTML Purifier.
@@ -1454,6 +1531,42 @@ class Import
     }
 
     /**
+     * Perform a LIS API request that returns binary content (e.g., PDFs).
+     */
+    protected function lis_api_request_binary($path, array $query = [], string $accept = 'application/octet-stream')
+    {
+        $base_url = 'https://lis.virginia.gov';
+        $query = array_filter($query, static function ($value) {
+            return $value !== null && $value !== '';
+        });
+
+        $url = $base_url . $path;
+        if (!empty($query)) {
+            $url .= '?' . http_build_query($query, '', '&', PHP_QUERY_RFC3986);
+        }
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FAILONERROR, false);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'WebAPIKey: ' . LIS_KEY,
+            'Accept: ' . $accept,
+        ]);
+
+        $body = curl_exec($ch);
+        $error = curl_error($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        if ($body === false || $status >= 400) {
+            $this->log->put('LIS API binary request failed for ' . $url . ' with status ' . $status . ' error ' . $error, 5);
+            return false;
+        }
+
+        return $body;
+    }
+
+    /**
      * Normalize an LIS identifier into the numeric member number.
      *
      * @param string $chamber Chamber identifier (`house` or `senate`).
@@ -1610,18 +1723,18 @@ class Import
     /**
      * Select the most appropriate legislation text entry from the API response.
      *
-     * @param array       $items         List of legislation text payloads.
-     * @param string|null $document_code Optional document code to match.
+     * @param array       $items             List of legislation text payloads.
+     * @param string|null $document_code     Optional document code to match.
+     * @param string      $preferred_format  Preferred format (html, pdf).
      *
      * @return array|null Winning legislation text entry or null when none qualify.
      */
-    private function selectLegislationTextItem(array $items, ?string $document_code): ?array
+    private function selectLegislationTextItem(array $items, ?string $document_code, string $preferred_format = 'html'): ?array
     {
-        $filtered = array_filter($items, function ($item) use ($document_code) {
+        $preferred_format = strtolower($preferred_format);
+
+        $filtered = array_filter($items, function ($item) use ($document_code, $preferred_format) {
             if (!is_array($item)) {
-                return false;
-            }
-            if (empty($item['DraftText'])) {
                 return false;
             }
             if ($document_code !== null && isset($item['DocumentCode'])) {
@@ -1629,12 +1742,21 @@ class Import
                     return false;
                 }
             }
+
+            if ($preferred_format === 'pdf') {
+                return $this->isPdfLegislationText($item) && !empty($item['LegislationTextID']);
+            }
+
+            if ($preferred_format === 'html') {
+                return !empty($item['DraftText']);
+            }
+
             return true;
         });
 
         if (empty($filtered)) {
             $filtered = array_filter($items, function ($item) {
-                return is_array($item) && !empty($item['DraftText']);
+                return is_array($item);
             });
         }
 
@@ -1642,17 +1764,17 @@ class Import
             return null;
         }
 
-        usort($filtered, function ($a, $b) {
+        usort($filtered, function ($a, $b) use ($preferred_format) {
             $dateA = isset($a['VersionDate']) ? strtotime((string)$a['VersionDate']) : 0;
             $dateB = isset($b['VersionDate']) ? strtotime((string)$b['VersionDate']) : 0;
             if ($dateA !== $dateB) {
                 return $dateB <=> $dateA;
             }
 
-            $htmlA = $this->isHtmlLegislationText($a);
-            $htmlB = $this->isHtmlLegislationText($b);
-            if ($htmlA !== $htmlB) {
-                return $htmlB <=> $htmlA;
+            $prefA = $this->matchesPreferredFormat($a, $preferred_format);
+            $prefB = $this->matchesPreferredFormat($b, $preferred_format);
+            if ($prefA !== $prefB) {
+                return $prefB <=> $prefA;
             }
 
             $idA = (int)($a['LegislationTextID'] ?? 0);
@@ -1661,12 +1783,44 @@ class Import
         });
 
         foreach ($filtered as $item) {
-            if ($this->isHtmlLegislationText($item)) {
+            if ($this->matchesPreferredFormat($item, $preferred_format)) {
+                if ($preferred_format === 'html' && empty($item['DraftText'])) {
+                    continue;
+                }
                 return $item;
             }
         }
 
         return $filtered[0];
+    }
+
+
+    /**
+     * Check if the supplied item matches the preferred format.
+     */
+    private function matchesPreferredFormat(array $item, string $preferred_format): bool
+    {
+        $preferred_format = strtolower($preferred_format);
+        if ($preferred_format === 'pdf') {
+            return $this->isPdfLegislationText($item);
+        }
+        if ($preferred_format === 'html') {
+            return $this->isHtmlLegislationText($item);
+        }
+        return true;
+    }
+
+    /**
+     * Determine whether the legislation text is a PDF.
+     */
+    private function isPdfLegislationText(array $item): bool
+    {
+        $format = strtolower((string)($item['TextFormat'] ?? ''));
+        if ($format === 'pdf') {
+            return true;
+        }
+        $formatId = isset($item['TextFormatID']) ? (int)$item['TextFormatID'] : null;
+        return $formatId === 1;
     }
 
     /**
