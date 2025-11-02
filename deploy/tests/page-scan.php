@@ -1,6 +1,13 @@
 <?php
 
-$url_prefix = 'http://localhost:8000';
+// Figure out if this is running in Docker
+if (file_exists('/.dockerenv')) {
+    $url_prefix = 'http://rs_web';
+} elseif (is_readable('/proc/1/cgroup') && strpos(file_get_contents('/proc/1/cgroup'), '/docker/') !== false) {
+    $url_prefix = 'http://rs_web';
+} else {
+    $url_prefix = 'http://localhost:8000';
+}
 
 $failures = [];
 
