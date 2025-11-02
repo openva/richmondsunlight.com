@@ -1943,11 +1943,11 @@ class Import
     }
 
     /**
-     * Build the URL for a legislator photo given the member number.
+     * Build the URL for a legislator photo using context information.
      *
-     * @param string $member_number Member number identifier.
+     * @param array $context Context array containing member_number, last_name, chamber, district_number.
      *
-     * @return string Absolute photo URL.
+     * @return string|null Absolute photo URL or null when it cannot be determined.
      */
     private function build_photo_url(array $context)
     {
