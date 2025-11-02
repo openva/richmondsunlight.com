@@ -20,6 +20,9 @@ class Import
     /** @var string|null */
     public $text;
 
+    /** @var string|null Document code (e.g., HB1H1) used when requesting bill text. */
+    public $document_number;
+
     /**
      * Initialise the importer with a logger dependency.
      *
@@ -112,6 +115,70 @@ class Import
 
         # Make the text available within the scope of the class.
         $this->text = $text;
+    }
+
+    /**
+     * Retrieve a bill's text from the LIS API.
+     *
+     * @return bool|null False when retrieval fails; null on success after populating $this->text.
+     */
+    public function get_bill_text_api()
+    {
+        if (empty($this->bill_number)) {
+            return false;
+        }
+
+        $query = [
+            'sessionCode' => '20' . SESSION_LIS_ID,
+            'legislationNumber' => mb_strtoupper($this->bill_number),
+            'IsActive' => 'true',
+        ];
+
+        if (!empty($this->lis_session_id)) {
+            $query['sessionID'] = $this->lis_session_id;
+        }
+
+        if (!empty($this->document_number)) {
+            $query['documentNumber'] = mb_strtoupper($this->document_number);
+        }
+
+        $response = $this->lis_api_request('/LegislationText/api/getlegislationtextbyidasync', $query);
+        if (empty($response)) {
+            return false;
+        }
+
+        if (isset($response['ListItems']) && is_array($response['ListItems'])) {
+            $response = $response['ListItems'];
+        }
+
+        if (isset($response['DraftText']) || isset($response['LegislationTextID'])) {
+            $items = [$response];
+        } elseif (is_array($response)) {
+            $items = $response;
+        } else {
+            $items = [];
+        }
+
+        if (empty($items)) {
+            return false;
+        }
+
+        $selected = $this->selectLegislationTextItem($items, $this->document_number ?? null);
+        if ($selected === null) {
+            return false;
+        }
+
+        $draft_text = $selected['DraftText'] ?? '';
+        if (!is_string($draft_text) || trim($draft_text) === '') {
+            return false;
+        }
+
+        if (!empty($selected['DocumentCode'])) {
+            $this->document_number = trim((string)$selected['DocumentCode']);
+        }
+
+        $this->text = $draft_text;
+        return null;
     }
 
     /**
@@ -1338,7 +1405,7 @@ class Import
      *
      * @return array|false Decoded JSON response or false on failure.
      */
-    private function lis_api_request($path, array $query = [])
+    protected function lis_api_request($path, array $query = [])
     {
         $base_url = 'https://lis.virginia.gov';
         $query = array_filter($query, static function ($value) {
@@ -1538,6 +1605,85 @@ class Import
             }
             return $value !== null;
         });
+    }
+
+    /**
+     * Select the most appropriate legislation text entry from the API response.
+     *
+     * @param array       $items         List of legislation text payloads.
+     * @param string|null $document_code Optional document code to match.
+     *
+     * @return array|null Winning legislation text entry or null when none qualify.
+     */
+    private function selectLegislationTextItem(array $items, ?string $document_code): ?array
+    {
+        $filtered = array_filter($items, function ($item) use ($document_code) {
+            if (!is_array($item)) {
+                return false;
+            }
+            if (empty($item['DraftText'])) {
+                return false;
+            }
+            if ($document_code !== null && isset($item['DocumentCode'])) {
+                if (strcasecmp((string)$item['DocumentCode'], $document_code) !== 0) {
+                    return false;
+                }
+            }
+            return true;
+        });
+
+        if (empty($filtered)) {
+            $filtered = array_filter($items, function ($item) {
+                return is_array($item) && !empty($item['DraftText']);
+            });
+        }
+
+        if (empty($filtered)) {
+            return null;
+        }
+
+        usort($filtered, function ($a, $b) {
+            $dateA = isset($a['VersionDate']) ? strtotime((string)$a['VersionDate']) : 0;
+            $dateB = isset($b['VersionDate']) ? strtotime((string)$b['VersionDate']) : 0;
+            if ($dateA !== $dateB) {
+                return $dateB <=> $dateA;
+            }
+
+            $htmlA = $this->isHtmlLegislationText($a);
+            $htmlB = $this->isHtmlLegislationText($b);
+            if ($htmlA !== $htmlB) {
+                return $htmlB <=> $htmlA;
+            }
+
+            $idA = (int)($a['LegislationTextID'] ?? 0);
+            $idB = (int)($b['LegislationTextID'] ?? 0);
+            return $idB <=> $idA;
+        });
+
+        foreach ($filtered as $item) {
+            if ($this->isHtmlLegislationText($item)) {
+                return $item;
+            }
+        }
+
+        return $filtered[0];
+    }
+
+    /**
+     * Determine whether the legislation text is HTML.
+     *
+     * @param array $item Legislation text payload.
+     *
+     * @return bool True when the text format is HTML.
+     */
+    private function isHtmlLegislationText(array $item): bool
+    {
+        $format = strtolower((string)($item['TextFormat'] ?? ''));
+        if ($format === 'html') {
+            return true;
+        }
+        $formatId = isset($item['TextFormatID']) ? (int)$item['TextFormatID'] : null;
+        return $formatId === 2;
     }
 
     /**

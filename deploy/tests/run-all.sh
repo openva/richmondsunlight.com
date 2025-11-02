@@ -10,6 +10,11 @@ if ! php ./page-scan.php; then
     ERRORED=true
 fi
 
+# Run the page-scan tests
+if ! php ./get_bill_text_api_test.php; then
+    ERRORED=true
+fi
+
 # Run the API tests
 if ! ./api.sh; then
     ERRORED=true
