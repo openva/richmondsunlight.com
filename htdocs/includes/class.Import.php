@@ -1566,6 +1566,102 @@ class Import
         return $body;
     }
 
+    public function fetch_bill_text_from_api($document_number, $session_lis_id = null)
+    {
+        $document_number = trim((string)$document_number);
+        $session_code = $this->normalize_session_code($session_lis_id);
+
+        $result = [
+            'success' => false,
+            'status' => 'error',
+            'http_code' => null,
+            'text' => null,
+            'raw_html' => null,
+            'message' => null,
+            'url' => null,
+        ];
+
+        if ($document_number === '') {
+            $result['message'] = 'Missing document number';
+            $result['status'] = 'validation_error';
+            return $result;
+        }
+
+        if ($session_code === null) {
+            $result['message'] = 'Missing session code';
+            $result['status'] = 'validation_error';
+            return $result;
+        }
+
+        $url = 'https://lis.virginia.gov/LegislationText/api/GetLegislationTextByIDAsync'
+            . '?sessionCode=' . rawurlencode($session_code)
+            . '&documentNumber=' . rawurlencode($document_number);
+        $result['url'] = $url;
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_FAILONERROR, false);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'WebAPIKey: ' . LIS_KEY,
+            'Accept: application/json'
+        ]);
+
+        $body = curl_exec($ch);
+        $error = curl_error($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+
+        $result['http_code'] = $status ?: null;
+
+        if ($body === false || $status < 200 || $status >= 300) {
+            $result['message'] = $error ?: 'HTTP ' . $status;
+            $result['status'] = 'transport_error';
+            return $result;
+        }
+
+        if ($body === '' || trim($body) === '') {
+            $result['message'] = 'No draft text for document';
+            $result['status'] = 'no_text';
+            return $result;
+        }
+
+        $decoded = json_decode($body, true);
+        if ($decoded === null) {
+            $result['message'] = 'Invalid JSON: ' . json_last_error_msg();
+            $result['status'] = 'json_error';
+            return $result;
+        }
+
+        $texts_list = $decoded['TextsList'] ?? [];
+        if (!is_array($texts_list) || count($texts_list) === 0) {
+            $result['message'] = 'No draft text entries returned';
+            $result['status'] = 'no_text';
+            return $result;
+        }
+
+        $draft_text = $texts_list[0]['DraftText'] ?? '';
+        if ($draft_text === '' || $this->contains_no_text_message($draft_text)) {
+            $result['message'] = 'No draft text for document';
+            $result['status'] = 'no_text';
+            return $result;
+        }
+
+        $sanitized = $this->sanitize_bill_text($draft_text);
+        if ($sanitized === '') {
+            $result['message'] = 'Draft text sanitised to empty output';
+            $result['status'] = 'empty_after_sanitisation';
+            return $result;
+        }
+
+        $result['success'] = true;
+        $result['status'] = 'ok';
+        $result['text'] = $sanitized;
+        $result['raw_html'] = $draft_text;
+
+        return $result;
+    }
+
     /**
      * Normalize an LIS identifier into the numeric member number.
      *
@@ -1718,6 +1814,75 @@ class Import
             }
             return $value !== null;
         });
+    }
+
+    private function normalize_session_code($session_lis_id)
+    {
+        if ($session_lis_id === null || $session_lis_id === '') {
+            $session_lis_id = SESSION_LIS_ID;
+        }
+
+        $session_lis_id = preg_replace('/[^0-9]/', '', (string)$session_lis_id);
+        if ($session_lis_id === '') {
+            return null;
+        }
+
+        if (strncmp($session_lis_id, '20', 2) === 0) {
+            return $session_lis_id;
+        }
+
+        return '20' . $session_lis_id;
+    }
+
+    private function contains_no_text_message($draft_text)
+    {
+        $messages = [
+            'There is no draft text for the provided document code and session code',
+            'There is no html file for the provided document code and session code',
+        ];
+
+        foreach ($messages as $message) {
+            if (stripos($draft_text, $message) !== false) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private function sanitize_bill_text($draft_text)
+    {
+        if ($draft_text === '') {
+            return '';
+        }
+
+        $normalized = str_replace('</p> <p', "</p>\n<p", $draft_text);
+        $segments = explode("\n", $normalized);
+
+        $full_text_clean = '';
+        $law_start = false;
+
+        foreach ($segments as $segment) {
+            if ($law_start === false) {
+                if (
+                    stripos($segment, 'Be it enacted by') !== false
+                    || stripos($segment, 'WHEREAS ') !== false
+                    || stripos($segment, 'RESOLVED by the ') !== false
+                ) {
+                    $law_start = true;
+                }
+            }
+
+            if ($law_start === true) {
+                $segment = str_replace('<em class=new>', '<ins>', $segment);
+                $segment = str_replace('</em>', '</ins>', $segment);
+                $full_text_clean .= $segment . "\n";
+            }
+        }
+
+        $allowed_tags = '<p><b><i><em><strong><u><a><br><center><s><strike><ins>';
+
+        return trim(strip_tags($full_text_clean, $allowed_tags));
     }
 
     /**
