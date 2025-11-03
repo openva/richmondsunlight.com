@@ -98,6 +98,7 @@ CREATE TABLE `bills_full_text` (
   `number` varchar(10) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
   `date_introduced` date NOT NULL,
   `text` mediumtext DEFAULT NULL,
+  `pdf_url` VARCHAR(255) CHARACTER SET latin1 NULL DEFAULT NULL,
   `failed_retrievals` tinyint(3) unsigned NOT NULL DEFAULT 0 COMMENT 'Number of times we''ve queried this text.',
   `date_created` datetime NOT NULL,
   `date_modified` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
