@@ -276,6 +276,17 @@ class Bill2
             }
         }
 
+        // PDFs of the text of the legislation.
+        $sql = 'SELECT date_introduced AS date, number, pdf_url
+                FROM bills_full_text
+                WHERE bill_id=' . $bill['id'];
+        if (mysqli_num_rows($result) > 0) {
+            $bill['text'] = array();
+            while ($version = mysqli_fetch_array($result)) {
+                $bill['text'][] = array_map('stripslashes', $version);
+            }
+        }
+
         # Place names mentioned.
         $sql = 'SELECT
                     placename AS name,
