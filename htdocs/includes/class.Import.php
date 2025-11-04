@@ -2689,11 +2689,11 @@ class Import
     }
 
     /**
-     * Normalise a phone number into (###) ###-#### format.
+     * Normalise a phone number into ###-###-#### format.
      *
      * @param string|null $phone Raw phone number string.
      *
-     * @return string|null Normalised phone number or null when not parseable.
+     * @return string|null Normalized phone number or null when not parseable.
      */
     private function normalizePhone($phone)
     {
