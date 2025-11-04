@@ -1270,9 +1270,11 @@ class Import
 						FROM sessions
 						WHERE date_started > now()';
                 $stmt = $GLOBALS['db']->prepare($sql);
-                $stmt->execute();
-                $session = $stmt->fetch(PDO::FETCH_OBJ);
-                if (count($session) > 0) {
+                $session = false;
+                if ($stmt && $stmt->execute()) {
+                    $session = $stmt->fetch(PDO::FETCH_OBJ);
+                }
+                if (!empty($session) && !empty($session->date_started)) {
                     $legislator['date_started'] = $session->date_started;
                 }
 
