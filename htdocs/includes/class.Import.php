@@ -740,11 +740,9 @@ class Import
 					FROM sessions
 					WHERE date_started > now()';
             $stmt = $GLOBALS['db']->prepare($sql);
-            $session = false;
-            if ($stmt && $stmt->execute()) {
-                $session = $stmt->fetch(PDO::FETCH_OBJ);
-            }
-            if (!empty($session) && !empty($session->date_started)) {
+            $stmt->execute();
+            $session = $stmt->fetch(PDO::FETCH_OBJ);
+            if (count($session) > 0) {
                 $date_ended = $session->date_started;
             }
 
@@ -1272,11 +1270,9 @@ class Import
 						FROM sessions
 						WHERE date_started > now()';
                 $stmt = $GLOBALS['db']->prepare($sql);
-                $session = false;
-                if ($stmt && $stmt->execute()) {
-                    $session = $stmt->fetch(PDO::FETCH_OBJ);
-                }
-                if (!empty($session) && !empty($session->date_started)) {
+                $stmt->execute();
+                $session = $stmt->fetch(PDO::FETCH_OBJ);
+                if (count($session) > 0) {
                     $legislator['date_started'] = $session->date_started;
                 }
 
@@ -1433,12 +1429,15 @@ class Import
             'sessionCode' => $session_code
         ];
 
+        $filter_chamber = null;
         if (!empty($chamber)) {
             $normalized = strtolower($chamber);
             if ($normalized === 'house' || $normalized === 'h') {
                 $query['chamberCode'] = 'H';
+                $filter_chamber = 'house';
             } elseif ($normalized === 'senate' || $normalized === 's') {
                 $query['chamberCode'] = 'S';
+                $filter_chamber = 'senate';
             } else {
                 return [];
             }
@@ -1470,6 +1469,9 @@ class Import
 
             $member_chamber_code = strtoupper($member['ChamberCode'] ?? '');
             $member_chamber = ($member_chamber_code === 'S') ? 'senate' : 'house';
+            if ($filter_chamber !== null && $member_chamber !== $filter_chamber) {
+                continue;
+            }
             $member_number_normalized = $this->normalize_member_number(
                 $member_chamber,
                 $member['MemberNumber'] ?? ''
