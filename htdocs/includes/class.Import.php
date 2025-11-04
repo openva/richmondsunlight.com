@@ -781,7 +781,7 @@ class Import
      *
      * @throws Exception When the identifier cannot be normalized or is invalid.
      */
-    public function legislator_in_csv($lis_id)
+    public function legislator_in_lis($lis_id)
     {
 
         $lis_id = strtoupper(trim((string)$lis_id));
