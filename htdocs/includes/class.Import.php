@@ -325,7 +325,8 @@ class Import
 
         $this->log->put(
             'Downloading legislation PDF from ' . $url . ' returned non-PDF content ' .
-            '(content type: ' . ($contentType ?: 'unknown') . ')', 5
+            '(content type: ' . ($contentType ?: 'unknown') . ')',
+            5
         );
 
         return false;
@@ -355,7 +356,8 @@ class Import
         if ($body === false || $status >= 400) {
             $this->log->put(
                 'Downloading legislation PDF from ' . $url . ' failed with status ' . $status .
-                ' error ' . $error, 5
+                ' error ' . $error,
+                5
             );
             return false;
         }
