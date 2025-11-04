@@ -27,14 +27,17 @@ class ImportTestDouble extends Import
 {
     private array $mockResponses;
     private array $mockBinaryResponses;
+    private array $mockHttpDownloads;
     public array $requests = [];
     public array $binaryRequests = [];
+    public array $httpDownloads = [];
 
-    public function __construct(array $mockResponses, array $mockBinaryResponses = [])
+    public function __construct(array $mockResponses, array $mockBinaryResponses = [], array $mockHttpDownloads = [])
     {
         parent::__construct(new TestLog());
         $this->mockResponses = $mockResponses;
         $this->mockBinaryResponses = $mockBinaryResponses;
+        $this->mockHttpDownloads = $mockHttpDownloads;
     }
 
     protected function lis_api_request($path, array $query = [])
@@ -47,6 +50,12 @@ class ImportTestDouble extends Import
     {
         $this->binaryRequests[] = ['path' => $path, 'query' => $query, 'accept' => $accept];
         return $this->mockBinaryResponses[$path] ?? false;
+    }
+
+    protected function performHttpDownload(string $url)
+    {
+        $this->httpDownloads[] = $url;
+        return $this->mockHttpDownloads[$url] ?? false;
     }
 }
 
@@ -76,6 +85,11 @@ $mockResponse = [
                 'DocumentCode' => 'HB1H1',
                 'VersionDate' => '2024-02-01T12:30:00',
                 'LegislationTextID' => 201,
+                'PDFFile' => [
+                    [
+                        'FileURL' => 'https://example.com/mock.pdf',
+                    ],
+                ],
             ],
         ],
     ],
@@ -85,7 +99,15 @@ $mockBinaryResponses = [
     '/LegislationText/api/getdrafttextbylegislationtextidasync' => 'PDFDATA',
 ];
 
-$import = new ImportTestDouble($mockResponse, $mockBinaryResponses);
+$mockHttpDownloads = [
+    'https://example.com/mock.pdf' => [
+        'body' => '{"TextsList":[{"DraftText":"<p>Not a PDF</p>"}]}',
+        'content_type' => 'application/json',
+        'status' => 200,
+    ],
+];
+
+$import = new ImportTestDouble($mockResponse, $mockBinaryResponses, $mockHttpDownloads);
 $import->bill_number = 'HB1';
 $import->document_number = 'HB1H1';
 $import->get_bill_text_api();
@@ -118,6 +140,11 @@ if (($import->binaryRequests[0]['query']['legislationTextID'] ?? null) !== 201) 
 
 if ($import->pdf !== 'PDFDATA') {
     throw new RuntimeException('PDF content was not cached in Import::$pdf');
+}
+
+$expectedDownloads = ['https://example.com/mock.pdf'];
+if ($import->httpDownloads !== $expectedDownloads) {
+    throw new RuntimeException('Expected PDF FileURL to be attempted before falling back to binary endpoint');
 }
 
 $import->binaryRequests = [];

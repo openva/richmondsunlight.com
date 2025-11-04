@@ -311,6 +311,35 @@ class Import
             return false;
         }
 
+        $response = $this->performHttpDownload($url);
+        if ($response === false) {
+            return false;
+        }
+
+        $body = $response['body'] ?? '';
+        $contentType = strtolower((string)($response['content_type'] ?? ''));
+
+        if ($this->isPdfBinaryPayload($body, $contentType)) {
+            return $body;
+        }
+
+        $this->log->put(
+            'Downloading legislation PDF from ' . $url . ' returned non-PDF content ' .
+            '(content type: ' . ($contentType ?: 'unknown') . ')', 5
+        );
+
+        return false;
+    }
+
+    /**
+     * Perform an HTTP download and return response metadata.
+     *
+     * @param string $url Absolute URL to download.
+     *
+     * @return array|false Array with body, status, and content_type or false on failure.
+     */
+    protected function performHttpDownload(string $url)
+    {
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
@@ -320,15 +349,48 @@ class Import
         $body = curl_exec($ch);
         $error = curl_error($ch);
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE) ?: '';
         curl_close($ch);
 
         if ($body === false || $status >= 400) {
-            $this->log->put('Downloading legislation PDF from ' . $url . ' failed with status '
-                . $status . ' error ' . $error, 5);
+            $this->log->put(
+                'Downloading legislation PDF from ' . $url . ' failed with status ' . $status .
+                ' error ' . $error, 5
+            );
             return false;
         }
 
-        return $body;
+        return [
+            'body' => $body,
+            'status' => $status,
+            'content_type' => $contentType,
+        ];
+    }
+
+    /**
+     * Determine whether the downloaded payload represents a PDF document.
+     *
+     * @param mixed  $body        Downloaded response body.
+     * @param string $contentType Response content type header.
+     *
+     * @return bool True when the payload looks like a PDF.
+     */
+    private function isPdfBinaryPayload($body, string $contentType): bool
+    {
+        if (!is_string($body) || $body === '') {
+            return false;
+        }
+
+        $contentType = strtolower(trim($contentType));
+        if ($contentType !== '') {
+            $isPdfType = strpos($contentType, 'application/pdf') === 0;
+            $isOctetStream = strpos($contentType, 'application/octet-stream') === 0;
+            if (!$isPdfType && !$isOctetStream) {
+                return false;
+            }
+        }
+
+        return strncmp($body, '%PDF-', 5) === 0;
     }
 
 
