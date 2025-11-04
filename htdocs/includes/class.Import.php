@@ -2703,6 +2703,8 @@ class Import
         $digits = preg_replace('/[^0-9]/', '', $phone);
         if (strlen($digits) === 10) {
             return substr($digits, 0, 3) . '-' . substr($digits, 3, 3) . '-' . substr($digits, 6);
+        } elseif (strlen($digits) > 10) {
+            return null;
         }
         return $phone;
     }
