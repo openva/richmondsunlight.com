@@ -1700,6 +1700,9 @@ class Import
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FAILONERROR, false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_ENCODING, '');
+        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'WebAPIKey: ' . LIS_KEY,
             'Accept: ' . $accept,
@@ -1708,10 +1711,25 @@ class Import
         $body = curl_exec($ch);
         $error = curl_error($ch);
         $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $contentType = curl_getinfo($ch, CURLINFO_CONTENT_TYPE) ?: '';
         curl_close($ch);
 
         if ($body === false || $status >= 400) {
             $this->log->put('LIS API binary request failed for ' . $url . ' with status ' . $status . ' error ' . $error, 5);
+            return false;
+        }
+
+        if (!is_string($body) || $body === '') {
+            $this->log->put('LIS API binary request for ' . $url . ' returned an empty response body', 5);
+            return false;
+        }
+
+        if (!$this->isPdfBinaryPayload($body, (string)$contentType)) {
+            $this->log->put(
+                'LIS API binary request for ' . $url . ' returned non-PDF content (content type: ' .
+                ($contentType ?: 'unknown') . ')',
+                5
+            );
             return false;
         }
 

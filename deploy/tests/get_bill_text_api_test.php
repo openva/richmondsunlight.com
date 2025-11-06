@@ -96,7 +96,7 @@ $mockResponse = [
 ];
 
 $mockBinaryResponses = [
-    '/LegislationText/api/getdrafttextbylegislationtextidasync' => 'PDFDATA',
+    '/LegislationText/api/getdrafttextbylegislationtextidasync' => "%PDF-FAKE\n%%EOF",
 ];
 
 $mockHttpDownloads = [
@@ -130,7 +130,7 @@ if (empty($import->requests)) {
 }
 
 $pdf = $import->get_bill_pdf_api();
-if ($pdf !== 'PDFDATA') {
+if ($pdf !== "%PDF-FAKE\n%%EOF") {
     throw new RuntimeException('PDF data not returned from get_bill_pdf_api');
 }
 
@@ -138,7 +138,7 @@ if (($import->binaryRequests[0]['query']['legislationTextID'] ?? null) !== 201) 
     throw new RuntimeException('legislationTextID not passed when requesting PDF');
 }
 
-if ($import->pdf !== 'PDFDATA') {
+if ($import->pdf !== "%PDF-FAKE\n%%EOF") {
     throw new RuntimeException('PDF content was not cached in Import::$pdf');
 }
 
@@ -153,7 +153,7 @@ $resultPath = $import->get_bill_pdf_api($tempFile);
 if ($resultPath !== $tempFile) {
     throw new RuntimeException('Destination path not returned when saving PDF');
 }
-if (!is_file($tempFile) || file_get_contents($tempFile) !== 'PDFDATA') {
+if (!is_file($tempFile) || file_get_contents($tempFile) !== "%PDF-FAKE\n%%EOF") {
     throw new RuntimeException('PDF file was not written as expected');
 }
 unlink($tempFile);
