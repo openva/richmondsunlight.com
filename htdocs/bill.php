@@ -538,8 +538,7 @@ $page_sidebar .= '
 // Put together a URL for the PDF
 if (isset($bill['pdf_url'])) {
     $pdf_url = $bill['pdf_url'];
-}
-elseif ($bill['year'] < 2025) {
+} elseif ($bill['year'] < 2025) {
     $pdf_url = 'https://legacylis.virginia.gov/cgi-bin/legp604.exe?'
         . $bill['session_lis_id'] . '+ful+' . mb_strtoupper($bill['number']) . '+pdf';
 }
