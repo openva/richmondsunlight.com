@@ -534,10 +534,21 @@ $page_sidebar .= '
 	<div class="box">
 		<h3>More Information</h3>
 		<ul>';
-$page_sidebar .= '
-			<li><a href="https://legacylis.virginia.gov/cgi-bin/legp604.exe?'
-            . $bill['session_lis_id'] . '+ful+' . mb_strtoupper($bill['number'])
-            . '+pdf">View as PDF</a></li>';
+
+// Put together a URL for the PDF
+if (isset($bill['pdf_url'])) {
+    $pdf_url = $bill['pdf_url'];
+}
+elseif ($bill['year'] < 2025) {
+    $pdf_url = 'https://legacylis.virginia.gov/cgi-bin/legp604.exe?'
+        . $bill['session_lis_id'] . '+ful+' . mb_strtoupper($bill['number']) . '+pdf';
+}
+
+// If we've got a PDF URL, display it
+if (isset($pdf_url)) {
+    $page_sidebar .= '
+			<li><a href="' . $pdf_url . '">View as PDF</a></li>';
+}
 $page_sidebar .= '
 			<li><a href="https://lis.virginia.gov/bill-details/20' . $bill['session_lis_id']
             . '/' . mb_strtoupper($bill['number'])
