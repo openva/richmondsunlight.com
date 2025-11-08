@@ -11,12 +11,12 @@ $legislator_menu_file = 'htdocs/includes/templates/legislators.html';
  */
 if (!file_exists($template_file))
 {
-    echo 'Error: ' . $FILE_TO_EDIT . ' template is missing, cannot insert legislators menu.' . "\n";
+    echo 'Error: ' . $template_file . ' template is missing, cannot insert legislators menu.' . "\n";
     exit(1);
 }
 elseif (!file_exists($legislator_menu_file))
 {
-    echo 'Error: ' . $REPLACEMENT_FILE . ' is missing, cannot insert into template.' . "\n";
+    echo 'Error: ' . $legislator_menu_file . ' is missing, cannot insert into template.' . "\n";
     exit(1);
 }
 
