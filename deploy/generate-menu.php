@@ -9,10 +9,11 @@
 
 require '../htdocs/includes/settings.inc.php';
 require '../htdocs/includes/class.Database.php';
+require '../htdocs/includes/class.Legislator.php';
 require '../htdocs/includes/vendor/autoload.php';
 
 $database = new Database();
-$db = $database->connect_mysqli();
+$database->connect_mysqli();
 
 /*
  * Get a list of all legislators.
