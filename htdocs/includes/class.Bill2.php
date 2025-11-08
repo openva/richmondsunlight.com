@@ -283,7 +283,7 @@ class Bill2
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0) {
             $bill['text'] = array();
-            while ($version = mysqli_fetch_array($result)) {
+            while ($version = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
                 if (empty($version['pdf_url'])) {
                     unset($version['pdf_url']);
                 }
