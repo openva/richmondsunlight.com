@@ -277,9 +277,13 @@ class Bill2
         }
 
         // PDFs of the text of the legislation.
-        $sql = 'SELECT date_introduced AS date, number, pdf_url
+        $sql = 'SELECT
+                    date_introduced AS date,
+                    number,
+                    pdf_url
                 FROM bills_full_text
-                WHERE bill_id=' . $bill['id'];
+                WHERE bill_id=' . $bill['id'] . '
+                ORDER BY date_introduced ASC';
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0) {
             $bill['text'] = array();
