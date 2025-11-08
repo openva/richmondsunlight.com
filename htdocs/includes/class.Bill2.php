@@ -284,6 +284,9 @@ class Bill2
         if (mysqli_num_rows($result) > 0) {
             $bill['text'] = array();
             while ($version = mysqli_fetch_array($result)) {
+                if (empty($version['pdf_url'])) {
+                    unset($version['pdf_url']);
+                }
                 $bill['text'][] = array_map('stripslashes', $version);
             }
         }
