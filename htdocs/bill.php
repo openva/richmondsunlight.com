@@ -536,8 +536,16 @@ $page_sidebar .= '
 		<ul>';
 
 // Put together a URL for the PDF
-if (isset($bill['pdf_url'])) {
-    $pdf_url = $bill['pdf_url'];
+if ($bill['year'] >= 2025) {
+    if (isset($bill['text']) && count($bill['text']) > 0) {
+        // Select the last (newest) entry in the text array that has 'pdf_url' defined
+        for ($i = count($bill['text']) - 1; $i >= 0; $i--) {
+            if (isset($bill['text'][$i]->pdf_url) && !empty($bill['text'][$i]->pdf_url)) {
+                $pdf_url = $bill['text'][$i]->pdf_url;
+                break;
+            }
+        }
+    }
 } elseif ($bill['year'] < 2025) {
     $pdf_url = 'https://legacylis.virginia.gov/cgi-bin/legp604.exe?'
         . $bill['session_lis_id'] . '+ful+' . mb_strtoupper($bill['number']) . '+pdf';
