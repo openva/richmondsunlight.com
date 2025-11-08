@@ -1660,6 +1660,11 @@ class Import
             return [];
         }
 
+        if ($status >= 204) {
+            $this->log->put('LIS API for ' . $url . ' returned no content.', 3);
+            return [];
+        }
+
         if ($body === '' || trim($body) === '') {
             return [];
         }
