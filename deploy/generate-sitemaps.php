@@ -33,11 +33,10 @@ $sitemap_list = [];
 $sql = 'SELECT shortname
         FROM representatives
         ORDER BY shortname ASC';
-$result = mysqli_query($GLOBALS['db'],$sql);
+$result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
-
     $filename = '../htdocs/sitemaps/legislators.xml';
-    
+
     // Create legislators.xml, if it doesn't already exist, or if it's old.
     if (file_exists($filename) === false || filemtime($filename) < strtotime('-7 day')) {
         $sitemap_file = fopen($filename, 'w');
@@ -64,8 +63,7 @@ if (mysqli_num_rows($result) > 0) {
 /*
  * Generate one bills sitemap per year
  */
-for ($year=2006; $year <= SESSION_YEAR; $year++) {
-
+for ($year = 2006; $year <= SESSION_YEAR; $year++) {
     /*
     * Fetch all bills to generate a sitemap
     */
@@ -75,9 +73,8 @@ for ($year=2006; $year <= SESSION_YEAR; $year++) {
                 ON bills.session_id = sessions.id
             WHERE sessions.year = ' . $year . '
             ORDER BY year ASC, number ASC';
-    $result = mysqli_query($GLOBALS['db'],$sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0) {
-
         $filename = '../htdocs/sitemaps/bills-' . $year . '.xml';
         // Create sitemap-bills-{year}.xml, if it doesn't already exist, or if it's from this year
         // and also old.
@@ -85,7 +82,7 @@ for ($year=2006; $year <= SESSION_YEAR; $year++) {
                 file_exists($filename) === false
                 ||
                 $year == SESSION_YEAR && filemtime($filename) < strtotime('-7 day')
-            ) {
+        ) {
             $sitemap_file = fopen($filename, 'w');
 
             // Write XML header.
