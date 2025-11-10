@@ -3,10 +3,12 @@
 require '../htdocs/includes/settings.inc.php';
 require '../htdocs/includes/class.Database.php';
 require '../htdocs/includes/class.Legislator.php';
+require '../htdocs/includes/class.Log.php';
 require '../htdocs/includes/vendor/autoload.php';
 
 $database = new Database();
 $db = $database->connect_mysqli();
+$log = new Log();
 
 /*
  * Sitemap XML header and footer, which we'll reuse repeatedly.
@@ -53,11 +55,13 @@ if (mysqli_num_rows($result) > 0) {
         // Write XML footer.
         fwrite($sitemap_file, $sitemap_xml_footer . "\n");
 
-        fclose($sitemap_file);
+        $log->put(message: 'Regenerated legislators sitemap', level: 3);
     }
 
     // Append this to our list
     $sitemap_list[] = 'legislators.xml';
+} else {
+    $log->put(message: 'No legislators found for sitemap generation', level: 5);
 }
 
 /*
@@ -97,10 +101,12 @@ for ($year = 2006; $year <= SESSION_YEAR; $year++) {
             // Write XML footer.
             fwrite($sitemap_file, $sitemap_xml_footer . "\n");
 
-            fclose($sitemap_file);
+            $log->put(message: 'Regenerated bills sitemap for ' . $year, level: 3);
         }
         // Append this to our list
         $sitemap_list[] = 'bills-' . $year . '.xml';
+    } else {
+        $log->put(message: 'No bills found for year ' . $year . ' when generating sitemap', level: 4);
     }
 }
 
@@ -127,3 +133,5 @@ foreach ($sitemap_list as $file) {
 fwrite($sitemap_file, $sitemap_index_footer . "\n");
 
 fclose($sitemap_file);
+$log->put(message: 'Sitemap index updated with ' . count(value: $sitemap_list) . ' entries',
+    level: 3);
