@@ -107,6 +107,7 @@ for ($year = 2006; $year <= SESSION_YEAR; $year++) {
             // Write XML footer.
             fwrite($sitemap_file, $sitemap_xml_footer . "\n");
 
+
             $log->put(message: 'Regenerated bills sitemap for ' . $year, level: 3);
         }
         // Append this to our list
