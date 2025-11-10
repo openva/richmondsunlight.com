@@ -14,7 +14,11 @@ else
     exit 1
 fi
 
-# Make the cache directories writeable
+# Start by making everything owned by ubuntu:www-data
+chown -R ubuntu:www-data "$SITE_PATH"/htdocs/
+chmod -R g+w "$SITE_PATH"/htdocs/
+
+# Make the cache directories world-writeable
 chmod o+w "$SITE_PATH"/htdocs/cache/
 chmod o+w "$SITE_PATH"/htdocs/rss/cache/
 
