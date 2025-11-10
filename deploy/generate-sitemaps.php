@@ -20,8 +20,14 @@ $sitemap_xml_footer = '</urlset>';
 /*
  * If the sitemaps directory doesn't exist, create it.
  */
-if (!file_exists('../htdocs/sitemaps')) {
-    mkdir('../htdocs/sitemaps', 0755, true);
+if (!file_exists(filename: '../htdocs/sitemaps')) {
+    if (
+        !mkdir(directory: '../htdocs/sitemaps', permissions: 0755, recursive: true)
+        && !is_dir(filename: '../htdocs/sitemaps')
+    ) {
+        $log->put(message: 'Failed to create sitemaps directory', level: 6);
+        exit(1);
+    }
 }
 
 /*
