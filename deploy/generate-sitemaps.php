@@ -41,30 +41,31 @@ $sitemap_list = [];
 $sql = 'SELECT shortname
         FROM representatives
         ORDER BY shortname ASC';
-$result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0) {
+$result = mysqli_query(mysql: $GLOBALS['db'], query: $sql);
+if ($result && mysqli_num_rows(result: $result) > 0) {
     $filename = '../htdocs/sitemaps/legislators.xml';
 
     // Create legislators.xml, if it doesn't already exist, or if it's old.
-    if (file_exists($filename) === false || filemtime($filename) < strtotime('-7 day')) {
-        $sitemap_file = fopen($filename, 'w');
+    if (file_exists(filename: $filename) === false || filemtime(filename: $filename) < strtotime(datetime: '-7 day')) {
+        $sitemap_file = fopen(filename: $filename, mode: 'w');
 
         // Write XML header.
-        fwrite($sitemap_file, $sitemap_xml_header . "\n");
+        fwrite(stream: $sitemap_file, data: $sitemap_xml_header . "\n");
 
         // Write each legislator's URL.
         while ($row = $result->fetch_assoc()) {
-            fwrite($sitemap_file, '<url><loc>https://www.richmondsunlight.com/legislator/'
+            fwrite(stream: $sitemap_file, data: '<url><loc>https://www.richmondsunlight.com/legislator/'
                 . $row['shortname'] . '/</loc></url>' . "\n");
         }
 
         // Write XML footer.
-        fwrite($sitemap_file, $sitemap_xml_footer . "\n");
+        fwrite(stream: $sitemap_file, data: $sitemap_xml_footer . "\n");
+
+        fclose(stream: $sitemap_file);
 
         $log->put(message: 'Regenerated legislators sitemap', level: 3);
     }
 
-    // Append this to our list
     $sitemap_list[] = 'legislators.xml';
 } else {
     $log->put(message: 'No legislators found for sitemap generation', level: 5);
@@ -83,34 +84,34 @@ for ($year = 2006; $year <= SESSION_YEAR; $year++) {
                 ON bills.session_id = sessions.id
             WHERE sessions.year = ' . $year . '
             ORDER BY year ASC, number ASC';
-    $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) > 0) {
+    $result = mysqli_query(mysql: $GLOBALS['db'], query: $sql);
+    if ($result && mysqli_num_rows(result: $result) > 0) {
         $filename = '../htdocs/sitemaps/bills-' . $year . '.xml';
         // Create sitemap-bills-{year}.xml, if it doesn't already exist, or if it's from this year
         // and also old.
         if (
-                file_exists($filename) === false
+                file_exists(filename: $filename) === false
                 ||
-                $year == SESSION_YEAR && filemtime($filename) < strtotime('-7 day')
+                $year == SESSION_YEAR && filemtime(filename: $filename) < strtotime(datetime: '-7 day')
         ) {
-            $sitemap_file = fopen($filename, 'w');
+            $sitemap_file = fopen(filename: $filename, mode: 'w');
 
             // Write XML header.
-            fwrite($sitemap_file, $sitemap_xml_header . "\n");
+            fwrite(stream: $sitemap_file, data: $sitemap_xml_header . "\n");
 
             // Write each bill's URL.
             while ($row = $result->fetch_assoc()) {
-                fwrite($sitemap_file, '<url><loc>https://www.richmondsunlight.com/bill/' . $year
-                    . '/' . $row['number'] . '/</loc></url>' . "\n");
+                fwrite(stream: $sitemap_file, data: '<url><loc>https://www.richmondsunlight.com/bill/'
+                    . $year . '/' . $row['number'] . '/</loc></url>' . "\n");
             }
 
             // Write XML footer.
-            fwrite($sitemap_file, $sitemap_xml_footer . "\n");
+            fwrite(stream: $sitemap_file, data: $sitemap_xml_footer . "\n");
 
+            fclose(stream: $sitemap_file);
 
             $log->put(message: 'Regenerated bills sitemap for ' . $year, level: 3);
         }
-        // Append this to our list
         $sitemap_list[] = 'bills-' . $year . '.xml';
     } else {
         $log->put(message: 'No bills found for year ' . $year . ' when generating sitemap', level: 4);
@@ -121,24 +122,26 @@ for ($year = 2006; $year <= SESSION_YEAR; $year++) {
  * Create a master sitemap.xml that refers to all the other sitemaps.
  */
 $filename = '../htdocs/sitemap.xml';
-$sitemap_file = fopen($filename, 'w');
+$sitemap_file = fopen(filename: $filename, mode: 'w');
 
 $sitemap_index_header = '<?xml version="1.0" encoding="UTF-8"?>
     <sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 $sitemap_index_footer = '</sitemapindex>';
 
 // Write XML header.
-fwrite($sitemap_file, $sitemap_index_header . "\n");
+fwrite(stream: $sitemap_file, data: $sitemap_index_header . "\n");
 
 foreach ($sitemap_list as $file) {
-    fwrite($sitemap_file, '<sitemap>
+    fwrite(stream: $sitemap_file, data: '<sitemap>
         <loc>https://www.richmondsunlight.com/sitemaps/' . $file . '</loc>
     </sitemap>' . "\n");
 }
 
 // Write XML footer.
-fwrite($sitemap_file, $sitemap_index_footer . "\n");
+fwrite(stream: $sitemap_file, data: $sitemap_index_footer . "\n");
 
-fclose($sitemap_file);
-$log->put(message: 'Sitemap index updated with ' . count(value: $sitemap_list) . ' entries',
-    level: 3);
+fclose(stream: $sitemap_file);
+$log->put(
+    message: 'Sitemap index updated with ' . count(value: $sitemap_list) . ' entries',
+    level: 3
+);
