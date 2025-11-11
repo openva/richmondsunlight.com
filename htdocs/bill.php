@@ -836,15 +836,14 @@ if (
     $page_body .= '<div id="disinformation">
         <h2>Looking for Vaccine Info?</h2>
 
-        <p>When it comes to health, everyone wants reliable, up-to-date information. The U.S.
-        Centers for Disease Control (CDC) has information that can help answer questions you
-        might have about vaccines.</p>
+        <p>When it comes to health, everyone wants reliable, up-to-date information. Immunize.org
+        has information that can help answer questions you might have about vaccines.</p>
 
-        <p><a href="https://www.cdc.gov/vaccines/vac-gen/">Go to CDC.gov</a></p>
+        <p><a href="https://www.vaccineinformation.org/>Go to VaccineInformation.org</a></p>
 
         <p>Richmond Sunlight prohibits comments that spread disinformation about COVID-19 or about
-        vaccines. We will promptly delete any claims that COVID isn’t serious or claims that
-        vaccines are unsafe or ineffective.</p>
+        vaccines. We will promptly delete any claims that COVID isn’t serious or spurious claims
+        that vaccines are unsafe or ineffective.</p>
     </div>';
 }
 
