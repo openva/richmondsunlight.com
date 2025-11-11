@@ -45,7 +45,7 @@ $page_body = '';
 
 // Get the bill's content from the API.
 // We append a query string, containing the current time, to avoid getting a cached copy.
-$json_url = API_URL . '1.1/bill/' . $year . '/' . $bill . '.json?' . time();
+$json_url = API_URL . '1.1/bill/' . $year . '/' . $bill . '.json';
 $json = get_content($json_url);
 
 $debug_timing['JSON retrieved'] = microtime(true);
