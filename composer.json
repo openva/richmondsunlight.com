@@ -20,7 +20,7 @@
         "php": "^8.0",
         "phpmailer/phpmailer": "^6.5",
         "ezyang/htmlpurifier": "^4.13",
-        "doctrine/instantiator": "^1.4",
+        "doctrine/instantiator": "^2.0",
         "simplepie/simplepie": "^1.7",
         "romainneutron/sphinx-search-api-php-client": "2.0.8.1",
         "aws/aws-sdk-php": "^3.186"
