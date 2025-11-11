@@ -26,3 +26,4 @@ hooks:
     - location: deploy/predeploy.sh
   AfterInstall:
     - location: deploy/postdeploy.sh
+      runas: ubuntu
