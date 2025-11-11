@@ -1,4 +1,6 @@
 name: Deploy Process
+permissions:
+  contents: read
 
 on:
   push:
