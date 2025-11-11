@@ -15,12 +15,12 @@ else
 fi
 
 # Start by making everything owned by ubuntu:www-data
-chown -R ubuntu:www-data "$SITE_PATH"/htdocs/
-chmod -R g+w "$SITE_PATH"/htdocs/
+sudo chown -R ubuntu:www-data "$SITE_PATH"/htdocs/
+sudo chmod -R g+w "$SITE_PATH"/htdocs/
 
 # Make the cache directories world-writeable
-chmod o+w "$SITE_PATH"/htdocs/cache/
-chmod o+w "$SITE_PATH"/htdocs/rss/cache/
+sudo chmod o+w "$SITE_PATH"/htdocs/cache/
+sudo chmod o+w "$SITE_PATH"/htdocs/rss/cache/
 
 # Set Memcached to start every time
 sudo systemctl enable memcached
