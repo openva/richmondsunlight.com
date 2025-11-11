@@ -253,7 +253,7 @@ if ($bill['session_id'] == SESSION_ID) {
     if (!empty($user['id'])) {
         $sql .= ' AND users.id != ' . $user['id'];
     }
-    $sql .= ' ORDER BY RAND()';
+    $sql .= ' ORDER BY dashboard_portfolios.id';
     $result = mysqli_query($GLOBALS['db'], $sql);
     $portfolio_count = mysqli_num_rows($result);
 
