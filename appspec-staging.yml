@@ -28,4 +28,4 @@ hooks:
       runas: root
   AfterInstall:
     - location: deploy/postdeploy.sh
-      runas: ubuntu
+      runas: root
