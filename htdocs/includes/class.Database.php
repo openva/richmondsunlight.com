@@ -1,12 +1,19 @@
 <?php
 
 /**
- * Database-connection methods.
+ * Provides helper methods for establishing database connections.
  */
 class Database
 {
-    /*
-     * Create a PDO-based MySQL connection.
+    /**
+     * @var PDO|mysqli|null Active database connection.
+     */
+    public $db;
+
+    /**
+     * Create a PDO-based MySQL connection (or reuse an existing one).
+     *
+     * @return PDO|false Active PDO connection, or false if the connection fails.
      */
     public function connect()
     {
@@ -51,8 +58,10 @@ class Database
         }
     }
 
-    /*
-     * Connect via MySQLi
+    /**
+     * Create a MySQLi connection (or reuse an existing one).
+     *
+     * @return mysqli|false Active MySQLi connection, or false if the connection fails.
      */
     public function connect_mysqli()
     {

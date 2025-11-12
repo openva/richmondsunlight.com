@@ -78,10 +78,19 @@ if (mysqli_num_rows($result) > 0) {
 $page_body .= '<h2>Legislation Scheduled for Hearings</h2>';
 
 # Select the upcoming meetings.
-$sql = 'SELECT dockets.date, committees.id AS committee_id, committees.chamber,
-		committees2.name as parent_committee, committees.name AS committee,
-		committees.parent_id, COUNT(*) AS bills, committees.shortname, meetings.description,
-		DATE_FORMAT(meetings.time, "%l:%i %p") AS time, meetings.timedesc, meetings.location
+$sql = 'SELECT
+            dockets.date,
+            dockets.committee_id AS committee_id,
+            committees.chamber,
+		    committees2.name as parent_committee,
+            committees.name AS committee,
+		    committees.parent_id,
+            COUNT(*) AS bills,
+            committees.shortname,
+            meetings.description,
+		    DATE_FORMAT(meetings.time, "%l:%i %p") AS time,
+            meetings.timedesc,
+            meetings.location
 		FROM dockets
 		LEFT JOIN committees
 			ON dockets.committee_id=committees.id
@@ -91,7 +100,9 @@ $sql = 'SELECT dockets.date, committees.id AS committee_id, committees.chamber,
 			ON committees.id = meetings.committee_id
 		WHERE dockets.date = "' . mysqli_real_escape_string($GLOBALS['db'], $date) . '"
 		GROUP BY dockets.committee_id
-		ORDER BY committees.chamber DESC, committees.name ASC';
+		ORDER BY
+            committees.chamber DESC,
+            committees.name ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) < 1) {
     $page_body .= '<p>No committee or subcommittee meetings are currently scheduled for today.</p>';

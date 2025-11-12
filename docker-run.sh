@@ -22,14 +22,12 @@ if [ ! -d "api/" ]; then
 
     mv rs-api-master/ api/
 
-    # Concatenate the database dumps into a single file, for MariaDB to load
-    cd deploy/
-    cat mysql/structure.sql mysql/basic-contents.sql mysql/test-records.sql > ../api/deploy/database.sql
-    cd ..
-    
     # Remove artifacts
     rm api.zip
 fi
+
+# Concatenate the database dumps into a single file, for MariaDB to load
+cat deploy/mysql/structure.sql deploy/mysql/basic-contents.sql deploy/mysql/test-records.sql > api/deploy/database.sql
 
 # Stand it up
 docker compose build && docker compose up -d

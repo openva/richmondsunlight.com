@@ -46,8 +46,7 @@ class TextStatistics
      */
     public function __construct($strEncoding = '')
     {
-        if ($strEncoding <> '')
-        {
+        if ($strEncoding <> '') {
             // Encoding is given. Use it!
             $this->strEncoding = $strEncoding;
         }
@@ -121,19 +120,13 @@ class TextStatistics
     {
         $intTextLength = 0;
 
-        try
-        {
-            if ($this->strEncoding == '')
-            {
+        try {
+            if ($this->strEncoding == '') {
                 $intTextLength = mb_strlen($strText);
+            } else {
+                $intTextLength = mb_strlen($strText, $this->strEncoding);
             }
-            else
-            {
-                $intTextLength = strlen($strText, $this->strEncoding);
-            }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $intTextLength = strlen($strText);
         }
         return $intTextLength;
@@ -148,19 +141,13 @@ class TextStatistics
         $strText = $this->clean_text($strText); // To clear out newlines etc
         $intTextLength = 0;
         $strText = preg_replace('/[^A-Za-z]+/', '', $strText);
-        try
-        {
-            if ($this->strEncoding == '')
-            {
-                $intTextLength = strlen($strText);
+        try {
+            if ($this->strEncoding == '') {
+                $intTextLength = mb_strlen($strText);
+            } else {
+                $intTextLength = mb_strlen($strText, $this->strEncoding);
             }
-            else
-            {
-                $intTextLength = strlen($strText, $this->strEncoding);
-            }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $intTextLength = strlen($strText);
         }
         return $intTextLength;
@@ -174,8 +161,7 @@ class TextStatistics
     {
         // all these tags should be preceeded by a full stop.
         $fullStopTags = array('li', 'p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'dd');
-        foreach ($fullStopTags as $tag)
-        {
+        foreach ($fullStopTags as $tag) {
             $strText = str_ireplace('</' . $tag . '>', '.', $strText);
         }
         $strText = strip_tags($strText);
@@ -186,7 +172,15 @@ class TextStatistics
         $strText = preg_replace('/([\.])[\. ]+/', '$1', $strText); // Check for duplicated terminators
         $strText = trim(preg_replace('/[ ]*([\.])/', '$1 ', $strText)); // Pad sentence terminators
         $strText = preg_replace('/[ ]+/', ' ', $strText); // Remove multiple spaces
-        $strText = preg_replace_callback('/\. [^ ]+/', create_function('$matches', 'return strtolower($matches[0]);'), $strText); // Lower case all words following terminators (for gunning fog score)
+        $strText = preg_replace_callback('/\. [^ ]+/', function ($matches) {
+            if (function_exists('mb_strtolower')) {
+                if ($this->strEncoding === '') {
+                    return mb_strtolower($matches[0]);
+                }
+                return mb_strtolower($matches[0], $this->strEncoding);
+            }
+            return strtolower($matches[0]);
+        }, $strText); // Lower case all words following terminators (for gunning fog score)
         return $strText;
     }
 
@@ -197,19 +191,13 @@ class TextStatistics
     protected function lower_case($strText)
     {
         $strLowerCaseText = '';
-        try
-        {
-            if ($this->strEncoding == '')
-            {
+        try {
+            if ($this->strEncoding == '') {
                 $strLowerCaseText = mb_strtolower($strText);
+            } else {
+                $strLowerCaseText = mb_strtolower($strText, $this->strEncoding);
             }
-            else
-            {
-                $strLowerCaseText = strtolower($strText, $this->strEncoding);
-            }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $strLowerCaseText = strtolower($strText);
         }
         return $strLowerCaseText;
@@ -222,19 +210,13 @@ class TextStatistics
     protected function upper_case($strText)
     {
         $strUpperCaseText = '';
-        try
-        {
-            if ($this->strEncoding == '')
-            {
+        try {
+            if ($this->strEncoding == '') {
                 $strUpperCaseText = mb_strtoupper($strText);
+            } else {
+                $strUpperCaseText = mb_strtoupper($strText, $this->strEncoding);
             }
-            else
-            {
-                $strUpperCaseText = strtoupper($strText, $this->strEncoding);
-            }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $strUpperCaseText = strtoupper($strText);
         }
         return $strUpperCaseText;
@@ -249,19 +231,13 @@ class TextStatistics
     protected function substring($strText, $intStart, $intLength)
     {
         $strSubstring = '';
-        try
-        {
-            if ($this->strEncoding == '')
-            {
+        try {
+            if ($this->strEncoding == '') {
                 $strSubstring = mb_substr($strText, $intStart, $intLength);
+            } else {
+                $strSubstring = mb_substr($strText, $intStart, $intLength, $this->strEncoding);
             }
-            else
-            {
-                $strSubstring = substr($strText, $intStart, $intLength, $this->strEncoding);
-            }
-        }
-        catch (Exception $e)
-        {
+        } catch (Exception $e) {
             $strSubstring = substr($strText, $intStart, $intLength);
         }
         return $strSubstring;
@@ -313,8 +289,7 @@ class TextStatistics
         $intSyllableCount = 0;
         $intWordCount = $this->word_count($strText);
         $arrWords = explode(' ', $strText);
-        for ($i = 0; $i < $intWordCount; $i++)
-        {
+        for ($i = 0; $i < $intWordCount; $i++) {
             $intSyllableCount += $this->syllable_count($arrWords[$i]);
         }
         return ($intSyllableCount / $intWordCount);
@@ -331,19 +306,13 @@ class TextStatistics
         $intLongWordCount = 0;
         $intWordCount = $this->word_count($strText);
         $arrWords = explode(' ', $strText);
-        for ($i = 0; $i < $intWordCount; $i++)
-        {
-            if ($this->syllable_count($arrWords[$i]) > 2)
-            {
-                if ($blnCountProperNouns)
-                {
+        for ($i = 0; $i < $intWordCount; $i++) {
+            if ($this->syllable_count($arrWords[$i]) > 2) {
+                if ($blnCountProperNouns) {
                     $intLongWordCount++;
-                }
-                else
-                {
+                } else {
                     $strFirstLetter = $this->substring($arrWords[$i], 0, 1);
-                    if ($strFirstLetter !== $this->upper_case($strFirstLetter))
-                    {
+                    if ($strFirstLetter !== $this->upper_case($strFirstLetter)) {
                         // First letter is lower case. Count it.
                         $intLongWordCount++;
                     }
@@ -384,12 +353,10 @@ class TextStatistics
             ,'forever' => 3
             ,'shoreline' => 2
         );
-        if (isset($arrProblemWords[$strWord]))
-        {
+        if (isset($arrProblemWords[$strWord])) {
             $intSyllableCount = $arrProblemWords[$strWord];
         }
-        if ($intSyllableCount > 0)
-        {
+        if ($intSyllableCount > 0) {
             return $intSyllableCount;
         }
 
@@ -452,10 +419,8 @@ class TextStatistics
         $strWord = preg_replace('/[^a-z]/is', '', $strWord);
         $arrWordParts = preg_split('/[^aeiouy]+/', $strWord);
         $intWordPartCount = 0;
-        foreach ($arrWordParts as $strWordPart)
-        {
-            if ($strWordPart <> '')
-            {
+        foreach ($arrWordParts as $strWordPart) {
+            if ($strWordPart <> '') {
                 $intWordPartCount++;
             }
         }
@@ -463,12 +428,10 @@ class TextStatistics
         // Some syllables do not follow normal rules - check for them
         // Thanks to Joe Kovar for correcting a bug in the following lines
         $intSyllableCount = $intWordPartCount + $intPrefixSuffixCount;
-        foreach ($arrSubSyllables as $strSyllable)
-        {
+        foreach ($arrSubSyllables as $strSyllable) {
             $intSyllableCount -= preg_match('~' . $strSyllable . '~', $strWord);
         }
-        foreach ($arrAddSyllables as $strSyllable)
-        {
+        foreach ($arrAddSyllables as $strSyllable) {
             $intSyllableCount += preg_match('~' . $strSyllable . '~', $strWord);
         }
         $intSyllableCount = ($intSyllableCount == 0) ? 1 : $intSyllableCount;

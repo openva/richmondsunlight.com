@@ -14,13 +14,13 @@ else
     exit 1
 fi
 
-# Set permissions properly, since appspec.yml gets this wrong.
-chown -R ubuntu:ubuntu "$SITE_PATH"
-chmod -R g+w "$SITE_PATH"
+# Start by making everything owned by ubuntu:www-data
+sudo chown -R ubuntu:www-data "$SITE_PATH"/htdocs/
+sudo chmod -R g+w "$SITE_PATH"/htdocs/
 
-# Make the cache directories writeable
-chmod o+w "$SITE_PATH"/htdocs/cache/
-chmod o+w "$SITE_PATH"/htdocs/rss/cache/
+# Make the cache directories world-writeable
+sudo chmod o+w "$SITE_PATH"/htdocs/cache/
+sudo chmod o+w "$SITE_PATH"/htdocs/rss/cache/
 
 # Set Memcached to start every time
 sudo systemctl enable memcached
@@ -81,7 +81,14 @@ then
 fi
 
 # Populate the template with the list of legislators
+pwd # Debug step
 php deploy/populate_menu.php
 
 # Expire the cached template
 echo "delete template-new" | nc -N localhost 11211  || true
+
+# Instruct web crawlers to avoid the staging site
+if [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Staging" ]
+then
+    cp deploy/staging-robots.txt "$SITE_PATH"/htdocs/robots.txt
+fi

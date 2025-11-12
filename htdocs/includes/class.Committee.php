@@ -1,9 +1,35 @@
 <?php
 
+/**
+ * Provides helpers for retrieving committee details, members, and identifiers.
+ */
 class Committee
 {
+    /** @var int|string|null */
+    public $id;
+
+    /** @var string|null */
+    public $shortname;
+
+    /** @var string|null */
+    public $name;
+
+    /** @var string|null */
+    public $chamber;
+
+    /** @var string|null */
+    public $meeting_time;
+
+    /** @var string|null */
+    public $url;
+
+    /** @var array|null */
+    public $members;
+
     /**
      * Return information about a single committee.
+     *
+     * @return bool True when committee data is loaded, false otherwise.
      */
     public function info()
     {
@@ -48,6 +74,8 @@ class Committee
 
     /**
      * Return the list of members for a single committee, or for all committees.
+     *
+     * @return bool True when members were loaded, false otherwise.
      */
     public function members()
     {
@@ -90,6 +118,8 @@ class Committee
 
     /**
      * Return the ID of a committee, when provided with a chamber and a name.
+     *
+     * @return int|false Committee ID on success, false otherwise.
      */
     public function get_id()
     {

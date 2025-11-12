@@ -88,7 +88,7 @@ jobs:
       
       - name: Run tests
         id: tests
-        run: deploy/tests/run-all.sh
+        run: docker exec -i rs_web /var/www/deploy/tests/run-all.sh
       
       - name: Stop Docker
         if: always()
@@ -162,10 +162,12 @@ jobs:
             --deployment-group-name RS-Web-Staging \
             --deployment-config-name CodeDeployDefault.OneAtATime \
             --s3-location bucket=deploy.richmondsunlight.com,key=rs-web-staging.zip,bundleType=zip
-            
+
       - name: Deploy to production
         if: github.ref_name == 'deploy'
         run: |
+          unzip rs-web-deploy.zip -d .
+          rm rs-web-deploy.zip
           aws deploy push \
             --application-name RS-Web \
             --s3-location s3://deploy.richmondsunlight.com/rs-web-deploy.zip \

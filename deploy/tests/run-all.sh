@@ -2,11 +2,17 @@
 
 # Switch to the working directory from wherever this is being invoked
 pushd .
+ERRORED=false
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "$DIR" || exit
 
 # Run the page-scan tests
 if ! php ./page-scan.php; then
+    ERRORED=true
+fi
+
+# Run the bill text API tests
+if ! php ./get_bill_text_api_test.php; then
     ERRORED=true
 fi
 

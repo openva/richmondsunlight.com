@@ -1,12 +1,31 @@
 <?php
 
-/*
- * WHY IS THIS NAMED "BILL2"?
- * Because naming it "Bill" breaks every single legislator-related page. Why? I have NO IDEA.
+/**
+ * Provides lookup, enrichment, and related-data utilities for General Assembly bills.
+ *
+ * The class is named "Bill2" because naming it "Bill" conflicts with other legacy code paths that
+ * power legislator pages.
  */
 class Bill2
 {
-    # Take a year and a bill number, return a bill ID.
+    public $id;
+    public $bill_id;
+    public $javascript;
+    public $term_pcres;
+    public $text;
+    public $changes;
+
+    protected $text_hash;
+    protected $related_bills;
+
+    /**
+     * Resolve a bill's internal identifier for a given session year and bill number.
+     *
+     * @param int|string $year   Four-digit session year (e.g. 2024).
+     * @param string     $number Bill number (e.g. HB1 or SB250).
+     *
+     * @return int|false Bill ID when found, or false if the inputs are invalid or no match exists.
+     */
     public function getid($year, $number)
     {
 
@@ -62,6 +81,11 @@ class Bill2
         return $bill['id'];
     }
 
+    /**
+     * Retrieve a fully populated bill record for the current instance.
+     *
+     * @return array|false Associative array of bill data, or false when the bill is unavailable.
+     */
     public function info()
     {
 
@@ -252,6 +276,25 @@ class Bill2
             }
         }
 
+        // PDFs of the text of the legislation.
+        $sql = 'SELECT
+                    date_introduced AS date,
+                    number,
+                    pdf_url
+                FROM bills_full_text
+                WHERE bill_id=' . $bill['id'] . '
+                ORDER BY date_introduced ASC';
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        if (mysqli_num_rows($result) > 0) {
+            $bill['text'] = array();
+            while ($version = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+                if (empty($version['pdf_url'])) {
+                    unset($version['pdf_url']);
+                }
+                $bill['text'][] = array_map('stripslashes', $version);
+            }
+        }
+
         # Place names mentioned.
         $sql = 'SELECT
                     placename AS name,
@@ -325,8 +368,9 @@ class Bill2
     } // function "info"
 
     /**
-     * Returns a list of PCREs for all defined terms that exist within the Code of Virginia for the
-     * affected section of the Code.
+     * Build PCRE patterns for defined terms referenced within the bill text.
+     *
+     * @return bool True when term patterns are available, false if they cannot be determined.
      */
     public function get_terms()
     {
@@ -451,9 +495,11 @@ class Bill2
 
 
     /**
-     * Generate a list of all textual changes for a bill
+     * Generate a structured list of textual changes for the bill text.
      *
-     * @todo: Handle bills that amend multiple sections.
+     * @todo Handle bills that amend multiple sections.
+     *
+     * @return array|false Array describing each change, or false when no changes are detected.
      */
     public function list_changes()
     {
@@ -610,7 +656,9 @@ class Bill2
     }
 
     /**
-     * Get the fiscal impact statements for a bill
+     * Retrieve fiscal impact statements associated with the bill.
+     *
+     * @return array|false Array of impact statements, or false when none exist.
      */
     public function impact_statements()
     {
@@ -643,9 +691,11 @@ class Bill2
     }
 
     /**
-     * List bills related to a given bill
+     * Assemble a list of related bills using external and internal similarity checks.
      *
-     * @return array
+     * @param array $bill Bill data array containing tags, identifiers, and metadata.
+     *
+     * @return array|false Related bills when found, or false if the input is incomplete.
      */
     public function related($bill)
     {
@@ -678,6 +728,13 @@ class Bill2
         return $this->related_bills;
     }
 
+    /**
+     * Populate related bills via tag overlap within the internal database.
+     *
+     * @param array $bill Bill data array with tags and identifiers.
+     *
+     * @return bool True when the query executes, false otherwise.
+     */
     private function related_internal($bill)
     {
 
@@ -748,6 +805,13 @@ class Bill2
         return true;
     }
 
+    /**
+     * Query the recordedvote.org API for similar legislation.
+     *
+     * @param array $bill Bill data array providing the number for the API request.
+     *
+     * @return bool True if related bills were retrieved, false on failure.
+     */
     private function related_recordedvote($bill)
     {
 

@@ -1,13 +1,39 @@
 <?php
 
+/**
+ * Renders full HTML pages by assembling templates and outputting the result.
+ */
 class Page
 {
+    public $template;
+    public $browser_title;
+    public $page_title;
+    public $page_body;
+    public $page_sidebar;
+    public $html_head;
+    public $site_section;
+    public $body_tag;
+
+    protected $output;
+
+    /**
+     * Build the page and send it to the browser.
+     *
+     * @return bool True when processing completes.
+     */
     public function process()
     {
         Page::assemble();
         Page::display();
+
+        return true;
     }
 
+    /**
+     * Populate template placeholders with content and prepare the rendered output.
+     *
+     * @return bool True when the template is successfully assembled.
+     */
     public function assemble()
     {
 
@@ -143,7 +169,11 @@ class Page
         return true;
     }
 
-    # Send the contents of the page to the browser.
+    /**
+     * Send the assembled page contents to the browser.
+     *
+     * @return bool True on success.
+     */
     public function display()
     {
 

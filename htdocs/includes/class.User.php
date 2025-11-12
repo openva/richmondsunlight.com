@@ -1,9 +1,18 @@
 <?php
 
+/**
+ * Encapsulates user-related queries and personalization helpers.
+ */
 class User
 {
-    /*
-     * A wrapper around get_user(), in functions.inc.php.
+    public $data;
+    public $registered;
+    public $id;
+
+    /**
+     * Populate the instance with the currently signed-in user.
+     *
+     * @return bool True when user data is loaded, false if no user is present.
      */
     public function get()
     {
@@ -16,9 +25,12 @@ class User
         return true;
     }
 
-    /*
-     * A reimplementation logged_in() function, in functions.inc.php, but that returns not just
-     * TRUE or FALSE, but also whether the user is registered.
+    /**
+     * Check whether a visitor is logged in and optionally registered.
+     *
+     * @param string $check_if_registered Unused legacy parameter.
+     *
+     * @return bool True when the user has a session, false otherwise.
      */
     public function logged_in($check_if_registered = '')
     {
@@ -84,6 +96,11 @@ class User
         return false;
     }
 
+    /**
+     * Build a tag cloud based on bills the user has viewed.
+     *
+     * @return array|false Associative array of tags and counts, or false when insufficient data.
+     */
     public function views_cloud()
     {
 
@@ -136,6 +153,11 @@ class User
     # in. This works by getting tag cloud data for this user's bill views, using that raw data
     # to query a list of bills that he's liable to be interestd in, and then substracting out a
     # list of every bill that he's already seen.
+    /**
+     * Recommend bills to the user based on viewing history and tags.
+     *
+     * @return array|false List of recommended bills, or false when recommendations are unavailable.
+     */
     public function recommended_bills()
     {
 
@@ -260,6 +282,11 @@ class User
     # and longitude that are within a fraction of a degree of the user's location and ordering the
     # resulting list by the size of the difference between the two. I'm not proud, but it's a great
     # deal easier than installing spatial extensions to MySQL.
+    /**
+     * Locate bills tied to places near the user's stored coordinates.
+     *
+     * @return array|false Bills referencing nearby locations, or false if location is missing.
+     */
     public function nearby_bills()
     {
 
@@ -303,6 +330,11 @@ class User
     }
 
     # Provide some statistics about this user's tagging habits.
+    /**
+     * Summarize the user's tagging activity.
+     *
+     * @return object|false Tag statistics object, or false when none exist.
+     */
     public function tagging_stats()
     {
 
@@ -335,6 +367,11 @@ class User
     }
 
     # Get a listing of the comments by this user.
+    /**
+     * Retrieve the user's latest published comments.
+     *
+     * @return array|false Array of comments, or false when no recent comments exist.
+     */
     public function list_comments()
     {
 
@@ -372,8 +409,10 @@ class User
     }
 
     /**
-     * Delete a user.
-     **/
+     * Delete the user identified by `$this->id`.
+     *
+     * @return bool True on success, false otherwise.
+     */
     public function delete()
     {
 

@@ -2,120 +2,116 @@
 
 /**
  * Generate Legislators Menu
- * 
- * Query the database to generate a list of all legislators, to update the menu.
- * The resulting list is sent to stdout.
- **/
+ *
+ * Query the database to generate a list of all legislators and emit the HTML that
+ * is inserted into the site-wide navigation.
+ */
 
 require '../htdocs/includes/settings.inc.php';
 require '../htdocs/includes/class.Database.php';
+require '../htdocs/includes/class.Legislator.php';
 require '../htdocs/includes/vendor/autoload.php';
 
-$database = new Database;
-$db = $database->connect_mysqli();
+$database = new Database();
+$database->connect_mysqli();
 
 /*
- * Get a list of all legislators.
+ * Get a list of all current legislators.
  */
-$legislator = new Legislator;
+$legislator = new Legislator();
 $legislator_list = $legislator->get_list('current');
 
-$legislators = array('house' => array(), 'senate' => array());
+$alphabet = range('A', 'Z');
+$legislators = [
+    'house' => array_fill_keys($alphabet, []),
+    'senate' => array_fill_keys($alphabet, []),
+];
 
 /*
- * Build up an HTML-formatted array of legislators by chamber.
+ * Build up an HTML-formatted array of legislators by chamber and first letter.
  */
-foreach ($legislator_list as $legislator)
-{
-
-    $legislators[$legislator{'chamber'}][substr($legislator{'name'}, 0, 1)][] = '<a href="/legislator/' . $legislator['shortname']
-        . '/">' . $legislator['name_formatted'] . '</a>';
-
+foreach ($legislator_list as $legislator) {
+    $letter = strtoupper(substr($legislator['name'], 0, 1));
+    if (!in_array($letter, $alphabet, true)) {
+        continue;
+    }
+    $link = '<a href="/legislator/' . $legislator['shortname'] . '/">' . $legislator['name_formatted'] . '</a>';
+    $legislators[$legislator['chamber']][$letter][] = $link;
 }
+
+foreach ($legislators as &$chamber) {
+    foreach ($chamber as &$by_letter) {
+        if (!empty($by_letter)) {
+            sort($by_letter, SORT_NATURAL | SORT_FLAG_CASE);
+        }
+    }
+    unset($by_letter);
+}
+unset($chamber);
 
 /*
- * Establish our alphabetical groupings
+ * Establish our alphabetical groupings. These letters mark where each submenu starts.
  */
-$alphabet = explode(',', 'A,B,C,D,E,F,G,H,I,J,K,L,M,N,O,P,Q,R,S,T,U,V,W,X,Y,Z');
-$house_categories = explode(',', 'A,I,D,M,S');
-$senate_categories = explode(',', 'A,J,S');
+$house_categories = ['A', 'D', 'I', 'M', 'S'];
+$senate_categories = ['A', 'J', 'S'];
 
-////////////////////////////////////////////////////////////////////////
-///// Redo this to be based on iterating through the alphabet, NOT 
-///// iterating through the list of legislators. Missing alphabetical
-///// letters from legislators names is hobbling this.
-////////////////////////////////////////////////////////////////////////
-
-/*
- * Output menu data
+/**
+ * Render the menu markup for a single chamber.
  */
-echo '
-<ul>
-    <li>House »
-        <ul class="alphabetic">';
-
-$first = true;
-foreach ($legislators['house'] as $letter => $by_letter)
+function render_chamber_menu($title, array $categories, array $alphabet, array $legislators_by_letter)
 {
+    $categories = array_values(array_unique(array_map('strtoupper', $categories)));
+    sort($categories);
 
-    if (in_array($letter, $house_categories) || $first == true)
-    {
-        echo 
-            '<li>' . $letter . ' »
-            <ul class="legislators">';
+    if (empty($categories)) {
+        return '';
     }
 
-    foreach ($by_letter as $legislator)
-    {
-        echo '
-                <li>' . $legislator . '</li>';
+    $segments = [];
+    $segments[] = '    <li>' . $title . ' »';
+    $segments[] = '        <ul class="alphabetic">';
+
+    $pending_categories = $categories;
+    $current_category = array_shift($pending_categories);
+    $open_section = false;
+
+    foreach ($alphabet as $letter) {
+        if ($current_category === null && $open_section === false) {
+            break;
+        }
+
+        if ($current_category !== null && $letter === $current_category) {
+            if ($open_section) {
+                $segments[] = '                </ul></li>';
+            }
+            $segments[] = '            <li>' . $letter . ' »';
+            $segments[] = '                <ul class="legislators">';
+            $open_section = true;
+            $current_category = array_shift($pending_categories);
+        } elseif ($open_section === false) {
+            continue;
+        }
+
+        foreach ($legislators_by_letter[$letter] ?? [] as $legislator_link) {
+            $segments[] = '                    <li>' . $legislator_link . '</li>';
+        }
     }
 
-    if (in_array($alphabet[array_search($letter, $alphabet)]+1, $house_categories))
-    {
-        echo '
-            </ul></li>';
+    if ($open_section) {
+        $segments[] = '                </ul></li>';
     }
 
-    $first = false;
+    $segments[] = '        </ul>';
+    $segments[] = '    </li>';
 
+    return implode("\n", $segments);
 }
 
-echo '
-    </li>
-    <li>Senate »
-        <ul class="alphabetic">';
+$menu = [
+    '<ul>',
+    render_chamber_menu('House', $house_categories, $alphabet, $legislators['house']),
+    render_chamber_menu('Senate', $senate_categories, $alphabet, $legislators['senate']),
+    '</ul>',
+];
 
-$first = true;
-foreach ($legislators['senate'] as $letter => $by_letter)
-{
-
-    if (in_array($letter, $senate_categories) || $first == true)
-    {
-        echo '
-            <li>' . $letter . ' »
-            <ul class="legislators">';
-    }
-
-    foreach ($by_letter as $legislator)
-    {
-        echo '
-                <li>' . $legislator . '</li>';
-    }
-
-    if (in_array($alphabet[array_search($letter, $alphabet)]+1, $senate_categories))
-    {
-        echo '
-            </ul></li>';
-    }
-
-    $first = false;
-
-}
-
-echo '
-            </ul>
-        </li>
-        </ul>
-    </li>
-</ul>';
+echo implode("\n", array_filter($menu));

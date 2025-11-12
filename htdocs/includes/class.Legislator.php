@@ -1,9 +1,19 @@
 <?php
 
+/**
+ * Handles lookup and detail retrieval for members of the General Assembly.
+ */
 class Legislator
 {
-    /*
-     * List all legislators, either current or all legislators ever
+    public $id;
+    public $shortname;
+
+    /**
+     * List legislators constrained by a subset (e.g. current membership).
+     *
+     * @param string $subset Either `current` for active members or any other value for all.
+     *
+     * @return array|false Array of legislators keyed by columns, or false when none are found.
      */
     public function get_list($subset)
     {
@@ -33,6 +43,13 @@ class Legislator
         return $legislators;
     } // end method "get_list"
 
+    /**
+     * Translate a legislator shortname into the internal representative ID.
+     *
+     * @param string $shortname Legislator shortname slug (e.g. john-doe).
+     *
+     * @return int|false Representative ID on success, or false when it cannot be resolved.
+     */
     public function getid($shortname)
     {
 
@@ -54,6 +71,13 @@ class Legislator
         return $legislator['id'];
     } // end method "getid"
 
+    /**
+     * Retrieve detailed information about a legislator, with caching support.
+     *
+     * @param int|string $id Representative identifier.
+     *
+     * @return array|false Associative legislator data, or false if the ID is invalid or missing.
+     */
     public function info($id)
     {
 

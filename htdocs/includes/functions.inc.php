@@ -148,7 +148,7 @@ function seconds_to_time($seconds, $lpad = false)
 # to use exactly the same function name, thus preventing the Richmond Sunlight blog from
 # working. So here's the solution. We don't need create_user() on the blog, anyway.
 if (!function_exists('create_user')) {
-    function create_user($options)
+    function create_user($options = '')
     {
         # Turn the URL-style options into an array.
         parse_str($options, $options);
@@ -297,11 +297,6 @@ function update_user($options)
     }
     if (empty($_SESSION['id'])) {
         return false;
-    }
-
-    # If this user's data is cached in APC, delete it, since it's now out of date.
-    if (apc_exists('user-' . $_SESSION['id']) !== false) {
-        apc_delete('user-' . $_SESSION['id']);
     }
 
     # Assemble the SQL string.
@@ -976,7 +971,7 @@ function bill_sections($bill_id)
     }
 
     # In case we wound up with no viable sections.
-    if (count($section) == 0) {
+    if (count($sections) == 0) {
         return false;
     }
 

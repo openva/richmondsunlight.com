@@ -1,7 +1,16 @@
 <?php
 
+/**
+ * Emits application log messages to multiple backends (filesystem, Slack, stdout).
+ */
 class Log
 {
+    public $verbosity;
+    public $output;
+
+    /**
+     * Configure logging verbosity and destination.
+     */
     public function __construct()
     {
 
@@ -25,6 +34,14 @@ class Log
         }
     }
 
+    /**
+     * Record a log message if it meets the configured verbosity threshold.
+     *
+     * @param string $message Message to log.
+     * @param int    $level   Severity level (1=debug .. 8=emergency).
+     *
+     * @return bool True after the message is handled; false when input is invalid.
+     */
     public function put($message, $level)
     {
         if (!isset($message)) {
@@ -73,6 +90,15 @@ class Log
         return true;
     }
 
+    /**
+     * Send a log message to Slack via incoming webhook.
+     *
+     * @param string $message Message body.
+     * @param string $room    Slack channel slug (without leading #).
+     * @param string $icon    Emoji identifier to show with the message.
+     *
+     * @return string|false Slack API response body, or false on failure.
+     */
     public function slack($message, $room = 'rs', $icon = ':longbox:')
     {
         $room = ($room) ? $room : 'general';
@@ -94,7 +120,11 @@ class Log
     }
 
     /**
-     * Log an error to a text file.
+     * Append a log message to the filesystem log file.
+     *
+     * @param string $message Message text.
+     *
+     * @return bool True on success, false when writing fails.
      */
     public function filesystem($message)
     {

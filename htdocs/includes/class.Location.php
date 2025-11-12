@@ -1,11 +1,22 @@
 <?php
 
-# For functions pertaining to geolocation of individuals and legislators.
+/**
+ * Provides geolocation utilities for addresses and coordinates within Virginia.
+ */
 class Location
 {
-    # When given an address (whether a ZIP code alone or a complete street address), returns the
-    # lat/lon pair for that location, querying the Virginia GIS server. Results return as an
-    # array, not an object.
+    public $street;
+    public $city;
+    public $zip;
+    public $address;
+    public $latitude;
+    public $longitude;
+
+    /**
+     * Resolve the latitude/longitude pair for the instance's address components.
+     *
+     * @return array|false Associative array with `latitude` and `longitude`, or false on failure.
+     */
     public function get_coordinates()
     {
 
@@ -55,7 +66,11 @@ class Location
         return $coordinates;
     }
 
-    # Convert coordinates into district IDs.
+    /**
+     * Convert the instance's latitude and longitude into Virginia district identifiers.
+     *
+     * @return stdClass|false Object containing `house` and/or `senate` IDs, or false on failure.
+     */
     public function coords_to_districts()
     {
 
@@ -77,13 +92,21 @@ class Location
 
         $district = json_decode($district, true);
 
+        $district = array_values(array_filter(
+            isset($district['results']) ? $district['results'] : [],
+            static function ($item) {
+                return isset($item['jurisdiction']['classification'])
+                    && $item['jurisdiction']['classification'] === 'state';
+            }
+        ));
+
         # If this isn't an array with two elements (one for each legislator), bail.
-        if (count($district['results']) != 2) {
+        if (count($district) != 2) {
             return false;
         }
 
         $result = new stdClass();
-        foreach ($district['results'] as $legislator) {
+        foreach ($district as $legislator) {
             # If it's the house.
             if ($legislator['current_role']['org_classification'] == 'lower') {
                 $result->house = district_to_id($legislator['current_role']['district'], 'house');
