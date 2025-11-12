@@ -82,6 +82,7 @@ then
 fi
 
 # Populate the template with the list of legislators
+pwd # Debug step
 php deploy/populate_menu.php
 
 # Expire the cached template
