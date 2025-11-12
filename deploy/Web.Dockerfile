@@ -1,9 +1,5 @@
 FROM php:8-apache
 
-# Replace sources.list with the archived repository URLs
-RUN echo "deb http://archive.debian.org/debian/ stretch main non-free contrib" > /etc/apt/sources.list \
-    && echo "deb-src http://archive.debian.org/debian/ stretch main non-free contrib" >> /etc/apt/sources.list
-
 # Disable checking for valid signatures on the archived repositories
 RUN echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/90ignore-release-date \
     && echo 'Acquire::AllowInsecureRepositories "true";' >> /etc/apt/apt.conf.d/90ignore-release-date \
@@ -12,9 +8,9 @@ RUN echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/90ignore-re
 RUN docker-php-ext-install mysqli && a2enmod rewrite && a2enmod expires && a2enmod headers
 
 # Install our packages
-RUN apt-get update && \
-    apt-get upgrade -y && \
-    apt-get install -y gnupg2 curl
+RUN apt update && \
+    apt upgrade -y && \
+    apt install -y gnupg2 curl redis
 
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor -o /etc/apt/trusted.gpg.d/yarn.gpg
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
@@ -24,9 +20,8 @@ RUN apt-get install -y git zip sphinxsearch zlib1g-dev jq yarn
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
-# Copy over the deploy scripts
-WORKDIR /var/www/
-COPY . deploy/
+# Copy over the webroot
+COPY deploy/ /var/www/deploy/
 
 EXPOSE 80
 

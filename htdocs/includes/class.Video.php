@@ -264,7 +264,7 @@ class Video
                 $this->clips->{$i}->path = $clip->path;
                 $this->clips->{$i}->date = $clip->date;
                 $this->clips->{$i}->chamber = $clip->chamber;
-                $this->clips->{$i}->screenshot = str_replace('/video/', 'https://s3.amazonaws.com/video.richmondsunlight.com/', $clip->screenshot);
+                $this->clips->{$i}->screenshot = str_replace('/video/', 'https://video.richmondsunlight.com/', $clip->screenshot);
                 $this->clips->{$i}->start = time_to_seconds($clip->time_start);
                 $this->clips->{$i}->end = time_to_seconds($clip->time_end);
                 $this->clips->{$i}->duration = time_to_seconds($clip->time_end) - time_to_seconds($clip->time_start);
@@ -349,7 +349,7 @@ class Video
                         'chamber' => $index2[$i]['chamber'],
                         'screenshot' => str_replace(
                             '/video/',
-                            'https://s3.amazonaws.com/video.richmondsunlight.com/',
+                            'https://video.richmondsunlight.com/',
                             $index2[$i]['capture_directory']
                         ) . $index2[$i]['screenshot'] . '.jpg',
                         'start' => time_to_seconds($index2[$i - 1]['time']) - 10,
@@ -449,7 +449,7 @@ class Video
             }
             $this->screenshots->{$j}->number = $j;
             $this->screenshots->{$j}->seconds = round($j * $this->frequency);
-            $this->screenshots->{$j}->filename = str_replace('/video/', 'https://s3.amazonaws.com/video.richmondsunlight.com/', $this->capture_directory)
+            $this->screenshots->{$j}->filename = str_replace('/video/', 'https://video.richmondsunlight.com/', $this->capture_directory)
                 . str_pad($i, 8, '0', STR_PAD_LEFT) . '.jpg';
             $j++;
             $i = $i + $increment;
@@ -596,7 +596,7 @@ class Video
                     'path' => $index[$i]['path'],
                     'date' => $index[$i]['date'],
                     'chamber' => $index[$i]['chamber'],
-                    'screenshot' => str_replace('/video/', 'https://s3.amazonaws.com/video.richmondsunlight.com/', $index[$i]['screenshot']),
+                    'screenshot' => str_replace('/video/', 'https://video.richmondsunlight.com/', $index[$i]['screenshot']),
                     'start' => time_to_seconds($index[$i - 1]['time']) - $this->fuzz,
                     'end' => time_to_seconds($index[$i]['time']) + $this->fuzz,
                     'duration' => time_to_seconds($index[$i]['time']) - time_to_seconds($index[$i - 1]['time']) + ($this->fuzz * 2),

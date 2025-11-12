@@ -52,7 +52,7 @@ $page_sidebar = '
 ';
 
 # PAGE CONTENT
-$page_content = '';
+$page_body = '';
 
 # Retrieve the senate committee info from the database
 $sql = 'SELECT id, shortname, name, chamber, meeting_time,
@@ -62,7 +62,7 @@ $sql = 'SELECT id, shortname, name, chamber, meeting_time,
 			 AND last_committee_id=committees.id
 			 AND current_chamber=committees.chamber
 			 AND status != "failed" AND status != "continued" AND status != "approved"
-			 AND status != "passed ' . $committee['chamber'] . '" AND status != "passed"
+			 AND status != "passed senate" AND status != "passed"
 			 AND status != "vetoed") AS count
 		FROM committees
 		WHERE chamber="senate" AND parent_id IS NULL
@@ -95,7 +95,7 @@ $sql = 'SELECT id, shortname, name, chamber, meeting_time,
 			 AND last_committee_id=committees.id
 			 AND current_chamber=committees.chamber
 			 AND status != "failed" AND status != "continued" AND status != "approved"
-			 AND status != "passed ' . $committee['chamber'] . '" AND status != "passed"
+			 AND status != "passed house" AND status != "passed"
 			 AND status != "vetoed") AS count
 		FROM committees
 		WHERE chamber="house" AND parent_id IS NULL

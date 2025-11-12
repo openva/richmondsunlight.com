@@ -86,7 +86,7 @@ $page_sidebar = '
 		<div class="box">
 			<h3>Meeting Schedule</h3>
 			<p>The ' . $committee->name . ' committee meets when the ' . $committee->chamber . ' is '
-            . 'in session, ' . $committee->meeting->time . '.</p>';
+            . 'in session, ' . $committee->meeting_time . '.</p>';
 if (isset($committee->meeting->next)) {
     $page_sidebar .= '<p>The next scheduled meeting is on ' . $committee->meeting->next . '. '
         . number_format($committee->meeting->bill_count) . ' bills are on the agenda.

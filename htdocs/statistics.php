@@ -31,6 +31,9 @@ $html_head = '<style>
 <script src="/js/vendor/chart.js/dist/chart.umd.js"></script>';
 
 # PAGE CONTENT
+$page_body = '';
+$page_sidebar = '';
+
 $sql = 'SELECT
             date,
             COUNT(*) actions
