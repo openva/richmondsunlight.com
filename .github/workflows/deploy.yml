@@ -165,8 +165,6 @@ jobs:
       - name: Deploy to production
         if: github.ref_name == 'deploy'
         run: |
-          unzip rs-web-deploy.zip -d .
-          rm rs-web-deploy.zip
           aws deploy push \
             --application-name RS-Web \
             --s3-location s3://deploy.richmondsunlight.com/rs-web-deploy.zip \
