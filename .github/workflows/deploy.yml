@@ -3,9 +3,9 @@ permissions:
   contents: read
 on:
   push:
-    branches: [master]
+    branches: [master, deploy]
   pull_request:
-    branches: [master]
+    branches: [master, deploy]
   workflow_dispatch:
   schedule:
     - cron: '0 4 * * *' # Redeploy at 4 AM every day
