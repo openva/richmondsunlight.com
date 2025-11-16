@@ -52,10 +52,12 @@ jobs:
         uses: snyk/actions/setup@806182742461562b67788a64410098c9d9b96adb
 
       - name: Snyk Code test
+        id: snyk_code
         run: snyk code test --sarif --sarif-file-output=snyk-code.sarif
         continue-on-error: true
 
       - name: Upload Code results to GitHub Security
+        if: hashFiles('snyk-code.sarif') != ''
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: snyk-code.sarif
