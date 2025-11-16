@@ -26,6 +26,9 @@ $page_title = 'Welcome to Richmond Sunlight';
 $browser_title = 'Tracking the Virginia General Assembly';
 $site_section = 'home';
 
+// Initialize variables
+$html_head = '';
+
 # PAGE CONTENT
 if (strtotime(SESSION_START) < time() && strtotime(SESSION_END) > time()) {
     $page_body = '<p>The ' . SESSION_YEAR . ' Virginia General Assembly session began on '
@@ -293,6 +296,7 @@ $sql = 'SELECT chamber, COUNT(*) AS count
 		WHERE session_id=' . SESSION_ID . '
 		GROUP BY chamber';
 $result = mysqli_query($GLOBALS['db'], $sql);
+$session = array('house_count' => 0, 'senate_count' => 0);
 while ($stats = mysqli_fetch_array($result)) {
     if ($stats['chamber'] == 'house') {
         $session['house_count'] = $stats['count'];

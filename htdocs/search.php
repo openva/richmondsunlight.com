@@ -105,6 +105,12 @@ if (!empty($q)) {
     # Issue the query.
     $result = $sphinx->Query($q, 'bills');
 
+    # If there was an error getting Sphinx results, show Sphinx's error message.
+    if ($sphinx->GetLastError()) {
+        $page_body .= '<p class="error">Sphinx error: ' . htmlspecialchars($sphinx->GetLastError()) . '</p>';
+        $result = false;
+    }
+
     # If there's an error, return a warning and bail.
     if ($result === false) {
         $page_body .= '<p>An error occurred, so no results could be found.</p>';

@@ -2,8 +2,8 @@ services:
   # Primary web interface
   web:
     build:
-      context: deploy/
-      dockerfile: Web.Dockerfile
+      context: .
+      dockerfile: deploy/Web.Dockerfile
     depends_on:
       api:
         condition: service_healthy

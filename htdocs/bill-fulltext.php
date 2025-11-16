@@ -144,7 +144,7 @@ while ($version = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
 
     # If we have a list of terms (in regular expression form), then wrap every use of
     # that term with <span class="dictionary"></span>.
-    if (is_array($term_pcres)) {
+    if (isset($term_pcres)) {
         $version['text'] = preg_replace_callback($term_pcres, 'replace_terms', $version['text']);
     }
 

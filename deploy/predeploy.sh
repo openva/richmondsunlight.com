@@ -25,18 +25,18 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
     # Add the Yarn repo
     dpkg -s yarn
     if [ $? -eq 1 ]; then
-        curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
-        echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+        curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor -o /usr/share/keyrings/yarnkey.gpg
+        echo "deb [signed-by=/usr/share/keyrings/yarnkey.gpg] https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
     fi
 
     # Install all packages.
     sudo apt update
     sudo DEBIAN_FRONTEND=noninteractive apt -y upgrade
     sudo DEBIAN_FRONTEND=noninteractive apt install -y apache2 curl geoip-database git gzip \
-    unzip openssl mysql-client memcached \
-    php php-mysql php-curl php-mbstring php-xml php-fpm php-memcached \
+    unzip openssl mysql-client memcached redis \
+    php php-mysql php-curl php-mbstring php-xml php-memcached php-redis \
     python python-pip s3cmd sphinxsearch wget awscli certbot \
-    python-certbot-apache yarn \
+    python3-certbot-apache yarn
 
     # Install mod_pagespeed
     dpkg -s mod-pagespeed-beta
@@ -91,6 +91,6 @@ EOF
     # Enable Sphinx's server
     echo "START=yes" | sudo tee /etc/default/sphinxsearch
     sudo cp /etc/sphinxsearch/sphinx-min.conf.dist /etc/sphinxsearch/sphinx.conf
-    sudo /etc/init.d/sphinxsearch start
+    sudo service sphinxsearch start
     
 fi

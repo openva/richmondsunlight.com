@@ -24,8 +24,11 @@ fi
 # If any tests failed, have this script return that failure
 if [ "$ERRORED" == true ]; then
     echo "Some tests failed"
+    popd || exit 1
     exit 1
 fi
 
 # Switch back to the directory this was invoked from
 popd || exit
+
+echo "All tests passed successfully"

@@ -47,6 +47,10 @@ if (!empty($_GET['tagless'])) {
     $tagless = true;
 }
 
+# Initialize variables.
+$html_head = '';
+$page_body = '';
+
 # PAGE METADATA
 if (!empty($tag)) {
     $page_title = SESSION_YEAR . ' Bills Tagged with “' . ucwords($tag) . '”';
