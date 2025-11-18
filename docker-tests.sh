@@ -13,6 +13,6 @@ if ! $COMPOSE_BINARY ps --format '{{.Name}}' | grep -q "^${CONTAINER_NAME}$"; th
 fi
 
 # Execute test suite inside the running container (service name required for exec)
-$COMPOSE_BINARY exec "${WEB_SERVICE}" deploy/tests/run-all.sh
+$COMPOSE_BINARY exec "${WEB_SERVICE}" /var/www/deploy/tests/run-all.sh
 
 echo "All tests completed successfully."
