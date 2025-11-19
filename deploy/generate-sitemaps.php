@@ -38,9 +38,13 @@ $sitemap_list = [];
 /*
  * Fetch all representatives' shortnames to generate a sitemap
  */
-$sql = 'SELECT shortname
+$sql = 'SELECT
+            people.shortname,
+            DATE_FORMAT(terms.date_modified, "%Y-%m-%d") AS date_modified
         FROM people
-        ORDER BY shortname ASC';
+        LEFT JOIN terms
+            ON people.id = terms.person_id
+        ORDER BY people.shortname ASC';
 $result = mysqli_query(mysql: $GLOBALS['db'], query: $sql);
 if ($result && mysqli_num_rows(result: $result) > 0) {
     $filename = '../htdocs/sitemaps/legislators.xml';
@@ -53,9 +57,10 @@ if ($result && mysqli_num_rows(result: $result) > 0) {
         fwrite(stream: $sitemap_file, data: $sitemap_xml_header . "\n");
 
         // Write each legislator's URL.
-        while ($row = $result->fetch_assoc()) {
+        while ($legislator = $result->fetch_assoc()) {
             fwrite(stream: $sitemap_file, data: '<url><loc>https://www.richmondsunlight.com/legislator/'
-                . $row['shortname'] . '/</loc></url>' . "\n");
+                . $legislator['shortname'] . '/</loc><lastmod>' . $legislator['date_modified']
+                . '</lastmod></url>' . "\n");
         }
 
         // Write XML footer.
