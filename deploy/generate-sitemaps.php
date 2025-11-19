@@ -99,10 +99,12 @@ for ($year = 2006; $year <= SESSION_YEAR; $year++) {
             // Write XML header.
             fwrite(stream: $sitemap_file, data: $sitemap_xml_header . "\n");
 
-            // Write each bill's URL.
+            // Write the URL each bill and its full text link.
             while ($row = $result->fetch_assoc()) {
                 fwrite(stream: $sitemap_file, data: '<url><loc>https://www.richmondsunlight.com/bill/'
                     . $year . '/' . $row['number'] . '/</loc></url>' . "\n");
+                fwrite(stream: $sitemap_file, data: '<url><loc>https://www.richmondsunlight.com/bill/'
+                    . $year . '/' . $row['number'] . '/fulltext/</loc></url>' . "\n");
             }
 
             // Write XML footer.
