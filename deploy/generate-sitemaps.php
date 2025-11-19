@@ -77,8 +77,17 @@ if ($result && mysqli_num_rows(result: $result) > 0) {
 for ($year = 2006; $year <= SESSION_YEAR; $year++) {
     /*
     * Fetch all bills to generate a sitemap
+    *
+    * This is a really expensive query (it takes on the order of 10 seconds), but this runs so
+    * rarely that I'm not losing sleep over it.
     */
-    $sql = 'SELECT bills.number
+    $sql = 'SELECT bills.number,
+                (SELECT date
+                FROM bills_status
+                WHERE bill_id=bills.id AND
+                date IS NOT NULL
+                ORDER BY date DESC
+                LIMIT 1) AS date
             FROM bills
             LEFT JOIN sessions
                 ON bills.session_id = sessions.id
@@ -100,11 +109,11 @@ for ($year = 2006; $year <= SESSION_YEAR; $year++) {
             fwrite(stream: $sitemap_file, data: $sitemap_xml_header . "\n");
 
             // Write the URL each bill and its full text link.
-            while ($row = $result->fetch_assoc()) {
+            while ($bill = $result->fetch_assoc()) {
                 fwrite(stream: $sitemap_file, data: '<url><loc>https://www.richmondsunlight.com/bill/'
-                    . $year . '/' . $row['number'] . '/</loc></url>' . "\n");
+                    . $year . '/' . $bill['number'] . '/</loc><lastmod>' . $bill['date'] . '</lastmod></url>' . "\n");
                 fwrite(stream: $sitemap_file, data: '<url><loc>https://www.richmondsunlight.com/bill/'
-                    . $year . '/' . $row['number'] . '/fulltext/</loc></url>' . "\n");
+                    . $year . '/' . $bill['number'] . '/fulltext/</loc></url>' . "\n");
             }
 
             // Write XML footer.
