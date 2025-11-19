@@ -39,7 +39,7 @@ $sitemap_list = [];
  * Fetch all representatives' shortnames to generate a sitemap
  */
 $sql = 'SELECT shortname
-        FROM representatives
+        FROM people
         ORDER BY shortname ASC';
 $result = mysqli_query(mysql: $GLOBALS['db'], query: $sql);
 if ($result && mysqli_num_rows(result: $result) > 0) {
