@@ -81,10 +81,17 @@ define('SLACK_WEBHOOK', '');
 # OpenAI API key
 define('OPENAI_KEY', '');
 
+# Internet Archive S3-style auth info
+define('IA_ACCESS_KEY', '');
+define('IA_SECRET_KEY', '');
+
 # AWS auth info
-# This is only used in some RS instances.
+define('AWS_REGION', 'us-east-1');
 define('AWS_ACCESS_KEY', '');
 define('AWS_SECRET_KEY', '');
+
+# Video SQS URL
+define('VIDEO_SQS_URL', 'https://sqs.us-east-1.amazonaws.com/947603853016/rs-video-harvester.fifo');
 
 # The list of words that, when used, will lead to instant blacklisting. They're rot 13ed here.
 $GLOBALS['banned_words'] = array('fuvg','shpx','nffubyr','chffl','phag','shpxre','zbgureshpxre',
