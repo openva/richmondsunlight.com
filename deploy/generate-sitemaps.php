@@ -38,9 +38,13 @@ $sitemap_list = [];
 /*
  * Fetch all representatives' shortnames to generate a sitemap
  */
-$sql = 'SELECT shortname
-        FROM representatives
-        ORDER BY shortname ASC';
+$sql = 'SELECT
+            people.shortname,
+            DATE_FORMAT(terms.date_modified, "%Y-%m-%d") AS date_modified
+        FROM people
+        LEFT JOIN terms
+            ON people.id = terms.person_id
+        ORDER BY people.shortname ASC';
 $result = mysqli_query(mysql: $GLOBALS['db'], query: $sql);
 if ($result && mysqli_num_rows(result: $result) > 0) {
     $filename = '../htdocs/sitemaps/legislators.xml';
@@ -53,9 +57,10 @@ if ($result && mysqli_num_rows(result: $result) > 0) {
         fwrite(stream: $sitemap_file, data: $sitemap_xml_header . "\n");
 
         // Write each legislator's URL.
-        while ($row = $result->fetch_assoc()) {
+        while ($legislator = $result->fetch_assoc()) {
             fwrite(stream: $sitemap_file, data: '<url><loc>https://www.richmondsunlight.com/legislator/'
-                . $row['shortname'] . '/</loc></url>' . "\n");
+                . $legislator['shortname'] . '/</loc><lastmod>' . $legislator['date_modified']
+                . '</lastmod></url>' . "\n");
         }
 
         // Write XML footer.
@@ -77,8 +82,17 @@ if ($result && mysqli_num_rows(result: $result) > 0) {
 for ($year = 2006; $year <= SESSION_YEAR; $year++) {
     /*
     * Fetch all bills to generate a sitemap
+    *
+    * This is a really expensive query (it takes on the order of 10 seconds), but this runs so
+    * rarely that I'm not losing sleep over it.
     */
-    $sql = 'SELECT bills.number
+    $sql = 'SELECT bills.number,
+                (SELECT date
+                FROM bills_status
+                WHERE bill_id=bills.id AND
+                date IS NOT NULL
+                ORDER BY date DESC
+                LIMIT 1) AS date
             FROM bills
             LEFT JOIN sessions
                 ON bills.session_id = sessions.id
@@ -99,10 +113,12 @@ for ($year = 2006; $year <= SESSION_YEAR; $year++) {
             // Write XML header.
             fwrite(stream: $sitemap_file, data: $sitemap_xml_header . "\n");
 
-            // Write each bill's URL.
-            while ($row = $result->fetch_assoc()) {
+            // Write the URL each bill and its full text link.
+            while ($bill = $result->fetch_assoc()) {
                 fwrite(stream: $sitemap_file, data: '<url><loc>https://www.richmondsunlight.com/bill/'
-                    . $year . '/' . $row['number'] . '/</loc></url>' . "\n");
+                    . $year . '/' . $bill['number'] . '/</loc><lastmod>' . $bill['date'] . '</lastmod></url>' . "\n");
+                fwrite(stream: $sitemap_file, data: '<url><loc>https://www.richmondsunlight.com/bill/'
+                    . $year . '/' . $bill['number'] . '/fulltext/</loc></url>' . "\n");
             }
 
             // Write XML footer.

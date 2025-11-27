@@ -172,6 +172,7 @@ CREATE TABLE `bills_full_text` (
   `id` mediumint(8) unsigned NOT NULL AUTO_INCREMENT,
   `bill_id` mediumint(8) unsigned NOT NULL,
   `number` varchar(10) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
+  `session_id` tinyint(3) unsigned NOT NULL,
   `date_introduced` date NOT NULL,
   `text` mediumtext DEFAULT NULL,
   `pdf_url` varchar(255) DEFAULT NULL,
@@ -184,7 +185,7 @@ CREATE TABLE `bills_full_text` (
   KEY `monitor_attempts` (`failed_retrievals`,`text`(1)),
   KEY `text_nullness` (`text`(1)),
   FULLTEXT KEY `text` (`text`)
-) ENGINE=InnoDB AUTO_INCREMENT=1202025 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1202096 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -252,7 +253,7 @@ CREATE TABLE `bills_status` (
   KEY `date` (`date`),
   KEY `bill_id` (`bill_id`),
   FULLTEXT KEY `status` (`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=128050271 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=128050991 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -273,7 +274,7 @@ CREATE TABLE `bills_views` (
   KEY `user_id` (`user_id`),
   KEY `date` (`date`),
   KEY `ip` (`ip`)
-) ENGINE=MyISAM AUTO_INCREMENT=21431743 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=MyISAM AUTO_INCREMENT=21495824 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -459,7 +460,7 @@ CREATE TABLE `dashboard_portfolios` (
   KEY `watch_list_id` (`watch_list_id`),
   KEY `public` (`public`),
   FULLTEXT KEY `notes` (`notes`)
-) ENGINE=InnoDB AUTO_INCREMENT=5142 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=5145 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -608,7 +609,7 @@ CREATE TABLE `fiscal_impact_statements` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `bill_id_2` (`bill_id`,`lis_id`),
   KEY `bill_id` (`bill_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=1690915 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1959592 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -629,35 +630,6 @@ CREATE TABLE `gazetteer` (
   PRIMARY KEY (`id`),
   KEY `county` (`municipality`,`latitude`,`longitude`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `lobbyists`
---
-
-DROP TABLE IF EXISTS `lobbyists`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `lobbyists` (
-  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
-  `name` varchar(120) NOT NULL,
-  `sc_id` char(36) NOT NULL COMMENT 'Secretary of the Commonwealth ID',
-  `id_hash` char(32) NOT NULL,
-  `principal` varchar(120) NOT NULL,
-  `principal_hash` char(32) NOT NULL,
-  `organization` varchar(120) DEFAULT NULL,
-  `address` tinytext NOT NULL,
-  `phone` char(12) NOT NULL,
-  `year` smallint(3) unsigned NOT NULL,
-  `statement` text NOT NULL,
-  `date_registered` date NOT NULL,
-  `date_created` datetime NOT NULL,
-  `date_modified` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  PRIMARY KEY (`id`),
-  KEY `sbe_id` (`sc_id`,`year`),
-  KEY `id_hash` (`id_hash`),
-  KEY `principal_hash` (`principal_hash`)
-) ENGINE=InnoDB AUTO_INCREMENT=13736 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -719,7 +691,30 @@ CREATE TABLE `polls` (
   UNIQUE KEY `bill_id_4` (`bill_id`,`ip`),
   UNIQUE KEY `one_vote` (`bill_id`,`user_id`),
   KEY `bill_id` (`bill_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=114586 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=114587 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `people`
+--
+
+DROP TABLE IF EXISTS `people`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `people` (
+  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `shortname` varchar(32) NOT NULL,
+  `name` varchar(64) NOT NULL,
+  `name_formal` varchar(64) NOT NULL,
+  `birthday` date DEFAULT NULL,
+  `race` enum('american indian','asian','pacific islander','white','black','latino','other') DEFAULT NULL,
+  `sex` enum('male','female') DEFAULT NULL,
+  `bio` text DEFAULT NULL,
+  `date_created` datetime NOT NULL,
+  `date_modified` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `shortname` (`shortname`)
+) ENGINE=InnoDB AUTO_INCREMENT=543 DEFAULT CHARSET=utf16 COLLATE=utf16_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -773,44 +768,6 @@ CREATE TABLE `representatives` (
   KEY `coordinates` (`longitude`,`latitude`) USING BTREE,
   FULLTEXT KEY `name_2` (`name_formal`,`bio`,`notes`)
 ) ENGINE=InnoDB AUTO_INCREMENT=543 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `representatives_districts`
---
-
-DROP TABLE IF EXISTS `representatives_districts`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `representatives_districts` (
-  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-  `representative_id` smallint(5) unsigned NOT NULL,
-  `district_id` smallint(5) unsigned NOT NULL,
-  `date_created` datetime NOT NULL,
-  `date_modified` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `representative_id` (`representative_id`,`district_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=441 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `representatives_terms`
---
-
-DROP TABLE IF EXISTS `representatives_terms`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8mb4 */;
-CREATE TABLE `representatives_terms` (
-  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
-  `representative_id` smallint(5) unsigned NOT NULL,
-  `chamber` enum('house','senate') NOT NULL,
-  `date_start` date NOT NULL,
-  `date_end` date NOT NULL,
-  `date_created` timestamp NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `chamber_list` (`chamber`,`date_end`),
-  KEY `representative_id` (`representative_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -882,6 +839,48 @@ CREATE TABLE `tags` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `terms`
+--
+
+DROP TABLE IF EXISTS `terms`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `terms` (
+  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `person_id` smallint(5) unsigned NOT NULL,
+  `name_formatted` varchar(64) NOT NULL,
+  `lis_shortname` varchar(32) NOT NULL,
+  `lis_id` smallint(5) unsigned NOT NULL,
+  `chamber` enum('house','senate') NOT NULL,
+  `party` enum('D','R','I') NOT NULL DEFAULT 'D',
+  `district_Id` int(11) NOT NULL,
+  `date_started` date NOT NULL,
+  `date_ended` date DEFAULT NULL,
+  `sbe_id` varchar(11) DEFAULT NULL,
+  `email` varchar(128) DEFAULT NULL,
+  `url` varchar(64) DEFAULT NULL,
+  `rss_url` varchar(64) DEFAULT NULL,
+  `place` varchar(64) DEFAULT NULL COMMENT 'District office location',
+  `longitude` float DEFAULT NULL,
+  `latitude` float DEFAULT NULL,
+  `partisanship` tinyint(3) unsigned NOT NULL,
+  `date_created` datetime NOT NULL,
+  `date_modified` timestamp NOT NULL,
+  `phone_district` varchar(12) DEFAULT NULL,
+  `phone_richmond` varchar(12) DEFAULT NULL,
+  `address_district` varchar(128) DEFAULT NULL,
+  `address_richmond` varchar(128) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `person_id` (`person_id`),
+  KEY `lis_id` (`lis_id`),
+  KEY `partisanship` (`partisanship`),
+  KEY `coordinates` (`latitude`,`longitude`),
+  KEY `lis_shortname` (`lis_shortname`),
+  KEY `place` (`place`)
+) ENGINE=InnoDB AUTO_INCREMENT=544 DEFAULT CHARSET=utf16 COLLATE=utf16_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `users`
 --
 
@@ -913,7 +912,7 @@ CREATE TABLE `users` (
   `date_created` datetime NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `cookie_hash` (`cookie_hash`)
-) ENGINE=InnoDB AUTO_INCREMENT=91438 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=91442 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1082,4 +1081,4 @@ CREATE TABLE `votes` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-11-04 16:11:41
+-- Dump completed on 2025-11-17 22:34:45

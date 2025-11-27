@@ -827,11 +827,20 @@ class Import
             $date_ended = date('Y-m-d', strtotime('-1 day'));
         }
 
-        $sql = 'UPDATE representatives
-				SET date_ended="' . $date_ended . '"
-				WHERE lis_id="' . $id . '"';
+        if ($id === '') {
+            $id = '0';
+        }
+
+        $sql = 'UPDATE terms
+                SET date_ended = :date_ended,
+                    date_modified = NOW()
+                WHERE lis_id = :lis_id
+                    AND date_ended IS NULL';
         $stmt = $GLOBALS['dbh']->prepare($sql);
-        $result = $stmt->execute();
+        $result = $stmt->execute([
+            ':date_ended' => $date_ended,
+            ':lis_id' => (int)$id,
+        ]);
 
         return $result;
     } // deactivate_legislator()
@@ -921,51 +930,82 @@ class Import
             return false;
         }
 
-        /*
-         * Make sure that there is not already a record for this shortname.
-         */
-        $sql = 'SELECT *
-				FROM representatives
-				WHERE shortname="' . $legislator['shortname'] . '"';
-        $stmt = $GLOBALS['dbh']->prepare($sql);
-        $stmt->execute();
-        $existing = $stmt->fetchAll(PDO::FETCH_OBJ);
-
-        if (count($existing) > 0) {
-            $error = 'Not creating a record for ' . $legislator['name_formatted'] . ' because '
-                . ' there is already a record for ' . $legislator['shortname'] . ' in the '
-                . 'database. This legislator must be added manually. Use this info: ';
-            foreach ($legislator as $key => $value) {
-                $error .= $key . ': ' . $value . "\n";
-            }
-            $this->log->put($error, 6);
-
+        $normalized_lis_id = $this->normalizeLisNumericIdentifier($legislator['lis_id']);
+        if ($normalized_lis_id === null) {
+            $this->log->put('Unable to determine LIS ID for ' . $legislator['name_formatted'], 6);
             return false;
         }
 
-        /*
-         * LIS IDs are preceded with an "H" or an "S," but we don't use those within the
-         * database, so strip that out.
-         */
-        $legislator['lis_id'] = preg_replace('/[H,S]/', '', $legislator['lis_id']);
-
-        /*
-         * Build the SQL query
-         */
-        $sql = 'INSERT INTO representatives SET ';
-        foreach ($legislator as $key => $value) {
-            $sql .= $key . '="' . addslashes($value) . '", ';
+        $person_id = $this->ensurePersonRecord($legislator);
+        if ($person_id === false) {
+            return false;
         }
 
-        $sql .= 'date_created=now()';
+        $active_check = $GLOBALS['dbh']->prepare(
+            'SELECT id
+                FROM terms
+                WHERE lis_id = :lis_id
+                    AND chamber = :chamber
+                    AND date_ended IS NULL
+                LIMIT 1'
+        );
+        $active_check->execute([
+            ':lis_id' => $normalized_lis_id,
+            ':chamber' => $legislator['chamber'],
+        ]);
+        if ($active_check->fetch(PDO::FETCH_ASSOC)) {
+            $this->log->put(
+                'Not creating a record for ' . $legislator['name_formatted']
+                . ' because there is already an active term for LIS ID ' . $legislator['lis_id'] . '.',
+                5
+            );
+            return false;
+        }
 
-        /*
-         * Insert the legislator record
-         */
-        $stmt = $GLOBALS['dbh']->prepare($sql);
-        $result = $stmt->execute();
+        $term_sql = 'INSERT INTO terms
+                (person_id, name_formatted, lis_shortname, lis_id, chamber, party, district_id,
+                 date_started, date_ended, sbe_id, email, url, rss_url, place, longitude, latitude,
+                 partisanship, phone_district, phone_richmond, address_district, address_richmond,
+                 date_created, date_modified)
+            VALUES
+                (:person_id, :name_formatted, :lis_shortname, :lis_id, :chamber, :party, :district_id,
+                 :date_started, :date_ended, :sbe_id, :email, :url, :rss_url, :place, :longitude, :latitude,
+                 :partisanship, :phone_district, :phone_richmond, :address_district, :address_richmond,
+                 NOW(), NOW())';
+
+        $term_params = [
+            ':person_id' => $person_id,
+            ':name_formatted' => $legislator['name_formatted'],
+            ':lis_shortname' => $this->deriveLisShortname($legislator),
+            ':lis_id' => $normalized_lis_id,
+            ':chamber' => $legislator['chamber'],
+            ':party' => $legislator['party'],
+            ':district_id' => (int)$legislator['district_id'],
+            ':date_started' => $this->sanitizeDateValue($legislator['date_started']) ?? date('Y-m-d'),
+            ':date_ended' => $this->sanitizeDateValue($legislator['date_ended'] ?? null),
+            ':sbe_id' => $this->normalizeOptionalString($legislator['sbe_id'] ?? null),
+            ':email' => $this->normalizeOptionalString($legislator['email'] ?? null),
+            ':url' => $this->normalizeOptionalString($legislator['url'] ?? null),
+            ':rss_url' => $this->normalizeOptionalString($legislator['rss_url'] ?? null),
+            ':place' => $this->normalizeOptionalString($legislator['place'] ?? null),
+            ':longitude' => $this->normalizeNullableFloat($legislator['longitude'] ?? null),
+            ':latitude' => $this->normalizeNullableFloat($legislator['latitude'] ?? null),
+            ':partisanship' => isset($legislator['partisanship'])
+                ? (int)$legislator['partisanship']
+                : 0,
+            ':phone_district' => $this->normalizeOptionalString($legislator['phone_district'] ?? null),
+            ':phone_richmond' => $this->normalizeOptionalString($legislator['phone_richmond'] ?? null),
+            ':address_district' => $this->normalizeOptionalString($legislator['address_district'] ?? null),
+            ':address_richmond' => $this->normalizeOptionalString($legislator['address_richmond'] ?? null),
+        ];
+
+        $stmt = $GLOBALS['dbh']->prepare($term_sql);
+        $result = $stmt->execute($term_params);
         if ($result == false) {
-            $this->log->put('Error: Legislator record could not be added.' . "\n" . $sql . "\n", 6);
+            $this->log->put(
+                'Error: Legislator term could not be added for ' . $legislator['name_formatted'] . '.',
+                6
+            );
             return false;
         }
 
@@ -1044,17 +1084,12 @@ class Import
 
         $log = new Log();
 
-        /*
-        * These are the only fields that may be updated automatically
-        */
-        $allowed_fields = array(
+        $term_fields = array(
             'email' => true,
             'address_richmond' => true,
             'address_district' => true,
             'phone_richmond' => true,
             'phone_district' => true,
-            'race' => true,
-            'sex' => true,
             'url' => true,
             'sbe_id' => true,
             'place' => true,
@@ -1063,46 +1098,280 @@ class Import
             'district_id' => true,
         );
 
-        /*
-         * See if any of these fields are found within $legislator
-         */
-        $changed_fields = array_intersect_key($allowed_fields, $legislator);
-        if (count($changed_fields) == 0) {
+        $person_fields = array(
+            'race' => true,
+            'sex' => true,
+        );
+
+        $term_changes = array_intersect_key($term_fields, $legislator);
+        $person_changes = array_intersect_key($person_fields, $legislator);
+        if (count($term_changes) === 0 && count($person_changes) === 0) {
             return;
         }
 
-        /*
-         * LIS IDs are preceded with an "H" or an "S," but we don't use those within the
-         * database, so strip that out.
-         */
-        $legislator['lis_id'] = preg_replace('/[H,S]/', '', $legislator['lis_id']);
+        if (count($term_changes) > 0) {
+            $set = array();
+            $params = array(':term_id' => (int)$legislator['id']);
+            foreach ($term_changes as $field => $unused) {
+                $placeholder = ':' . $field;
+                $set[] = $field . ' = ' . $placeholder;
+                if ($field === 'latitude' || $field === 'longitude') {
+                    $params[$placeholder] = $this->normalizeNullableFloat($legislator[$field]);
+                } elseif ($field === 'district_id') {
+                    $params[$placeholder] = (int)$legislator[$field];
+                } else {
+                    $params[$placeholder] = $this->normalizeOptionalString($legislator[$field]);
+                }
+            }
+            $set[] = 'date_modified = NOW()';
 
-        /*
-         * Build the SQL query
-         */
-        $sql = 'UPDATE representatives SET ';
-        foreach ($changed_fields as $key => $value) {
-            $sql .= $key . '="' . addslashes($legislator[$key]) . '", ';
+            $sql = 'UPDATE terms SET ' . implode(', ', $set) . ' WHERE id = :term_id';
+            $stmt = $GLOBALS['dbh']->prepare($sql);
+            if ($stmt->execute($params) == false) {
+                $this->log->put('Error: Term record could not be updated.' . "\n" . $sql . "\n", 6);
+                return false;
+            }
         }
 
-        $sql = substr($sql, 0, -2) . ' ';
+        if (count($person_changes) > 0) {
+            $person_id = $this->fetchPersonIdForTerm((int)$legislator['id']);
+            if ($person_id === null) {
+                $this->log->put(
+                    'Error: Could not determine the associated person record for legislator #' . $legislator['id'],
+                    6
+                );
+                return false;
+            }
 
-        $sql .= 'WHERE id=' . $legislator['id'];
+            $set = array();
+            $params = array(':person_id' => $person_id);
+            foreach ($person_changes as $field => $unused) {
+                $placeholder = ':' . $field;
+                $set[] = $field . ' = ' . $placeholder;
+                $value = strtolower(trim((string)$legislator[$field]));
+                $params[$placeholder] = $value === '' ? null : $value;
+            }
+            $set[] = 'date_modified = NOW()';
 
-        /*
-         * Update the legislator record
-         */
-        $stmt = $GLOBALS['dbh']->prepare($sql);
-        $result = $stmt->execute();
-        if ($result == false) {
-            $this->log->put('Error: Legislator record could not be updated.' . "\n" . $sql . "\n", 6);
-            return false;
+            $sql = 'UPDATE people SET ' . implode(', ', $set) . ' WHERE id = :person_id';
+            $stmt = $GLOBALS['dbh']->prepare($sql);
+            if ($stmt->execute($params) == false) {
+                $this->log->put('Error: Person record could not be updated.' . "\n" . $sql . "\n", 6);
+                return false;
+            }
         }
 
         $log->put('Refreshed the legislator record for ' . $legislator['name_formatted'] . '.', 2);
 
         return true;
     } // update_legislator
+
+    /**
+     * Convert an LIS identifier into its numeric portion.
+     *
+     * @param string $lis_id Raw LIS identifier (e.g., H0123 or S123).
+     *
+     * @return int|null Normalized numeric identifier or null when digits cannot be determined.
+     */
+    private function normalizeLisNumericIdentifier($lis_id)
+    {
+        $digits = preg_replace('/[^0-9]/', '', (string)$lis_id);
+        if ($digits === '') {
+            return null;
+        }
+        $trimmed = ltrim($digits, '0');
+        if ($trimmed === '') {
+            return 0;
+        }
+        return (int)$trimmed;
+    }
+
+    /**
+     * Determine the LIS shortname to store for a legislator term.
+     *
+     * @param array $legislator Legislator data array.
+     *
+     * @return string Shortname limited to 32 characters.
+     */
+    private function deriveLisShortname(array $legislator)
+    {
+        if (!empty($legislator['lis_shortname'])) {
+            return substr(trim((string)$legislator['lis_shortname']), 0, 32);
+        }
+
+        $candidates = array(
+            $legislator['name'] ?? null,
+            $legislator['name_formal'] ?? null,
+            $legislator['name_formatted'] ?? null,
+            $legislator['shortname'] ?? null,
+        );
+
+        foreach ($candidates as $candidate) {
+            $candidate = trim((string)$candidate);
+            if ($candidate !== '') {
+                return substr(strtolower($candidate), 0, 32);
+            }
+        }
+
+        return 'unknown';
+    }
+
+    /**
+     * Insert or update the person record that corresponds to a legislator.
+     *
+     * @param array $legislator Legislator data array.
+     *
+     * @return int|false Person ID on success or false when persistence fails.
+     */
+    private function ensurePersonRecord(array $legislator)
+    {
+        $shortname = trim((string)$legislator['shortname']);
+        if ($shortname === '') {
+            $this->log->put('Cannot create person record without a shortname.', 6);
+            return false;
+        }
+
+        $stmt = $GLOBALS['dbh']->prepare(
+            'SELECT id FROM people WHERE shortname = :shortname LIMIT 1'
+        );
+        $stmt->execute([':shortname' => $shortname]);
+        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        $birthday = $this->sanitizeDateValue($legislator['birthday'] ?? null);
+        $race = isset($legislator['race']) ? strtolower((string)$legislator['race']) : null;
+        $sex = isset($legislator['sex']) ? strtolower((string)$legislator['sex']) : null;
+        $bio = $this->normalizeOptionalString($legislator['bio'] ?? null);
+
+        if ($existing) {
+            $params = array(
+                ':name' => $legislator['name'],
+                ':name_formal' => $legislator['name_formal'],
+                ':birthday' => $birthday,
+                ':race' => $race === '' ? null : $race,
+                ':sex' => $sex === '' ? null : $sex,
+                ':bio' => $bio,
+                ':id' => (int)$existing['id'],
+            );
+            $sql = 'UPDATE people
+                    SET name = :name,
+                        name_formal = :name_formal,
+                        birthday = :birthday,
+                        race = :race,
+                        sex = :sex,
+                        bio = :bio,
+                        date_modified = NOW()
+                    WHERE id = :id';
+            $update = $GLOBALS['dbh']->prepare($sql);
+            if ($update->execute($params) == false) {
+                $this->log->put('Error: Person record could not be updated for ' . $legislator['name_formal'], 6);
+                return false;
+            }
+
+            return (int)$existing['id'];
+        }
+
+        $params = array(
+            ':shortname' => $shortname,
+            ':name' => $legislator['name'],
+            ':name_formal' => $legislator['name_formal'],
+            ':birthday' => $birthday,
+            ':race' => $race === '' ? null : $race,
+            ':sex' => $sex === '' ? null : $sex,
+            ':bio' => $bio,
+        );
+
+        $sql = 'INSERT INTO people
+                (shortname, name, name_formal, birthday, race, sex, bio, date_created, date_modified)
+            VALUES
+                (:shortname, :name, :name_formal, :birthday, :race, :sex, :bio, NOW(), NOW())';
+        $insert = $GLOBALS['dbh']->prepare($sql);
+        if ($insert->execute($params) == false) {
+            $this->log->put('Error: Person record could not be created for ' . $legislator['name_formal'], 6);
+            return false;
+        }
+
+        return (int)$GLOBALS['dbh']->lastInsertId();
+    }
+
+    /**
+     * Normalize optional strings by trimming whitespace and converting blanks to null.
+     *
+     * @param mixed $value Value to normalize.
+     *
+     * @return string|null Normalized string or null when empty.
+     */
+    private function normalizeOptionalString($value)
+    {
+        if ($value === null) {
+            return null;
+        }
+        $value = trim((string)$value);
+        return $value === '' ? null : $value;
+    }
+
+    /**
+     * Convert optional float values to native floats or null.
+     *
+     * @param mixed $value Possible float value.
+     *
+     * @return float|null Normalized float or null when empty.
+     */
+    private function normalizeNullableFloat($value)
+    {
+        if ($value === null) {
+            return null;
+        }
+        if (is_string($value)) {
+            $value = trim($value);
+        }
+        if ($value === '') {
+            return null;
+        }
+        return (float)$value;
+    }
+
+    /**
+     * Normalize raw date strings into YYYY-MM-DD format or null when blank.
+     *
+     * @param mixed $value Raw date value.
+     *
+     * @return string|null Normalized date string or null when invalid/empty.
+     */
+    private function sanitizeDateValue($value)
+    {
+        $value = $value ?? '';
+        $value = trim((string)$value);
+        if ($value === '' || $value === '0000-00-00' || $value === '0000-00-00 00:00:00') {
+            return null;
+        }
+        if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $value)) {
+            return $value;
+        }
+        if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $value)) {
+            return substr($value, 0, 10);
+        }
+        return null;
+    }
+
+    /**
+     * Retrieve the associated person identifier for a term.
+     *
+     * @param int $term_id Term identifier.
+     *
+     * @return int|null Person identifier or null when it cannot be determined.
+     */
+    private function fetchPersonIdForTerm($term_id)
+    {
+        $stmt = $GLOBALS['dbh']->prepare('SELECT person_id FROM terms WHERE id = :id');
+        if ($stmt->execute([':id' => $term_id]) == false) {
+            return null;
+        }
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$row) {
+            return null;
+        }
+        return (int)$row['person_id'];
+    }
 
     /**
      * Retrieve legislator data by scraping the General Assembly website.
