@@ -87,7 +87,7 @@ jobs:
       
       - name: Run tests
         id: tests
-        run: docker exec -i rs_web /var/www/deploy/tests/run-all.sh
+        run: ./docker-tests.sh
       
       - name: Stop Docker
         if: always()
