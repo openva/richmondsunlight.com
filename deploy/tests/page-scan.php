@@ -188,8 +188,6 @@ foreach ($pages as $page) {
     }
 
     echo '✅ '  . $page['url'] . "\n";
-
-    curl_close($ch);
 }
 
 if (count($failures) > 0) {
