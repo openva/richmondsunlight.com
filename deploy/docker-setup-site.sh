@@ -48,13 +48,13 @@ sed -i -e "s|{PDO_SERVER}|db|g" /etc/sphinxsearch/sphinx.conf
 sed -i -e "s|{PDO_USERNAME}|ricsun|g" /etc/sphinxsearch/sphinx.conf
 sed -i -e "s|{PDO_PASSWORD}|password|g" /etc/sphinxsearch/sphinx.conf
 sed -i -e "s|{MYSQL_DATABASE}|richmondsunlight|g" /etc/sphinxsearch/sphinx.conf
-service sphinxsearch start
 
-# If we have an existing index, update it
+# Build the index before starting searchd if none exists; otherwise rotate while it's running.
+mkdir -p /var/lib/sphinxsearch/data
 if [[ -f /var/lib/sphinxsearch/data/bills.sph ]]; then
-    # Reindex
-    indexer --all --rotate
-# If there is no index, create a new one
+    service sphinxsearch start
+    indexer --all --rotate || indexer --all
 else
     indexer --all
+    service sphinxsearch start
 fi
