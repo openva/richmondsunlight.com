@@ -136,8 +136,6 @@ $site_section = 'bills';
 $html_head .= '
     <meta property="og:title" content="' . mb_strtoupper($bill['number']) . ': '
     . $bill['catch_line'] . '"/>
-	<meta property="og:image" content="https://www.richmondsunlight.com/images/legislators/thumbnails/'
-        . $bill['patron_shortname'] . '.jpg"/>
 	<meta property="og:url" content="' . $bill['url'] . '"/>
 	<meta property="og:type" content="website" />
 	<meta property="og:site_name" content="Richmond Sunlight" />
