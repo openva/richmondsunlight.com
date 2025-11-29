@@ -892,7 +892,7 @@ if (!empty($bill['outcome'])) {
 }
 
 // If this bill remains alive.
-else {
+elseif (isset($statuses)) {
     $page_body .= '<h2>Status</h2>
 	<p>';
 
