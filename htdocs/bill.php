@@ -913,9 +913,13 @@ else {
     // If it's assigned to a committee, but the committee has not yet acted on it, then we can
     // say that it's going to be voted on by that committee soon.
     elseif (
-        !empty($bill['committee']) && !in_array('passed senate', $statuses) && !in_array('passed house', $statuses)
-        && !in_array('passed committee', $statuses) && !in_array('failed committee', $statuses)
-        && !in_array('failed subcommittee', $statuses) && !in_array('incorporated', $statuses)
+        !empty($bill['committee']) &&
+        !in_array('passed senate', $statuses) &&
+        !in_array('passed house', $statuses) &&
+        !in_array('passed committee', $statuses) &&
+        !in_array('failed committee', $statuses) &&
+        !in_array('failed subcommittee', $statuses) &&
+        !in_array('incorporated', $statuses)
     ) {
         $page_body .=
             'Awaiting a Vote in the <a href="/committee/' . $bill['committee_chamber'] . '/' . $bill['committee_shortname'] . '/">'
