@@ -27,7 +27,9 @@ hooks:
     - location: deploy/predeploy.sh
       timeout: 300
       runas: root
-  Install: []
+  Install:
+    - location: deploy/install-log.sh
+      runas: root
   AfterInstall:
     - location: deploy/postdeploy.sh
       runas: root
