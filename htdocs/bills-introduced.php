@@ -83,6 +83,8 @@ if ($num_results > 0) {
         $i++;
     }
     $page_body .= '</ul>';
+} else {
+	$page_body .= '<p>No bills introduced in the past ' . $days . ' days.</p>';
 }
 
 # PAGE SIDEBAR
