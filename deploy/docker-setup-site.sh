@@ -16,8 +16,13 @@ if [ $(grep include_path .htaccess |grep -v "#" |wc -l |xargs) -eq 0 ]; then
 fi
 
 # Have PHP report errors.
-if [ $(grep 2039 .htaccess |grep -v "#" |wc -l |xargs) -eq 0 ]; then
-	echo 'php_value error_reporting 2039' >> .htaccess
+if [ $(grep error_reporting .htaccess |grep -v "#" |wc -l |xargs) -eq 0 ]; then
+	echo 'php_value error_reporting 32767' >> .htaccess
+fi
+
+# Show errors in the browser for easier debugging inside Docker.
+if [ $(grep display_errors .htaccess |grep -v "#" |wc -l |xargs) -eq 0 ]; then
+	echo 'php_flag display_errors On' >> .htaccess
 fi
 
 cd ..
