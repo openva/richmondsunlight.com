@@ -408,6 +408,15 @@ ul.tabs li {
 			background-color: #f4eee5;
 		}
 
+/* Strip default jQuery UI border around tabbed panels */
+.tabs.ui-tabs.ui-widget.ui-widget-content {
+	border: 0;
+	background: transparent;
+}
+.tabs.ui-tabs .ui-tabs-panel {
+	border: 0;
+}
+
 /* A legislator's biographical section */
 div.tabs > div {
 	background-color: #f4eee5;
