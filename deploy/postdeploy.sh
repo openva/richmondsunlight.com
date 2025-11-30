@@ -1,6 +1,7 @@
 #!/bin/bash
 
-echo Debug: DEPLOYMENT_GROUP_NAME is "$DEPLOYMENT_GROUP_NAME"
+LOGFILE=/tmp/postdeploy.log
+echo "$(date -Iseconds) postdeploy starting; DEPLOYMENT_GROUP_NAME='${DEPLOYMENT_GROUP_NAME:-}'" | tee -a "$LOGFILE"
 
 # Set variables based on whether this is for the staging site or the production site.
 if [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Staging" ]
@@ -12,7 +13,7 @@ then
     SITE_PATH=/var/www/richmondsunlight.com
     SITE_URL=richmondsunlight.com
 else
-    echo "Fatal error: No deployment group found"
+    echo "Fatal error: No deployment group found" | tee -a "$LOGFILE"
     exit 1
 fi
 
