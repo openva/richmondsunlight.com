@@ -127,9 +127,8 @@ if (mysqli_num_rows($result) > 0) {
     $page_body .= '
 			</tbody>
 		</table>';
-}
-else {
-	$page_body = '
+} else {
+    $page_body = '
 		<p>' . $legislator['prefix'] . ' ' . $legislator['name'] . ' did not
 		cast any recorded votes in ' . $year . '.</p>';
 }
