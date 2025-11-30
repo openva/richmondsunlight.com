@@ -18,7 +18,8 @@
     },
     "scripts": {
         "post-install-cmd": [
-            "curl -fsSL https://raw.githubusercontent.com/manticoresoftware/manticoresearch/master/api/sphinxapi.php -o htdocs/includes/vendor/sphinxapi.php"
+            "curl -fsSL https://raw.githubusercontent.com/manticoresoftware/manticoresearch/master/api/sphinxapi.php -o htdocs/includes/vendor/sphinxapi.php",
+            "sed -i.bak \"s/0x120/0x11F/g\" htdocs/includes/vendor/sphinxapi.php && rm htdocs/includes/vendor/sphinxapi.php.bak"
         ],
         "post-update-cmd": [
             "@post-install-cmd"
