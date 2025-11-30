@@ -1,5 +1,7 @@
 #!/bin/bash
 
+echo Debug: DEPLOYMENT_GROUP_NAME is "$DEPLOYMENT_GROUP_NAME"
+
 # Set variables based on whether this is for the staging site or the production site.
 if [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Staging" ]
 then
