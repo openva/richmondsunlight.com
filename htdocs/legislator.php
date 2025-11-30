@@ -416,7 +416,7 @@ if (!empty($legislator['date_ended'])) {
 		<div class="content">' . $next_election . '</div>
     </div>';
 }
-if (is_array($legislator['committees']) && (count($legislator['committees']) > 0)) {
+if (isset($legislator['committees']) && (count($legislator['committees']) > 0)) {
     $page_body .= '
     <div class="pair">
 		<div class="label">Committees</div>
