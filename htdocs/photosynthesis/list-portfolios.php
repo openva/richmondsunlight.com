@@ -71,4 +71,3 @@ foreach (array('page_title', 'page_body', 'page_sidebar', 'site_section') as $pr
     }
 }
 $page->process();
-
