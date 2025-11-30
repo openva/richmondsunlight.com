@@ -568,7 +568,7 @@ if (isset($impact_statements)) {
             $url = $impact_statement['pdf_url'];
         } elseif (!empty($impact_statement['lis_id'])) {
             $url = 'https://lis.virginia.gov/cgi-bin/legp604.exe?'
-                . $bill['lis_id'] . '+oth+' . mb_strtoupper($bill['number'])
+                . $impact_statement['lis_id'] . '+oth+' . mb_strtoupper($bill['number'])
                 . $impact_statement['lis_id'] . '+PDF';
         }
         $page_sidebar .= '<li><a href="' . $url . '">Fiscal Impact Statement</a></li>';
