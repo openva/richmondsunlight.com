@@ -111,6 +111,8 @@ if ($num_results > 0) {
         $i++;
     }
     $page_body .= '</ul>';
+} else {
+    $page_body .= '<p>No bill activity in the past ' . $days . ' days.</p>';
 }
 
 # PAGE SIDEBAR
