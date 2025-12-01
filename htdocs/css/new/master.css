@@ -413,8 +413,10 @@ ul.tabs li {
 	border: 0;
 	background: transparent;
 }
-.tabs.ui-tabs .ui-tabs-panel {
-	border: 0;
+.tabs.ui-widget-content a {
+	color: #c6a952;
+	font-weight: bold;
+	text-decoration: underline;
 }
 
 /* A legislator's biographical section */

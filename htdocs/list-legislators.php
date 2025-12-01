@@ -26,9 +26,7 @@ session_start();
 # PAGE METADATA
 $page_title = 'Legislators';
 $site_section = 'legislators';
-
-# Include the tabbing code.
-$html_head = '<script src="/js/scriptaculous/control-tabs.js" type="text/javascript"></script>';
+$html_head = '';
 
 # PAGE SIDEBAR
 $page_sidebar = '
@@ -51,8 +49,9 @@ $page_sidebar = '
 # PAGE CONTENT
 
 # Present the tab options.
-/*$page_body = '
-    <ul class="tabs" id="tab_group_one">
+$page_body = '
+<div class="tabs" id="tab_group_one">
+    <ul class="tabs">
         <li><a href="#names">Names</a></li>
         <li><a href="#location">Map</a></li>';
 $page_body .= '
@@ -155,14 +154,8 @@ if (mysqli_num_rows($result) > 0)
     </script>';
     $body_tag = ' onunload="GUnload()"';
 }
-$page_body .= '</div>';
-
-# Insert the script code to render the tabs.
-$page_body .= '
-<script type="text/javascript">
-    new Control.Tabs(\'tab_group_one\');
-</script>';*/
-
+$page_body .= '</div>'; // end #districts
+$page_body .= '</div>'; // end #tab_group_one
 
 # OUTPUT THE PAGE
 $page = new Page();
