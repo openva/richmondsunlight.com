@@ -200,28 +200,34 @@ ksort($parties);
 # Only bother displaying a graph if this vote wasn't unanimous. (Most votes are unanimous,
 # so this is a real time-saver.)
 if (count($graph) > 1) {
-    $html_head .= '
-    <script src="https://www.gstatic.com/charts/loader.js"></script>
-	<script>
-		google.load("visualization", "1", {packages:["corechart"]});
-		google.setOnLoadCallback(drawChart);
-		function drawChart() {
-			var data = new google.visualization.DataTable();
-			data.addColumn("string", "Vote");';
+    // Build Chart.js datasets keyed by party to mirror the Google Charts output.
+    $party_labels = [];
+    $party_colors = [];
     foreach ($parties as $party => $blargh) {
-        if ($party == 'r') {
-            $party = 'Rep.';
-        } elseif ($party == 'd') {
-            $party = 'Dem.';
-        } elseif ($party == 'i') {
-            $party = 'Ind.';
+        if ($party === 'r') {
+            $party_labels[$party] = 'Rep.';
+            $party_colors[$party] = '#d32f2f';
+        } elseif ($party === 'd') {
+            $party_labels[$party] = 'Dem.';
+            $party_colors[$party] = '#1e88e5';
+        } elseif ($party === 'i') {
+            $party_labels[$party] = 'Ind.';
+            $party_colors[$party] = '#43a047';
+        } else {
+            $party_labels[$party] = strtoupper($party);
+            $party_colors[$party] = '#9e9e9e';
         }
-        $html_head .= '
-			data.addColumn("number", "' . $party . '");';
     }
-    $html_head .= '
-			data.addRows(' . count($graph) . ');';
-    $i = 0;
+
+    $chart_labels = [];
+    $datasets = [];
+    foreach ($parties as $party => $blargh) {
+        $datasets[$party] = [
+            'label' => $party_labels[$party],
+            'data' => [],
+            'backgroundColor' => $party_colors[$party]
+        ];
+    }
 
     foreach ($graph as $outcome => $tally) {
         if ($outcome == 'y') {
@@ -233,38 +239,40 @@ if (count($graph) > 1) {
         } elseif ($outcome == 'a') {
             $outcome = 'Abstained';
         }
+        $chart_labels[] = $outcome;
 
-        $html_head .= '
-				data.setValue(' . $i . ', 0, "' . $outcome . '");';
-        $j = 1;
-
-        foreach ($tally as $party => $count) {
-            $html_head .= '
-				data.setValue(' . $i . ', ' . $j . ', ' . $count . ');';
-            $j++;
+        foreach ($parties as $party => $blargh) {
+            $datasets[$party]['data'][] = (int)$tally[$party];
         }
-        $i++;
     }
-    $html_head .= '
-			var chart = new google.visualization.ColumnChart(document.getElementById("chart"));
-			chart.draw(data, {isStacked: true, width: 400, height: 240,';
 
-    # Specify the three colors that will color our graph, that correlate (alphabetically)
-    # to Democrats, independents, and Republicans.
-    if (count($parties) == 3) {
-        $html_head .= '
-			colors:["blue", "green", "red"]});';
-    }
-    # Unless no independents voted, in which case we just want to define colors for Democrats
-    # and Republicans.
-    else {
-        $html_head .= '
-			colors:["blue", "red"]});';
-    }
-    $html_head .= '
-		}
-	</script>';
-    $page_body .= '<div id="chart"></div>';
+    $chart_data = [
+        'labels' => $chart_labels,
+        'datasets' => array_values($datasets)
+    ];
+
+    $html_head .= '<script src="/js/vendor/chart.js/dist/chart.umd.js"></script>';
+    $page_body .= '<div id="chart-container" style="width: 400px; height: 240px"><canvas id="chart"></canvas></div>';
+    $page_body .= '<script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var ctx = document.getElementById("chart").getContext("2d");
+            new Chart(ctx, {
+                type: "bar",
+                data: ' . json_encode($chart_data) . ',
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { stacked: true },
+                        y: { stacked: true, beginAtZero: true, ticks: { precision: 0 } }
+                    },
+                    plugins: {
+                        legend: { position: "top" }
+                    }
+                }
+            });
+        });
+    </script>';
 }
 
 # Display the actual vote results.
