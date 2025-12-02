@@ -587,7 +587,13 @@ a.balloon div {
 		display: none;
 	}
 	#sidebar {
-		display: none;
+		display: block;
+		clear: both;
+		margin: 1em auto 0 auto;
+		width: 96%;
+		max-width: 34em;
+		padding: 1em;
+		box-sizing: border-box;
 	}
 	#date, #status, p.quote, #bill-progress {
 		display: none;
