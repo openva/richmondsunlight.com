@@ -175,8 +175,8 @@ if (mysqli_num_rows($result) > 0) {
     ];
     $geojson = json_encode($geojson);
 
-    $html_head .= '<script src="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.js"></script>
-    <link href="https://api.mapbox.com/mapbox-gl-js/v2.3.1/mapbox-gl.css" rel="stylesheet" />';
+    $html_head .= '<script src="/js/vendor/mapbox-gl/dist/mapbox-gl.js"></script>
+    <link href="/js/vendor/mapbox-gl/dist/mapbox-gl.css" rel="stylesheet" />';
 
     $page_body .= '<h2>Places Mentioned in Bills</h2>
 	<script>
