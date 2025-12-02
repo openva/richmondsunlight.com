@@ -37,6 +37,9 @@ $site_section = 'bills';
 
 # PAGE CONTENT
 
+// Initialize page body
+$page_body = '';
+
 # Select the status of the bills.
 $sql = 'SELECT
 			bills.number,
