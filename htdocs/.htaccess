@@ -62,6 +62,9 @@ RewriteCond %{HTTP_USER_AGENT} SemrushBot [OR]
 RewriteCond %{HTTP_USER_AGENT} AhrefsBot
 RewriteRule .* - [F]
 
+# Bypass rewrites for static assets
+RewriteRule \.(?:js|css|png|jpe?g|gif|svg|ico|json|map|woff2?|ttf|eot)$ - [L]
+
 # Force www prefix
 RewriteCond %{HTTP_HOST} ^richmondsunlight.com [NC]
 RewriteRule ^(.*)$ https://www.richmondsunlight.com/$1 [L,R=301,NC]
