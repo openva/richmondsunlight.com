@@ -1,44 +1,37 @@
 #!/usr/bin/env bash
 
+set -euo pipefail
+
 echo "Running API tests..."
 
-# Is the bill's catch line included?
-URL="http://rs_api/1.1/bill/2024/sb278.json"
-OUTPUT="$(curl --silent $URL | jq '.catch_line')"
-EXPECTED='"Virginia Abortion Care &amp; Gender-Affirming Health Care Protection Act; established, civil penalties."';
-if [ "$OUTPUT" != "$EXPECTED" ]
-then
-    echo "❌: $URL Bill's catch line isn't included (expected $EXPECTED, got \"$OUTPUT\")"
-    ERRORED=true
+# Prefer in-cluster hostname if available; otherwise fall back to published port
+if getent hosts rs_api >/dev/null 2>&1; then
+    API_BASE="${API_BASE:-http://rs_api/1.1}"
 else
-    echo "✅: $URL Bill's catch line is included"
+    API_BASE="${API_BASE:-http://localhost:5001/1.1}"
 fi
 
-# Is the bill's patron shortname correct?
-URL="http://rs_api/1.1/bill/2024/sb278.json"
-OUTPUT="$(curl --silent $URL | jq '.patron_shortname')"
-EXPECTED='"gfhashmi"';
-if [ "$OUTPUT" != "$EXPECTED" ]
-then
-    echo "❌: $URL Bill's patron shortname isn't correct (expected $EXPECTED, got \"$OUTPUT\")"
-    ERRORED=true
-else
-    echo "✅: $URL Bill's patron shortname is correct"
-fi
+ERRORED=false
 
-# Is the legislator's formatted name correct?
-URL="http://rs_api/1.1/legislator/rcdeeds.json"
-OUTPUT="$(curl --silent $URL | jq '.name_formatted')"
-EXPECTED='"Sen. Creigh Deeds (D-Charlottesville)"';
-if [ "$OUTPUT" != "$EXPECTED" ]
-then
-    echo "❌: $URL Legislator's formatted name isn't correct (expected $EXPECTED, got \"$OUTPUT\")"
-    ERRORED=true
-else
-    echo "✅: $URL Legislator's formatted name is correct"
-fi
+check() {
+    local path="$1"
+    local jq_expr="$2"
+    local expected="$3"
+    local url="${API_BASE}${path}"
 
-# If any tests failed, have this script return that failure
-if [ "$ERRORED" == true ]; then
+    output="$(curl --silent "$url" | jq "$jq_expr")"
+    if [ "$output" != "$expected" ]; then
+        echo "❌: $url (${jq_expr}) expected $expected, got \"$output\""
+        ERRORED=true
+    else
+        echo "✅: $url (${jq_expr}) matches expected"
+    fi
+}
+
+check "/bill/2024/sb278.json" ".catch_line" '"Virginia Abortion Care &amp; Gender-Affirming Health Care Protection Act; established, civil penalties."'
+check "/bill/2024/sb278.json" ".patron_shortname" '"gfhashmi"'
+check "/legislator/rcdeeds.json" ".name_formatted" '"Sen. Creigh Deeds (D-Charlottesville)"'
+
+if [ "$ERRORED" = true ]; then
     exit 1
 fi
