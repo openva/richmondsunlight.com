@@ -25,4 +25,39 @@ The site can be run locally, in Docker:
 When you are done, run `./docker-stop.sh` (or quit Docker).
 
 ## Architecture
-![Network diagram](https://gist.githubusercontent.com/waldoj/b86e65bd8a14609849badefb85984ebf/raw/58012252ed5564fe6cf4b479df3fe8e2599786b9/rs_architecture.svg?sanitize=true)
+```mermaid
+flowchart LR
+  subgraph AWS
+    CD[CodeDeploy]
+    MACH["Machine (rs-machine)"]
+    RDS[(RDS)]
+    SQS[(SQS)]
+    VP[Video Processor]
+    S3[(Video S3)]
+    FE["Front-End (this site)"]
+    API["API (rs-api)"]
+    CF[CloudFront]
+  end
+
+  Users["Users/Browsers"]
+
+  CD --> MACH
+  CD --> FE
+  CD --> API
+  CD --> VP
+
+  MACH -->|reads/writes| RDS
+  MACH -->|enqueue videos| SQS
+  MACH -->|upload clips| S3
+
+  SQS --> VP
+  VP -->|transcoded video| S3
+
+  FE <-->|cached| CF
+  CF <-->|serves| Users
+
+  FE <-->|app data| RDS
+  FE <-->|calls| API
+  API <-->|data| RDS
+```
+

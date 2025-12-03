@@ -136,8 +136,6 @@ $site_section = 'bills';
 $html_head .= '
     <meta property="og:title" content="' . mb_strtoupper($bill['number']) . ': '
     . $bill['catch_line'] . '"/>
-	<meta property="og:image" content="https://www.richmondsunlight.com/images/legislators/thumbnails/'
-        . $bill['patron_shortname'] . '.jpg"/>
 	<meta property="og:url" content="' . $bill['url'] . '"/>
 	<meta property="og:type" content="website" />
 	<meta property="og:site_name" content="Richmond Sunlight" />
@@ -570,7 +568,7 @@ if (isset($impact_statements)) {
             $url = $impact_statement['pdf_url'];
         } elseif (!empty($impact_statement['lis_id'])) {
             $url = 'https://lis.virginia.gov/cgi-bin/legp604.exe?'
-                . $bill['lis_id'] . '+oth+' . mb_strtoupper($bill['number'])
+                . $impact_statement['lis_id'] . '+oth+' . mb_strtoupper($bill['number'])
                 . $impact_statement['lis_id'] . '+PDF';
         }
         $page_sidebar .= '<li><a href="' . $url . '">Fiscal Impact Statement</a></li>';
@@ -892,7 +890,7 @@ if (!empty($bill['outcome'])) {
 }
 
 // If this bill remains alive.
-else {
+elseif (isset($statuses)) {
     $page_body .= '<h2>Status</h2>
 	<p>';
 
@@ -913,9 +911,13 @@ else {
     // If it's assigned to a committee, but the committee has not yet acted on it, then we can
     // say that it's going to be voted on by that committee soon.
     elseif (
-        !empty($bill['committee']) && !in_array('passed senate', $statuses) && !in_array('passed house', $statuses)
-        && !in_array('passed committee', $statuses) && !in_array('failed committee', $statuses)
-        && !in_array('failed subcommittee', $statuses) && !in_array('incorporated', $statuses)
+        !empty($bill['committee']) &&
+        !in_array('passed senate', $statuses) &&
+        !in_array('passed house', $statuses) &&
+        !in_array('passed committee', $statuses) &&
+        !in_array('failed committee', $statuses) &&
+        !in_array('failed subcommittee', $statuses) &&
+        !in_array('incorporated', $statuses)
     ) {
         $page_body .=
             'Awaiting a Vote in the <a href="/committee/' . $bill['committee_chamber'] . '/' . $bill['committee_shortname'] . '/">'

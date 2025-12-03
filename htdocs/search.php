@@ -12,7 +12,7 @@
 # Include any files or libraries that are necessary for this specific
 # page to function.
 include_once 'settings.inc.php';
-include_once 'includes/sphinxapi.php';
+include_once 'includes/vendor/sphinxapi.php';
 include_once 'vendor/autoload.php';
 
 # DECLARATIVE FUNCTIONS
@@ -29,9 +29,15 @@ $page_title = 'Search';
 $site_section = 'search';
 
 # LOCALIZE VARIABLES
-$q = $_REQUEST['q'];
-$year = $_REQUEST['year'];
-$p = $_REQUEST['p'];
+if (isset($_REQUEST['q'])) {
+    $q = $_REQUEST['q'];
+}
+if (isset($_REQUEST['year'])) {
+    $year = $_REQUEST['year'];
+}
+if (isset($_REQUEST['p'])) {
+    $p = $_REQUEST['p'];
+}
 
 # Clean up the variables.
 $per_page = 10;

@@ -286,6 +286,8 @@ if (!empty($year)) {
 			<li><a href="/bills/2022/">2022</a></li>
 			<li><a href="/bills/2023/">2023</a></li>
 			<li><a href="/bills/2024/">2024</a></li>
+			<li><a href="/bills/2025/">2025</a></li>
+			<li><a href="/bills/2026/">2026</a></li>
 		</ul>
 
 		<p style="margin-top: 1em;">View bills that:</p>
@@ -347,7 +349,7 @@ if (!empty($year)) {
     $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0) {
         $page_sidebar .= '
-	<a href="javascript:openpopup(\'/help/tag-clouds/\')"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
+	<a href="/help/tag-clouds/" class="help-icon-link" data-help-url="/help/tag-clouds/"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
 
 	<div class="box">
 		<h3>Tag Cloud</h3>
@@ -394,7 +396,7 @@ if (!empty($tag)) {
     $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0) {
         $page_sidebar .= '
-	<a href="javascript:openpopup(\'/help/tag-clouds/\')"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
+	<a href="/help/tag-clouds/" class="help-icon-link" data-help-url="/help/tag-clouds/"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
 
 	<div class="box">
 		<h3>Related Tag Cloud</h3>

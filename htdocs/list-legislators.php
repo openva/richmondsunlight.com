@@ -26,9 +26,7 @@ session_start();
 # PAGE METADATA
 $page_title = 'Legislators';
 $site_section = 'legislators';
-
-# Include the tabbing code.
-$html_head = '<script src="/js/scriptaculous/control-tabs.js" type="text/javascript"></script>';
+$html_head = '';
 
 # PAGE SIDEBAR
 $page_sidebar = '
@@ -51,12 +49,12 @@ $page_sidebar = '
 # PAGE CONTENT
 
 # Present the tab options.
-/*$page_body = '
-    <ul class="tabs" id="tab_group_one">
+$page_body = '
+<div class="tabs" id="tab_group_one">
+    <ul class="tabs">
         <li><a href="#names">Names</a></li>
-        <li><a href="#location">Map</a></li>';
-$page_body .= '
-    </ul>';*/
+        <li><a href="#districts">Districts</a></li>
+    </ul>';
 
 $page_body .= '<div id="names">';
 
@@ -102,74 +100,201 @@ if (mysqli_num_rows($result) > 0) {
 
 $page_body .= '</div>';
 
+$page_body .= '<div id="districts">';
 
-
-
-/*$page_body .= "\r\r\t".'<div id="location">';
-
-# Get a listing legislators with their latitude and longitude.
-$sql = 'SELECT id, shortname, name, chamber, latitude, longitude
-        FROM representatives
-        WHERE (date_ended IS NULL OR date_ended > now())
-        AND latitude IS NOT NULL AND longitude IS NOT NULL';
+// List all districts and their boundaries
+$sql = 'SELECT
+            terms.name_formatted,
+            people.shortname,
+            terms.party,
+            districts.boundaries,
+            districts.chamber,
+            districts.number
+        FROM terms
+        LEFT JOIN people
+            ON terms.person_id=people.id
+        LEFT JOIN districts
+            ON terms.district_id=districts.id
+        WHERE
+            terms.date_ended IS NULL OR
+            terms.date_ended > NOW()
+        ORDER BY
+            districts.chamber,
+            districts.number';
 $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0)
-{
-    # Create the HTML that defines the map.
-    $html_head .= "\r\t".'<script src="http://maps.google.com/maps?file=api&amp;v=2&amp;sensor=false&amp;key=ABQIAAAAn01L8sl4uwWn5vTPpoEoXhS0gyL4OV3haSzsE_slDr_NsupiLRSOvHSKmqYYxuXboyr-TTQzL6K8gg" type="text/javascript"></script>';
+$districts = array(
+    'house' => array(
+        'type' => 'FeatureCollection',
+        'features' => array()
+    ),
+    'senate' => array(
+        'type' => 'FeatureCollection',
+        'features' => array()
+    )
+);
+if (mysqli_num_rows($result) > 0) {
+    while ($row = mysqli_fetch_assoc($result)) {
+        if (empty($row['boundaries']) || !isset($districts[$row['chamber']])) {
+            continue;
+        }
+
+        $boundary = json_decode($row['boundaries'], true);
+        if (!isset($boundary['features'][0])) {
+            continue;
+        }
+
+        $feature = $boundary['features'][0];
+        // Replace any existing properties with simpler identifying data.
+        $feature['properties'] = array(
+            'name' => $row['name_formatted'],
+            'chamber' => $row['chamber'],
+            'number' => $row['number'],
+            'shortname' => $row['shortname'],
+            'party' => $row['party']
+        );
+
+        $districts[$row['chamber']]['features'][] = $feature;
+    }
+
+    $html_head .= '<script src="/js/vendor/mapbox-gl/dist/mapbox-gl.js"></script>
+    <link href="/js/vendor/mapbox-gl/dist/mapbox-gl.css" rel="stylesheet" />
+    <script src="/js/vendor/@turf/turf/turf.min.js"></script>
+    <style>
+        #district_map { height: 300px; margin-top: 1em; }
+        .map-toggle { margin-top: .5em; }
+        .map-toggle button { margin-right: .25em; }
+        .map-toggle button.active { background-color: #dccbaf; }
+    </style>';
 
     $page_body .= '
-    <div id="map" style="width: 100%; height: 300px;"></div>
-
+    <div class="map-toggle">
+        <button type="button" class="active" data-chamber="house">House</button>
+        <button type="button" data-chamber="senate">Senate</button>
+    </div>
+    <div id="district_map"></div>
     <script type="text/javascript">
-        //<![CDATA[
+        $(function() {
+            var districtData = ' . json_encode($districts) . ';
+            var current = "house";
+            var map;
 
-        if (GBrowserIsCompatible()) {
+            mapboxgl.accessToken = "' . MAPBOX_TOKEN . '";
+            map = new mapboxgl.Map({
+                container: "district_map",
+                style: "mapbox://styles/mapbox/streets-v11",
+                center: [-78.57,37.48],
+                zoom: 7
+            });
+            map.addControl(new mapboxgl.NavigationControl());
 
-            function createMarker(point,html) {
-                var marker = new GMarker(point);
-                GEvent.addListener(marker, "click", function() {
-                    marker.openInfoWindowHtml(html);
+            function fitToData() {
+                var features = districtData[current].features;
+                if (!features.length) {
+                    return;
+                }
+                var bounds = new mapboxgl.LngLatBounds();
+                features.forEach(function(feature) {
+                    var bbox = turf.bbox(feature);
+                    bounds.extend([bbox[0], bbox[1]]);
+                    bounds.extend([bbox[2], bbox[3]]);
                 });
-                return marker;
+                map.fitBounds(bounds, { padding: 20 });
             }
 
-            var map = new GMap2(document.getElementById("map"));
+            map.on("load", function() {
+                map.addSource("boundaries", {
+                    "type": "geojson",
+                    "data": districtData[current]
+                });
+                map.addLayer({
+                    "id": "boundaries-fill",
+                    "type": "fill",
+                    "source": "boundaries",
+                    "paint": {
+                        "fill-color": [
+                            "case",
+                            ["==", ["get", "party"], "D"], "#0000ff",
+                            ["==", ["get", "party"], "R"], "#ff0000",
+                            "#00ff00"
+                        ],
+                        "fill-opacity": 0.2
+                    }
+                });
+                map.addLayer({
+                    "id": "boundaries",
+                    "type": "line",
+                    "source": "boundaries",
+                    "layout": {
+                        "line-join": "round",
+                        "line-cap": "round"
+                    },
+                    "paint": {
+                        "line-color": "#888",
+                        "line-width": 3
+                    }
+                });
 
-            map.addControl(new GSmallZoomControl());
-            map.setCenter(new GLatLng(38, -79), 6);'."\r\r\t\t\t\t";
+                fitToData();
+            });
 
-    while ($legislator = mysqli_fetch_array($result))
-    {
-        $legislator = array_map('stripslashes', $legislator);
+            $(".map-toggle button").on("click", function() {
+                var chamber = $(this).data("chamber");
+                if (chamber === current) {
+                    return;
+                }
 
-        $page_body .= "\r\r
-            var point = new GLatLng(".$legislator['latitude'].", ".$legislator['longitude'].");
-            var marker = createMarker(point,'".pivot($legislator['name'])."')
-            map.addOverlay(marker);";
+                current = chamber;
+                $(".map-toggle button").removeClass("active");
+                $(this).addClass("active");
 
-    }
-    $page_body .= '
-        }
-        //]]>
+                var source = map.getSource("boundaries");
+                if (source) {
+                    source.setData(districtData[current]);
+                    fitToData();
+                }
+            });
+
+            $("#tab_group_one").tabs({
+                activate: function(event, ui) {
+                    if (ui.newPanel.attr("id") === "districts" && map) {
+                        map.resize();
+                        fitToData();
+                    }
+                }
+                });
+                var clickHandler = function(e) {
+                    if (!e.features || !e.features.length) {
+                        return;
+                    }
+                    var props = e.features[0].properties || {};
+                    if (props.shortname) {
+                        window.location = "/legislator/" + props.shortname + "/";
+                    }
+                };
+                map.on("click", "boundaries", clickHandler);
+                map.on("click", "boundaries-fill", clickHandler);
+                var enterHandler = function() { map.getCanvas().style.cursor = "pointer"; };
+                var leaveHandler = function() { map.getCanvas().style.cursor = ""; };
+                map.on("mouseenter", "boundaries", enterHandler);
+                map.on("mouseleave", "boundaries", leaveHandler);
+                map.on("mouseenter", "boundaries-fill", enterHandler);
+                map.on("mouseleave", "boundaries-fill", leaveHandler);
+
+                map.on("mousemove", function(e) {
+                    var features = map.queryRenderedFeatures(e.point, { layers: ["boundaries", "boundaries-fill"] });
+                    map.getCanvas().style.cursor = features.length ? "pointer" : "";
+                });
+            });
     </script>';
-    $body_tag = ' onunload="GUnload()"';
 }
-$page_body .= '</div>';
-
-# Insert the script code to render the tabs.
-$page_body .= '
-<script type="text/javascript">
-    new Control.Tabs(\'tab_group_one\');
-</script>';*/
-
+$page_body .= '</div>'; // end #districts
+$page_body .= '</div>'; // end #tab_group_one
 
 # OUTPUT THE PAGE
 $page = new Page();
-$page->page_title = $page_title;
-$page->page_body = $page_body;
-$page->page_sidebar = $page_sidebar;
-$page->site_section = $site_section;
-$page->body_tag = $body_tag;
-$page->html_head = $html_head;
+foreach (array('page_title', 'page_body', 'page_sidebar', 'site_section', 'html_head') as $prop) {
+    if (isset(${$prop})) {
+        $page->{$prop} = ${$prop};
+    }
+}
 $page->process();

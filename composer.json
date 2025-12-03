@@ -2,27 +2,12 @@
     "config": {
         "vendor-dir": "htdocs/includes/vendor"
     },
-    "repositories": {
-        "sphinx-search-api-php-client": {
-            "type": "package",
-            "package": {
-                "name": "romainneutron/sphinx-search-api-php-client",
-                "version": "2.0.8.1",
-                "source": {
-                    "url": "https://github.com/romainneutron/Sphinx-Search-API-PHP-Client/",
-                    "type": "git",
-                    "reference": "origin/master"
-                }
-            }
-        }
-    },
     "require": {
         "php": "^8.0",
         "phpmailer/phpmailer": "^6.5",
         "ezyang/htmlpurifier": "^4.13",
         "doctrine/instantiator": "^2.0",
         "simplepie/simplepie": "^1.7",
-        "romainneutron/sphinx-search-api-php-client": "2.0.8.1",
         "aws/aws-sdk-php": "^3.186"
     },
     "autoload": {
@@ -30,5 +15,14 @@
             "htdocs/includes/vendor/"
         ],
         "files": ["htdocs/includes/functions.inc.php"]
+    },
+    "scripts": {
+        "post-install-cmd": [
+            "curl -fsSL https://raw.githubusercontent.com/manticoresoftware/manticoresearch/master/api/sphinxapi.php -o htdocs/includes/vendor/sphinxapi.php",
+            "sed -i.bak \"s/0x120/0x11F/g\" htdocs/includes/vendor/sphinxapi.php && rm htdocs/includes/vendor/sphinxapi.php.bak"
+        ],
+        "post-update-cmd": [
+            "@post-install-cmd"
+        ]
     }
 }

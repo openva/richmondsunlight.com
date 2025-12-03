@@ -129,7 +129,7 @@ else {
     $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0) {
         $page_sidebar .= '
-		<a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
+		<a href="/help/tag-clouds/" class="help-icon-link" data-help-url="/help/tag-clouds/" title="Help"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
 		<h3>These Bills Are About .&thinsp;.&thinsp;.</h3>
 		<div class="box">
 			<div class="tags">';

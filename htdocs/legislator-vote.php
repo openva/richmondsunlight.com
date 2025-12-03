@@ -127,12 +127,17 @@ if (mysqli_num_rows($result) > 0) {
     $page_body .= '
 			</tbody>
 		</table>';
+} else {
+    $page_body = '
+		<p>' . $legislator['prefix'] . ' ' . $legislator['name'] . ' did not
+		cast any recorded votes in ' . $year . '.</p>';
 }
 
 # OUTPUT THE PAGE
 $page = new Page();
-$page->page_title = $page_title;
-$page->page_body = $page_body;
-$page->page_sidebar = $page_sidebar;
-$page->site_section = $site_section;
+foreach (array('page_title', 'page_body', 'page_sidebar', 'site_section') as $prop) {
+    if (isset(${$prop})) {
+        $page->{$prop} = ${$prop};
+    }
+}
 $page->process();

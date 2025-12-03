@@ -432,6 +432,33 @@ if (
             $(".tabs").tabs();
         });
 
+        /* Help icon tooltips */
+        $(function(){
+            $(".help-icon-link").each(function() {
+                var $link = $(this);
+                var url = $link.data("help-url") || $link.attr("href");
+
+                // Prevent the old popup behavior.
+                $link.on("click", function(e){ e.preventDefault(); });
+
+                $link.qtip({
+                    content: {
+                        text: function(event, api) {
+                            var ajaxUrl = url.indexOf("?") === -1 ? url + "?ajax=1" : url + "&ajax=1";
+                            $.ajax({ url: ajaxUrl })
+                                .then(function(content) { api.set("content.text", content); })
+                                .fail(function() { api.set("content.text", "Unable to load help."); });
+                            return "Loading…";
+                        }
+                    },
+                    position: { my: "top center", at: "bottom center" },
+                    show: { event: "mouseenter" },
+                    hide: { event: "mouseleave unfocus", delay: 200, fixed: true },
+                    style: { classes: "qtip-dark qtip-shadow" }
+                });
+            });
+        });
+
         /* Truncate text at 500 characters of length. Written by "c_harm" and posted to Stack Overflow
         at http://stackoverflow.com/a/1199627/955342 */
         String.prototype.truncate = function(){

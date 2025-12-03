@@ -1,5 +1,8 @@
 #!/bin/bash
 
+LOGFILE=/tmp/postdeploy.log
+echo "$(date -Iseconds) postdeploy starting; DEPLOYMENT_GROUP_NAME='${DEPLOYMENT_GROUP_NAME:-}'" | tee -a "$LOGFILE"
+
 # Set variables based on whether this is for the staging site or the production site.
 if [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Staging" ]
 then
@@ -10,7 +13,7 @@ then
     SITE_PATH=/var/www/richmondsunlight.com
     SITE_URL=richmondsunlight.com
 else
-    echo "Fatal error: No deployment group found"
+    echo "Fatal error: No deployment group found" | tee -a "$LOGFILE"
     exit 1
 fi
 
@@ -81,7 +84,6 @@ then
 fi
 
 # Populate the template with the list of legislators
-pwd # Debug step
 php deploy/populate_menu.php
 
 # Expire the cached template
