@@ -196,6 +196,13 @@ EOD;
 EOD;
 }
 
+$is_ajax = (isset($_REQUEST['ajax']) && $_REQUEST['ajax'] == '1');
+
+if ($is_ajax) {
+    echo $page_body;
+    exit;
+}
+
 $page = new Page();
 $page->page_title = $page_title;
 $page->page_body = $page_body;

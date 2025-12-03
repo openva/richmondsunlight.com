@@ -616,7 +616,7 @@ if (isset($partisanship)) {
         <div class="pair">
 			<div class="label">Partisanship</div>
 			<div class="content" id="partisanship">
-			' . $partisanship . '   <a href="javascript:openpopup(\'/help/partisanship/\')" title="Help"><img src="/images/help-f4eee5.gif" class="help-icon" alt="?" /></a>
+			' . $partisanship . '   <a href="/help/partisanship/" class="help-icon-link" data-help-url="/help/partisanship/" title="Help"><img src="/images/help-f4eee5.gif" class="help-icon" alt="?" /></a>
 			</div>
         </div>';
 }
@@ -636,7 +636,7 @@ $tag_count = mysqli_num_rows($result);
 if ($tag_count > 0) {
     $page_body .= '
         <div class="pair">
-		<div class="label">Bill Topics <a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img src="/images/help-f4eee5.gif" class="help-icon" alt="?" /></a></div>
+		<div class="label">Bill Topics <a href="/help/tag-clouds/" class="help-icon-link" data-help-url="/help/tag-clouds/" title="Help"><img src="/images/help-f4eee5.gif" class="help-icon" alt="?" /></a></div>
 		<div class="content">
 			<div class="tags">';
     // Build up an array of tags, with the key being the tag and the value being the count.

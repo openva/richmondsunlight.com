@@ -297,7 +297,7 @@ $sql = 'SELECT
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_sidebar .= '
-		<a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img
+		<a href="/help/tag-clouds/" class="help-icon-link" data-help-url="/help/tag-clouds/" title="Help"><img
             src="/images/help-beige.gif" class="help-icon" alt="?" /></a>
 
 		<div class="box">
@@ -340,7 +340,7 @@ $sql = 'SELECT
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_sidebar .= '
-		<a href="javascript:openpopup(\'/help/tag-clouds/\')" title="Help"><img
+		<a href="/help/tag-clouds/" class="help-icon-link" data-help-url="/help/tag-clouds/" title="Help"><img
         src="/images/help-beige.gif" class="help-icon" alt="?" /></a>
 
 		<div class="box">

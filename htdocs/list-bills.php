@@ -349,7 +349,7 @@ if (!empty($year)) {
     $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0) {
         $page_sidebar .= '
-	<a href="javascript:openpopup(\'/help/tag-clouds/\')"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
+	<a href="/help/tag-clouds/" class="help-icon-link" data-help-url="/help/tag-clouds/"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
 
 	<div class="box">
 		<h3>Tag Cloud</h3>
@@ -396,7 +396,7 @@ if (!empty($tag)) {
     $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0) {
         $page_sidebar .= '
-	<a href="javascript:openpopup(\'/help/tag-clouds/\')"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
+	<a href="/help/tag-clouds/" class="help-icon-link" data-help-url="/help/tag-clouds/"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
 
 	<div class="box">
 		<h3>Related Tag Cloud</h3>
