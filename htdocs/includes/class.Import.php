@@ -1794,7 +1794,6 @@ class Import
         );
 
         $legislators = [];
-        $seen_member_numbers = [];
         foreach ($members as $member) {
             if (!is_array($member) || empty($member['MemberNumber'])) {
                 continue;
@@ -1817,15 +1816,6 @@ class Import
             if ($member_number_normalized === false) {
                 continue;
             }
-
-            if (isset($seen_member_numbers[$member_number_normalized])) {
-                $this->log->put(
-                    'Duplicate member returned in LIS roster for ' . $member_number_normalized,
-                    4
-                );
-                continue;
-            }
-            $seen_member_numbers[$member_number_normalized] = true;
 
             $legislator = $this->map_member_to_legislator(
                 $member,
@@ -2745,6 +2735,7 @@ class Import
 
         $middle_initial = '';
         if (count($display_parts) > 2) {
+            // Find the index of the last-name token to avoid suffixes in the middle scan.
             $last_token_index = count($display_parts) - 1;
             for ($i = count($display_parts) - 1; $i >= 1; $i--) {
                 $candidate = strtolower(preg_replace('/[^A-Za-z-]+/', '', $this->sanitize_name_token($display_parts[$i])));
