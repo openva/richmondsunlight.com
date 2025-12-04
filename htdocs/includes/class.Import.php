@@ -1794,6 +1794,7 @@ class Import
         );
 
         $legislators = [];
+        $seen_member_numbers = [];
         foreach ($members as $member) {
             if (!is_array($member) || empty($member['MemberNumber'])) {
                 continue;
@@ -1816,6 +1817,15 @@ class Import
             if ($member_number_normalized === false) {
                 continue;
             }
+
+            if (isset($seen_member_numbers[$member_number_normalized])) {
+                $this->log->put(
+                    'Duplicate member returned in LIS roster for ' . $member_number_normalized,
+                    4
+                );
+                continue;
+            }
+            $seen_member_numbers[$member_number_normalized] = true;
 
             $legislator = $this->map_member_to_legislator(
                 $member,
