@@ -29,9 +29,9 @@
 <link rel="icon" type="image/png" href="/images/favicons/192.png" sizes="192x192" />
 
 <!-- Add to Home Screen -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
-<meta name="apple-mobile-web-app-title" content="Richmond Sunlight">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-status-bar-style" content="black">
+<meta name="mobile-web-app-title" content="Richmond Sunlight">
 
 <!-- iOS Touch Icons -->
 <link rel="apple-touch-icon" type="image/png" href="/images/favicons/apple-touch-icons/76.png" sizes="76x76" />
