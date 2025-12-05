@@ -138,7 +138,7 @@ if ($legislator['district_boundaries'] != false) {
     <link href="/js/vendor/mapbox-gl/dist/mapbox-gl.css" rel="stylesheet" />
     <script src="/js/vendor/@turf/turf/turf.min.js"></script>
         <style>
-            // district_map { height: 250px; }
+            #district_map { height: 250px; }
         </style>
         <script>
             $( document ).ready(function() {
