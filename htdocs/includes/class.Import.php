@@ -1794,6 +1794,7 @@ class Import
         );
 
         $legislators = [];
+        $seen_member_numbers = [];
         foreach ($members as $member) {
             if (!is_array($member) || empty($member['MemberNumber'])) {
                 continue;
@@ -1816,6 +1817,15 @@ class Import
             if ($member_number_normalized === false) {
                 continue;
             }
+
+            if (isset($seen_member_numbers[$member_number_normalized])) {
+                $this->log->put(
+                    'Duplicate member returned in LIS roster for ' . $member_number_normalized,
+                    4
+                );
+                continue;
+            }
+            $seen_member_numbers[$member_number_normalized] = true;
 
             $legislator = $this->map_member_to_legislator(
                 $member,
@@ -2529,6 +2539,10 @@ class Import
             ]),
         ];
 
+        if (!empty($member['RoomNumber'])) {
+            $legislator['address_richmond'] = trim((string)$member['RoomNumber']);
+        }
+
         $location = new Location();
         if (!empty($legislator['address_district'])) {
             $location->address = $legislator['address_district'];
@@ -2712,40 +2726,65 @@ class Import
      */
     private function build_shortname(string $preferred_first_name, array $member, string $last_name)
     {
+        $display = trim((string)($member['MemberDisplayName'] ?? ''));
+        $display_parts = $display === '' ? [] : preg_split('/\s+/', $display);
+        $sanitized_last = strtolower(preg_replace('/[^A-Za-z-]+/', '', $last_name));
+
+        // Use the legal first token for the leading initial; fall back to preferred name.
         $first_initial = '';
-        $preferred_first_name = trim($preferred_first_name);
-        if ($preferred_first_name !== '') {
-            $first_initial = strtolower(mb_substr($preferred_first_name, 0, 1));
-        } else {
-            $display = trim((string)($member['MemberDisplayName'] ?? ''));
-            if ($display !== '') {
-                $parts = preg_split('/\s+/', $display);
-                $token = $this->sanitize_name_token($parts[0] ?? '');
-                if ($token !== '') {
-                    $first_initial = strtolower($token[0]);
-                }
+        if (!empty($display_parts)) {
+            $token = $this->sanitize_name_token($display_parts[0]);
+            if ($token !== '') {
+                $first_initial = strtolower($token[0]);
             }
+        }
+        $preferred_first_name = trim($preferred_first_name);
+        if ($first_initial === '' && $preferred_first_name !== '') {
+            $first_initial = strtolower(mb_substr($preferred_first_name, 0, 1));
         }
 
         $middle_initial = '';
-        $display_name = (string)($member['MemberDisplayName'] ?? '');
-        $parts = preg_split('/\s+/', trim($display_name));
-        if (count($parts) > 2) {
-            for ($i = 1; $i < count($parts) - 1; $i++) {
-                $token = $this->sanitize_name_token($parts[$i]);
-                if ($token === '' || preg_match('/^[A-Z]\.?$/i', $token) !== 1) {
-                    if ($token !== '' && preg_match('/^[A-Za-z]/', $token) === 1) {
-                        $middle_initial = strtolower($token[0]);
-                        break;
-                    }
+        if (count($display_parts) > 2) {
+            // Find the index of the last-name token to avoid suffixes in the middle scan.
+            $last_token_index = count($display_parts) - 1;
+            for ($i = count($display_parts) - 1; $i >= 1; $i--) {
+                $candidate = strtolower(preg_replace('/[^A-Za-z-]+/', '', $this->sanitize_name_token($display_parts[$i])));
+                if ($candidate === $sanitized_last && $candidate !== '') {
+                    $last_token_index = $i;
+                    break;
+                }
+            }
+
+            $skip_tokens = ['jr', 'sr', 'ii', 'iii', 'iv', 'v'];
+            for ($i = 1; $i < $last_token_index; $i++) {
+                $raw = $display_parts[$i];
+                if (strpos($raw, '"') !== false) {
                     continue;
                 }
-                $middle_initial = strtolower($token[0]);
-                break;
+                $token = $this->sanitize_name_token($raw);
+                if ($token === '') {
+                    continue;
+                }
+                $lower = strtolower($token);
+                if (in_array($lower, $skip_tokens, true)) {
+                    continue;
+                }
+
+                if (preg_match('/^[A-Za-z]+$/', $token) === 1) {
+                    $middle_initial .= strtolower($token[0]);
+                } elseif (preg_match_all('/[A-Za-z]/', $token, $matches)) {
+                    foreach ($matches[0] as $letter) {
+                        $middle_initial .= strtolower($letter);
+                    }
+                }
+
+                if (strlen($middle_initial) >= 2) {
+                    $middle_initial = substr($middle_initial, 0, 2);
+                    break;
+                }
             }
         }
 
-        $sanitized_last = strtolower(preg_replace('/[^A-Za-z-]+/', '', $last_name));
         return $first_initial . $middle_initial . $sanitized_last;
     }
 
