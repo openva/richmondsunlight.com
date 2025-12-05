@@ -451,18 +451,48 @@ if (!empty($legislator['website'])) {
     </div>';
 }
 
-/*if (!empty($legislator['activity']) && IN_SESSION == true) {
+if (!empty($legislator['activity']) && IN_SESSION == true) {
+    $html_head .= '<script src="/js/vendor/chart.js/dist/chart.umd.js"></script>';
+
+    $activity_data = (array) $legislator['activity'];
+    $activity_labels = array_keys($activity_data);
+    $activity_values = array_values($activity_data);
+
     $page_body .= '
     <div class="pair">
         <div class="label">Daily Activity</div>
         <div class="content" id="activity">
-            <img src="'
-            . '//chart.googleapis.com/chart?cht=ls&chs=400x70&chco=243a51&chf=bg,s,f4eee5'
-            . '&chm=B,dccbaf,0,0,0&chds=0,' . $legislator['activity_peak'] . '&chd=t:'
-            . ($legislator['activity']) . '" />
+            <canvas id="activityChart" width="400" height="70"></canvas>
         </div>
-    </div>';
-}*/
+    </div>
+    <script>
+        (function() {
+            var ctx = document.getElementById("activityChart").getContext("2d");
+            new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: ' . json_encode($activity_labels) . ',
+                    datasets: [{
+                        data: ' . json_encode($activity_values) . ',
+                        borderColor: "#243a51",
+                        backgroundColor: "rgba(36,58,81,0.12)",
+                        fill: true,
+                        tension: 0.35,
+                        pointRadius: 0,
+                        pointHitRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { enabled: false } },
+                    scales: { x: { display: false }, y: { display: false } },
+                    animation: false
+                }
+            });
+        })();
+    </script>';
+}
 
 // COPATRONING STATS
 // Calculate the percentage of the bills copatroned by this legislator that were introduced by
@@ -690,46 +720,6 @@ $page_body .= '</div>
     </div>
 	</div>';
 
-// Start a new DIV for top contributions.
-/*if (isset($legislator['contributions']['List']))
-{
-
-    // Sort the list by total cumulative contributions, and keep only the top 10.
-    function cmp($a, $b)
-    {
-        if ($a->cumulative_amount == $b->cumulative_amount) return 0;
-        return ($a->cumulative_amount > $b->cumulative_amount) ? -1 : 1;
-    }
-    $contributions = $legislator['contributions']['List'];
-    usort($contributions, 'cmp');
-    $contributions = array_slice($contributions, 0, 10);
-    $page_body .= '
-        <div id="donors">
-        <table style="width: 100%;">
-            <caption>Top 10 Donors</caption>
-            <tbody>';
-
-    foreach ($contributions as $contribution)
-    {
-        $page_body .= '
-                <tr>
-                    <td>' . $contribution->name_first . ' ' . $contribution->name_middle . ' ' . $contribution->name_last . '</td>
-                    <td>' . $contribution->occupation . '</td>
-                    <td>' . ( ($contribution->address_state == 'VA') ? $contribution->address_city : $contribution->address_state). '</td>
-                    <td>$' . number_format(round($contribution->cumulative_amount)) . '</td>
-                </tr>';
-    }
-
-    $page_body .= '
-            </tbody>
-        </table>
-        <p>Get <a href="http://openva.com/campaign-finance/contributions/'
-            . $legislator['contributions']['CommitteeCode'] . '.csv">a list of all contributions as '
-            .'CSV</a> or <a href="http://openva.com/campaign-finance/contributions/'
-            . $legislator['contributions']['CommitteeCode'] . '.json">JSON</a>.</p>
-        </div>';
-
-}*/
 
 // Start a new DIV for news mentions.
 $page_body .= '
