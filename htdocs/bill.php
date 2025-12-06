@@ -1000,7 +1000,7 @@ if (isset($bill['places']) && (count($bill['places']) > 0)) {
     <link href="/js/vendor/mapbox-gl/dist/mapbox-gl.css" rel="stylesheet" />
     <script src="/js/vendor/@turf/turf/turf.min.js"></script>
     <style>
-        // map { height: 250px; width:100%; margin-bottom: 1.5em; }
+        #map { height: 250px; width:100%; margin-bottom: 1.5em; }
     </style>
     <script>
         $( document ).ready(function() {
