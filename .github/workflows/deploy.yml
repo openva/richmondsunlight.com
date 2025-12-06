@@ -152,6 +152,17 @@ jobs:
       - name: Deploy to staging
         if: github.ref_name == 'master'
         run: |
+          # Cancel any in-progress staging deployment to avoid conflicts
+          DEPLOYMENT_ID=$(aws deploy list-deployments \
+            --application-name RS-Web \
+            --deployment-group-name RS-Web-Staging \
+            --include-only-statuses Created InProgress Queued \
+            --query "deployments[0]" \
+            --output text)
+          if [ "$DEPLOYMENT_ID" != "None" ]; then
+            aws deploy stop-deployment --deployment-id "$DEPLOYMENT_ID" --auto-rollback-enabled
+          fi
+
           aws deploy push \
             --application-name RS-Web \
             --s3-location s3://deploy.richmondsunlight.com/rs-web-staging.zip \
@@ -165,6 +176,17 @@ jobs:
       - name: Deploy to production
         if: github.ref_name == 'deploy'
         run: |
+          # Cancel any in-progress production deployment to avoid conflicts
+          DEPLOYMENT_ID=$(aws deploy list-deployments \
+            --application-name RS-Web \
+            --deployment-group-name RS-Web-Fleet \
+            --include-only-statuses Created InProgress Queued \
+            --query "deployments[0]" \
+            --output text)
+          if [ "$DEPLOYMENT_ID" != "None" ]; then
+            aws deploy stop-deployment --deployment-id "$DEPLOYMENT_ID" --auto-rollback-enabled
+          fi
+
           aws deploy push \
             --application-name RS-Web \
             --s3-location s3://deploy.richmondsunlight.com/rs-web-deploy.zip \
