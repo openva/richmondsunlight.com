@@ -94,7 +94,7 @@ $sql = 'SELECT
             COUNT(*) as number
         FROM bills
         WHERE
-            session_id=30
+            session_id=' . SESSION_ID . '
         GROUP BY date_introduced
         ORDER BY date_introduced ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
@@ -150,7 +150,7 @@ $sql = 'SELECT
         FROM representatives
         LEFT JOIN bills
             ON representatives.id=bills.chief_patron_id
-        WHERE bills.session_id=30
+        WHERE bills.session_id=' . SESSION_ID . '
         GROUP BY representatives.id
         ORDER BY number DESC, name ASC
         LIMIT 10';
