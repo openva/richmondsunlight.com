@@ -3,8 +3,9 @@
 /*
  * Define file names
  */
-$template_file = 'htdocs/includes/templates/new.inc.php';
-$legislator_menu_file = 'htdocs/includes/templates/legislators.html';
+$root = realpath(__DIR__ . '/../htdocs');
+$template_file = require $root . '/includes/templates/new.inc.php';
+$legislator_menu_file = require $root . '/includes/templates/legislators.html';
 
 /*
  * Make sure the files exist
