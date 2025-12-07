@@ -21,7 +21,9 @@ fi
 sudo chown -R ubuntu:www-data "$SITE_PATH"/htdocs/
 sudo chmod -R g+w "$SITE_PATH"/htdocs/
 
-# Make the cache directories world-writeable
+# Make sure the cache directories exist and are world-writeable
+mkdir -p "$SITE_PATH"/htdocs/cache/
+mkdir -p "$SITE_PATH"/htdocs/rss/cache/
 sudo chmod o+w "$SITE_PATH"/htdocs/cache/
 sudo chmod o+w "$SITE_PATH"/htdocs/rss/cache/
 
