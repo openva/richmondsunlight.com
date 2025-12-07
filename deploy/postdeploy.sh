@@ -1,7 +1,11 @@
 #!/bin/bash
 
+# Log actions to a file, because CodeDeploy logging isn't detailed enough.
 LOGFILE=/tmp/postdeploy.log
-echo "$(date -Iseconds) postdeploy starting; DEPLOYMENT_GROUP_NAME='${DEPLOYMENT_GROUP_NAME:-}'" | tee -a "$LOGFILE"
+exec > >(tee -a "$LOGFILE") 2>&1
+PS4='+[$(date -Iseconds)] ${BASH_SOURCE##*/}:${LINENO}: '
+set -x
+echo "$(date -Iseconds) postdeploy starting; DEPLOYMENT_GROUP_NAME='${DEPLOYMENT_GROUP_NAME:-}'"
 
 # Set variables based on whether this is for the staging site or the production site.
 if [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Staging" ]
