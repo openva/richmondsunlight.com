@@ -150,6 +150,8 @@ if (
                                     <li><a href="/bills/2021/">2021</a></li>
                                     <li><a href="/bills/2022/">2022</a></li>
                                     <li><a href="/bills/2023/">2023</a></li>
+                                    <li><a href="/bills/2024/">2024</a></li>
+                                    <li><a href="/bills/2025/">2025</a></li>
                                 </ul>
                             </li>
                         </ul>
