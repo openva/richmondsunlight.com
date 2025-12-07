@@ -90,7 +90,7 @@ php deploy/populate_menu.php
 echo "delete template-new" | nc -N localhost 11211  || true
 
 # Regenerate sitemaps
-php deploy/generate-sitemaps.php
+php "$SITE_PATH"/deploy/generate-sitemaps.php
 
 # Instruct web crawlers to avoid the staging site
 if [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Staging" ]
