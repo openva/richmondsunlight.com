@@ -86,6 +86,7 @@ then
 fi
 
 # Populate the template with the list of legislators
+php "$SITE_PATH"/deploy/generate_menu.php > "$SITE_PATH"/htdocs/includes/templates/legislators.html
 php "$SITE_PATH"/deploy/populate_menu.php
 
 # Expire the cached template
