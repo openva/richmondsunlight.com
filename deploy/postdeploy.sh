@@ -97,5 +97,5 @@ php "$SITE_PATH"/deploy/generate-sitemaps.php
 # Instruct web crawlers to avoid the staging site
 if [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Staging" ]
 then
-    cp deploy/staging-robots.txt "$SITE_PATH"/htdocs/robots.txt
+    cp "$SITE_PATH"/deploy/staging-robots.txt "$SITE_PATH"/htdocs/robots.txt
 fi
