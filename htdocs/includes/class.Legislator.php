@@ -24,7 +24,7 @@ class Legislator
         $sql = 'SELECT
                     people.id,
                     terms.lis_id,
-                    terms.shortname,
+                    people.shortname,
                     people.name,
                     terms.name_formatted,
                     terms.chamber
