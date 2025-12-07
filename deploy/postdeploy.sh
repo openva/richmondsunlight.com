@@ -63,7 +63,7 @@ fi
 if [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Fleet" ]
 then
     # Copy over the Sphinx configuration, restart Sphinx
-    sudo cp deploy/sphinx.conf /etc/sphinxsearch/sphinx.conf
+    sudo cp "$SITE_PATH"/deploy/sphinx.conf /etc/sphinxsearch/sphinx.conf
     sudo /etc/init.d/sphinxsearch restart
     
     # If we have an existing index, update it
