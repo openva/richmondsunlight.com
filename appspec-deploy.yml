@@ -10,10 +10,6 @@ permissions:
     owner: ubuntu
     group: www-data
     mode: 755
-    acls:
-      - "d:u::rwx"
-      - "d:g::rx"
-      - "d:o::rx"
     type:
       - directory
   - object: /var/www/richmondsunlight.com/
