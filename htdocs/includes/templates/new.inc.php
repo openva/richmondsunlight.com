@@ -158,8 +158,7 @@ if (
                     </li>
                     
                     <li id="t-legislators"><a href="/legislators/" accesskey="l">Legislators</a>
-                        <ul>
-                            <!--legislator_menu-->
+                        <!--legislator_menu-->
                         <li><a href="/legislators/detailed/">Detailed Listing</a></li>
                         <li><a href="/committees/">Committees</a></li>
                         <li><a href="/your-legislators/">Your Legislators</a></li>
