@@ -119,9 +119,6 @@ function render_chamber_menu($title, array $categories, array $alphabet, array $
         $segments[] = '                </ul></li>';
     }
 
-    $segments[] = '        </ul>';
-    $segments[] = '    </li>';
-
     return implode("\n", $segments);
 }
 
