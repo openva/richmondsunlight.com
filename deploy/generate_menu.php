@@ -53,8 +53,8 @@ unset($chamber);
 /*
  * Establish our alphabetical groupings. These letters mark where each submenu starts.
  */
-$house_categories = ['A', 'D', 'I', 'M', 'S'];
-$senate_categories = ['A', 'J', 'S'];
+$house_categories = ['A', 'C', 'F', 'M', 'P', 'T'];
+$senate_categories = ['A', 'H', 'R'];
 
 /**
  * Render the menu markup for a single chamber.
@@ -75,6 +75,7 @@ function render_chamber_menu($title, array $categories, array $alphabet, array $
     $pending_categories = $categories;
     $current_category = array_shift($pending_categories);
     $open_section = false;
+    $alphabet_positions = array_flip($alphabet);
 
     foreach ($alphabet as $letter) {
         if ($current_category === null && $open_section === false) {
@@ -85,7 +86,23 @@ function render_chamber_menu($title, array $categories, array $alphabet, array $
             if ($open_section) {
                 $segments[] = '                </ul></li>';
             }
-            $segments[] = '            <li>' . $letter . ' »';
+            $next_category = $pending_categories[0] ?? null;
+            $start_index = $alphabet_positions[$letter] ?? 0;
+            $end_index = ($next_category !== null && isset($alphabet_positions[$next_category]))
+                ? $alphabet_positions[$next_category] - 1
+                : count($alphabet) - 1;
+            $end_letter = $alphabet[$end_index];
+            // Find the last letter in this range that actually has legislators.
+            for ($i = $end_index; $i >= $start_index; $i--) {
+                $candidate = $alphabet[$i];
+                if (!empty($legislators_by_letter[$candidate])) {
+                    $end_letter = $candidate;
+                    break;
+                }
+            }
+            $label = ($end_letter === $letter) ? $letter : $letter . '–' . $end_letter;
+
+            $segments[] = '            <li>' . $label . ' »';
             $segments[] = '                <ul class="legislators">';
             $open_section = true;
             $current_category = array_shift($pending_categories);
