@@ -119,6 +119,7 @@ function render_chamber_menu($title, array $categories, array $alphabet, array $
         $segments[] = '                </ul></li>';
     }
 
+    $segments[] = '        </ul>';
     $segments[] = '    </li>';
 
     return implode("\n", $segments);
@@ -128,7 +129,8 @@ $menu = [
     '<ul>',
     render_chamber_menu('House', $house_categories, $alphabet, $legislators['house']),
     render_chamber_menu('Senate', $senate_categories, $alphabet, $legislators['senate']),
-    '</ul>',
+    '</ul>
+    </li>',
 ];
 
 echo implode("\n", array_filter($menu));
