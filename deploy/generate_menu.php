@@ -129,8 +129,6 @@ $menu = [
     '<ul>',
     render_chamber_menu('House', $house_categories, $alphabet, $legislators['house']),
     render_chamber_menu('Senate', $senate_categories, $alphabet, $legislators['senate']),
-    '</ul>
-    </li>',
 ];
 
 echo implode("\n", array_filter($menu));
