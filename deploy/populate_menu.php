@@ -3,8 +3,13 @@
 /*
  * Define file names
  */
-$template_file = 'htdocs/includes/templates/new.inc.php';
-$legislator_menu_file = 'htdocs/includes/templates/legislators.html';
+$root = realpath(__DIR__ . '/../htdocs');
+if ($root === false) {
+    echo "Error: Unable to resolve htdocs directory.\n";
+    exit(1);
+}
+$template_file = $root . '/includes/templates/new.inc.php';
+$legislator_menu_file = $root . '/includes/templates/legislators.html';
 
 /*
  * Make sure the files exist
@@ -18,7 +23,7 @@ if (!file_exists($template_file)) {
 }
 
 /*
- * Get the contents of both files
+ * Get the contents of both files as plain text
  */
 $legislator_menu = file_get_contents($legislator_menu_file);
 $template = file_get_contents($template_file);

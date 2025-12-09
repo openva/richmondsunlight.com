@@ -1,10 +1,11 @@
 <?php
 
-require '../htdocs/includes/settings.inc.php';
-require '../htdocs/includes/class.Database.php';
-require '../htdocs/includes/class.Legislator.php';
-require '../htdocs/includes/class.Log.php';
-require '../htdocs/includes/vendor/autoload.php';
+$root = realpath(__DIR__ . '/../htdocs');
+require $root . '/includes/settings.inc.php';
+require $root . '/includes/class.Database.php';
+require $root . '/includes/class.Legislator.php';
+require $root . '/includes/class.Log.php';
+require $root . '/includes/vendor/autoload.php';
 
 $database = new Database();
 $db = $database->connect_mysqli();

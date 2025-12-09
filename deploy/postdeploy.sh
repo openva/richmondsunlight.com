@@ -25,7 +25,9 @@ fi
 sudo chown -R ubuntu:www-data "$SITE_PATH"/htdocs/
 sudo chmod -R g+w "$SITE_PATH"/htdocs/
 
-# Make the cache directories world-writeable
+# Make sure the cache directories exist and are world-writeable
+mkdir -p "$SITE_PATH"/htdocs/cache/
+mkdir -p "$SITE_PATH"/htdocs/rss/cache/
 sudo chmod o+w "$SITE_PATH"/htdocs/cache/
 sudo chmod o+w "$SITE_PATH"/htdocs/rss/cache/
 
@@ -67,7 +69,7 @@ fi
 if [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Fleet" ]
 then
     # Copy over the Sphinx configuration, restart Sphinx
-    sudo cp deploy/sphinx.conf /etc/sphinxsearch/sphinx.conf
+    sudo cp "$SITE_PATH"/deploy/sphinx.conf /etc/sphinxsearch/sphinx.conf
     sudo /etc/init.d/sphinxsearch restart
     
     # If we have an existing index, update it
@@ -88,16 +90,17 @@ then
 fi
 
 # Populate the template with the list of legislators
-php deploy/populate_menu.php
+php "$SITE_PATH"/deploy/generate_menu.php > "$SITE_PATH"/htdocs/includes/templates/legislators.html
+php "$SITE_PATH"/deploy/populate_menu.php
 
 # Expire the cached template
 echo "delete template-new" | nc -N localhost 11211  || true
 
 # Regenerate sitemaps
-php deploy/generate-sitemaps.php
+php "$SITE_PATH"/deploy/generate_sitemaps.php
 
 # Instruct web crawlers to avoid the staging site
 if [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Staging" ]
 then
-    cp deploy/staging-robots.txt "$SITE_PATH"/htdocs/robots.txt
+    cp "$SITE_PATH"/deploy/staging-robots.txt "$SITE_PATH"/htdocs/robots.txt
 fi
