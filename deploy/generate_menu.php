@@ -32,6 +32,9 @@ $legislators = [
  * Build up an HTML-formatted array of legislators by chamber and first letter.
  */
 foreach ($legislator_list as $legislator) {
+    if (empty($legislator['chamber']) || !isset($legislators[$legislator['chamber']])) {
+        continue;
+    }
     $letter = strtoupper(substr($legislator['name'], 0, 1));
     if (!in_array($letter, $alphabet, true)) {
         continue;
