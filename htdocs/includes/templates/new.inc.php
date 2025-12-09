@@ -158,7 +158,7 @@ if (
                     </li>
                     
                     <li id="t-legislators"><a href="/legislators/" accesskey="l">Legislators</a>
-                        <!--legislator_menu-->
+                        <?php require('legislators.html'); ?>
                         </li>
                         <li><a href="/legislators/detailed/">Detailed Listing</a></li>
                         <li><a href="/committees/">Committees</a></li>
