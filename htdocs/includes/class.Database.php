@@ -73,7 +73,14 @@ class Database
             return $GLOBALS['db'];
         }
 
-        $this->db = mysqli_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
+        $previous_reporting = mysqli_report(MYSQLI_REPORT_OFF);
+        try {
+            $this->db = mysqli_connect('p:' . PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
+        } catch (mysqli_sql_exception $e) {
+            $this->db = false;
+        } finally {
+            mysqli_report($previous_reporting);
+        }
 
         /*
          * If the connection succeeded.
@@ -89,6 +96,7 @@ class Database
          * If this is isn't a request to the API, send the browser to an error page.
          */
         if (mb_stristr($_GET['REQUEST_URI'], 'api.richmondsunlight.com') === false) {
+            http_response_code(503);
             header('Location: https://' . $_SERVER['SERVER_NAME'] . '/site-down/');
             exit;
         }
