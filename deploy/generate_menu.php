@@ -7,6 +7,10 @@
  * is inserted into the site-wide navigation.
  */
 
+// Avoid emitting deprecation notices into the generated menu output.
+error_reporting(E_ALL & ~E_DEPRECATED);
+ini_set('display_errors', '0');
+
 $root = realpath(__DIR__ . '/../htdocs');
 require $root . '/includes/settings.inc.php';
 require $root . '/includes/class.Database.php';
