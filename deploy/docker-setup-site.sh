@@ -46,6 +46,10 @@ cd htdocs/js/vendor; yarn build; cd ../../..
 # Move over the settings file.
 cp deploy/settings-docker.inc.php htdocs/includes/settings.inc.php
 
+# Populate the template with the list of legislators
+php deploy/generate_menu.php > htdocs/includes/templates/legislators.html
+php deploy/populate_menu.php
+
 # Set up Sphinx and start it
 echo "START=yes" | tee /etc/default/sphinxsearch
 cp deploy/sphinx.conf /etc/sphinxsearch/sphinx.conf
