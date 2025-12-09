@@ -69,7 +69,7 @@ function render_chamber_menu($title, array $categories, array $alphabet, array $
     }
 
     $segments = [];
-    $segments[] = '    <li>' . $title . ' »';
+    $segments[] = '    <li>' . $title . '&nbsp;»';
     $segments[] = '        <ul class="alphabetic">';
 
     $pending_categories = $categories;
