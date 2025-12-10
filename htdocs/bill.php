@@ -578,7 +578,7 @@ if (isset($impact_statements)) {
 $page_sidebar .= '</ul></div>';
 
 // Only display this DIV if we actually have some data.
-if (isset($bill['related']) && ($bill['related'] > 0)) {
+if (isset($bill['related']) && count($bill['related']) > 0) {
     $page_sidebar .= '
 		<div class="box">
 			<h3>Related Bills</h3>
