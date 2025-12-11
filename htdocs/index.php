@@ -44,7 +44,7 @@ if (strtotime(SESSION_START) < time() && strtotime(SESSION_END) > time()) {
     $page_body = '<p>The ' . SESSION_YEAR . ' Virginia General Assembly session began on '
         . date('F j', strtotime(SESSION_START)) . ' and continued through '
         . date('F j', strtotime(SESSION_END)) . '. Here you can read <a href="/bills/">the '
-        . 'bills were proposed</a> and <a href="/bills/passed/">the bills that passed into '
+        . 'bills were proposed</a> and <a href="/bills/passed/">the bills that passed</a> into '
         . 'law.</p>';
 }
 
