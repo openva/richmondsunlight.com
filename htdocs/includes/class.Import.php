@@ -746,7 +746,7 @@ class Import
          * Store the file without an extension (we don't know the image format)
          */
         $filename = $shortname;
-        if (file_put_contents($filename, $photo) == false) {
+        if (file_put_contents('photos/' . $filename, $photo) == false) {
             return false;
         }
 
