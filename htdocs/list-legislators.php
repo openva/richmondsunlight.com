@@ -290,9 +290,17 @@ if (mysqli_num_rows($result) > 0) {
 $page_body .= '</div>'; // end #districts
 $page_body .= '</div>'; // end #tab_group_one
 
-# OUTPUT THE PAGE
+// OUTPUT THE PAGE
 $page = new Page();
-foreach (array('page_title', 'page_body', 'page_sidebar', 'site_section', 'html_head') as $prop) {
+foreach ([
+    'page_title',
+    'page_body',
+    'page_sidebar',
+    'site_section',
+    'browser_title',
+    'html_head',
+    'body_tag',
+] as $prop) {
     if (isset(${$prop})) {
         $page->{$prop} = ${$prop};
     }

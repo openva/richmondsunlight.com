@@ -44,8 +44,19 @@ $page_body = <<<EOD
 
 EOD;
 
+// OUTPUT THE PAGE
 $page = new Page();
-$page->page_title = $page_title;
-$page->page_body = $page_body;
-$page->site_section = $site_section;
+foreach ([
+    'page_title',
+    'page_body',
+    'page_sidebar',
+    'site_section',
+    'browser_title',
+    'html_head',
+    'body_tag',
+] as $prop) {
+    if (isset(${$prop})) {
+        $page->{$prop} = ${$prop};
+    }
+}
 $page->process();

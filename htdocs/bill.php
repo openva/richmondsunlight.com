@@ -1442,11 +1442,19 @@ $page_body .= '
 
 // OUTPUT THE PAGE
 $page = new Page();
-$page->page_title = $page_title;
-$page->page_body = $page_body;
-$page->page_sidebar = $page_sidebar;
-$page->site_section = $site_section;
-$page->html_head = $html_head;
+foreach ([
+    'page_title',
+    'page_body',
+    'page_sidebar',
+    'site_section',
+    'browser_title',
+    'html_head',
+    'body_tag',
+] as $prop) {
+    if (isset(${$prop})) {
+        $page->{$prop} = ${$prop};
+    }
+}
 $debug_timing['contents prepped for output'] = microtime(true);
 $page->process();
 

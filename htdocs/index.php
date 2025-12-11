@@ -411,12 +411,19 @@ $html_head .= '
 }
 </script>';
 
+// OUTPUT THE PAGE
 $page = new Page();
-$page->page_title = $page_title;
-$page->page_body = $page_body;
-$page->page_sidebar = $page_sidebar;
-$page->site_section = $site_section;
-$page->html_head = $html_head;
-$page->browser_title = $browser_title;
-$page->assemble();
-$page->display();
+foreach ([
+    'page_title',
+    'page_body',
+    'page_sidebar',
+    'site_section',
+    'browser_title',
+    'html_head',
+    'body_tag',
+] as $prop) {
+    if (isset(${$prop})) {
+        $page->{$prop} = ${$prop};
+    }
+}
+$page->process();
