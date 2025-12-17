@@ -964,13 +964,13 @@ class Import
 
         $term_sql = 'INSERT INTO terms
                 (person_id, name_formatted, lis_shortname, lis_id, chamber, party, district_id,
-                 date_started, date_ended, sbe_id, email, url, rss_url, place, longitude, latitude,
-                 partisanship, phone_district, phone_richmond, address_district, address_richmond,
-                 date_created, date_modified)
+                 date_started, date_ended, sbe_id, email, url, rss_url, place, partisanship,
+                 phone_district, phone_richmond, address_district, address_richmond, date_created,
+                 date_modified)
             VALUES
                 (:person_id, :name_formatted, :lis_shortname, :lis_id, :chamber, :party, :district_id,
-                 :date_started, :date_ended, :sbe_id, :email, :url, :rss_url, :place, :longitude, :latitude,
-                 :partisanship, :phone_district, :phone_richmond, :address_district, :address_richmond,
+                 :date_started, :date_ended, :sbe_id, :email, :url, :rss_url, :place,  :partisanship,
+                 :phone_district, :phone_richmond, :address_district, :address_richmond,
                  NOW(), NOW())';
 
         $term_params = [
@@ -988,8 +988,6 @@ class Import
             ':url' => $this->normalizeOptionalString($legislator['url'] ?? null),
             ':rss_url' => $this->normalizeOptionalString($legislator['rss_url'] ?? null),
             ':place' => $this->normalizeOptionalString($legislator['place'] ?? null),
-            ':longitude' => $this->normalizeNullableFloat($legislator['longitude'] ?? null),
-            ':latitude' => $this->normalizeNullableFloat($legislator['latitude'] ?? null),
             ':partisanship' => isset($legislator['partisanship'])
                 ? (int)$legislator['partisanship']
                 : 0,
@@ -1093,8 +1091,6 @@ class Import
             'url' => true,
             'sbe_id' => true,
             'place' => true,
-            'latitude' => true,
-            'longitude' => true,
             'district_id' => true,
         );
 
@@ -1115,9 +1111,7 @@ class Import
             foreach ($term_changes as $field => $unused) {
                 $placeholder = ':' . $field;
                 $set[] = $field . ' = ' . $placeholder;
-                if ($field === 'latitude' || $field === 'longitude') {
-                    $params[$placeholder] = $this->normalizeNullableFloat($legislator[$field]);
-                } elseif ($field === 'district_id') {
+                if ($field === 'district_id') {
                     $params[$placeholder] = (int)$legislator[$field];
                 } else {
                     $params[$placeholder] = $this->normalizeOptionalString($legislator[$field]);
@@ -1657,10 +1651,6 @@ class Import
             $location->address = $legislator['address_district'];
         } elseif (!empty($legislator['place'])) {
             $location->address = $legislator['place'] . ', VA';
-        }
-        if (!empty($legislator['place']) && $location->get_coordinates($legislator['place']) != false) {
-            $legislator['latitude'] = round($location->latitude, 2);
-            $legislator['longitude'] = round($location->longitude, 2);
         }
 
         /*
@@ -2548,15 +2538,6 @@ class Import
             $location->address = $legislator['address_district'];
         } elseif (!empty($legislator['place'])) {
             $location->address = $legislator['place'] . ', VA';
-        }
-
-        if (
-            isset($location->address)
-            && !empty($legislator['place'])
-            && $location->get_coordinates() !== false
-        ) {
-            $legislator['latitude'] = round($location->latitude, 2);
-            $legislator['longitude'] = round($location->longitude, 2);
         }
 
         return array_filter($legislator, function ($value) {
