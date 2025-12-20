@@ -14,6 +14,7 @@ php_value include_path ".:includes/"
 php_value session.cache_limiter private
 php_value session.gc_maxlifetime 7776000
 php_value session_cache_expire 7776000
+php_value session.cookie_lifetime 7776000
 
 # Security settings
 php_flag session.cookie_httponly on
