@@ -1,33 +1,33 @@
 <?php
 
-    ###
-    # Help System
-    #
-    # PURPOSE
-    # Display the data that will consistute the "help" system.
-    #
-    # NOTES
-    # This does not use the standard template but, rather, a more stripped-down version.
-    #
-    ###
+###
+# Help System
+#
+# PURPOSE
+# Display the data that will consistute the "help" system.
+#
+# NOTES
+# This does not use the standard template but, rather, a more stripped-down version.
+#
+###
 
-    # INCLUDES
-    # Include any files or libraries that are necessary for this specific
-    # page to function.
-    include_once 'includes/settings.inc.php';
-    include_once 'vendor/autoload.php';
+# INCLUDES
+# Include any files or libraries that are necessary for this specific
+# page to function.
+include_once 'includes/settings.inc.php';
+include_once 'vendor/autoload.php';
 
-    # LOCALIZE VARIABLES
-    $topic = $_REQUEST['topic'];
+# LOCALIZE VARIABLES
+$topic = $_REQUEST['topic'];
 
-    # PAGE METADATA
-    $page_title = 'Help with ' . ucwords(str_replace('-', ' ', $topic));
-    $site_section = '';
-    $template = 'help';
+# PAGE METADATA
+$page_title = 'Help with ' . ucwords(str_replace('-', ' ', $topic));
+$site_section = '';
+$template = 'help';
 
-    # PAGE CONTENT
+# PAGE CONTENT
 
-    # Use the $topic variable to determine which help information to provide.
+# Use the $topic variable to determine which help information to provide.
 switch ($topic) {
     # How to use tags.
     case 'tags':
@@ -81,7 +81,7 @@ switch ($topic) {
 				<p>In summary: keep it simple, be objective, and try to follow existing
 				standards.</p>
 EOD;
-        break;
+break;
 
 
     # How to interpret a tag cloud.
@@ -174,8 +174,8 @@ EOD;
 EOD;
 
 
-        # How to read the partisanship graph.
-        // no break
+	# How to read the partisanship graph.
+	// no break
     case 'partisanship':
         $page_body = <<<EOD
 				<p>This is a measure of where a legislator is on the left-to-right political
@@ -203,10 +203,19 @@ if ($is_ajax) {
     exit;
 }
 
+// OUTPUT THE PAGE
 $page = new Page();
-$page->page_title = $page_title;
-$page->page_body = $page_body;
-$page->page_sidebar = $page_sidebar;
-$page->site_section = $site_section;
-$page->template = $template;
+foreach ([
+    'page_title',
+    'page_body',
+    'page_sidebar',
+    'site_section',
+    'browser_title',
+    'html_head',
+    'body_tag',
+] as $prop) {
+    if (isset(${$prop})) {
+        $page->{$prop} = ${$prop};
+    }
+}
 $page->process();

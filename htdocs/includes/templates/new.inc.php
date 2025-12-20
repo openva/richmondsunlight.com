@@ -1,14 +1,14 @@
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-<meta charset="utf-8" />
+<meta charset="utf-8">
 <meta name=viewport content="width=device-width, initial-scale=1">
 <title>%browser_title%</title>
 <link rel="manifest" href="/manifest.json">
-<meta name="theme-color" content="#790806"/>
-<link rel="stylesheet" href="/css/new/screen.css" media="screen" />
-<link rel="stylesheet" href="/css/new/print.css" media="print" />
-<link rel="stylesheet" href="/css/page-elements.css" media="screen" />
+<meta name="theme-color" content="#790806">
+<link rel="stylesheet" href="/css/new/screen.css" media="screen">
+<link rel="stylesheet" href="/css/new/print.css" media="print">
+<link rel="stylesheet" href="/css/page-elements.css" media="screen">
 <link rel="stylesheet" href="/css/jquery-ui.theme.min.css" media="screen">
 <link rel="stylesheet" href="/js/vendor/qtip2/dist/jquery.qtip.min.css" media="screen">
 <link rel="stylesheet" href="/js/vendor/jquery.tabSlideOut.js/jquery.tabSlideOut.css"> 
@@ -22,11 +22,11 @@
 <script src="/js/vendor/jquery.tabSlideOut.js/jquery.tabSlideOut.js"></script>
 
 <!-- For IE 11, Chrome, Firefox, Safari, Opera -->
-<link rel="icon" type="image/png" href="/images/favicons/16.png" sizes="16x16" />
-<link rel="icon" type="image/png" href="/images/favicons/32.png" sizes="32x32" />
-<link rel="icon" type="image/png" href="/images/favicons/48.png" sizes="48x48" />
-<link rel="icon" type="image/png" href="/images/favicons/62.png" sizes="62x62" />
-<link rel="icon" type="image/png" href="/images/favicons/192.png" sizes="192x192" />
+<link rel="icon" type="image/png" href="/images/favicons/16.png" sizes="16x16">
+<link rel="icon" type="image/png" href="/images/favicons/32.png" sizes="32x32">
+<link rel="icon" type="image/png" href="/images/favicons/48.png" sizes="48x48">
+<link rel="icon" type="image/png" href="/images/favicons/62.png" sizes="62x62">
+<link rel="icon" type="image/png" href="/images/favicons/192.png" sizes="192x192">
 
 <!-- Add to Home Screen -->
 <meta name="mobile-web-app-capable" content="yes">
@@ -34,13 +34,13 @@
 <meta name="mobile-web-app-title" content="Richmond Sunlight">
 
 <!-- iOS Touch Icons -->
-<link rel="apple-touch-icon" type="image/png" href="/images/favicons/apple-touch-icons/76.png" sizes="76x76" />
-<link rel="apple-touch-icon" type="image/png" href="/images/favicons/apple-touch-icons/120.png" sizes="120x120" />
-<link rel="apple-touch-icon" type="image/png" href="/images/favicons/apple-touch-icons/152.png" sizes="152x152" />
-<link rel="apple-touch-icon" type="image/png" href="/images/favicons/apple-touch-icons/180.png" sizes="180x180" />
+<link rel="apple-touch-icon" type="image/png" href="/images/favicons/apple-touch-icons/76.png" sizes="76x76">
+<link rel="apple-touch-icon" type="image/png" href="/images/favicons/apple-touch-icons/120.png" sizes="120x120">
+<link rel="apple-touch-icon" type="image/png" href="/images/favicons/apple-touch-icons/152.png" sizes="152x152">
+<link rel="apple-touch-icon" type="image/png" href="/images/favicons/apple-touch-icons/180.png" sizes="180x180">
 
 <!-- Safari Pinned Site -->
-<link rel="mask-icon" href="/images/favicons/safari_icon.svg" />
+<link rel="mask-icon" href="/images/favicons/safari_icon.svg">
 
 <?php
     # Include the below JavaScript, but only if the browser is IE. We do an Opera check because
@@ -97,7 +97,7 @@ if (
                 <div id="logo">
                     <a href="/"><img src="/images/templates/new/richmond-sunlight-logo.png"
                         alt="Richmond Sunlight Logo" title="Richmond Sunlight" width="274" height="88"
-                        pagespeed_no_transform /></a>
+                        pagespeed_no_transform></a>
                 </div>
 
                 <div id="from-and-search">
@@ -106,9 +106,9 @@ if (
                     </div>
                     <form id="search" method="get" action="/search/">
                         <label for="search-box"><img src="/images/templates/new/search-label.gif"
-                            width="56" height="20" alt="Search" /></label>
-                        <input type="search" name="q" id="search-box" />
-                        <input type="image" src="/images/templates/new/go-search.gif" alt="Go" />
+                            width="56" height="20" alt="Search"></label>
+                        <input type="search" name="q" id="search-box">
+                        <input type="image" src="/images/templates/new/go-search.gif" alt="Go">
                     </form>
                 </div>
 
@@ -367,7 +367,7 @@ if (
                                 // Set the tooltip content
                                 var content = '<img src="/images/legislators/thumbnails/' + legislator + '.jpg" height="50" style="float: left; margin: 0 .5em .5em 0" \/>'
                                     + '<strong>' + data.name_formatted + '</strong></br >Represents: '
-                                    + data.district_description + '<br />Took Office: ' + data.date_started;
+                                    + data.district_description + '<br>Took Office: ' + data.date_started;
                                 api.set('content.text', content);
                             }, function(xhr, status, error) {
                                 // Upon error

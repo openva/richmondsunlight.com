@@ -217,9 +217,17 @@ if ($user['type'] == 'free') {
 # The last thing that we do is up the last access date in the session data.
 $_SESSION['last_access'] = time();
 
-# OUTPUT THE PAGE
+// OUTPUT THE PAGE
 $page = new Page();
-foreach (array('page_title', 'page_body', 'page_sidebar', 'site_section') as $prop) {
+foreach ([
+    'page_title',
+    'page_body',
+    'page_sidebar',
+    'site_section',
+    'browser_title',
+    'html_head',
+    'body_tag',
+] as $prop) {
     if (isset(${$prop})) {
         $page->{$prop} = ${$prop};
     }

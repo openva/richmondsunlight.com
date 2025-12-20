@@ -22,12 +22,19 @@ $page_title = 'Site Too Busy';
 $page_body = '<p>We’re sorry, but the site is totally overwhelmed with traffic right now. There are more people trying to look at the site than we can show it to at once.
 				Just wait a minute or two and try again, and it should likely work for you then. Sorry for the growing pains!</p>';
 
-# OUTPUT THE PAGE
-
+// OUTPUT THE PAGE
 $page = new Page();
-$page->page_title = $page_title;
-$page->page_body = $page_body;
-$page->page_sidebar = $page_sidebar;
-$page->site_section = $site_section;
-$page->html_head = $html_head;
+foreach ([
+    'page_title',
+    'page_body',
+    'page_sidebar',
+    'site_section',
+    'browser_title',
+    'html_head',
+    'body_tag',
+] as $prop) {
+    if (isset(${$prop})) {
+        $page->{$prop} = ${$prop};
+    }
+}
 $page->process();

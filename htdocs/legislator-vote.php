@@ -133,9 +133,17 @@ if (mysqli_num_rows($result) > 0) {
 		cast any recorded votes in ' . $year . '.</p>';
 }
 
-# OUTPUT THE PAGE
+// OUTPUT THE PAGE
 $page = new Page();
-foreach (array('page_title', 'page_body', 'page_sidebar', 'site_section') as $prop) {
+foreach ([
+    'page_title',
+    'page_body',
+    'page_sidebar',
+    'site_section',
+    'browser_title',
+    'html_head',
+    'body_tag',
+] as $prop) {
     if (isset(${$prop})) {
         $page->{$prop} = ${$prop};
     }

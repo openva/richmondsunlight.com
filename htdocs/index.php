@@ -44,7 +44,7 @@ if (strtotime(SESSION_START) < time() && strtotime(SESSION_END) > time()) {
     $page_body = '<p>The ' . SESSION_YEAR . ' Virginia General Assembly session began on '
         . date('F j', strtotime(SESSION_START)) . ' and continued through '
         . date('F j', strtotime(SESSION_END)) . '. Here you can read <a href="/bills/">the '
-        . 'bills were proposed</a> and <a href="/bills/passed/">the bills that passed into '
+        . 'bills were proposed</a> and <a href="/bills/passed/">the bills that passed</a> into '
         . 'law.</p>';
 }
 
@@ -411,12 +411,19 @@ $html_head .= '
 }
 </script>';
 
+// OUTPUT THE PAGE
 $page = new Page();
-$page->page_title = $page_title;
-$page->page_body = $page_body;
-$page->page_sidebar = $page_sidebar;
-$page->site_section = $site_section;
-$page->html_head = $html_head;
-$page->browser_title = $browser_title;
-$page->assemble();
-$page->display();
+foreach ([
+    'page_title',
+    'page_body',
+    'page_sidebar',
+    'site_section',
+    'browser_title',
+    'html_head',
+    'body_tag',
+] as $prop) {
+    if (isset(${$prop})) {
+        $page->{$prop} = ${$prop};
+    }
+}
+$page->process();

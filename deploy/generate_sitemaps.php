@@ -131,7 +131,9 @@ for ($year = 2006; $year <= SESSION_YEAR; $year++) {
         }
         $sitemap_list[] = 'bills-' . $year . '.xml';
     } else {
-        $log->put(message: 'No bills found for year ' . $year . ' when generating sitemap', level: 4);
+        $log->put(message: 'No bills found for year ' . $year . ' when generating sitemap -- '
+            . 'ending sitemap generation process', level: 4);
+        return;
     }
 }
 
