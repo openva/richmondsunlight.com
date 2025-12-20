@@ -321,7 +321,11 @@ if (
                             })
                             .then(function(data) {
                                 // Set the tooltip content
-                                var content = '<a href="/legislator/' + data.chief_patron_shortname + '/">' + data.patron_name_formatted + '</a>: ' + data.summary.truncate();
+                                var sponsor = '<a href="/legislator/' + data.chief_patron_shortname + '/">' + data.patron_name_formatted + '</a>'
+                                var content;
+                                if (data.summary) {
+                                    content = sponsor + ': ' + data.summary.truncate();
+                                }
                                 api.set('content.text', content);
                             }, function(xhr, status, error) {
                                 // Upon error
