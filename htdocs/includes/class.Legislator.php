@@ -145,7 +145,8 @@ class Legislator
                     terms.email,
                     terms.url AS website,
                     terms.place,
-                    terms.lis_id
+                    terms.lis_id,
+                    terms.sbe_id
 				FROM people
                 LEFT JOIN terms
                     ON people.id = terms.person_id
