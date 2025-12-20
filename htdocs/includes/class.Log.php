@@ -84,6 +84,9 @@ class Log
                 7 => ':scream:',
                 8 => ':skull:'
                 );
+            if ($level >= 6) {
+                $message = "@channel {$message}";
+            }
             $this->slack($message, 'rs', $emoji[$level]);
         }
 
