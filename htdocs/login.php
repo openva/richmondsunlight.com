@@ -25,6 +25,25 @@ $site_section = '';
 # INITIALIZE SESSION
 session_start();
 
+# If we're arriving from another page, remember it so we can send the user back after login.
+if (!isset($_POST['submit']) && empty($_GET['return_uri']) && !empty($_SERVER['HTTP_REFERER'])) {
+    $referer = parse_url($_SERVER['HTTP_REFERER']);
+    $host = isset($referer['host']) ? $referer['host'] : '';
+
+    // Only allow same-host redirects to avoid open redirects.
+    $host_matches = empty($host) || strcasecmp($host, $_SERVER['HTTP_HOST']) === 0 || strcasecmp($host, $_SERVER['SERVER_NAME']) === 0;
+    if ($host_matches && !empty($referer['path'])) {
+        // Avoid redirect loops back to login-related paths.
+        if (!preg_match('#/(account/)?(login|logout|register|reset-password)/?#i', $referer['path'])) {
+            $return_uri = $referer['path'];
+            if (!empty($referer['query'])) {
+                $return_uri .= '?' . $referer['query'];
+            }
+            $_GET['return_uri'] = $return_uri;
+        }
+    }
+}
+
 if (isset($_POST['submit'])) {
     $form_data = array_map('stripslashes', $_POST['form_data']);
     if (empty($form_data['password'])) {
