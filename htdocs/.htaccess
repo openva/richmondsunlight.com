@@ -6,14 +6,16 @@ php_value log_errors Off
 
 php_value include_path ".:includes/"
 
-#php_value session.save_handler redis
-#php_value session.save_path tcp://127.0.0.1:6379
+# Persist sessions in Memcached instead of local disk
+php_value session.save_handler memcached
+php_value session.save_path "127.0.0.1:11211"
 
 # Instruct browsers to cache and proxies not to cache, timing out cookies after a year. Affects only
 # PHP.
 php_value session.cache_limiter private
 php_value session.gc_maxlifetime 7776000
 php_value session_cache_expire 7776000
+php_value session.cookie_lifetime 7776000
 
 # Security settings
 php_flag session.cookie_httponly on
