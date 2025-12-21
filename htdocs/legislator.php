@@ -286,8 +286,9 @@ $page_sidebar .= '
         <h3>More Info</h3>
         <ul>
             <li><a href="https://lis.virginia.gov/session-details/20' . SESSION_LIS_ID
-                . '/member-information/0'
-                . ($legislator['chamber'] == 'house' ? 'H' : 'S') . $legislator['lis_id']
+                . '/member-information/'
+                . ($legislator['chamber'] == 'house' ? 'H' : 'S')
+                . str_pad(preg_replace('/[H,S]/', replacement: '',subject: $legislator['lis_id']), 4, '0', STR_PAD_LEFT)
                 . '/member-details">View on the Legislature’s Site</li>
             <li><a href="https://api.richmondsunlight.com/1.1/legislator/'
                 . $legislator['shortname'] . '.json">View as JSON</a></li>
