@@ -381,7 +381,8 @@ div#public-portfolio .bill {
 		font-weight: bold;
 	}
 		.tabs > ul li.ui-state-active {
-			background-color: #dccbaf;
+			background-color: #f4eee5;
+			border-bottom: 1px solid #f4eee5;
 		}
 		.tabs > ul li a {
 			display: block;
@@ -402,6 +403,8 @@ div#public-portfolio .bill {
 			}
 	.tabs > div {
 		clear: left;
+		border: 1px solid rgb(170, 170, 170);
+		margin-top: -1px; /* tuck under the tab border so the active tab looks attached */
 	}
 table.tabbed  {
 	clear: left;

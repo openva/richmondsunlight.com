@@ -24,9 +24,6 @@ $database->connect_mysqli();
 $page_title = 'Recommended Bills';
 $site_section = '';
 
-# Include the tabbing code.
-$html_head = '<script src="/js/scriptaculous/control-tabs.js" type="text/javascript"></script>';
-
 # INITIALIZE SESSION
 session_start();
 
@@ -43,9 +40,7 @@ else {
     $user = @get_user();
 }
 
-$page_body = '
-
-<div id="interests">';
+$page_body = '<div id="interests">';
 
 $user_data = new User();
 $bills = $user_data->recommended_bills();
