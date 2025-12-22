@@ -932,8 +932,7 @@ if (isset($legislator['bills']) && count($legislator['bills']) > 0) {
 				<ul>';
 
         foreach ($year_bills as $bill) {
-            $page_body .= '
-            <li><a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number']) . '/" class="balloon">' . mb_strtoupper($bill['number']) . balloon($bill, 'bill-noleg') . '</a>: ' . $bill['catch_line'] . '</li>';
+            $page_body .= '<li><a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number']) . '/" class="balloon">' . mb_strtoupper($bill['number']) . balloon($bill, 'bill-noleg') . '</a>: ' . $bill['catch_line'] . '</li>';
         }
 
         $page_body .= '
