@@ -244,10 +244,64 @@ if (
     </div>
 
     <script pagespeed_no_defer="">
-        /* Create tabs. */
+        /* Create tabs and add dropdown fallback when tabs overflow. */
         // Wait until the DOM has loaded before querying the document
         $(document).ready(function() {
             $(".tabs").tabs();
+
+            function debounce(fn, wait) {
+                var t;
+                return function() {
+                    clearTimeout(t);
+                    t = setTimeout(fn, wait);
+                };
+            }
+
+            function ensureDropdown($tabs) {
+                var $select = $tabs.children("select.tabs-dropdown");
+                if ($select.length) {
+                    return $select;
+                }
+
+                var $ul = $tabs.children("ul").first();
+                $select = $('<select class="tabs-dropdown" aria-label="Select section"></select>');
+
+                $ul.find("a").each(function(i) {
+                    var $a = $(this);
+                    $select.append($("<option></option>").val(i).text($a.text()));
+                });
+
+                $select.on("change", function() {
+                    $tabs.tabs("option", "active", parseInt(this.value, 10));
+                });
+
+                $select.insertBefore($ul);
+
+                $tabs.on("tabsactivate", function(e, ui) {
+                    $select.val(ui.newTab.index());
+                });
+
+                return $select;
+            }
+
+            function updateLayout($tabs) {
+                var $ul = $tabs.children("ul").first();
+                var overflow = $ul[0] && $ul[0].scrollWidth > $ul.innerWidth();
+                if (overflow) {
+                    ensureDropdown($tabs);
+                    $tabs.addClass("tabs--dropdown");
+                } else {
+                    $tabs.removeClass("tabs--dropdown");
+                }
+            }
+
+            $(".tabs").each(function() {
+                var $tabs = $(this);
+                updateLayout($tabs);
+                $(window).on("resize", debounce(function() {
+                    updateLayout($tabs);
+                }, 150));
+            });
         });
 
         /* Help icon tooltips */

@@ -27,9 +27,6 @@ $site_section = '';
 # INITIALIZE SESSION
 session_start();
 
-# Include the tabbing code.
-$html_head = '<script src="/js/scriptaculous/control-tabs.js"></script>';
-
 # Include the password-strength-meter code.
 $html_head = '<script src="/js/vendor/zxcvbn/dist/zxcvbn.js"></script>
 			<script src="/js/password-test.js"></script>';
@@ -211,7 +208,7 @@ if (isset($_POST['submit'])) {
 if (!isset($_POST['submit'])) {
     $page_body .= '
 	<div class="tabs">
-	<ul>
+	<ul class="tabs">
 		<li><a href="#settings">Settings</a></li>
 		<li><a href="#stats">Statistics</a></li>
 		<li><a href="#comments">Comments</a></li>

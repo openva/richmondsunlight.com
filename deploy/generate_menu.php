@@ -43,14 +43,21 @@ foreach ($legislator_list as $legislator) {
     if (!in_array($letter, $alphabet, true)) {
         continue;
     }
-    $link = '<a href="/legislator/' . $legislator['shortname'] . '/">' . $legislator['name_formatted'] . '</a>';
-    $legislators[$legislator['chamber']][$letter][] = $link;
+    $legislators[$legislator['chamber']][$letter][] = [
+        'sort_key' => $legislator['name'], // "Last, First" from DB keeps last-name ordering
+        'link' => '<a href="/legislator/' . $legislator['shortname'] . '/">' . $legislator['name_formatted'] . '</a>',
+    ];
 }
 
 foreach ($legislators as &$chamber) {
     foreach ($chamber as &$by_letter) {
         if (!empty($by_letter)) {
-            sort($by_letter, SORT_NATURAL | SORT_FLAG_CASE);
+            usort(
+                $by_letter,
+                static function ($a, $b) {
+                    return strnatcasecmp($a['sort_key'], $b['sort_key']);
+                }
+            );
         }
     }
     unset($by_letter);
@@ -118,7 +125,7 @@ function render_chamber_menu($title, array $categories, array $alphabet, array $
         }
 
         foreach ($legislators_by_letter[$letter] ?? [] as $legislator_link) {
-            $segments[] = '                    <li>' . $legislator_link . '</li>';
+            $segments[] = '                    <li>' . $legislator_link['link'] . '</li>';
         }
     }
 

@@ -362,13 +362,19 @@ div#public-portfolio .bill {
 
 /* Subsection Tabs
 --------------------*/
+.tabs select.tabs-dropdown { display: none; margin: 0 0 .5em 0; }
+.tabs.tabs--dropdown > ul { display: none; }
+.tabs.tabs--dropdown select.tabs-dropdown { display: block; width: 100%; }
+.tabs > ul { display: flex; flex-wrap: nowrap; overflow: hidden; }
+.tabs > ul li { float: none; flex: 0 0 auto; }
 .tabs > ul {
 	list-style-type: none !important;
 	margin: 0 1em 0 0;
-	padding: 0;
+	padding: .25em .5em 0 .5em;
 	clear: both;
-	border: 0;
-	height: 20px;
+	border: 1px solid #aaa;
+	border-bottom: 0;
+	height: auto;
 	background-color: transparent;
 }
 	.tabs > ul.ui-widget.ui-widget-content {
@@ -376,12 +382,13 @@ div#public-portfolio .bill {
 	}
 	.tabs > ul li {
 		float: left;
-		margin-right: 5px;
+		margin: 0 5px -1px 0;
 		text-align: center;
 		font-weight: bold;
 	}
 		.tabs > ul li.ui-state-active {
-			background-color: #dccbaf;
+			background-color: #f4eee5;
+			border-bottom: 1px solid #f4eee5;
 		}
 		.tabs > ul li a {
 			display: block;
@@ -402,6 +409,8 @@ div#public-portfolio .bill {
 			}
 	.tabs > div {
 		clear: left;
+		border: 1px solid rgb(170, 170, 170);
+		margin-top: -1px; /* tuck under the tab border so the active tab looks attached */
 	}
 table.tabbed  {
 	clear: left;
