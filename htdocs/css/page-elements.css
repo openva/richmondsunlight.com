@@ -362,6 +362,11 @@ div#public-portfolio .bill {
 
 /* Subsection Tabs
 --------------------*/
+.tabs select.tabs-dropdown { display: none; margin: 0 0 .5em 0; }
+.tabs.tabs--dropdown > ul { display: none; }
+.tabs.tabs--dropdown select.tabs-dropdown { display: block; width: 100%; }
+.tabs > ul { display: flex; flex-wrap: nowrap; overflow: hidden; }
+.tabs > ul li { float: none; flex: 0 0 auto; }
 .tabs > ul {
 	list-style-type: none !important;
 	margin: 0 1em 0 0;
