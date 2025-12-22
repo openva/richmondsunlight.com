@@ -365,10 +365,11 @@ div#public-portfolio .bill {
 .tabs > ul {
 	list-style-type: none !important;
 	margin: 0 1em 0 0;
-	padding: 0;
+	padding: .25em .5em 0 .5em;
 	clear: both;
-	border: 0;
-	height: 20px;
+	border: 1px solid #aaa;
+	border-bottom: 0;
+	height: auto;
 	background-color: transparent;
 }
 	.tabs > ul.ui-widget.ui-widget-content {
@@ -376,7 +377,7 @@ div#public-portfolio .bill {
 	}
 	.tabs > ul li {
 		float: left;
-		margin-right: 5px;
+		margin: 0 5px -1px 0;
 		text-align: center;
 		font-weight: bold;
 	}
