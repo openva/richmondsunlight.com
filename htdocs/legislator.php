@@ -907,37 +907,25 @@ if (isset($legislator['bills']) && count($legislator['bills']) > 0) {
     }
 
     // Start the tab header code
-    $page_body .= '
-		<ul>';
+    $page_body .= '<ul>';
 
     // Step through each year and generate a tab.
     foreach ($bills as $year => $bill) {
-        if (count($bills) > 8) {
-            $page_body .= '
-				<li><a href="#' . $year . '">' . preg_replace('/^20/', "‘", $year) . '</a></li>';
-        } else {
-            $page_body .= '
-				<li><a href="#' . $year . '">' . $year . '</a></li>';
-        }
+        $page_body .= '<li><a href="#' . $year . '">' . $year . '</a></li>';
     }
 
     // End the tab header code.
-    $page_body .= '
-		</ul>';
+    $page_body .= '</ul>';
 
     // Now step through each year, and each bill within each year, and generate the tab's data.
     foreach ($bills as $year => $year_bills) {
-        $page_body .= '
-			<div id="' . $year . '" class="bills">
-				<ul>';
+        $page_body .= '<div id="' . $year . '" class="bills"><ul>';
 
         foreach ($year_bills as $bill) {
             $page_body .= '<li><a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number']) . '/" class="balloon">' . mb_strtoupper($bill['number']) . balloon($bill, 'bill-noleg') . '</a>: ' . $bill['catch_line'] . '</li>';
         }
 
-        $page_body .= '
-				</ul>
-			</div>';
+        $page_body .= '</ul></div>';
     }
 
     // Close the Bills DIV
