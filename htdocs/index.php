@@ -58,10 +58,8 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 		ORDER BY tag ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
 $tag_count = mysqli_num_rows($result);
-if ($tag_count > 0) {
-    $page_body .= '
-	<h2>Bill Topics</h2>
-	<div class="tags">';
+if ($tag_count >= 10) {
+    $page_body .= '<h2>Bill Topics</h2><div class="tags">';
     # Build up an array of tags, with the key being the tag and the value being the count.
     while ($tag = mysqli_fetch_array($result)) {
         $tag = array_map('stripslashes', $tag);
@@ -89,8 +87,7 @@ if ($tag_count > 0) {
         $page_body .= '<span style="font-size: ' . $size . 'em;"><a href="/bills/tags/'
             . urlencode($tag) . '/">' . $tag . '</a></span> ';
     }
-    $page_body .= '
-	</div>';
+    $page_body .= '</div>';
 }
 
 # Show all bills, with a hotness greater than or equal to 10, that have recently hit progress
