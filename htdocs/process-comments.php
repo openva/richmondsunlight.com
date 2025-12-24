@@ -14,6 +14,33 @@
 #
 ###
 
+/*
+ * Set up JSON-based error handling
+ */
+ini_set('display_errors', '0');
+error_reporting(E_ALL);
+
+// Convert any warning/notice/fatal into a clean JSON error and exit
+set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+    // Respect @-suppression
+    if (!(error_reporting() & $errno)) {
+        return false;
+    }
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['error' => 'Server error.']);
+    return true; // handled
+});
+
+register_shutdown_function(function () {
+    $e = error_get_last();
+    if ($e && in_array($e['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        http_response_code(500);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['error' => 'Server error.']);
+    }
+});
+
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
@@ -47,7 +74,7 @@ $comment['url']     = $_POST['age'];
 if (preg_match("#([0-9]{2})/([0-9]{2})#D", $comment['name'])) {
     exit();
 }
-if (preg_match("/([0-9]{6}/", $comment['name'])) {
+if (preg_match("/([0-9]{6})/", $comment['name'])) {
     exit();
 }
 if ((mb_strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})/D", $comment['email']))) {
@@ -56,10 +83,10 @@ if ((mb_strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})/D", $comment
 if ((mb_strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})-([0-9]{4})/D", $comment['email']))) {
     exit();
 }
-if (preg_match("/([0-9]{2})/D", $comment['age'])) {
+if (isset($comment['age']) && preg_match("/([0-9]{2})/D", $comment['age'])) {
     exit();
 }
-if (!empty($comment['state'])) {
+if (isset($comment['state']) && !empty($comment['state'])) {
     exit();
 }
 if (mb_strlen($_SERVER['HTTP_USER_AGENT']) <= 1) {

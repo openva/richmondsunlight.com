@@ -372,8 +372,7 @@ div#public-portfolio .bill {
 	margin: 0 1em 0 0;
 	padding: .25em .5em 0 .5em;
 	clear: both;
-	border: 1px solid #aaa;
-	border-bottom: 0;
+	border: 0;
 	height: auto;
 	background-color: transparent;
 }
@@ -385,6 +384,10 @@ div#public-portfolio .bill {
 		margin: 0 5px -1px 0;
 		text-align: center;
 		font-weight: bold;
+		border: 1px solid #aaa;
+		border-bottom: 0;
+		background-color: #f8f8f8;
+		border-radius: 4px 4px 0 0;
 	}
 		.tabs > ul li.ui-state-active {
 			background-color: #f4eee5;
@@ -397,6 +400,7 @@ div#public-portfolio .bill {
 			background-color: transparent;
 			color: #333;
 			text-decoration: none;
+			border: 0;
 		}
 		.ui-tabs .ui-tabs-nav li a {
 			padding: .33em .5em !important;

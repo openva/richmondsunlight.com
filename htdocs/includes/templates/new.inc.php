@@ -286,13 +286,23 @@ if (
 
             function updateLayout($tabs) {
                 var $ul = $tabs.children("ul").first();
-                var overflow = $ul[0] && $ul[0].scrollWidth > $ul.innerWidth();
+                var wasDropdown = $tabs.hasClass("tabs--dropdown");
+
+                // Measure with the tabs visible; hiding them (dropdown mode) makes widths zero.
+                if (wasDropdown) {
+                    $tabs.removeClass("tabs--dropdown");
+                }
+
+                var overflow = $ul[0] && $ul[0].scrollWidth > $ul.innerWidth() + 1; // 1px buffer
+
                 if (overflow) {
                     ensureDropdown($tabs);
                     $tabs.addClass("tabs--dropdown");
                 } else {
                     $tabs.removeClass("tabs--dropdown");
                 }
+
+                // If we were already in dropdown mode and still are, no-op; otherwise state is set above.
             }
 
             $(".tabs").each(function() {
