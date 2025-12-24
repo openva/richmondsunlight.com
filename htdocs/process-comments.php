@@ -83,10 +83,10 @@ if ((mb_strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})/D", $comment
 if ((mb_strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})-([0-9]{4})/D", $comment['email']))) {
     exit();
 }
-if (preg_match("/([0-9]{2})/D", $comment['age'])) {
+if (isset($comment['age']) && preg_match("/([0-9]{2})/D", $comment['age'])) {
     exit();
 }
-if (!empty($comment['state'])) {
+if (isset($comment['state']) && !empty($comment['state'])) {
     exit();
 }
 if (mb_strlen($_SERVER['HTTP_USER_AGENT']) <= 1) {
