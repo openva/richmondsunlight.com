@@ -5,6 +5,8 @@ services:
       context: .
       dockerfile: deploy/Web.Dockerfile
     depends_on:
+      memcached:
+        condition: service_healthy
       api:
         condition: service_healthy
       db:
@@ -31,6 +33,8 @@ services:
       context: api/deploy/
       dockerfile: API.Dockerfile
     depends_on:
+      memcached:
+        condition: service_healthy
       db:
         condition: service_healthy
     ports:
@@ -79,6 +83,21 @@ services:
     container_name: rs_zap
     networks:
       - rs_network
+
+  # Memcached for sessions/cache
+  memcached:
+    image: memcached:1.6-alpine
+    command: ["memcached", "-m", "128", "-p", "11211", "-u", "memcache"]
+    ports:
+      - "11211:11211"
+    container_name: rs_memcached
+    networks:
+      - rs_network
+    healthcheck:
+      test: ["CMD-SHELL", "nc -z 127.0.0.1 11211 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 volumes:
   db_data: {}
