@@ -14,6 +14,33 @@
 #
 ###
 
+/*
+ * Set up JSON-based error handling
+ */
+ini_set('display_errors', '0');
+error_reporting(E_ALL);
+
+// Convert any warning/notice/fatal into a clean JSON error and exit
+set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+    // Respect @-suppression
+    if (!(error_reporting() & $errno)) {
+        return false;
+    }
+    http_response_code(500);
+    header('Content-Type: application/json; charset=utf-8');
+    echo json_encode(['error' => 'Server error.']);
+    return true; // handled
+});
+
+register_shutdown_function(function () {
+    $e = error_get_last();
+    if ($e && in_array($e['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        http_response_code(500);
+        header('Content-Type: application/json; charset=utf-8');
+        echo json_encode(['error' => 'Server error.']);
+    }
+});
+
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
