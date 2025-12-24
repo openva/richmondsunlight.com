@@ -74,7 +74,7 @@ $comment['url']     = $_POST['age'];
 if (preg_match("#([0-9]{2})/([0-9]{2})#D", $comment['name'])) {
     exit();
 }
-if (preg_match("/([0-9]{6}/", $comment['name'])) {
+if (preg_match("/([0-9]{6})/", $comment['name'])) {
     exit();
 }
 if ((mb_strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})/D", $comment['email']))) {
