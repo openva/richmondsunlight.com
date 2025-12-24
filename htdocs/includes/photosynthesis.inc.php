@@ -173,8 +173,23 @@ function populate_smart_portfolio($portfolio_id)
 # NOTES
 # None
 ###
-function smart_portfolio_form($form_data)
+function smart_portfolio_form($form_data = array())
 {
+    # Provide defaults so the form can render even when no data is supplied.
+    $defaults = array(
+        'name' => '',
+        'notes' => '',
+        'tag' => '',
+        'patron_id' => '',
+        'committee_id' => '',
+        'keyword' => '',
+        'status' => '',
+        'current_chamber' => '',
+        'public' => 'y',
+        'notify' => 'none',
+    );
+    $form_data = array_merge($defaults, (array) $form_data);
+
     # Determine where the form is to be posted.
     if (isset($form_data['id'])) {
         $action = $_SERVER['REQUEST_URI'];
@@ -447,8 +462,16 @@ function smart_portfolio_form($form_data)
 # NOTES
 # None
 ###
-function portfolio_form($form_data)
+function portfolio_form($form_data = array())
 {
+    # Provide defaults so the form can render even when no data is supplied.
+    $defaults = array(
+        'name' => '',
+        'notes' => '',
+        'public' => 'y',
+        'notify' => 'none',
+    );
+    $form_data = array_merge($defaults, (array) $form_data);
 
     # If we're editing an existing portfolio.
     if (isset($form_data['id'])) {
@@ -594,10 +617,10 @@ function show_portfolio($portfolio, $user_id)
 		</table>';
     } else {
         if ($portfolio['type'] == 'smart') {
-            $content .= '
+            $content = '
 			<div class="no-bills">No bills currently match your criteria for this smart portfolio.</div>';
         } else {
-            $content .= '
+            $content = '
 			<div class="no-bills">
 				<strong>Get started: Add some bills to your portfolio!</strong>
 				<p>You can either enter a bill ID here, or you can add them directly from any
