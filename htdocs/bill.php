@@ -395,22 +395,33 @@ $page_sidebar .= '
         <ul class="tags" id="tags_list">';
 
 if (isset($bill['tags']) && (count((array)$bill['tags']) > 0)) {
-    $html_head .= "
+    $html_head .= <<<'JS'
         <script>
-        $('.delete').click(function(e) {
+        $(document).on('click', '.delete-tag', function(e) {
             e.preventDefault();
-            var tagId = $(this).attr('data-id');
-            var url = '/process-tags.php';
-            $.post(url, { delete: tagId }, function(data){ console.log('deleted');} );
+            var $link = $(this),
+                tagId = $link.data('id'),
+                billId = $link.data('bill'),
+                tagName = $link.data('tag');
+            $.post('/delete-tags.php', { tag_id: tagId, bill_id: billId, tag: tagName })
+                .done(function() {
+                    // Remove the tag from the list on success
+                    $link.closest('li').remove();
+                })
+                .fail(function(xhr) {
+                    console.error('Failed to delete tag', xhr.responseText);
+                });
         });
-        </script>";
+        </script>
+JS;
 
     foreach ($bill['tags'] as $tag_id => $tag) {
         // We're saving this list for use below, in the list of related bills.
         $tags[] = $tag;
         $page_sidebar .= '<li><a href="/bills/tags/' . urlencode($tag) . '/">' . $tag . '</a>';
         if (isset($user) && ($user['trusted'] == 'y')) {
-            $page_sidebar .= ' [<a data-id="' . $tag_id . '" class="delete">x</a>]';
+            $page_sidebar .= ' [<a data-id="' . $tag_id . '" data-bill="' . $bill['id']
+                . '" data-tag="' . htmlspecialchars($tag, ENT_QUOTES) . '" class="delete-tag">x</a>]';
         }
         $page_sidebar .= '</li>';
     }

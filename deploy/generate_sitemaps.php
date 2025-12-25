@@ -11,6 +11,15 @@ $database = new Database();
 $db = $database->connect_mysqli();
 $log = new Log();
 
+if ($db === false) {
+    $log->put(
+        message: 'Sitemap generation aborted: database connection failed for host '
+            . PDO_SERVER . ' database ' . MYSQL_DATABASE,
+        level: 6
+    );
+    exit(1);
+}
+
 /*
  * Sitemap XML header and footer, which we'll reuse repeatedly.
  */
@@ -74,7 +83,14 @@ if ($result && mysqli_num_rows(result: $result) > 0) {
 
     $sitemap_list[] = 'legislators.xml';
 } else {
-    $log->put(message: 'No legislators found for sitemap generation', level: 5);
+    if ($result === false) {
+        $log->put(
+            message: 'Legislator sitemap query failed: ' . mysqli_error(mysql: $GLOBALS['db']),
+            level: 6
+        );
+    } else {
+        $log->put(message: 'No legislators found for sitemap generation', level: 5);
+    }
 }
 
 /*
@@ -131,8 +147,16 @@ for ($year = 2006; $year <= SESSION_YEAR; $year++) {
         }
         $sitemap_list[] = 'bills-' . $year . '.xml';
     } else {
-        $log->put(message: 'No bills found for year ' . $year . ' when generating sitemap -- '
-            . 'ending sitemap generation process', level: 4);
+        if ($result === false) {
+            $log->put(
+                message: 'Bills sitemap query failed for year ' . $year . ': '
+                    . mysqli_error(mysql: $GLOBALS['db']),
+                level: 6
+            );
+        } else {
+            $log->put(message: 'No bills found for year ' . $year . ' when generating sitemap -- '
+                . 'ending sitemap generation process', level: 4);
+        }
         return;
     }
 }

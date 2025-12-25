@@ -43,6 +43,10 @@ define('API_URL', '');
 define('MEMCACHED_SERVER', '');
 define('MEMCACHED_PORT', '11211');
 
+# Configure PHP sessions to use Memcached
+ini_set('session.save_handler', 'memcached');
+ini_set('session.save_path', MEMCACHED_SERVER . ':' . MEMCACHED_PORT);
+
 # The House Speaker's IDs. This is used in update_vote.php to translate votes credited to
 # "H0000," which bizarrely indicates the speaker, to that legislator's ID, and in
 # Video::identify_speakers to match the speaker to her identity. Here, H322 and 455 indicate
