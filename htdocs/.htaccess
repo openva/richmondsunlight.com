@@ -21,6 +21,7 @@ php_value session.cookie_lifetime 7776000
 php_flag session.cookie_httponly on
 php_flag session.use_only_cookies on
 php_flag session.cookie_secure on
+php_value session.cookie_samesite "Strict"
 Header always set Permissions-Policy "push=(self), fullscreen=(self), geolocation=(self), notifications=(self), autoplay=(self)"
 Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
 Header always set X-Frame-Options "SAMEORIGIN"
@@ -28,7 +29,7 @@ Header always set X-Xss-Protection "1; mode=block"
 Header always set X-Content-Type-Options "nosniff"
 Header always set Referrer-Policy "strict-origin-when-cross-origin"
 Header always set Content-Security-Policy "default-src * 'unsafe-inline' 'unsafe-eval' data: blob:;"
-Header always edit Set-Cookie (.*) "$1; SameSite=Lax"
+Header always edit Set-Cookie (.*) "$1; SameSite=Strict"
 
 <IfModule mod_deflate.c>
 	AddOutputFilterByType DEFLATE text/text text/html text/plain text/xml text/css application/x-javascript application/javascript
