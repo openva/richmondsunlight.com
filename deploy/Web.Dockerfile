@@ -1,4 +1,4 @@
-FROM php:8-apache
+FROM php:8.4-apache
 
 # Disable checking for valid signatures on the archived repositories
 RUN echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/90ignore-release-date \
