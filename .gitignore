@@ -8,13 +8,10 @@ htdocs/includes/vendor/
 htdocs/includes/settings.inc.php
 htdocs/downloads/
 htdocs/cache/
-*.srt
 htdocs/video/
 htdocs/admin/memcache.php
 htdocs/audio/
 htdocs/photosynthesis/rss/cache/
-htdocs/finance/
-htdocs/api/1.0/finance
 htdocs/mirror/
 htdocs/blog/
 htdocs/cron/hashes/
@@ -22,11 +19,6 @@ htdocs/includes/settings.inc.php
 backups/
 logs/
 html
-alarmlimit
-process-audio
-process-video
-lobbyist.php
-petition.php
 
 composer.phar
 *.cache
@@ -36,3 +28,4 @@ composer.phar
 .DS_Store
 htdocs/sitemap.xml
 /htdocs/sitemaps
+zap-reports/
