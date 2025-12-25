@@ -26,7 +26,7 @@ fi
 
 mkdir -p "${ZAP_REPORT_DIR}"
 
-# Normalise and validate ZAP fail level
+# Normalize and validate ZAP fail level
 ZAP_FAIL_LEVEL=$(echo "${ZAP_FAIL_LEVEL_RAW}" | tr '[:lower:]' '[:upper:]')
 case "${ZAP_FAIL_LEVEL}" in
   PASS|IGNORE|INFO|WARN|FAIL) ;;
@@ -36,7 +36,7 @@ case "${ZAP_FAIL_LEVEL}" in
     ;;
 esac
 
-# Run a quick OWASP ZAP baseline scan against the site
+# Run an OWASP ZAP scan against the site
 if [ "${FULL_SCAN}" = true ]; then
   echo "Running OWASP ZAP full scan against ${ZAP_TARGET} (fail on ${ZAP_FAIL_LEVEL}+ alerts)..."
   $COMPOSE_BINARY run --rm --entrypoint="" -v "${ZAP_REPORT_DIR}:/zap/wrk" owasp_zap \
