@@ -112,26 +112,21 @@ jobs:
           ./deploy/branch_deploy.sh
           ./deploy/config_variables.sh
           ./deploy/aws_credentials.sh
+          zip -r codebase.zip . -x ".git/*"
 
       - name: Upload staging site
         if: env.GITHUB_REF_NAME == 'master'
         uses: actions/upload-artifact@v4
         with:
           name: codebase
-          path: |
-            .
-            **/.*
-            !.git/**
+          path: codebase.zip
 
       - name: Upload production site
         if: env.GITHUB_REF_NAME == 'deploy'
         uses: actions/upload-artifact@v4
         with:
           name: codebase
-          path: |
-            .
-            **/.*
-            !.git/**
+          path: codebase.zip
 
     outputs:
       branch: ${{ steps.vars.outputs.branch }}
@@ -147,6 +142,10 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: codebase
+          path: .
+
+      - name: Unzip codebase
+        run: unzip codebase.zip
           
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
