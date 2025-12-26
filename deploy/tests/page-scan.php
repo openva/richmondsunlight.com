@@ -13,27 +13,25 @@ $failures = [];
 
 echo 'Running front end tests...' . "\n";
 
-/*
- // These tests have been pulled out because Sphinx isn't starting up properly in GitHub Actions.
 $pages =
 [
 
     [
-        'url' => '/search/?q=abortion&year=2024',
+        'url' => '/search/?q=learning&year=2025',
         'http_status' => '200',
-        'string' => 'SB278',
+        'string' => 'HB41',
     ],
     [
-        'url' => '/search/?q=cat&year=',
+        'url' => '/search/?q=tax&year=',
         'http_status' => '200',
-        'string' => 'HB221',
+        'string' => 'HB1561',
     ],
     [
         'url' => '/search/?q=nosuchresult',
         'http_status' => '200',
         'string' => '0 results found',
     ],
-];*/
+];
 
 $pages =
 [
@@ -48,42 +46,42 @@ $pages =
         'string' => 'bills found',
     ],
     [
-        'url' => '/bills/2024/',
+        'url' => '/bills/2025/',
         'http_status' => '200',
-        'string' => 'SB278',
+        'string' => 'SB305',
     ],
     [
-        'url' => '/bills/2024/1/',
+        'url' => '/bills/2025/1/',
         'http_status' => '200',
         'string' => 'No bills',
     ],
     [
-        'url' => '/bills/tags/abortion/',
+        'url' => '/bills/tags/civics/',
         'http_status' => '200',
         'string' => 'bill found',
     ],
     [
-        'url' => '/bill/2024/hb0/',
+        'url' => '/bill/2025/hb0/',
         'http_status' => '404',
     ],
     [
-        'url' => '/bill/2024/hb10223/',
+        'url' => '/bill/2025/hb10223/',
         'http_status' => '404',
     ],
     [
-        'url' => '/bill/2024/hb221/',
+        'url' => '/bill/2025/hb2049/',
         'http_status' => '200',
-        'string' => 'Cat Management',
+        'string' => 'Retail Sales and Use Tax',
     ],
     [
         'url' => '/bills/introduced/1000/',
         'http_status' => '200',
-        'string' => 'Home instruction',
+        'string' => 'food allergy',
     ],
     [
         'url' => '/bills/activity/1000/',
         'http_status' => '200',
-        'string' => 'Rereferred',
+        'string' => 'Senate substitute rejected',
     ],
     [
         'url' => '/legislators/',
@@ -115,12 +113,12 @@ $pages =
         'string' => 'Metadata',
     ],
     [
-        'url' => '/schedule/2024/01/31/',
+        'url' => '/schedule/2025/01/13/',
         'http_status' => '200',
-        'string' => 'Health Care',
+        'string' => 'Child support',
     ],
     [
-        'url' => '/schedule/2024/01/32/',
+        'url' => '/schedule/2025/01/32/',
         'http_status' => '404',
     ],
     [
