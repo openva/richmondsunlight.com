@@ -13,15 +13,15 @@ ZAP_REPORT_JSON=${ZAP_REPORT_JSON:-/zap/wrk/zap-baseline.json}
 ZAP_REPORT_HTML=${ZAP_REPORT_HTML:-/zap/wrk/zap-baseline.html}
 
 FULL_SCAN=false
-RUN_BROWSER=false
+RUN_BROWSER=true
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --zap-full-scan)
       FULL_SCAN=true
       shift
       ;;
-    --browser-tests)
-      RUN_BROWSER=true
+    --no-browser-tests)
+      RUN_BROWSER=false
       shift
       ;;
     *)
@@ -47,6 +47,8 @@ if [ "${RUN_BROWSER}" = true ]; then
     -e PLAYWRIGHT_BASE_URL="${ZAP_TARGET}" \
     --workdir /workspace/deploy/browser-tests \
     playwright bash -lc "npm ci --ignore-scripts && npx playwright test"
+else
+  echo "Skipping Playwright browser interaction tests (disabled)."
 fi
 
 mkdir -p "${ZAP_REPORT_DIR}"
