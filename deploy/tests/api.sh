@@ -19,18 +19,40 @@ check() {
     local expected="$3"
     local url="${API_BASE}${path}"
 
-    output="$(curl --silent "$url" | jq "$jq_expr")"
+    response="$(curl --silent --show-error --fail "$url")" || {
+        echo "❌: $url request failed"
+        response="$(curl --silent "$url")"
+        echo "$response"
+        ERRORED=true
+        return
+    }
+
+    output="$(printf '%s' "$response" | jq "$jq_expr")"
     if [ "$output" != "$expected" ]; then
         echo "❌: $url (${jq_expr}) expected $expected, got \"$output\""
+        echo "$response"
         ERRORED=true
     else
         echo "✅: $url (${jq_expr}) matches expected"
     fi
 }
 
-check "/bill/2024/sb278.json" ".catch_line" '"Virginia Abortion Care &amp; Gender-Affirming Health Care Protection Act; established, civil penalties."'
-check "/bill/2024/sb278.json" ".patron_shortname" '"gfhashmi"'
+check "/bill/2025/hb41.json" ".catch_line" '"Standards of Learning; programs of instruction, civics education on local government."'
+check "/bill/2025/hb41.json" ".patron_shortname" '"wcgreen"'
+check "/bill/2025/hb41.json" ".status" '"failed committee"'
+check "/bill/2025/hb41.json" ".chamber" '"house"'
+check "/bill/2025/hb41.json" ".year" '"2025"'
+check "/bill/2025/hb41.json" ".related | length > 0" 'true'
+check "/bill/2025/hb41.json" ".text[0].number" '"HB41"'
+check "/bill/2025/hb41.json" "any(.status_history[].translation; contains(\"failed committee\"))" 'true'
+check "/bill/2025/hb41.json" "any(.tags[]?; . == \"high school\")" 'true'
+check "/bill/2025/hb41.json" ".full_text | contains(\"develop the skills\")" 'true'
+
 check "/legislator/rcdeeds.json" ".name_formatted" '"Sen. Creigh Deeds (D-Charlottesville)"'
+check "/legislator/rcdeeds.json" ".shortname" '"rcdeeds"'
+check "/legislator/rcdeeds.json" ".chamber" '"senate"'
+check "/legislator/rcdeeds.json" ".district" '"11"'
+check "/legislator/rcdeeds.json" ".email" '"senatordeeds@senate.virginia.gov"'
 
 if [ "$ERRORED" = true ]; then
     exit 1
