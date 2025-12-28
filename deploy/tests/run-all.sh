@@ -16,6 +16,11 @@ if ! php ./bill-test.php; then
     ERRORED=true
 fi
 
+# Run Legislator unit tests
+if ! php ./legislator-test.php; then
+    ERRORED=true
+fi
+
 # Run the bill text API tests
 if ! php ./get_bill_text_api_test.php; then
     ERRORED=true
