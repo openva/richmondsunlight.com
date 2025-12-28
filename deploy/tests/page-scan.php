@@ -43,7 +43,7 @@ $pages =
     [
         'url' => '/bills/',
         'http_status' => '200',
-        'string' => 'bills found',
+        'strings' => ['bills found'],
     ],
     [
         'url' => '/bills/2025/',
@@ -86,17 +86,19 @@ $pages =
     [
         'url' => '/legislators/',
         'http_status' => '200',
-        'string' => 'Charlottesville',
+        'strings' =>
+            ['Charlottesville', 'Richmond', 'Virginia Beach', 'Norfolk'],
     ],
     [
         'url' => '/legislator/rcdeeds/',
         'http_status' => '200',
-        'string' => 'Sen. Creigh Deeds',
+        'strings' =>
+            ['Sen. Creigh Deeds', 'Democrat', 'District 11', 'Charlottesville'],
     ],
     [
         'url' => '/legislator/rlware/',
         'http_status' => '200',
-        'string' => 'Del. Lee Ware',
+        'strings' => ['Powhatan', 'January 1998', 'DelLWare&#064;house.virginia.gov']
     ],
     [
         'url' => '/legislator/jondoe/',
@@ -115,7 +117,7 @@ $pages =
     [
         'url' => '/schedule/2025/01/13/',
         'http_status' => '200',
-        'string' => 'Child support',
+        'strings' => ['Neurological Injury', 'Child support', 'Zoning'],
     ],
     [
         'url' => '/schedule/2025/01/32/',
@@ -129,7 +131,7 @@ $pages =
     [
         'url' => '/account/register/',
         'http_status' => '200',
-        'string' => 'Create Your Account',
+        'strings' => ['Create Your Account', 'Password', 'E-Mail'],
     ],
     [
         'url' => '/search/',
@@ -139,12 +141,12 @@ $pages =
     [
         'url' => '/committees/',
         'http_status' => '200',
-        'string' => 'Appropriations',
+        'strings' => ['Appropriations', 'Education', 'Health and Human Services', 'Courts of Justice'],
     ],
     [
         'url' => '/committee/house/appropriations/',
         'http_status' => '200',
-        'string' => 'Transportation',
+        'strings' => ['House Appropriations Committee', 'Transportation', 'Higher Education'],
     ],
     [
         'url' => '/committee/house/nosuchcommittee/',
@@ -153,7 +155,7 @@ $pages =
     [
         'url' => '/statistics/',
         'http_status' => '200',
-        'string' => 'Bills Introduced Daily',
+        'strings' => ['Bills Introduced Daily', 'Top 10 Bill Filers', 'Top 10 Most-Viewed Bills'],
     ],
 ];
 
@@ -179,10 +181,26 @@ foreach ($pages as $page) {
         continue;
     }
 
-    if (!empty($page['string']) && stristr($content, $page['string']) === false) {
-        $failures[] = ['page' => $page, 'error' => ['string' => false]];
-        echo '❌ '  . $page['url'] . "\n";
-        continue;
+    if (!empty($page['string'])) {
+        if (stristr($content, $page['string']) === false) {
+            $failures[] = ['page' => $page, 'error' => ['string' => false]];
+            echo '❌ '  . $page['url'] . "\n";
+            continue;
+        }
+    }
+
+    if (!empty($page['strings']) && is_array($page['strings'])) {
+        $missing = [];
+        foreach ($page['strings'] as $needle) {
+            if (stristr($content, $needle) === false) {
+                $missing[] = $needle;
+            }
+        }
+        if (!empty($missing)) {
+            $failures[] = ['page' => $page, 'error' => ['strings' => $missing]];
+            echo '❌ '  . $page['url'] . "\n";
+            continue;
+        }
     }
 
     echo '✅ '  . $page['url'] . "\n";
@@ -196,6 +214,12 @@ if (count($failures) > 0) {
         foreach ($failure['error'] as $key => $value) {
             if ($key == 'string') {
                 $value = 'nothing that matched';
+            }
+            if ($key == 'strings' && is_array($value)) {
+                $value = 'missing: ' . implode(', ', $value);
+                $expected = 'expected all: ' . implode(', ', $failure['page']['strings']);
+                echo $value . ' (' . $expected . ')';
+                continue;
             }
             echo $value . ' for ' . $key . ' instead of ' . $failure['page'][$key];
         }
