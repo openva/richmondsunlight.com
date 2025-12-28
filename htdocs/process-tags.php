@@ -175,7 +175,7 @@ if (!empty($_SESSION['id'])) {// && !blacklisted())
     if (MEMCACHED_SERVER != '') {
         $mc = new Memcached();
         $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-        $result = $mc->delete('bill-' . $tags['bill_id']);
+        $result = $mc->delete('bill-' . $bill_id);
     }
 
     $log = new Log();
