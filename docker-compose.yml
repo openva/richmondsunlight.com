@@ -101,7 +101,7 @@ services:
 
   # Headless browser for interaction tests
   playwright:
-    image: mcr.microsoft.com/playwright:v1.57.0-jammy
+    image: mcr.microsoft.com/playwright:v1.49.0-jammy
     working_dir: /workspace
     volumes:
       - type: bind
