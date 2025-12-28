@@ -87,7 +87,7 @@ jobs:
       
       - name: Run tests
         id: tests
-        run: ./docker-tests.sh
+        run: ./docker-tests.sh --zap-full-scan
       
       - name: Stop Docker
         if: always()
