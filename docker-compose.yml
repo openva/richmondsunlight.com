@@ -99,6 +99,18 @@ services:
       timeout: 5s
       retries: 3
 
+  # Headless browser for interaction tests
+  playwright:
+    image: mcr.microsoft.com/playwright:v1.49.0-jammy
+    working_dir: /workspace
+    volumes:
+      - type: bind
+        source: .
+        target: /workspace
+    container_name: rs_playwright
+    networks:
+      - rs_network
+
 volumes:
   db_data: {}
 networks:
