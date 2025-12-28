@@ -40,6 +40,15 @@ if ! $COMPOSE_BINARY ps --format '{{.Name}}' | grep -q "^${CONTAINER_NAME}$"; th
     exit 1
 fi
 
+# Ensure DB container is running (needed for loading test users)
+if ! $COMPOSE_BINARY ps --format '{{.Name}}' | grep -q "^rs_db$"; then
+    echo "Container 'rs_db' is not running. Please start docker compose before running tests." >&2
+    exit 1
+fi
+
+# Ensure test users are loaded for browser/login flows
+./deploy/load-test-users.sh
+
 # Run browser-based interaction tests
 if [ "${RUN_BROWSER}" = true ]; then
   echo "Running Playwright browser interaction tests..."
