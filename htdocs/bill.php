@@ -1021,6 +1021,7 @@ if (isset($bill['places']) && (count($bill['places']) > 0)) {
         $( document ).ready(function() {
 
             mapboxgl.accessToken = "' . MAPBOX_TOKEN . '";
+            mapboxgl.setTelemetryEnabled(false);
             var map = new mapboxgl.Map({
                 container: "map",
                 style: "mapbox://styles/mapbox/streets-v11",
