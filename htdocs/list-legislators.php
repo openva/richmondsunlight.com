@@ -179,6 +179,7 @@ if (mysqli_num_rows($result) > 0) {
             var map;
 
             mapboxgl.accessToken = "' . MAPBOX_TOKEN . '";
+            mapboxgl.setTelemetryEnabled(false);
             map = new mapboxgl.Map({
                 container: "district_map",
                 style: "mapbox://styles/mapbox/streets-v11",

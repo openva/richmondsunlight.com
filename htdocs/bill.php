@@ -420,8 +420,8 @@ JS;
         $tags[] = $tag;
         $page_sidebar .= '<li><a href="/bills/tags/' . urlencode($tag) . '/">' . $tag . '</a>';
         if (isset($user) && ($user['trusted'] == 'y')) {
-            $page_sidebar .= ' [<a data-id="' . $tag_id . '" data-bill="' . $bill['id']
-                . '" data-tag="' . htmlspecialchars($tag, ENT_QUOTES) . '" class="delete-tag">x</a>]';
+            $page_sidebar .= ' [<a href="#" data-id="' . $tag_id . '" data-bill="' . $bill['id']
+                . '" data-tag="' . htmlspecialchars($tag, ENT_QUOTES) . '" class="delete-tag" aria-label="Delete tag">x</a>]';
         }
         $page_sidebar .= '</li>';
     }
@@ -490,7 +490,11 @@ $page_sidebar .=
                 // If the posting failed.
                 posting.fail(function( data ) {
 
-                    var response = $.parseJSON( data );
+                    var message = 'Saving tags failed.';
+                    if (data && data.responseJSON && data.responseJSON.error) {
+                        message = data.responseJSON.error;
+                    }
+                    alert(message);
 
                 });
 
@@ -1017,6 +1021,7 @@ if (isset($bill['places']) && (count($bill['places']) > 0)) {
         $( document ).ready(function() {
 
             mapboxgl.accessToken = "' . MAPBOX_TOKEN . '";
+            mapboxgl.setTelemetryEnabled(false);
             var map = new mapboxgl.Map({
                 container: "map",
                 style: "mapbox://styles/mapbox/streets-v11",

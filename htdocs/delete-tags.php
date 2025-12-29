@@ -110,7 +110,8 @@ $log = new Log();
 $result = $log->put('Tag deleted: ' . $tag . ' from bill ID ' . $bill_id, 2);
 
 /*
- * Send a 201 Created HTTP header, to indicate success.
+ * Send a 200 OK HTTP header, to indicate success.
  */
-header('HTTP/1.0 201 Created');
+http_response_code(200);
+echo json_encode(['status' => 'deleted']);
 exit();

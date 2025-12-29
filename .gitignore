@@ -29,3 +29,4 @@ composer.phar
 htdocs/sitemap.xml
 /htdocs/sitemaps
 zap-reports/
+deploy/browser-tests/node_modules/

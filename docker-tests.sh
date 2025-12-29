@@ -13,10 +13,23 @@ ZAP_REPORT_JSON=${ZAP_REPORT_JSON:-/zap/wrk/zap-baseline.json}
 ZAP_REPORT_HTML=${ZAP_REPORT_HTML:-/zap/wrk/zap-baseline.html}
 
 FULL_SCAN=false
-if [[ "${1:-}" == "--zap-full-scan" ]]; then
-  FULL_SCAN=true
-  shift
-fi
+RUN_BROWSER=true
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --zap-full-scan)
+      FULL_SCAN=true
+      shift
+      ;;
+    --no-browser-tests)
+      RUN_BROWSER=false
+      shift
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      exit 1
+      ;;
+  esac
+done
 
 # Execute test suite inside the running container (service name required for exec)
 $COMPOSE_BINARY exec "${WEB_SERVICE}" /var/www/deploy/tests/run-all.sh
@@ -25,6 +38,26 @@ $COMPOSE_BINARY exec "${WEB_SERVICE}" /var/www/deploy/tests/run-all.sh
 if ! $COMPOSE_BINARY ps --format '{{.Name}}' | grep -q "^${CONTAINER_NAME}$"; then
     echo "Container '${CONTAINER_NAME}' is not running. Please start docker compose before running tests." >&2
     exit 1
+fi
+
+# Ensure DB container is running (needed for loading test users)
+if ! $COMPOSE_BINARY ps --format '{{.Name}}' | grep -q "^rs_db$"; then
+    echo "Container 'rs_db' is not running. Please start docker compose before running tests." >&2
+    exit 1
+fi
+
+# Ensure test users are loaded for browser/login flows
+./deploy/load-test-users.sh
+
+# Run browser-based interaction tests
+if [ "${RUN_BROWSER}" = true ]; then
+  echo "Running Playwright browser interaction tests..."
+  $COMPOSE_BINARY run --rm \
+    -e PLAYWRIGHT_BASE_URL="${ZAP_TARGET}" \
+    --workdir /workspace/deploy/browser-tests \
+    playwright bash -lc "npm ci --ignore-scripts && npx playwright test"
+else
+  echo "Skipping Playwright browser interaction tests (disabled)."
 fi
 
 mkdir -p "${ZAP_REPORT_DIR}"

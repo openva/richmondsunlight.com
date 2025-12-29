@@ -180,6 +180,7 @@ if (mysqli_num_rows($result) > 0) {
 		
 		$( document ).ready(function() {
 			mapboxgl.accessToken = "' . MAPBOX_TOKEN . '";
+            mapboxgl.setTelemetryEnabled(false);
 			
 			var markers = ' . $geojson . '
 

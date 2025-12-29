@@ -15,24 +15,32 @@
 ini_set('display_errors', '0');
 error_reporting(E_ALL);
 
-// Convert any warning/notice/fatal into a clean JSON error and exit
-set_error_handler(function ($errno, $errstr, $errfile, $errline) {
-    // Respect @-suppression
+// Convert any warning/notice/fatal into a clean JSON error and exit (emit only once)
+$tags_error_emitted = false;
+set_error_handler(function ($errno, $errstr, $errfile, $errline) use (&$tags_error_emitted) {
     if (!(error_reporting() & $errno)) {
         return false;
+    }
+    if ($tags_error_emitted) {
+        return true;
     }
     http_response_code(500);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode(['error' => 'Server error.']);
-    return true; // handled
+    $tags_error_emitted = true;
+    return true;
 });
 
-register_shutdown_function(function () {
+register_shutdown_function(function () use (&$tags_error_emitted) {
     $e = error_get_last();
     if ($e && in_array($e['type'], [E_ERROR, E_PARSE, E_CORE_ERROR, E_COMPILE_ERROR])) {
+        if ($tags_error_emitted) {
+            return;
+        }
         http_response_code(500);
         header('Content-Type: application/json; charset=utf-8');
         echo json_encode(['error' => 'Server error.']);
+        $tags_error_emitted = true;
     }
 });
 
@@ -175,11 +183,12 @@ if (!empty($_SESSION['id'])) {// && !blacklisted())
     if (MEMCACHED_SERVER != '') {
         $mc = new Memcached();
         $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-        $result = $mc->delete('bill-' . $tags['bill_id']);
+        $result = $mc->delete('bill-' . $bill_id);
     }
 
     $log = new Log();
-    $result = $log->put('New tags added: ' . implode(', ', $tag) . ' ' . $_SERVER['HTTP_REFERER'], 3);
+    $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';
+    $result = $log->put('New tags added: ' . implode(', ', $tag) . ' ' . $referer, 3);
 
     /*
      * Send a 201 Created HTTP header, to indicate success.

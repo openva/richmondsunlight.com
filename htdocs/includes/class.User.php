@@ -263,8 +263,12 @@ class User
             }
         }
 
-        # Now hack off the top 10 bills.
-        $bills = array_slice($bills, 0, 10);
+        // If we've got any bills, save the top 10.
+        if (isset($bills) && is_array($bills) && count($bills) > 0) {
+            $bills = array_slice($bills, 0, 10);
+        } else {
+            $bill = false;
+        }
 
         # Store this user's recommendations in Memcached for the next half-hour. We keep it brief
         # because user sessions are unlikely to last longer than this and to allow their
