@@ -154,11 +154,14 @@ if (!function_exists('create_user')) {
         parse_str($options, $options);
 
         $options = array_map('urldecode', $options);
+        $is_dashboard_user = (isset($options['dashboard']) && $options['dashboard'] == 'y');
+        $sql_inserts = '';
+        $users_inserts = '';
+        $dashboard_inserts = '';
 
         # If this isn't a Dashboard user, parse the variables in the standard way.
-        if ($options['dashboard'] != 'y') {
+        if (!$is_dashboard_user) {
             if (count($options) > 0) {
-                $sql_inserts = '';
                 foreach ($options as $key => $value) {
                     $value = mysqli_real_escape_string($GLOBALS['db'], $value);
                     if (empty($value)) {
@@ -171,10 +174,8 @@ if (!function_exists('create_user')) {
         }
 
         # But if this is a Dashboard user, parse the variables out into two separate SQL inserts.
-        elseif ($options['dashboard'] == 'y') {
+        elseif ($is_dashboard_user) {
             if (count($options) > 0) {
-                $users_inserts = '';
-                $dashboard_inserts = '';
                 foreach ($options as $key => $value) {
                     # Make the data safe for the database.
                     $value = mysqli_real_escape_string($GLOBALS['db'], $value);
@@ -223,7 +224,7 @@ if (!function_exists('create_user')) {
             $log->put('A user registration failed: ' . $sql, 6);
             return false;
         }
-        if ($options['dashboard'] == 'y') {
+        if ($is_dashboard_user) {
             # Get the user's ID.
             $user_id = mysqli_insert_id($GLOBALS['db']);
 
