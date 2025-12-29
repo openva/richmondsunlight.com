@@ -420,8 +420,8 @@ JS;
         $tags[] = $tag;
         $page_sidebar .= '<li><a href="/bills/tags/' . urlencode($tag) . '/">' . $tag . '</a>';
         if (isset($user) && ($user['trusted'] == 'y')) {
-            $page_sidebar .= ' [<a data-id="' . $tag_id . '" data-bill="' . $bill['id']
-                . '" data-tag="' . htmlspecialchars($tag, ENT_QUOTES) . '" class="delete-tag">x</a>]';
+            $page_sidebar .= ' [<a href="#" data-id="' . $tag_id . '" data-bill="' . $bill['id']
+                . '" data-tag="' . htmlspecialchars($tag, ENT_QUOTES) . '" class="delete-tag" aria-label="Delete tag">x</a>]';
         }
         $page_sidebar .= '</li>';
     }
