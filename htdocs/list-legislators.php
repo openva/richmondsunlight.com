@@ -179,6 +179,9 @@ if (mysqli_num_rows($result) > 0) {
             var map;
 
             mapboxgl.accessToken = "' . MAPBOX_TOKEN . '";
+            if (mapboxgl.config && typeof mapboxgl.config === "object") {
+                mapboxgl.config.EVENTS_URL = null;
+            }
             if (typeof mapboxgl.setTelemetryEnabled === "function") {
                 mapboxgl.setTelemetryEnabled(false);
             }
