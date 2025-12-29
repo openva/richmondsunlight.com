@@ -490,7 +490,11 @@ $page_sidebar .=
                 // If the posting failed.
                 posting.fail(function( data ) {
 
-                    var response = $.parseJSON( data );
+                    var message = 'Saving tags failed.';
+                    if (data && data.responseJSON && data.responseJSON.error) {
+                        message = data.responseJSON.error;
+                    }
+                    alert(message);
 
                 });
 
