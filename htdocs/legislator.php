@@ -144,7 +144,9 @@ if ($legislator['district_boundaries'] != false) {
             $( document ).ready(function() {
 
                 mapboxgl.accessToken = "' . MAPBOX_TOKEN . '";
-                mapboxgl.setTelemetryEnabled(false);
+                if (typeof mapboxgl.setTelemetryEnabled === "function") {
+                    mapboxgl.setTelemetryEnabled(false);
+                }
                 var map = new mapboxgl.Map({
                     container: "district_map",
                     style: "mapbox://styles/mapbox/streets-v11",
