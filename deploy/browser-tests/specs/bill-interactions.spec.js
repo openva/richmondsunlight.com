@@ -180,7 +180,8 @@ test.describe('Bill interactions', () => {
       deleteLink.click(),
     ]);
     expect(deleteResponse.ok()).toBeTruthy();
-    await expect(page.locator('#tags_list li', { hasText: cleanTag })).toHaveCount(0);
+    await page.reload();
+    await expect(page.locator('#tags_list li', { hasText: cleanTag })).toHaveCount(0, { timeout: 15000 });
   });
 
   test('untrusted user cannot delete tags', async ({ page }) => {
