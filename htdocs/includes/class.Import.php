@@ -27,6 +27,227 @@ class Import
     public $pdf;
 
     /**
+     * Retrieve the public status history for a bill by its LIS legislation ID.
+     *
+     * @param int|string $legislation_id LIS legislation ID.
+     * @return array Status history entries (empty array on failure).
+     */
+    public function get_bill_status_history($legislation_id): array
+    {
+        if (empty($legislation_id)) {
+            return [];
+        }
+        $session_code = (string) SESSION_LIS_ID;
+        if (strlen($session_code) === 3) {
+            $session_code = '20' . $session_code;
+        }
+
+        $response = $this->lis_api_request(
+            '/LegislationEvent/api/GetPublicLegislationEventHistoryListAsync',
+            [
+                'legislationId' => (int) $legislation_id,
+                'sessionCode' => $session_code,
+            ]
+        );
+
+        if (!is_array($response)) {
+            return [];
+        }
+
+        if (isset($response['LegislationEvents']) && is_array($response['LegislationEvents'])) {
+            return $response['LegislationEvents'];
+        }
+
+        return [];
+    }
+
+    /**
+     * Normalize a LegislationEvents array into a simplified structure.
+     *
+     * @param array $events Raw LegislationEvents array.
+     * @return array[] Each entry: ['chamber' => string, 'date' => string, 'status' => string]
+     */
+    public function normalize_status_history(array $events): array
+    {
+        $normalized = [];
+
+        foreach ($events as $event) {
+            if (!is_array($event)) {
+                continue;
+            }
+
+            $chamber_code = $event['ChamberCode'] ?? '';
+            $chamber = null;
+            if ($chamber_code === 'H') {
+                $chamber = 'house';
+            } elseif ($chamber_code === 'S') {
+                $chamber = 'senate';
+            }
+
+            $date = $event['EventDate'] ?? null;
+            // Store as-is (string) so MariaDB can parse it as datetime when needed.
+            if (is_string($date)) {
+                $date = trim($date);
+            }
+
+            $status = $event['Description'] ?? '';
+            if (!is_string($status)) {
+                $status = '';
+            }
+
+            $normalized[] = [
+                'chamber' => $chamber,
+                'date' => $date,
+                'status' => $status,
+            ];
+        }
+
+        return $normalized;
+    }
+
+    /**
+     * Store normalized status history rows into bills_status.
+     *
+     * @param int   $bill_id  Internal bills.id value.
+     * @param array $history  Normalized rows from normalize_status_history().
+     * @param int|null $session_id Session identifier (defaults to SESSION_ID).
+     *
+     * @return int Number of rows inserted or updated.
+     */
+    public function store_status_history(int $bill_id, array $history, ?int $session_id = null): int
+    {
+        if ($bill_id <= 0) {
+            return 0;
+        }
+
+        if ($session_id === null && defined('SESSION_ID')) {
+            $session_id = (int)SESSION_ID;
+        }
+
+        if ($session_id === null || $session_id <= 0) {
+            return 0;
+        }
+
+        $pdo = $this->getPdo();
+        if (!$pdo instanceof PDO) {
+            $this->log->put('Database connection unavailable when storing status history.', 6);
+            return 0;
+        }
+
+        $stmt = $pdo->prepare(
+            'INSERT INTO bills_status (bill_id, session_id, status, translation, date, lis_vote_id, date_created)
+                VALUES (:bill_id, :session_id, :status, :translation, :date, :lis_vote_id, :date_created)
+            ON DUPLICATE KEY UPDATE
+                translation = VALUES(translation),
+                lis_vote_id = VALUES(lis_vote_id),
+                date_modified = CURRENT_TIMESTAMP()'
+        );
+
+        if ($stmt === false) {
+            $this->log->put('Failed to prepare bills_status insert statement.', 8);
+            return 0;
+        }
+
+        $now = date('Y-m-d H:i:s');
+        $count = 0;
+        $rows = [];
+
+        foreach ($history as $entry) {
+            if (!is_array($entry)) {
+                continue;
+            }
+
+            $status = trim((string)($entry['status'] ?? ''));
+            $date = $this->normalize_status_date($entry['date'] ?? null);
+
+            if ($status === '' || $date === null) {
+                continue;
+            }
+
+            $translation = $entry['translation'] ?? null;
+            if (is_string($translation)) {
+                $translation = trim($translation);
+            } else {
+                $translation = null;
+            }
+            if ($translation === '') {
+                $translation = null;
+            }
+
+            $lis_vote_id = $entry['lis_vote_id'] ?? null;
+            if (is_string($lis_vote_id)) {
+                $lis_vote_id = trim($lis_vote_id);
+            } else {
+                $lis_vote_id = null;
+            }
+            if ($lis_vote_id === '') {
+                $lis_vote_id = null;
+            }
+
+            $rows[$status . '|' . $date] = [
+                'status' => $status,
+                'date' => $date,
+                'translation' => $translation,
+                'lis_vote_id' => $lis_vote_id,
+            ];
+        }
+
+        foreach ($rows as $row) {
+            $stmt->bindValue(':bill_id', $bill_id, PDO::PARAM_INT);
+            $stmt->bindValue(':session_id', $session_id, PDO::PARAM_INT);
+            $stmt->bindValue(':status', $row['status']);
+            $stmt->bindValue(
+                ':translation',
+                $row['translation'],
+                $row['translation'] === null ? PDO::PARAM_NULL : PDO::PARAM_STR
+            );
+            $stmt->bindValue(':date', $row['date']);
+            $stmt->bindValue(
+                ':lis_vote_id',
+                $row['lis_vote_id'],
+                $row['lis_vote_id'] === null ? PDO::PARAM_NULL : PDO::PARAM_STR
+            );
+            $stmt->bindValue(':date_created', $now);
+
+            if ($stmt->execute()) {
+                $count++;
+            } else {
+                $this->log->put(
+                    'Failed to persist bill status "' . $row['status'] . '" for bill ID ' . $bill_id,
+                    7
+                );
+            }
+        }
+
+        return $count;
+    }
+
+    /**
+     * Normalize a status date into Y-m-d format.
+     *
+     * @param mixed $value Raw date value.
+     *
+     * @return string|null Normalized date string or null when invalid.
+     */
+    private function normalize_status_date($value): ?string
+    {
+        if ($value instanceof \DateTimeInterface) {
+            return $value->format('Y-m-d');
+        }
+
+        if (!is_string($value) && !is_numeric($value)) {
+            return null;
+        }
+
+        $timestamp = strtotime((string)$value);
+        if ($timestamp === false) {
+            return null;
+        }
+
+        return date('Y-m-d', $timestamp);
+    }
+
+    /**
      * Initialise the importer with a logger dependency.
      *
      * @param Log $log Logger instance for recording warnings and errors.
