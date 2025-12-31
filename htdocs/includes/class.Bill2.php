@@ -251,7 +251,7 @@ class Bill2
                     bills_status.status,
                     bills_status.translation,
 				    DATE_FORMAT(bills_status.date, "%m/%d/%Y") AS date,
-                    bills_status.date AS date_raw,
+                    DATE_FORMAT(bills_status.date, "%Y-%m-%d") AS date AS date_raw,
 				    bills_status.lis_vote_id,
                     votes.total AS vote_count
 				FROM bills_status

@@ -59,7 +59,7 @@ $page_title = $legislator['prefix'] . ' ' . $legislator['name'] . '’s ' . $yea
 # Select the vote data from the database.
 $sql = 'SELECT bills.number AS bill_number, bills.catch_line, representatives_votes.vote,
 		votes.outcome, committees.name AS committee, committees.shortname AS committee_shortname,
-		bills_status.date, votes.lis_id
+		DATE_FORMAT(bills_status.date, "%Y-%m-%d") AS date, votes.lis_id
 		FROM bills
 		LEFT JOIN bills_status ON bills.id = bills_status.bill_id
 		LEFT JOIN votes ON bills_status.lis_vote_id = votes.lis_id
