@@ -163,7 +163,12 @@ jobs:
         id: tests
         env:
           PLAYWRIGHT_BROWSERS_PATH: /tmp/pw-browsers
-        run: ./docker-tests.sh --zap-full-scan
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] || { [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.ref_name }}" = "deploy" ]; }; then
+            ./docker-tests.sh --zap-full-scan
+          else
+            ./docker-tests.sh
+          fi
 
       - name: Stop Docker
         if: always()
