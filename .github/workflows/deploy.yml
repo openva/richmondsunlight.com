@@ -195,7 +195,7 @@ jobs:
           ./deploy/branch_deploy.sh
           ./deploy/config_variables.sh
           ./deploy/aws_credentials.sh
-          zip -r codebase.zip . -x ".git/*"
+          zip -r codebase.zip . -x ".git/*" ".pw-browsers/*" "deploy/browser-tests/*"
 
       - name: Upload staging site
         if: env.GITHUB_REF_NAME == 'master'
