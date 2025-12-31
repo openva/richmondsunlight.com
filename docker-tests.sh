@@ -52,7 +52,7 @@ fi
 # Run browser-based interaction tests
 if [ "${RUN_BROWSER}" = true ]; then
   echo "Running Playwright browser interaction tests..."
-  export PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH:-/tmp/pw-browsers}
+  export PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH:-/workspace/.pw-browsers}
   mkdir -p "${PLAYWRIGHT_BROWSERS_PATH}"
   $COMPOSE_BINARY run --rm \
     -e PLAYWRIGHT_BASE_URL="${ZAP_TARGET}" \
