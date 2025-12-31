@@ -35,6 +35,9 @@ jobs:
           php-version: '8.4'
           extensions: mysqli, curl, memcached, redis
 
+      - name: Ensure Composer cache dir exists
+        run: mkdir -p ~/.composer/cache
+
       - name: Cache Composer dependencies
         uses: actions/cache@v3
         with:
@@ -82,6 +85,9 @@ jobs:
         with:
           php-version: '8.4'
           extensions: mysqli, curl, memcached, redis
+
+      - name: Ensure Composer cache dir exists
+        run: mkdir -p ~/.composer/cache
 
       - name: Cache Composer dependencies
         uses: actions/cache@v3
