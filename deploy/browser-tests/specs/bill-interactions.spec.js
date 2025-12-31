@@ -1,6 +1,7 @@
 const { test, expect } = require('@playwright/test');
 
 const billPath = '/bill/2025/hb41/';
+const apiBaseUrl = process.env.PLAYWRIGHT_API_BASE_URL;
 
 async function loginTestUser(page) {
   const resp = await page.request.post('/account/login/', {
@@ -188,7 +189,7 @@ test.describe('Bill interactions', () => {
     await loginTestUser(page);
 
     // Fetch an existing tag via API to get a tag ID without relying on cache invalidation timing.
-    const apiResponse = await page.request.get('http://api.richmondsunlight.com/1.1/bill/2025/hb41.json');
+    const apiResponse = await page.request.get(`${apiBaseUrl}/1.1/bill/2025/hb41.json`);
     const billJson = await apiResponse.json();
     const tags = billJson.tags || {};
     const firstTagId = Object.keys(tags)[0];
