@@ -139,7 +139,8 @@ jobs:
           context: .
           file: ./deploy/Web.Dockerfile
           push: false
-          tags: rs_web:latest
+          load: true
+          tags: rs_web:ci
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new
 
