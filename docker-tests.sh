@@ -53,11 +53,13 @@ fi
 if [ "${RUN_BROWSER}" = true ]; then
   echo "Running Playwright browser interaction tests..."
   export PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH:-/tmp/pw-browsers}
+  mkdir -p "${PLAYWRIGHT_BROWSERS_PATH}"
   $COMPOSE_BINARY run --rm \
     -e PLAYWRIGHT_BASE_URL="${ZAP_TARGET}" \
     -e PLAYWRIGHT_BROWSERS_PATH="${PLAYWRIGHT_BROWSERS_PATH}" \
+    -v "${PLAYWRIGHT_BROWSERS_PATH}:${PLAYWRIGHT_BROWSERS_PATH}" \
     --workdir /workspace/deploy/browser-tests \
-    playwright bash -lc "npm ci --ignore-scripts && npx playwright test"
+    playwright bash -lc "npm ci --ignore-scripts && npx playwright install --with-deps chromium && npx playwright test"
 else
   echo "Skipping Playwright browser interaction tests (disabled)."
 fi
