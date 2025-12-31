@@ -52,12 +52,15 @@ fi
 # Run browser-based interaction tests
 if [ "${RUN_BROWSER}" = true ]; then
   echo "Running Playwright browser interaction tests..."
-  export PLAYWRIGHT_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH:-/workspace/.pw-browsers}
-  mkdir -p "${PLAYWRIGHT_BROWSERS_PATH}"
+  HOST_PW_BROWSERS_PATH=${PLAYWRIGHT_BROWSERS_PATH:-$(pwd)/.pw-browsers}
+  CONTAINER_PW_BROWSERS_PATH=/workspace/.pw-browsers
+  export PLAYWRIGHT_API_BASE_URL=${PLAYWRIGHT_API_BASE_URL:-http://rs_api}
+  mkdir -p "${HOST_PW_BROWSERS_PATH}"
   $COMPOSE_BINARY run --rm \
     -e PLAYWRIGHT_BASE_URL="${ZAP_TARGET}" \
-    -e PLAYWRIGHT_BROWSERS_PATH="${PLAYWRIGHT_BROWSERS_PATH}" \
-    -v "${PLAYWRIGHT_BROWSERS_PATH}:${PLAYWRIGHT_BROWSERS_PATH}" \
+    -e PLAYWRIGHT_BROWSERS_PATH="${CONTAINER_PW_BROWSERS_PATH}" \
+    -e PLAYWRIGHT_API_BASE_URL="${PLAYWRIGHT_API_BASE_URL}" \
+    -v "${HOST_PW_BROWSERS_PATH}:${CONTAINER_PW_BROWSERS_PATH}" \
     --workdir /workspace/deploy/browser-tests \
     playwright bash -lc "npm ci --ignore-scripts && npx playwright install --with-deps chromium && npx playwright test"
 else
