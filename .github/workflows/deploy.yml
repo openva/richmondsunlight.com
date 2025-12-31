@@ -58,7 +58,7 @@ jobs:
           path: |
             ~/.cache/yarn
             htdocs/js/vendor/node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles('htdocs/js/vendor/yarn.lock') }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
 
@@ -106,7 +106,7 @@ jobs:
           path: |
             ~/.cache/yarn
             htdocs/js/vendor/node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles('htdocs/js/vendor/yarn.lock') }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
 
