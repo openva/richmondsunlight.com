@@ -16,8 +16,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build:
-    name: Build and Test
+  lint_unit:
+    name: Lint and Build Assets
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
@@ -28,34 +28,104 @@ jobs:
       - uses: Firenza/secrets-to-env@v1.2.0
         with:
           secrets: ${{ toJSON(secrets) }}
-      
+
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
           extensions: mysqli, curl, memcached, redis
-      
-      - name: Install system dependencies
-        run: |
-          sudo apt update
-          sudo apt install -y \
-            apt-transport-https \
-            ca-certificates \
-            gnupg-agent \
-            gnupg \
-            gnupg2 \
-            zip
+
+      - name: Ensure Composer cache dir exists
+        run: mkdir -p ~/.composer/cache
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
 
       - name: Ensure PHP syntax is valid
         run: find htdocs -name '*.php' -print0 | xargs -0 -n1 -P8 php -l
-            
+
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist
-      
+
+      - name: Cache Yarn dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/yarn
+            htdocs/js/vendor/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
       - name: Install Node dependencies
         working-directory: htdocs/js/vendor
         run: yarn install && yarn build
-      
+
+  integration:
+    name: Integration Tests
+    runs-on: ubuntu-24.04
+    needs: lint_unit
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set branch name as env var
+        run: echo "GITHUB_REF_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
+
+      - uses: Firenza/secrets-to-env@v1.2.0
+        with:
+          secrets: ${{ toJSON(secrets) }}
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mysqli, curl, memcached, redis
+
+      - name: Ensure Composer cache dir exists
+        run: mkdir -p ~/.composer/cache
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ~/.composer/cache
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Cache Yarn dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cache/yarn
+            htdocs/js/vendor/node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+
+      - name: Install Node dependencies
+        working-directory: htdocs/js/vendor
+        run: yarn install && yarn build
+
+      - name: Determine API repo head
+        id: api_ref
+        run: echo "sha=$(git ls-remote https://github.com/openva/rs-api.git refs/heads/master | cut -f1)" >> $GITHUB_OUTPUT
+
+      - name: Cache API checkout
+        uses: actions/cache@v3
+        with:
+          path: api
+          key: ${{ runner.os }}-api-${{ steps.api_ref.outputs.sha }}
+          restore-keys: |
+            ${{ runner.os }}-api-
+
       - name: Setup Docker
         uses: docker/setup-buildx-action@v3
         with:
@@ -68,31 +138,44 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
+
       - name: Build Docker images with cache
         uses: docker/build-push-action@v5
         with:
           context: .
           file: ./deploy/Web.Dockerfile
           push: false
-          tags: rs_web:latest
-          cache-from: type=local,src=/tmp/.buildx-cache
-          cache-to: type=local,dest=/tmp/.buildx-cache-new
-      - name: Move new cache
-        run: |
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
-      
+          load: true
+          tags: rs_web:ci
+          cache-from: type=gha,scope=${{ github.ref_name }}
+          cache-to: type=gha,mode=max,scope=${{ github.ref_name }}
+
       - name: Run Docker environment
         run: ./docker-run.sh
-      
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v3
+        with:
+          path: .pw-browsers
+          key: ${{ runner.os }}-playwright-${{ hashFiles('deploy/browser-tests/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-
+
       - name: Run tests
         id: tests
-        run: ./docker-tests.sh --zap-full-scan
-      
+        env:
+          PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.pw-browsers
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] || { [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.ref_name }}" = "deploy" ]; }; then
+            ./docker-tests.sh --zap-full-scan
+          else
+            ./docker-tests.sh
+          fi
+
       - name: Stop Docker
         if: always()
         run: ./docker-stop.sh
-          
+
       - name: Configure deployment type
         run: |
           if [ "$GITHUB_REF_NAME" = "master" ]; then
@@ -106,13 +189,13 @@ jobs:
             echo "No deployment configuration for branch: $GITHUB_REF_NAME"
             exit 0
           fi
-      
+
       - name: Populate secrets and compress
         run: |
           ./deploy/branch_deploy.sh
           ./deploy/config_variables.sh
           ./deploy/aws_credentials.sh
-          zip -r codebase.zip . -x ".git/*"
+          zip -r codebase.zip . -x ".git/*" ".pw-browsers/*" "deploy/browser-tests/*"
 
       - name: Upload staging site
         if: env.GITHUB_REF_NAME == 'master'
@@ -128,12 +211,9 @@ jobs:
           name: codebase
           path: codebase.zip
 
-    outputs:
-      branch: ${{ steps.vars.outputs.branch }}
-
   deploy:
     name: Deploy to AWS
-    needs: build
+    needs: [lint_unit, integration]
     runs-on: ubuntu-24.04
     if: github.event_name != 'pull_request'
     

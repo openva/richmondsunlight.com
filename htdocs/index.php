@@ -180,7 +180,12 @@ if (mysqli_num_rows($result) > 0) {
 		
 		$( document ).ready(function() {
 			mapboxgl.accessToken = "' . MAPBOX_TOKEN . '";
-            mapboxgl.setTelemetryEnabled(false);
+            if (mapboxgl.config && typeof mapboxgl.config === "object") {
+                mapboxgl.config.EVENTS_URL = null;
+            }
+            if (typeof mapboxgl.setTelemetryEnabled === "function") {
+                mapboxgl.setTelemetryEnabled(false);
+            }
 			
 			var markers = ' . $geojson . '
 

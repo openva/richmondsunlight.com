@@ -30,7 +30,8 @@ $year = mysqli_real_escape_string($GLOBALS['db'], $_GET['year']);
 
 # Select the vote data from the database.
 $sql = 'SELECT bills.number AS bill_number, bills.catch_line, representatives_votes.vote,
-		votes.outcome, committees.name AS committee, bills_status.date
+		votes.outcome, committees.name AS committee,
+        DATE_FORMAT(bills_status.date, "%Y-%m-%d") AS date
 		FROM bills
 		LEFT JOIN bills_status ON bills.id = bills_status.bill_id
 		LEFT JOIN votes ON bills_status.lis_vote_id = votes.lis_id

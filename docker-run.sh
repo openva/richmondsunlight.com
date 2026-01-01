@@ -30,7 +30,12 @@ fi
 cat deploy/mysql/structure.sql deploy/mysql/basic-contents.sql deploy/mysql/test-records.sql > api/deploy/database.sql
 
 # Stand it up
-docker compose build && docker compose up -d
+if docker image inspect rs_web:ci >/dev/null 2>&1; then
+    echo "Found prebuilt rs_web:ci image; using it without rebuild."
+    docker compose up -d
+else
+    docker compose build && docker compose up -d
+fi
 
 # Wait for MariaDB to be available
 while ! nc -z localhost 3306; do sleep 1; done
