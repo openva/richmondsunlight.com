@@ -62,6 +62,74 @@ class Import
     }
 
     /**
+     * Retrieve the legislation list (with current status) for a session.
+     *
+     * @param int|string|null $session_code Session code (e.g., 20261). Defaults to SESSION_LIS_ID.
+     *
+     * @return array<int,array{legislation_id:int,number:?string,status:?string}>
+     */
+    public function get_legislation_session_statuses($session_code = null): array
+    {
+        if ($session_code === null && defined('SESSION_LIS_ID')) {
+            $session_code = SESSION_LIS_ID;
+        }
+
+        if ($session_code === null || $session_code === '') {
+            return [];
+        }
+
+        $session_code = (string) $session_code;
+        if (strlen($session_code) === 3) {
+            $session_code = '20' . $session_code;
+        }
+
+        $response = $this->lis_api_request(
+            '/Legislation/api/getlegislationsessionlistasync',
+            [
+                'sessionCode' => $session_code,
+            ]
+        );
+
+        if (!is_array($response)) {
+            return [];
+        }
+
+        $list = [];
+        foreach ($response as $item) {
+            if (!is_array($item)) {
+                continue;
+            }
+
+            $id = $item['LegislationID'] ?? null;
+            if ($id === null || $id === '') {
+                continue;
+            }
+
+            $number = $item['LegislationNumber'] ?? null;
+            if (is_string($number)) {
+                $number = trim($number);
+            } else {
+                $number = null;
+            }
+
+            $status = $item['LegislationStatus'] ?? null;
+            if (is_string($status)) {
+                $status = trim($status);
+            } else {
+                $status = null;
+            }
+
+            $list[] = [
+                'legislation_id' => (int) $id,
+                'number' => $number,
+                'status' => $status,
+            ];
+        }
+
+        return $list;
+    }
+
+    /**
      * Normalize a LegislationEvents array into a simplified structure.
      *
      * @param array $events Raw LegislationEvents array.
@@ -85,9 +153,9 @@ class Import
             }
 
             $date = $event['EventDate'] ?? null;
-            // Store as-is (string) so MariaDB can parse it as datetime when needed.
+            // Normalize to MySQL-friendly datetime format (YYYY-MM-DD HH:MM:SS).
             if (is_string($date)) {
-                $date = trim($date);
+                $date = str_replace('T', ' ', trim($date));
             }
 
             $status = $event['Description'] ?? '';
@@ -223,7 +291,7 @@ class Import
     }
 
     /**
-     * Normalize a status date into Y-m-d format.
+     * Normalize a status date into Y-m-d H:i:s format.
      *
      * @param mixed $value Raw date value.
      *
@@ -232,19 +300,20 @@ class Import
     private function normalize_status_date($value): ?string
     {
         if ($value instanceof \DateTimeInterface) {
-            return $value->format('Y-m-d');
+            return $value->format('Y-m-d H:i:s');
         }
 
         if (!is_string($value) && !is_numeric($value)) {
             return null;
         }
 
-        $timestamp = strtotime((string)$value);
+        // Accept both "T" and space separators; strtotime tolerates either.
+        $timestamp = strtotime(str_replace('T', ' ', (string)$value));
         if ($timestamp === false) {
             return null;
         }
 
-        return date('Y-m-d', $timestamp);
+        return date('Y-m-d H:i:s', $timestamp);
     }
 
     /**
