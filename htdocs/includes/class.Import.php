@@ -85,9 +85,9 @@ class Import
             }
 
             $date = $event['EventDate'] ?? null;
-            // Store as-is (string) so MariaDB can parse it as datetime when needed.
+            // Normalize to MySQL-friendly datetime format (YYYY-MM-DD HH:MM:SS).
             if (is_string($date)) {
-                $date = trim($date);
+                $date = str_replace('T', ' ', trim($date));
             }
 
             $status = $event['Description'] ?? '';
@@ -223,7 +223,7 @@ class Import
     }
 
     /**
-     * Normalize a status date into Y-m-d format.
+     * Normalize a status date into Y-m-d H:i:s format.
      *
      * @param mixed $value Raw date value.
      *
@@ -232,19 +232,20 @@ class Import
     private function normalize_status_date($value): ?string
     {
         if ($value instanceof \DateTimeInterface) {
-            return $value->format('Y-m-d');
+            return $value->format('Y-m-d H:i:s');
         }
 
         if (!is_string($value) && !is_numeric($value)) {
             return null;
         }
 
-        $timestamp = strtotime((string)$value);
+        // Accept both "T" and space separators; strtotime tolerates either.
+        $timestamp = strtotime(str_replace('T', ' ', (string)$value));
         if ($timestamp === false) {
             return null;
         }
 
-        return date('Y-m-d', $timestamp);
+        return date('Y-m-d H:i:s', $timestamp);
     }
 
     /**
