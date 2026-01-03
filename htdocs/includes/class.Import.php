@@ -94,9 +94,6 @@ class Import
             return [];
         }
 
-        // All bills are a subset of the 'Legislations' key
-        $response = $response['Legislations'];
-
         $list = [];
         foreach ($response as $item) {
             if (!is_array($item)) {
@@ -130,6 +127,54 @@ class Import
         }
 
         return $list;
+    }
+
+    /**
+     * Compare current legislation statuses against a cached snapshot and return changed LIS IDs.
+     *
+     * @param array<int,array{lis_id:int,number:?string,status:?string}> $currentById
+     * @param string                                                     $cacheFile
+     * @return int[]
+     */
+    public function detect_changed_legislation_statuses(array $currentById, string $cacheFile): array
+    {
+        $previousById = [];
+        if (is_readable($cacheFile)) {
+            $decoded = json_decode(file_get_contents($cacheFile), true);
+            if (is_array($decoded)) {
+                foreach ($decoded as $item) {
+                    if (!is_array($item) || !isset($item['lis_id'])) {
+                        continue;
+                    }
+                    $prevStatus = is_string($item['status'] ?? null) ? trim($item['status']) : null;
+                    $prevNumber = is_string($item['number'] ?? null) ? trim($item['number']) : null;
+                    $previousById[(int)$item['lis_id']] = [
+                        'status' => $prevStatus,
+                        'number' => $prevNumber,
+                    ];
+                }
+            }
+        }
+
+        $changedLisIds = [];
+        foreach ($currentById as $lisId => $data) {
+            $prevStatus = $previousById[$lisId]['status'] ?? null;
+            if ($data['status'] !== $prevStatus) {
+                $changedLisIds[] = (int)$lisId;
+            }
+        }
+
+        // Persist updated snapshot (best effort).
+        $dir = dirname($cacheFile);
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0755, true);
+        }
+        $written = file_put_contents($cacheFile, json_encode(array_values($currentById), JSON_PRETTY_PRINT));
+        if ($written === false) {
+            $this->log->put('Unable to write status cache to ' . $cacheFile, 5);
+        }
+
+        return $changedLisIds;
     }
 
     /**
