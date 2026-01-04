@@ -1004,11 +1004,20 @@ if (isset($bill['places']) && (count($bill['places']) > 0)) {
 		<h2>Map</h2>
 		<p>This bill mentions';
 
+    $place_count = count($bill['places']);
+    $i = 0;
     foreach ($bill['places'] as $place) {
         $place = (array) $place;
-        $page_body .= ' ' . $place['name'] . ',';
+        $i++;
+        if ($i == $place_count && $place_count > 1) {
+            $page_body .= ' and ' . $place['name'];
+        } else {
+            $page_body .= ' ' . $place['name'];
+            if ($i < $place_count) {
+                $page_body .= ',';
+            }
+        }
     }
-    $page_body = rtrim($page_body, ',');
     $page_body .= '.</p>';
 
     $html_head .= '<script src="/js/vendor/mapbox-gl/dist/mapbox-gl.js"></script>
