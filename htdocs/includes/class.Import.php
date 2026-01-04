@@ -94,6 +94,9 @@ class Import
             return [];
         }
 
+        // All bills are a subset of the 'Legislations' key
+        $response = $response['Legislations'];
+
         $list = [];
         foreach ($response as $item) {
             if (!is_array($item)) {
