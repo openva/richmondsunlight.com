@@ -46,8 +46,8 @@ cd htdocs/js/vendor; yarn build; cd ../../..
 # Move over the settings file.
 cp deploy/settings-docker.inc.php htdocs/includes/settings.inc.php
 
-# Load test users into the database
-/var/www/deploy/load-test-users.sh
+# Note: Test users are now loaded as part of the initial database.sql file,
+# not via load-test-users.sh, to ensure consistency with the database initialization
 
 # Set up Sphinx and start it
 echo "START=yes" | tee /etc/default/sphinxsearch

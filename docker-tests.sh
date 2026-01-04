@@ -40,14 +40,14 @@ if ! $COMPOSE_BINARY ps --format '{{.Name}}' | grep -q "^${CONTAINER_NAME}$"; th
     exit 1
 fi
 
-# Ensure DB container is running (needed for loading test users)
+# Ensure DB container is running
 if ! $COMPOSE_BINARY ps --format '{{.Name}}' | grep -q "^rs_db$"; then
     echo "Container 'rs_db' is not running. Please start docker compose before running tests." >&2
     exit 1
 fi
 
-# Ensure test users are loaded for browser/login flows
-./deploy/load-test-users.sh
+# Note: Test users are now loaded as part of the initial database.sql file during docker-run.sh,
+# not via load-test-users.sh, to ensure consistency with the database initialization
 
 # Run browser-based interaction tests
 if [ "${RUN_BROWSER}" = true ]; then
