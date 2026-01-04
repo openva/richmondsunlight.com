@@ -4,7 +4,7 @@ test('can log in with test user and see account links', async ({ page }) => {
   // Submit login, then set session cookie in the browser.
   const resp = await page.request.post('/account/login/', {
     form: {
-      'form_data[email]': 'testuser@example.com',
+      'form_data[email]': 'tester@example.com',
       'form_data[password]': 'password123',
       submit: 'Log In',
       'form_data[return_uri]': '/',
@@ -30,7 +30,7 @@ test('can log out and see login link', async ({ page }) => {
   // Log in and seed the session cookie
   const resp = await page.request.post('/account/login/', {
     form: {
-      'form_data[email]': 'testuser@example.com',
+      'form_data[email]': 'tester@example.com',
       'form_data[password]': 'password123',
       submit: 'Log In',
       'form_data[return_uri]': '/',
