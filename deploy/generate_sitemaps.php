@@ -153,11 +153,14 @@ for ($year = 2006; $year <= SESSION_YEAR; $year++) {
                     . mysqli_error(mysql: $GLOBALS['db']),
                 level: 6
             );
+            // Database error - exit entire script
+            exit(1);
         } else {
             $log->put(message: 'No bills found for year ' . $year . ' when generating sitemap -- '
-                . 'ending sitemap generation process', level: 4);
+                . 'skipping this year', level: 4);
+            // No bills for this year - skip and continue to next year
+            continue;
         }
-        return;
     }
 }
 
