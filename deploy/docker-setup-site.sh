@@ -34,11 +34,12 @@ git config --global --add safe.directory /var/www
 composer install
 
 # Install Node
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
 source ~/.bashrc
 export NVM_DIR="$HOME/.nvm"
-# Node 10 will run on this old release, while still supporting our libraries
-nvm install 10
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+# Node 20 is the current LTS version with long-term support until 2026
+nvm install 20
 
 # Install Node dependencies
 cd htdocs/js/vendor; yarn build; cd ../../..
