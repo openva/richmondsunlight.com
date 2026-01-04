@@ -137,10 +137,18 @@ test.describe('Account Registration Form', () => {
     });
 
     await page.waitForTimeout(6000);
-    await page.click('input[type="submit"][value="Create My Account"]');
+
+    // Submit and wait for response
+    await Promise.all([
+      page.waitForLoadState('domcontentloaded'),
+      page.click('input[type="submit"][value="Create My Account"]')
+    ]);
+
+    // Wait for page to finish loading
+    await page.waitForLoadState('networkidle', { timeout: 15000 });
 
     // Should see error message about email already in use
-    await expect(page.locator('div#messages.errors')).toBeVisible();
+    await expect(page.locator('div#messages.errors')).toBeVisible({ timeout: 10000 });
     await expect(page.locator('div#messages.errors')).toContainText('an e-mail address');
     await expect(page.locator('div#messages.errors')).toContainText('not already in use');
     await expect(page.locator('a[href="/account/reset-password/"]').filter({ hasText: 'reset your password' })).toBeVisible();
