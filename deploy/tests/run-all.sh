@@ -26,8 +26,8 @@ if ! php ./get_bill_text_api_test.php; then
     ERRORED=true
 fi
 
-# Run the API tests
-if ! ./api.sh; then
+# Run the API tests (from rs-api repository)
+if ! ../../api/deploy/tests/run-tests.sh; then
     ERRORED=true
 fi
 
