@@ -1419,6 +1419,10 @@ if (($bill['session_id'] == SESSION_ID)) {
                     // Stop the form from submitting normally.
                     event.preventDefault();
 
+                    // Disable the submit button to prevent double-posting.
+                    var $submitBtn = $(this);
+                    $submitBtn.prop("disabled", true);
+
                     // Get the form values.
                     var expiration_date = $("#expiration_date").val(),
                         zip = $("#zip").val(),
@@ -1449,6 +1453,9 @@ if (($bill['session_id'] == SESSION_ID)) {
                         // Flash and fade the comment
                         $("#newcomment").fadeIn(200).fadeOut(200).fadeIn(200).fadeOut(200).fadeIn(200);
 
+                        // Re-enable the submit button.
+                        $submitBtn.prop("disabled", false);
+
                     });
 
                     // If the posting failed.
@@ -1459,6 +1466,9 @@ if (($bill['session_id'] == SESSION_ID)) {
                         // Display the error in the error field.
                         $( "#comment-error" ).empty().append( response.error );
                         $( "#comment-error" ).show();
+
+                        // Re-enable the submit button so they can try again.
+                        $submitBtn.prop("disabled", false);
 
                     });
 
