@@ -347,6 +347,7 @@ $log->put('New comment posted, by ' . stripslashes($comment['name']) . ':'
 /*
  * Send a 201 Created HTTP header, to indicate success.
  */
-header('HTTP/1.0 201 Created');
-$message = array('success' => 'Commented posted.');
+http_response_code(201);
+header('Content-Type: application/json; charset=utf-8');
+$message = array('success' => 'Comment posted.');
 echo json_encode($message);
