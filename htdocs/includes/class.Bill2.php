@@ -9,7 +9,6 @@
 class Bill2
 {
     public $id;
-    public $bill_id;
     public $javascript;
     public $term_pcres;
     public $text;
@@ -17,6 +16,59 @@ class Bill2
 
     protected $text_hash;
     protected $related_bills;
+
+    /**
+     * @var PDO Database connection.
+     */
+    protected $db;
+
+    /**
+     * @var Memcached|null Cache connection.
+     */
+    protected $cache;
+
+    /**
+     * Constructor with optional dependency injection.
+     *
+     * For backward compatibility, if no arguments are provided, connections
+     * are established lazily when needed.
+     *
+     * @param PDO|null       $db    Database connection.
+     * @param Memcached|null $cache Cache connection.
+     */
+    public function __construct(?PDO $db = null, ?Memcached $cache = null)
+    {
+        $this->db = $db;
+        $this->cache = $cache;
+    }
+
+    /**
+     * Get the database connection, establishing one if needed.
+     *
+     * @return PDO
+     */
+    protected function getDb(): PDO
+    {
+        if ($this->db === null) {
+            $database = new Database();
+            $this->db = $database->connect();
+        }
+        return $this->db;
+    }
+
+    /**
+     * Get the cache connection, establishing one if needed.
+     *
+     * @return Memcached|null Returns null if caching is disabled.
+     */
+    protected function getCache(): ?Memcached
+    {
+        if ($this->cache === null && MEMCACHED_SERVER != '') {
+            $this->cache = new Memcached();
+            $this->cache->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+        }
+        return $this->cache;
+    }
 
     /**
      * Resolve a bill's internal identifier for a given session year and bill number.
@@ -30,18 +82,22 @@ class Bill2
     {
 
         # Make sure we've got the information that we need.
-        if (!isset($number) || empty($number)) {
+        if (empty($number) || !is_string($number)) {
             return false;
         }
-        if (!isset($year) || empty($year)) {
+        if (empty($year)) {
             return false;
         }
 
+        # Normalize inputs.
+        $year = (int) $year;
+        $number = trim($number);
+
         # Check that the data is clean.
-        if (mb_strlen($year) != 4) {
+        if ($year < 1900 || $year > 2100) {
             return false;
         }
-        if (mb_strlen($number) > 7) {
+        if (mb_strlen($number) > 7 || !preg_match('/^[a-zA-Z]{2}\d+$/i', $number)) {
             return false;
         }
         $number = mb_strtolower($number);
@@ -49,35 +105,33 @@ class Bill2
         /*
          * If this bill is from the present year, try to retrieve the bill ID from Memcached.
          */
-        if ($year == SESSION_YEAR && MEMCACHED_SERVER != '') {
-            $mc = new Memcached();
-            $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-            $result = $mc->get('bill-' . $number);
-            if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
-                return $result;
+        if ($year == SESSION_YEAR) {
+            $cache = $this->getCache();
+            if ($cache !== null) {
+                $result = $cache->get('bill-' . $number);
+                if ($cache->getResultCode() == Memcached::RES_SUCCESS) {
+                    return $result;
+                }
             }
         }
-
-        $database = new Database();
-        $database->connect_mysqli();
 
         /*
          * Query the DB.
          */
-        $sql = 'SELECT
-                    bills.id
-				FROM bills
-				LEFT JOIN sessions
-					ON bills.session_id=sessions.id
-				WHERE
-                    bills.number="' . mysqli_real_escape_string($GLOBALS['db'], $number) . '" AND
-				    sessions.year= ' . mysqli_real_escape_string($GLOBALS['db'], $year) . '
-                ORDER BY sessions.date_started DESC';
-        $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) < 1) {
+        $sql = 'SELECT bills.id
+                FROM bills
+                LEFT JOIN sessions ON bills.session_id = sessions.id
+                WHERE bills.number = :number AND sessions.year = :year
+                ORDER BY sessions.date_started DESC
+                LIMIT 1';
+        $stmt = $this->getDb()->prepare($sql);
+        $stmt->execute(['number' => $number, 'year' => $year]);
+        $bill = $stmt->fetch();
+
+        if ($bill === false) {
             return false;
         }
-        $bill = mysqli_fetch_array($result);
+
         return $bill['id'];
     }
 
@@ -88,67 +142,90 @@ class Bill2
      */
     public function info()
     {
-
-        # We'll accept the ID in either format.
-        if (isset($this->id)) {
-            $id = $this->id;
-        }
-
-        # Don't proceed unless we have a bill ID.
-        if (!isset($id)) {
+        if (!isset($this->id)) {
             return false;
         }
 
-        /*
-         * Connect to Memcached.
-         */
-        if (MEMCACHED_SERVER != '') {
-            $mc = new Memcached();
-            $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+        $id = (int) $this->id;
+        if ($id <= 0) {
+            return false;
+        }
 
-            /*
-             * If this bill is cached in Memcached, retrieve it from there.
-             */
-            $bill = $mc->get('bill-' . $id);
-            if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
-                return unserialize($bill);
+        // Check cache first
+        $cache = $this->getCache();
+        if ($cache !== null) {
+            $cached = $cache->get('bill-' . $id);
+            if ($cache->getResultCode() == Memcached::RES_SUCCESS) {
+                return unserialize($cached);
             }
         }
 
-        $database = new Database();
-        $database->connect_mysqli();
+        // Fetch core bill data
+        $bill = $this->fetchBasicInfo($id);
+        if ($bill === false) {
+            return false;
+        }
 
-        # RETRIEVE THE BILL INFO FROM THE DATABASE
+        // Enrich with computed fields
+        $this->enrichBillData($bill);
+
+        // Fetch related data
+        $this->fetchCopatrons($bill);
+        $this->fetchTags($bill);
+        $this->fetchStatusHistory($bill);
+        $this->fetchTextVersions($bill);
+        $this->fetchPlaces($bill);
+        $this->fetchDuplicates($bill);
+
+        // Fetch related bills
+        $this->related($bill);
+        $bill['related'] = $this->related_bills;
+
+        // Cache the result
+        $this->cacheResult($id, $bill, $cache);
+
+        return $bill;
+    }
+
+    /**
+     * Fetch the core bill record from the database.
+     *
+     * @param int $id Bill ID.
+     *
+     * @return array|false Bill data array or false if not found.
+     */
+    private function fetchBasicInfo(int $id)
+    {
         $sql = 'SELECT
                     bills.id,
                     bills.number,
                     bills.session_id,
                     bills.chamber,
-				    bills.catch_line,
+                    bills.catch_line,
                     bills.chief_patron_id,
                     bills.summary,
                     bills.summary_hash,
-				    bills.full_text,
+                    bills.full_text,
                     bills.notes,
                     bills.status,
-				    bills.date_introduced,
+                    bills.date_introduced,
                     bills.outcome,
                     bills2.number AS incorporated_into,
-				    bills.copatrons AS copatron_count,
+                    bills.copatrons AS copatron_count,
                     representatives.name AS patron,
-				    districts.number AS patron_district,
+                    districts.number AS patron_district,
                     sessions.year,
                     sessions.lis_id AS session_lis_id,
-				    representatives.party AS patron_party,
+                    representatives.party AS patron_party,
                     representatives.chamber AS patron_chamber,
-				    representatives.shortname AS patron_shortname,
+                    representatives.shortname AS patron_shortname,
                     representatives.place AS patron_place,
-				    DATE_FORMAT(representatives.date_started, "%Y") AS patron_started,
-				    representatives.name_formatted as patron_name_formatted,
-				    representatives.address_district AS patron_address,
-				    committees.name AS committee,
+                    DATE_FORMAT(representatives.date_started, "%Y") AS patron_started,
+                    representatives.name_formatted as patron_name_formatted,
+                    representatives.address_district AS patron_address,
+                    committees.name AS committee,
                     committees.shortname AS committee_shortname,
-				    committees.chamber AS committee_chamber,
+                    committees.chamber AS committee_chamber,
                     (
                         SELECT translation
                         FROM bills_status
@@ -181,191 +258,228 @@ class Bill2
                     ON bills.last_committee_id=committees.id
                 LEFT JOIN bills AS bills2
                     ON bills.incorporated_into=bills2.id
-                WHERE bills.id=' . $id;
-        $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) == 0) {
-            return false;
-        }
-        $bill = mysqli_fetch_assoc($result);
-        $bill = array_map('stripslashes', $bill);
+                WHERE bills.id = :id';
+        $stmt = $this->getDb()->prepare($sql);
+        $stmt->execute(['id' => $id]);
+        return $stmt->fetch();
+    }
 
-        # Data conversions
+    /**
+     * Add computed fields to the bill data.
+     *
+     * @param array &$bill Bill data array (modified in place).
+     */
+    private function enrichBillData(array &$bill): void
+    {
         $bill['word_count'] = str_word_count($bill['full_text']);
         $bill['patron_suffix'] = '(' . $bill['patron_party'] . '-' . $bill['patron_place'] . ')';
+
         if ($bill['patron_chamber'] == 'house') {
             $bill['patron_prefix'] = 'Del.';
         } elseif ($bill['patron_chamber'] == 'senate') {
             $bill['patron_prefix'] = 'Sen.';
         }
+
         $bill['url'] = 'https://www.richmondsunlight.com/bill/' . $bill['year'] . '/'
             . mb_strtolower($bill['number']) . '/';
 
-        /*
-         * Flag this as either a bill or a resolution.
-         */
-        if (in_array(preg_replace('/[0-9]/', '', $bill['number']), array('sr', 'hr', 'hj', 'sj'))) {
-            $bill['type'] = 'resolution';
-        } else {
-            $bill['type'] = 'bill';
+        // Flag as bill or resolution
+        $prefix = preg_replace('/[0-9]/', '', $bill['number']);
+        $bill['type'] = in_array($prefix, ['sr', 'hr', 'hj', 'sj']) ? 'resolution' : 'bill';
+    }
+
+    /**
+     * Fetch copatrons for a bill.
+     *
+     * @param array &$bill Bill data array (modified in place).
+     */
+    private function fetchCopatrons(array &$bill): void
+    {
+        if ($bill['copatron_count'] <= 0) {
+            return;
         }
 
-        # If this bill has any copatrons, we want to gather up all of them and include them in the bill
-        # array.
-        if ($bill['copatron_count'] > 0) {
-            $sql = 'SELECT
-                        representatives.shortname,
-                        representatives.name_formatted,
-					    representatives.partisanship
-					FROM bills_copatrons
-					LEFT JOIN representatives
-						ON bills_copatrons.legislator_id=representatives.id
-					WHERE
-                        bills_copatrons.bill_id=' . $bill['id'] . '
-					ORDER BY
-                        representatives.chamber ASC,
-                        representatives.name ASC';
-            $bill_result = mysqli_query($GLOBALS['db'], $sql);
-            while ($copatron = mysqli_fetch_assoc($bill_result)) {
-                $copatron = array_map('stripslashes', $copatron);
-                $bill['copatron'][] = $copatron;
-            }
+        $sql = 'SELECT
+                    representatives.shortname,
+                    representatives.name_formatted,
+                    representatives.partisanship
+                FROM bills_copatrons
+                LEFT JOIN representatives
+                    ON bills_copatrons.legislator_id=representatives.id
+                WHERE bills_copatrons.bill_id = :bill_id
+                ORDER BY
+                    representatives.chamber ASC,
+                    representatives.name ASC';
+        $stmt = $this->getDb()->prepare($sql);
+        $stmt->execute(['bill_id' => $bill['id']]);
+
+        while ($copatron = $stmt->fetch()) {
+            $bill['copatron'][] = $copatron;
         }
+    }
 
-        # Select all tags from the database.
-        $sql = 'SELECT id, tag
-				FROM tags
-				WHERE bill_id=' . $bill['id'];
-        $result = mysqli_query($GLOBALS['db'], $sql);
+    /**
+     * Fetch tags for a bill.
+     *
+     * @param array &$bill Bill data array (modified in place).
+     */
+    private function fetchTags(array &$bill): void
+    {
+        $sql = 'SELECT id, tag FROM tags WHERE bill_id = :bill_id';
+        $stmt = $this->getDb()->prepare($sql);
+        $stmt->execute(['bill_id' => $bill['id']]);
+        $tags = $stmt->fetchAll();
 
-        # If there are any tags, display them.
-        if (mysqli_num_rows($result) > 0) {
-            while ($tag = mysqli_fetch_array($result)) {
-                $tag['tag'] = stripslashes($tag['tag']);
-                # Save the tags.
+        if (count($tags) > 0) {
+            foreach ($tags as $tag) {
                 $bill['tags'][$tag['id']] = $tag['tag'];
             }
         }
+    }
 
-        # The status history.
+    /**
+     * Fetch status history for a bill.
+     *
+     * @param array &$bill Bill data array (modified in place).
+     */
+    private function fetchStatusHistory(array &$bill): void
+    {
         $sql = 'SELECT
                     bills_status.status,
                     bills_status.translation,
-				    DATE_FORMAT(bills_status.date, "%m/%d/%Y") AS date,
+                    DATE_FORMAT(bills_status.date, "%m/%d/%Y") AS date,
                     DATE_FORMAT(bills_status.date, "%Y-%m-%d") AS date_raw,
-				    bills_status.lis_vote_id,
+                    bills_status.lis_vote_id,
                     votes.total AS vote_count
-				FROM bills_status
-				LEFT JOIN votes
-					ON bills_status.lis_vote_id = votes.lis_id
-				    AND bills_status.session_id=votes.session_id
-				WHERE bills_status.bill_id = ' . $bill['id'] . '
-				ORDER BY
+                FROM bills_status
+                LEFT JOIN votes
+                    ON bills_status.lis_vote_id = votes.lis_id
+                    AND bills_status.session_id=votes.session_id
+                WHERE bills_status.bill_id = :bill_id
+                ORDER BY
                     date_raw DESC,
                     bills_status.id DESC';
-        $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) > 0) {
-            # Initialize this array.
-            $bill['status_history'] = array();
-            # Iterate through the status history.
-            while ($status = mysqli_fetch_assoc($result)) {
-                # Clean it up.
-                $status = array_map('stripslashes', $status);
+        $stmt = $this->getDb()->prepare($sql);
+        $stmt->execute(['bill_id' => $bill['id']]);
+        $status_history = $stmt->fetchAll();
 
-                # Append this status data to the status history array.
-                $bill['status_history'][] = $status;
-            }
+        if (count($status_history) > 0) {
+            $bill['status_history'] = $status_history;
         }
+    }
 
-        // PDFs of the text of the legislation.
+    /**
+     * Fetch text versions (PDFs) for a bill.
+     *
+     * @param array &$bill Bill data array (modified in place).
+     */
+    private function fetchTextVersions(array &$bill): void
+    {
         $sql = 'SELECT
                     date_introduced AS date,
                     number,
                     pdf_url
                 FROM bills_full_text
-                WHERE bill_id=' . $bill['id'] . '
+                WHERE bill_id = :bill_id
                 ORDER BY date_introduced ASC';
-        $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) > 0) {
-            $bill['text'] = array();
-            while ($version = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
+        $stmt = $this->getDb()->prepare($sql);
+        $stmt->execute(['bill_id' => $bill['id']]);
+        $text_versions = $stmt->fetchAll();
+
+        if (count($text_versions) > 0) {
+            $bill['text'] = [];
+            foreach ($text_versions as $version) {
                 if (empty($version['pdf_url'])) {
                     unset($version['pdf_url']);
                 }
-                $bill['text'][] = array_map('stripslashes', $version);
+                $bill['text'][] = $version;
             }
         }
+    }
 
-        # Place names mentioned.
+    /**
+     * Fetch place names mentioned in a bill.
+     *
+     * @param array &$bill Bill data array (modified in place).
+     */
+    private function fetchPlaces(array &$bill): void
+    {
         $sql = 'SELECT
                     placename AS name,
                     latitude,
                     longitude
-				FROM bills_places
-				WHERE bill_id=' . $bill['id'] . '';
-        $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) > 0) {
-            $bill['places'] = array();
-            while ($place = mysqli_fetch_array($result)) {
-                $bill['places'][] = array_map('stripslashes', $place);
-            }
-        }
+                FROM bills_places
+                WHERE bill_id = :bill_id';
+        $stmt = $this->getDb()->prepare($sql);
+        $stmt->execute(['bill_id' => $bill['id']]);
+        $places = $stmt->fetchAll();
 
-        # Duplicates of this bill.
-        # Select all bills that share this summary.
+        if (count($places) > 0) {
+            $bill['places'] = $places;
+        }
+    }
+
+    /**
+     * Fetch duplicate bills (bills with the same summary).
+     *
+     * @param array &$bill Bill data array (modified in place).
+     */
+    private function fetchDuplicates(array &$bill): void
+    {
         $sql = 'SELECT
                     bills.number,
                     bills.chamber,
                     bills.catch_line,
                     bills.status,
-				    representatives.name AS patron,
+                    representatives.name AS patron,
                     sessions.year,
                     bills.date_introduced
-				FROM bills
-				LEFT JOIN representatives
-					ON bills.chief_patron_id = representatives.id
-				LEFT JOIN sessions
-					ON bills.session_id = sessions.id
-				WHERE
-                    bills.session_id = ' . $bill['session_id'] . ' AND
-				    bills.summary_hash = "' . $bill['summary_hash'] . '" AND
-                    bills.id != ' . $bill['id'] . '
-				ORDER BY
+                FROM bills
+                LEFT JOIN representatives
+                    ON bills.chief_patron_id = representatives.id
+                LEFT JOIN sessions
+                    ON bills.session_id = sessions.id
+                WHERE
+                    bills.session_id = :session_id AND
+                    bills.summary_hash = :summary_hash AND
+                    bills.id != :bill_id
+                ORDER BY
                     bills.date_introduced ASC,
                     bills.chamber DESC';
-        $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) > 0) {
-            $bill['duplicates'] = array();
+        $stmt = $this->getDb()->prepare($sql);
+        $stmt->execute([
+            'session_id' => $bill['session_id'],
+            'summary_hash' => $bill['summary_hash'],
+            'bill_id' => $bill['id']
+        ]);
+        $duplicates = $stmt->fetchAll();
 
-            # Build up an array of duplicates.
-            while ($duplicate = mysqli_fetch_array($result)) {
-                $duplicate = array_map('stripslashes', $duplicate);
-                $bill['duplicates'][] = $duplicate;
-            }
+        if (count($duplicates) > 0) {
+            $bill['duplicates'] = $duplicates;
+        }
+    }
+
+    /**
+     * Cache the bill result in Memcached.
+     *
+     * @param int            $id    Bill ID.
+     * @param array          $bill  Bill data array.
+     * @param Memcached|null $cache Cache connection.
+     */
+    private function cacheResult(int $id, array $bill, ?Memcached $cache): void
+    {
+        if ($cache === null) {
+            return;
         }
 
-        /*
-         * Get related bills
-         */
-        $this->related($bill);
-        $bill['related'] = $this->related_bills;
+        // Cache this bill for one week
+        $cache->set('bill-' . $id, serialize($bill), (60 * 60 * 24 * 7));
 
-        if (MEMCACHED_SERVER != '') {
-            /*
-            * Cache this bill in Memcached for one week.
-            */
-            $mc->set('bill-' . $id, serialize($bill), (60 * 60 * 24 * 7));
-
-            /*
-            * And cache the bill's number in Memcached, indefinitely, if the bill is from this
-            * year.
-            */
-            if ($bill['year'] == SESSION_YEAR) {
-                $mc->set('bill-' . $bill['number'], $bill['id']);
-            }
+        // Cache the bill's number indefinitely if from this year
+        if ($bill['year'] == SESSION_YEAR) {
+            $cache->set('bill-' . $bill['number'], $bill['id']);
         }
-
-        return $bill;
-    } // function "info"
+    }
 
     /**
      * Build PCRE patterns for defined terms referenced within the bill text.
@@ -378,14 +492,19 @@ class Bill2
         /*
          * We must have a bill ID.
          */
-        if (!isset($this->bill_id)) {
+        if (!isset($this->id)) {
+            return false;
+        }
+
+        $bill_id = (int) $this->id;
+        if ($bill_id <= 0) {
             return false;
         }
 
         /*
          * Get an array of all sections of the Code of Virginia mentioned in this bill.
          */
-        $code_sections = bill_sections($this->bill_id);
+        $code_sections = bill_sections($bill_id);
 
         if ($code_sections !== false) {
             /*
@@ -395,17 +514,12 @@ class Bill2
             $this->javascript = '<script>var section_number = "' . $code_sections[0]['section_number'] . '";</script>';
 
             /*
-             * Connect to Memcached.
+             * Check Memcached.
              */
-            if (MEMCACHED_SERVER != '') {
-                $mc = new Memcached();
-                $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-
-                /*
-                * See if these terms are cached in Memcached.
-                */
-                $this->term_pcres = $mc->get('definitions-' . $this->bill_id);
-                if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
+            $cache = $this->getCache();
+            if ($cache !== null) {
+                $this->term_pcres = $cache->get('definitions-' . $bill_id);
+                if ($cache->getResultCode() == Memcached::RES_SUCCESS) {
                     return true;
                 }
             }
@@ -483,8 +597,8 @@ class Bill2
             /*
              * Save this list of definitions.
              */
-            if (MEMCACHED_SERVER != '') {
-                $mc->set('definitions-' . $this->bill_id, $this->term_pcres);
+            if ($cache !== null) {
+                $cache->set('definitions-' . $bill_id, $this->term_pcres);
             }
 
             return true;
@@ -507,7 +621,7 @@ class Bill2
         /*
          * We must have bill text.
          */
-        if (!isset($this->text)) {
+        if (!isset($this->text) || !is_string($this->text) || empty($this->text)) {
             return false;
         }
 
@@ -524,11 +638,10 @@ class Bill2
         /*
          * See if we have this cached.
          */
-        if (MEMCACHED_SERVER != '') {
-            $mc = new Memcached();
-            $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-            $this->changes = $mc->get('bill-changes-' . $this->text_hash);
-            if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
+        $cache = $this->getCache();
+        if ($cache !== null) {
+            $this->changes = $cache->get('bill-changes-' . $this->text_hash);
+            if ($cache->getResultCode() == Memcached::RES_SUCCESS) {
                 return $this->changes;
             }
         }
@@ -648,8 +761,8 @@ class Bill2
         /*
          * Cache the results for three days.
          */
-        if (MEMCACHED_SERVER != '') {
-            $mc->set('bill-changes-' . $this->text_hash, $this->changes, (60 * 60 * 24 * 3));
+        if ($cache !== null) {
+            $cache->set('bill-changes-' . $this->text_hash, $this->changes, (60 * 60 * 24 * 3));
         }
 
         return $this->changes;
@@ -666,25 +779,20 @@ class Bill2
             return false;
         }
 
-        $database = new Database();
-        $database->connect_mysqli();
-
-        $sql = 'SELECT
-                    lis_id,
-                    pdf_url,
-                    summary
-                FROM fiscal_impact_statements
-                WHERE bill_id=' . $this->id;
-        $result = mysqli_query($GLOBALS['db'], $sql);
-
-        if (mysqli_num_rows($result) == 0) {
+        $id = (int) $this->id;
+        if ($id <= 0) {
             return false;
         }
 
-        $impact_statements = array();
-        while ($impact_statement = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-            $impact_statement = array_map('stripslashes', $impact_statement);
-            $impact_statements[] = $impact_statement;
+        $sql = 'SELECT lis_id, pdf_url, summary
+                FROM fiscal_impact_statements
+                WHERE bill_id = :bill_id';
+        $stmt = $this->getDb()->prepare($sql);
+        $stmt->execute(['bill_id' => $id]);
+        $impact_statements = $stmt->fetchAll();
+
+        if (count($impact_statements) == 0) {
+            return false;
         }
 
         return $impact_statements;
@@ -704,8 +812,14 @@ class Bill2
          * Make sure that the whole bill object has been passed along.
          */
         if (
-            !isset($bill) || !isset($bill['tags']) || !isset($bill['id']) || !isset($bill['number'])
-            || !isset($bill['summary_hash']) || !isset($bill['session_id'])
+            !is_array($bill)
+            || !isset($bill['tags'])
+            || !is_array($bill['tags'])
+            || empty($bill['tags'])
+            || !isset($bill['id'])
+            || !isset($bill['number'])
+            || !isset($bill['summary_hash'])
+            || !isset($bill['session_id'])
         ) {
             return false;
         }
@@ -737,6 +851,20 @@ class Bill2
      */
     private function related_internal($bill)
     {
+        $db = $this->getDb();
+
+        # Build placeholders for tags
+        $tag_placeholders = [];
+        $tag_params = [];
+        $i = 0;
+        foreach ($bill['tags'] as $tag) {
+            $placeholder = ':tag' . $i;
+            $tag_placeholders[] = 'tags2.tag = ' . $placeholder;
+            $tag_params['tag' . $i] = $tag;
+            $i++;
+        }
+        $tags_sql2 = implode(' OR ', $tag_placeholders);
+        $tags_sql = str_replace('tags2', 'tags', $tags_sql2);
 
         # Display a list of related bills, by finding the bills that share the most tags with this
         # one.
@@ -759,24 +887,8 @@ class Bill2
                         FROM bills AS bills2
                         LEFT JOIN tags AS tags2
                             ON bills2.id=tags2.bill_id
-                        WHERE (';
-        # Using an array of tags established above, when listing the bill's tags, iterate
-        # through them to create the SQL. The actual tag SQL is built up and then reused,
-        # though slightly differently, later on in the SQL query, hence the str_replace.
-        $tags_sql = '';
-
-        $i = 0;
-        foreach ($bill['tags'] as $tag) {
-            $tags_sql .= 'tags2.tag = "' . $tag . '"';
-            if ($i < (count($bill['tags']) - 1)) {
-                $tags_sql .= ' OR ';
-            }
-            $i++;
-        }
-        $sql .= $tags_sql;
-        $tags_sql = str_replace('tags2', 'tags', $tags_sql);
-        $sql .= ')
-                    AND bills2.id = bills.id
+                        WHERE (' . $tags_sql2 . ')
+                        AND bills2.id = bills.id
                     ) AS count
                 FROM bills
                 LEFT JOIN tags
@@ -787,19 +899,26 @@ class Bill2
                     ON bills.last_committee_id = committees.id
                 WHERE
                     (' . $tags_sql . ') AND
-                    bills.id != ' . $bill['id'] . ' AND
-                    bills.session_id = ' . $bill['session_id'] . ' AND
-                    bills.summary_hash != "' . $bill['summary_hash'] . '"
+                    bills.id != :bill_id AND
+                    bills.session_id = :session_id AND
+                    bills.summary_hash != :summary_hash
                 ORDER BY count DESC
                 LIMIT 5';
 
-        $result = mysqli_query($GLOBALS['db'], $sql);
+        $stmt = $db->prepare($sql);
 
-        if (mysqli_num_rows($result) > 0) {
-            $this->related_bills = array();
-            while ($related = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-                $this->related_bills[] = $related;
-            }
+        # Merge tag params with other params
+        $params = array_merge($tag_params, [
+            'bill_id' => $bill['id'],
+            'session_id' => $bill['session_id'],
+            'summary_hash' => $bill['summary_hash']
+        ]);
+
+        $stmt->execute($params);
+        $results = $stmt->fetchAll();
+
+        if (count($results) > 0) {
+            $this->related_bills = $results;
         }
 
         return true;
