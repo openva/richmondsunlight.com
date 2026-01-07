@@ -26,3 +26,8 @@ if ! grep -q "ServerSignature Off" /etc/apache2/conf-available/security.conf; th
     sed -i 's/ServerSignature On/ServerSignature Off/g' /etc/apache2/conf-available/security.conf
 fi
 
+# Allow ImageMagick to process PDFs (required for bill preview image generation)
+if [ -f "/etc/ImageMagick-6/policy.xml" ]; then
+    sed -i 's/rights="none" pattern="PDF"/rights="read|write" pattern="PDF"/g' /etc/ImageMagick-6/policy.xml
+fi
+

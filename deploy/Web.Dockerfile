@@ -5,7 +5,16 @@ RUN echo 'Acquire::Check-Valid-Until "false";' > /etc/apt/apt.conf.d/90ignore-re
     && echo 'Acquire::AllowInsecureRepositories "true";' >> /etc/apt/apt.conf.d/90ignore-release-date \
     && echo 'Acquire::AllowDowngradeToInsecureRepositories "true";' >> /etc/apt/apt.conf.d/90ignore-release-date
 
-RUN docker-php-ext-install mysqli && a2enmod rewrite && a2enmod expires && a2enmod headers
+# Install GD dependencies and ImageMagick/Ghostscript for preview image generation
+RUN apt-get update && apt-get install -y \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    ghostscript \
+    imagemagick \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install mysqli pdo pdo_mysql gd \
+    && a2enmod rewrite && a2enmod expires && a2enmod headers
 
 # Install our packages
 RUN apt update && \
