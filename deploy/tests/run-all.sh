@@ -26,10 +26,8 @@ if ! php ./get_bill_text_api_test.php; then
     ERRORED=true
 fi
 
-# Run the API tests (from rs-api repository)
-if ! ../../api/deploy/tests/run-tests.sh; then
-    ERRORED=true
-fi
+# Note: API tests are run separately from the host via docker-tests.sh,
+# not from inside the container, since they require docker access.
 
 # If any tests failed, have this script return that failure
 if [ "$ERRORED" == true ]; then
