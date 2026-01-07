@@ -1,6 +1,7 @@
 {
 	"name": "RichmondSunlight",
 	"version": "1.0.0",
+	"license": "MIT",
 	"dependencies": {
 		"jquery": "3.x",
 		"jquery-ui-dist": "1.13.2",

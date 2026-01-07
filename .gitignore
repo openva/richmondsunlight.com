@@ -31,3 +31,5 @@ htdocs/sitemap.xml
 zap-reports/
 deploy/browser-tests/node_modules/
 /.pw-browsers
+llm-instructions.md
+/deploy/browser-tests/test-results

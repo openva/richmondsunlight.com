@@ -27,7 +27,7 @@ if [ ! -d "api/" ]; then
 fi
 
 # Concatenate the database dumps into a single file, for MariaDB to load
-cat deploy/mysql/structure.sql deploy/mysql/basic-contents.sql deploy/mysql/test-records.sql > api/deploy/database.sql
+cat deploy/mysql/structure.sql deploy/mysql/basic-contents.sql deploy/mysql/test-records.sql deploy/mysql/test-users.sql > api/deploy/database.sql
 
 # Stand it up
 if docker image inspect rs_web:ci >/dev/null 2>&1; then

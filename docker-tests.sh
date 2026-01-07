@@ -34,20 +34,23 @@ done
 # Execute test suite inside the running container (service name required for exec)
 $COMPOSE_BINARY exec "${WEB_SERVICE}" /var/www/deploy/tests/run-all.sh
 
+# Run API tests from the host (requires docker access)
+./api/deploy/run_tests.sh
+
 # Ensure the specific container is running (compose ps gives container names when container_name is set)
 if ! $COMPOSE_BINARY ps --format '{{.Name}}' | grep -q "^${CONTAINER_NAME}$"; then
     echo "Container '${CONTAINER_NAME}' is not running. Please start docker compose before running tests." >&2
     exit 1
 fi
 
-# Ensure DB container is running (needed for loading test users)
+# Ensure DB container is running
 if ! $COMPOSE_BINARY ps --format '{{.Name}}' | grep -q "^rs_db$"; then
     echo "Container 'rs_db' is not running. Please start docker compose before running tests." >&2
     exit 1
 fi
 
-# Ensure test users are loaded for browser/login flows
-./deploy/load-test-users.sh
+# Note: Test users are now loaded as part of the initial database.sql file during docker-run.sh,
+# not via load-test-users.sh, to ensure consistency with the database initialization
 
 # Run browser-based interaction tests
 if [ "${RUN_BROWSER}" = true ]; then

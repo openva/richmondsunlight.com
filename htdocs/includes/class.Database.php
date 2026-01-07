@@ -33,9 +33,16 @@ class Database
         }
 
         /*
-         * Connect
+         * Connect with persistent connection and optimized settings
          */
-        $this->db = new PDO(PDO_DSN, PDO_USERNAME, PDO_PASSWORD);
+        $options = [
+            PDO::ATTR_PERSISTENT => true,
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            PDO::ATTR_EMULATE_PREPARES => false,
+            PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
+        ];
+        $this->db = new PDO(PDO_DSN, PDO_USERNAME, PDO_PASSWORD, $options);
 
         if ($this->db !== false) {
             $GLOBALS['db_pdo'] = $this->db;
@@ -109,41 +116,4 @@ class Database
         }
     }
 
-    /*
-     * Connect via PHP's old-school MySQL connector
-     */
-    public function connect_old()
-    {
-        if (!function_exists('mysql_connect')) {
-            return false;
-        }
-
-        // If we already have a database connection, reuse it.
-        if (isset($GLOBALS['db_old'])) {
-            return $GLOBALS['db_old'];
-        } elseif (isset($GLOBALS['db']) && get_class($GLOBALS['db']) == 'mysql') {
-            return $GLOBALS['db'];
-        }
-
-        $db = mysql_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
-
-        // If the connection succeeded.
-        if ($db !== false) {
-            mysql_select_db(MYSQL_DATABASE, $db);
-            mysql_query('SET NAMES "utf8"');
-            $GLOBALS['db'] = $db;
-            return $db;
-        }
-
-        // If this isn't a request to the API, send the browser to an error page.
-        if (mb_stristr($_GET['REQUEST_URI'], 'api.richmondsunlight.com') === false) {
-            header('Location: https://' . $_SERVER['SERVER_NAME'] . '/site-down/');
-            exit;
-        }
-
-        // If this is a request to the API, just return false.
-        else {
-            return false;
-        }
-    }
 }

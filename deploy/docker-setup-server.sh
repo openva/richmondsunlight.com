@@ -16,3 +16,13 @@ fi
 if [ ! -f "/usr/local/etc/php/php.ini" ]; then
     cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
 fi
+
+# Configure Apache security settings
+if ! grep -q "ServerTokens Prod" /etc/apache2/conf-available/security.conf; then
+    sed -i 's/ServerTokens OS/ServerTokens Prod/g' /etc/apache2/conf-available/security.conf
+fi
+
+if ! grep -q "ServerSignature Off" /etc/apache2/conf-available/security.conf; then
+    sed -i 's/ServerSignature On/ServerSignature Off/g' /etc/apache2/conf-available/security.conf
+fi
+

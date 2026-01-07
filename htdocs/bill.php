@@ -1004,11 +1004,20 @@ if (isset($bill['places']) && (count($bill['places']) > 0)) {
 		<h2>Map</h2>
 		<p>This bill mentions';
 
+    $place_count = count($bill['places']);
+    $i = 0;
     foreach ($bill['places'] as $place) {
         $place = (array) $place;
-        $page_body .= ' ' . $place['name'] . ',';
+        $i++;
+        if ($i == $place_count && $place_count > 1) {
+            $page_body .= ' and ' . $place['name'];
+        } else {
+            $page_body .= ' ' . $place['name'];
+            if ($i < $place_count) {
+                $page_body .= ',';
+            }
+        }
     }
-    $page_body = rtrim($page_body, ',');
     $page_body .= '.</p>';
 
     $html_head .= '<script src="/js/vendor/mapbox-gl/dist/mapbox-gl.js"></script>
@@ -1410,6 +1419,10 @@ if (($bill['session_id'] == SESSION_ID)) {
                     // Stop the form from submitting normally.
                     event.preventDefault();
 
+                    // Disable the submit button to prevent double-posting.
+                    var $submitBtn = $(this);
+                    $submitBtn.prop("disabled", true);
+
                     // Get the form values.
                     var expiration_date = $("#expiration_date").val(),
                         zip = $("#zip").val(),
@@ -1440,6 +1453,9 @@ if (($bill['session_id'] == SESSION_ID)) {
                         // Flash and fade the comment
                         $("#newcomment").fadeIn(200).fadeOut(200).fadeIn(200).fadeOut(200).fadeIn(200);
 
+                        // Re-enable the submit button.
+                        $submitBtn.prop("disabled", false);
+
                     });
 
                     // If the posting failed.
@@ -1450,6 +1466,9 @@ if (($bill['session_id'] == SESSION_ID)) {
                         // Display the error in the error field.
                         $( "#comment-error" ).empty().append( response.error );
                         $( "#comment-error" ).show();
+
+                        // Re-enable the submit button so they can try again.
+                        $submitBtn.prop("disabled", false);
 
                     });
 

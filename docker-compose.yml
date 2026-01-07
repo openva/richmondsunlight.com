@@ -59,7 +59,7 @@ services:
       context: api/deploy/
       dockerfile: MySQL.Dockerfile
     volumes:
-      - db_data:/var/lib/mariadb
+      - db_data:/var/lib/mysql
     restart: always
     ports:
       - "3306:3306"

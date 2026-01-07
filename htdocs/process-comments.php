@@ -216,7 +216,7 @@ foreach ($comment_words AS $word)
 # Make sure that this person hasn't posted in the past 5 seconds.
 $sql = 'SELECT id
 		FROM comments
-		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
+		WHERE (email="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(SECOND, date_created, now()) < 5)';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
@@ -229,7 +229,7 @@ if (mysqli_num_rows($result) > 0) {
 # Make sure that this person hasn't posted too many times recently.
 $sql = 'SELECT *
 		FROM comments
-		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
+		WHERE (email="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 5)';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 10) {
@@ -242,7 +242,7 @@ if (mysqli_num_rows($result) > 10) {
 # Make sure that this person hasn't posted this precise same comment within the past hour.
 $sql = 'SELECT id
 		FROM comments
-		WHERE (name="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
+		WHERE (email="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 60)
 		AND comment="' . $comment['comment'] . '"';
 $result = mysqli_query($GLOBALS['db'], $sql);
@@ -347,6 +347,7 @@ $log->put('New comment posted, by ' . stripslashes($comment['name']) . ':'
 /*
  * Send a 201 Created HTTP header, to indicate success.
  */
-header('HTTP/1.0 201 Created');
-$message = array('success' => 'Commented posted.');
+http_response_code(201);
+header('Content-Type: application/json; charset=utf-8');
+$message = array('success' => 'Comment posted.');
 echo json_encode($message);
