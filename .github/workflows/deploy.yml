@@ -119,12 +119,17 @@ jobs:
         run: echo "sha=$(git ls-remote https://github.com/openva/rs-api.git refs/heads/master | cut -f1)" >> $GITHUB_OUTPUT
 
       - name: Cache API checkout
+        id: api_cache
         uses: actions/cache@v3
         with:
           path: api
           key: ${{ runner.os }}-api-${{ steps.api_ref.outputs.sha }}
-          restore-keys: |
-            ${{ runner.os }}-api-
+
+      - name: Clone API repo if not cached
+        if: steps.api_cache.outputs.cache-hit != 'true'
+        run: |
+          rm -rf api
+          git clone --depth 1 https://github.com/openva/rs-api.git api
 
       - name: Setup Docker
         uses: docker/setup-buildx-action@v3
