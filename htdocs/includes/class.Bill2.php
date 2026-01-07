@@ -859,12 +859,15 @@ class Bill2
         $i = 0;
         foreach ($bill['tags'] as $tag) {
             $placeholder = ':tag' . $i;
-            $tag_placeholders[] = 'tags2.tag = ' . $placeholder;
+            $placeholder2 = ':tag2_' . $i;
+            $tag_placeholders[] = 'tags2.tag = ' . $placeholder2;
+            $tag_placeholders_main[] = 'tags.tag = ' . $placeholder;
             $tag_params['tag' . $i] = $tag;
+            $tag_params['tag2_' . $i] = $tag;
             $i++;
         }
         $tags_sql2 = implode(' OR ', $tag_placeholders);
-        $tags_sql = str_replace('tags2', 'tags', $tags_sql2);
+        $tags_sql = implode(' OR ', $tag_placeholders_main);
 
         # Display a list of related bills, by finding the bills that share the most tags with this
         # one.
