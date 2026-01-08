@@ -158,6 +158,69 @@ for ($year = 2006; $year <= SESSION_YEAR; $year++) {
         } else {
             $log->put(message: 'No bills found for year ' . $year . ' when generating sitemap -- '
                 . 'skipping this year', level: 4);
+            // Debug why bills query returned no rows despite succeeding.
+            $session_ids = [];
+            $session_result = mysqli_query(
+                mysql: $GLOBALS['db'],
+                query: 'SELECT id FROM sessions WHERE year = ' . $year . ' ORDER BY id ASC'
+            );
+            if ($session_result) {
+                while ($session = $session_result->fetch_assoc()) {
+                    $session_ids[] = $session['id'];
+                }
+                $log->put(
+                    message: 'Bills sitemap debug for year ' . $year . ': sessions found='
+                        . count(value: $session_ids)
+                        . (count(value: $session_ids) > 0 ? ' ids=' . implode(separator: ',', array: $session_ids) : ''),
+                    level: 4
+                );
+                if (count(value: $session_ids) > 0) {
+                    $bill_count_result = mysqli_query(
+                        mysql: $GLOBALS['db'],
+                        query: 'SELECT COUNT(*) AS bill_count FROM bills WHERE session_id IN ('
+                            . implode(separator: ',', array: $session_ids) . ')'
+                    );
+                    if ($bill_count_result) {
+                        $bill_count_row = $bill_count_result->fetch_assoc();
+                        $log->put(
+                            message: 'Bills sitemap debug for year ' . $year . ': bills with those sessions='
+                                . $bill_count_row['bill_count'],
+                            level: 4
+                        );
+                    } else {
+                        $log->put(
+                            message: 'Bills sitemap debug for year ' . $year . ': bill count query failed: '
+                                . mysqli_error(mysql: $GLOBALS['db']),
+                            level: 5
+                        );
+                    }
+                }
+            } else {
+                $log->put(
+                    message: 'Bills sitemap debug for year ' . $year . ': session lookup failed: '
+                        . mysqli_error(mysql: $GLOBALS['db']),
+                    level: 5
+                );
+            }
+
+            $null_session_result = mysqli_query(
+                mysql: $GLOBALS['db'],
+                query: 'SELECT COUNT(*) AS null_session_count FROM bills WHERE session_id IS NULL'
+            );
+            if ($null_session_result) {
+                $null_session_row = $null_session_result->fetch_assoc();
+                $log->put(
+                    message: 'Bills sitemap debug: bills with NULL session_id='
+                        . $null_session_row['null_session_count'],
+                    level: 4
+                );
+            } else {
+                $log->put(
+                    message: 'Bills sitemap debug: NULL session_id count query failed: '
+                        . mysqli_error(mysql: $GLOBALS['db']),
+                    level: 5
+                );
+            }
             // No bills for this year - skip and continue to next year
             continue;
         }
