@@ -70,7 +70,7 @@ $page_sidebar .= '
 	</div>';
 
 if (mysqli_num_rows($result) == 0) {
-    $page_body = '<p>No minutes are yet available for ' . SESSION_YEAR . ', but you may select minutes
+    $page_body = '<p>No minutes are yet available for ' . $year . ', but you may select minutes
 		from past years using the menu at right.</p>';
 } elseif (mysqli_num_rows($result) > 0) {
     # PAGE CONTENT

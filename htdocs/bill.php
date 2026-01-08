@@ -131,25 +131,35 @@ $page_title = $bill['year'] . ' » ' . $bill['catch_line'] . ' (' . mb_strtouppe
 $site_section = 'bills';
 
 /*
- * Facebook metadata.
+ * Preview image URL for social media cards.
+ */
+$preview_image_url = 'https://www.richmondsunlight.com/bill/' . $bill['year'] . '/'
+    . mb_strtolower($bill['number']) . '/preview.png';
+
+/*
+ * Facebook/Open Graph metadata.
  */
 $html_head .= '
     <meta property="og:title" content="' . mb_strtoupper($bill['number']) . ': '
     . $bill['catch_line'] . '"/>
-	<meta property="og:url" content="' . $bill['url'] . '"/>
-	<meta property="og:type" content="website" />
-	<meta property="og:site_name" content="Richmond Sunlight" />
-	<meta property="og:locale" content="en_US" />';
+    <meta property="og:url" content="' . $bill['url'] . '"/>
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Richmond Sunlight" />
+    <meta property="og:locale" content="en_US" />
+    <meta property="og:image" content="' . $preview_image_url . '" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />';
 
 /*
  * Twitter metadata.
  */
 $html_head .= '
-    <meta name="twitter:card" content="summary" />
-	<meta property="twitter:title" content="' . mb_strtoupper($bill['number']) . ', introduced by ' . $bill['patron_name_formatted'] . '"/>
-	<meta property="twitter:image" content="https://www.richmondsunlight.com/images/legislators/thumbnails/'
-        . $bill['patron_shortname'] . '.jpg"/>
-    <meta property="twitter:description" content="' . $bill['catch_line'] . '" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta property="twitter:title" content="' . mb_strtoupper($bill['number']) . ': '
+        . $bill['catch_line'] . '"/>
+    <meta property="twitter:image" content="' . $preview_image_url . '"/>
+    <meta property="twitter:description" content="Introduced by ' . $bill['patron_name_formatted']
+        . '. ' . $bill['catch_line'] . '" />
     <meta name="twitter:label1" value="Introduced By" />
     <meta name="twitter:data1" value="' . $bill['patron_name_formatted'] . '" />
     <meta name="twitter:label2" value="Status" />

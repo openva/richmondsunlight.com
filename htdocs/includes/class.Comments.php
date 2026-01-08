@@ -59,7 +59,7 @@ class Comments
 					LEFT JOIN bills
 						ON comments.bill_id=bills.id
 					WHERE
-					(comments.bill_id=' . mysqli_real_escape_string($GLOBALS['db'], $this->bill_id) . '
+					(comments.bill_id=' . mysqli_real_escape_string($GLOBALS['db'], (string)$this->bill_id) . '
 					OR
 						(bills.summary_hash = "' . $billInfo['summary_hash'] . '"
 						AND bills.session_id=' . $billInfo['session_id'] . ')

@@ -64,9 +64,16 @@ Options -Indexes
 
 RewriteEngine On
 
+# Disable mod_dir's automatic trailing slash redirects since we handle this ourselves
+# This prevents redirects that incorrectly use the filesystem path
+DirectorySlash Off
+
 RewriteCond %{HTTP_USER_AGENT} SemrushBot [OR]
 RewriteCond %{HTTP_USER_AGENT} AhrefsBot
 RewriteRule .* - [F]
+
+# Bill preview images (must come before static asset bypass)
+RewriteRule ^bill/([0-9]{4})/([hs][bjr]{1,2}[0-9]{1,4})/preview\.png$ /bill-preview.php?year=$1&bill=$2 [QSA,L]
 
 # Bypass rewrites for static assets
 RewriteRule \.(?:js|css|png|jpe?g|gif|svg|ico|json|map|woff2?|ttf|eot)$ - [L]
@@ -80,14 +87,15 @@ RewriteCond %{REQUEST_URI} [A-Z]
 RewriteRule ^(.*)$ ${tolower:%{REQUEST_URI}} [L,R=301,NE]
 
 # Add trailing slash for extensionless paths (external only)
-RewriteCond %{THE_REQUEST} \s/+([^\s?]+)
-RewriteCond %1 !\.[^./\s]+$
-RewriteCond %1 !/$
-RewriteRule ^ %1/ [L,R=301,NE]
+RewriteCond %{REQUEST_URI} !/$
+RewriteCond %{REQUEST_URI} !\.[^/]+$
+RewriteCond %{REQUEST_FILENAME} -d
+RewriteRule ^(.*)$ /$1/ [L,R=301]
 
 # Individual Bill
 RewriteRule ^bill/([0-9]{4})/([HS][BJR]{1,2}[0-9]{1,4})?/?$ /bill/$1/${tolower:$2}/ [R=301]
 RewriteRule ^bill/([0-9]{4})/([hs][bjr]{1,2}[0-9]{1,4})?/?$ /bill.php?year=$1&bill=$2 [QSA]
+RewriteRule ^bill/([0-9]{4})/([hs][bjr]{1,2}[0-9]{1,4})/preview\.png$ /bill-preview.php?year=$1&bill=$2 [QSA,L]
 RewriteRule ^bill/([0-9]{4})/([hs][bjr]{1,2}[0-9]{1,4})/fulltext?/?$ /bill-fulltext.php?year=$1&bill=$2 [QSA]
 RewriteRule ^bill/([0-9]{4})/([hs][bjr]{1,2}[0-9]{1,4})/history?/?$ /bill-history.php?year=$1&bill=$2 [QSA]
 RewriteRule ^bill/([0-9]{4})/([hs][bjr]{1,2}[0-9]{1,4})/([A-Za-z0-9]{6,8})?/?$ /vote.php?year=$1&bill=$2&lis_id=$3 [QSA]
