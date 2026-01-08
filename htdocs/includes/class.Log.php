@@ -85,7 +85,7 @@ class Log
                 8 => ':skull:'
                 );
             if ($level >= 6) {
-                $message = "@channel {$message}";
+                $message = "<!channel> {$message}";
             }
             $this->slack($message, 'rs', $emoji[$level]);
         }
@@ -117,7 +117,6 @@ class Log
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         $result = curl_exec($ch);
-        curl_close($ch);
 
         return $result;
     }

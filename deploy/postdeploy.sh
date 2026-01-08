@@ -95,8 +95,11 @@ php "$SITE_PATH"/deploy/generate_menu.php > "$SITE_PATH"/htdocs/includes/templat
 # Expire the cached template
 echo "delete template-new" | nc -N localhost 11211  || true
 
-# Regenerate sitemaps
-php "$SITE_PATH"/deploy/generate_sitemaps.php
+# Regenerate sitemaps, but only in production
+if [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Fleet" ]
+then
+    php "$SITE_PATH"/deploy/generate_sitemaps.php
+fi
 
 # Instruct web crawlers to avoid the staging site
 if [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Staging" ]
