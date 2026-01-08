@@ -1084,26 +1084,34 @@ class Import
         }
 
         /*
+         * Ensure the photos directory exists
+         */
+        if (!is_dir('photos')) {
+            mkdir('photos', 0755, true);
+        }
+
+        /*
          * Store the file without an extension (we don't know the image format)
          */
         $filename = $shortname;
-        if (file_put_contents('photos/' . $filename, $photo) == false) {
+        $filepath = 'photos/' . $filename;
+        if (file_put_contents($filepath, $photo) == false) {
             return false;
         }
 
         /*
          * Try to identify the file format
          */
-        $filetype = mime_content_type($filename);
+        $filetype = mime_content_type($filepath);
         if (stristr($filetype, 'image/jpeg')) {
-            rename($filename, $filename . '.jpg');
-            $filename = $filename . '.jpg';
+            rename($filepath, $filepath . '.jpg');
+            $filepath = $filepath . '.jpg';
         } elseif (stristr($filetype, 'image/png')) {
-            rename($filename, $filename . '.png');
-            $filename = $filename . '.png';
+            rename($filepath, $filepath . '.png');
+            $filepath = $filepath . '.png';
         }
 
-        return $filename;
+        return $filepath;
     }
 
     /**
