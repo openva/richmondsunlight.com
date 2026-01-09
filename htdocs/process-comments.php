@@ -29,7 +29,7 @@ set_error_handler(function ($errno, $errstr, $errfile, $errline) {
     http_response_code(500);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode(['error' => 'Server error.']);
-    return true; // handled
+    exit();
 });
 
 register_shutdown_function(function () {
@@ -58,14 +58,14 @@ session_start();
 
 # LOCALIZE VARIABLES
 $comment = array();
-$comment['comment']     = $_POST['comment'];
-$comment['bill_id']     = $_POST['bill_id'];
+$comment['comment']     = $_POST['comment'] ?? '';
+$comment['bill_id']     = $_POST['bill_id'] ?? '';
 
 # RENAME VARIABLES
 # These had faux names to deter spammers.  Give them proper names.
-$comment['name']    = $_POST['expiration_date'];
-$comment['email']   = $_POST['zip'];
-$comment['url']     = $_POST['age'];
+$comment['name']    = $_POST['expiration_date'] ?? '';
+$comment['email']   = $_POST['zip'] ?? '';
+$comment['url']     = $_POST['age'] ?? '';
 
 # CHECK FOR SPAMMERS
 # If any of these form fields have obviously been filled out based on the
@@ -86,16 +86,17 @@ if ((mb_strlen($comment['email']) == 5) && (preg_match("/([0-9]{5})-([0-9]{4})/D
 if (isset($comment['age']) && preg_match("/([0-9]{2})/D", $comment['age'])) {
     exit();
 }
-if (isset($comment['state']) && !empty($comment['state'])) {
+if (!empty($_POST['state'] ?? '')) {
     exit();
 }
-if (mb_strlen($_SERVER['HTTP_USER_AGENT']) <= 1) {
+$user_agent = $_SERVER['HTTP_USER_AGENT'] ?? '';
+if (mb_strlen($user_agent) <= 1) {
     exit();
 }
-if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'curl') === true) {
+if (mb_stristr($user_agent, 'curl') === true) {
     exit();
 }
-if (mb_stristr($_SERVER['HTTP_USER_AGENT'], 'Wget') === true) {
+if (mb_stristr($user_agent, 'Wget') === true) {
     exit();
 }
 
@@ -113,7 +114,8 @@ foreach ($spam_strings as $spam_string) {
 
 # We don't allow comments from Fairfax County Public Schools, because 99% of the comments from
 # there are garbage, and 75% of garbage comments come from there.
-if ($_SERVER['REMOTE_ADDR'] == '151.188.97.205') {
+$remote_addr = $_SERVER['REMOTE_ADDR'] ?? '';
+if ($remote_addr == '151.188.97.205') {
     echo '<p>We do not allow comments from Fairfax County Public Schools, because it means that
     every time a teacher has a class go to the website on their computers, the site is temporarily
     drowned in garbage comments. Maybe <em>you</em> just tried to post a reasonable comment, but
@@ -216,7 +218,7 @@ foreach ($comment_words AS $word)
 # Make sure that this person hasn't posted in the past 5 seconds.
 $sql = 'SELECT id
 		FROM comments
-		WHERE (email="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
+		WHERE (email="' . $comment['email'] . '" OR ip="' . $remote_addr . '")
 		AND (TIMESTAMPDIFF(SECOND, date_created, now()) < 5)';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
@@ -229,7 +231,7 @@ if (mysqli_num_rows($result) > 0) {
 # Make sure that this person hasn't posted too many times recently.
 $sql = 'SELECT *
 		FROM comments
-		WHERE (email="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
+		WHERE (email="' . $comment['email'] . '" OR ip="' . $remote_addr . '")
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 5)';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 10) {
@@ -242,7 +244,7 @@ if (mysqli_num_rows($result) > 10) {
 # Make sure that this person hasn't posted this precise same comment within the past hour.
 $sql = 'SELECT id
 		FROM comments
-		WHERE (email="' . $comment['email'] . '" OR ip="' . $_SERVER['REMOTE_ADDR'] . '")
+		WHERE (email="' . $comment['email'] . '" OR ip="' . $remote_addr . '")
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 60)
 		AND comment="' . $comment['comment'] . '"';
 $result = mysqli_query($GLOBALS['db'], $sql);
@@ -260,7 +262,7 @@ if (mysqli_num_rows($result) > 0) {
 # ASSEMBLE THE INSERTION SQL
 $sql = 'INSERT INTO comments
 		SET bill_id=' . $comment['bill_id'] . ', name="' . $comment['name'] . '",
-		email="' . $comment['email'] . '", ip="' . $_SERVER['REMOTE_ADDR'] . '",
+		email="' . $comment['email'] . '", ip="' . $remote_addr . '",
 		comment="' . $comment['comment'] . '", status="published",
 		date_created=now()';
 if (!empty($comment['url'])) {
@@ -340,9 +342,10 @@ if (MEMCACHED_SERVER != '') {
 }
 
 $log = new Log();
+$http_host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 $log->put('New comment posted, by ' . stripslashes($comment['name']) . ':'
     . "\n\n" . str_replace("\r\n", ' ¶ ', stripslashes($comment['comment']))
-    . ' https://' . $_SERVER['HTTP_HOST'] . '/admin/comments/#comment-' . $comment['id'], 3);
+    . ' https://' . $http_host . '/admin/comments/#comment-' . $comment['id'], 3);
 
 /*
  * Send a 201 Created HTTP header, to indicate success.
