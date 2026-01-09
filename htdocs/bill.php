@@ -1441,12 +1441,15 @@ if (($bill['session_id'] == SESSION_ID)) {
                         bill_id = $("#bill_id").val(),
                         subscribe = $("#subscribe").val();
 
-                    var posting = $.post( "/process-comments.php", { expiration_date: expiration_date, zip: zip, age: age, bill_id: bill_id, subscribe: subscribe, comment: comment } );
+                    var posting = $.post(
+                        "/process-comments.php",
+                        { expiration_date: expiration_date, zip: zip, age: age, bill_id: bill_id, subscribe: subscribe, comment: comment },
+                        null,
+                        "json"
+                    );
 
                     // If the posting was successful.
                     posting.done(function( data ) {
-
-                        var response = $.parseJSON( data );
 
                         // Append the comment to the list
                         $( "#comment-list" ).append(
@@ -1470,11 +1473,11 @@ if (($bill['session_id'] == SESSION_ID)) {
 
                     // If the posting failed.
                     posting.fail(function( data ) {
-
-                        var response = $.parseJSON( data );
+                        var response = data.responseJSON || {};
+                        var errorMessage = response.error || data.responseText || "Comment failed.";
 
                         // Display the error in the error field.
-                        $( "#comment-error" ).empty().append( response.error );
+                        $( "#comment-error" ).empty().append( errorMessage );
                         $( "#comment-error" ).show();
 
                         // Re-enable the submit button so they can try again.
