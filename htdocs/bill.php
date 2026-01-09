@@ -1404,7 +1404,7 @@ if (($bill['session_id'] == SESSION_ID)) {
         $debug_timing['subscription determined'] = microtime(true);
 
         // If the person isn't already subscribed to this bill's comments.
-        if ($subscription_status === false) {
+       /*if ($subscription_status === false) {
             $page_body .= '<input type="checkbox" value="y" name="comment[subscribe]"'
             . ' id="subscribe" /> <label for="subscribe"><strong>Subscribe</strong> <small>get future'
             . ' comments by e-mail</small></label><br />';
@@ -1414,7 +1414,7 @@ if (($bill['session_id'] == SESSION_ID)) {
         else {
             $page_body .= '<strong>You are subscribed</strong> to be e-mailed future comments
                 to this bill. <a href="/unsubscribe/' . $subscription_status . '/">Unsubscribe?</a><br />';
-        }
+        }*/
     }
 
     $page_body .= '
