@@ -25,6 +25,11 @@ if [ $(grep display_errors .htaccess |grep -v "#" |wc -l |xargs) -eq 0 ]; then
 	echo 'php_flag display_errors On' >> .htaccess
 fi
 
+# Ensure the app can write logs during tests.
+mkdir -p /var/www/htdocs/logs
+chown -R www-data:www-data /var/www/htdocs/logs
+chmod -R 775 /var/www/htdocs/logs
+
 cd ..
 
 # This keeps Composer from balking at the permissions of the directory

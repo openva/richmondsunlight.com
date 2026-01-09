@@ -135,14 +135,25 @@ class Log
         $message = date('Y-m-d H:i:s') . ' ' . $message . "\n";
 
         // Keep logs in the project log directory, regardless of invocation context.
-        $file = __DIR__ . '/../logs/site.log';
+        $log_dir = __DIR__ . '/../logs';
+        $file = $log_dir . '/site.log';
 
-        // Make the directory, if it doesn't exist
-        if (!file_exists(__DIR__ . '/../logs/')) {
-            mkdir(__DIR__ . '/../logs/');
+        // Make the directory, if it doesn't exist.
+        if (!is_dir($log_dir)) {
+            if (!@mkdir($log_dir, 0775, true) && !is_dir($log_dir)) {
+                return false;
+            }
         }
 
-        if (file_put_contents($file, $message, FILE_APPEND) === false) {
+        // Avoid warnings that would become 500s under JSON error handlers.
+        if (!is_writable($log_dir)) {
+            return false;
+        }
+        if (file_exists($file) && !is_writable($file)) {
+            return false;
+        }
+
+        if (@file_put_contents($file, $message, FILE_APPEND) === false) {
             return false;
         }
         return true;
