@@ -3,6 +3,12 @@
 # Allow people to subscribe to (or cease subscribing to) comments to particular bills via e-mail.
 class CommentSubscription
 {
+    public $user_id;
+    public $bill_id;
+    public $hash;
+    public $subscriptions;
+    public $comment;
+
     # Save a new subscription for a given user for a given bill.
     public function save()
     {
@@ -117,9 +123,12 @@ class CommentSubscription
         $tmp->id = $this->bill_id;
         $bill = $tmp->info();
 
-        // This is quite likely not the right place to include this, but what the heck?
-        // THIS INCLUDE IS FAILING. THE FILE CAN'T BE FOUND.
-        include 'Mail.php';
+        // Mail.php isn't guaranteed in local/test environments; skip notifications if missing.
+        $mail_path = stream_resolve_include_path('Mail.php');
+        if ($mail_path === false) {
+            return false;
+        }
+        include_once $mail_path;
 
         # Iterate through every subscriber and e-mail them.
         // I have to suspect that PEAR::Mail can handle this without iterating through, in one
