@@ -474,7 +474,6 @@ class Bill2
                 LEFT JOIN sessions
                     ON bills.session_id = sessions.id
                 WHERE
-                    bills.session_id = :session_id AND
                     bills.summary_hash = :summary_hash AND
                     bills.id != :bill_id
                 ORDER BY
@@ -482,7 +481,6 @@ class Bill2
                     bills.chamber DESC';
         $stmt = $this->getDb()->prepare($sql);
         $stmt->execute([
-            'session_id' => $bill['session_id'],
             'summary_hash' => $bill['summary_hash'],
             'bill_id' => $bill['id']
         ]);

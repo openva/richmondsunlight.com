@@ -1236,7 +1236,7 @@ if (isset($bill['duplicates'])) {
         $duplicate = (array) $duplicate;
 
         $page_body .= '<a href="/bill/' . $duplicate['year'] . '/' . $duplicate['number'] . '/">'
-            . mb_strtoupper($duplicate['number']) . '</a>';
+            . mb_strtoupper($duplicate['number']) . '</a> (' . $duplicate['year'] . ')';
         if ((count($bill['duplicates']) - 2) == $i) {
             $page_body .= ' and ';
         } elseif (count($bill['duplicates']) > ($i + 1)) {
