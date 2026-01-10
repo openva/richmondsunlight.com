@@ -188,6 +188,40 @@ class Bill2
     }
 
     /**
+     * Retrieve the current status narrative text for a bill.
+     *
+     * @param int|string|null $bill_id Bill ID to query; defaults to the instance ID.
+     *
+     * @return string|false Narrative text when present, or false when missing/invalid.
+     */
+    public function statusNarrative($bill_id = null)
+    {
+        $id = $bill_id ?? $this->id ?? null;
+        if ($id === null) {
+            return false;
+        }
+        $id = (int) $id;
+        if ($id <= 0) {
+            return false;
+        }
+
+        $sql = 'SELECT text
+                FROM bills_status_narratives
+                WHERE bill_id = :bill_id AND current = "y"
+                ORDER BY date_modified DESC
+                LIMIT 1';
+        $stmt = $this->getDb()->prepare($sql);
+        $stmt->execute(['bill_id' => $id]);
+        $row = $stmt->fetch();
+
+        if ($row === false || $row['text'] === null) {
+            return false;
+        }
+
+        return $row['text'];
+    }
+
+    /**
      * Fetch the core bill record from the database.
      *
      * @param int $id Bill ID.

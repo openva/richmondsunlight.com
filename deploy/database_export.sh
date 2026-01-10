@@ -15,7 +15,7 @@ STRUCTURE=(bills bills_copatrons bills_full_text bills_places bills_section_numb
 ALL_CONTENTS=(committees committee_members districts files people representatives sessions terms)
 
 # All database tables that we want to export some contents of, as test data
-SOME_CONTENTS=(bills_copatrons bills_full_text bills_places bills_section_numbers bills_status bills_views comments dockets fiscal_impact_statements polls tags video_clips votes)
+SOME_CONTENTS=(bills_copatrons bills_full_text bills_places bills_section_numbers bills_status bills_status_narratives bills_views comments dockets fiscal_impact_statements polls tags video_clips votes)
 
 # The ID of the bills to use to generate test data
 # Generate a new list with this query:
