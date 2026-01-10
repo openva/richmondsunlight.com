@@ -8,6 +8,23 @@
 #
 ###
 
+if (!function_exists('rs_define')) {
+    /**
+     * Define a constant unless it was already provided (e.g., via local overrides).
+     */
+    function rs_define(string $name, $value): void
+    {
+        if (!defined($name)) {
+            define($name, $value);
+        }
+    }
+}
+
+$rs_local_settings_file = __DIR__ . '/settings.local.inc.php';
+if (is_readable($rs_local_settings_file)) {
+    require $rs_local_settings_file;
+}
+
 # THE CURRENT SESSION
 # As defined by Richmond Sunlight's database
 define('SESSION_ID', 31);
