@@ -35,6 +35,9 @@ define('SESSION_SUFFIX', '');
 # As defined by the GA LIS' database.
 define('SESSION_LIS_ID', '251');
 
+# As defined by the GA LIS' database, based on an internal ID.
+rs_define('SESSION_LIS_API_ID', '59');
+
 # As defined by the year.
 define('SESSION_YEAR', 2025);
 
