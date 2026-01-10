@@ -257,6 +257,28 @@ CREATE TABLE `bills_status` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `bills_status_narratives`
+--
+
+DROP TABLE IF EXISTS `bills_status_narratives`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `bills_status_narratives` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `bill_id` mediumint(8) unsigned NOT NULL,
+  `session_id` tinyint(3) unsigned NOT NULL,
+  `text` mediumtext DEFAULT NULL,
+  `current` enum('y','n') CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT 'y',
+  `date_created` datetime NOT NULL,
+  `date_modified` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  PRIMARY KEY (`id`),
+  KEY `bill_id` (`bill_id`),
+  KEY `session_id` (`session_id`),
+  KEY `bill_current` (`bill_id`,`current`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `bills_views`
 --
 

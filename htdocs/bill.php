@@ -964,6 +964,7 @@ if (!empty($bill['history'])) {
     $page_body .= '
 	<h2 id="history">History</h2>
 	<div id="status-history">
+		' . (!empty($bill['narrative']) ? '<div class="status-narrative">' . $bill['narrative'] . '</div>' : '') . '
 		' . $bill['history'] . '
 	</div>';
 }
