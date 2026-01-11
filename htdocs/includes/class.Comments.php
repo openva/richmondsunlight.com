@@ -127,7 +127,8 @@ class Comments
                     $comment['type'] = 'photosynthesis';
 
                     // Add this comment to the comments array.
-                    $comments[$comment]['timestamp'] = $comment;
+                    $commentTimestamp = $comment['timestamp'];
+                    $comments[$commentTimestamp] = $comment;
                 }
             }
         }
