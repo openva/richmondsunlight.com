@@ -253,12 +253,14 @@ if (mysqli_num_rows($result) == 0) {
 
         $video2->clip_type = 'bills';
         $video2->get_clips();
+        $bill_clips = [];
         if (isset($video2->clips)) {
             $bill_clips = $video2->clips;
         }
 
         $video2->clip_type = 'legislators';
         $video2->index_clips();
+        $legislator_clips = [];
         if (isset($video2->clips)) {
             $legislator_clips = $video2->clips;
         }
@@ -269,7 +271,7 @@ if (mysqli_num_rows($result) == 0) {
 
         if (
             isset($video['html']) &&
-            (count($bill_clips) > 0 || count($legislator_clips) > 0 || count($video2->screenshots) > 0)
+            (count($bill_clips) > 0 || count($legislator_clips) > 0 || (isset($video2->screenshots) && count((array)$video2->screenshots) > 0))
         ) {
             $page_body .= '<h3>Index</h3>
 				<div id="video-index" class="tabs">
