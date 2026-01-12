@@ -251,6 +251,12 @@ if (mysqli_num_rows($result) == 0) {
 
         $video2->fuzz = 5;
 
+        $bill_clips = [];
+        $legislator_clips = [];
+        if (!isset($video2->screenshots)) {
+            $video2->screenshots = [];
+        }
+
         $video2->clip_type = 'bills';
         $video2->get_clips();
         if (isset($video2->clips)) {
