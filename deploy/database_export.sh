@@ -9,7 +9,7 @@ PASSWORD="{PDO_PASSWORD}"
 export MYSQL_PWD="$PASSWORD"
 
 # All database tables that we want to export the structure of
-STRUCTURE=(bills bills_copatrons bills_full_text bills_places bills_section_numbers bills_status bills_views blacklist chamber_status comments comments_subscriptions committees committee_members dashboard_bills dashboard_portfolios dashboard_user_data dashboard_watch_lists districts dockets files fiscal_impact_statements gazetteer meetings minutes polls people representatives representatives_votes sessions tags terms users vacode video_clips video_index video_index_faces video_transcript votes)
+STRUCTURE=(bills bills_copatrons bills_full_text bills_places bills_section_numbers bills_status bills_status_narratives bills_views blacklist chamber_status comments comments_subscriptions committees committee_members dashboard_bills dashboard_portfolios dashboard_user_data dashboard_watch_lists districts dockets files fiscal_impact_statements gazetteer meetings minutes polls people representatives representatives_votes sessions tags terms users vacode video_clips video_index video_index_faces video_transcript votes)
 
 # All database tables that we want to export all contents of
 ALL_CONTENTS=(committees committee_members districts files people representatives sessions terms)
@@ -22,14 +22,24 @@ SOME_CONTENTS=(bills_copatrons bills_full_text bills_places bills_section_number
 #   SELECT id
 #   FROM bills
 #   WHERE session_id = (SELECT id FROM sessions ORDER BY date_started DESC LIMIT 1,1)
+#    OR session_id = (SELECT id FROM sessions ORDER BY date_started DESC LIMIT 2,1)
 #   ORDER BY interestingness DESC
-#   LIMIT 20;
-BILL_IDS=(77039 76873 77034 77430 77318 77399 76972 76995 76483 78711 78827 78195 78269 79224 77600 76777 77557 76924 76912 78905
+#   LIMIT 80;
+
+BILL_IDS=(
+    77039 74613 72911 76873 74093 73894 73446 77034 72883 74728 73202 77430 72884 74117 73805 77318
+    72954 73556 77399 72980 76972 76995 73362 74500 74148 76483 78711 78827 72932 73272 72955 78195
+    73118 79224 77600 78269 74670 73984 73286 76777 73960 77557 75107 74616 74490 73030 76924 78905
+    76912 73053 74513 77733 73112 78556 78552 76706 74071 74585 77462 74875 76741 79465 77771 79881
+    78258 77302 77668 74452 78892 79024 78235 73480 79928 77053 73896 73230 72902 78115 79529 74045
 )
 
 # Change to the directory this script is in
 cd "$(dirname "$0")"
 mkdir -p mysql
+
+# Remove any existing SQL files
+rm -f mysql/*.sql
 
 # Export the structural data
 truncate --size 0 mysql/structure.sql
@@ -63,3 +73,6 @@ done
 
 # Remove the environment variable, now that we're done with it
 unset MYSQL_PWD
+
+# Combine all into a single file, which we want for some repos
+cat mysql/*.sql > mysql/database.sql
