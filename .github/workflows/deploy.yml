@@ -158,18 +158,8 @@ jobs:
       - name: Run Docker environment
         run: ./docker-run.sh
 
-      - name: Cache Playwright browsers
-        uses: actions/cache@v3
-        with:
-          path: .pw-browsers
-          key: ${{ runner.os }}-playwright-${{ hashFiles('deploy/browser-tests/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-playwright-
-
       - name: Run tests
         id: tests
-        env:
-          PLAYWRIGHT_BROWSERS_PATH: ${{ github.workspace }}/.pw-browsers
         run: |
           if [ "${{ github.event_name }}" = "schedule" ] || { [ "${{ github.event_name }}" = "pull_request" ] && [ "${{ github.ref_name }}" = "deploy" ]; }; then
             ./docker-tests.sh --zap-full-scan
