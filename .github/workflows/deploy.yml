@@ -167,13 +167,6 @@ jobs:
             ./docker-tests.sh
           fi
 
-      - name: Fix Playwright cache permissions
-        if: always()
-        run: |
-          if [ -d .pw-browsers ]; then
-            chmod -R a+rX .pw-browsers
-          fi
-
       - name: Stop Docker
         if: always()
         run: ./docker-stop.sh
