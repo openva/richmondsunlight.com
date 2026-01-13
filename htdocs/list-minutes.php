@@ -65,8 +65,8 @@ $page_sidebar .= '
 		<h3>Explanation</h3>
 		<p>We have the official minutes of the General Assembly as recorded by the clerk,
 		for these dates presented verbatim. “Minutes” is just a fancy term that means “list
-		of stuff they did on that day” For lots of these dates we also have video and transcripts
-		which are a lot more informative than the minutes.</p>
+		of stuff they did on that day.” For lots of these dates we also have video and transcripts,
+		which are a lot more detailed than the minutes.</p>
 	</div>';
 
 if (mysqli_num_rows($result) == 0) {
