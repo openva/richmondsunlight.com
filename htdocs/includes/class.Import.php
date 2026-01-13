@@ -2,11 +2,15 @@
 
 use Sunra\PhpSimple\HtmlDomParser;
 
+require_once(__DIR__ . '/class.Import.Minutes.php');
+
 /**
  * Imports, normalizes, and enriches bill and legislator data from external sources.
  */
 class Import
 {
+    use ImportMinutes;
+
     private $log;
     private $pdo;
     private $preferredNameCache = [];
