@@ -246,17 +246,17 @@ class Bill2
                     bills.outcome,
                     bills2.number AS incorporated_into,
                     bills.copatrons AS copatron_count,
-                    representatives.name AS patron,
+                    people.name AS patron,
                     districts.number AS patron_district,
                     sessions.year,
                     sessions.lis_id AS session_lis_id,
-                    representatives.party AS patron_party,
-                    representatives.chamber AS patron_chamber,
-                    representatives.shortname AS patron_shortname,
-                    representatives.place AS patron_place,
-                    DATE_FORMAT(representatives.date_started, "%Y") AS patron_started,
-                    representatives.name_formatted as patron_name_formatted,
-                    representatives.address_district AS patron_address,
+                    terms.party AS patron_party,
+                    terms.chamber AS patron_chamber,
+                    people.shortname AS patron_shortname,
+                    terms.place AS patron_place,
+                    DATE_FORMAT(terms.date_started, "%Y") AS patron_started,
+                    terms.name_formatted as patron_name_formatted,
+                    terms.address_district AS patron_address,
                     committees.name AS committee,
                     committees.shortname AS committee_shortname,
                     committees.chamber AS committee_chamber,
@@ -284,10 +284,12 @@ class Bill2
                 FROM bills
                 LEFT JOIN sessions
                     ON sessions.id=bills.session_id
-                LEFT JOIN representatives
-                    ON representatives.id=bills.chief_patron_id
+                LEFT JOIN people
+                    ON people.id=bills.chief_patron_id
+                LEFT JOIN terms
+                    ON terms.person_id=people.id
                 LEFT JOIN districts
-                    ON representatives.district_id=districts.id
+                    ON terms.district_id=districts.id
                 LEFT JOIN committees
                     ON bills.last_committee_id=committees.id
                 LEFT JOIN bills AS bills2
