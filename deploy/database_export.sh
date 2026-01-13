@@ -75,4 +75,5 @@ done
 unset MYSQL_PWD
 
 # Combine all into a single file, which we want for some repos
-cat mysql/*.sql > mysql/database.sql
+cat mysql/structure.sql mysql/basic-contents.sql mysql/test-records.sql mysql/test-users.sql \
+    > mysql/database.sql
