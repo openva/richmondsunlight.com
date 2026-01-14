@@ -2,10 +2,7 @@
 
 ###
 # Bills' Full Text
-#
-# PURPOSE
 # List the full text of individual bills.
-#
 ###
 
 # INCLUDES
@@ -65,9 +62,11 @@ if (
     $bill['type'] == 'bill'
     &&
         (
-        mb_stripos($bill['full_text'], 'A BILL to amend and reenact') !== false
+        mb_stripos($bill['full_text'], 'amend and reenact') !== false
         ||
         mb_stripos($bill['full_text'], 'Proposing an amendment') !== false
+        ||
+        mb_stripos($bill['full_text'], 'amended and reenacted') !== false
         )
 ) {
     $bill['amends'] = true;
