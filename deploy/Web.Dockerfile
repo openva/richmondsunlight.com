@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y \
 # Install our packages
 RUN apt update && \
     apt upgrade -y && \
-    apt install -y gnupg2 curl redis libmemcached-dev zlib1g-dev libssl-dev
+    apt install -y gnupg2 curl libmemcached-dev zlib1g-dev libssl-dev
 
 RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor -o /etc/apt/trusted.gpg.d/yarn.gpg
 RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
