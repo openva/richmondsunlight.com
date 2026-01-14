@@ -74,5 +74,5 @@ done
 # Perform the same for the Postfix/SES authentication file
 for i in "${variables[@]}"
 do
-	sed -i -e "s|{$i}|${!i}|g" deploy/sasl_passwd
+	sed -i -e "s|{$i}|${!i}|g" deploy/postfix/sasl_passwd
 done
