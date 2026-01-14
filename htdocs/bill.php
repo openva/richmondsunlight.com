@@ -472,6 +472,11 @@ $page_sidebar .=
                 // Stop the form from submitting normally.
                 event.preventDefault();
 
+                var pendingTag = $.trim($("#tags_tag").val());
+                if (pendingTag !== "") {
+                    $("#tags").addTag(pendingTag, { focus: false, unique: true });
+                }
+
                 // Get the form values.
                 var tags = $("#tags").val(),
                     bill_id = $("#bill_id").val();
