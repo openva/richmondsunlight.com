@@ -88,7 +88,7 @@ if (isset($_GET['delete-bill'])) {
     if (MEMCACHED_SERVER != '') {
         $sql = 'SELECT bill_id AS id
                 FROM dashboard_bills
-                WHERE id=' . record_id;
+                WHERE id=' . (int) $record_id;
         $result = mysqli_query($GLOBALS['db'], $sql);
         $bill = mysqli_fetch_array($result);
         $mc = new Memcached();
