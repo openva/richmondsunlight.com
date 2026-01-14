@@ -33,7 +33,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: mysqli, curl, memcached, redis
+          extensions: mysqli, curl, memcached
 
       - name: Ensure Composer cache dir exists
         run: mkdir -p ~/.composer/cache
@@ -84,7 +84,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
-          extensions: mysqli, curl, memcached, redis
+          extensions: mysqli, curl, memcached
 
       - name: Ensure Composer cache dir exists
         run: mkdir -p ~/.composer/cache

@@ -13,6 +13,7 @@
 # page to function.
 require_once 'includes/settings.inc.php';
 include_once 'vendor/autoload.php';
+use PHPMailer\PHPMailer\PHPMailer;
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific

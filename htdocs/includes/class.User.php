@@ -301,22 +301,29 @@ class User
             return false;
         }
 
+        if (!is_numeric($user['latitude']) || !is_numeric($user['longitude'])) {
+            return false;
+        }
+
+        $latitude = (float) $user['latitude'];
+        $longitude = (float) $user['longitude'];
+
         $database = new Database();
         $database->connect_mysqli();
 
         $sql = 'SELECT bills.id, bills.number, bills.catch_line, sessions.year,
 				bills_places.placename, bills_places.latitude, bills_places.longitude,
-				(' . $user['latitude'] . ' - bills_places.latitude) AS lat_diff,
-				(' . $user['longitude'] . ' - bills_places.longitude) AS lon_diff
+				(' . $latitude . ' - bills_places.latitude) AS lat_diff,
+				(' . $longitude . ' - bills_places.longitude) AS lon_diff
 				FROM bills_places
 				LEFT JOIN bills
 					ON bills_places.bill_id = bills.id
 				LEFT JOIN sessions
 					ON bills.session_id=sessions.id
-				WHERE (latitude >= ' . (round($user['latitude'], 1) - .25) . '
-				AND latitude <=' . (round($user['latitude'], 1) + .25) . ')
-				AND (longitude <= ' . (round($user['longitude'], 1) + .25) . '
-				AND longitude >= ' . (round($user['longitude'], 1) - .25) . ')
+				WHERE (latitude >= ' . (round($latitude, 1) - .25) . '
+				AND latitude <=' . (round($latitude, 1) + .25) . ')
+				AND (longitude <= ' . (round($longitude, 1) + .25) . '
+				AND longitude >= ' . (round($longitude, 1) - .25) . ')
 				AND bills.session_id = ' . SESSION_ID . '
 				ORDER BY ( lat_diff + lon_diff ) DESC';
         $result = mysqli_query($GLOBALS['db'], $sql);

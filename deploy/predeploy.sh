@@ -33,8 +33,8 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
     sudo apt update
     sudo DEBIAN_FRONTEND=noninteractive apt -y upgrade
     sudo DEBIAN_FRONTEND=noninteractive apt install -y apache2 curl geoip-database git gzip \
-    unzip openssl mysql-client memcached redis \
-    php php-mysql php-curl php-mbstring php-xml php-memcached php-redis php-gd \
+    unzip openssl mysql-client memcached \
+    php php-mysql php-curl php-mbstring php-xml php-memcached php-gd \
     python python-pip s3cmd sphinxsearch wget awscli certbot \
     python3-certbot-apache yarn imagemagick
 

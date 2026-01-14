@@ -92,6 +92,9 @@ fi
 # Populate the template with the list of legislators
 php "$SITE_PATH"/deploy/generate_menu.php > "$SITE_PATH"/htdocs/includes/templates/legislators.html
 
+# Report missing legislator photos
+php "$SITE_PATH"/deploy/photo-check.php
+
 # Expire the cached template
 echo "delete template-new" | nc -N localhost 11211  || true
 
