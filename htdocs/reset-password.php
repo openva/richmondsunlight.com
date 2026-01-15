@@ -2,10 +2,7 @@
 
 ###
 # Reset Password
-#
-# PURPOSE
 # Allows a user to reset his password.
-#
 ###
 
 # INCLUDES
@@ -72,7 +69,7 @@ if (!empty($_POST['email'])) {
                 'As you requested, here is a link to a page where you can reset your password ' .
                 "on Richmond Sunlight.\n\n" .
                 'https://www.richmondsunlight.com/account/reset-password/' . $user_data['private_hash'] . "\n\n" .
-                'If you didn\'t request that your password be reset, don\'t worry -- you can just ' .
+                'If you didn’t request that your password be reset, don’t worry -- you can just ' .
                 'ignore this e-mail. No harm done.' . "\n\n" .
                 "Best wishes,\nRichmond Sunlight";
 
@@ -89,7 +86,7 @@ if (!empty($_POST['email'])) {
             $page_body = '
 				<div id="messages" class="updated">
 					<p>An e-mail has been sent to you at that address. Check your e-mail and click
-					on the link provided and you’ll be in business.</p>
+					on the link provided and you’ll be back in business.</p>
 				</div>';
         }
     }
