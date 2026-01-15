@@ -1,0 +1,19 @@
+# Amazon SES SMTP Settings
+relayhost = email-smtp.us-east-1.amazonaws.com:587
+
+# Rewrite sender addresses to verified SES email
+smtp_generic_maps = hash:/etc/postfix/generic
+
+# Enable SASL authentication
+smtp_sasl_auth_enable = yes
+smtp_sasl_security_options = noanonymous
+smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
+
+# Enable TLS encryption
+smtp_use_tls = yes
+smtp_tls_security_level = encrypt
+smtp_tls_note_starttls_offer = yes
+smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
+
+# Additional settings
+smtp_tls_loglevel = 1

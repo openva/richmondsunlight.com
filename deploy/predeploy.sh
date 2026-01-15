@@ -61,16 +61,8 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
 
     # Set up mail relay to AWS SES
     sudo DEBIAN_FRONTEND=noninteractive apt install -y postfix mailutils
-
-    # First set append to the Postfix config file
-    echo <<'EOF' | sudo tee -a /etc/postfix/main.cf
-    smtp_sasl_security_options = noanonymous
-    smtp_sasl_password_maps = hash:/etc/postfix/sasl_passwd
-    smtp_use_tls = yes
-    smtp_tls_security_level = encrypt
-    smtp_tls_note_starttls_offer = yes
-    smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt
-EOF
+    sudo cp deploy/postfix/* /etc/postfix/
+    sudo newaliases
 
     # Then set up the SES SMTP credentials in Postfix
     sudo mv sasl_passwd /etc/postfix/sasl_passwd
@@ -81,6 +73,10 @@ EOF
     sudo postmap hash:/etc/postfix/sasl_passwd
     sudo chown root:root /etc/postfix/sasl_passwd.db
     sudo chmod 0600 /etc/postfix/sasl_passwd.db
+
+    sudo postmap /etc/postfix/generic
+    sudo chmod 600 /etc/postfix/generic
+    sudo chown root:root /etc/postfix/generic
 
     # Tell Postfix where to find the SES certificate
     sudo postconf -e 'smtp_tls_CAfile = /etc/ssl/certs/ca-certificates.crt'

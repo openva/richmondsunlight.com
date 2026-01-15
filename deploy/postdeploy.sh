@@ -93,7 +93,10 @@ fi
 php "$SITE_PATH"/deploy/generate_menu.php > "$SITE_PATH"/htdocs/includes/templates/legislators.html
 
 # Report missing legislator photos
-php "$SITE_PATH"/deploy/photo-check.php
+if [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Fleet" ]
+then
+    php "$SITE_PATH"/deploy/photo-check.php
+fi
 
 # Expire the cached template
 echo "delete template-new" | nc -N localhost 11211  || true
