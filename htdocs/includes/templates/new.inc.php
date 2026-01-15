@@ -577,7 +577,7 @@ if (
                             var date = (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear();
 
                             $( "#portfolio-list" ).append( '<div class="bill"><a href="' + bill.url + '">'
-                                + bill.number + '</a>: ' + bill.catch_line + ' <span class="last-updated">Updated&nbsp;' + date + '</span></div>');
+                                + bill.number.toUpperCase() + '</a>: ' + bill.catch_line + ' <span class="last-updated">Updated&nbsp;' + date + '</span></div>');
                         });
                     });
                 });
