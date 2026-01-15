@@ -26,6 +26,11 @@ if ! php ./get_bill_text_api_test.php; then
     ERRORED=true
 fi
 
+# Run reset password tests
+if ! php ./reset-password-test.php; then
+    ERRORED=true
+fi
+
 # Note: API tests are run separately from the host via docker-tests.sh,
 # not from inside the container, since they require docker access.
 
