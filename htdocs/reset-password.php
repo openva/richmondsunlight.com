@@ -2,10 +2,7 @@
 
 ###
 # Reset Password
-#
-# PURPOSE
 # Allows a user to reset his password.
-#
 ###
 
 # INCLUDES
@@ -30,22 +27,58 @@ session_start();
 
 # If we're receiving a request for a reset -- that is, somebody actually clicking on a
 # link in an e-mail after completing the first half of the process.
+$reset_user = null;
+$reset_hash = null;
 if (!empty($_GET['hash'])) {
-    $hash = mysqli_real_escape_string($GLOBALS['db'], $_GET['hash']);
-    $sql = 'SELECT cookie_hash
-			FROM users
-			WHERE private_hash = "' . $hash . '"';
+    $reset_hash = mysqli_real_escape_string($GLOBALS['db'], $_GET['hash']);
+    $sql = 'SELECT id, name
+            FROM users
+            WHERE private_hash = "' . $reset_hash . '" AND password IS NOT NULL';
     $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) == 0) {
         die('Your password reset link has failed mysteriously.');
     }
-    $user_data = mysqli_fetch_array($result);
-    $_SESSION['id'] = $user_data['cookie_hash'];
-    header('Location: https://www.richmondsunlight.com/account/?reset');
-    exit();
+    $reset_user = mysqli_fetch_array($result);
 }
 
-if (!empty($_POST['email'])) {
+if (!empty($_POST['reset_password'])) {
+    $reset_hash = mysqli_real_escape_string($GLOBALS['db'], $_POST['hash'] ?? '');
+    $sql = 'SELECT id, name
+            FROM users
+            WHERE private_hash = "' . $reset_hash . '" AND password IS NOT NULL';
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    if (mysqli_num_rows($result) == 0) {
+        $reset_error = 'Your password reset link has failed mysteriously.';
+    } else {
+        $reset_user = mysqli_fetch_array($result);
+        $password = $_POST['password'] ?? '';
+        $password_2 = $_POST['password_2'] ?? '';
+        if (mb_strlen($password) < 7) {
+            $reset_error = 'Please choose a password that is at least seven characters long.';
+        } elseif ($password !== $password_2) {
+            $reset_error = 'Please enter the same password twice.';
+        } else {
+            $password_hash = md5($password);
+            $chars = 'bcdfghjklmnpqrstvxyz0123456789';
+            $new_hash = mb_substr(str_shuffle($chars), 0, 8);
+            $sql = 'UPDATE users
+                    SET password="' . mysqli_real_escape_string($GLOBALS['db'], $password_hash) . '",
+                        private_hash="' . mysqli_real_escape_string($GLOBALS['db'], $new_hash) . '"
+                    WHERE id=' . (int) $reset_user['id'];
+            $result = mysqli_query($GLOBALS['db'], $sql);
+            if ($result === false) {
+                $reset_error = 'Your password could not be updated.';
+            } else {
+                $page_body = '
+                    <div id="messages" class="updated">
+                        <p>Your password has been reset. You may now <a href="/account/login/">log in</a>.</p>
+                    </div>';
+            }
+        }
+    }
+}
+
+if (!empty($_POST['email']) && $reset_user === null && !isset($page_body)) {
     $email = $_POST['email'];
     if (!validate_email($email)) {
         $error = 'That’s not a valid e-mail address.';
@@ -72,7 +105,7 @@ if (!empty($_POST['email'])) {
                 'As you requested, here is a link to a page where you can reset your password ' .
                 "on Richmond Sunlight.\n\n" .
                 'https://www.richmondsunlight.com/account/reset-password/' . $user_data['private_hash'] . "\n\n" .
-                'If you didn\'t request that your password be reset, don\'t worry -- you can just ' .
+                'If you didn’t request that your password be reset, don’t worry -- you can just ' .
                 'ignore this e-mail. No harm done.' . "\n\n" .
                 "Best wishes,\nRichmond Sunlight";
 
@@ -89,7 +122,7 @@ if (!empty($_POST['email'])) {
             $page_body = '
 				<div id="messages" class="updated">
 					<p>An e-mail has been sent to you at that address. Check your e-mail and click
-					on the link provided and you’ll be in business.</p>
+					on the link provided and you’ll be back in business.</p>
 				</div>';
         }
     }
@@ -103,16 +136,38 @@ if (!empty($_POST['email'])) {
 }
 
 # Display the password reset form.
-$page_body .= '
-	<p>Forgot your password? No problem. Enter your e-mail address here and we’ll e-mail you
-	a link so you can reset it.</p>
+if ($reset_user !== null && !isset($page_body)) {
+    if (isset($reset_error)) {
+        $page_body = '
+			<div id="messages" class="errors">
+				<p>' . $reset_error . '</p>
+			</div>';
+    }
+    $page_body .= '
+        <p>Hi ' . htmlspecialchars($reset_user['name'], ENT_QUOTES) . '. Choose a new password below.</p>
+        <form method="post" action="/account/reset-password/">
+            <input type="hidden" name="hash" value="' . htmlspecialchars($reset_hash, ENT_QUOTES) . '" />
+            <label for="password">New Password</label><br />
+            <input type="password" name="password" id="password" size="32" maxlength="64" /><br />
+            <label for="password_2">New Password Again</label><br />
+            <input type="password" name="password_2" id="password_2" size="32" maxlength="64" /><br />
+            <input type="submit" name="reset_password" id="reset_password" value="Set New Password" />
+        </form>
+    ';
+}
 
-	<form method="post" action="/account/reset-password/">
-		<label for="email">Your E-Mail Address</label><br />
-		<input type="text" name="email" size="32" id="email" maxlength="64" /><br />
-		<input type="submit" name="submit" id="submit" value="Reset Password" />
-	</form>
-';
+if ($reset_user === null && !isset($page_body)) {
+    $page_body .= '
+    	<p>Forgot your password? No problem. Enter your e-mail address here and we’ll e-mail you
+    	a link so you can reset it.</p>
+
+    	<form method="post" action="/account/reset-password/">
+    		<label for="email">Your E-Mail Address</label><br />
+    		<input type="text" name="email" size="32" id="email" maxlength="64" /><br />
+    		<input type="submit" name="submit" id="submit" value="Reset Password" />
+    	</form>
+    ';
+}
 
 // OUTPUT THE PAGE
 $page = new Page();
