@@ -34,18 +34,19 @@ $site_section = 'minutes';
 $html_head = '
 <script>
 document.addEventListener("DOMContentLoaded", function() {
-    // Get the link and video elements
-    var link = document.getElementByClass("marker");
+    var markers = document.querySelectorAll(".marker");
     var video = document.getElementById("player");
 
-    // Listen for click on the link
-    link.addEventListener("click", function(event) {
-        // Prevent the default action of the anchor tag
-        event.preventDefault();
+    if (!video || markers.length === 0) {
+        return;
+    }
 
-        // Get the time from the data-seek attribute and seek the video to that time
-        var time = link.getAttribute("data-time");
-        video.currentTime = time;
+    markers.forEach(function(marker) {
+        marker.addEventListener("click", function(event) {
+            event.preventDefault();
+            var time = marker.getAttribute("data-time");
+            video.currentTime = time;
+        });
     });
 });
 </script>';
