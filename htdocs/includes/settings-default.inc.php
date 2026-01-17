@@ -102,6 +102,9 @@ rs_define('LOG_VERBOSITY', 3);
 # Slack API URL
 rs_define('SLACK_WEBHOOK', '');
 
+# YouTube API key
+rs_define('YOUTUBE_API_KEY', '');
+
 # OpenAI API key
 rs_define('OPENAI_KEY', '');
 
