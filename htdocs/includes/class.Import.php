@@ -1294,24 +1294,38 @@ class Import
             return false;
         }
 
+        // Check for any recent or active term for this lis_id/chamber combination
         $active_check = $GLOBALS['dbh']->prepare(
-            'SELECT id
+            'SELECT id, date_ended
                 FROM terms
                 WHERE lis_id = :lis_id
                     AND chamber = :chamber
-                    AND date_ended IS NULL
+                    AND (date_ended IS NULL OR date_ended >= DATE_SUB(NOW(), INTERVAL 60 DAY))
+                ORDER BY date_ended DESC
                 LIMIT 1'
         );
         $active_check->execute([
             ':lis_id' => $normalized_lis_id,
             ':chamber' => $legislator['chamber'],
         ]);
-        if ($active_check->fetch(PDO::FETCH_ASSOC)) {
-            $this->log->put(
-                'Not creating a record for ' . $legislator['name_formatted']
-                . ' because there is already an active term for LIS ID ' . $legislator['lis_id'] . '.',
-                5
-            );
+
+        $existing_term = $active_check->fetch(PDO::FETCH_ASSOC);
+        if ($existing_term) {
+            if ($existing_term['date_ended'] === null) {
+                $this->log->put(
+                    'Not creating a record for ' . $legislator['name_formatted']
+                    . ' because there is already an active term for LIS ID ' . $legislator['lis_id'] . '.',
+                    5
+                );
+            } else {
+                $this->log->put(
+                    'Warning: Legislature servers report ' . $legislator['name_formatted']
+                    . ' (LIS ID ' . $legislator['lis_id'] . ') as active, but their term ended on '
+                    . $existing_term['date_ended'] . '. This appears to be stale data from the legislature. '
+                    . 'Not creating a duplicate term.',
+                    5
+                );
+            }
             return false;
         }
 

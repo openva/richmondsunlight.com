@@ -111,6 +111,7 @@ trait ImportMinutes
     {
         $dom = new DOMDocument();
         libxml_use_internal_errors(true);
+        $html = '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">' . $html;
         $loaded = $dom->loadHTML($html);
         libxml_clear_errors();
 
