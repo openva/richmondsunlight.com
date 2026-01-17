@@ -29,7 +29,7 @@ Header always set X-Frame-Options "SAMEORIGIN"
 Header always set X-Xss-Protection "1; mode=block"
 Header always set X-Content-Type-Options "nosniff"
 Header always set Referrer-Policy "strict-origin-when-cross-origin"
-Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.richmondsunlight.com/ https:; media-src 'self' https://*.richmondsunlight.com https://*.archive.org  https://*.sliq.net https://archive-video.granicus.com https://*.youtube.com https://i.ytimg.com; frame-src 'self' https://*.youtube.com https://*.richmondsunlight.com https://*.archive.org; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'self';"
+Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.richmondsunlight.com/ https:; media-src 'self' https://*.richmondsunlight.com https://*.archive.org https://archive.org https://*.sliq.net https://archive-video.granicus.com https://*.youtube.com https://i.ytimg.com; frame-src 'self' https://*.youtube.com https://*.richmondsunlight.com https://*.archive.org; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'self';"
 Header always set Cross-Origin-Opener-Policy "same-origin"
 Header always unset X-Powered-By
 Header always edit Set-Cookie (.*) "$1; SameSite=Strict"
