@@ -913,7 +913,7 @@ class Import
 
         $sql = 'SELECT id, lis_id, chamber
 				FROM committees
-				WHERE parent_id IS NULL
+				WHERE parent_id IS NULL AND date_ended IS NULL
 				ORDER BY id ASC';
         $result = mysqli_query($db, $sql);
         if ($result === false || mysqli_num_rows($result) == 0) {

@@ -102,6 +102,9 @@ rs_define('LOG_VERBOSITY', 3);
 # Slack API URL
 rs_define('SLACK_WEBHOOK', '');
 
+# YouTube API key
+rs_define('YOUTUBE_API_KEY', '');
+
 # OpenAI API key
 rs_define('OPENAI_KEY', '');
 
@@ -116,6 +119,9 @@ rs_define('AWS_SECRET_KEY', '');
 
 # Video SQS URL
 rs_define('VIDEO_SQS_URL', 'https://sqs.us-east-1.amazonaws.com/947603853016/rs-video-harvester.fifo');
+
+# Define the browser used to get cookies for yt-dlp
+define('YTDLP_COOKIES_BROWSER', 'chrome');
 
 # The list of words that, when used, will lead to instant blacklisting. They're rot 13ed here.
 $GLOBALS['banned_words'] = array('fuvg','shpx','nffubyr','chffl','phag','shpxre','zbgureshpxre',

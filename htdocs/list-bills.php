@@ -106,6 +106,7 @@ elseif (!empty($committee)) {
 			WHERE sessions.id = bills.session_id
 			AND committees.shortname = "' . $committee . '"
 			AND committees.chamber = "' . $chamber . '"
+			AND committees.date_ended IS NOT NULL
 			AND sessions.year = ' . SESSION_YEAR . '
 			AND bills.status != "failed" AND bills.status != "passed ' . $chamber . '" AND
 			bills.status != "passed committee" AND bills.status != "failed committee"
@@ -438,7 +439,8 @@ if (!empty($committee) && !empty($chamber)) {
     $sql = 'SELECT name, chamber
 			FROM committees
 			WHERE shortname="' . $committee . '"
-			AND chamber="' . $chamber . '"';
+			AND chamber="' . $chamber . '"
+			AND date_ended IS NOT NULL';
     $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0) {
         $committee = mysqli_fetch_array($result);

@@ -46,7 +46,7 @@ class Committee
          */
         $sql = 'SELECT id, shortname, name, chamber, meeting_time, url
                 FROM committees
-                WHERE ';
+                WHERE date_ended IS NULL AND ';
         if (isset($this->id)) {
             $sql .= 'id = ' . $this->id;
         } elseif (isset($this->shortname)) {
@@ -91,7 +91,7 @@ class Committee
 				LEFT JOIN
 				representatives
 					ON committee_members.representative_id=representatives.id
-                WHERE ';
+                WHERE representatives.date_ended IS NULL AND ';
         if (isset($this->id)) {
             $sql .= 'committee_members.committee_id=' . $this->id . ' AND';
         }
@@ -130,7 +130,7 @@ class Committee
         $sql = 'SELECT id, shortname, name, chamber, meeting_time, url,
                 LEVENSHTEIN("' . $this->name . '", name) AS distance
                 FROM committees
-                WHERE chamber="' . $this->chamber . '"
+                WHERE chamber="' . $this->chamber . '" AND date_ended IS NULL
                 ORDER BY distance ASC
                 LIMIT 1';
         $result = mysqli_query($GLOBALS['db'], $sql);
