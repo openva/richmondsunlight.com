@@ -398,13 +398,15 @@ DROP TABLE IF EXISTS `committees`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `committees` (
   `id` tinyint(4) unsigned NOT NULL AUTO_INCREMENT,
-  `lis_id` tinyint(32) unsigned DEFAULT NULL,
+  `lis_id` smallint(32) unsigned DEFAULT NULL,
   `parent_id` tinyint(3) unsigned DEFAULT NULL,
   `name` varchar(120) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
   `shortname` varchar(32) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
   `chamber` enum('house','senate') CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
   `meeting_time` varchar(160) DEFAULT NULL,
-  `url` varchar(120) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
+  `url` varchar(120) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,  
+  `date_started` date DEFAULT NULL,                                     
+  `date_ended` date DEFAULT NULL,  
   `date_created` datetime NOT NULL,
   `date_modified` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),

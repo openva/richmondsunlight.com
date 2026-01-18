@@ -65,7 +65,7 @@ $sql = 'SELECT id, shortname, name, chamber, meeting_time,
 			 AND status != "passed senate" AND status != "passed"
 			 AND status != "vetoed") AS count
 		FROM committees
-		WHERE chamber="senate" AND parent_id IS NULL
+		WHERE chamber="senate" AND parent_id IS NULL AND date_ended IS NULL
 		ORDER BY name ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
@@ -98,7 +98,7 @@ $sql = 'SELECT id, shortname, name, chamber, meeting_time,
 			 AND status != "passed house" AND status != "passed"
 			 AND status != "vetoed") AS count
 		FROM committees
-		WHERE chamber="house" AND parent_id IS NULL
+		WHERE chamber="house" AND parent_id IS NULL AND date_ended IS NULL
 		ORDER BY name ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {

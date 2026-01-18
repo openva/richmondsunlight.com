@@ -213,6 +213,7 @@ class Legislator
 				LEFT JOIN committee_members
 					ON committees.id = committee_members.committee_id
 				WHERE
+                    committees.date_ended IS NULL AND
                     committee_members.representative_id = ' . $legislator['id'] . ' AND
                     (committee_members.date_ended IS NULL
                     OR

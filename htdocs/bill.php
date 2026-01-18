@@ -985,7 +985,10 @@ $sql = 'SELECT DATE_FORMAT(dockets.date, "%m/%d/%Y") AS date, committees.name AS
 			ON dockets.committee_id = committees.id
 		LEFT JOIN committees AS committees_parent
 			ON committees.parent_id = committees_parent.id
-		WHERE dockets.bill_id=' . $bill['id'] . ' AND dockets.date > now()
+		WHERE
+            dockets.bill_id=' . $bill['id'] . ' AND
+            dockets.date > now() AND
+            committees.date_ended IS NULL
 		LIMIT 1';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
