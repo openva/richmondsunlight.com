@@ -91,7 +91,7 @@ class Committee
 				LEFT JOIN
 				representatives
 					ON committee_members.representative_id=representatives.id
-                WHERE date_ended IS NULL AND ';
+                WHERE representatives.date_ended IS NULL AND ';
         if (isset($this->id)) {
             $sql .= 'committee_members.committee_id=' . $this->id . ' AND';
         }
