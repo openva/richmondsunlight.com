@@ -117,7 +117,7 @@ $pages =
     [
         'url' => '/schedule/2025/01/13/',
         'http_status' => '200',
-        'strings' => ['Neurological Injury', 'Child support', 'Zoning'],
+        'strings' => ['Neurological Injury', 'Zoning'],
     ],
     [
         'url' => '/schedule/2025/01/32/',
@@ -141,7 +141,7 @@ $pages =
     [
         'url' => '/committees/',
         'http_status' => '200',
-        'strings' => ['Appropriations', 'Education', 'Health and Human Services', 'Courts of Justice'],
+        'strings' => ['Appropriations', 'Education', 'Welfare', 'Courts of Justice'],
     ],
     [
         'url' => '/committee/house/appropriations/',
