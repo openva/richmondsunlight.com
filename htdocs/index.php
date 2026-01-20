@@ -148,7 +148,7 @@ if (mysqli_num_rows($result) > 0) {
         $place_json['latitude'] = $place['latitude'];
         $place_json['longitude'] = $place['longitude'];
         $place_json['place'] = $place['placename'];
-        $place_json['description'] = strtoupper($place['number']) . ': ' . $place['catch_line'];
+        $place_json['description'] = $place['placename'] . '<br>' . strtoupper($place['number']) . ': ' . $place['catch_line'];
         $place_json['url'] = '/bill/' . SESSION_YEAR . '/' . $place['number'] . '/';
         $places[] = $place_json;
     }
