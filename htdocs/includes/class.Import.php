@@ -258,9 +258,10 @@ class Import
         }
 
         $stmt = $pdo->prepare(
-            'INSERT INTO bills_status (bill_id, session_id, status, translation, date, lis_vote_id, date_created)
-                VALUES (:bill_id, :session_id, :status, :translation, :date, :lis_vote_id, :date_created)
+            'INSERT INTO bills_status (bill_id, session_id, status, chamber, translation, date, lis_vote_id, date_created)
+                VALUES (:bill_id, :session_id, :status, :chamber, :translation, :date, :lis_vote_id, :date_created)
             ON DUPLICATE KEY UPDATE
+                chamber = VALUES(chamber),
                 translation = VALUES(translation),
                 lis_vote_id = VALUES(lis_vote_id),
                 date_modified = CURRENT_TIMESTAMP()'
@@ -287,6 +288,11 @@ class Import
                 continue;
             }
 
+            $chamber = $entry['chamber'] ?? null;
+            if ($chamber !== 'house' && $chamber !== 'senate') {
+                $chamber = null;
+            }
+
             $translation = $entry['translation'] ?? null;
             if (is_string($translation)) {
                 $translation = trim($translation);
@@ -309,6 +315,7 @@ class Import
 
             $rows[$status . '|' . $date] = [
                 'status' => $status,
+                'chamber' => $chamber,
                 'date' => $date,
                 'translation' => $translation,
                 'lis_vote_id' => $lis_vote_id,
@@ -319,6 +326,11 @@ class Import
             $stmt->bindValue(':bill_id', $bill_id, PDO::PARAM_INT);
             $stmt->bindValue(':session_id', $session_id, PDO::PARAM_INT);
             $stmt->bindValue(':status', $row['status']);
+            $stmt->bindValue(
+                ':chamber',
+                $row['chamber'],
+                $row['chamber'] === null ? PDO::PARAM_NULL : PDO::PARAM_STR
+            );
             $stmt->bindValue(
                 ':translation',
                 $row['translation'],
