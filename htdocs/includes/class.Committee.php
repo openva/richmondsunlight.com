@@ -83,21 +83,22 @@ class Committee
         $db = new Database();
         $db->connect_mysqli();
 
-        $sql = 'SELECT representatives.id, representatives.shortname,
-                representatives.name_formatted AS name,
-				representatives.name AS name_simple, committee_members.position,
-				representatives.email, committee_members.committee_id
+        $sql = 'SELECT people.id, people.shortname,
+                terms.name_formatted AS name,
+				people.name AS name_simple, committee_members.position,
+				terms.email, committee_members.committee_id
                 FROM committee_members
-				LEFT JOIN
-				representatives
-					ON committee_members.representative_id=representatives.id
-                WHERE representatives.date_ended IS NULL AND ';
+				LEFT JOIN people
+					ON committee_members.representative_id=people.id
+                LEFT JOIN terms
+                    ON people.id=terms.person_id
+                WHERE terms.date_ended IS NULL AND ';
         if (isset($this->id)) {
             $sql .= 'committee_members.committee_id=' . $this->id . ' AND';
         }
         $sql .= '(committee_members.date_ended > now() OR committee_members.date_ended IS NULL)
-				AND (representatives.date_ended >= now() OR representatives.date_ended IS NULL)
-				ORDER BY committee_members.position DESC, representatives.name ASC';
+				AND (terms.date_ended >= now() OR terms.date_ended IS NULL)
+				ORDER BY committee_members.position DESC, people.name ASC';
         $result = mysqli_query($GLOBALS['db'], $sql);
 
         if (mysqli_num_rows($result) == 0) {
