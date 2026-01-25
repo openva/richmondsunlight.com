@@ -83,15 +83,17 @@ function show_form($form_data)
 # If the form has been submitted
 if (isset($_POST['form_data'])) {
     /*
-     * Block non-US IPs. (This is where most spam comes from.)
+     * Block non-US IPs (production only). This is where most spam comes from.
      */
-    $url = 'http://ip-api.com/json/' . $_SERVER['REMOTE_ADDR'];
-    $json = get_content($url);
-    if ($json !== false) {
-        $ip_data = json_decode($json);
-        if ($ip_data !== false) {
-            if ($ip_data->countryCode != 'US') {
-                die();
+    if (!defined('IS_PRODUCTION') || IS_PRODUCTION) {
+        $url = 'http://ip-api.com/json/' . $_SERVER['REMOTE_ADDR'];
+        $json = get_content($url);
+        if ($json !== false) {
+            $ip_data = json_decode($json);
+            if ($ip_data !== false) {
+                if ($ip_data->countryCode != 'US') {
+                    die();
+                }
             }
         }
     }
@@ -236,9 +238,9 @@ if (isset($_POST['form_data'])) {
     }
 } else {
     /*
-     * Spammers have no referrer -- block them.
+     * Spammers have no referrer -- block them (production only).
      */
-    if (!isset($_SERVER['HTTP_REFERER']) || $_SERVER['HTTP_REFERER'] == '') {
+    if ((!defined('IS_PRODUCTION') || IS_PRODUCTION) && (!isset($_SERVER['HTTP_REFERER']) || $_SERVER['HTTP_REFERER'] == '')) {
         die();
     }
 
