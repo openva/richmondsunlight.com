@@ -98,7 +98,7 @@ ul#nav > li > ul > li {
 
 #nav ul a {                   /* all the other level menu link elements */
 	margin: 0px;
-	width: 108px;             /* (padding*2) must be subtracted from #nav ul li width and set for this one, or borders won't display properly. */
+	width: 114px;             /* match the li width for consistent text wrapping */
 	display: block;
 	color: white;
 	text-decoration: none;
