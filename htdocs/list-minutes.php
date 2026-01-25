@@ -33,7 +33,7 @@ if (isset($_REQUEST['year']) && strlen($_REQUEST['year']) == 4 && is_numeric($_R
 # PAGE METADATA
 $page_title = 'Minutes';
 if (!empty($year)) {
-    $page_title .= '» ' . $year;
+    $page_title .= ' » ' . $year;
 }
 $site_section = 'minutes';
 
