@@ -278,15 +278,15 @@ if (mysqli_num_rows($result) == 0) {
 
         if (
             isset($video['html']) &&
-            (count($bill_clips) > 0 || count($legislator_clips) > 0 || (isset($video2->screenshots) && count((array)$video2->screenshots) > 0))
+            (count((array)$bill_clips) > 0 || count((array)$legislator_clips) > 0 || (isset($video2->screenshots) && count((array)$video2->screenshots) > 0))
         ) {
             $page_body .= '<h3>Index</h3>
 				<div id="video-index" class="tabs">
 				<ul>';
-            if (count($bill_clips) > 0) {
+            if (count((array)$bill_clips) > 0) {
                 $page_body .= '<li><a href="#bill">By Bill</a></li>';
             }
-            if (count($legislator_clips) > 0) {
+            if (count((array)$legislator_clips) > 0) {
                 $page_body .= '<li><a href="#legislator">By Legislator</a></li>';
             }
 
