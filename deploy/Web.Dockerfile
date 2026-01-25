@@ -21,10 +21,15 @@ RUN apt update && \
     apt upgrade -y && \
     apt install -y gnupg2 curl libmemcached-dev zlib1g-dev libssl-dev
 
-RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | gpg --dearmor -o /etc/apt/trusted.gpg.d/yarn.gpg
-RUN echo "deb https://dl.yarnpkg.com/debian/ stable main" | tee /etc/apt/sources.list.d/yarn.list
-RUN apt-get update
-RUN apt-get install -y git zip sphinxsearch zlib1g-dev jq yarn
+# Install Node.js from NodeSource
+RUN curl -fsSL https://deb.nodesource.com/setup_lts.x | bash - && \
+    apt-get install -y nodejs
+
+# Install Yarn via npm
+RUN npm install -g yarn
+
+# Install remaining packages
+RUN apt-get install -y git zip sphinxsearch zlib1g-dev jq
 
 # Install PHP memcached extension
 RUN pecl install memcached && docker-php-ext-enable memcached
