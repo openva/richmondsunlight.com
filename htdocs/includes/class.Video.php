@@ -476,8 +476,8 @@ class Video
         # identified clip.
         if (!isset($this->fuzz)) {
             $this->fuzz = 0;
-            $this->fuzz_default = $this->fuzz;
         }
+        $this->fuzz_default = $this->fuzz;
 
         $database = new Database();
         $database->connect_mysqli();
@@ -600,10 +600,16 @@ class Video
                     'start' => time_to_seconds($index[$i - 1]['time']) - $this->fuzz,
                     'end' => time_to_seconds($index[$i]['time']) + $this->fuzz,
                     'duration' => time_to_seconds($index[$i]['time']) - time_to_seconds($index[$i - 1]['time']) + ($this->fuzz * 2),
-                    'linked_id' => $index[$i]['linked_id'],
-                    'bill_number' => mb_strtoupper($index[$i]['bill_number']),
-                    'legislator_name' => $index[$i]['legislator_name']
+                    'linked_id' => $index[$i]['linked_id']
                 );
+
+                # Add bill_number or legislator_name depending on what's available
+                if (isset($index[$i]['bill_number'])) {
+                    $clip['bill_number'] = mb_strtoupper($index[$i]['bill_number']);
+                }
+                if (isset($index[$i]['legislator_name'])) {
+                    $clip['legislator_name'] = $index[$i]['legislator_name'];
+                }
 
                 $this->clips->{$j} = (object)$clip;
             }
