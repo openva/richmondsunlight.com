@@ -2169,6 +2169,19 @@ class Import
                 continue;
             }
 
+            // Skip members with a ServiceEndDate in the past
+            if (!empty($member['ServiceEndDate'])) {
+                $end_date = strtotime($member['ServiceEndDate']);
+                if ($end_date !== false && $end_date < time()) {
+                    $this->log->put(
+                        'Skipping ' . ($member['MemberDisplayName'] ?? $member['MemberNumber']) .
+                        ' - ServiceEndDate ' . $member['ServiceEndDate'] . ' is in the past',
+                        2
+                    );
+                    continue;
+                }
+            }
+
             $contact_details = $this->extract_contact_details_from_api(
                 $contacts_response,
                 $member['MemberNumber']
