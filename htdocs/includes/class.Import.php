@@ -2169,6 +2169,19 @@ class Import
                 continue;
             }
 
+            // Skip members with a ServiceEndDate in the past
+            if (!empty($member['ServiceEndDate'])) {
+                $end_date = strtotime($member['ServiceEndDate']);
+                if ($end_date !== false && $end_date < time()) {
+                    $this->log->put(
+                        'Skipping ' . ($member['MemberDisplayName'] ?? $member['MemberNumber']) .
+                        ' - ServiceEndDate ' . $member['ServiceEndDate'] . ' is in the past',
+                        2
+                    );
+                    continue;
+                }
+            }
+
             $contact_details = $this->extract_contact_details_from_api(
                 $contacts_response,
                 $member['MemberNumber']
@@ -3504,5 +3517,74 @@ class Import
             }
         }
         return false;
+    }
+
+    /**
+     * Parse the House minutes ID from the HTML response.
+     *
+     * @param string $html HTML response from the House minutes scraper.
+     *
+     * @return int|null The minutes ID or null if not found.
+     */
+    public function parse_house_minutes_id($html)
+    {
+        if (preg_match('/<input[^>]+id=["\']minute-id["\'][^>]+value=["\'](\d+)["\']/', $html, $matches)) {
+            return (int)$matches[1];
+        }
+        if (preg_match('/<input[^>]+value=["\'](\d+)["\'][^>]+id=["\']minute-id["\']/', $html, $matches)) {
+            return (int)$matches[1];
+        }
+        return null;
+    }
+
+    /**
+     * Extract House minutes data (date and text) from HTML.
+     *
+     * @param string $html HTML response from the House minutes scraper.
+     *
+     * @return array|null Array with 'date' and 'text' keys, or null on failure.
+     */
+    public function extract_house_minutes_data($html)
+    {
+        // Load HTML into DOMDocument
+        $dom = new DOMDocument();
+        @$dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        $xpath = new DOMXPath($dom);
+
+        // Extract the entire minutes-admin-vga div
+        $minutes_admin = $xpath->query('//div[@class="minutes-admin-vga"]');
+        if ($minutes_admin->length === 0) {
+            return null;
+        }
+
+        // Extract date from header h5 elements
+        $headers = $xpath->query('.//header//h5', $minutes_admin->item(0));
+        $date = null;
+        foreach ($headers as $h5) {
+            $text = trim($h5->textContent);
+            if (preg_match('/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),\s+(.+)$/i', $text, $matches)) {
+                $date_str = $matches[2];
+                $parsed = strtotime($date_str);
+                if ($parsed !== false) {
+                    $date = date('Y-m-d', $parsed);
+                    break;
+                }
+            }
+        }
+
+        if ($date === null) {
+            return null;
+        }
+
+        // Extract the full minutes HTML including header
+        $text_html = $dom->saveHTML($minutes_admin->item(0));
+        if ($text_html === false) {
+            return null;
+        }
+
+        return [
+            'date' => $date,
+            'text' => $text_html
+        ];
     }
 }
