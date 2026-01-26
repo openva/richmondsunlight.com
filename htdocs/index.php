@@ -172,6 +172,41 @@ if (mysqli_num_rows($result) > 0) {
     ];
     $geojson = json_encode($geojson);
 
+    // Try to get boundaries from Memcached first
+    $memcached = new Memcached();
+    $memcached->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+    $cache_key = 'municipal_boundaries_geojson';
+    $boundaries_geojson = $memcached->get($cache_key);
+
+    if ($boundaries_geojson === false) {
+        // Not in cache, query from database
+        $boundaries_sql = "SELECT name, ST_AsGeoJSON(boundaries) as geometry
+                           FROM gazetteer
+                           WHERE boundaries IS NOT NULL";
+        $boundaries_result = mysqli_query($GLOBALS['db'], $boundaries_sql);
+
+        $boundaries_features = [];
+        if ($boundaries_result && mysqli_num_rows($boundaries_result) > 0) {
+            while ($boundary = mysqli_fetch_array($boundaries_result, MYSQLI_ASSOC)) {
+                $boundaries_features[] = [
+                    'type' => 'Feature',
+                    'geometry' => json_decode($boundary['geometry'], true),
+                    'properties' => [
+                        'name' => $boundary['name']
+                    ]
+                ];
+            }
+        }
+
+        $boundaries_geojson = json_encode([
+            'type' => 'FeatureCollection',
+            'features' => $boundaries_features
+        ]);
+
+        // Store in Memcached for 365 days
+        $memcached->set($cache_key, $boundaries_geojson, 31536000);
+    }
+
     $html_head .= '<script src="/js/vendor/mapbox-gl/dist/mapbox-gl.js"></script>
     <link href="/js/vendor/mapbox-gl/dist/mapbox-gl.css" rel="stylesheet" />';
 
@@ -229,7 +264,39 @@ if (mysqli_num_rows($result) > 0) {
 			markers.features = adjustedFeatures;
 
 			map.on("load", function () {
-                
+
+				// Add municipal boundaries
+				var boundaries = ' . $boundaries_geojson . ';
+
+				map.addSource("boundaries", {
+					"type": "geojson",
+					"data": boundaries
+				});
+
+				map.addLayer({
+					"id": "boundaries-fill",
+					"type": "fill",
+					"source": "boundaries",
+					"layout": {},
+					"paint": {
+						"fill-color": "#627BC1",
+						"fill-opacity": 0.1
+					}
+				});
+
+				map.addLayer({
+					"id": "boundaries-outline",
+					"type": "line",
+					"source": "boundaries",
+					"layout": {},
+					"paint": {
+						"line-color": "#627BC1",
+						"line-width": 2,
+						"line-opacity": 0.5
+					}
+				});
+
+				// Add place markers on top of boundaries
 				map.addSource("places", {
 					"type": "geojson",
 					"data": markers
@@ -285,10 +352,23 @@ if (mysqli_num_rows($result) > 0) {
 					}
 				});
 
+				// Add boundary hover effects
+				map.on("mouseenter", "boundaries-fill", (e) => {
+					map.getCanvas().style.cursor = "pointer";
+					const name = e.features[0].properties.name;
+					const coordinates = e.lngLat;
+					popup.setLngLat(coordinates).setHTML("<strong>" + name + "</strong>").addTo(map);
+				});
+
+				map.on("mouseleave", "boundaries-fill", () => {
+					map.getCanvas().style.cursor = "";
+					popup.remove();
+				});
+
 			});
 		});
 	</script>
-	<div id="map" style="height:250px; width: 100%;"></div>';
+	<div id="map" style="height:400px; width: 100%;"></div>';
 }
 
 $page_sidebar = '';
