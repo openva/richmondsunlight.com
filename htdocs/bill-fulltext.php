@@ -150,6 +150,49 @@ while ($version = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
     # Every set of centered hyphens should become an HR.
     $version['text'] = str_replace('<center>----------</center>', '<hr>', $version['text']);
 
+    # Indent different sections according to their level.
+    // Track the section hierarchy as we process each section
+    $section_stack = [];
+
+    $version['text'] = preg_replace_callback(
+        '/<p class=(["\']?)section\1>(\s*(?:<[^>]+>)*\s*)([A-Za-z0-9]+)\.\s*/m',
+        function ($matches) use (&$section_stack) {
+            $quote = $matches[1];
+            $prefix_tags = $matches[2];
+            $identifier = $matches[3];
+
+            // Determine what type this identifier is
+            if (preg_match('/^[A-Z]+$/', $identifier)) {
+                $type = 'uppercase';
+            } elseif (preg_match('/^[0-9]+$/', $identifier)) {
+                $type = 'number';
+            } elseif (preg_match('/^[a-z]+$/', $identifier)) {
+                $type = 'lowercase';
+            } else {
+                $type = 'unknown';
+            }
+
+            // Find if this type already exists in our stack
+            $found_index = array_search($type, $section_stack);
+
+            if ($found_index !== false) {
+                // We've seen this type before - return to that level
+                $section_stack = array_slice($section_stack, 0, $found_index + 1);
+            } else {
+                // New type - add it to the stack
+                $section_stack[] = $type;
+            }
+
+            // Indent based on depth (0-indexed position in stack)
+            $indent_level = count($section_stack) - 1;
+            $indent_px = $indent_level * 20;
+            $outdent_px = 20; // How far to outdent the section identifier
+
+            return '<p class=' . $quote . 'section' . $quote . ' style="margin-left: ' . ($indent_px + $outdent_px) . 'px; text-indent: -' . $outdent_px . 'px;">' . $prefix_tags . $matches[3] . '. ';
+        },
+        $version['text']
+    );
+
     # Save all of this to an array.
     $versions[] = $version;
 }
