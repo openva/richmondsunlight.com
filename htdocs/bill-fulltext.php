@@ -208,6 +208,7 @@ $page_body .= '
 		font-family: georgia, "times new roman", times, serif;
 		font-size: 16px;
 		line-height: 24px;
+        padding: 1em;
 	}
 	.bill-text hr {
 		width: 33%;
