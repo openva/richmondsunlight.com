@@ -422,7 +422,15 @@ class Video
             $this->frequency = 60;
         }
 
-        $increment = $this->frequency / round($this->capture_rate / $this->fps);
+        // Cast to float and check for zero/null values to prevent division errors
+        $fps = (float)($this->fps ?? 0);
+        $capture_rate = (float)($this->capture_rate ?? 0);
+
+        if ($fps == 0 || $capture_rate == 0) {
+            return false;
+        }
+
+        $increment = $this->frequency / round($capture_rate / $fps);
         $tmp = array_reverse(explode(':', $this->length));
         $this->length_in_seconds = 0;
         for ($i = 0; $i < count($tmp); $i++) {
@@ -435,7 +443,7 @@ class Video
             }
         }
 
-        $this->total_screenshots = floor($this->length_in_seconds * $this->fps / $this->capture_rate);
+        $this->total_screenshots = floor($this->length_in_seconds * $fps / $capture_rate);
 
         # Build up a list of screenshots.
         $j = 0;
@@ -476,8 +484,8 @@ class Video
         # identified clip.
         if (!isset($this->fuzz)) {
             $this->fuzz = 0;
+            $this->fuzz_default = $this->fuzz;
         }
-        $this->fuzz_default = $this->fuzz;
 
         $database = new Database();
         $database->connect_mysqli();
@@ -600,16 +608,10 @@ class Video
                     'start' => time_to_seconds($index[$i - 1]['time']) - $this->fuzz,
                     'end' => time_to_seconds($index[$i]['time']) + $this->fuzz,
                     'duration' => time_to_seconds($index[$i]['time']) - time_to_seconds($index[$i - 1]['time']) + ($this->fuzz * 2),
-                    'linked_id' => $index[$i]['linked_id']
+                    'linked_id' => $index[$i]['linked_id'],
+                    'bill_number' => mb_strtoupper($index[$i]['bill_number']),
+                    'legislator_name' => $index[$i]['legislator_name']
                 );
-
-                # Add bill_number or legislator_name depending on what's available
-                if (isset($index[$i]['bill_number'])) {
-                    $clip['bill_number'] = mb_strtoupper($index[$i]['bill_number']);
-                }
-                if (isset($index[$i]['legislator_name'])) {
-                    $clip['legislator_name'] = $index[$i]['legislator_name'];
-                }
 
                 $this->clips->{$j} = (object)$clip;
             }
