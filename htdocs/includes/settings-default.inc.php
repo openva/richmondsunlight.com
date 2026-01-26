@@ -45,6 +45,10 @@ rs_define('SESSION_YEAR', 2026);
 rs_define('SESSION_START', '2026-01-14');
 rs_define('SESSION_END', '2026-03-15');
 
+# ENVIRONMENT
+# Set to false for Docker/development, true for production
+rs_define('IS_PRODUCTION', true);
+
 # Set the FTP auth pair for legislative data.
 rs_define('LIS_FTP_USERNAME', '');
 rs_define('LIS_FTP_PASSWORD', '');

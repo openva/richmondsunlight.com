@@ -35,14 +35,14 @@ $page_body = '';
 $page_sidebar = '';
 
 $sql = 'SELECT
-            date,
+            DATE_FORMAT(date, "%M %d") AS d,
             COUNT(*) actions
         FROM bills_status
         WHERE
             date >= "' . SESSION_START . '" AND
-            DATE <= "' . SESSION_END . '"
-        GROUP BY date
-        ORDER BY date ASC';
+            date <= "' . SESSION_END . '"
+        GROUP BY d
+        ORDER BY d ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_body = '<h2>Daily Bill Actions</h2>
@@ -50,7 +50,7 @@ if (mysqli_num_rows($result) > 0) {
         sent to committees, assessed, etc. Here is how many such actions were taken each day.</p>';
     $days = mysqli_fetch_all($result, MYSQLI_ASSOC);
 
-    $labels = json_encode(array_column($days, 'date'));
+    $labels = json_encode(array_column($days, 'd'));
     $data = json_encode(array_column($days, 'actions'));
     $page_body .=
     <<<EOD
