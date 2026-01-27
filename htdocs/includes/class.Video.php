@@ -59,6 +59,8 @@ class Video
                 $this->$key = $variable;
             }
         }
+
+        return true;
     }
 
     /**
