@@ -927,6 +927,9 @@ class Video
         # Turn the raw data into an array.
         $this->sbv = explode('-----', $this->sbv);
 
+        # Initialize the moments object
+        $this->moments = new stdClass();
+
         # Step through every moment in the array.
         $i = 0;
         foreach ($this->sbv as $moment) {
@@ -935,6 +938,9 @@ class Video
 
             # Break the moment up into individual lines.
             $moment = explode(PHP_EOL, $moment);
+
+            # Initialize this moment
+            $this->moments->$i = new stdClass();
 
             $this->moments->$i->time_start = implode(array_slice(explode(',', $moment[0]), 0, 1));
             $this->moments->$i->time_end = implode(array_slice(explode(',', $moment[0]), 1, 1));
