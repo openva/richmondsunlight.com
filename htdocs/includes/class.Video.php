@@ -485,6 +485,10 @@ class Video
         # identified clip.
         if (!isset($this->fuzz)) {
             $this->fuzz = 0;
+        }
+
+        # Always set the default fuzz level
+        if (!isset($this->fuzz_default)) {
             $this->fuzz_default = $this->fuzz;
         }
 
