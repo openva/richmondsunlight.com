@@ -8,6 +8,9 @@
 #
 ###
 
+# CONSTANTS
+define('VIDEO_CLIP_FUZZ_SECONDS', 5);
+
 # INCLUDES
 # Include any files or libraries that are necessary for this specific
 # page to function.
@@ -88,8 +91,10 @@ if (mysqli_num_rows($result) == 0) {
 
     # Create a new video object.
     $video2 = new Video();
-    $video2->id = $video['id'];
-    $video2->get_video();
+    if (isset($video['id'])) {
+        $video2->id = $video['id'];
+        $video2->get_video();
+    }
 
     /*
      * Retrieve a transcript.
@@ -133,7 +138,7 @@ if (mysqli_num_rows($result) == 0) {
     }
 
     # If we have a path, use that.
-    if (mb_substr($video['path'], -3) == 'mp4') {
+    if (isset($video['path']) && mb_substr($video['path'], -3) == 'mp4') {
         $video['html'] = '
 		<style>
 			#player, video {
@@ -155,7 +160,7 @@ if (mysqli_num_rows($result) == 0) {
 			clerk, for ' . date('m/d/Y', strtotime($date)) . ', presented verbatim. They’re
 			pretty dry, but they are the best way to see what the ' . ucfirst($chamber) . ' did on
 			a given day.</p>';
-    if ($video['license'] == 'public domain') {
+    if (isset($video['license']) && $video['license'] == 'public domain') {
         $page_sidebar .= '
 			<p>Thankfully, there’s video. The video is the official video recording of the
 			chamber for the same date. It’s is in the public domain, and may be freely
@@ -206,6 +211,7 @@ if (mysqli_num_rows($result) == 0) {
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0) {
             # Build up an array of tags, with the key being the tag and the value being the count.
+            $tags = array();
             while ($tag = mysqli_fetch_array($result)) {
                 $tag = array_map('stripslashes', $tag);
                 $tags[$tag['tag']] = $tag['count'];
@@ -250,23 +256,24 @@ if (mysqli_num_rows($result) == 0) {
 					' . $video['html'] . '
 				</div>';
 
-        $video2->fuzz = 5;
+        $video2->fuzz = VIDEO_CLIP_FUZZ_SECONDS;
 
         $bill_clips = [];
         $legislator_clips = [];
-        if (!isset($video2->screenshots)) {
-            $video2->screenshots = [];
-        }
 
         $video2->clip_type = 'bills';
-        $video2->get_clips();
+        if (!$video2->get_clips()) {
+            $video2->index_clips();
+        }
         $bill_clips = [];
         if (isset($video2->clips)) {
             $bill_clips = $video2->clips;
         }
 
         $video2->clip_type = 'legislators';
-        $video2->index_clips();
+        if (!$video2->get_clips()) {
+            $video2->index_clips();
+        }
         $legislator_clips = [];
         if (isset($video2->clips)) {
             $legislator_clips = $video2->clips;

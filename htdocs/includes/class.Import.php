@@ -1327,7 +1327,7 @@ class Import
                 $this->log->put(
                     'Not creating a record for ' . $legislator['name_formatted']
                     . ' because there is already an active term for LIS ID ' . $legislator['lis_id'] . '.',
-                    5
+                    3
                 );
             } else {
                 $this->log->put(
@@ -1335,7 +1335,7 @@ class Import
                     . ' (LIS ID ' . $legislator['lis_id'] . ') as active, but their term ended on '
                     . $existing_term['date_ended'] . '. This appears to be stale data from the legislature. '
                     . 'Not creating a duplicate term.',
-                    5
+                    3
                 );
             }
             return false;

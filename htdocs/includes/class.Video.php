@@ -1,10 +1,40 @@
 <?php
 
-# Interaction with videos of the minutes.
+/**
+ * Video class - Interaction with legislative floor videos.
+ *
+ * Manages video files of legislative proceedings including:
+ * - Video metadata (path, length, dimensions, etc.)
+ * - Video indexing by bill number and legislator from chyron data
+ * - Clip generation with time boundaries
+ * - Transcript parsing and speaker identification
+ * - Screenshot generation and tag clouds
+ *
+ * Primary workflows:
+ * 1. Index clips: analyze video_index -> create clip boundaries -> store in video_clips
+ * 2. Retrieve clips: fetch pre-stored clips from video_clips table
+ * 3. Generate transcripts: parse video_transcript -> identify speakers -> format output
+ */
 class Video
 {
-    # Retrieve a single video.
-    public function get_video()
+    # Constants for time-based operations
+    private const DEFAULT_FUZZ_SECONDS = 5;
+    private const MIN_FUZZ_FOR_SAME_TIME = 15;
+    private const DEFAULT_SCREENSHOT_FREQUENCY = 60;
+    private const CLIP_PADDING_SECONDS = 10;
+    private const CLIP_BOUNDARY_THRESHOLD = 30;
+    private const SPEAKER_MATCH_START_THRESHOLD = 20;
+    private const SPEAKER_MATCH_END_THRESHOLD = 10;
+    private const MAX_PHRASE_LENGTH_FOR_SPEAKER_ID = 400;
+    private const MIN_TAG_COUNT = 10;
+    private const MAX_TAG_COUNT = 30;
+
+    /**
+     * Retrieve a single video.
+     *
+     * @return bool Returns false if no ID is set, true otherwise
+     */
+    public function get_video(): bool
     {
         if (!isset($this->id)) {
             return false;
@@ -31,8 +61,16 @@ class Video
         }
     }
 
-    # Add (or edit) a video.
-    public function submit()
+    /**
+     * Add or edit a video record in the database.
+     *
+     * Requires $this->video to be set with video metadata.
+     * Updates existing video if found (matching chamber, date, length),
+     * otherwise inserts a new record.
+     *
+     * @return bool Returns false if $this->video is not set or query fails
+     */
+    public function submit(): bool
     {
         if (!isset($this->video)) {
             return false;
@@ -59,7 +97,7 @@ class Video
 				WHERE
                     chamber="' . $this->video['chamber'] . '" AND
 				    date="' . $this->video['date'] . '" AND
-				    length="' . $this->video['length'] . ' "';
+				    length="' . $this->video['length'] . '"';
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0) {
             $file = mysqli_fetch_array($result);
@@ -83,7 +121,7 @@ class Video
             $sql .= ', committee_id=' . $this->video['committee_id'];
         }
         if (!empty($this->video['author_name'])) {
-            $sql .= ', author_name=' . $this->video['author_name'] . '"';
+            $sql .= ', author_name="' . $this->video['author_name'] . '"';
         }
         if (!empty($this->video['html'])) {
             $sql .= ', html="' . $this->video['html'] . '"';
@@ -170,7 +208,9 @@ class Video
             $largest = $dir[0];
             $largest = explode('.', $largest);
             $largest = round($largest[0]);
-            $this->capture_rate = round(($mplayer['id_length'] * $mplayer['id_video_fps']) / $largest);
+            if ($largest > 0) {
+                $this->capture_rate = round(($mplayer['id_length'] * $mplayer['id_video_fps']) / $largest);
+            }
         }
 
         return true;
@@ -189,26 +229,6 @@ class Video
         $database = new Database();
         $database->connect_mysqli();
 
-        /*$sql = 'SELECT DISTINCT
-
-                    (SELECT TIME_TO_SEC(MIN(time))
-                    FROM video_index AS vi2
-                    WHERE vi2.file_id=video_index.file_id AND vi2.linked_id=video_index.linked_id
-                    AND vi2.file_id=video_index.file_id) AS start,
-
-                    (SELECT TIME_TO_SEC(MAX(time))
-                    FROM video_index AS vi2
-                    WHERE vi2.file_id=video_index.file_id AND vi2.linked_id=video_index.linked_id
-                    AND vi2.file_id=video_index.file_id) AS end,
-
-                files.path, files.chamber, files.date
-                FROM video_index
-                LEFT JOIN files
-                    ON video_index.file_id=files.id
-                WHERE video_index.type="legislator" AND video_index.linked_id=' . $this->legislator_id . '
-                HAVING start != end AND ( (end - start) < (60 * 5) )
-                ORDER BY RAND()
-                LIMIT 5';*/
         $sql = 'SELECT video_clips.time_start AS start, video_clips.time_end AS end,
 					files.path, files.chamber, files.date
 				FROM video_clips
@@ -311,7 +331,7 @@ class Video
                         ||
                         ($index[$i]['date'] != $index[$i - 1]['date'])
                         ||
-                        ((time_to_seconds($index[$i]['time']) - time_to_seconds($index[$i - 1]['time'])) > 30)
+                        ((time_to_seconds($index[$i]['time']) - time_to_seconds($index[$i - 1]['time'])) > self::CLIP_BOUNDARY_THRESHOLD)
                 ) {
                     $index2[] = $index[$i - 1];
                     $index2[] = $index[$i];
@@ -331,7 +351,7 @@ class Video
 
             # If we've saved an odd number of frames, then drop the last one. We really shouldn't
             # have done that, and presumably it's indictive of larger problems, but what the heck?
-            if (((count($index2) + 1) % 2) == 0) {
+            if ((count($index2) % 2) != 0) {
                 $index2 = array_slice($index2, 0, -1);
             }
 
@@ -352,9 +372,9 @@ class Video
                             'https://video.richmondsunlight.com/',
                             $index2[$i]['capture_directory']
                         ) . $index2[$i]['screenshot'] . '.jpg',
-                        'start' => time_to_seconds($index2[$i - 1]['time']) - 10,
-                        'end' => time_to_seconds($index2[$i]['time']) + 10,
-                        'duration' => time_to_seconds($index2[$i]['time']) - time_to_seconds($index2[$i - 1]['time']) + 20
+                        'start' => time_to_seconds($index2[$i - 1]['time']) - self::CLIP_PADDING_SECONDS,
+                        'end' => time_to_seconds($index2[$i]['time']) + self::CLIP_PADDING_SECONDS,
+                        'duration' => time_to_seconds($index2[$i]['time']) - time_to_seconds($index2[$i - 1]['time']) + (self::CLIP_PADDING_SECONDS * 2)
                     );
                 }
             }
@@ -390,7 +410,7 @@ class Video
         $result = mysqli_query($GLOBALS['db'], $sql);
 
         # Unless we have ten tags, we just don't have enough data to continue.
-        if (mysqli_num_rows($result) < 10) {
+        if (mysqli_num_rows($result) < self::MIN_TAG_COUNT) {
             return false;
         }
 
@@ -404,7 +424,7 @@ class Video
         # Sort the tags in reverse order by key (their count), shave off the top 30, and then
         # resort alphabetically.
         arsort($tags);
-        $tags = array_slice($tags, 0, 30, true);
+        $tags = array_slice($tags, 0, self::MAX_TAG_COUNT, true);
         $tag_data['biggest'] = max(array_values($tags));
         $tag_data['smallest'] = min(array_values($tags));
         ksort($tags);
@@ -412,14 +432,31 @@ class Video
         return $tags;
     }
 
-    # Get a list of screenshots, one for each X seconds of video. (Default is 60.)
+    /**
+     * Generate a list of screenshot URLs at regular intervals.
+     *
+     * Creates $this->screenshots object with URLs pointing to captured
+     * frame images at regular time intervals throughout the video.
+     *
+     * Requires:
+     * - $this->id
+     * - $this->fps (frames per second)
+     * - $this->capture_rate
+     * - $this->length (video duration)
+     * - $this->capture_directory
+     *
+     * Optional:
+     * - $this->frequency (seconds between screenshots, defaults to 60)
+     *
+     * @return bool|void Returns false if requirements not met, void otherwise
+     */
     public function screenshots()
     {
         if (!isset($this->id)) {
             return false;
         }
         if (!isset($this->frequency)) {
-            $this->frequency = 60;
+            $this->frequency = self::DEFAULT_SCREENSHOT_FREQUENCY;
         }
 
         // Cast to float and check for zero/null values to prevent division errors
@@ -449,7 +486,8 @@ class Video
         $j = 0;
         $i = 1;
         while ($i < $this->total_screenshots) {
-            if (!isset($this->screenshots)) {
+            # Initialize screenshots as object, or reset if it was previously an array
+            if (!isset($this->screenshots) || is_array($this->screenshots)) {
                 $this->screenshots = new stdClass();
             }
             if (!isset($this->screenshots->{$j})) {
@@ -465,8 +503,24 @@ class Video
     } // end method file_tags()
 
 
-    # Indexes video clips by legislator and bill. Meant to be called by the store_clips() method.
-    public function index_clips()
+    /**
+     * Index video clips by legislator or bill from video_index data.
+     *
+     * Analyzes video_index screenshots to identify continuous segments where
+     * bills or legislators appear, creating clip boundaries with start/end times.
+     *
+     * Requires:
+     * - $this->id (file ID)
+     *
+     * Optional:
+     * - $this->clip_type ('bills' or 'legislators', defaults to 'bills')
+     * - $this->fuzz (padding seconds, defaults to 0)
+     *
+     * Sets $this->clips to stdClass of clip objects with start, end, duration, etc.
+     *
+     * @return bool Returns false if no ID or no clips found, true otherwise
+     */
+    public function index_clips(): bool
     {
 
         # We must have a file ID.
@@ -484,6 +538,10 @@ class Video
         # identified clip.
         if (!isset($this->fuzz)) {
             $this->fuzz = 0;
+        }
+
+        # Always set the default fuzz level
+        if (!isset($this->fuzz_default)) {
             $this->fuzz_default = $this->fuzz;
         }
 
@@ -584,20 +642,17 @@ class Video
         for ($i = 0; $i < count($index); $i++) {
             # If this is an odd number.
             if (($i != 0) && ((($i + 1) % 2) == 0)) {
-                # If the beginning and end of this clip are the exact same time, then we obviously
-                # need to arrange for a clip that's longer than a single moment. Stretch it out to
-                # thirty seconds.
-                if (
-                    (time_to_seconds($index[$i - 1]['time']) === time_to_seconds($index[$i]['time']))
-                    &&
-                    ($this->fuzz === 0)
-                ) {
-                    $this->fuzz = 15;
-                }
+                # Calculate the actual time difference
+                $time_diff = time_to_seconds($index[$i]['time']) - time_to_seconds($index[$i - 1]['time']);
 
-                # Otherwise make sure that we've set the fuzz level to the default.
+                # If the beginning and end of this clip are the exact same time or very close,
+                # use a larger fuzz to ensure a visible clip duration.
+                if ($time_diff <= 1) {
+                    $current_fuzz = max(self::MIN_FUZZ_FOR_SAME_TIME, $this->fuzz);
+                }
+                # Otherwise use the default fuzz level.
                 else {
-                    $this->fuzz = $this->fuzz_default;
+                    $current_fuzz = $this->fuzz_default;
                 }
 
                 $clip = array(
@@ -605,13 +660,18 @@ class Video
                     'date' => $index[$i]['date'],
                     'chamber' => $index[$i]['chamber'],
                     'screenshot' => str_replace('/video/', 'https://video.richmondsunlight.com/', $index[$i]['screenshot']),
-                    'start' => time_to_seconds($index[$i - 1]['time']) - $this->fuzz,
-                    'end' => time_to_seconds($index[$i]['time']) + $this->fuzz,
-                    'duration' => time_to_seconds($index[$i]['time']) - time_to_seconds($index[$i - 1]['time']) + ($this->fuzz * 2),
-                    'linked_id' => $index[$i]['linked_id'],
-                    'bill_number' => mb_strtoupper($index[$i]['bill_number']),
-                    'legislator_name' => $index[$i]['legislator_name']
+                    'start' => time_to_seconds($index[$i - 1]['time']) - $current_fuzz,
+                    'end' => time_to_seconds($index[$i]['time']) + $current_fuzz,
+                    'duration' => $time_diff + ($current_fuzz * 2),
+                    'linked_id' => $index[$i]['linked_id']
                 );
+
+                # Add bill_number or legislator_name depending on clip type
+                if ($this->clip_type == 'bills' && isset($index[$i]['bill_number'])) {
+                    $clip['bill_number'] = mb_strtoupper($index[$i]['bill_number']);
+                } elseif ($this->clip_type == 'legislators' && isset($index[$i]['legislator_name'])) {
+                    $clip['legislator_name'] = $index[$i]['legislator_name'];
+                }
 
                 $this->clips->{$j} = (object)$clip;
             }
@@ -762,8 +822,25 @@ class Video
     }
 
 
-    # Get all clips for a given file ID.
-    public function get_clips()
+    /**
+     * Retrieve pre-stored video clips from the video_clips table.
+     *
+     * Gets clips that were previously indexed and stored via store_clips().
+     * Unlike index_clips(), this reads from the database rather than
+     * analyzing video_index data.
+     *
+     * Requires:
+     * - $this->id (file ID)
+     * - $this->clip_type ('bills', 'legislators', or other)
+     *
+     * Optional:
+     * - $this->fuzz (padding seconds, defaults to 5)
+     *
+     * Sets $this->clips to stdClass of clip objects.
+     *
+     * @return bool Returns false if no ID/clip_type or no clips found, true otherwise
+     */
+    public function get_clips(): bool
     {
         if (!isset($this->id) || !isset($this->clip_type)) {
             return false;
@@ -771,7 +848,7 @@ class Video
 
         # If a fuzz time has not been established, set it at 5 seconds.
         if (!isset($this->fuzz)) {
-            $this->fuzz = 5;
+            $this->fuzz = self::DEFAULT_FUZZ_SECONDS;
         }
 
         $database = new Database();
@@ -868,8 +945,8 @@ class Video
         }
 
         # Restore the transcript to its original variable.
-        $this->sbv = $this->sbv_raw;
-        unset($this->sbv_raw);
+        $this->sbv = $this->raw_sbv;
+        unset($this->raw_sbv);
 
         return true;
     }
@@ -1228,7 +1305,7 @@ class Video
         while ($caption = mysqli_fetch_assoc($result)) {
             if ($caption['new_speaker'] == 'y') {
                 $i++;
-                $caption[$i] = array();
+                $captions[$i] = array();
             }
 
             $caption['timestamp_start'] = time_to_seconds($caption['time_start']);
@@ -1342,7 +1419,7 @@ class Video
              * If this contains phrases that allow us to identify the identify as the
              * Speaker of the House, ID it as such.
              */
-            if (mb_strlen($transcript) < 400) {
+            if (mb_strlen($transcript) < self::MAX_PHRASE_LENGTH_FOR_SPEAKER_ID) {
                 foreach ($phrases['speaker'] as $phrase) {
                     if (mb_stripos($transcript, $phrase) !== false) {
                         foreach ($caption as &$line) {
@@ -1363,9 +1440,9 @@ class Video
              */
             foreach ($clips as &$clip) {
                 if (
-                    abs($time['start'] - $clip['timestamp_start']) < 20
+                    abs($time['start'] - $clip['timestamp_start']) < self::SPEAKER_MATCH_START_THRESHOLD
                     &&
-                    abs($time['end'] - $clip['timestamp_end']) < 10
+                    abs($time['end'] - $clip['timestamp_end']) < self::SPEAKER_MATCH_END_THRESHOLD
                 ) {
                     foreach ($caption as &$line) {
                         $line['legislator_id'] = $clip['legislator_id'];
@@ -1509,9 +1586,21 @@ class Video
     }
 
     /**
-     * Create a transcript based on the atomized transcript in the database
+     * Create a transcript based on the atomized transcript in the database.
+     *
+     * Retrieves video_transcript records, groups them by speaker
+     * (identified by new_speaker flag), and formats them into a structured
+     * transcript with legislator names and timestamps. Text is converted
+     * to sentence case.
+     *
+     * Requires:
+     * - $this->file_id or $this->id
+     *
+     * Sets $this->transcript to an array of transcript segments.
+     *
+     * @return bool Returns false if no file_id or no transcript data, true otherwise
      */
-    public function generate_transcript()
+    public function generate_transcript(): bool
     {
 
         /*
@@ -1731,53 +1820,4 @@ class Video
 
         return $return;
     }
-
-    /*
-    ///////
-    // MOVE ALL VIDEOS TO HAVE A NAME BASED ON THEIR ID
-    ///////
-    # Select a list of every video path & ID.
-    $sql = 'SELECT id, CONCAT('/video/', chamber, path) AS path
-            FROM files
-            WHERE type="video" AND path IS NOT NULL
-            ORDER BY path ASC';
-    $result = mysqli_query($GLOBALS['db'], $sql);
-    while ($video = mysqli_fetch_array($result))
-    {
-        $videos[$video{path}] = $video['id'];
-    }
-
-    // Iterate through the file listing
-    $container_directory = '/video/floor/senate/';
-    $new_container_directory = '/video/';
-    $files = scandir($container_directory);
-
-    # Iterate through this list of files and move each of them.
-    foreach ($files as $file)
-    {
-
-        # If this isn't an MP4, we're not going to be doing anything with it.
-        if (substr($file, -4, 4) != '.mp4')
-        {
-            continue;
-        }
-
-        # Figure out the name of the directory containing the screenshots.
-        $screenshot_directory = str_replace($file, '.mp4', '');
-
-        # Rename the video file, making it the ID
-        rename($container_directory.$file, $new_container_directory.$video[$file]);
-
-        # Rename the video directory (if it exists), making it the ID.
-        if (file_exists($screenshot_directory) !== false)
-        {
-            rename($screenshot_directory, $new_container_directory.$video[$file]);
-        }
-
-        # Update every files record to use the new path
-        $sql = 'UPDATE video_index
-                SET path="'.$.'", cache
-                WHERE path="'.$.'"';
-    }
-    */
 }
