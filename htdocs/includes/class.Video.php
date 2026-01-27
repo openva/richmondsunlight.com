@@ -449,7 +449,8 @@ class Video
         $j = 0;
         $i = 1;
         while ($i < $this->total_screenshots) {
-            if (!isset($this->screenshots)) {
+            # Initialize screenshots as object, or reset if it was previously an array
+            if (!isset($this->screenshots) || is_array($this->screenshots)) {
                 $this->screenshots = new stdClass();
             }
             if (!isset($this->screenshots->{$j})) {
