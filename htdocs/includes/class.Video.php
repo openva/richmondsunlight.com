@@ -59,6 +59,8 @@ class Video
                 $this->$key = $variable;
             }
         }
+
+        return true;
     }
 
     /**
@@ -371,7 +373,7 @@ class Video
                             '/video/',
                             'https://video.richmondsunlight.com/',
                             $index2[$i]['capture_directory']
-                        ) . $index2[$i]['screenshot'] . '.jpg',
+                        ) . str_pad($index2[$i]['screenshot'], 8, '0', STR_PAD_LEFT) . '.jpg',
                         'start' => time_to_seconds($index2[$i - 1]['time']) - self::CLIP_PADDING_SECONDS,
                         'end' => time_to_seconds($index2[$i]['time']) + self::CLIP_PADDING_SECONDS,
                         'duration' => time_to_seconds($index2[$i]['time']) - time_to_seconds($index2[$i - 1]['time']) + (self::CLIP_PADDING_SECONDS * 2)
@@ -814,8 +816,11 @@ class Video
         $this->clip->duration_seconds = $this->clip->time_end_seconds - $this->clip->time_start_seconds;
         $this->clip->title = $this->clip->legislator_name . ' Speaking about '
             . mb_strtoupper($this->clip->bill_number) . ' on ' . $this->clip->date_formatted;
+        // Ensure screenshot uses https:// protocol
         if (mb_substr($this->clip->screenshot, 0, 2) == '//') {
             $this->clip->screenshot = 'https:' . $this->clip->screenshot;
+        } elseif (mb_substr($this->clip->screenshot, 0, 7) == 'http://') {
+            $this->clip->screenshot = str_replace('http://', 'https://', $this->clip->screenshot);
         }
 
         return true;
@@ -925,6 +930,9 @@ class Video
         # Turn the raw data into an array.
         $this->sbv = explode('-----', $this->sbv);
 
+        # Initialize the moments object
+        $this->moments = new stdClass();
+
         # Step through every moment in the array.
         $i = 0;
         foreach ($this->sbv as $moment) {
@@ -933,6 +941,9 @@ class Video
 
             # Break the moment up into individual lines.
             $moment = explode(PHP_EOL, $moment);
+
+            # Initialize this moment
+            $this->moments->$i = new stdClass();
 
             $this->moments->$i->time_start = implode(array_slice(explode(',', $moment[0]), 0, 1));
             $this->moments->$i->time_end = implode(array_slice(explode(',', $moment[0]), 1, 1));

@@ -21,6 +21,11 @@ if ! php ./legislator-test.php; then
     ERRORED=true
 fi
 
+# Run Video unit tests
+if ! php ./video-test.php; then
+    ERRORED=true
+fi
+
 # Run the bill text API tests
 if ! php ./get_bill_text_api_test.php; then
     ERRORED=true
