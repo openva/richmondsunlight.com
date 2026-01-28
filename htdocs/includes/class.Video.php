@@ -816,8 +816,11 @@ class Video
         $this->clip->duration_seconds = $this->clip->time_end_seconds - $this->clip->time_start_seconds;
         $this->clip->title = $this->clip->legislator_name . ' Speaking about '
             . mb_strtoupper($this->clip->bill_number) . ' on ' . $this->clip->date_formatted;
+        // Ensure screenshot uses https:// protocol
         if (mb_substr($this->clip->screenshot, 0, 2) == '//') {
             $this->clip->screenshot = 'https:' . $this->clip->screenshot;
+        } elseif (mb_substr($this->clip->screenshot, 0, 7) == 'http://') {
+            $this->clip->screenshot = str_replace('http://', 'https://', $this->clip->screenshot);
         }
 
         return true;
