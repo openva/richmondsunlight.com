@@ -373,7 +373,7 @@ class Video
                             '/video/',
                             'https://video.richmondsunlight.com/',
                             $index2[$i]['capture_directory']
-                        ) . $index2[$i]['screenshot'] . '.jpg',
+                        ) . str_pad($index2[$i]['screenshot'], 8, '0', STR_PAD_LEFT) . '.jpg',
                         'start' => time_to_seconds($index2[$i - 1]['time']) - self::CLIP_PADDING_SECONDS,
                         'end' => time_to_seconds($index2[$i]['time']) + self::CLIP_PADDING_SECONDS,
                         'duration' => time_to_seconds($index2[$i]['time']) - time_to_seconds($index2[$i - 1]['time']) + (self::CLIP_PADDING_SECONDS * 2)
