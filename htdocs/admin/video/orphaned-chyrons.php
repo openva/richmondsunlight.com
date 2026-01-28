@@ -78,7 +78,7 @@ if (count($_POST) == 0) {
     while ($chyron = mysqli_fetch_array($result)) {
         $chyron['url'] = str_replace(
             '/video/',
-            'http://video.richmondsunlight.com/',
+            'https://video.richmondsunlight.com/',
             $chyron['url']
         );
 
