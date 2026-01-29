@@ -1,5 +1,5 @@
 /*M!999999\- enable the sandbox mode */ 
--- MariaDB dump 10.19  Distrib 10.11.13-MariaDB, for debian-linux-gnu (x86_64)
+-- MariaDB dump 10.19  Distrib 10.11.14-MariaDB, for debian-linux-gnu (x86_64)
 --
 -- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
 -- ------------------------------------------------------
@@ -140,7 +140,7 @@ CREATE TABLE `bills` (
   KEY `duplicates` (`session_id`,`summary_hash`,`id`),
   KEY `interestingness` (`interestingness`),
   KEY `dls_prepared` (`dls_prepared`)
-) ENGINE=InnoDB AUTO_INCREMENT=85937 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=86136 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -186,8 +186,10 @@ CREATE TABLE `bills_full_text` (
   KEY `bill_id` (`bill_id`),
   KEY `monitor_attempts` (`failed_retrievals`,`text`(1)),
   KEY `text_nullness` (`text`(1)),
+  KEY `pdf_url` (`pdf_url`),
+  KEY `session_bill` (`session_id`,`number`),
   FULLTEXT KEY `text` (`text`)
-) ENGINE=InnoDB AUTO_INCREMENT=1219130 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1223175 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -208,7 +210,7 @@ CREATE TABLE `bills_places` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `bill_place` (`bill_id`,`placename`),
   KEY `bill_id` (`bill_id`,`latitude`,`longitude`)
-) ENGINE=InnoDB AUTO_INCREMENT=13302 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=13326 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -228,7 +230,7 @@ CREATE TABLE `bills_section_numbers` (
   PRIMARY KEY (`id`),
   KEY `bill_id` (`bill_id`,`section_number`),
   KEY `full_text_id` (`full_text_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=166981 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=169394 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -258,7 +260,7 @@ CREATE TABLE `bills_status` (
   KEY `date` (`date`) USING BTREE,
   KEY `chamber` (`id`),
   FULLTEXT KEY `status` (`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=128065999 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=128075627 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -280,7 +282,7 @@ CREATE TABLE `bills_status_narratives` (
   KEY `bill_id` (`bill_id`),
   KEY `session_id` (`session_id`),
   KEY `bill_current` (`bill_id`,`current`)
-) ENGINE=InnoDB AUTO_INCREMENT=571 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=731 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -301,7 +303,7 @@ CREATE TABLE `bills_views` (
   KEY `user_id` (`user_id`),
   KEY `date` (`date`),
   KEY `ip` (`ip`)
-) ENGINE=MyISAM AUTO_INCREMENT=21990542 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=MyISAM AUTO_INCREMENT=22056533 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -369,7 +371,7 @@ CREATE TABLE `comments` (
   KEY `user_id` (`user_id`),
   KEY `status` (`status`),
   KEY `publishable` (`bill_id`,`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=16394 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=16410 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -460,7 +462,7 @@ CREATE TABLE `dashboard_bills` (
   KEY `user_id` (`user_id`,`bill_id`),
   KEY `portfoilo_id` (`portfolio_id`),
   FULLTEXT KEY `notes` (`notes`)
-) ENGINE=InnoDB AUTO_INCREMENT=53399 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=53859 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -489,7 +491,7 @@ CREATE TABLE `dashboard_portfolios` (
   KEY `watch_list_id` (`watch_list_id`),
   KEY `public` (`public`),
   FULLTEXT KEY `notes` (`notes`)
-) ENGINE=InnoDB AUTO_INCREMENT=5157 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=5158 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -578,7 +580,7 @@ CREATE TABLE `dockets` (
   PRIMARY KEY (`id`),
   KEY `date` (`date`,`committee_id`,`bill_id`),
   KEY `bill_id` (`bill_id`,`date`)
-) ENGINE=InnoDB AUTO_INCREMENT=1958907 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1982842 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -618,7 +620,7 @@ CREATE TABLE `files` (
   PRIMARY KEY (`id`),
   KEY `chamber` (`chamber`),
   FULLTEXT KEY `description` (`description`)
-) ENGINE=InnoDB AUTO_INCREMENT=14804 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=14812 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -639,7 +641,7 @@ CREATE TABLE `fiscal_impact_statements` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `bill_id_2` (`bill_id`,`lis_id`),
   KEY `bill_id` (`bill_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2186812 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=2219488 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -657,6 +659,7 @@ CREATE TABLE `gazetteer` (
   `longitude` float NOT NULL,
   `coordinates` point NOT NULL,
   `elevation` tinyint(3) unsigned DEFAULT NULL,
+  `boundaries` geometry DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `county` (`municipality`,`latitude`,`longitude`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
@@ -683,7 +686,7 @@ CREATE TABLE `meetings` (
   PRIMARY KEY (`id`),
   KEY `session_id` (`session_id`),
   KEY `triumverate` (`date`,`time`,`committee_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=522375 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=522461 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -700,7 +703,7 @@ CREATE TABLE `minutes` (
   `text` mediumtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `date` (`date`,`chamber`)
-) ENGINE=InnoDB AUTO_INCREMENT=1597 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1620 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -721,7 +724,7 @@ CREATE TABLE `polls` (
   UNIQUE KEY `bill_id_4` (`bill_id`,`ip`),
   UNIQUE KEY `one_vote` (`bill_id`,`user_id`),
   KEY `bill_id` (`bill_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=114801 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=114907 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -863,7 +866,7 @@ CREATE TABLE `tags` (
   UNIQUE KEY `unique_pairing` (`bill_id`,`tag`),
   KEY `bill_id` (`bill_id`),
   KEY `tag` (`tag`)
-) ENGINE=InnoDB AUTO_INCREMENT=144852 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=154437 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -881,7 +884,7 @@ CREATE TABLE `terms` (
   `lis_id` smallint(5) unsigned NOT NULL,
   `chamber` enum('house','senate') NOT NULL,
   `party` enum('D','R','I') NOT NULL DEFAULT 'D',
-  `district_Id` int(11) NOT NULL,
+  `district_id` int(11) NOT NULL,
   `date_started` date NOT NULL,
   `date_ended` date DEFAULT NULL,
   `sbe_id` varchar(11) DEFAULT NULL,
@@ -902,7 +905,7 @@ CREATE TABLE `terms` (
   KEY `partisanship` (`partisanship`),
   KEY `lis_shortname` (`lis_shortname`),
   KEY `place` (`place`)
-) ENGINE=InnoDB AUTO_INCREMENT=569 DEFAULT CHARSET=utf16 COLLATE=utf16_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=570 DEFAULT CHARSET=utf16 COLLATE=utf16_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -937,7 +940,7 @@ CREATE TABLE `users` (
   `date_created` datetime NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `cookie_hash` (`cookie_hash`)
-) ENGINE=InnoDB AUTO_INCREMENT=91592 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=91642 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1012,7 +1015,7 @@ CREATE TABLE `video_index` (
   KEY `ignore` (`ignored`),
   CONSTRAINT `video_index_ibfk_1` FOREIGN KEY (`file_id`) REFERENCES `files` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `video_index_ibfk_2` FOREIGN KEY (`file_id`) REFERENCES `files` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=1206409 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1207856 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1106,4 +1109,4 @@ CREATE TABLE `votes` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-01-22 17:04:07
+-- Dump completed on 2026-01-29  9:56:37

@@ -17,7 +17,7 @@ class TestLog extends Log
         // Skip parent constructor to avoid external dependencies.
     }
 
-    public function put($message, $level)
+    public function put($message, $level = 3)
     {
         // No-op for tests.
     }

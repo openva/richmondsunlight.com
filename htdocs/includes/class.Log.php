@@ -42,13 +42,10 @@ class Log
      *
      * @return bool True after the message is handled; false when input is invalid.
      */
-    public function put($message, $level)
+    public function put($message, $level = 3)
     {
         if (!isset($message)) {
             return false;
-        }
-        if (!isset($level)) {
-            $level = 3;
         }
 
         /*

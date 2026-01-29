@@ -131,19 +131,32 @@ class ScreenshotMigration
     private function processVideo(array $video): void
     {
         $this->log("Processing video ID {$video['id']}: {$video['chamber']} {$video['date']}");
+        $this->log("  capture_directory: {$video['capture_directory']}");
 
         // Build S3 prefix for this video's screenshots
-        // capture_directory might be like "/video/senate/20200221/" or "senate/20200221/"
+        // capture_directory might be like "/video/senate/20200221/screenshots/"
+        // We need to get to "senate/20200221/screenshots/" for S3 prefix
         $captureDir = trim($video['capture_directory'], '/');
-        $captureDir = str_replace('/video/', '', $captureDir);
+        $captureDir = preg_replace('#^video/#', '', $captureDir);
 
-        // Look for files in both /screenshots/full/ and /screenshots/thumbnail/
-        $prefixes = [
-            $captureDir . '/screenshots/full/',
-            $captureDir . '/screenshots/thumbnail/'
-        ];
+        // If capture_directory already contains "screenshots", look there
+        // Otherwise, append "screenshots" subdirectory
+        if (strpos($captureDir, 'screenshots') !== false) {
+            // Already has screenshots in the path, just add full/thumbnail
+            $prefixes = [
+                $captureDir . '/full/',
+                $captureDir . '/thumbnail/'
+            ];
+        } else {
+            // Need to add screenshots subdirectory
+            $prefixes = [
+                $captureDir . '/screenshots/full/',
+                $captureDir . '/screenshots/thumbnail/'
+            ];
+        }
 
         foreach ($prefixes as $prefix) {
+            $this->log("  Searching S3 prefix: {$prefix}");
             $this->processPrefix($prefix, $video);
         }
     }
@@ -157,6 +170,7 @@ class ScreenshotMigration
                 'Prefix' => $prefix
             ]);
 
+            $filesInPrefix = 0;
             foreach ($results as $result) {
                 if (!isset($result['Contents'])) {
                     continue;
@@ -164,8 +178,13 @@ class ScreenshotMigration
 
                 foreach ($result['Contents'] as $object) {
                     $this->stats['files_found']++;
+                    $filesInPrefix++;
                     $this->processObject($object['Key'], $prefix);
                 }
+            }
+
+            if ($filesInPrefix > 0) {
+                $this->log("    Found {$filesInPrefix} files");
             }
         } catch (AwsException $e) {
             $this->error("Failed to list objects with prefix '{$prefix}': " . $e->getMessage());
@@ -421,3 +440,4 @@ if (in_array($mode, ['execute', 'cleanup'])) {
 // Run migration
 $migration = new ScreenshotMigration($mode);
 $migration->run();
+

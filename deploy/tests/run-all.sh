@@ -26,6 +26,11 @@ if ! php ./video-test.php; then
     ERRORED=true
 fi
 
+# Run Video integration tests (requires video_index data)
+if ! php ./video-integration-test.php; then
+    ERRORED=true
+fi
+
 # Run the bill text API tests
 if ! php ./get_bill_text_api_test.php; then
     ERRORED=true
