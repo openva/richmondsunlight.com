@@ -1,5 +1,6 @@
 <?php
 
+#[AllowDynamicProperties]
 /**
  * Video class - Interaction with legislative floor videos.
  *
@@ -958,6 +959,9 @@ class Video
 
         # Initialize the moments object
         $this->moments = new stdClass();
+
+        # Initialize the transcript
+        $this->transcript = '';
 
         # Step through every moment in the array.
         $i = 0;
