@@ -30,6 +30,35 @@ class Video
     private const MAX_TAG_COUNT = 30;
 
     /**
+     * Normalize a capture_directory path to a full https:// URL.
+     *
+     * Handles various formats found in the database:
+     * - /video/senate/20200221/ -> https://video.richmondsunlight.com/senate/20200221/
+     * - /senate/committee/claims/20200221/ -> https://video.richmondsunlight.com/senate/committee/claims/20200221/
+     * - senate/committee/claims/20200221/ -> https://video.richmondsunlight.com/senate/committee/claims/20200221/
+     * - https://video.richmondsunlight.com/senate/20200221/ -> (unchanged)
+     *
+     * @param string $path The capture_directory path from the database
+     * @return string The normalized https:// URL
+     */
+    private function normalize_screenshot_url(string $path): string
+    {
+        // Already a full URL
+        if (strpos($path, 'https://') === 0) {
+            return $path;
+        }
+
+        // Remove /video/ prefix if present
+        $path = preg_replace('#^/video/#', '', $path);
+
+        // Remove leading slash
+        $path = ltrim($path, '/');
+
+        // Build full URL
+        return 'https://video.richmondsunlight.com/' . $path;
+    }
+
+    /**
      * Retrieve a single video.
      *
      * @return bool Returns false if no ID is set, true otherwise
@@ -286,7 +315,7 @@ class Video
                 $this->clips->{$i}->path = $clip->path;
                 $this->clips->{$i}->date = $clip->date;
                 $this->clips->{$i}->chamber = $clip->chamber;
-                $this->clips->{$i}->screenshot = str_replace('/video/', 'https://video.richmondsunlight.com/', $clip->screenshot);
+                $this->clips->{$i}->screenshot = $this->normalize_screenshot_url($clip->screenshot);
                 $this->clips->{$i}->start = time_to_seconds($clip->time_start);
                 $this->clips->{$i}->end = time_to_seconds($clip->time_end);
                 $this->clips->{$i}->duration = time_to_seconds($clip->time_end) - time_to_seconds($clip->time_start);
@@ -369,11 +398,8 @@ class Video
                         'path' => $index2[$i]['path'],
                         'date' => $index2[$i]['date'],
                         'chamber' => $index2[$i]['chamber'],
-                        'screenshot' => str_replace(
-                            '/video/',
-                            'https://video.richmondsunlight.com/',
-                            $index2[$i]['capture_directory']
-                        ) . str_pad($index2[$i]['screenshot'], 8, '0', STR_PAD_LEFT) . '.jpg',
+                        'screenshot' => $this->normalize_screenshot_url($index2[$i]['capture_directory'])
+                            . str_pad($index2[$i]['screenshot'], 8, '0', STR_PAD_LEFT) . '.jpg',
                         'start' => time_to_seconds($index2[$i - 1]['time']) - self::CLIP_PADDING_SECONDS,
                         'end' => time_to_seconds($index2[$i]['time']) + self::CLIP_PADDING_SECONDS,
                         'duration' => time_to_seconds($index2[$i]['time']) - time_to_seconds($index2[$i - 1]['time']) + (self::CLIP_PADDING_SECONDS * 2)
@@ -497,7 +523,7 @@ class Video
             }
             $this->screenshots->{$j}->number = $j;
             $this->screenshots->{$j}->seconds = round($j * $this->frequency);
-            $this->screenshots->{$j}->filename = str_replace('/video/', 'https://video.richmondsunlight.com/', $this->capture_directory)
+            $this->screenshots->{$j}->filename = $this->normalize_screenshot_url($this->capture_directory)
                 . str_pad($i, 8, '0', STR_PAD_LEFT) . '.jpg';
             $j++;
             $i = $i + $increment;
@@ -661,7 +687,7 @@ class Video
                     'path' => $index[$i]['path'],
                     'date' => $index[$i]['date'],
                     'chamber' => $index[$i]['chamber'],
-                    'screenshot' => str_replace('/video/', 'https://video.richmondsunlight.com/', $index[$i]['screenshot']),
+                    'screenshot' => $this->normalize_screenshot_url($index[$i]['screenshot']),
                     'start' => time_to_seconds($index[$i - 1]['time']) - $current_fuzz,
                     'end' => time_to_seconds($index[$i]['time']) + $current_fuzz,
                     'duration' => $time_diff + ($current_fuzz * 2),
