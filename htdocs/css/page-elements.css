@@ -460,6 +460,12 @@ div.video {
 		float: left;
 		width: 350px;
 	}
+	
+	div.video iframe {                                                         
+		width: 100%;                                                        
+		max-width: 100%;                                                    
+		aspect-ratio: 16 / 9;                                               
+	}  
 
 	div.video div.index {
 		width: 140px;
