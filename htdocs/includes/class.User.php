@@ -164,6 +164,11 @@ class User
         # Get the user's account data.
         $user = get_user();
 
+        # If there's no logged-in user, we can't provide recommendations.
+        if ($user === false) {
+            return false;
+        }
+
         /*
          * Connect to Memcached.
          */
