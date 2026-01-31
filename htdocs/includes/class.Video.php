@@ -39,11 +39,16 @@ class Video
      * - senate/committee/claims/20200221/ -> https://video.richmondsunlight.com/senate/committee/claims/20200221/
      * - https://video.richmondsunlight.com/senate/20200221/ -> (unchanged)
      *
-     * @param string $path The capture_directory path from the database
-     * @return string The normalized https:// URL
+     * @param string|null $path The capture_directory path from the database
+     * @return string The normalized https:// URL, or empty string if path is null
      */
-    private function normalize_screenshot_url(string $path): string
+    private function normalize_screenshot_url(?string $path): string
     {
+        // Handle null or empty path
+        if (empty($path)) {
+            return '';
+        }
+
         // Already a full URL
         if (strpos($path, 'https://') === 0) {
             return $path;

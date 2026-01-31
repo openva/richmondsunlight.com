@@ -38,7 +38,7 @@ $html_head = '
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     var markers = document.querySelectorAll(".marker");
-    var video = document.getElementById("player");
+    var video = document.querySelector("#player video");
 
     if (!video || markers.length === 0) {
         return;
@@ -49,6 +49,7 @@ document.addEventListener("DOMContentLoaded", function() {
             event.preventDefault();
             var time = marker.getAttribute("data-time");
             video.currentTime = time;
+            video.play();
         });
     });
 });
@@ -283,6 +284,9 @@ if (mysqli_num_rows($result) == 0) {
             $page_body .= '<p><a href="' . $video2->path . '">Download this Video</a></p>';
         }
 
+        # Generate screenshots before checking if we should display the index
+        $video2->screenshots();
+
         if (
             isset($video['html']) &&
             (count((array)$bill_clips) > 0 || count((array)$legislator_clips) > 0 || (isset($video2->screenshots) && count((array)$video2->screenshots) > 0))
@@ -315,7 +319,6 @@ if (mysqli_num_rows($result) == 0) {
             }
             $page_body .= '</div>';
 
-            $video2->screenshots();
             $page_body .= '<div id="time">';
             foreach ($video2->screenshots as $screenshot) {
                 $page_body .= '<div class="marker" data-time="' . $screenshot->seconds . '" style="background-image: url(' . $screenshot->filename . ')">
