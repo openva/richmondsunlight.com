@@ -301,8 +301,11 @@ if (mysqli_num_rows($result) == 0) {
                 $page_body .= '<li><a href="#legislator">By Legislator</a></li>';
             }
 
-            $page_body .= '<li><a href="#time">By Time</a></li>
-				</ul>
+            if (isset($video2->screenshots) && count((array)$video2->screenshots) > 0) {
+                $page_body .= '<li><a href="#time">By Time</a></li>';
+            }
+
+            $page_body .= '</ul>
 
 				<div id="bill">';
 
@@ -319,13 +322,16 @@ if (mysqli_num_rows($result) == 0) {
             }
             $page_body .= '</div>';
 
-            $page_body .= '<div id="time">';
-            foreach ($video2->screenshots as $screenshot) {
-                $page_body .= '<div class="marker" data-time="' . $screenshot->seconds . '" style="background-image: url(' . $screenshot->filename . ')">
-				<span>' . mb_substr(seconds_to_time($screenshot->seconds), 0, 5) . '</span></div>';
+            if (isset($video2->screenshots) && count((array)$video2->screenshots) > 0) {
+                $page_body .= '<div id="time">';
+                foreach ($video2->screenshots as $screenshot) {
+                    $page_body .= '<div class="marker" data-time="' . $screenshot->seconds . '" style="background-image: url(' . $screenshot->filename . ')">
+					<span>' . mb_substr(seconds_to_time($screenshot->seconds), 0, 5) . '</span></div>';
+                }
+                $page_body .= '</div>';
             }
-            $page_body .= '</div>
-				</div>';
+
+            $page_body .= '</div>';
         }
 
         # Close the DIV for the video tab.
