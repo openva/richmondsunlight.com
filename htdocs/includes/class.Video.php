@@ -708,9 +708,8 @@ class Video
                 }
 
                 $this->clips->{$j} = (object)$clip;
+                $j++;
             }
-
-            $j++;
         }
 
         return true;
