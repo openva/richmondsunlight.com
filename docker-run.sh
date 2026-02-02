@@ -28,7 +28,7 @@ fi
 
 # Concatenate the database dumps into a single file, for MariaDB to load
 cat deploy/mysql/structure.sql deploy/mysql/basic-contents.sql deploy/mysql/test-records.sql \
-    deploy/mysql/test-users.sql deploy/mysql/video-index.sql > api/deploy/database.sql
+    deploy/mysql/test-users.sql deploy/mysql/video-records.sql > api/deploy/database.sql
 
 # Stand it up
 if docker image inspect rs_web:ci >/dev/null 2>&1; then

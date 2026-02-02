@@ -17,6 +17,9 @@ ALL_CONTENTS=(committees committee_members districts files people representative
 # All database tables that we want to export some contents of, as test data
 SOME_CONTENTS=(bills_copatrons bills_full_text bills_places bills_section_numbers bills_status bills_status_narratives bills_views comments dockets fiscal_impact_statements polls tags video_clips votes)
 
+# The file IDs of videos and minutes that we want to export all the data for.
+VIDEO_CONTENTS=(14798)
+
 # The ID of the bills to use to generate test data
 # Generate a new list with this query:
 #   SELECT id
@@ -71,9 +74,19 @@ for TABLE in "${SOME_CONTENTS[@]}"; do
     done
 done
 
+# Export video records
+truncate --size 0 mysql/video-records.sql
+for TABLE in video_index video_clips video_transcript; do
+    for FILE_ID in "${VIDEO_CONTENTS[@]}"; do
+        mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables \
+            -u "$USERNAME" --host "$HOST" "$TABLE" \
+            --where "file_id=$FILE_ID" >> mysql/video-records.sql
+    done
+done
+
 # Remove the environment variable, now that we're done with it
 unset MYSQL_PWD
 
-# Combine all into a single file, which we want for some repos
+# Combine some exports into a single file, which we want for some repos
 cat mysql/structure.sql mysql/basic-contents.sql mysql/test-records.sql \
     > mysql/database.sql
