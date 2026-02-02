@@ -585,7 +585,7 @@ class Video
         # Generates a list of every moment.
         $sql = 'SELECT files.path, files.capture_directory, files.date, files.chamber,
 				video_index.time,
-				CONCAT(files.capture_directory, video_index.screenshot, ".jpg") AS screenshot,
+				CONCAT(COALESCE(files.capture_directory, ""), LPAD(video_index.screenshot, 8, "0"), ".jpg") AS screenshot,
 				video_index.linked_id, ';
         if ($this->clip_type == 'bills') {
             $sql .= 'bills.number AS bill_number';
@@ -708,9 +708,8 @@ class Video
                 }
 
                 $this->clips->{$j} = (object)$clip;
+                $j++;
             }
-
-            $j++;
         }
 
         return true;

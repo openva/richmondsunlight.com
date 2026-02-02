@@ -101,6 +101,16 @@ class Log
      */
     public function slack($message, $room = 'rs', $icon = ':longbox:')
     {
+        // Check Memcached for active rate limit
+        if (MEMCACHED_SERVER != '') {
+            $mc = new Memcached();
+            $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+            $retry_after = $mc->get('slack-retry-after');
+            if ($mc->getResultCode() == Memcached::RES_SUCCESS && $retry_after > time()) {
+                return false;
+            }
+        }
+
         $room = ($room) ? $room : 'general';
         $data = 'payload=' . json_encode(array(
                 'channel'       =>  '#' . $room,
@@ -108,14 +118,29 @@ class Log
                 'icon_emoji'    =>  $icon
             ));
 
-        // You can get your webhook endpoint from your Slack settings
         $ch = curl_init(SLACK_WEBHOOK);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'POST');
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        $result = curl_exec($ch);
+        curl_setopt($ch, CURLOPT_HEADER, true);
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
 
-        return $result;
+        // If rate-limited, store the retry-after time in Memcached
+        if ($http_code == 429 && MEMCACHED_SERVER != '') {
+            $retry_seconds = 60; // default
+            if (preg_match('/^retry-after:\s*(\d+)/mi', $response, $matches)) {
+                $retry_seconds = (int)$matches[1];
+            }
+            if (!isset($mc)) {
+                $mc = new Memcached();
+                $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+            }
+            $mc->set('slack-retry-after', time() + $retry_seconds, $retry_seconds);
+        }
+
+        return $response;
     }
 
     /**
