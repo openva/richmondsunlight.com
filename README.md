@@ -24,6 +24,17 @@ The site can be run locally, in Docker:
 
 When you are done, run `./docker-stop.sh` (or quit Docker).
 
+### Rebuilding the database
+
+The database is initialized from SQL dumps when the MariaDB container is first created. If you change any SQL files under `deploy/mysql/`, those changes won't take effect until you destroy the existing database volume and rebuild:
+
+```sh
+docker compose down && docker volume rm richmondsunlightcom_db_data
+./docker-run.sh
+```
+
+Removing the `db_data` volume forces MariaDB to re-run the init scripts on the next startup.
+
 ## Architecture
 ```mermaid
 flowchart LR
