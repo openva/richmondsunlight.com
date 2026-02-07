@@ -42,7 +42,7 @@ $sql = 'SELECT
             date >= "' . SESSION_START . '" AND
             date <= "' . SESSION_END . '"
         GROUP BY d
-        ORDER BY d ASC';
+        ORDER BY date ASC';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $page_body = '<h2>Daily Bill Actions</h2>
