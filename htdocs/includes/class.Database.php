@@ -36,7 +36,7 @@ class Database
          * Connect with persistent connection and optimized settings
          */
         $options = [
-            PDO::ATTR_PERSISTENT => true,
+            PDO::ATTR_PERSISTENT => false,
             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES => false,
@@ -82,7 +82,7 @@ class Database
 
         $previous_reporting = mysqli_report(MYSQLI_REPORT_OFF);
         try {
-            $this->db = mysqli_connect('p:' . PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
+            $this->db = mysqli_connect(PDO_SERVER, PDO_USERNAME, PDO_PASSWORD);
         } catch (mysqli_sql_exception $e) {
             $this->db = false;
         } finally {
