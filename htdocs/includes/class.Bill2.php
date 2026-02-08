@@ -833,6 +833,37 @@ class Bill2
     }
 
     /**
+     * Retrieve third-party news articles that mention this bill.
+     *
+     * @return array|false Array of news articles, or false when none exist.
+     */
+    public function news()
+    {
+        if (!isset($this->id)) {
+            return false;
+        }
+
+        $id = (int) $this->id;
+        if ($id <= 0) {
+            return false;
+        }
+
+        $sql = 'SELECT publication, title, url, date
+                FROM bills_news
+                WHERE bill_id = :bill_id
+                ORDER BY date DESC';
+        $stmt = $this->getDb()->prepare($sql);
+        $stmt->execute(['bill_id' => $id]);
+        $news = $stmt->fetchAll();
+
+        if (count($news) == 0) {
+            return false;
+        }
+
+        return $news;
+    }
+
+    /**
      * Assemble a list of related bills using external and internal similarity checks.
      *
      * @param array $bill Bill data array containing tags, identifiers, and metadata.
