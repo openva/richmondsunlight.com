@@ -1,0 +1,175 @@
+/*M!999999\- enable the sandbox mode */ 
+-- MariaDB dump 10.19  Distrib 10.11.14-MariaDB, for debian-linux-gnu (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	11.4.7-MariaDB-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Dumping data for table `video_index`
+--
+-- WHERE:  file_id=14798
+
+LOCK TABLES `video_index` WRITE;
+/*!40000 ALTER TABLE `video_index` DISABLE KEYS */;
+INSERT INTO `video_index` VALUES
+(1213055,14798,'00:00:00','00000001','Analyst','legislator',NULL,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:46:17'),
+(1214066,14798,'00:00:00','00000001','Analyst','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213056,14798,'00:00:05','00000006','Delegate Torian','legislator',343,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214067,14798,'00:00:05','00000006','Delegate Torian','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213057,14798,'00:00:09','00000010','Delegate Laufer','legislator',514,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214068,14798,'00:00:09','00000010','Delegate Laufer','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213058,14798,'00:00:14','00000015','Delegate Herring','legislator',327,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214069,14798,'00:00:14','00000015','Delegate Herring','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213059,14798,'00:00:19','00000020','Delegate Willett','legislator',453,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214070,14798,'00:00:19','00000020','Delegate Willett','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213060,14798,'00:00:24','00000025','Delegate Carr','legislator',348,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214071,14798,'00:00:24','00000025','Delegate Carr','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213061,14798,'00:00:32','00000033','Delegate Willett','legislator',453,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214072,14798,'00:00:32','00000033','Delegate Willett','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213062,14798,'00:00:39','00000040','Delegate Krizek','legislator',413,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214073,14798,'00:00:39','00000040','Delegate Krizek','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213063,14798,'00:00:44','00000045','Analyst','legislator',NULL,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:46:17'),
+(1214074,14798,'00:00:44','00000045','Analyst','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213064,14798,'00:00:50','00000051','Delegate Bloxom','legislator',396,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214075,14798,'00:00:50','00000051','Delegate Bloxom','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213065,14798,'00:00:55','00000056','Delegate Wiley','legislator',471,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214076,14798,'00:00:55','00000056','Delegate Wiley','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213066,14798,'00:01:04','00000065','Delegate Krizek','legislator',413,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214077,14798,'00:01:04','00000065','Delegate Krizek','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213067,14798,'00:04:46','00000287','Delegate Reid','legislator',431,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214078,14798,'00:04:46','00000287','Delegate Reid','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213068,14798,'00:06:33','00000394','Delegate Krizek','legislator',413,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214079,14798,'00:06:33','00000394','Delegate Krizek','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213069,14798,'00:07:01','00000422','Delegate Reid','legislator',431,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214080,14798,'00:07:01','00000422','Delegate Reid','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213070,14798,'00:07:57','00000478','Delegate Krizek','legislator',413,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214081,14798,'00:07:57','00000478','Delegate Krizek','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213071,14798,'00:08:04','00000485','Public Testimony','legislator',NULL,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:46:17'),
+(1214082,14798,'00:08:04','00000485','Public Testimony','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213072,14798,'00:08:19','00000500','Delegate Krizek','legislator',413,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214083,14798,'00:08:19','00000500','Delegate Krizek','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213073,14798,'00:09:18','00000559','Delegate Dougherty','legislator',556,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214084,14798,'00:09:18','00000559','Delegate Dougherty','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213074,14798,'00:10:57','00000658','Delegate Krizek','legislator',413,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214085,14798,'00:10:57','00000658','Delegate Krizek','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213075,14798,'00:11:11','00000672','Public Testimony','legislator',NULL,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:46:18'),
+(1214086,14798,'00:11:11','00000672','Public Testimony','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213076,14798,'00:12:30','00000751','Delegate Krizek','legislator',413,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214087,14798,'00:12:30','00000751','Delegate Krizek','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213077,14798,'00:12:37','00000758','Delegate Carr','legislator',348,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214088,14798,'00:12:37','00000758','Delegate Carr','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213078,14798,'00:12:46','00000767','Public Testimony','legislator',NULL,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:46:18'),
+(1214089,14798,'00:12:46','00000767','Public Testimony','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213079,14798,'00:12:56','00000777','Delegate Krizek','legislator',413,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214090,14798,'00:12:56','00000777','Delegate Krizek','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213080,14798,'00:13:00','00000781','Delegate Laufer','legislator',514,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214091,14798,'00:13:00','00000781','Delegate Laufer','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213081,14798,'00:13:12','00000793','Public Testimony','legislator',NULL,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:46:18'),
+(1214092,14798,'00:13:12','00000793','Public Testimony','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213082,14798,'00:13:34','00000815','Delegate Laufer','legislator',514,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214093,14798,'00:13:34','00000815','Delegate Laufer','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213083,14798,'00:13:45','00000826','Delegate Krizek','legislator',413,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214094,14798,'00:13:45','00000826','Delegate Krizek','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213084,14798,'00:14:04','00000845','Public Testimony','legislator',NULL,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:46:18'),
+(1214095,14798,'00:14:04','00000845','Public Testimony','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213085,14798,'00:14:26','00000867','Delegate Krizek','legislator',413,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214096,14798,'00:14:26','00000867','Delegate Krizek','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213086,14798,'00:14:41','00000882','Delegate Dougherty','legislator',556,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214097,14798,'00:14:41','00000882','Delegate Dougherty','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16'),
+(1213087,14798,'00:14:47','00000888','Delegate Krizek','legislator',413,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
+(1214098,14798,'00:14:47','00000888','Delegate Krizek','legislator',NULL,'n',NULL,'2026-01-31 12:48:16','2026-01-31 17:48:16');
+/*!40000 ALTER TABLE `video_index` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2026-02-01 23:44:27
+/*M!999999\- enable the sandbox mode */ 
+-- MariaDB dump 10.19  Distrib 10.11.14-MariaDB, for debian-linux-gnu (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	11.4.7-MariaDB-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Dumping data for table `video_clips`
+--
+-- WHERE:  file_id=14798
+
+LOCK TABLES `video_clips` WRITE;
+/*!40000 ALTER TABLE `video_clips` DISABLE KEYS */;
+/*!40000 ALTER TABLE `video_clips` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2026-02-01 23:44:27
+/*M!999999\- enable the sandbox mode */ 
+-- MariaDB dump 10.19  Distrib 10.11.14-MariaDB, for debian-linux-gnu (x86_64)
+--
+-- Host: richmondsunlight.crok4xr9pagp.us-east-1.rds.amazonaws.com    Database: richmondsunlight
+-- ------------------------------------------------------
+-- Server version	11.4.7-MariaDB-log
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Dumping data for table `video_transcript`
+--
+-- WHERE:  file_id=14798
+
+LOCK TABLES `video_transcript` WRITE;
+/*!40000 ALTER TABLE `video_transcript` DISABLE KEYS */;
+/*!40000 ALTER TABLE `video_transcript` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2026-02-01 23:44:27
