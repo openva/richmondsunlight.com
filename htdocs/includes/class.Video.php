@@ -89,7 +89,7 @@ class Video
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (mysqli_num_rows($result) > 0) {
             $tmp = mysqli_fetch_object($result);
-            $tmp = array_map('stripslashes', (array)$tmp);
+            $tmp = array_map(fn($v) => stripslashes($v ?? ''), (array)$tmp);
             foreach ($tmp as $key => $variable) {
                 $this->$key = $variable;
             }
