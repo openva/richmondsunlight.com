@@ -962,6 +962,22 @@ elseif (isset($statuses)) {
 }
 
 /*
+ * List news articles about this bill, if there are any.
+ */
+if (!empty($bill['news'])) {
+    $page_body .= '
+        <h2 id="news">News</h2>
+        <div>';
+    foreach ($bill['news'] as $article) {
+        $article = (array) $article;
+        $page_body .= '<li><em>' . $article['publication'] . '</em>: “<a href="' . $article['url']
+            . '">' . $article['title'] . '</a>,” '
+            . date('M j, Y', strtotime($article['date'])) . '</li>';
+    }
+    $page_body .= '</div>';
+}
+
+/*
  * When a bill is brand-new, there's no history data. Only show the history section if we've got
  * history data.
  */
