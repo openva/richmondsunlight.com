@@ -47,7 +47,7 @@ services:
     networks:
       - rs_network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      test: ["CMD", "curl", "-f", "http://localhost:80/1.1/bills/2025.json"]
       start_period: 30s
       interval: 15s
       timeout: 5s
