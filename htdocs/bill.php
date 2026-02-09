@@ -966,15 +966,15 @@ elseif (isset($statuses)) {
  */
 if (!empty($bill['news'])) {
     $page_body .= '
-        <div>';
         <h2 id="news">News Coverage</h2>
+        <ul>';
     foreach ($bill['news'] as $article) {
         $article = (array) $article;
         $page_body .= '<li><em>' . $article['publication'] . '</em>: “<a href="' . $article['url']
             . '">' . $article['title'] . '</a>,” '
             . date('M j, Y', strtotime($article['date'])) . '</li>';
     }
-    $page_body .= '</div>';
+    $page_body .= '</ul>';
 }
 
 /*
