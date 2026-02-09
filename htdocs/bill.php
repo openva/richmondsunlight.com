@@ -1259,8 +1259,9 @@ if (isset($bill['duplicates'])) {
     foreach ($bill['duplicates'] as $duplicate) {
         $duplicate = (array) $duplicate;
 
-        $page_body .= '<a href="/bill/' . $duplicate['year'] . '/' . $duplicate['number'] . '/">'
-            . mb_strtoupper($duplicate['number']) . '</a> (' . $duplicate['year'] . ')';
+        $page_body .= '<a href="/bill/' . $duplicate['year'] . '/' . $duplicate['number']
+            . '/" class="bill">' . mb_strtoupper($duplicate['number']) . '</a> ('
+            . $duplicate['year'] . ')';
         if ((count($bill['duplicates']) - 2) == $i) {
             $page_body .= ' and ';
         } elseif (count($bill['duplicates']) > ($i + 1)) {
