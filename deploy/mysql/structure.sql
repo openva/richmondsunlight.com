@@ -234,6 +234,27 @@ CREATE TABLE `bills_section_numbers` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `bills_news`
+--
+
+DROP TABLE IF EXISTS `bills_news`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `bills_news` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `bill_id` mediumint(8) unsigned NOT NULL,
+  `url` varchar(1000) NOT NULL,
+  `title` varchar(1000) NOT NULL,
+  `publication` varchar(100) NOT NULL,
+  `date` date NOT NULL,
+  `date_created` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `url_bill` (`url`(500), `bill_id`),
+  KEY `bill_id` (`bill_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `bills_status`
 --
 

@@ -47,7 +47,7 @@ services:
     networks:
       - rs_network
     healthcheck:
-      test: ["CMD", "apache2ctl", "-M"]
+      test: ["CMD-SHELL", "curl -s -o /dev/null http://localhost:80/"]
       start_period: 30s
       interval: 15s
       timeout: 5s
