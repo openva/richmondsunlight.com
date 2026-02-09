@@ -54,8 +54,7 @@ $video->legislator_id = $legislator['id'];
 $legislator['videos'] = $video->legislator_sample();
 
 // Gin up a meta description for search engines.
-$html_head = '
-<meta name="description" content="Information about ' . $legislator['name_formatted']
+$html_head = '<meta name="description" content="Information about ' . $legislator['name_formatted']
     . ', including a list of ' . $legislator['possessive'] . ' bills, ' . $legislator['possessive']
     . ' full voting record, contact information, donors, recent media coverage, and more." />';
 
@@ -78,15 +77,13 @@ $html_head .= '<meta name="twitter:card" content="summary" />
 $page_sidebar = '';
 
 // Contact the rep.
-$page_sidebar .= '
-<div class="box vcard">
+$page_sidebar .= '<div class="box vcard">
 	<h3>Contact ' . $legislator['name'] . '</h3>
 	<span style="display: none;" class="fn">' . $legislator['name'] . '</span>';
 
 // District Office
 if (!empty($legislator['address_district'])) {
-    $page_sidebar .= '
-	<p class="adr"><strong>District Office</strong><br />
+    $page_sidebar .= '<p class="adr"><strong>District Office</strong><br />
 	' . $legislator['address_district'];
 }
 if (!empty($legislator['phone_district'])) {
@@ -110,14 +107,12 @@ if (!empty($legislator['phone_richmond'])) {
 }
 $page_sidebar .= '</p>';
 if (!empty($legislator['address_richmond'])) {
-    $page_sidebar .= '
-	<p>Room ' . $legislator['address_richmond'] . ' of the General Assembly Building</p>';
+    $page_sidebar .= '<p>Room ' . $legislator['address_richmond'] . ' of the General Assembly Building</p>';
 }
 
 // E-Mail
 if (!empty($legislator['email'])) {
-    $page_sidebar .= '
-	<p><strong>Email</strong><br />
+    $page_sidebar .= '<p><strong>Email</strong><br />
 	<a href="mailto:' . spam_proof($legislator['email']) . '" class="email">' . spam_proof($legislator['email']) . '</a></p>';
 }
 
@@ -193,8 +188,7 @@ if ($legislator['district_boundaries'] != false) {
     $page_sidebar .= '<div id="district_map"></div>';
 }
 
-$page_sidebar .= '
-</div>';
+$page_sidebar .= '</div>';
 
 // Newest Comments
 $sql = 'SELECT
@@ -227,8 +221,7 @@ $sql = 'SELECT
 		LIMIT 5';
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
-    $page_sidebar .= '
-		<div class="box" id="newest-comments">
+    $page_sidebar .= '<div class="box" id="newest-comments">
 			<h3>Newest Comments</h3>
 			<ul>';
     while ($comment = mysqli_fetch_array($result)) {
@@ -243,15 +236,12 @@ if (mysqli_num_rows($result) > 0) {
 				<a href="/bill/' . $comment['year'] . '/' . $comment['bill_number'] . '/#comment-' . $comment['number'] . '">' . $comment['name'] . ' writes:</a>
 				' . $comment['comment'] . '</li>';
     }
-    $page_sidebar .= '
-			</ul>
-		</div>';
+    $page_sidebar .= '</ul></div>';
 }
 
 
 // Voting Record
-$page_sidebar .= '
-	<div class="box">
+$page_sidebar .= '<div class="box">
 		<h3>Voting Record</h3>
 		' . $legislator['prefix'] . ' ' . $legislator['name'] . '’s voting record for ';
 
@@ -287,8 +277,7 @@ $page_sidebar .= ' is available to view or download.
 	</div>';
 
 // More info
-$page_sidebar .= '
-    <div class="box">
+$page_sidebar .= '<div class="box">
         <h3>More Info</h3>
         <ul>
             <li><a href="https://lis.virginia.gov/session-details/20' . SESSION_LIS_ID
@@ -302,30 +291,24 @@ $page_sidebar .= '
     </div>';
 
 // Corrections
-$page_sidebar .= '
-	<div class="box">
+$page_sidebar .= '<div class="box">
 		<h3>Corrections? Additions?</h3>
 		If any information about ' . $legislator['name'] . ' is missing, incomplete or wrong,
 		please <a href="/contact/">correct it</a>.
 	</div>';
 
 // PAGE CONTENT
-$page_body = '
-<div class="tabs">
-<ul class="tabs">
+$page_body = '<div class="tabs">
+    <ul class="tabs">
 	<li><a href="#bio">Bio</a></li>';
-$page_body .= '
-	<li><a href="#media">Media</a></li>';
+$page_body .= '<li><a href="#media">Media</a></li>';
 if (!empty($legislator['rss_url']) && empty($legislator['date_ended'])) {
-    $page_body .= '
-	<li><a href="#news">News</a></li>';
+    $page_body .= '<li><a href="#news">News</a></li>';
 }
 if (!empty($legislator['videos'])) {
-    $page_body .= '
-	<li><a href="#video">Video</a></li>';
+    $page_body .= '<li><a href="#video">Video</a></li>';
 }
-$page_body .= '
-</ul>
+$page_body .= '</ul>
 
 <div id="bio">
 <div>
@@ -386,15 +369,13 @@ if ($legislator['batting']['total'] == 0) {
 }
 
 if (!empty($legislator['date_started'])) {
-    $page_body .= '
-    <div class="pair">
+    $page_body .= '<div class="pair">
 		<div class="label">Took Office</div>
 		<div class="content">' . $legislator['date_started'] . '</div>
     </div>';
 }
 if (!empty($legislator['date_ended'])) {
-    $page_body .= '
-    <div class="pair">
+    $page_body .= '<div class="pair">
 		<div class="label">Left Office</div>
 		<div class="content">' . $legislator['date_ended'] . '</div>
     </div>';
@@ -417,15 +398,13 @@ if (!empty($legislator['date_ended'])) {
             }
         }
     }
-    $page_body .= '
-    <div class="pair">
+    $page_body .= '<div class="pair">
 		<div class="label">Next Election</div>
 		<div class="content">' . $next_election . '</div>
     </div>';
 }
 if (isset($legislator['committees']) && (count($legislator['committees']) > 0)) {
-    $page_body .= '
-    <div class="pair">
+    $page_body .= '<div class="pair">
 		<div class="label">Committees</div>
 		<div class="content">';
     $i = 0;
@@ -451,8 +430,7 @@ if (($legislator['age'] != date('Y')) && !empty($legislator['age'])) {
         </div>';
 }
 if (!empty($legislator['website'])) {
-    $page_body .= '
-    <div class="pair">
+    $page_body .= '<div class="pair">
 		<div class="label">Website</div>
 		<div class="content"><a href="' . $legislator['website'] . '">' . $legislator['website_name'] . '</a></div>
     </div>';
@@ -465,8 +443,7 @@ if (!empty($legislator['activity']) && IN_SESSION == true) {
     $activity_labels = array_keys($activity_data);
     $activity_values = array_values($activity_data);
 
-    $page_body .= '
-    <div class="pair">
+    $page_body .= '<div class="pair">
         <div class="label">Daily Activity</div>
         <div class="content" id="activity">
             <canvas id="activityChart" width="400" height="70"></canvas>
@@ -627,8 +604,7 @@ if ($total > 0) {
 // Display how partisan that this legislator's record is, in light of his copatroning habits.
 // We've calculated these copatroning habits via a cron job already.
 if (!empty($legislator['partisanship'])) {
-    $partisanship = '
-		<div class="content" id="partisanship-graph">
+    $partisanship = '<div class="content" id="partisanship-graph">
 			<div style="width: ' . $legislator['partisanship'] . '%;"></div>
 		</div>';
 }
@@ -649,8 +625,7 @@ if (isset($introduced) || isset($supporters) || isset($pool)) {
     $page_body .= '</div></div>';
 }
 if (isset($partisanship)) {
-    $page_body .= '
-        <div class="pair">
+    $page_body .= '<div class="pair">
 			<div class="label">Partisanship</div>
 			<div class="content" id="partisanship">
 			' . $partisanship . '   <a href="/help/partisanship/" class="help-icon-link" data-help-url="/help/partisanship/" title="Help"><img src="/images/help-f4eee5.gif" class="help-icon" alt="?" /></a>
@@ -671,8 +646,7 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 $result = mysqli_query($GLOBALS['db'], $sql);
 $tag_count = mysqli_num_rows($result);
 if ($tag_count > 0) {
-    $page_body .= '
-        <div class="pair">
+    $page_body .= '<div class="pair">
 		<div class="label">Bill Topics <a href="/help/tag-clouds/" class="help-icon-link" data-help-url="/help/tag-clouds/" title="Help"><img src="/images/help-f4eee5.gif" class="help-icon" alt="?" /></a></div>
 		<div class="content">
 			<div class="tags">';
@@ -715,8 +689,7 @@ if (!empty($legislator['batting'])) {
 }
 
 if (!empty($legislator['bio'])) {
-    $page_body .= '
-    <div class="pair">
+    $page_body .= '<div class="pair">
 		<div class="label">Bio</div>
 		<div class="content">' . nl2p($legislator['bio']) . '</div>
     </div>';
@@ -729,8 +702,7 @@ $page_body .= '</div>
 
 
 // Start a new DIV for news mentions.
-$page_body .= '
-<div id="media">
+$page_body .= '<div id="media">
 	<table style="width: 100%">
 	<caption>Recent Mentions in the Media</caption>
 	<tbody>';
@@ -778,13 +750,10 @@ foreach ($newsfeed->get_items() as $item) {
     // Hack off the state that often leads off the article.
     $summary = preg_replace('/,&nbsp;([A-Z]{2})&nbsp;- /D', '', $summary);
 
-    $page_body .= '
-        <tr>
-        <td>
+    $page_body .= '<tr><td>
         <h3>' . $source . ': <a href="' . $item->get_permalink() . '">' . $title . '</a></h3>' .
         '<p>' . $item->get_date('F j, Y | g:i a') . '<br />' . $summary . '</p>
-        </td>
-        </tr>';
+        </td></tr>';
 
     $rss_count++;
     if ($rss_count == 5) {
@@ -793,8 +762,7 @@ foreach ($newsfeed->get_items() as $item) {
 }
 
 // Provide a link to read more.
-$page_body .= '
-    <tr><td><div style="float: right;">
+$page_body .= '<tr><td><div style="float: right;">
         <a href="' . $google_link . '">More Media Mentions &gt;&gt;</a>
     </div></td></tr>';
 
@@ -808,24 +776,21 @@ if (!empty($legislator['rss_url']) && empty($legislator['date_ended'])) {
     $newsfeed->handle_content_type();
 
     // Start a new DIV for legislator's blogs, etc.
-    $page_body .= '
-	<div id="news">
+    $page_body .= '<div id="news">
 		<table style="width: 100%">
             <tbody>
             <caption>From the Legislator’s Website</caption>';
 
     $rss_count = 0;
     foreach ($newsfeed->get_items() as $item) {
-        $page_body .= '
-            <tr><td>
+        $page_body .= '<tr><td>
             <h3><a href="' . $item->get_permalink() . '">' . $item->get_title() . '</a></h3>' .
             '<p>';
         $page_body .= $item->get_date('F j, Y') . '<br />';
         $page_body .= strip_tags($item->get_description()) . '</p></td></tr>';
     }
     // End the DIV for news mentions.
-    $page_body .= '
-				</tbody>
+    $page_body .= '</tbody>
 			</table>
 	</div>';
 }
@@ -839,12 +804,10 @@ if ($legislator['videos'] !== false) {
     /*
      * Add the Flowplayer code.
      */
-    $html_head .= '
-		<script src="/js/flowplayer-6.0.5/flowplayer.min.js"></script>
+    $html_head .= '<script src="/js/flowplayer-6.0.5/flowplayer.min.js"></script>
 		<link rel="stylesheet" href="/js/flowplayer-6.0.5/skin/minimalist.css">';
 
-    $page_body .= '
-	<div id="video" style="width: 100%; clear: left;">
+    $page_body .= '<div id="video" style="width: 100%; clear: left;">
 		<p>These are all of the video clips of ' . $legislator['name'] . '’s remarks on the floor of the
 		' . ucfirst($legislator['chamber']) . ' since ' . mb_substr($video->clips->{0}->date, 0, 4) . '.
 		There are ' . count((array) $video->clips) . ' video clips in all.</p>
