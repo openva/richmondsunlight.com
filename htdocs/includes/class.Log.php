@@ -61,6 +61,11 @@ class Log
         $this->filesystem($message);
 
         /*
+         * Always write all messages to the database
+         */
+        $this->database($message, $level);
+
+        /*
          * If the level of this message is below our verbosity level, ignore it.
          */
         if ($level < $this->verbosity) {
@@ -179,5 +184,32 @@ class Log
             return false;
         }
         return true;
+    }
+
+    /**
+     * Store a log message in the database.
+     *
+     * @param string $message Message text.
+     * @param int    $level   Severity level (1=debug .. 8=emergency).
+     *
+     * @return bool True on success, false on failure.
+     */
+    public function database($message, $level = 3)
+    {
+        if (!isset($GLOBALS['db_pdo'])) {
+            return false;
+        }
+
+        $sql = 'INSERT INTO logs
+                    (message, level, date)
+                    VALUES
+                    (:message, :level, now())';
+        $stmt = $GLOBALS['db_pdo']->prepare($sql);
+        $result = $stmt->execute([
+            ':message' => $message,
+            ':level' => $level,
+        ]);
+
+        return $result;
     }
 }
