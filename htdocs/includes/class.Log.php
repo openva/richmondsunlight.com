@@ -202,11 +202,12 @@ class Log
         $sql = 'INSERT INTO logs
                     (message, level, date)
                     VALUES
-                    (:message, :level, now())';
+                    (:message, :level, :date)';
         $stmt = $GLOBALS['db_pdo']->prepare($sql);
         $result = $stmt->execute([
             ':message' => $message,
             ':level' => $level,
+            ':date' => (new DateTime('now', new DateTimeZone('America/New_York')))->format('Y-m-d H:i:s'),
         ]);
 
         return $result;
