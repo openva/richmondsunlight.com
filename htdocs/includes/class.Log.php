@@ -130,7 +130,6 @@ class Log
         curl_setopt($ch, CURLOPT_HEADER, true);
         $response = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
 
         // If rate-limited, store the retry-after time in Memcached
         if ($http_code == 429 && MEMCACHED_SERVER != '') {
