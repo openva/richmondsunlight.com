@@ -130,7 +130,6 @@ class Log
         curl_setopt($ch, CURLOPT_HEADER, true);
         $response = curl_exec($ch);
         $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
 
         // If rate-limited, store the retry-after time in Memcached
         if ($http_code == 429 && MEMCACHED_SERVER != '') {
@@ -203,11 +202,12 @@ class Log
         $sql = 'INSERT INTO logs
                     (message, level, date)
                     VALUES
-                    (:message, :level, now())';
+                    (:message, :level, :date)';
         $stmt = $GLOBALS['db_pdo']->prepare($sql);
         $result = $stmt->execute([
             ':message' => $message,
             ':level' => $level,
+            ':date' => (new DateTime('now', new DateTimeZone('America/New_York')))->format('Y-m-d H:i:s'),
         ]);
 
         return $result;

@@ -889,15 +889,14 @@ if (!empty($bill['notes'])) {
 // wrong, but there are currently no bills that have both of these things, so let's burn that
 // bridge when we get to it.
 elseif (!empty($impact_statements)) {
+    $page_body .= '<div id="notes">
+                    <h2>Notes</h2>';
     foreach ($impact_statements as $impact_statement) {
         if (isset($impact_statement['summary']) && $impact_statement['summary'] != '') {
-            $page_body .= '
-                    <div id="notes">
-                    <h2>Notes</h2>
-                    ' . $impact_statement['summary'] . '
-                    </div>';
+            $page_body .= $impact_statement['summary'];
         }
     }
+    $page_body .= '</div>';
 }
 
 /*
