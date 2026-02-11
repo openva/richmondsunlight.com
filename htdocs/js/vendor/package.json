@@ -12,9 +12,10 @@
 		"jquery.tabSlideOut.js": "microneer/jquery.tabSlideOut.js",
 		"chart.js": "4.x",
 		"@turf/turf": "6.x",
-		"mapbox-gl": "3.x"
+		"mapbox-gl": "3.x",
+		"d3": "7.x"
 	},
 	"scripts": {
-		"build": "yarn install && cp -r node_modules/* . && rm -Rf node_modules/ && rm -Rf jquery-ui && mv -T jquery-ui-dist jquery-ui"
+		"build": "yarn install && cp -r node_modules/* . && rm -Rf node_modules/ && rm -Rf jquery-ui && mv jquery-ui-dist jquery-ui"
 	}
 }
