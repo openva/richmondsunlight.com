@@ -171,17 +171,25 @@ class Import
             }
         }
 
-        // Persist updated snapshot (best effort).
+        return $changedLisIds;
+    }
+
+    /**
+     * Write the legislation status cache file.
+     *
+     * @param array<int,array{lis_id:int,number:?string,status:?string}> $statuses
+     * @param string                                                     $cacheFile
+     */
+    public function write_status_cache(array $statuses, string $cacheFile): void
+    {
         $dir = dirname($cacheFile);
         if (!is_dir($dir)) {
             @mkdir($dir, 0755, true);
         }
-        $written = file_put_contents($cacheFile, json_encode(array_values($currentById), JSON_PRETTY_PRINT));
+        $written = file_put_contents($cacheFile, json_encode(array_values($statuses), JSON_PRETTY_PRINT));
         if ($written === false) {
             $this->log->put('Unable to write status cache to ' . $cacheFile, 5);
         }
-
-        return $changedLisIds;
     }
 
     /**
