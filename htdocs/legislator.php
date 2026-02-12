@@ -503,8 +503,8 @@ if ($total > 0) {
 
     // Create the text that we'll use below in the copatroning stats.
     $introduced = round((current($tmp) / $total) * 100) . '% of bills ' . $legislator['pronoun']
-    . ' has copatroned were introduced by ' . ((key($tmp) == 'R') ? 'Republicans' : 'Democrats')
-    . '. ';
+    . ' ' . (($legislator['pronoun'] == 'they') ? 'have' : 'has') . ' copatroned were introduced by '
+    . ((key($tmp) == 'R') ? 'Republicans' : 'Democrats') . '. ';
 
     // Populate an array that we use to determine overall partisanship. 0 = Democratic and 100 =
     // Republican. Because our number is based on the majority support, we need to rescale it.
@@ -542,8 +542,8 @@ if ($total > 0) {
     arsort($tmp);
 
     // Create the text that we'll use below in the copatroning stats.
-    $supporters = 'Of all of the copatrons of ' . (($legislator['sex'] == 'male') ? 'his' : 'her')
-        . ' bills, ' . round((current($tmp) / $total) * 100) . '% of them are '
+    $supporters = 'Of all of the copatrons of ' . $legislator['possessive'] . ' bills, '
+    . round((current($tmp) / $total) * 100) . '% of them are '
     . ((key($tmp) == 'R') ? 'Republicans' : 'Democrats') . '. ';
 
     // Populate an array that we use to determine overall partisanship. 0 = Democratic and 100 =
@@ -583,10 +583,9 @@ $total = array_sum($tmp);
 if ($total > 0) {
     arsort($tmp);
     // Create the text that we'll use below in the copatroning stats.
-    $pool = 'Of all of ' . (($legislator['sex'] == 'male') ? 'his' : 'her')
-        . ' fellow copatrons of the bills that ' . (($legislator['sex'] == 'male') ? 'he' : 'she')
-        . ' copatroned, ' . round((current($tmp) / $total) * 100) . '% of them are '
-    . ((key($tmp) == 'R') ? 'Republicans' : 'Democrats') . '. ';
+    $pool = 'Of all of ' . $legislator['possessive'] . ' fellow copatrons of the bills that '
+        . $legislator['pronoun'] . ' copatroned, ' . round((current($tmp) / $total) * 100)
+        . '% of them are ' . ((key($tmp) == 'R') ? 'Republicans' : 'Democrats') . '. ';
 
     // Populate an array that we use to determine overall partisanship. 0 = Democratic and 100 =
     // Republican. Because our number is based on the majority support, we need to rescale it.
