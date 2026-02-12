@@ -1199,7 +1199,7 @@ class Video
                  * Convert the time to seconds (dropping microseconds).
                  */
                 $caption->{$time} = preg_replace("/^([\d]{2})\:([\d]{2})\:([\d]{2}),([\d]{3})$/", "$1:$2:$3.$4", $caption->{$time});
-                sscanf($caption->{$time}, "%d:%d:%d.%d", $hours, $minutes, $seconds, $microseconds);
+                sscanf($caption->{$time}, "%d:%d:%d.%d", $hours, $minutes, $seconds, $ms);
                 $caption->{$time} = $hours * 3600 + $minutes * 60 + $seconds;
 
                 /*
@@ -1210,7 +1210,7 @@ class Video
                 /*
                  * Format the seconds as HH:MM:SS again.
                  */
-                $caption->{$time} = gmdate("H:i:s", $caption->{$time}) . '.' . $microseconds;
+                $caption->{$time} = gmdate("H:i:s", $caption->{$time}) . '.' . $ms;
             }
         }
 
