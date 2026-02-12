@@ -590,7 +590,7 @@ class Video
         if ($this->clip_type == 'bills') {
             $sql .= 'bills.number AS bill_number';
         } elseif ($this->clip_type == 'legislators') {
-            $sql .= 'representatives.name_formatted AS legislator_name';
+            $sql .= 'terms.name_formatted AS legislator_name';
         }
         $sql .= '
 				FROM video_index
@@ -603,8 +603,8 @@ class Video
 				WHERE video_index.type="bill"';
         } elseif ($this->clip_type == 'legislators') {
             $sql .= '
-				LEFT JOIN representatives
-					ON video_index.linked_id = representatives.id
+				LEFT JOIN terms
+					ON video_index.linked_id = terms.id
 				WHERE video_index.type="legislator"';
         }
 
@@ -824,13 +824,13 @@ class Video
         $database->connect_mysqli();
 
         $sql = 'SELECT files.path, files.date, DATE_FORMAT(files.date, "%b %e, %Y") AS date_formatted,
-				representatives.name_formatted AS legislator_name, bills.number AS bill_number,
+				terms.name_formatted AS legislator_name, bills.number AS bill_number,
 				video_clips.bill_id, video_clips.time_start, video_clips.time_end, video_clips.screenshot
 				FROM video_clips
 				LEFT JOIN files
 					ON video_clips.file_id = files.id
-				LEFT JOIN representatives
-					ON video_clips.legislator_id = representatives.id
+				LEFT JOIN terms
+					ON video_clips.legislator_id = terms.id
 				LEFT JOIN bills
 					ON video_clips.bill_id = bills.id
 				WHERE ';
@@ -896,11 +896,11 @@ class Video
         $database->connect_mysqli();
 
         if ($this->clip_type == 'legislators') {
-            $sql = 'SELECT representatives.name_formatted AS legislator_name, video_clips.time_start,
+            $sql = 'SELECT terms.name_formatted AS legislator_name, video_clips.time_start,
 					video_clips.time_end, video_clips.screenshot
 					FROM video_clips
-					LEFT JOIN representatives
-						ON video_clips.legislator_id = representatives.id
+					LEFT JOIN terms
+						ON video_clips.legislator_id = terms.id
 					WHERE legislator_id IS NOT NULL AND video_clips.file_id=' . $this->id;
         } elseif ($this->clip_type == 'bills') {
             $sql = 'SELECT bills.number AS bill_number, video_clips.time_start, video_clips.time_end,
@@ -911,13 +911,13 @@ class Video
 					WHERE bill_id IS NOT NULL AND legislator_id IS NULL
 					AND video_clips.file_id=' . $this->id;
         } else {
-            $sql = 'SELECT representatives.name_formatted AS legislator_name,
+            $sql = 'SELECT terms.name_formatted AS legislator_name,
 					bills.number AS bill_number,
 					video_clips.bill_id, video_clips.time_start, video_clips.time_end,
 					video_clips.screenshot
 					FROM video_clips
-					LEFT JOIN representatives
-						ON video_clips.legislator_id = representatives.id
+					LEFT JOIN terms
+						ON video_clips.legislator_id = terms.id
 					LEFT JOIN bills
 						ON video_clips.bill_id = bills.id
 					WHERE video_clips.file_id=' . $this->id;
@@ -1102,11 +1102,11 @@ class Video
         }
 
         # SELECT A LIST OF EVERY SPEAKER AND BILL, BY TIME
-        $sql = 'SELECT representatives.name_formatted AS legislator, bills.number AS bill,
+        $sql = 'SELECT terms.name_formatted AS legislator, bills.number AS bill,
 				video_clips.time_start, video_clips.time_end
 				FROM video_clips
-				LEFT JOIN representatives
-					ON video_clips.legislator_id = representatives.id
+				LEFT JOIN terms
+					ON video_clips.legislator_id = terms.id
 				LEFT JOIN bills
 					ON video_clips.bill_id = bills.id
 				WHERE video_clips.file_id = ' . $this->id . '
@@ -1568,13 +1568,15 @@ class Video
                  * First we check without verifying the location, since the named location
                  * isn't necessarily a county or city (leading to under-matches).
                  */
-                $sql = 'SELECT id
-						FROM representatives
-						WHERE name LIKE "' . $name . '%" ';
+                $sql = 'SELECT terms.id
+						FROM terms
+						LEFT JOIN people
+							ON terms.person_id = people.id
+						WHERE people.name LIKE "' . $name . '%" ';
                 if (!empty($sex)) {
-                    $sql .= 'AND sex = "' . $sex . '" ';
+                    $sql .= 'AND people.sex = "' . $sex . '" ';
                 }
-                $sql .= 'AND chamber =
+                $sql .= 'AND terms.chamber =
 							(SELECT chamber
 							FROM files
 							WHERE id=' . $this->file_id . ')';
@@ -1585,21 +1587,23 @@ class Video
                  * with location.
                  */
                 if (mysqli_num_rows($result) > 1) {
-                    $sql = 'SELECT representatives.id
-							FROM representatives
+                    $sql = 'SELECT terms.id
+							FROM terms
+							LEFT JOIN people
+								ON terms.person_id = people.id
 							LEFT JOIN districts
-								ON representatives.district_id = districts.id
-							WHERE representatives.name LIKE "' . $name . '%" ';
+								ON terms.district_id = districts.id
+							WHERE people.name LIKE "' . $name . '%" ';
                     if (!empty($sex)) {
-                        $sql .= 'AND representatives.sex = "' . $sex . '" ';
+                        $sql .= 'AND people.sex = "' . $sex . '" ';
                     }
                     $sql .= '
-							AND representatives.chamber =
+							AND terms.chamber =
 								(SELECT chamber
 								FROM files
 								WHERE files.id=' . $this->file_id . ')
 							AND
-								(representatives.place LIKE "' . $place . '%"
+								(terms.place LIKE "' . $place . '%"
 								OR
 								districts.description LIKE "%' . $place . '%")';
                     $result = mysqli_query($GLOBALS['db'], $sql);
@@ -1681,11 +1685,13 @@ class Video
          */
         $sql = 'SELECT video_transcript.id, video_transcript.text, video_transcript.time_start,
 				video_transcript.time_end, video_transcript.new_speaker,
-				video_transcript.legislator_id, representatives.name,
-				representatives.shortname
+				video_transcript.legislator_id, people.name,
+				people.shortname
 				FROM video_transcript
-				LEFT JOIN representatives
-					ON video_transcript.legislator_id = representatives.id
+				LEFT JOIN terms
+					ON video_transcript.legislator_id = terms.id
+				LEFT JOIN people
+					ON terms.person_id = people.id
 				WHERE file_id=' . $this->file_id . '
 				ORDER BY time_start ASC';
         $result = mysqli_query($GLOBALS['db'], $sql);
