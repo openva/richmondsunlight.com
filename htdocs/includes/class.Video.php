@@ -231,6 +231,11 @@ class Video
                 $newoptions[$tmp[0]] = $tmp[1];
             }
         }
+
+        if (empty($newoptions) || !isset($newoptions['id_video_fps'])) {
+            return false;
+        }
+
         $mplayer = $newoptions;
         unset($tmp);
         $this->fps = $mplayer['id_video_fps'];
