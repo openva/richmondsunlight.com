@@ -24,12 +24,25 @@ include_once 'vendor/autoload.php';
 $database = new Database();
 $database->connect_mysqli();
 
-// INITIALIZE SESSION
-session_start();
+// Detect bots early so we can skip session overhead for them.
+$is_bot = false;
+$bots = array('Googlebot', 'msnbot', 'Gigabot', 'Slurp', 'Teoma', 'ia_archiver', 'Yandex',
+            'Heritrix', 'twiceler', 'bingbot', 'bot', 'updown.io');
+if (isset($_SERVER['HTTP_USER_AGENT'])) {
+    foreach ($bots as $bot) {
+        if (mb_stripos($_SERVER['HTTP_USER_AGENT'], $bot) !== false) {
+            $is_bot = true;
+            break;
+        }
+    }
+}
 
-// Grab the user data.
-if (logged_in() === true) {
-    $user = get_user();
+// Only start a session for real users.
+if (!$is_bot) {
+    session_start();
+    if (logged_in() === true) {
+        $user = get_user();
+    }
 }
 
 $debug_timing['logged in'] = microtime(true);
@@ -97,19 +110,6 @@ if ($impact_statements === false) {
     unset($impact_statements);
 }
 
-// We want to record a view count hit for this bill, but only if this is a real user, not a
-// search engine. Start by defining a list of bots.
-$bots = array('Googlebot', 'msnbot', 'Gigabot', 'Slurp', 'Teoma', 'ia_archiver', 'Yandex',
-            'Heritrix', 'twiceler', 'bingbot', 'bot', 'updown.io');
-// Check to see if the current user agent is a known bot.
-if (isset($_SERVER['HTTP_USER_AGENT'])) {
-    foreach ($bots as $bot) {
-        if (mb_stripos($_SERVER['HTTP_USER_AGENT'], $bot) !== false) {
-            $is_bot = true;
-            break;
-        }
-    }
-}
 // Update bills_views to reflect this view, provided that this visitor hasn't been defined
 // as a bot.
 if (!isset($is_bot)) {
