@@ -32,7 +32,7 @@ if (isset($_GET['lis_id'])) {
 if (isset($_GET['year']) && (strlen($_GET['year']) == 4) && is_numeric($_GET['year'])) {
     $year = $_GET['year'];
 }
-if (isset($_GET['bill']) && strlen($_GET['bill'] <= 7)) {
+if (isset($_GET['bill']) && strlen($_GET['bill']) <= 7) {
     $bill = $_GET['bill'];
 }
 

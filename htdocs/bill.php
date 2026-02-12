@@ -690,7 +690,7 @@ if (isset($bill['status_history'])) {
         // aren't included in the vote data that's syndicated from the legislature in vote.csv.
         if (
             !empty($status['lis_vote_id']) && ($status['vote_count'] > 0)
-            && mb_strlen($status['lis_vote_id'] <= 8)
+            && mb_strlen($status['lis_vote_id']) <= 8
         ) {
             $tmp = $status['status'] . ' (<a href="/bill/' . $bill['year'] . '/'
                 . mb_strtolower($bill['number']) . '/' . mb_strtolower($status['lis_vote_id']) . '/">'
