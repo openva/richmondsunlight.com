@@ -223,6 +223,7 @@ class Video
         exec('/usr/bin/mplayer -ao null -vo null -identify -frames 0 ' . CLI_ROOT
             . $this->path, $mplayer);
 
+        $newoptions = array();
         foreach ($mplayer as $option) {
             if (mb_strpos($option, '=') !== false) {
                 $tmp = explode('=', $option);
@@ -230,6 +231,11 @@ class Video
                 $newoptions[$tmp[0]] = $tmp[1];
             }
         }
+
+        if (empty($newoptions) || !isset($newoptions['id_video_fps'])) {
+            return false;
+        }
+
         $mplayer = $newoptions;
         unset($tmp);
         $this->fps = $mplayer['id_video_fps'];
@@ -590,7 +596,7 @@ class Video
         if ($this->clip_type == 'bills') {
             $sql .= 'bills.number AS bill_number';
         } elseif ($this->clip_type == 'legislators') {
-            $sql .= 'representatives.name_formatted AS legislator_name';
+            $sql .= 'terms.name_formatted AS legislator_name';
         }
         $sql .= '
 				FROM video_index
@@ -603,8 +609,8 @@ class Video
 				WHERE video_index.type="bill"';
         } elseif ($this->clip_type == 'legislators') {
             $sql .= '
-				LEFT JOIN representatives
-					ON video_index.linked_id = representatives.id
+				LEFT JOIN terms
+					ON video_index.linked_id = terms.id
 				WHERE video_index.type="legislator"';
         }
 
@@ -762,6 +768,11 @@ class Video
         $this->clip_type = 'legislators';
         $this->index_clips();
 
+        # If there no clips were identified by index_clips(), then we're done here.
+        if (!isset($this->clips) || count($this->clips) == 0) {
+            return true;
+        }
+
         # Increment our counter.
         $this->clip_count = $this->clip_count + count($this->clips);
 
@@ -819,13 +830,13 @@ class Video
         $database->connect_mysqli();
 
         $sql = 'SELECT files.path, files.date, DATE_FORMAT(files.date, "%b %e, %Y") AS date_formatted,
-				representatives.name_formatted AS legislator_name, bills.number AS bill_number,
+				terms.name_formatted AS legislator_name, bills.number AS bill_number,
 				video_clips.bill_id, video_clips.time_start, video_clips.time_end, video_clips.screenshot
 				FROM video_clips
 				LEFT JOIN files
 					ON video_clips.file_id = files.id
-				LEFT JOIN representatives
-					ON video_clips.legislator_id = representatives.id
+				LEFT JOIN terms
+					ON video_clips.legislator_id = terms.id
 				LEFT JOIN bills
 					ON video_clips.bill_id = bills.id
 				WHERE ';
@@ -891,11 +902,11 @@ class Video
         $database->connect_mysqli();
 
         if ($this->clip_type == 'legislators') {
-            $sql = 'SELECT representatives.name_formatted AS legislator_name, video_clips.time_start,
+            $sql = 'SELECT terms.name_formatted AS legislator_name, video_clips.time_start,
 					video_clips.time_end, video_clips.screenshot
 					FROM video_clips
-					LEFT JOIN representatives
-						ON video_clips.legislator_id = representatives.id
+					LEFT JOIN terms
+						ON video_clips.legislator_id = terms.id
 					WHERE legislator_id IS NOT NULL AND video_clips.file_id=' . $this->id;
         } elseif ($this->clip_type == 'bills') {
             $sql = 'SELECT bills.number AS bill_number, video_clips.time_start, video_clips.time_end,
@@ -906,13 +917,13 @@ class Video
 					WHERE bill_id IS NOT NULL AND legislator_id IS NULL
 					AND video_clips.file_id=' . $this->id;
         } else {
-            $sql = 'SELECT representatives.name_formatted AS legislator_name,
+            $sql = 'SELECT terms.name_formatted AS legislator_name,
 					bills.number AS bill_number,
 					video_clips.bill_id, video_clips.time_start, video_clips.time_end,
 					video_clips.screenshot
 					FROM video_clips
-					LEFT JOIN representatives
-						ON video_clips.legislator_id = representatives.id
+					LEFT JOIN terms
+						ON video_clips.legislator_id = terms.id
 					LEFT JOIN bills
 						ON video_clips.bill_id = bills.id
 					WHERE video_clips.file_id=' . $this->id;
@@ -1097,11 +1108,11 @@ class Video
         }
 
         # SELECT A LIST OF EVERY SPEAKER AND BILL, BY TIME
-        $sql = 'SELECT representatives.name_formatted AS legislator, bills.number AS bill,
+        $sql = 'SELECT terms.name_formatted AS legislator, bills.number AS bill,
 				video_clips.time_start, video_clips.time_end
 				FROM video_clips
-				LEFT JOIN representatives
-					ON video_clips.legislator_id = representatives.id
+				LEFT JOIN terms
+					ON video_clips.legislator_id = terms.id
 				LEFT JOIN bills
 					ON video_clips.bill_id = bills.id
 				WHERE video_clips.file_id = ' . $this->id . '
@@ -1193,7 +1204,7 @@ class Video
                  * Convert the time to seconds (dropping microseconds).
                  */
                 $caption->{$time} = preg_replace("/^([\d]{2})\:([\d]{2})\:([\d]{2}),([\d]{3})$/", "$1:$2:$3.$4", $caption->{$time});
-                sscanf($caption->time_start, "%d:%d:%d.%d", $hours, $minutes, $seconds, $microseconds);
+                sscanf($caption->{$time}, "%d:%d:%d.%d", $hours, $minutes, $seconds, $ms);
                 $caption->{$time} = $hours * 3600 + $minutes * 60 + $seconds;
 
                 /*
@@ -1204,7 +1215,7 @@ class Video
                 /*
                  * Format the seconds as HH:MM:SS again.
                  */
-                $caption->{$time} = gmdate("H:i:s", $caption->{$time}) . '.' . $microseconds;
+                $caption->{$time} = gmdate("H:i:s", $caption->{$time}) . '.' . $ms;
             }
         }
 
@@ -1465,13 +1476,18 @@ class Video
              * Speaker of the House, ID it as such.
              */
             if (mb_strlen($transcript) < self::MAX_PHRASE_LENGTH_FOR_SPEAKER_ID) {
+                $speaker_matched = false;
                 foreach ($phrases['speaker'] as $phrase) {
                     if (mb_stripos($transcript, $phrase) !== false) {
                         foreach ($caption as &$line) {
                             $line['legislator_id'] = HOUSE_SPEAKER_ID;
                         }
-                        continue;
+                        $speaker_matched = true;
+                        break;
                     }
+                }
+                if ($speaker_matched) {
+                    continue;
                 }
             }
 
@@ -1483,6 +1499,7 @@ class Video
              * If this text's timespan substantially overlaps with a chyron timespan,
              * then call it a match.
              */
+            $clip_matched = false;
             foreach ($clips as &$clip) {
                 if (
                     abs($time['start'] - $clip['timestamp_start']) < self::SPEAKER_MATCH_START_THRESHOLD
@@ -1492,8 +1509,12 @@ class Video
                     foreach ($caption as &$line) {
                         $line['legislator_id'] = $clip['legislator_id'];
                     }
-                    continue;
+                    $clip_matched = true;
+                    break;
                 }
+            }
+            if ($clip_matched) {
+                continue;
             }
 
             /*
@@ -1553,13 +1574,15 @@ class Video
                  * First we check without verifying the location, since the named location
                  * isn't necessarily a county or city (leading to under-matches).
                  */
-                $sql = 'SELECT id
-						FROM representatives
-						WHERE name LIKE "' . $name . '%" ';
+                $sql = 'SELECT terms.id
+						FROM terms
+						LEFT JOIN people
+							ON terms.person_id = people.id
+						WHERE people.name LIKE "' . $name . '%" ';
                 if (!empty($sex)) {
-                    $sql .= 'AND sex = "' . $sex . '" ';
+                    $sql .= 'AND people.sex = "' . $sex . '" ';
                 }
-                $sql .= 'AND chamber =
+                $sql .= 'AND terms.chamber =
 							(SELECT chamber
 							FROM files
 							WHERE id=' . $this->file_id . ')';
@@ -1570,21 +1593,23 @@ class Video
                  * with location.
                  */
                 if (mysqli_num_rows($result) > 1) {
-                    $sql = 'SELECT representatives.id
-							FROM representatives
+                    $sql = 'SELECT terms.id
+							FROM terms
+							LEFT JOIN people
+								ON terms.person_id = people.id
 							LEFT JOIN districts
-								ON representatives.district_id = districts.id
-							WHERE representatives.name LIKE "' . $name . '%" ';
+								ON terms.district_id = districts.id
+							WHERE people.name LIKE "' . $name . '%" ';
                     if (!empty($sex)) {
-                        $sql .= 'AND representatives.sex = "' . $sex . '" ';
+                        $sql .= 'AND people.sex = "' . $sex . '" ';
                     }
                     $sql .= '
-							AND representatives.chamber =
+							AND terms.chamber =
 								(SELECT chamber
 								FROM files
 								WHERE files.id=' . $this->file_id . ')
 							AND
-								(representatives.place LIKE "' . $place . '%"
+								(terms.place LIKE "' . $place . '%"
 								OR
 								districts.description LIKE "%' . $place . '%")';
                     $result = mysqli_query($GLOBALS['db'], $sql);
@@ -1666,11 +1691,13 @@ class Video
          */
         $sql = 'SELECT video_transcript.id, video_transcript.text, video_transcript.time_start,
 				video_transcript.time_end, video_transcript.new_speaker,
-				video_transcript.legislator_id, representatives.name,
-				representatives.shortname
+				video_transcript.legislator_id, people.name,
+				people.shortname
 				FROM video_transcript
-				LEFT JOIN representatives
-					ON video_transcript.legislator_id = representatives.id
+				LEFT JOIN terms
+					ON video_transcript.legislator_id = terms.id
+				LEFT JOIN people
+					ON terms.person_id = people.id
 				WHERE file_id=' . $this->file_id . '
 				ORDER BY time_start ASC';
         $result = mysqli_query($GLOBALS['db'], $sql);
@@ -1849,7 +1876,7 @@ class Video
         foreach ($words as $word) {
             $word = str_replace('.', '\.', $word);
             $find = '/(\b)' . mb_strtolower($word) . '(\b)/';
-            $replace = '\1' . $word . ' \1';
+            $replace = '\1' . $word . '\2';
             $return = preg_replace($find, $replace, $return);
         }
 

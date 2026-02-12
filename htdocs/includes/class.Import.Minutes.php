@@ -94,114 +94,129 @@ trait ImportMinutes
      */
     public function parse_house_minutes_id(string $html): ?int
     {
-        if (preg_match('/id="minute-id"\\s+value="(\\d+)"/', $html, $matches)) {
+        if (preg_match('/<input[^>]+id=["\']minute-id["\'][^>]+value=["\'](\d+)["\']/', $html, $matches)) {
             return (int)$matches[1];
         }
-
+        if (preg_match('/<input[^>]+value=["\'](\d+)["\'][^>]+id=["\']minute-id["\']/', $html, $matches)) {
+            return (int)$matches[1];
+        }
         return null;
     }
 
     /**
-     * Extract the House minutes date and text content from the HTML.
+     * Extract House minutes data (date and text) from HTML.
      *
-     * @param string $html
-     * @return array|null
+     * Produces plain text with double newlines between paragraphs, suitable
+     * for storage and display via nl2p(). Strips all buttons, controls, and
+     * decorative markup from the source HTML.
+     *
+     * @param string $html HTML response from the House minutes scraper.
+     *
+     * @return array|null Array with 'date' and 'text' keys, or null on failure.
      */
     public function extract_house_minutes_data(string $html): ?array
     {
         $dom = new DOMDocument();
-        libxml_use_internal_errors(true);
-        $html = '<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">' . $html;
-        $loaded = $dom->loadHTML($html);
-        libxml_clear_errors();
-
-        if (!$loaded) {
-            return null;
-        }
-
+        @$dom->loadHTML($html, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
         $xpath = new DOMXPath($dom);
-        $container = $xpath->query(
-            '//div[contains(concat(" ", normalize-space(@class), " "), " minutes-admin-vga ")]'
-        )->item(0);
 
-        if (!$container) {
+        $minutes_admin = $xpath->query('//div[@class="minutes-admin-vga"]');
+        if ($minutes_admin->length === 0) {
             return null;
         }
 
-        $date_text = '';
-        $header = $xpath->query('.//header', $container)->item(0);
-        if ($header) {
-            $h5s = $xpath->query('.//h5', $header);
-            if ($h5s->length > 0) {
-                $date_text = trim($h5s->item($h5s->length - 1)->textContent);
-            }
-        }
+        $root = $minutes_admin->item(0);
 
-        $date_text = preg_replace('/\\s+/', ' ', $date_text);
-        $minutes_date = '';
-        if (!empty($date_text)) {
-            $date = DateTime::createFromFormat('l, F j, Y', $date_text);
-            if (!$date) {
-                $timestamp = strtotime($date_text);
-                if ($timestamp !== false) {
-                    $date = new DateTime('@' . $timestamp);
+        // Extract date and header lines from the <header> h5 elements
+        $date = null;
+        $header_lines = [];
+        foreach ($xpath->query('.//header//h5', $root) as $h5) {
+            $text = trim($h5->textContent);
+            if ($text !== '') {
+                $header_lines[] = $text;
+            }
+            if ($date === null && preg_match(
+                '/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),\s+(.+)$/i',
+                $text,
+                $matches
+            )) {
+                $parsed = strtotime($matches[2]);
+                if ($parsed !== false) {
+                    $date = date('Y-m-d', $parsed);
                 }
             }
-            if ($date) {
-                $minutes_date = $date->format('Y-m-d');
-            }
         }
 
-        if (empty($minutes_date)) {
+        if ($date === null) {
             return null;
         }
 
-        foreach ($xpath->query('.//script|.//style', $container) as $node) {
-            $node->parentNode->removeChild($node);
-        }
+        $paragraphs = [implode("\n", $header_lines)];
 
-        foreach ($xpath->query('.//*[contains(concat(" ", normalize-space(@class), " "), " controls ")]', $container)
-            as $node) {
-            $node->parentNode->removeChild($node);
+        // Pull text from each section. In the full admin HTML each section has
+        // a div.section-content wrapper; fall back to the section element itself
+        // for simpler renderings that use plain <p> tags directly.
+        foreach ($xpath->query('.//section', $root) as $section) {
+            $content_nodes = $xpath->query('.//div[contains(@class,"section-content")]', $section);
+            if ($content_nodes->length > 0) {
+                foreach ($content_nodes as $content_node) {
+                    $text = $this->extract_minutes_text($content_node);
+                    if ($text !== '') {
+                        $paragraphs[] = $text;
+                    }
+                }
+            } else {
+                $text = $this->extract_minutes_text($section);
+                if ($text !== '') {
+                    $paragraphs[] = $text;
+                }
+            }
         }
-
-        $inner_html = '';
-        foreach ($container->childNodes as $child) {
-            $inner_html .= $dom->saveHTML($child);
-        }
-
-        $minutes_text = $this->house_minutes_html_to_text($inner_html);
 
         return [
-            'date' => $minutes_date,
-            'text' => $minutes_text,
+            'date' => $date,
+            'text' => implode("\n\n", $paragraphs),
         ];
     }
 
     /**
-     * Normalize House minutes HTML into display-ready text with line breaks.
+     * Recursively extract plain text from a DOM node, skipping interactive
+     * and decorative elements. Inserts spaces between sibling block elements
+     * to prevent words from running together.
      *
-     * @param string $html
+     * @param DOMNode $node
      * @return string
      */
-    public function house_minutes_html_to_text(string $html): string
+    private function extract_minutes_text(DOMNode $node): string
     {
-        $html = preg_replace('/<\\s*br\\s*\\/?\\s*>/i', "\n", $html);
-        $html = preg_replace(
-            '/<\\/\\s*(p|div|section|header|h[1-6]|li|ul|ol|table|tr|td|th|blockquote)\\s*>/i',
-            "\n",
-            $html
-        );
-        $html = preg_replace('/<\\s*li\\b[^>]*>/i', '- ', $html);
-        $text = strip_tags($html);
-        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        $text = preg_replace("/\\r\\n?/", "\n", $text);
-        $text = preg_replace("/[ \\t]+\\n/", "\n", $text);
-        $text = preg_replace("/\\n{3,}/", "\n\n", $text);
-        $text = trim($text);
+        if ($node->nodeType === XML_TEXT_NODE) {
+            return $node->textContent;
+        }
 
-        $text = htmlspecialchars($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if ($node->nodeType !== XML_ELEMENT_NODE) {
+            return '';
+        }
 
-        return nl2br($text);
+        $tag = strtolower($node->nodeName);
+
+        // Drop buttons, inputs, icons, and scripts entirely
+        if (in_array($tag, ['button', 'input', 'i', 'script', 'style'], true)) {
+            return '';
+        }
+
+        // Drop the controls div (move/delete buttons, directional handles)
+        if ($tag === 'div' && preg_match('/\bcontrols\b/', (string)$node->getAttribute('class'))) {
+            return '';
+        }
+
+        $parts = [];
+        foreach ($node->childNodes as $child) {
+            $child_text = $this->extract_minutes_text($child);
+            if ($child_text !== '') {
+                $parts[] = $child_text;
+            }
+        }
+
+        return trim(preg_replace('/\s+/', ' ', implode(' ', $parts)));
     }
 }

@@ -23,14 +23,26 @@ include_once 'vendor/autoload.php';
 // page.
 $database = new Database();
 $database->connect_mysqli();
-$log = new Log();
 
-// INITIALIZE SESSION
-session_start();
+// Detect bots early so we can skip session overhead for them.
+$is_bot = false;
+$bots = array('Googlebot', 'msnbot', 'Gigabot', 'Slurp', 'Teoma', 'ia_archiver', 'Yandex',
+            'Heritrix', 'twiceler', 'bingbot', 'bot', 'updown.io');
+if (isset($_SERVER['HTTP_USER_AGENT'])) {
+    foreach ($bots as $bot) {
+        if (mb_stripos($_SERVER['HTTP_USER_AGENT'], $bot) !== false) {
+            $is_bot = true;
+            break;
+        }
+    }
+}
 
-// Grab the user data.
-if (logged_in() === true) {
-    $user = get_user();
+// Only start a session for real users.
+if (!$is_bot) {
+    session_start();
+    if (logged_in() === true) {
+        $user = get_user();
+    }
 }
 
 $debug_timing['logged in'] = microtime(true);
@@ -96,34 +108,6 @@ $impact_statements = $fis->impact_statements();
 
 if ($impact_statements === false) {
     unset($impact_statements);
-}
-
-// We want to record a view count hit for this bill, but only if this is a real user, not a
-// search engine. Start by defining a list of bots.
-$bots = array('Googlebot', 'msnbot', 'Gigabot', 'Slurp', 'Teoma', 'ia_archiver', 'Yandex',
-            'Heritrix', 'twiceler', 'bingbot', 'bot', 'updown.io');
-// Check to see if the current user agent is a known bot.
-if (isset($_SERVER['HTTP_USER_AGENT'])) {
-    foreach ($bots as $bot) {
-        if (mb_stripos($_SERVER['HTTP_USER_AGENT'], $bot) !== false) {
-            $is_bot = true;
-            break;
-        }
-    }
-}
-// Update bills_views to reflect this view, provided that this visitor hasn't been defined
-// as a bot.
-if (!isset($is_bot)) {
-    if (filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP)) {
-        // Increment the view counter for this bill.
-        $sql = 'INSERT INTO bills_views
-                SET bill_id = ' . $bill['id'] . ', ip="' . $_SERVER['REMOTE_ADDR'] . '"';
-        if (isset($user) && !empty($user['id'])) {
-            $sql .= ', user_id = ' . $user['id'];
-        }
-
-        mysqli_query($GLOBALS['db'], $sql);
-    }
 }
 
 // PAGE METADATA
@@ -1113,24 +1097,31 @@ if (isset($bill['places']) && (count($bill['places']) > 0)) {
 
 if (($bill['video'] !== false) && (count($bill['video']) > 0)) {
     /*
-     * Generate a text transcript of these clips.
+     * Generate a text transcript of these clips in a single query.
      */
     $transcript = array();
+    $conditions = [];
     foreach ($bill['video'] as $video) {
-        $sql = 'SELECT representatives.name_formatted AS speaker, video_transcript.text
-				FROM video_transcript
-				LEFT JOIN representatives
-					ON video_transcript.legislator_id = representatives.id
-				WHERE video_transcript.file_id=' . $video->file_id . '
-					AND time_start >= " ' . seconds_to_time($video->start) . ' "
-					AND time_end <= " ' . seconds_to_time($video->end) . ' "
-				ORDER BY video_transcript.time_start ASC';
+        $conditions[] = '(video_transcript.file_id=' . (int)$video->file_id
+            . ' AND time_start >= "' . seconds_to_time($video->start) . '"'
+            . ' AND time_end <= "' . seconds_to_time($video->end) . '")';
+    }
+    if (count($conditions) > 0) {
+        $sql = 'SELECT video_transcript.file_id, representatives.name_formatted AS speaker,
+                    video_transcript.text
+                FROM video_transcript
+                LEFT JOIN representatives
+                    ON video_transcript.legislator_id = representatives.id
+                WHERE ' . implode(' OR ', $conditions) . '
+                ORDER BY video_transcript.file_id ASC, video_transcript.time_start ASC';
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) > 0) {
-            $transcript[$video->file_id] = array();
-
+        if ($result && mysqli_num_rows($result) > 0) {
             while ($line = mysqli_fetch_assoc($result)) {
-                $transcript[$video->file_id][] = $line;
+                $fid = $line['file_id'];
+                if (!isset($transcript[$fid])) {
+                    $transcript[$fid] = array();
+                }
+                $transcript[$fid][] = $line;
             }
         }
     }
@@ -1565,4 +1556,14 @@ if (isset($user) && ($user['id'] == '5059')) {
     echo '<tr><td>Total</td><td>' . round(microtime(true) - $start_time, 3) . '</td></tr>';
 
     echo '</table></div>';
+}
+
+// Record the view count after output, so it doesn't block page rendering.
+if (!$is_bot && filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP)) {
+    $sql = 'INSERT INTO bills_views
+            SET bill_id = ' . $bill['id'] . ', ip="' . $_SERVER['REMOTE_ADDR'] . '"';
+    if (isset($user) && !empty($user['id'])) {
+        $sql .= ', user_id = ' . $user['id'];
+    }
+    mysqli_query($GLOBALS['db'], $sql);
 }
