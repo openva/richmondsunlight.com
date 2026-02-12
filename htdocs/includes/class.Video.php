@@ -223,6 +223,7 @@ class Video
         exec('/usr/bin/mplayer -ao null -vo null -identify -frames 0 ' . CLI_ROOT
             . $this->path, $mplayer);
 
+        $newoptions = array();
         foreach ($mplayer as $option) {
             if (mb_strpos($option, '=') !== false) {
                 $tmp = explode('=', $option);
