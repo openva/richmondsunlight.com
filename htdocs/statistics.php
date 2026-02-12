@@ -236,11 +236,12 @@ foreach ($chambers as $chamber_key => $chamber_label) {
     $chamber_sql = mysqli_real_escape_string($GLOBALS['db'], $chamber_key);
 
     // Nodes: current legislators in this chamber
-    $sql = 'SELECT representatives.id, representatives.name_formatted AS name,
-                   representatives.shortname, representatives.party
-            FROM representatives
-            WHERE chamber = "' . $chamber_sql . '"
-              AND date_ended IS NULL';
+    $sql = 'SELECT people.id, people.name, people.shortname,
+                   terms.name_formatted, terms.party
+            FROM people
+            JOIN terms ON people.id = terms.person_id
+            WHERE terms.chamber = "' . $chamber_sql . '"
+              AND terms.date_ended IS NULL';
     $result = mysqli_query($GLOBALS['db'], $sql);
     $nodes = [];
     $node_index = [];
@@ -254,16 +255,18 @@ foreach ($chambers as $chamber_key => $chamber_label) {
     }
 
     // Edges: copatroning pairs within this chamber for the current session
-    $sql = 'SELECT a.legislator_id AS source, b.legislator_id AS target, COUNT(*) AS weight
+    // bills_copatrons.legislator_id = terms.id (not person_id),
+    // so join on terms.id and return person_id to match the node index.
+    $sql = 'SELECT ta.person_id AS source, tb.person_id AS target, COUNT(*) AS weight
             FROM bills_copatrons a
             JOIN bills_copatrons b ON a.bill_id = b.bill_id AND a.legislator_id < b.legislator_id
             JOIN bills ON a.bill_id = bills.id
-            JOIN representatives ra ON a.legislator_id = ra.id
-            JOIN representatives rb ON b.legislator_id = rb.id
+            JOIN terms ta ON a.legislator_id = ta.id
+            JOIN terms tb ON b.legislator_id = tb.id
             WHERE bills.session_id = ' . SESSION_ID . '
-              AND ra.chamber = "' . $chamber_sql . '"
-              AND rb.chamber = "' . $chamber_sql . '"
-            GROUP BY a.legislator_id, b.legislator_id
+              AND ta.chamber = "' . $chamber_sql . '"
+              AND tb.chamber = "' . $chamber_sql . '"
+            GROUP BY ta.person_id, tb.person_id
             HAVING weight >= 2
             ORDER BY weight DESC';
     $result = mysqli_query($GLOBALS['db'], $sql);
@@ -290,8 +293,10 @@ foreach ($chambers as $chamber_key => $chamber_label) {
     // Only render if we have nodes
     if (count($nodes) > 0) {
         $nodes_json = json_encode(array_map(function ($n) {
+            $last_name = strstr($n['name'], ',', true) ?: $n['name'];
             return [
-                'name' => $n['name'],
+                'name' => $n['name_formatted'],
+                'last_name' => $last_name,
                 'shortname' => $n['shortname'],
                 'party' => $n['party'],
             ];
@@ -342,11 +347,11 @@ names, click to visit a legislator's page.</p>
         .on('zoom', function(event) { g.attr('transform', event.transform); })
     );
 
-    // Weight scale for edge thickness
+    // Weight scales for edge thickness and opacity
     var weights = links.map(function(l) { return l.weight; });
-    var strokeScale = d3.scaleLinear()
-        .domain([d3.min(weights) || 1, d3.max(weights) || 1])
-        .range([0.5, 4]);
+    var wMin = d3.min(weights) || 1, wMax = d3.max(weights) || 1;
+    var strokeScale = d3.scaleLinear().domain([wMin, wMax]).range([0.5, 6]);
+    var opacityScale = d3.scaleLinear().domain([wMin, wMax]).range([0.15, 0.85]);
 
     var simulation = d3.forceSimulation(nodes)
         .force('link', d3.forceLink(links)
@@ -362,19 +367,15 @@ names, click to visit a legislator's page.</p>
         .selectAll('line')
         .data(links)
         .enter().append('line')
-        .attr('stroke', '#999')
-        .attr('stroke-opacity', 0.4)
+        .attr('stroke', '#555')
+        .attr('stroke-opacity', function(d) { return opacityScale(d.weight); })
         .attr('stroke-width', function(d) { return strokeScale(d.weight); });
 
-    var node = g.append('g')
-        .selectAll('circle')
+    var nodeGroup = g.append('g')
+        .selectAll('g')
         .data(nodes)
-        .enter().append('circle')
+        .enter().append('g')
         .attr('class', 'node')
-        .attr('r', 6)
-        .attr('fill', function(d) { return partyColor[d.party] || '#7f8c8d'; })
-        .attr('stroke', '#fff')
-        .attr('stroke-width', 1.5)
         .call(d3.drag()
             .on('start', function(event, d) {
                 if (!event.active) simulation.alphaTarget(0.3).restart();
@@ -389,14 +390,28 @@ names, click to visit a legislator's page.</p>
             })
         );
 
-    // Tooltip
+    nodeGroup.append('circle')
+        .attr('r', 6)
+        .attr('fill', function(d) { return partyColor[d.party] || '#7f8c8d'; })
+        .attr('stroke', '#fff')
+        .attr('stroke-width', 1.5);
+
+    nodeGroup.append('text')
+        .text(function(d) { return d.last_name; })
+        .attr('dx', 8)
+        .attr('dy', '.35em')
+        .attr('font-size', '9px')
+        .attr('fill', '#333')
+        .attr('pointer-events', 'none');
+
+    // Tooltip (shows full name on hover)
     var tip = document.getElementById('{$container_id}-tip');
-    node.on('mouseover', function(event, d) {
+    nodeGroup.on('mouseover', function(event, d) {
             tip.textContent = d.name;
             tip.style.display = 'block';
             tip.style.left = (event.offsetX + 10) + 'px';
             tip.style.top = (event.offsetY - 10) + 'px';
-            d3.select(this).attr('r', 9);
+            d3.select(this).select('circle').attr('r', 9);
         })
         .on('mousemove', function(event) {
             tip.style.left = (event.offsetX + 10) + 'px';
@@ -404,7 +419,7 @@ names, click to visit a legislator's page.</p>
         })
         .on('mouseout', function() {
             tip.style.display = 'none';
-            d3.select(this).attr('r', 6);
+            d3.select(this).select('circle').attr('r', 6);
         })
         .on('click', function(event, d) {
             window.location.href = '/legislator/' + d.shortname + '/';
@@ -415,8 +430,7 @@ names, click to visit a legislator's page.</p>
             .attr('y1', function(d) { return d.source.y; })
             .attr('x2', function(d) { return d.target.x; })
             .attr('y2', function(d) { return d.target.y; });
-        node.attr('cx', function(d) { return d.x; })
-            .attr('cy', function(d) { return d.y; });
+        nodeGroup.attr('transform', function(d) { return 'translate(' + d.x + ',' + d.y + ')'; });
     });
 
     // After simulation settles, fit viewBox to actual node positions
