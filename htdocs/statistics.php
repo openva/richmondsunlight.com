@@ -27,8 +27,51 @@ $html_head = '<style>
         list-style: decimal;
         margin-left: 2em;
     }
+    .copatron-network {
+        position: relative;
+        border: 1px solid #dccbaf;
+        border-radius: 4px;
+        margin-bottom: 1.5em;
+        overflow: hidden;
+    }
+    .copatron-network svg {
+        display: block;
+        width: 100%;
+    }
+    .copatron-tooltip {
+        position: absolute;
+        background: rgba(0,0,0,.8);
+        color: #fff;
+        padding: 4px 8px;
+        border-radius: 3px;
+        font-size: 12px;
+        pointer-events: none;
+        white-space: nowrap;
+        display: none;
+    }
+    .copatron-network .node { cursor: pointer; }
+    .copatron-network .node:hover { stroke-width: 3px; }
+    .copatron-legend {
+        font-size: 13px;
+        color: #555;
+        margin-bottom: .5em;
+    }
+    .copatron-legend span {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 3px;
+        vertical-align: middle;
+    }
+    .copatron-legend em {
+        margin-left: 12px;
+        font-style: italic;
+        color: #888;
+    }
 </style>
-<script src="/js/vendor/chart.js/dist/chart.umd.js"></script>';
+<script src="/js/vendor/chart.js/dist/chart.umd.js"></script>
+<script src="/js/vendor/d3/dist/d3.min.js"></script>';
 
 # PAGE CONTENT
 $page_body = '';
@@ -185,6 +228,210 @@ if (mysqli_num_rows($result) > 0) {
             . strtoupper($bill['number']) . '</a>: ' . $bill['catch_line'] . '</li>';
     }
     $page_body .= '</ol>';
+}
+
+# COPATRONING NETWORK GRAPHS
+$chambers = ['house' => 'House', 'senate' => 'Senate'];
+foreach ($chambers as $chamber_key => $chamber_label) {
+    $chamber_sql = mysqli_real_escape_string($GLOBALS['db'], $chamber_key);
+
+    // Nodes: current legislators in this chamber
+    $sql = 'SELECT representatives.id, representatives.name_formatted AS name,
+                   representatives.shortname, representatives.party
+            FROM representatives
+            WHERE chamber = "' . $chamber_sql . '"
+              AND date_ended IS NULL';
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    $nodes = [];
+    $node_index = [];
+    if ($result && mysqli_num_rows($result) > 0) {
+        $i = 0;
+        while ($row = mysqli_fetch_assoc($result)) {
+            $nodes[] = $row;
+            $node_index[$row['id']] = $i;
+            $i++;
+        }
+    }
+
+    // Edges: copatroning pairs within this chamber for the current session
+    $sql = 'SELECT a.legislator_id AS source, b.legislator_id AS target, COUNT(*) AS weight
+            FROM bills_copatrons a
+            JOIN bills_copatrons b ON a.bill_id = b.bill_id AND a.legislator_id < b.legislator_id
+            JOIN bills ON a.bill_id = bills.id
+            JOIN representatives ra ON a.legislator_id = ra.id
+            JOIN representatives rb ON b.legislator_id = rb.id
+            WHERE bills.session_id = ' . SESSION_ID . '
+              AND ra.chamber = "' . $chamber_sql . '"
+              AND rb.chamber = "' . $chamber_sql . '"
+            GROUP BY a.legislator_id, b.legislator_id
+            HAVING weight >= 2
+            ORDER BY weight DESC';
+    $result = mysqli_query($GLOBALS['db'], $sql);
+    $edges = [];
+    if ($result && mysqli_num_rows($result) > 0) {
+        while ($row = mysqli_fetch_assoc($result)) {
+            // Map legislator IDs to node indices
+            if (isset($node_index[$row['source']]) && isset($node_index[$row['target']])) {
+                $edges[] = [
+                    'source' => $node_index[$row['source']],
+                    'target' => $node_index[$row['target']],
+                    'weight' => (int)$row['weight'],
+                ];
+            }
+        }
+    }
+
+    // Cap edges to keep graph readable
+    $edge_cap = ($chamber_key === 'house') ? 400 : 200;
+    if (count($edges) > $edge_cap) {
+        $edges = array_slice($edges, 0, $edge_cap);
+    }
+
+    // Only render if we have nodes
+    if (count($nodes) > 0) {
+        $nodes_json = json_encode(array_map(function ($n) {
+            return [
+                'name' => $n['name'],
+                'shortname' => $n['shortname'],
+                'party' => $n['party'],
+            ];
+        }, $nodes));
+        $edges_json = json_encode($edges);
+        $svg_height = ($chamber_key === 'house') ? 600 : 450;
+        $container_id = 'copatron-' . $chamber_key;
+
+        $page_body .= <<<EOD
+
+<h2>{$chamber_label} Copatroning Network</h2>
+<p>Legislators who copatron bills together are linked below. Thicker lines mean
+more bills copatroned together. Drag to rearrange, scroll to zoom, hover for
+names, click to visit a legislator's page.</p>
+<div class="copatron-legend">
+    <span style="background:#c0392b;"></span> Republican
+    <span style="background:#2980b9; margin-left:8px;"></span> Democrat
+    <span style="background:#7f8c8d; margin-left:8px;"></span> Independent
+    <em>Drag nodes &middot; Scroll to zoom</em>
+</div>
+<div class="copatron-network" id="{$container_id}">
+    <div class="copatron-tooltip" id="{$container_id}-tip"></div>
+</div>
+
+<script>
+(function() {
+    var nodes = {$nodes_json};
+    var links = {$edges_json};
+    if (nodes.length === 0) return;
+
+    var container = document.getElementById('{$container_id}');
+    var width = container.clientWidth || 800;
+    var height = {$svg_height};
+
+    var partyColor = { R: '#c0392b', D: '#2980b9', I: '#7f8c8d' };
+
+    var svg = d3.select('#' + '{$container_id}')
+        .append('svg')
+        .attr('width', width)
+        .attr('height', height)
+        .attr('viewBox', '0 0 ' + width + ' ' + height);
+
+    var g = svg.append('g');
+
+    // Zoom
+    svg.call(d3.zoom()
+        .scaleExtent([0.3, 5])
+        .on('zoom', function(event) { g.attr('transform', event.transform); })
+    );
+
+    // Weight scale for edge thickness
+    var weights = links.map(function(l) { return l.weight; });
+    var strokeScale = d3.scaleLinear()
+        .domain([d3.min(weights) || 1, d3.max(weights) || 1])
+        .range([0.5, 4]);
+
+    var simulation = d3.forceSimulation(nodes)
+        .force('link', d3.forceLink(links)
+            .distance(60)
+            .strength(function(l) { return Math.min(l.weight / 10, 1); })
+        )
+        .force('charge', d3.forceManyBody().strength(-40))
+        .force('x', d3.forceX(width / 2).strength(0.1))
+        .force('y', d3.forceY(height / 2).strength(0.1))
+        .force('collide', d3.forceCollide(10));
+
+    var link = g.append('g')
+        .selectAll('line')
+        .data(links)
+        .enter().append('line')
+        .attr('stroke', '#999')
+        .attr('stroke-opacity', 0.4)
+        .attr('stroke-width', function(d) { return strokeScale(d.weight); });
+
+    var node = g.append('g')
+        .selectAll('circle')
+        .data(nodes)
+        .enter().append('circle')
+        .attr('class', 'node')
+        .attr('r', 6)
+        .attr('fill', function(d) { return partyColor[d.party] || '#7f8c8d'; })
+        .attr('stroke', '#fff')
+        .attr('stroke-width', 1.5)
+        .call(d3.drag()
+            .on('start', function(event, d) {
+                if (!event.active) simulation.alphaTarget(0.3).restart();
+                d.fx = d.x; d.fy = d.y;
+            })
+            .on('drag', function(event, d) {
+                d.fx = event.x; d.fy = event.y;
+            })
+            .on('end', function(event, d) {
+                if (!event.active) simulation.alphaTarget(0);
+                d.fx = null; d.fy = null;
+            })
+        );
+
+    // Tooltip
+    var tip = document.getElementById('{$container_id}-tip');
+    node.on('mouseover', function(event, d) {
+            tip.textContent = d.name;
+            tip.style.display = 'block';
+            tip.style.left = (event.offsetX + 10) + 'px';
+            tip.style.top = (event.offsetY - 10) + 'px';
+            d3.select(this).attr('r', 9);
+        })
+        .on('mousemove', function(event) {
+            tip.style.left = (event.offsetX + 10) + 'px';
+            tip.style.top = (event.offsetY - 10) + 'px';
+        })
+        .on('mouseout', function() {
+            tip.style.display = 'none';
+            d3.select(this).attr('r', 6);
+        })
+        .on('click', function(event, d) {
+            window.location.href = '/legislator/' + d.shortname + '/';
+        });
+
+    simulation.on('tick', function() {
+        link.attr('x1', function(d) { return d.source.x; })
+            .attr('y1', function(d) { return d.source.y; })
+            .attr('x2', function(d) { return d.target.x; })
+            .attr('y2', function(d) { return d.target.y; });
+        node.attr('cx', function(d) { return d.x; })
+            .attr('cy', function(d) { return d.y; });
+    });
+
+    // After simulation settles, fit viewBox to actual node positions
+    simulation.on('end', function() {
+        var xs = nodes.map(function(n) { return n.x; });
+        var ys = nodes.map(function(n) { return n.y; });
+        var pad = 30;
+        var minX = d3.min(xs) - pad, maxX = d3.max(xs) + pad;
+        var minY = d3.min(ys) - pad, maxY = d3.max(ys) + pad;
+        svg.attr('viewBox', minX + ' ' + minY + ' ' + (maxX - minX) + ' ' + (maxY - minY));
+    });
+})();
+</script>
+EOD;
+    }
 }
 
 # SIDEBAR
