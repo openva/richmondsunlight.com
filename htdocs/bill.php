@@ -1097,24 +1097,31 @@ if (isset($bill['places']) && (count($bill['places']) > 0)) {
 
 if (($bill['video'] !== false) && (count($bill['video']) > 0)) {
     /*
-     * Generate a text transcript of these clips.
+     * Generate a text transcript of these clips in a single query.
      */
     $transcript = array();
+    $conditions = [];
     foreach ($bill['video'] as $video) {
-        $sql = 'SELECT representatives.name_formatted AS speaker, video_transcript.text
-				FROM video_transcript
-				LEFT JOIN representatives
-					ON video_transcript.legislator_id = representatives.id
-				WHERE video_transcript.file_id=' . $video->file_id . '
-					AND time_start >= " ' . seconds_to_time($video->start) . ' "
-					AND time_end <= " ' . seconds_to_time($video->end) . ' "
-				ORDER BY video_transcript.time_start ASC';
+        $conditions[] = '(video_transcript.file_id=' . (int)$video->file_id
+            . ' AND time_start >= "' . seconds_to_time($video->start) . '"'
+            . ' AND time_end <= "' . seconds_to_time($video->end) . '")';
+    }
+    if (count($conditions) > 0) {
+        $sql = 'SELECT video_transcript.file_id, representatives.name_formatted AS speaker,
+                    video_transcript.text
+                FROM video_transcript
+                LEFT JOIN representatives
+                    ON video_transcript.legislator_id = representatives.id
+                WHERE ' . implode(' OR ', $conditions) . '
+                ORDER BY video_transcript.file_id ASC, video_transcript.time_start ASC';
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) > 0) {
-            $transcript[$video->file_id] = array();
-
+        if ($result && mysqli_num_rows($result) > 0) {
             while ($line = mysqli_fetch_assoc($result)) {
-                $transcript[$video->file_id][] = $line;
+                $fid = $line['file_id'];
+                if (!isset($transcript[$fid])) {
+                    $transcript[$fid] = array();
+                }
+                $transcript[$fid][] = $line;
             }
         }
     }
