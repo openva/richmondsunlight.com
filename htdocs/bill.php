@@ -23,7 +23,6 @@ include_once 'vendor/autoload.php';
 // page.
 $database = new Database();
 $database->connect_mysqli();
-$log = new Log();
 
 // INITIALIZE SESSION
 session_start();
