@@ -762,6 +762,11 @@ class Video
         $this->clip_type = 'legislators';
         $this->index_clips();
 
+        # If there no clips were identified by index_clips(), then we're done here.
+        if (!isset($this->clips) || count($this->clips) == 0) {
+            return true;
+        }
+
         # Increment our counter.
         $this->clip_count = $this->clip_count + count($this->clips);
 
@@ -1193,7 +1198,7 @@ class Video
                  * Convert the time to seconds (dropping microseconds).
                  */
                 $caption->{$time} = preg_replace("/^([\d]{2})\:([\d]{2})\:([\d]{2}),([\d]{3})$/", "$1:$2:$3.$4", $caption->{$time});
-                sscanf($caption->time_start, "%d:%d:%d.%d", $hours, $minutes, $seconds, $microseconds);
+                sscanf($caption->{$time}, "%d:%d:%d.%d", $hours, $minutes, $seconds, $microseconds);
                 $caption->{$time} = $hours * 3600 + $minutes * 60 + $seconds;
 
                 /*
@@ -1465,13 +1470,18 @@ class Video
              * Speaker of the House, ID it as such.
              */
             if (mb_strlen($transcript) < self::MAX_PHRASE_LENGTH_FOR_SPEAKER_ID) {
+                $speaker_matched = false;
                 foreach ($phrases['speaker'] as $phrase) {
                     if (mb_stripos($transcript, $phrase) !== false) {
                         foreach ($caption as &$line) {
                             $line['legislator_id'] = HOUSE_SPEAKER_ID;
                         }
-                        continue;
+                        $speaker_matched = true;
+                        break;
                     }
+                }
+                if ($speaker_matched) {
+                    continue;
                 }
             }
 
@@ -1483,6 +1493,7 @@ class Video
              * If this text's timespan substantially overlaps with a chyron timespan,
              * then call it a match.
              */
+            $clip_matched = false;
             foreach ($clips as &$clip) {
                 if (
                     abs($time['start'] - $clip['timestamp_start']) < self::SPEAKER_MATCH_START_THRESHOLD
@@ -1492,8 +1503,12 @@ class Video
                     foreach ($caption as &$line) {
                         $line['legislator_id'] = $clip['legislator_id'];
                     }
-                    continue;
+                    $clip_matched = true;
+                    break;
                 }
+            }
+            if ($clip_matched) {
+                continue;
             }
 
             /*
@@ -1849,7 +1864,7 @@ class Video
         foreach ($words as $word) {
             $word = str_replace('.', '\.', $word);
             $find = '/(\b)' . mb_strtolower($word) . '(\b)/';
-            $replace = '\1' . $word . ' \1';
+            $replace = '\1' . $word . '\2';
             $return = preg_replace($find, $replace, $return);
         }
 
