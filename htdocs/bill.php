@@ -110,21 +110,6 @@ if ($impact_statements === false) {
     unset($impact_statements);
 }
 
-// Update bills_views to reflect this view, provided that this visitor hasn't been defined
-// as a bot.
-if (!isset($is_bot)) {
-    if (filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP)) {
-        // Increment the view counter for this bill.
-        $sql = 'INSERT INTO bills_views
-                SET bill_id = ' . $bill['id'] . ', ip="' . $_SERVER['REMOTE_ADDR'] . '"';
-        if (isset($user) && !empty($user['id'])) {
-            $sql .= ', user_id = ' . $user['id'];
-        }
-
-        mysqli_query($GLOBALS['db'], $sql);
-    }
-}
-
 // PAGE METADATA
 $page_title = $bill['year'] . ' » ' . $bill['catch_line'] . ' (' . mb_strtoupper($bill['number']) . ')';
 $site_section = 'bills';
@@ -1564,4 +1549,14 @@ if (isset($user) && ($user['id'] == '5059')) {
     echo '<tr><td>Total</td><td>' . round(microtime(true) - $start_time, 3) . '</td></tr>';
 
     echo '</table></div>';
+}
+
+// Record the view count after output, so it doesn't block page rendering.
+if (!$is_bot && filter_var($_SERVER['REMOTE_ADDR'], FILTER_VALIDATE_IP)) {
+    $sql = 'INSERT INTO bills_views
+            SET bill_id = ' . $bill['id'] . ', ip="' . $_SERVER['REMOTE_ADDR'] . '"';
+    if (isset($user) && !empty($user['id'])) {
+        $sql .= ', user_id = ' . $user['id'];
+    }
+    mysqli_query($GLOBALS['db'], $sql);
 }
