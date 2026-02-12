@@ -226,10 +226,16 @@ class Import
                 $status = '';
             }
 
+            $lis_vote_id = $event['VoteID'] ?? null;
+            if ($lis_vote_id !== null) {
+                $lis_vote_id = (string) $lis_vote_id;
+            }
+
             $normalized[] = [
                 'chamber' => $chamber,
                 'date' => $date,
                 'status' => $status,
+                'lis_vote_id' => $lis_vote_id,
             ];
         }
 
