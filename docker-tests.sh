@@ -79,7 +79,7 @@ if [ "${RUN_BROWSER}" = true ]; then
     -e PLAYWRIGHT_API_BASE_URL="${PLAYWRIGHT_API_BASE_URL}" \
     -v "${HOST_PW_BROWSERS_PATH}:${CONTAINER_PW_BROWSERS_PATH}" \
     --workdir /workspace/deploy/browser-tests \
-    playwright bash -lc "npm ci --ignore-scripts && npx playwright install --with-deps chromium && npx playwright test"
+    playwright bash -lc "npm ci --ignore-scripts && npx playwright install chromium && npx playwright test"
 else
   echo "Skipping Playwright browser interaction tests (disabled)."
 fi
