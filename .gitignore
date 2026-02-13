@@ -23,6 +23,9 @@ html
 composer.phar
 *.cache
 
+# Local-only SQL data for the PHPUnit `local` test group (not committed to git)
+deploy/mysql/local-*.sql
+
 .php_cs.dist
 .php_cs.cache
 .DS_Store

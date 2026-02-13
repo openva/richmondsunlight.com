@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="htdocs/includes/vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="tests/bootstrap.php"
+         defaultTestSuite="default">
+    <testsuites>
+        <testsuite name="default">
+            <directory>deploy/tests/phpunit</directory>
+        </testsuite>
+        <testsuite name="local">
+            <directory>tests/local</directory>
+        </testsuite>
+    </testsuites>
+</phpunit>
