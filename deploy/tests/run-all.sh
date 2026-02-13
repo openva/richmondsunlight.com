@@ -6,38 +6,17 @@ ERRORED=false
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd "$DIR" || exit
 
-# Run the page-scan tests
+REPO_ROOT="$( cd "$DIR/../.." >/dev/null 2>&1 && pwd )"
+
+# Run PHPUnit test suite (unit + integration tests)
+if ! "$REPO_ROOT/htdocs/includes/vendor/bin/phpunit" \
+        --configuration "$REPO_ROOT/phpunit.xml" \
+        --testsuite default; then
+    ERRORED=true
+fi
+
+# Run the page-scan smoke tests (kept as standalone — requires live web server)
 if ! php ./page-scan.php; then
-    ERRORED=true
-fi
-
-# Run Bill unit tests
-if ! php ./bill-test.php; then
-    ERRORED=true
-fi
-
-# Run Legislator unit tests
-if ! php ./legislator-test.php; then
-    ERRORED=true
-fi
-
-# Run Video unit tests
-if ! php ./video-test.php; then
-    ERRORED=true
-fi
-
-# Run Video integration tests (requires video_index data)
-if ! php ./video-integration-test.php; then
-    ERRORED=true
-fi
-
-# Run the bill text API tests
-if ! php ./get_bill_text_api_test.php; then
-    ERRORED=true
-fi
-
-# Run reset password tests
-if ! php ./reset-password-test.php; then
     ERRORED=true
 fi
 
