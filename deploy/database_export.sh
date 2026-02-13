@@ -32,16 +32,31 @@ VIDEO_CONTENTS=(14798)
 #   ORDER BY interestingness DESC
 #   LIMIT 80;
 
+# Lots of tests require all legislators (people, terms, and the legacy representatives), all
+# committees, all sessions, and all terms. So those are included by default.
+#
+# API tests require 2025's HB41, SB839, SB738, HB1910, HB1894, and HB1591 (so those are IDs
+# 77034, 77318, 77430, 76483, 76873, and 77039); all legislators; and file #14569.
+#
+# Front-end tests additionally require 2025's HB1561, hb2049, SB1350, HB2723 (IDs 76924, 77600,
+# 78711, and 78905).
+
 BILL_IDS=(
     77039 74613 72911 76873 74093 73894 73446 77034 72883 74728 73202 77430 72884 74117 73805 77318
     72954 73556 77399 72980 76972 76995 73362 74500 74148 76483 78711 78827 72932 73272 72955 78195
+    77600 76924 78905
 )
 
 # A longer list of bill IDs, to have more test data.
 EXTENDED_BILL_IDS=(
-    73118 79224 77600 78269 74670 73984 73286 76777 73960 77557 75107 74616 74490 73030 76924 78905
-    76912 73053 74513 77733 73112 78556 78552 76706 74071 74585 77462 74875 76741 79465 77771 79881
-    78258 77302 77668 74452 78892 79024 78235 73480 79928 77053 73896 73230 72902 78115 79529 74045
+    73118 79224 78269 74670 73984 73286 76777 73960 77557 75107 74616 74490 73030 76912 79529 74045
+    73053 74513 77733 73112 78556 78552 76706 74071 74585 77462 74875 76741 79465 77771 79881 78258
+    77302 77668 74452 78892 79024 78235 73480 79928 77053 73896 73230 72902 78115 
+)
+
+# The file IDs that we want to export for video testing.
+FILE_IDS=(
+    14569
 )
 
 # Change to the directory this script is in
@@ -68,6 +83,30 @@ truncate --size 0 mysql/test-records.sql
 for BILL_ID in "${EXTENDED_BILL_IDS[@]}"; do
     mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables -u "$USERNAME" \
         --host "$HOST" bills --where "id=$BILL_ID" >> mysql/test-records.sql
+done
+
+# Files table
+for FILE_ID in "${FILE_IDS[@]}"; do
+    mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables -u "$USERNAME" \
+        --host "$HOST" files --where "id=$FILE_ID" >> mysql/test-records.sql
+done
+
+# Video index
+for FILE_ID in "${FILE_IDS[@]}"; do
+    mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables -u "$USERNAME" \
+        --host "$HOST" video_index --where "file_id=$FILE_ID" >> mysql/test-records.sql
+done
+
+# Video clips
+for FILE_ID in "${FILE_IDS[@]}"; do
+    mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables -u "$USERNAME" \
+        --host "$HOST" video_clips --where "file_id=$FILE_ID" >> mysql/test-records.sql
+done
+
+# Video transcripts
+for FILE_ID in "${FILE_IDS[@]}"; do
+    mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables -u "$USERNAME" \
+        --host "$HOST" video_transcripts --where "file_id=$FILE_ID" >> mysql/test-records.sql
 done
 
 for TABLE in "${SOME_CONTENTS[@]}"; do
