@@ -140,7 +140,7 @@ CREATE TABLE `bills` (
   KEY `duplicates` (`session_id`,`summary_hash`,`id`),
   KEY `interestingness` (`interestingness`),
   KEY `dls_prepared` (`dls_prepared`)
-) ENGINE=InnoDB AUTO_INCREMENT=86310 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=86314 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -160,7 +160,7 @@ CREATE TABLE `bills_copatrons` (
   KEY `bill_legislator` (`bill_id`,`legislator_id`),
   KEY `bill_id` (`bill_id`),
   KEY `legislator_id` (`legislator_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2749483 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=2749575 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -189,7 +189,7 @@ CREATE TABLE `bills_full_text` (
   KEY `pdf_url` (`pdf_url`),
   KEY `session_bill` (`session_id`,`number`),
   FULLTEXT KEY `text` (`text`)
-) ENGINE=InnoDB AUTO_INCREMENT=1244593 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1245817 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -230,7 +230,7 @@ CREATE TABLE `bills_section_numbers` (
   PRIMARY KEY (`id`),
   KEY `bill_id` (`bill_id`,`section_number`),
   KEY `full_text_id` (`full_text_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=170202 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=170219 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -260,7 +260,7 @@ CREATE TABLE `bills_status` (
   KEY `date` (`date`) USING BTREE,
   KEY `chamber` (`id`),
   FULLTEXT KEY `status` (`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=128334030 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=128339157 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -282,7 +282,7 @@ CREATE TABLE `bills_status_narratives` (
   KEY `bill_id` (`bill_id`),
   KEY `session_id` (`session_id`),
   KEY `bill_current` (`bill_id`,`current`)
-) ENGINE=InnoDB AUTO_INCREMENT=2473 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=2495 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -303,7 +303,7 @@ CREATE TABLE `bills_views` (
   KEY `user_id` (`user_id`),
   KEY `date` (`date`),
   KEY `ip` (`ip`)
-) ENGINE=MyISAM AUTO_INCREMENT=22276794 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=MyISAM AUTO_INCREMENT=22289070 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -371,7 +371,7 @@ CREATE TABLE `comments` (
   KEY `user_id` (`user_id`),
   KEY `status` (`status`),
   KEY `publishable` (`bill_id`,`status`)
-) ENGINE=InnoDB AUTO_INCREMENT=16419 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=16423 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -580,7 +580,7 @@ CREATE TABLE `dockets` (
   PRIMARY KEY (`id`),
   KEY `date` (`date`,`committee_id`,`bill_id`),
   KEY `bill_id` (`bill_id`,`date`)
-) ENGINE=InnoDB AUTO_INCREMENT=2032709 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=2032925 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -620,7 +620,7 @@ CREATE TABLE `files` (
   PRIMARY KEY (`id`),
   KEY `chamber` (`chamber`),
   FULLTEXT KEY `description` (`description`)
-) ENGINE=InnoDB AUTO_INCREMENT=15668 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=15672 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -641,7 +641,7 @@ CREATE TABLE `fiscal_impact_statements` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `bill_id_2` (`bill_id`,`lis_id`),
   KEY `bill_id` (`bill_id`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2795967 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=2821738 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -680,7 +680,7 @@ CREATE TABLE `logs` (
   PRIMARY KEY (`id`),
   KEY `level` (`level`),
   KEY `date` (`date`)
-) ENGINE=InnoDB AUTO_INCREMENT=135822 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=178173 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -704,7 +704,7 @@ CREATE TABLE `meetings` (
   PRIMARY KEY (`id`),
   KEY `session_id` (`session_id`),
   KEY `triumverate` (`date`,`time`,`committee_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=523888 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=524010 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -742,7 +742,7 @@ CREATE TABLE `polls` (
   UNIQUE KEY `bill_id_4` (`bill_id`,`ip`),
   UNIQUE KEY `one_vote` (`bill_id`,`user_id`),
   KEY `bill_id` (`bill_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=115046 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=115056 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -884,7 +884,7 @@ CREATE TABLE `tags` (
   UNIQUE KEY `unique_pairing` (`bill_id`,`tag`),
   KEY `bill_id` (`bill_id`),
   KEY `tag` (`tag`)
-) ENGINE=InnoDB AUTO_INCREMENT=155210 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=155223 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -958,7 +958,7 @@ CREATE TABLE `users` (
   `date_created` datetime NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `cookie_hash` (`cookie_hash`)
-) ENGINE=InnoDB AUTO_INCREMENT=91735 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=91753 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1033,7 +1033,7 @@ CREATE TABLE `video_index` (
   KEY `ignore` (`ignored`),
   CONSTRAINT `video_index_ibfk_1` FOREIGN KEY (`file_id`) REFERENCES `files` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `video_index_ibfk_2` FOREIGN KEY (`file_id`) REFERENCES `files` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
-) ENGINE=InnoDB AUTO_INCREMENT=1252898 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=InnoDB AUTO_INCREMENT=1254061 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1127,4 +1127,4 @@ CREATE TABLE `votes` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-02-12 23:20:25
+-- Dump completed on 2026-02-13 14:13:13

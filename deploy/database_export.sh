@@ -38,8 +38,8 @@ VIDEO_CONTENTS=(14798)
 # API tests require 2025's HB41, SB839, SB738, HB1910, HB1894, and HB1591 (so those are IDs
 # 77034, 77318, 77430, 76483, 76873, and 77039); all legislators; and file #14569.
 #
-# Front-end tests additionally require 2025's HB1561, hb2049, SB1350, HB2723 (IDs 76924, 77600,
-# 78711, and 78905).
+# Front-end tests additionally require 2025's HB1561, HB2049, SB1350, HB2723, and HB2052 (IDs
+# 76924, 77600, 78711, 78905, and 77635).
 
 BILL_IDS=(
     77039 74613 72911 76873 74093 73894 73446 77034 72883 74728 73202 77430 72884 74117 73805 77318
@@ -106,7 +106,7 @@ done
 # Video transcripts
 for FILE_ID in "${FILE_IDS[@]}"; do
     mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables -u "$USERNAME" \
-        --host "$HOST" video_transcripts --where "file_id=$FILE_ID" >> mysql/test-records.sql
+        --host "$HOST" video_transcript --where "file_id=$FILE_ID" >> mysql/test-records.sql
 done
 
 for TABLE in "${SOME_CONTENTS[@]}"; do
