@@ -160,6 +160,15 @@ class VideoTest extends TestCase
         $this->assertStringContainsString('Test caption', $video->sbv);
     }
 
+    public function testParseSbvAcceptsBlankLineSeparator(): void
+    {
+        $video = new Video();
+        $video->sbv = "0:00:00.000,0:00:05.000\nCaption one\n\n0:00:05.000,0:00:10.000\nCaption two";
+        $this->assertTrue($video->parse_sbv());
+        $this->assertStringContainsString('Caption one', $video->transcript);
+        $this->assertStringContainsString('Caption two', $video->transcript);
+    }
+
     // --- Method signatures ---
 
     public function testSubmitTakesNoParameters(): void
