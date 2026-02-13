@@ -361,6 +361,11 @@ class Video
                 $index[] = $moment;
             }
 
+            # A single screenshot is both the start and end of its own clip.
+            if (count($index) === 1) {
+                $index[] = $index[0];
+            }
+
             # Iteratively reduce the array to just the beginning and end of each segment. We start
             # at position 1, rather than 0, since this is a comparative operation.
             $index2 = array();
@@ -969,8 +974,9 @@ class Video
         # Set aside the raw SBV data.
         $this->raw_sbv = $this->sbv;
 
-        # Turn the raw data into an array.
-        $this->sbv = explode('-----', $this->sbv);
+        # Turn the raw data into an array. Support both the project's custom '-----' separator
+        # and the standard SBV blank-line separator used by YouTube.
+        $this->sbv = preg_split('/-----|\r?\n\r?\n/', $this->sbv);
 
         # Initialize the moments object
         $this->moments = new stdClass();
@@ -1091,7 +1097,7 @@ class Video
         $database = new Database();
         $database->connect_mysqli();
 
-        $this->transcript = new stdClass();
+        $entries = [];
 
         # SELECT A LIST OF EVERY TRANSCRIPT ITEM, BY TIME.
         $sql = 'SELECT time_start, time_end, text
@@ -1102,9 +1108,7 @@ class Video
         while ($caption = mysqli_fetch_object($result)) {
             $caption->time_start = time_to_seconds($caption->time_start);
             $caption->time_end = time_to_seconds($caption->time_end);
-            $key = $caption->time_start;
-            // THIS IS ACTUALLY A BAD IDEA. We'll miss some data by using the timestamp as the key.
-            $this->transcript->$key = $caption;
+            $entries[] = $caption;
         }
 
         # SELECT A LIST OF EVERY SPEAKER AND BILL, BY TIME
@@ -1121,13 +1125,10 @@ class Video
         while ($clip = mysqli_fetch_object($result)) {
             $clip->time_start = time_to_seconds($clip->time_start) - 5;
             $clip->time_end = time_to_seconds($clip->time_end);
-            $key = $clip->time_start;
-            // THIS IS ACTUALLY A BAD IDEA. We'll miss some data by using the timestamp as the key.
-            $this->transcript->$key = $clip;
+            $entries[] = $clip;
         }
-        $this->transcript = (array) $this->transcript;
-        ksort($this->transcript);
-        $this->transcript = (object) $this->transcript;
+        usort($entries, fn($a, $b) => $a->time_start <=> $b->time_start);
+        $this->transcript = $entries;
 
         return true;
     }
