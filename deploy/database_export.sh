@@ -47,7 +47,7 @@ BILL_IDS=(
     77600 76924 78905
 )
 
-# A longer list of bill IDs, to have more test data.
+# A longer list of bill IDs, to have more test data to use locally (but not store in GitHub).
 EXTENDED_BILL_IDS=(
     73118 79224 78269 74670 73984 73286 76777 73960 77557 75107 74616 74490 73030 76912 79529 74045
     73053 74513 77733 73112 78556 78552 76706 74071 74585 77462 74875 76741 79465 77771 79881 78258
@@ -80,7 +80,7 @@ mysqldump --no-create-info --skip-lock-tables -u "$USERNAME" \
 
 # Export selected contents from the other tables
 truncate --size 0 mysql/test-records.sql
-for BILL_ID in "${EXTENDED_BILL_IDS[@]}"; do
+for BILL_ID in "${BILL_IDS[@]}"; do
     mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables -u "$USERNAME" \
         --host "$HOST" bills --where "id=$BILL_ID" >> mysql/test-records.sql
 done
