@@ -52,7 +52,7 @@ Header always edit Set-Cookie (.*) "$1; SameSite=Strict"
 </IfModule>
 
 <FilesMatch ".(html|php)$">
-	Header set Cache-Control "max-age=0, private"
+	Header setifempty Cache-Control "max-age=0, private"
 </FilesMatch>
 
 # Customize Errors

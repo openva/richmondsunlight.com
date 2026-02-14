@@ -177,6 +177,12 @@ class Page
     public function display()
     {
 
+        if (isset($_SESSION['registered']) && $_SESSION['registered'] === 'y') {
+            header('Cache-Control: private, no-store');
+        } else {
+            header('Cache-Control: public, max-age=10800');
+        }
+
         # Send the completed page to the browser by clearing the buffer and echoing
         # its previously-saved contents.
         ob_end_clean();
