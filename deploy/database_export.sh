@@ -75,50 +75,51 @@ mysqldump -d --routines --triggers -u "$USERNAME" \
 # Export the tables for which we want complete contents
 truncate --size 0 mysql/basic-contents.sql
 ALL_CONTENTS_LIST=$(printf "%s " "${ALL_CONTENTS[@]}")
-mysqldump --no-create-info --skip-lock-tables -u "$USERNAME" \
+mysqldump --no-create-info --insert-ignore --skip-lock-tables -u "$USERNAME" \
     --host "$HOST" {MYSQL_DATABASE} $ALL_CONTENTS_LIST > mysql/basic-contents.sql
 
 # Export selected contents from the other tables
 truncate --size 0 mysql/test-records.sql
 for BILL_ID in "${BILL_IDS[@]}"; do
-    mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables -u "$USERNAME" \
+    mysqldump {MYSQL_DATABASE} --no-create-info --insert-ignore --skip-lock-tables -u "$USERNAME" \
         --host "$HOST" bills --where "id=$BILL_ID" >> mysql/test-records.sql
 done
 
 # Files table
 for FILE_ID in "${FILE_IDS[@]}"; do
-    mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables -u "$USERNAME" \
+    mysqldump {MYSQL_DATABASE} --no-create-info --insert-ignore --skip-lock-tables -u "$USERNAME" \
         --host "$HOST" files --where "id=$FILE_ID" >> mysql/test-records.sql
 done
 
 # Video index
 for FILE_ID in "${FILE_IDS[@]}"; do
-    mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables -u "$USERNAME" \
+    mysqldump {MYSQL_DATABASE} --no-create-info --insert-ignore --skip-lock-tables -u "$USERNAME" \
         --host "$HOST" video_index --where "file_id=$FILE_ID" >> mysql/test-records.sql
 done
 
 # Video clips
 for FILE_ID in "${FILE_IDS[@]}"; do
-    mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables -u "$USERNAME" \
+    mysqldump {MYSQL_DATABASE} --no-create-info --insert-ignore --skip-lock-tables -u "$USERNAME" \
         --host "$HOST" video_clips --where "file_id=$FILE_ID" >> mysql/test-records.sql
 done
 
 # Video transcripts
 for FILE_ID in "${FILE_IDS[@]}"; do
-    mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables -u "$USERNAME" \
+    mysqldump {MYSQL_DATABASE} --no-create-info --insert-ignore --skip-lock-tables -u "$USERNAME" \
         --host "$HOST" video_transcript --where "file_id=$FILE_ID" >> mysql/test-records.sql
 done
 
 # Meetings and dockets from the 2025 session
-mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables -u "$USERNAME" \
+mysqldump {MYSQL_DATABASE} --no-create-info --insert-ignore --skip-lock-tables -u "$USERNAME" \
     --host "$HOST" meetings --where "session_id=31" >> mysql/test-records.sql
-mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables -u "$USERNAME" \
-    --host "$HOST" dockets --where "session_id=31" >> mysql/test-records.sql
+mysqldump {MYSQL_DATABASE} --no-create-info --insert-ignore --skip-lock-tables -u "$USERNAME" \
+    --host "$HOST" dockets --where "date_created > '2025-01-01' AND date_created < '2025-06-01'" >> mysql/test-records.sql
+
 
 for TABLE in "${SOME_CONTENTS[@]}"; do
     for BILL_ID in "${EXTENDED_BILL_IDS[@]}"; do
         # Genericize all IP addresses and email addresses, to maintain privacy.
-        mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables \
+        mysqldump {MYSQL_DATABASE} --no-create-info --insert-ignore --skip-lock-tables \
             -u "$USERNAME" --host "$HOST" "$TABLE" \
             --where "bill_id=$BILL_ID" |perl -pe 's{[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}}{ sprintf "127.%01d.%01d.%01d", int(255*rand()), int(255*rand()), int(255*rand()) }ge' \
             |sed -E "s/\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/example@example.com/g" \
@@ -129,7 +130,7 @@ done
 # Export selected contents for local-only testing
 truncate --size 0 mysql/local-test-records.sql
 for BILL_ID in "${BILL_IDS[@]}"; do
-    mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables -u "$USERNAME" \
+    mysqldump {MYSQL_DATABASE} --no-create-info --insert-ignore --skip-lock-tables -u "$USERNAME" \
         --host "$HOST" bills --where "id=$BILL_ID" >> mysql/local-test-records.sql
 done
 
@@ -139,7 +140,7 @@ EXTENDED_CONTENTS+=("${SOME_CONTENTS[@]}")
 for TABLE in "${SOME_CONTENTS[@]}"; do
     for BILL_ID in "${BILL_IDS[@]}"; do
         # Genericize all IP addresses and email addresses, to maintain privacy.
-        mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables \
+        mysqldump {MYSQL_DATABASE} --no-create-info --insert-ignore --skip-lock-tables \
             -u "$USERNAME" --host "$HOST" "$TABLE" \
             --where "bill_id=$BILL_ID" |perl -pe 's{[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}}{ sprintf "127.%01d.%01d.%01d", int(255*rand()), int(255*rand()), int(255*rand()) }ge' \
             |sed -E "s/\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/example@example.com/g" \
@@ -148,14 +149,14 @@ for TABLE in "${SOME_CONTENTS[@]}"; do
 done
 
 # Get the entire contents of the files table
-mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables -u "$USERNAME" \
+mysqldump {MYSQL_DATABASE} --no-create-info --insert-ignore --skip-lock-tables -u "$USERNAME" \
     --host "$HOST" files  >> mysql/local-test-records.sql
 
 # Export video records
 truncate --size 0 mysql/video-records.sql
 for TABLE in video_index video_clips video_transcript; do
     for FILE_ID in "${VIDEO_CONTENTS[@]}"; do
-        mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables \
+        mysqldump {MYSQL_DATABASE} --no-create-info --insert-ignore --skip-lock-tables \
             -u "$USERNAME" --host "$HOST" "$TABLE" \
             --where "file_id=$FILE_ID" >> mysql/video-records.sql
     done
