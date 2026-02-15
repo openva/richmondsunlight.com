@@ -22,7 +22,7 @@
 
 LOCK TABLES `video_index` WRITE;
 /*!40000 ALTER TABLE `video_index` DISABLE KEYS */;
-INSERT INTO `video_index` VALUES
+INSERT IGNORE INTO `video_index` VALUES
 (1213055,14798,'00:00:00','00000001','Analyst','legislator',NULL,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:46:17'),
 (1213056,14798,'00:00:05','00000006','Delegate Torian','legislator',343,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
 (1213057,14798,'00:00:09','00000010','Delegate Laufer','legislator',514,'n',NULL,'2026-01-31 12:46:17','2026-01-31 17:47:36'),
@@ -67,7 +67,7 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-02-15  9:34:04
+-- Dump completed on 2026-02-15 12:05:37
 /*M!999999\- enable the sandbox mode */ 
 -- MariaDB dump 10.19  Distrib 10.11.14-MariaDB, for debian-linux-gnu (x86_64)
 --
@@ -103,7 +103,7 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-02-15  9:34:04
+-- Dump completed on 2026-02-15 12:05:37
 /*M!999999\- enable the sandbox mode */ 
 -- MariaDB dump 10.19  Distrib 10.11.14-MariaDB, for debian-linux-gnu (x86_64)
 --
@@ -139,4 +139,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-02-15  9:34:04
+-- Dump completed on 2026-02-15 12:05:37
