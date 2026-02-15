@@ -109,6 +109,10 @@ for FILE_ID in "${FILE_IDS[@]}"; do
         --host "$HOST" video_transcript --where "file_id=$FILE_ID" >> mysql/test-records.sql
 done
 
+# Meetings from the 2025 session
+mysqldump {MYSQL_DATABASE} --no-create-info --skip-lock-tables -u "$USERNAME" \
+    --host "$HOST" meetings --where "session_id=31" >> mysql/test-records.sql
+
 for TABLE in "${SOME_CONTENTS[@]}"; do
     for BILL_ID in "${EXTENDED_BILL_IDS[@]}"; do
         # Genericize all IP addresses and email addresses, to maintain privacy.
