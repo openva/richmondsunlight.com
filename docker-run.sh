@@ -26,13 +26,17 @@ if [ ! -d "api/" ]; then
     rm api.zip
 fi
 
-# Concatenate the database dumps into a single file, for MariaDB to load
-cat deploy/mysql/structure.sql deploy/mysql/basic-contents.sql deploy/mysql/test-records.sql \
-    deploy/mysql/test-users.sql deploy/mysql/video-records.sql > api/deploy/database.sql
+# Copy a bunch of test records into the API repo, to populate the database.
+rm -f api/deploy/database.sql
+cp deploy/mysql/structure.sql api/deploy/00structure.sql
+cp deploy/mysql/basic-contents.sql api/deploy/basic-contents.sql
+cp deploy/mysql/test-records.sql api/deploy/test-records.sql
+cp deploy/mysql/test-users.sql api/deploy/test-users.sql
+cp deploy/mysql/video-records.sql api/deploy/video-records.sql
 
 # Add local test records, if they exist
 if [ -f "deploy/mysql/local-test-records.sql" ]; then
-    cat deploy/mysql/local-test-records.sql >> api/deploy/database.sql
+    cp deploy/mysql/local-test-records.sql api/deploy/local-test-records.sql
 fi
 
 # Stand it up
