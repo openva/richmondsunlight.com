@@ -30,6 +30,11 @@ fi
 cat deploy/mysql/structure.sql deploy/mysql/basic-contents.sql deploy/mysql/test-records.sql \
     deploy/mysql/test-users.sql deploy/mysql/video-records.sql > api/deploy/database.sql
 
+# Add local test records, if they exist
+if [ -f "deploy/mysql/local-test-records.sql" ]; then
+    cat deploy/mysql/local-test-records.sql >> api/deploy/database.sql
+fi
+
 # Stand it up
 if docker image inspect rs_web:ci >/dev/null 2>&1; then
     echo "Found prebuilt rs_web:ci image; using it without rebuild."
