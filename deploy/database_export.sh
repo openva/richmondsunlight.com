@@ -117,7 +117,7 @@ mysqldump {MYSQL_DATABASE} --no-create-info --insert-ignore --skip-lock-tables -
 
 
 for TABLE in "${SOME_CONTENTS[@]}"; do
-    for BILL_ID in "${EXTENDED_BILL_IDS[@]}"; do
+    for BILL_ID in "${BILL_IDS[@]}"; do
         # Genericize all IP addresses and email addresses, to maintain privacy.
         mysqldump {MYSQL_DATABASE} --no-create-info --insert-ignore --skip-lock-tables \
             -u "$USERNAME" --host "$HOST" "$TABLE" \
@@ -129,12 +129,12 @@ done
 
 # Export selected contents for local-only testing
 truncate --size 0 mysql/local-test-records.sql
-for BILL_ID in "${BILL_IDS[@]}"; do
+for BILL_ID in "${EXTENDED_BILL_IDS[@]}"; do
     mysqldump {MYSQL_DATABASE} --no-create-info --insert-ignore --skip-lock-tables -u "$USERNAME" \
         --host "$HOST" bills --where "id=$BILL_ID" >> mysql/local-test-records.sql
 done
 
-# append SOME_CONTENTS to EXTENDED_CONTENTS
+# Append SOME_CONTENTS to EXTENDED_CONTENTS
 EXTENDED_CONTENTS+=("${SOME_CONTENTS[@]}")
 
 for TABLE in "${SOME_CONTENTS[@]}"; do
