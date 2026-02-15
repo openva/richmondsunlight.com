@@ -2,8 +2,9 @@
 USE richmondsunlight;
 
 -- Remove any previous copies of these test users
-DELETE FROM dashboard_portfolios
-WHERE user_id IN (90001, 90002, 90003, 90004);
+DELETE FROM dashboard_bills WHERE user_id IN (90001, 90002, 90003, 90004);
+DELETE FROM dashboard_user_data WHERE user_id IN (90001, 90002, 90003, 90004);
+DELETE FROM dashboard_portfolios WHERE user_id IN (90001, 90002, 90003, 90004);
 
 DELETE FROM users
 WHERE id IN (90001, 90002, 90003, 90004)
@@ -159,3 +160,32 @@ INSERT INTO dashboard_portfolios (
     0,
     NOW()
 );
+
+-- Public portfolio for testuser (for public portfolio and portfolio listing tests)
+INSERT INTO dashboard_portfolios (
+    user_id, name, hash, notes, notify, public, watch_list_id, view_count, date_created
+) VALUES (
+    90001,
+    'Public Test Portfolio',
+    'pwtp1',
+    'Public portfolio for browser testing',
+    'none',
+    'y',
+    NULL,
+    0,
+    NOW()
+);
+
+-- Dashboard user data: gives test users access to Photosynthesis
+INSERT INTO dashboard_user_data (user_id, type, organization, email_active, last_access, unsub_hash, date_created)
+VALUES (90001, 'paid', 'Test Organization', 'y', NOW(), 'pwtest01', NOW());
+
+INSERT INTO dashboard_user_data (user_id, type, organization, email_active, last_access, unsub_hash, date_created)
+VALUES (90004, 'free', NULL, 'y', NOW(), 'pwtest04', NOW());
+
+-- Pre-load HB2049 (bill ID 77600, 2025 session) into both portfolios for view/public tests
+INSERT INTO dashboard_bills (user_id, bill_id, portfolio_id, date_created)
+VALUES (90001, 77600, (SELECT id FROM dashboard_portfolios WHERE hash='pwt01'), NOW());
+
+INSERT INTO dashboard_bills (user_id, bill_id, portfolio_id, date_created)
+VALUES (90001, 77600, (SELECT id FROM dashboard_portfolios WHERE hash='pwtp1'), NOW());

@@ -127,6 +127,13 @@ for TABLE in "${SOME_CONTENTS[@]}"; do
     done
 done
 
+# Individual legislator vote records (representatives_votes links via votes.id, not bill_id)
+for BILL_ID in "${BILL_IDS[@]}"; do
+    mysqldump {MYSQL_DATABASE} --no-create-info --insert-ignore --skip-lock-tables -u "$USERNAME" \
+        --host "$HOST" representatives_votes \
+        --where "vote_id IN (SELECT id FROM votes WHERE bill_id=$BILL_ID)" >> mysql/test-records.sql
+done
+
 # Export selected contents for local-only testing
 truncate --size 0 mysql/local-test-records.sql
 for BILL_ID in "${EXTENDED_BILL_IDS[@]}"; do
@@ -146,6 +153,13 @@ for TABLE in "${SOME_CONTENTS[@]}"; do
             |sed -E "s/\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/example@example.com/g" \
             >> mysql/local-test-records.sql
     done
+done
+
+# Individual legislator vote records
+for BILL_ID in "${BILL_IDS[@]}"; do
+    mysqldump {MYSQL_DATABASE} --no-create-info --insert-ignore --skip-lock-tables -u "$USERNAME" \
+        --host "$HOST" representatives_votes \
+        --where "vote_id IN (SELECT id FROM votes WHERE bill_id=$BILL_ID)" >> mysql/local-test-records.sql
 done
 
 # Get the entire contents of the files table
