@@ -58,7 +58,7 @@ $pages =
     [
         'url' => '/bills/tags/civics/',
         'http_status' => '200',
-        'string' => 'bill found',
+        'string' => 'bills found',
     ],
     [
         'url' => '/bill/2025/hb0/',
