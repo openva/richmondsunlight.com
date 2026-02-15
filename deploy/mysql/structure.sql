@@ -324,7 +324,7 @@ CREATE TABLE `bills_views` (
   KEY `user_id` (`user_id`),
   KEY `date` (`date`),
   KEY `ip` (`ip`)
-) ENGINE=MyISAM AUTO_INCREMENT=22310100 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+) ENGINE=MyISAM AUTO_INCREMENT=22310152 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -1148,4 +1148,4 @@ CREATE TABLE `votes` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2026-02-15  9:13:23
+-- Dump completed on 2026-02-15  9:32:06
