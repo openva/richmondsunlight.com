@@ -84,7 +84,7 @@ RewriteRule ^(.*)$ https://www.richmondsunlight.com/$1 [L,R=301,NC]
 
 # Canonicalize paths to lowercase for consistency
 RewriteCond %{REQUEST_URI} [A-Z]
-RewriteRule ^(.*)$ ${tolower:%{REQUEST_URI}} [L,R=301,NE]
+RewriteRule ^(.*)$ /${tolower:$1} [L,R=301,NE]
 
 # Add trailing slash for extensionless paths (external only)
 RewriteCond %{REQUEST_URI} !/$
