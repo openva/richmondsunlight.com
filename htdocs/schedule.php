@@ -75,7 +75,7 @@ if (mysqli_num_rows($result) > 0) {
     }
 }
 
-$page_body = '<h2>Legislation Scheduled for Hearings</h2>';
+$page_body .= '<h2>Legislation Scheduled for Hearings</h2>';
 
 # Select the upcoming meetings.
 $sql = 'SELECT
