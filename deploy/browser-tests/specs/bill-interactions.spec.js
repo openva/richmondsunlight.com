@@ -237,6 +237,28 @@ test.describe('Bill interactions', () => {
     await expect(page.locator('#track-bill-form')).toHaveCount(0);
   });
 
+  test('bill detail page renders patron name', async ({ page }) => {
+    await page.goto(billPath);
+    const patronLink = page.locator('#bill-metadata a.legislator').first();
+    await expect(patronLink).toBeVisible({ timeout: 10000 });
+    await expect(patronLink).not.toBeEmpty();
+  });
+
+  test('bill detail page renders status history', async ({ page }) => {
+    await page.goto(billPath);
+    await expect(page.locator('#status-history')).toBeVisible({ timeout: 10000 });
+  });
+
+  test('bill detail page renders full text link', async ({ page }) => {
+    await page.goto(billPath);
+    await expect(page.locator('a[href*="/fulltext/"]')).toBeVisible({ timeout: 10000 });
+  });
+
+  test('bill detail page renders tags section', async ({ page }) => {
+    await page.goto(billPath);
+    await expect(page.locator('#tags_list')).toBeVisible({ timeout: 10000 });
+  });
+
   test('untrusted user cannot delete tags', async ({ page }) => {
     await loginTestUser(page);
 
