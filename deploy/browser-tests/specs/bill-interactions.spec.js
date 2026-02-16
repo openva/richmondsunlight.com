@@ -80,7 +80,7 @@ test.describe('Bill interactions', () => {
       // The bizarre field names are an anti-spam measure.
       form: {
         expiration_date: 'Playwright Tester',
-        zip: 'tester@example.com',
+        zip: 'playwright@example.com',
         age: 'https://example.com',
         bill_id: billId,
         comment: commentText,
@@ -108,7 +108,7 @@ test.describe('Bill interactions', () => {
     const commentResponse = await page.request.post('/process-comments.php', {
       form: {
         expiration_date: 'Playwright Tester',
-        zip: 'tester@example.com',
+        zip: 'testuser@example.com',
         age: 'https://example.com',
         bill_id: billId,
         comment: commentText,
@@ -183,6 +183,58 @@ test.describe('Bill interactions', () => {
     expect(deleteResponse.ok()).toBeTruthy();
     await page.reload();
     await expect(page.locator('#tags_list li', { hasText: cleanTag })).toHaveCount(0, { timeout: 15000 });
+  });
+
+  test('logged-in user can track a bill from the bill page via AJAX', async ({ page }) => {
+    // Log in as tester@example.com (free user, no pre-loaded bills)
+    const resp = await page.request.post('/account/login/', {
+      form: {
+        'form_data[email]': 'tester@example.com',
+        'form_data[password]': 'password123',
+        submit: 'Log In',
+        'form_data[return_uri]': '/',
+      },
+      maxRedirects: 0,
+    });
+    const setCookie = resp.headers()['set-cookie'] || '';
+    const match = setCookie.match(/PHPSESSID=([^;]+)/);
+    if (!match) throw new Error('Login did not return a PHPSESSID cookie');
+    await page.context().addCookies([
+      { name: 'PHPSESSID', value: match[1], domain: 'rs_web', path: '/' },
+    ]);
+
+    // Clean up: if this bill was tracked in a previous test run, delete it first so the
+    // track button appears. The delete link has a confirm() dialog that must be accepted.
+    await page.goto('/photosynthesis/');
+    const deleteLink = page.locator('a[href*="/photosynthesis/delete/pwt04-"]').first();
+    if (await deleteLink.count() > 0) {
+      page.once('dialog', dialog => dialog.accept());
+      await deleteLink.click();
+      await page.waitForURL(/\/photosynthesis\//);
+    }
+
+    // The login handler populates $_SESSION['portfolios'], so we can navigate directly to the
+    // bill page without visiting /photosynthesis/ first.
+    await page.goto(billPath);
+
+    const trackBtn = page.locator('#track-bill-submit');
+    await expect(trackBtn).toBeVisible({ timeout: 10000 });
+
+    const [response] = await Promise.all([
+      page.waitForResponse(
+        r => r.url().includes('/photosynthesis/process-actions.php') && r.status() === 200
+      ),
+      trackBtn.click(),
+    ]);
+    const body = await response.json();
+    expect(body.success).toBe(true);
+
+    // Verify no page navigation occurred
+    await expect(page).toHaveURL(new RegExp(billPath.replace(/\//g, '\\/')));
+
+    // Verify the form was replaced by a confirmation message
+    await expect(page.locator('#track-bill-container')).toContainText('tracking');
+    await expect(page.locator('#track-bill-form')).toHaveCount(0);
   });
 
   test('untrusted user cannot delete tags', async ({ page }) => {

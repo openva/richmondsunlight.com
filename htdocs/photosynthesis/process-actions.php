@@ -59,7 +59,19 @@ if (isset($_POST['add-bill'])) {
                 FROM dashboard_portfolios
                 WHERE hash="' . $portfolio_hash . '"),
             date_created=now()';
-    mysqli_query($GLOBALS['db'], $sql);
+    $result = mysqli_query($GLOBALS['db'], $sql);
+
+    # If this is an AJAX request, return JSON instead of redirecting.
+    if (@$_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+        header('Content-Type: application/json');
+        if ($result && mysqli_affected_rows($GLOBALS['db']) > 0) {
+            echo json_encode(['success' => true]);
+        } else {
+            http_response_code(422);
+            echo json_encode(['success' => false, 'error' => 'Bill could not be added.']);
+        }
+        exit;
+    }
 
     # Return the user back to his dashboard listing.
     header('Location: ' . $_SERVER['HTTP_REFERER']);

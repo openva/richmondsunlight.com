@@ -207,7 +207,7 @@ if ($bill['session_id'] == SESSION_ID) {
         // If this bill isn't being tracked, but user has portfolios to which this bill
         // could be added.
         elseif (isset($_SESSION['portfolios'])) {
-            $ps_status = '<form method="post" action="/photosynthesis/process-actions.php">';
+            $ps_status = '<div id="track-bill-container"><form id="track-bill-form" method="post" action="/photosynthesis/process-actions.php">';
             // If there's just one portfolio.
             if (count($_SESSION['portfolios']) == 1) {
                 $ps_status .= '<input type="hidden" name="portfolio" value="' . $_SESSION['portfolios'][0]['hash'] . '" />';
@@ -224,8 +224,28 @@ if ($bill['session_id'] == SESSION_ID) {
             }
             $ps_status .= '
 				<input type="hidden" name="add-bill" value="' . $bill['number'] . '" />
-				<input type="submit" value="Track this Bill" />
-			</form>';
+				<input type="submit" id="track-bill-submit" value="Track this Bill" />
+			</form></div>';
+            $html_head .= '<script>
+$(document).ready(function() {
+    $("#track-bill-form").on("submit", function(e) {
+        e.preventDefault();
+        var $btn = $("#track-bill-submit");
+        $btn.prop("disabled", true).val("Tracking...");
+        $.ajax({
+            type: "POST",
+            url: "/photosynthesis/process-actions.php",
+            data: $(this).serialize(),
+            dataType: "json"
+        }).done(function() {
+            $("#track-bill-container").html("<p>You are now tracking this bill.</p>");
+        }).fail(function() {
+            $btn.prop("disabled", false).val("Track this Bill");
+            alert("Failed to track bill. Please try again.");
+        });
+    });
+});
+</script>';
         }
     }
 
