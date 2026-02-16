@@ -25,6 +25,8 @@ $site_section = '';
 # INITIALIZE SESSION
 session_start();
 
+$page_body = '';
+
 # If we're arriving from another page, remember it so we can send the user back after login.
 if (!isset($_POST['submit']) && empty($_GET['return_uri']) && !empty($_SERVER['HTTP_REFERER'])) {
     $referer = parse_url($_SERVER['HTTP_REFERER']);
