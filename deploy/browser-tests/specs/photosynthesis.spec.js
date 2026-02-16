@@ -28,7 +28,7 @@ test.describe('Photosynthesis', () => {
     await loginTestUser(page);
     await page.goto('/photosynthesis/');
 
-    await expect(page.locator('input[name="add-bill"]')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByLabel('Bill #')).toBeVisible({ timeout: 10000 });
     // Use exact heading match to avoid matching "Public Test Portfolio" as a substring
     await expect(page.getByRole('heading', { name: 'Test Portfolio', exact: true })).toBeVisible({ timeout: 10000 });
     await expect(page.getByRole('cell', { name: 'HB2049' }).first()).toBeVisible({ timeout: 10000 });
@@ -39,7 +39,7 @@ test.describe('Photosynthesis', () => {
     await page.goto('/photosynthesis/');
 
     // Fill the bill number and select the portfolio, then submit the form
-    await page.fill('input[name="add-bill"]', 'HB41');
+    await page.getByLabel('Bill #').fill('HB41');
     // Test user has 2 portfolios, so a <select> is rendered
     await page.selectOption('select[name="portfolio"]', 'pwt01');
     await Promise.all([
