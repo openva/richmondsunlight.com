@@ -113,7 +113,7 @@ if (isset($_POST['submit'])) {
                 $form_data['return_uri'] = '/';
             }
 
-            header('Location: https://' . $_SERVER['SERVER_NAME'] . urldecode($form_data['return_uri']));
+            header('Location: ' . SITE_BASE_URL . urldecode($form_data['return_uri']));
             exit();
         }
     }

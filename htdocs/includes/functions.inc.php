@@ -832,8 +832,18 @@ function login_form()
     } elseif (isset($form_data) && isset($form_data['return_uri'])) {
         $return_uri = $_GET['return_uri'];
     }
+    // If the port of the requested URL is anything other than 80 or 443, we need to include in
+    // the form's post action value.
+    if ($_SERVER['SERVER_PORT'] != '80' && $_SERVER['SERVER_PORT'] != '443') {
+        $action_prefix = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['SERVER_NAME'] . ':'
+            . $_SERVER['SERVER_PORT'];
+    } else {
+        $action_prefix = '';
+    }
+    
+
     $returned_data = '
-		<form method="post" action="/account/login/">
+		<form method="post" action="' . $action_prefix . '/account/login/">
   
             <fieldset class="login">
                 <label for="email">E-Mail Address</label><br>

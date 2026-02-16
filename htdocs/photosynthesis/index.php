@@ -36,7 +36,7 @@ if (
         ((@logged_in() === true) && empty($user['type']))
 ) {
     # If the user isn't logged in, have the user create an account (or log in).
-    header('Location: https://' . $_SERVER['SERVER_NAME'] . '/account/login/?return_uri=' . urlencode($_SERVER['REQUEST_URI']));
+    header('Location: ' . SITE_BASE_URL . '/account/login/?return_uri=' . urlencode($_SERVER['REQUEST_URI']));
     exit;
 }
 

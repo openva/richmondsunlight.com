@@ -53,7 +53,7 @@ class Database
          * If this is isn't a request to the API, send the browser to an error page.
          */
         if (mb_stristr($_GET['REQUEST_URI'], 'api.richmondsunlight.com') === false) {
-            header('Location: https://' . $_SERVER['SERVER_NAME'] . '/site-down/');
+            header('Location: ' . SITE_BASE_URL . '/site-down/');
             exit;
         }
 
@@ -104,7 +104,7 @@ class Database
          */
         if (mb_stristr($_GET['REQUEST_URI'], 'api.richmondsunlight.com') === false) {
             http_response_code(503);
-            header('Location: https://' . $_SERVER['SERVER_NAME'] . '/site-down/');
+            header('Location: ' . SITE_BASE_URL . '/site-down/');
             exit;
         }
 
