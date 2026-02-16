@@ -58,7 +58,7 @@ $pages =
     [
         'url' => '/bills/tags/civics/',
         'http_status' => '200',
-        'string' => 'bill found',
+        'string' => 'bills found',
     ],
     [
         'url' => '/bill/2025/hb0/',
@@ -72,6 +72,16 @@ $pages =
         'url' => '/bill/2025/hb2049/',
         'http_status' => '200',
         'string' => 'Retail Sales and Use Tax',
+    ],
+    [
+        'url' => '/bill/2025/hb2049/history/',
+        'http_status' => '200',
+        'string' => 'Placed on Finance Agenda',
+    ],
+    [
+        'url' => '/bill/2025/sb738/s04v533/',
+        'http_status' => '200',
+        'string' => 'vote passed 9-6',
     ],
     [
         'url' => '/bills/introduced/1000/',
@@ -156,6 +166,55 @@ $pages =
         'url' => '/statistics/',
         'http_status' => '200',
         'strings' => ['Bills Introduced Daily', 'Top 10 Bill Filers', 'Top 10 Most-Viewed Bills'],
+    ],
+    [
+        'url' => '/bill/2025/hb2049/fulltext/',
+        'http_status' => '200',
+        'string' => 'Artificial or propane gas',
+    ],
+    [
+        'url' => '/bill/2025/hb2049/history/',
+        'http_status' => '200',
+        'string' => 'Placed on Finance Agenda',
+    ],
+    [
+        'url' => '/your-legislators/',
+        'http_status' => '200',
+        'string' => 'Your Legislators',
+    ],
+    [
+        'url' => '/about/',
+        'http_status' => '200',
+        'string' => 'About the General Assembly',
+    ],
+    [
+        'url' => '/about/site/',
+        'http_status' => '200',
+        'string' => 'About the Site',
+    ],
+    [
+        'url' => '/about/api/',
+        'http_status' => '200',
+        'string' => 'API',
+    ],
+    [
+        'url' => '/about/rss/',
+        'http_status' => '200',
+        'string' => 'About Subscriptions',
+    ],
+    [
+        'url' => '/contact/',
+        'http_status' => '200',
+        'string' => 'Contact',
+    ],
+    [
+        'url' => '/about/tos/',
+        'http_status' => '200',
+        'string' => 'Terms of Service',
+    ],
+    [
+        'url' => '/nosuchpage/',
+        'http_status' => '404',
     ],
 ];
 

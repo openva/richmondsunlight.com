@@ -14,6 +14,7 @@ ZAP_REPORT_HTML=${ZAP_REPORT_HTML:-/zap/wrk/zap-baseline.html}
 
 FULL_SCAN=false
 RUN_BROWSER=true
+RUN_LOCAL=false
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --zap-full-scan)
@@ -22,6 +23,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --no-browser-tests)
       RUN_BROWSER=false
+      shift
+      ;;
+    --local)
+      RUN_LOCAL=true
       shift
       ;;
     *)
@@ -33,6 +38,15 @@ done
 
 # Execute test suite inside the running container (service name required for exec)
 $COMPOSE_BINARY exec "${WEB_SERVICE}" /var/www/deploy/tests/run-all.sh
+
+# Optionally run the local PHPUnit test suite (requires local SQL data loaded into the DB)
+if [ "${RUN_LOCAL}" = true ]; then
+  echo "Running local PHPUnit test suite..."
+  $COMPOSE_BINARY exec "${WEB_SERVICE}" \
+    /var/www/htdocs/includes/vendor/bin/phpunit \
+    --configuration /var/www/phpunit.xml \
+    --testsuite local
+fi
 
 # Run API tests from the host (requires docker access)
 ./api/deploy/run_tests.sh
@@ -65,7 +79,7 @@ if [ "${RUN_BROWSER}" = true ]; then
     -e PLAYWRIGHT_API_BASE_URL="${PLAYWRIGHT_API_BASE_URL}" \
     -v "${HOST_PW_BROWSERS_PATH}:${CONTAINER_PW_BROWSERS_PATH}" \
     --workdir /workspace/deploy/browser-tests \
-    playwright bash -lc "npm ci --ignore-scripts && npx playwright install --with-deps chromium && npx playwright test"
+    playwright bash -lc "npm ci --ignore-scripts && npx playwright install chromium && npx playwright test"
 else
   echo "Skipping Playwright browser interaction tests (disabled)."
 fi

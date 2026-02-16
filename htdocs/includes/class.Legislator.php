@@ -160,7 +160,7 @@ class Legislator
         $legislator = mysqli_fetch_assoc($result);
 
         # Clean it up.
-        $legislator = array_map('stripslashes', $legislator);
+        $legislator = array_map(fn($v) => $v === null ? null : stripslashes($v), $legislator);
 
         # Convert some data.
         $legislator['suffix'] = '(' . $legislator['party'] . '-' . $legislator['place'] . ')';
@@ -222,7 +222,7 @@ class Legislator
         if (mysqli_num_rows($result) > 0) {
             while ($committee = mysqli_fetch_assoc($result)) {
                 # Clean it up.
-                $committee = array_map('stripslashes', $committee);
+                $committee = array_map(fn($v) => $v === null ? null : stripslashes($v), $committee);
 
                 if (empty($committee['position'])) {
                     $committee['position'] = 'member';

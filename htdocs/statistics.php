@@ -355,13 +355,13 @@ names, click to visit a legislator's page.</p>
 
     var simulation = d3.forceSimulation(nodes)
         .force('link', d3.forceLink(links)
-            .distance(60)
+            .distance(120)
             .strength(function(l) { return Math.min(l.weight / 10, 1); })
         )
-        .force('charge', d3.forceManyBody().strength(-40))
+        .force('charge', d3.forceManyBody().strength(-80))
         .force('x', d3.forceX(width / 2).strength(0.1))
         .force('y', d3.forceY(height / 2).strength(0.1))
-        .force('collide', d3.forceCollide(10));
+        .force('collide', d3.forceCollide(20));
 
     var link = g.append('g')
         .selectAll('line')

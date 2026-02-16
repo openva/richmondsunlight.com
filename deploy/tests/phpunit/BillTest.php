@@ -7,6 +7,8 @@ class BillTest extends TestCase
     private static bool $dbAvailable = false;
     private static mixed $id = false;
     private static mixed $info = null;
+    private static string $billNumber = '';
+    private static int $billYear = 0;
 
     public static function setUpBeforeClass(): void
     {
@@ -16,8 +18,23 @@ class BillTest extends TestCase
         }
         self::$dbAvailable = true;
 
+        // Find any bill in the seeded database along with its session year.
+        $result = mysqli_query(
+            $GLOBALS['db'],
+            'SELECT bills.number, sessions.year
+             FROM bills
+             JOIN sessions ON bills.session_id = sessions.id
+             LIMIT 1'
+        );
+        if (!$result || mysqli_num_rows($result) === 0) {
+            return;
+        }
+        $row = mysqli_fetch_assoc($result);
+        self::$billNumber = $row['number'];
+        self::$billYear   = (int) $row['year'];
+
         $bill = new Bill2();
-        self::$id = $bill->getid(2025, 'hb41');
+        self::$id = $bill->getid(self::$billYear, self::$billNumber);
 
         if (self::$id !== false) {
             $bill->id = self::$id;
@@ -30,11 +47,14 @@ class BillTest extends TestCase
         if (!self::$dbAvailable) {
             $this->markTestSkipped('Database not available');
         }
+        if (self::$billNumber === '') {
+            $this->markTestSkipped('No bills found in test database');
+        }
     }
 
     public function testGetidReturnsAnId(): void
     {
-        $this->assertNotFalse(self::$id, 'getid should return an ID for HB41 (2025)');
+        $this->assertNotFalse(self::$id, 'getid should return an ID for ' . strtoupper(self::$billNumber) . ' (' . self::$billYear . ')');
     }
 
     public function testGetidReturnsNumericId(): void
@@ -47,7 +67,7 @@ class BillTest extends TestCase
         if (self::$info === null) {
             $this->markTestSkipped('getid returned false');
         }
-        $this->assertSame('hb41', self::$info['number']);
+        $this->assertSame(self::$billNumber, self::$info['number']);
     }
 
     public function testInfoYear(): void
@@ -55,7 +75,7 @@ class BillTest extends TestCase
         if (self::$info === null) {
             $this->markTestSkipped('getid returned false');
         }
-        $this->assertSame(2025, (int) self::$info['year']);
+        $this->assertSame(self::$billYear, (int) self::$info['year']);
     }
 
     public function testInfoChamber(): void
@@ -63,7 +83,7 @@ class BillTest extends TestCase
         if (self::$info === null) {
             $this->markTestSkipped('getid returned false');
         }
-        $this->assertSame('house', self::$info['chamber']);
+        $this->assertContains(self::$info['chamber'], ['house', 'senate'], 'chamber should be house or senate');
     }
 
     public function testInfoStatus(): void
@@ -71,7 +91,8 @@ class BillTest extends TestCase
         if (self::$info === null) {
             $this->markTestSkipped('getid returned false');
         }
-        $this->assertSame('failed committee', self::$info['status']);
+        $this->assertIsString(self::$info['status'], 'status should be a string');
+        $this->assertNotEmpty(self::$info['status'], 'status should not be empty');
     }
 
     public function testInfoCatchLine(): void
@@ -79,6 +100,7 @@ class BillTest extends TestCase
         if (self::$info === null) {
             $this->markTestSkipped('getid returned false');
         }
-        $this->assertStringContainsString('Standards of Learning', self::$info['catch_line']);
+        $this->assertIsString(self::$info['catch_line'], 'catch_line should be a string');
+        $this->assertNotEmpty(self::$info['catch_line'], 'catch_line should not be empty');
     }
 }

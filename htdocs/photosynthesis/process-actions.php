@@ -46,6 +46,9 @@ if (isset($_POST['add-bill'])) {
     # Strip out spaces from bill numbers (i.e. HB 1).
     $bill_number = str_replace(' ', '', $bill_number);
 
+    # Normalize to lowercase to match how bills are stored in the database.
+    $bill_number = strtolower($bill_number);
+
     $sql = 'INSERT INTO dashboard_bills
             SET bill_id =
                 (SELECT id

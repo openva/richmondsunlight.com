@@ -42,7 +42,7 @@ class LocalExampleTest extends TestCase
      */
     public function testCurrentSessionHasSubstantialBillCount(): void
     {
-        $sql = 'SELECT COUNT(*) as count FROM bills WHERE year = ' . SESSION_YEAR;
+        $sql = 'SELECT COUNT(*) as count FROM bills WHERE session_id = (SELECT id FROM sessions WHERE year = ' . SESSION_YEAR . ')';
         $result = mysqli_query($GLOBALS['db'], $sql);
         $row = mysqli_fetch_assoc($result);
         $this->assertGreaterThan(

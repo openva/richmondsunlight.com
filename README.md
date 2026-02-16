@@ -22,6 +22,8 @@ The site can be run locally, in Docker:
 1. Run `./docker-run.sh`.
 1. In your browser, open `http://localhost:8000`.
 
+Tests can be run with `./docker-tests.sh`. There are additional tests meant to be run locally, meant to build atop additional MariaDB data that isn't stored in GitHub (you've got to export it with `deploy/database_export.sh` from data harvested by Machine), which are invoked with `./docker-tests.sh --local`.
+
 When you are done, run `./docker-stop.sh` (or quit Docker).
 
 ### Rebuilding the database

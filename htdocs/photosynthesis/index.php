@@ -85,7 +85,7 @@ if (mysqli_num_rows($result) == 0) {
 if ((mysqli_num_rows($result) > 0) || ($bypass == 1)) {
     # Display the header for the bill add form field.
     $page_body = '
-		<div id="add-bill">
+		<div id="add-bill-form">
 			<form method="post" action="/photosynthesis/process-actions.php">
 				<label for="add-bill">Bill #</label>
 				<input type="text" size="7" maxlength="9" name="add-bill" id="add-bill" />';

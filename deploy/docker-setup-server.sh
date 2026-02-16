@@ -12,6 +12,11 @@ if [ $? -eq 0 ]; then
     sed -i 's/html/htdocs/g' /etc/apache2/sites-enabled/000-default.conf
 fi
 
+# Add RewriteMap tolower so that ${tolower:...} works in .htaccess
+if ! grep -q "RewriteMap tolower" /etc/apache2/sites-enabled/000-default.conf; then
+    sed -i 's|DocumentRoot /var/www/htdocs|DocumentRoot /var/www/htdocs\n\tRewriteMap tolower int:tolower|' /etc/apache2/sites-enabled/000-default.conf
+fi
+
 # If the php.ini doesn't exist, create it.
 if [ ! -f "/usr/local/etc/php/php.ini" ]; then
     cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
