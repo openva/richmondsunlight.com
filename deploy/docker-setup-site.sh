@@ -53,8 +53,10 @@ cd htdocs/js/vendor; yarn build; cd ../../..
 cp deploy/settings-docker.inc.php htdocs/includes/settings.inc.php
 
 # Create a test admin password for the HTTP-Basic-protected /admin/ directory.
-# The password is "password123"; tests rely on this credential.
-htpasswd -bc htdocs/admin/.users admin password123
+# The .htaccess hardcodes the path as /var/www/richmondsunlight.com/htdocs/admin/.users;
+# create the file there so Apache can validate credentials. Password is "password123".
+mkdir -p /var/www/richmondsunlight.com/htdocs/admin
+htpasswd -bc /var/www/richmondsunlight.com/htdocs/admin/.users admin password123
 
 # Note: Test users are now loaded as part of the initial database.sql file,
 # not via load-test-users.sh, to ensure consistency with the database initialization
