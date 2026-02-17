@@ -154,11 +154,12 @@ $html_head .= '
  */
 $html_head .= '
 	<link rel="alternate" type="application/rss+xml" href="https://www.richmondsunlight.com/rss/bill/'
-        . $bill['number'] . '/" title="RSS for ' . $bill['number'] . '" />
+        . $bill['number'] . '/" title="RSS for ' . strtoupper($bill['number']) . '" />
 	<link rel="alternate" type="application/json" href="http://api.richmondsunlight.com/1.1/bill/'
-        . $bill['year'] . '/' . $bill['number'] . '.json" title="JSON for ' . $bill['number'] . '" />
+        . $bill['year'] . '/' . $bill['number'] . '.json" title="JSON for ' . strtoupper($bill['number']) . '" />
 	<link rel="alternate" type="application/pdf" href="http://legacylis.virginia.gov/cgi-bin/legp604.exe?'
-        . $bill['session_lis_id'] . '+ful+' . mb_strtoupper($bill['number']) . '+pdf" title="PDF of ' . $bill['number'] . '" />';
+        . $bill['session_lis_id'] . '+ful+' . mb_strtoupper($bill['number']) . '+pdf" title="PDF of '
+        . strtoupper($bill['number']) . '" />';
 
 // Come up with a meta description.
 if (!empty($bill['summary'])) {
