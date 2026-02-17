@@ -516,7 +516,6 @@ function get_content($url, $timeout = 10)
     curl_setopt($ch, CURLOPT_USERAGENT, 'rs-bot');
 
     $string = curl_exec($ch);
-    curl_close($ch);
 
     if (empty($string)) {
         return false;
@@ -987,16 +986,6 @@ function bill_sections($bill_id)
     }
 
     return $sections;
-}
-
-# When provided with a URL, Varnish will erase that URL from its cache.
-function varnish_purge($url)
-{
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PURGE');
-    curl_exec($ch);
-    return true;
 }
 
 # This is relied on by usort() in bill-full-text.php.
