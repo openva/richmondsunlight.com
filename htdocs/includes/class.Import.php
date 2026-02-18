@@ -824,8 +824,12 @@ class Import
         # The following are versions of the bill's full text. Only the first pair need be
         # present. But the remainder are there to deal with the possibility that the bill is
         # amended X times.
-        $bill['text'][0]['number'] = trim($bill[22]);
-        $bill['text'][0]['date'] = date('Y-m-d', strtotime(trim($bill[23])));
+        if (!empty($bill[22]) && strlen(trim($bill[22])) > 1) {
+            $bill['text'][0]['number'] = trim($bill[22]);
+        }
+        if (!empty($bill[23])) {
+            $bill['text'][0]['date'] = date('Y-m-d', strtotime(trim($bill[23])));
+        }
         if (!empty($bill[24])) {
             $bill['text'][1]['number'] = trim($bill[24]);
         }
