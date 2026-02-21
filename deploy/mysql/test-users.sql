@@ -1,6 +1,9 @@
 -- Test user fixtures for local/Docker environments
 USE richmondsunlight;
 
+-- Clean up poll votes for the test bill so the unique constraint doesn't block re-runs
+DELETE FROM polls WHERE bill_id = 76483;
+
 -- Remove any previous copies of these test users
 DELETE FROM dashboard_bills WHERE user_id IN (90001, 90002, 90003, 90004);
 DELETE FROM dashboard_user_data WHERE user_id IN (90001, 90002, 90003, 90004);

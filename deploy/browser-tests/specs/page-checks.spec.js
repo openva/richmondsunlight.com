@@ -111,6 +111,17 @@ test('process-comments.php returns JSON error for empty comment', async ({ reque
 });
 
 test('process-polls.php redirects after a valid poll vote', async ({ page }) => {
+  // Clean up any prior poll votes for this bill so the unique constraint doesn't block us.
+  const mysql = require('mysql2/promise');
+  const db = await mysql.createConnection({
+    host: process.env.DB_HOST || 'db',
+    user: 'ricsun',
+    password: 'password',
+    database: 'richmondsunlight',
+  });
+  await db.execute('DELETE FROM polls WHERE bill_id = ?', [billId]);
+  await db.end();
+
   // page.request shares the browser session so PHP can track the new anonymous user.
   const resp = await page.request.post('/process-polls.php', {
     form: {
