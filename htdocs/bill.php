@@ -194,13 +194,13 @@ if ($bill['session_id'] == SESSION_ID) {
         if (mysqli_num_rows($result) > 0) {
             $portfolio = mysqli_fetch_array($result);
             $portfolio = array_map('stripslashes', $portfolio);
-            if (isset($_SESSION['portfolios']) && (count($_SESSION['portfolios']) == 1)) {
-                $ps_status = '
-				<p><a href="/photosynthesis/">You are tracking this bill</a>.</p>';
-            } else {
-                $ps_status = '<p>You are tracking this bill in in
-				<a href="/photosynthesis/#' . $portfolio['hash'] . '">' . $portfolio['name'] . '</a>.</p>';
-            }
+            $ps_status = '<div id="track-bill-container">
+                <button type="button" id="track-bill-btn"
+                    data-record-id="' . $portfolio['dashboard_bills_id'] . '"
+                    data-portfolio-hash="' . $portfolio['hash'] . '"
+                    data-bill-number="' . $bill['number'] . '"
+                    data-state="tracking">Stop Tracking</button>
+            </div>';
             // Set a tracked flag so we don't double-count this later.
             $tracked = true;
         }
@@ -208,42 +208,83 @@ if ($bill['session_id'] == SESSION_ID) {
         // If this bill isn't being tracked, but user has portfolios to which this bill
         // could be added.
         elseif (isset($_SESSION['portfolios'])) {
-            $ps_status = '<div id="track-bill-container"><form id="track-bill-form" method="post" action="/photosynthesis/process-actions.php">';
+            $ps_status = '<div id="track-bill-container">';
             // If there's just one portfolio.
             if (count($_SESSION['portfolios']) == 1) {
-                $ps_status .= '<input type="hidden" name="portfolio" value="' . $_SESSION['portfolios'][0]['hash'] . '" />';
+                $ps_status .= '<input type="hidden" id="track-portfolio-hash" value="' . $_SESSION['portfolios'][0]['hash'] . '" />';
             }
 
             // Or, if there's multiple portfolios.
             else {
                 $ps_status .= '<label for="portfolio-selector">Select a Portfolio</label>
-                <select name="portfolio" id="portfolio-selector">';
+                <select id="portfolio-selector">';
                 foreach ($_SESSION['portfolios'] as $portfolio) {
                     $ps_status .= '<option value="' . $portfolio['hash'] . '">' . $portfolio['name'] . '</option>';
                 }
                 $ps_status .= '</select>';
             }
-            $ps_status .= '
-				<input type="hidden" name="add-bill" value="' . $bill['number'] . '" />
-				<input type="submit" id="track-bill-submit" value="Track this Bill" />
-			</form></div>';
+            $ps_status .= '<input type="hidden" id="track-bill-number" value="' . $bill['number'] . '" />
+                <button type="button" id="track-bill-btn" data-state="untracked">Track this Bill</button>
+            </div>';
+        }
+
+        if (isset($ps_status)) {
+            $is_single_portfolio = isset($_SESSION['portfolios']) && count($_SESSION['portfolios']) == 1;
             $html_head .= '<script>
 $(document).ready(function() {
-    $("#track-bill-form").on("submit", function(e) {
-        e.preventDefault();
-        var $btn = $("#track-bill-submit");
-        $btn.prop("disabled", true).val("Tracking...");
-        $.ajax({
-            type: "POST",
-            url: "/photosynthesis/process-actions.php",
-            data: $(this).serialize(),
-            dataType: "json"
-        }).done(function() {
-            $("#track-bill-container").html("<p>You are now tracking this bill.</p>");
-        }).fail(function() {
-            $btn.prop("disabled", false).val("Track this Bill");
-            alert("Failed to track bill. Please try again.");
-        });
+    var isSinglePortfolio = ' . ($is_single_portfolio ? 'true' : 'false') . ';
+
+    $(document).on("click", "#track-bill-btn", function() {
+        var $btn = $(this);
+        var state = $btn.data("state");
+        $btn.prop("disabled", true);
+
+        if (state === "tracking") {
+            var recordId = $btn.data("record-id");
+            var portfolioHash = $btn.data("portfolio-hash");
+            var billNumber = $btn.data("bill-number");
+            $.ajax({
+                type: "POST",
+                url: "/photosynthesis/process-actions.php",
+                data: { "delete-bill": portfolioHash + "-" + recordId },
+                dataType: "json"
+            }).done(function() {
+                if (isSinglePortfolio) {
+                    $("#track-bill-container").html(
+                        \'<input type="hidden" id="track-portfolio-hash" value="\' + portfolioHash + \'" />\' +
+                        \'<input type="hidden" id="track-bill-number" value="\' + billNumber + \'" />\' +
+                        \'<button type="button" id="track-bill-btn" data-state="untracked">Track this Bill</button>\'
+                    );
+                } else {
+                    location.reload();
+                }
+            }).fail(function() {
+                $btn.prop("disabled", false);
+                alert("Failed to stop tracking. Please try again.");
+            });
+        } else {
+            var billNumber = $("#track-bill-number").val();
+            var portfolioHash = isSinglePortfolio
+                ? $("#track-portfolio-hash").val()
+                : $("#portfolio-selector").val();
+            $.ajax({
+                type: "POST",
+                url: "/photosynthesis/process-actions.php",
+                data: { "add-bill": billNumber, "portfolio": portfolioHash },
+                dataType: "json"
+            }).done(function(response) {
+                $("#track-bill-container").html(
+                    \'<button type="button" id="track-bill-btn" \' +
+                    \'data-record-id="\' + response.record_id + \'" \' +
+                    \'data-portfolio-hash="\' + portfolioHash + \'" \' +
+                    \'data-bill-number="\' + billNumber + \'" \' +
+                    \'data-state="tracking">Stop Tracking</button>\'
+                );
+            }).fail(function() {
+                $btn.prop("disabled", false);
+                alert("Failed to track bill. Please try again.");
+            });
+        }
     });
 });
 </script>';
