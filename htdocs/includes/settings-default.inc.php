@@ -49,6 +49,15 @@ rs_define('SESSION_END', '2026-03-15');
 # Set to false for Docker/development, true for production
 rs_define('IS_PRODUCTION', true);
 
+# Base URL for this site (used in redirects, canonical links, etc.)
+if (php_sapi_name() !== 'cli' && isset($_SERVER['HTTP_HOST'])) {
+    $rs_scheme = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
+    rs_define('SITE_BASE_URL', $rs_scheme . '://' . $_SERVER['HTTP_HOST']);
+    unset($rs_scheme);
+} else {
+    rs_define('SITE_BASE_URL', 'https://www.richmondsunlight.com');
+}
+
 # Set the FTP auth pair for legislative data.
 rs_define('LIS_FTP_USERNAME', '');
 rs_define('LIS_FTP_PASSWORD', '');

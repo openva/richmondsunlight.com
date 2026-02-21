@@ -151,3 +151,12 @@ Disallow: /
 
 User-agent: Barkrowler
 Disallow: /
+
+User-agent: meta-webindexer
+Disallow: /
+
+User-agent: DataForSeoBot
+Disallow: /
+
+User-agent: AwarioBot
+Disallow: /

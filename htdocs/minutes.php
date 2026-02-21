@@ -76,7 +76,7 @@ if (mysqli_num_rows($result) == 0) {
 
     # Retrieve a single video, if it's available.
     $sql = 'SELECT id, author_name, title, html, path, description, license, length, sponsor,
-			video_index_cache AS index_cache, transcript,
+			video_index_cache AS index_cache, transcript, width, height,
 				(SELECT COUNT(*)
 				FROM video_index
 				WHERE file_id=files.id) AS index_data
@@ -291,6 +291,16 @@ if (mysqli_num_rows($result) == 0) {
             isset($video['html']) &&
             (count((array)$bill_clips) > 0 || count((array)$legislator_clips) > 0 || (isset($video2->screenshots) && count((array)$video2->screenshots) > 0))
         ) {
+            // Derive thumbnail width from the video's stored dimensions.
+            // Height is fixed at 112px (set by CSS); width scales with the aspect ratio.
+            $thumb_height = 112;
+            if (!empty($video['width']) && !empty($video['height'])) {
+                $thumb_width = (int) round($thumb_height * $video['width'] / $video['height']);
+            } else {
+                $thumb_width = 150; // fallback: approximate 4:3
+            }
+            $thumb_style = "width:{$thumb_width}px; background-size:{$thumb_width}px {$thumb_height}px;";
+
             $page_body .= '<h3>Index</h3>
 				<div id="video-index" class="tabs">
 				<ul>';
@@ -310,14 +320,14 @@ if (mysqli_num_rows($result) == 0) {
 				<div id="bill">';
 
             foreach ($bill_clips as $clip) {
-                $page_body .= '<div class="marker" data-time="' . $clip->start . '" style="background-image: url(' . $clip->screenshot . ')">
+                $page_body .= '<div class="marker" data-time="' . $clip->start . '" style="' . $thumb_style . ' background-image: url(' . $clip->screenshot . ')">
 					<span>' . mb_strtoupper($clip->bill_number) . '—' . seconds_to_time($clip->duration) . '</span></div>';
             }
             $page_body .= '</div>
 
 				<div id="legislator">';
             foreach ($legislator_clips as $clip) {
-                $page_body .= '<div class="marker" data-time="' . $clip->start . '" style="background-image: url(' . $clip->screenshot . ')">
+                $page_body .= '<div class="marker" data-time="' . $clip->start . '" style="' . $thumb_style . ' background-image: url(' . $clip->screenshot . ')">
 				<span>' . $clip->legislator_name . '—' . mb_substr(seconds_to_time($clip->duration), 3) . '</span></div>';
             }
             $page_body .= '</div>';
@@ -325,7 +335,7 @@ if (mysqli_num_rows($result) == 0) {
             if (isset($video2->screenshots) && count((array)$video2->screenshots) > 0) {
                 $page_body .= '<div id="time">';
                 foreach ($video2->screenshots as $screenshot) {
-                    $page_body .= '<div class="marker" data-time="' . $screenshot->seconds . '" style="background-image: url(' . $screenshot->filename . ')">
+                    $page_body .= '<div class="marker" data-time="' . $screenshot->seconds . '" style="' . $thumb_style . ' background-image: url(' . $screenshot->filename . ')">
 					<span>' . mb_substr(seconds_to_time($screenshot->seconds), 0, 5) . '</span></div>';
                 }
                 $page_body .= '</div>';

@@ -14,6 +14,7 @@ class Import
     private $log;
     private $pdo;
     private $preferredNameCache = [];
+    private $ga_member_page_cache = [];
 
     /** @var string|null */
     public $bill_number;
@@ -823,8 +824,12 @@ class Import
         # The following are versions of the bill's full text. Only the first pair need be
         # present. But the remainder are there to deal with the possibility that the bill is
         # amended X times.
-        $bill['text'][0]['number'] = trim($bill[22]);
-        $bill['text'][0]['date'] = date('Y-m-d', strtotime(trim($bill[23])));
+        if (!empty($bill[22]) && strlen(trim($bill[22])) > 1) {
+            $bill['text'][0]['number'] = trim($bill[22]);
+        }
+        if (!empty($bill[23])) {
+            $bill['text'][0]['date'] = date('Y-m-d', strtotime(trim($bill[23])));
+        }
         if (!empty($bill[24])) {
             $bill['text'][1]['number'] = trim($bill[24]);
         }
@@ -1227,15 +1232,20 @@ class Import
 
 
     /**
-     * Verify that a legislator is still listed in the General Assembly roster via the LIS API.
+     * Verify that a legislator is still listed on the General Assembly's official member pages.
      *
-     * @param string $lis_id Legislator LIS identifier.
+     * The GA's House and Senate websites are used as the primary source of truth. If the page
+     * cannot be fetched, the method falls back to the LIS API to avoid false negatives from a
+     * transient network issue.
+     *
+     * @param string      $lis_id Legislator LIS identifier (e.g. "H0100", "S0050").
+     * @param string|null $name   Legislator name in "Last, First" format.
      *
      * @return bool True when the legislator remains active, false otherwise.
      *
      * @throws Exception When the identifier cannot be normalized or is invalid.
      */
-    public function legislator_in_lis($lis_id)
+    public function legislator_in_lis($lis_id, $name = null)
     {
 
         $lis_id = strtoupper(trim((string)$lis_id));
@@ -1244,6 +1254,18 @@ class Import
         }
 
         $chamber = ($lis_id[0] === 'S') ? 'senate' : 'house';
+
+        if (!empty($name)) {
+            $last_name = trim(explode(',', $name)[0]);
+            $page_text = $this->fetch_ga_member_page($chamber);
+
+            if ($page_text !== false) {
+                return (bool) preg_match('/\b' . preg_quote($last_name, '/') . '\b/i', $page_text);
+            }
+
+            $this->log->put('GA member page unavailable; falling back to LIS API for ' . $last_name, 3);
+        }
+
         $member_number = $this->normalize_member_number($chamber, $lis_id);
         if ($member_number === false) {
             throw new Exception('Unable to normalize LIS ID: ' . $lis_id);
@@ -1267,6 +1289,70 @@ class Import
         }
 
         return true;
+    } //
+
+    /**
+     * Fetch and cache the plain-text content of a GA chamber's official member page.
+     *
+     * @param string $chamber "house" or "senate".
+     *
+     * @return string|false Stripped page text, or false on failure.
+     */
+    protected function fetch_ga_member_page($chamber)
+    {
+
+        if (isset($this->ga_member_page_cache[$chamber])) {
+            return $this->ga_member_page_cache[$chamber];
+        }
+
+        $url = ($chamber === 'senate')
+            ? 'https://apps.senate.virginia.gov/Senator/index.php'
+            : 'https://house.vga.virginia.gov/members';
+
+        $html = $this->http_get($url);
+
+        if ($html === false) {
+            $this->log->put('Failed to fetch GA member page from ' . $url, 5);
+            $this->ga_member_page_cache[$chamber] = false;
+            return false;
+        }
+
+        $this->ga_member_page_cache[$chamber] = strip_tags($html);
+        return $this->ga_member_page_cache[$chamber];
+    } //
+
+    /**
+     * Perform a plain HTTP GET and return the response body, or false on failure.
+     *
+     * Extracted as a protected method so tests can inject fake responses without
+     * making real network requests.
+     *
+     * @param string $url
+     *
+     * @return string|false
+     */
+    protected function http_get($url)
+    {
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        $html   = curl_exec($ch);
+        $status = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $error  = curl_error($ch);
+        curl_close($ch);
+
+        if ($html === false || $status >= 400) {
+            $this->log->put(
+                'HTTP GET failed for ' . $url
+                . ' (HTTP ' . $status . ', error: ' . $error . ')',
+                5
+            );
+            return false;
+        }
+
+        return $html;
     } //
 
     /**

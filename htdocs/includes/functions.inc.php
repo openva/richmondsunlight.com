@@ -516,7 +516,6 @@ function get_content($url, $timeout = 10)
     curl_setopt($ch, CURLOPT_USERAGENT, 'rs-bot');
 
     $string = curl_exec($ch);
-    curl_close($ch);
 
     if (empty($string)) {
         return false;
@@ -832,8 +831,18 @@ function login_form()
     } elseif (isset($form_data) && isset($form_data['return_uri'])) {
         $return_uri = $_GET['return_uri'];
     }
+    // If the port of the requested URL is anything other than 80 or 443, we need to include in
+    // the form's post action value.
+    if ($_SERVER['SERVER_PORT'] != '80' && $_SERVER['SERVER_PORT'] != '443') {
+        $action_prefix = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['SERVER_NAME'] . ':'
+            . $_SERVER['SERVER_PORT'];
+    } else {
+        $action_prefix = '';
+    }
+    
+
     $returned_data = '
-		<form method="post" action="/account/login/">
+		<form method="post" action="' . $action_prefix . '/account/login/">
   
             <fieldset class="login">
                 <label for="email">E-Mail Address</label><br>
@@ -977,16 +986,6 @@ function bill_sections($bill_id)
     }
 
     return $sections;
-}
-
-# When provided with a URL, Varnish will erase that URL from its cache.
-function varnish_purge($url)
-{
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PURGE');
-    curl_exec($ch);
-    return true;
 }
 
 # This is relied on by usort() in bill-full-text.php.

@@ -25,6 +25,8 @@ $site_section = '';
 # INITIALIZE SESSION
 session_start();
 
+$page_body = '';
+
 # If we're arriving from another page, remember it so we can send the user back after login.
 if (!isset($_POST['submit']) && empty($_GET['return_uri']) && !empty($_SERVER['HTTP_REFERER'])) {
     $referer = parse_url($_SERVER['HTTP_REFERER']);
@@ -81,8 +83,8 @@ if (isset($_POST['submit'])) {
             $user = mysqli_fetch_array($result);
             $_SESSION['id'] = $user['cookie_hash'];
 
-            # We store the user's name in session data because a) it's a handy shortcut to refer
-            # to the user by name and b) it enables Mint to track users by name.
+            # We store the user's name in session data because it's a handy shortcut to refer
+            # to the user by name
             if (!empty($user['name'])) {
                 $_SESSION['name'] = $user['name'];
             }
@@ -113,7 +115,7 @@ if (isset($_POST['submit'])) {
                 $form_data['return_uri'] = '/';
             }
 
-            header('Location: https://' . $_SERVER['SERVER_NAME'] . urldecode($form_data['return_uri']));
+            header('Location: ' . SITE_BASE_URL . urldecode($form_data['return_uri']));
             exit();
         }
     }

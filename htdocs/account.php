@@ -34,7 +34,7 @@ $html_head = '<script src="/js/vendor/zxcvbn/dist/zxcvbn.js"></script>
 # See if the user is logged in.
 if (@logged_in() === false) {
     # If the user isn't logged in, have the user create an account (or log in).
-    header('Location: https://' . $_SERVER['SERVER_NAME'] . '/account/login/');
+    header('Location: ' . SITE_BASE_URL . '/account/login/');
     exit;
 }
 
