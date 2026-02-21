@@ -13,23 +13,27 @@ div.left {
 	width: 100%;
 }
 div.portfolio {
-	background-color: #eee;
-	border: 1px solid #ccc;
+	background-color: #f4eee5;
+	border: 1px solid #dccbaf;
 	padding: 0;
 	margin: 0 0 2em 0;
 	clear: both;
 }
 	div.portfolio div.name {
-		padding: 1px 0 1px 3px;
-		background-color: #aaa;
+		padding: 6px 10px;
+		background-color: #243a51;
+		color: #fff;
 	}
+		div.portfolio div.name a {
+			color: #fff;
+		}
 		div.portfolio div.name h1 {
 			display: inline;
 			font-size: 1.3em;
 			background: transparent;
 		}
 			div.portfolio div.name h1 a {
-				color: #000;
+				color: #fff;
 			}
 				div.portfolio div.name h1 a:hover {
 					color: #0095eb;
@@ -56,21 +60,21 @@ div.portfolio {
 		text-align: right;
 		text-transform: uppercase;
 		vertical-align: bottom;
-		background-color: #ccc;
+		background-color: #dccbaf;
 	}
 		div.portfolio div.modify a {
 			text-decoration: none;
 			color: #000;
 		}
 		div.portfolio div.modify a:hover {
-			background-color: #ccc;
+			background-color: #dccbaf;
 		}
 	div.portfolio table {
 		width: 100%;
 		border-collapse: collapse;
 	}
 		div.portfolio table thead {
-			background-color: #ccc;
+			background-color: #dccbaf;
 			font-weight: normal;
 		}
 			div.portfolio th#bill, div.portfolio th#catch-line,
@@ -82,21 +86,21 @@ div.portfolio {
 			}
 		div.portfolio tr.notes td {
 			font-family: Verdana, 'Lucida Sans', Helvetica, Arial, sans-serif;
-			background-color: #eef;
+			background-color: #f4eee5;
 		}
 		div.portfolio tr {
-			border-bottom: 1px solid #ccc;
+			border-bottom: 1px solid #dccbaf;
 		}
 			div.portfolio tr.changed {
-				background-color: #ffa;
+				border-left: 3px solid #c6a952;
 			}
 			div.portfolio tbody tr:hover {
 				background-color: #fff;
 			}
 			div.portfolio tr td {
-				padding: 0 3px;
+				padding: 6px 10px;
 				vertical-align: top;
-				border-right: 1px solid #999;
+				border-right: 1px solid #dccbaf;
 			}
 				div.portfolio .comments textarea {
 					width: 40em !important;
@@ -185,7 +189,7 @@ div#messages.error {
 fieldset#create-smart-portfolio, fieldset#create-portfolio {
 	width: 300px;
 	border: 0;
-	background-color: #eee;
+	background-color: #f4eee5;
 }
 	fieldset#create-portfolio table {
 		width: 100%;
@@ -207,9 +211,18 @@ fieldset#create-smart-portfolio, fieldset#create-portfolio {
 		height: 4em;
 	}
 
+/* Add Bill Form */
 div#add-bill-form {
-	float: right;
+	margin-bottom: 1.5em;
+	padding: 0.5em;
+	background-color: #f4eee5;
+	border: 1px solid #dccbaf;
 }
+	div#add-bill-form form {
+		display: flex;
+		align-items: center;
+		gap: 0.5em;
+	}
 
 /* Portfolio Creation Tabs */
 div#create-portfolios {
@@ -222,3 +235,49 @@ div#create-portfolios {
 ul.tabs li a {
 	width: 100px;
 }
+
+/* Delete bill button */
+a.delete-bill {
+	color: #790806;
+	font-size: 0.8em;
+	text-decoration: none;
+}
+	a.delete-bill:hover {
+		text-decoration: underline;
+	}
+
+/* Public portfolio bill cards */
+#public-portfolio .bill {
+	background-color: #f4eee5;
+	border: 1px solid #dccbaf;
+	padding: 1em;
+	margin-bottom: 1em;
+}
+
+/* Public portfolio bill metadata */
+.bill-meta .label {
+	font-weight: bold;
+	color: #666;
+}
+
+/* Tag list */
+.tag-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.4em;
+}
+	.tag-list li a {
+		display: inline-block;
+		padding: 0.2em 0.6em;
+		background-color: #f4eee5;
+		border: 1px solid #dccbaf;
+		border-radius: 3px;
+		font-size: 0.85em;
+		text-decoration: none;
+	}
+		.tag-list li a:hover {
+			background-color: #dccbaf;
+		}
