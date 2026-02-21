@@ -3,6 +3,11 @@ const { test, expect } = require('@playwright/test');
 const billPath = '/bill/2025/hb41/';
 const apiBaseUrl = process.env.PLAYWRIGHT_API_BASE_URL;
 
+function escapeRegex(literal) {
+  // Escape all characters that have special meaning in regular expressions
+  return literal.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 async function loginTestUser(page) {
   const resp = await page.request.post('/account/login/', {
     form: {
@@ -230,7 +235,7 @@ test.describe('Bill interactions', () => {
     expect(body.success).toBe(true);
 
     // Verify no page navigation occurred
-    await expect(page).toHaveURL(new RegExp(billPath.replace(/\//g, '\\/')));
+    await expect(page).toHaveURL(new RegExp(escapeRegex(billPath)));
 
     // Verify the form was replaced by a confirmation message
     await expect(page.locator('#track-bill-container')).toContainText('tracking');
