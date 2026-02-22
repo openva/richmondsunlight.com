@@ -302,12 +302,50 @@ if (mysqli_num_rows($result) > 0) {
                 };
                 map.on("click", "boundaries", clickHandler);
                 map.on("click", "boundaries-fill", clickHandler);
-                var enterHandler = function() { map.getCanvas().style.cursor = "pointer"; };
-                var leaveHandler = function() { map.getCanvas().style.cursor = ""; };
-                map.on("mouseenter", "boundaries", enterHandler);
-                map.on("mouseleave", "boundaries", leaveHandler);
-                map.on("mouseenter", "boundaries-fill", enterHandler);
-                map.on("mouseleave", "boundaries-fill", leaveHandler);
+                var popup = new mapboxgl.Popup({ closeButton: false, closeOnClick: false, maxWidth: "300px" });
+                var popupShortname = null;
+
+                map.on("mouseenter", "boundaries-fill", function(e) {
+                    map.getCanvas().style.cursor = "pointer";
+                    if (!e.features || !e.features.length) return;
+                    var props = e.features[0].properties || {};
+                    if (!props.shortname) return;
+
+                    popupShortname = props.shortname;
+                    var label = (props.chamber === "house" ? "House" : "Senate") + " District " + props.number;
+                    popup.setLngLat(e.lngLat)
+                        .setHTML("<strong>" + (props.name || label) + "</strong><br>" + label + "<br><em>Loading…</em>")
+                        .addTo(map);
+
+                    $.ajax({ url: "<?php echo API_URL; ?>1.1/legislator/" + props.shortname + ".json" })
+                        .then(function(data) {
+                            if (popupShortname !== props.shortname) return;
+                            var html = "<img src=\"/images/legislators/thumbnails/" + props.shortname + ".jpg\" height=\"50\" style=\"float:left;margin:0 .5em .5em 0\" />"
+                                + "<strong>" + data.name_formatted + "</strong><br>"
+                                + label + "<br>"
+                                + "Represents: " + data.district_description + "<br>"
+                                + "Took Office: " + data.date_started;
+                            popup.setHTML(html);
+                        });
+                });
+
+                map.on("mousemove", "boundaries-fill", function(e) {
+                    if (e.features && e.features.length) {
+                        var props = e.features[0].properties || {};
+                        if (props.shortname !== popupShortname) {
+                            // Moved to a different district; trigger fresh popup
+                            map.fire("mouseenter", { features: e.features, lngLat: e.lngLat, point: e.point });
+                        } else {
+                            popup.setLngLat(e.lngLat);
+                        }
+                    }
+                });
+
+                map.on("mouseleave", "boundaries-fill", function() {
+                    map.getCanvas().style.cursor = "";
+                    popup.remove();
+                    popupShortname = null;
+                });
 
                 map.on("mousemove", function(e) {
                     var features = map.queryRenderedFeatures(e.point, { layers: ["boundaries", "boundaries-fill"] });
