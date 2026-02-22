@@ -102,9 +102,9 @@ if ${MYSQLDUMP_CMD} \
   --single-transaction \
   --quick \
   --lock-tables=false \
-  --set-gtid-purged=OFF \
   --skip-add-locks \
   --skip-comments \
+  --ignore-table="${DB_PROD}.logs" \
   -h "${DB_HOST}" \
   -u "${DB_USER}" \
   -p"${DB_PASS}" \
@@ -118,6 +118,26 @@ if ${MYSQLDUMP_CMD} \
   echo ""
 else
   echo "ERROR: Failed to copy database" >&2
+  exit 1
+fi
+
+# Copy the logs table structure (but not its data)
+echo "Copying logs table structure (empty)..."
+if ${MYSQLDUMP_CMD} \
+  --no-data \
+  -h "${DB_HOST}" \
+  -u "${DB_USER}" \
+  -p"${DB_PASS}" \
+  "${DB_PROD}" logs \
+  | ${MYSQL_CMD} \
+      -h "${DB_HOST}" \
+      -u "${DB_USER}" \
+      -p"${DB_PASS}" \
+      "${DB_STAGING}"; then
+  echo "✓ Logs table structure copied"
+  echo ""
+else
+  echo "ERROR: Failed to copy logs table structure" >&2
   exit 1
 fi
 
