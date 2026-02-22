@@ -41,7 +41,7 @@ $page_sidebar = '
 		<p><a href="/your-legislators/">Find out who represents you in the General Assembly!</a></p>
 
 		<p>House members serve just two-year terms, and are reelected every November in odd-numbered
-		years—2013, 2015, etc. Senate members serve four-year terms, reelected in 2011, 2015,
+		years—2025, 2027, etc. Senate members serve four-year terms, reelected in 2023, 2027,
 		etc.</p>
 	</div>
 ';
