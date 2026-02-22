@@ -22,8 +22,7 @@ class Location
 
         # If we've got a full address, join its components into a single string.
         if (isset($this->street, $this->city, $this->zip)) {
-            $q = '?Street=' . urlencode($this->street) . '&City=' . urlencode($this->city)
-                . '&ZIP=' . urlencode($this->zip);
+            $q = '?SingleLine=' . urlencode($this->street . ', ' . $this->city . ', VA ' . $this->zip);
         } elseif (isset($this->address)) {
             $q = '?SingleLine=' . urlencode($this->address);
         } elseif (isset($this->zip)) {
@@ -31,7 +30,7 @@ class Location
         }
 
         # Assemble our URL, instructing the Virginia GIS server
-        $url = 'https://gismaps.vdem.virginia.gov/arcgis/rest/services/Geocoding/VGIN_Composite_Locator/GeocodeServer/findAddressCandidates'
+        $url = 'https://vginmaps.vdem.virginia.gov/arcgis/rest/services/Geocoding/VGIN_Composite_Locator/GeocodeServer/findAddressCandidates'
             . $q . '&maxLocations=1&f=pjson';
 
         # Fetch the result

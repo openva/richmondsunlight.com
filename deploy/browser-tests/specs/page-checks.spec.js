@@ -135,6 +135,20 @@ test('process-polls.php redirects after a valid poll vote', async ({ page }) => 
 });
 
 // ---------------------------------------------------------------------------
+// Your Legislators — address geocoding
+// ---------------------------------------------------------------------------
+
+test('your-legislators address lookup successfully geocodes an address', async ({ page }) => {
+  await page.goto('/your-legislators/?street=100+E+Main+St&city=Richmond&zip=23219');
+  // If geocoding fails, the page shows "Your location could not be identified".
+  // If geocoding succeeds, the page moves on to district lookup (which may or may
+  // not work depending on whether OPENSTATES_KEY is configured). Either way, the
+  // "could not be identified" message must NOT appear.
+  const body = await page.locator('#content').textContent({ timeout: 15000 });
+  expect(body).not.toContain('Your location could not be identified');
+});
+
+// ---------------------------------------------------------------------------
 // CSV / data export
 // ---------------------------------------------------------------------------
 
