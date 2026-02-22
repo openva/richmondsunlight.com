@@ -58,9 +58,23 @@ $page_body = '
 
 $page_body .= '<div id="names">';
 
-# Fetch all legislators from the API and filter to those currently in office.
-$legislators_json = get_content(API_URL . '1.1/legislators.json');
-$all_legislators = ($legislators_json !== false) ? json_decode($legislators_json, true) : array();
+# Fetch all legislators from the API (cached in Memcached for 1 hour).
+$all_legislators = null;
+if (MEMCACHED_SERVER != '') {
+    $mc = new Memcached();
+    $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+    $cached = $mc->get('legislators-list-json');
+    if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
+        $all_legislators = unserialize($cached);
+    }
+}
+if ($all_legislators === null) {
+    $legislators_json = get_content(API_URL . '1.1/legislators.json');
+    $all_legislators = ($legislators_json !== false) ? json_decode($legislators_json, true) : array();
+    if (MEMCACHED_SERVER != '' && !empty($all_legislators)) {
+        $mc->set('legislators-list-json', serialize($all_legislators), 3600);
+    }
+}
 $now = date('Y-m-d');
 $current_legislators = array_filter($all_legislators, function ($leg) use ($now) {
     return empty($leg['date_ended']) || $leg['date_ended'] > $now;
