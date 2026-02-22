@@ -111,6 +111,17 @@ test('process-comments.php returns JSON error for empty comment', async ({ reque
 });
 
 test('process-polls.php redirects after a valid poll vote', async ({ page }) => {
+  // Clean up any prior poll votes for this bill so the unique constraint doesn't block us.
+  const mysql = require('mysql2/promise');
+  const db = await mysql.createConnection({
+    host: process.env.DB_HOST || 'db',
+    user: 'ricsun',
+    password: 'password',
+    database: 'richmondsunlight',
+  });
+  await db.execute('DELETE FROM polls WHERE bill_id = ?', [billId]);
+  await db.end();
+
   // page.request shares the browser session so PHP can track the new anonymous user.
   const resp = await page.request.post('/process-polls.php', {
     form: {
@@ -121,6 +132,36 @@ test('process-polls.php redirects after a valid poll vote', async ({ page }) => 
     maxRedirects: 0,
   });
   expect(resp.status()).toBe(302);
+});
+
+// ---------------------------------------------------------------------------
+// Legislators listing
+// ---------------------------------------------------------------------------
+
+test('/legislators/ lists current House and Senate members', async ({ page }) => {
+  await page.goto('/legislators/');
+  // The Names tab is inside jQuery UI tabs, so elements may not be "visible"
+  // until the tab is activated. Check the page HTML content instead.
+  const html = await page.content();
+  expect(html).toContain('House of Delegates');
+  expect(html).toContain('Senate');
+  // Verify a reasonable number of legislator links are present (100 House + 40 Senate)
+  const links = page.locator('#names a[href*="/legislator/"]');
+  expect(await links.count()).toBeGreaterThanOrEqual(100);
+});
+
+// ---------------------------------------------------------------------------
+// Your Legislators — address geocoding
+// ---------------------------------------------------------------------------
+
+test('your-legislators address lookup successfully geocodes an address', async ({ page }) => {
+  await page.goto('/your-legislators/?street=100+E+Main+St&city=Richmond&zip=23219');
+  // If geocoding fails, the page shows "Your location could not be identified".
+  // If geocoding succeeds, the page moves on to district lookup (which may or may
+  // not work depending on whether OPENSTATES_KEY is configured). Either way, the
+  // "could not be identified" message must NOT appear.
+  const body = await page.locator('#content').textContent({ timeout: 15000 });
+  expect(body).not.toContain('Your location could not be identified');
 });
 
 // ---------------------------------------------------------------------------

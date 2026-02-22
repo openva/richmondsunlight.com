@@ -222,24 +222,42 @@ test.describe('Bill interactions', () => {
     // bill page without visiting /photosynthesis/ first.
     await page.goto(billPath);
 
-    const trackBtn = page.locator('#track-bill-submit');
+    const trackBtn = page.locator('#track-bill-btn');
     await expect(trackBtn).toBeVisible({ timeout: 10000 });
+    await expect(trackBtn).toHaveText('Track this Bill');
 
-    const [response] = await Promise.all([
+    // Click "Track this Bill" and verify AJAX response
+    const [trackResponse] = await Promise.all([
       page.waitForResponse(
         r => r.url().includes('/photosynthesis/process-actions.php') && r.status() === 200
       ),
       trackBtn.click(),
     ]);
-    const body = await response.json();
-    expect(body.success).toBe(true);
+    const trackBody = await trackResponse.json();
+    expect(trackBody.success).toBe(true);
+    expect(trackBody.record_id).toBeTruthy();
 
     // Verify no page navigation occurred
     await expect(page).toHaveURL(new RegExp(escapeRegex(billPath)));
 
-    // Verify the form was replaced by a confirmation message
-    await expect(page.locator('#track-bill-container')).toContainText('tracking');
-    await expect(page.locator('#track-bill-form')).toHaveCount(0);
+    // Verify the button toggled to "Stop Tracking"
+    const stopBtn = page.locator('#track-bill-btn');
+    await expect(stopBtn).toHaveText('Stop Tracking');
+    await expect(stopBtn).toHaveAttribute('data-state', 'tracking');
+
+    // Click "Stop Tracking" and verify AJAX response
+    const [untrackResponse] = await Promise.all([
+      page.waitForResponse(
+        r => r.url().includes('/photosynthesis/process-actions.php') && r.status() === 200
+      ),
+      stopBtn.click(),
+    ]);
+    const untrackBody = await untrackResponse.json();
+    expect(untrackBody.success).toBe(true);
+
+    // Verify the button toggled back to "Track this Bill"
+    await expect(page.locator('#track-bill-btn')).toHaveText('Track this Bill');
+    await expect(page.locator('#track-bill-btn')).toHaveAttribute('data-state', 'untracked');
   });
 
   test('bill detail page renders patron name', async ({ page }) => {

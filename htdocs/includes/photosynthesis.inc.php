@@ -592,8 +592,8 @@ function show_portfolio($portfolio, $user_id)
             if ($portfolio['type'] == 'normal') {
                 $content .= '
 					<td class="options">
-						<a href="/photosynthesis/delete/' . $portfolio['hash'] . '-' . $bill['record_id'] . '/" title="Stop tracking this bill"
-							onclick="return confirm(\'Are you sure you want to stop tracking ' . mb_strtoupper($bill['number']) . '?\')">x</a>
+						<a class="delete-bill" href="/photosynthesis/delete/' . $portfolio['hash'] . '-' . $bill['record_id'] . '/" title="Stop tracking this bill"
+							onclick="return confirm(\'Are you sure you want to stop tracking ' . mb_strtoupper($bill['number']) . '?\')">&#x2715; Remove</a>
 					</td>';
             }
             $content .= '</tr>';

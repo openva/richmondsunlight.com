@@ -58,40 +58,49 @@ $page_body = '
 
 $page_body .= '<div id="names">';
 
-# Select all delegates from the database.
-$sql = 'SELECT shortname, name, party, place
-		FROM representatives
-		WHERE chamber="house"
-		AND (date_ended IS NULL OR date_ended > now())
-		ORDER BY name ASC';
-$result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0) {
+# Fetch all legislators from the API and filter to those currently in office.
+$legislators_json = get_content(API_URL . '1.1/legislators.json');
+$all_legislators = ($legislators_json !== false) ? json_decode($legislators_json, true) : array();
+$now = date('Y-m-d');
+$current_legislators = array_filter($all_legislators, function ($leg) use ($now) {
+    return empty($leg['date_ended']) || $leg['date_ended'] > $now;
+});
+
+# Split into chambers.
+$house = array_filter($current_legislators, function ($leg) {
+    return $leg['chamber'] === 'house';
+});
+$senate = array_filter($current_legislators, function ($leg) {
+    return $leg['chamber'] === 'senate';
+});
+
+# Sort each chamber by name.
+usort($house, function ($a, $b) {
+    return strcmp($a['name'], $b['name']);
+});
+usort($senate, function ($a, $b) {
+    return strcmp($a['name'], $b['name']);
+});
+
+if (count($house) > 0) {
     $page_body .= '
 	<div class="left_side">
 		<h2>House of Delegates</h2>
 		<ul>';
-    while ($legislator = mysqli_fetch_array($result)) {
-        $legislator = array_map('stripslashes', $legislator);
-        $page_body .= '<li><a href="/legislator/' . $legislator['shortname'] . '/">' . $legislator['name'] .
+    foreach ($house as $legislator) {
+        $page_body .= '<li><a href="/legislator/' . $legislator['id'] . '/">' . $legislator['name'] .
             ' (' . $legislator['party'] . '-' . $legislator['place'] . ')</a></li>';
     }
     $page_body .= '</ul>
 		</div>';
 }
 
-# Select all senators from the database.
-$sql = 'SELECT shortname, name, party, place
-		FROM representatives
-		WHERE chamber="senate"
-		AND (date_ended IS NULL OR date_ended > now())
-		ORDER BY name ASC';
-$result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) > 0) {
+if (count($senate) > 0) {
     $page_body .= '<div class="right_side">
 		<h2>Senate</h2>
 		<ul>';
-    while ($legislator = mysqli_fetch_array($result)) {
-        $page_body .= '<li><a href="/legislator/' . $legislator['shortname'] . '/">' . $legislator['name'] .
+    foreach ($senate as $legislator) {
+        $page_body .= '<li><a href="/legislator/' . $legislator['id'] . '/">' . $legislator['name'] .
             ' (' . $legislator['party'] . '-' . $legislator['place'] . ')</a></li>';
     }
     $page_body .= '</ul>

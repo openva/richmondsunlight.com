@@ -65,7 +65,7 @@ if (isset($_POST['add-bill'])) {
     if (@$_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
         header('Content-Type: application/json');
         if ($result && mysqli_affected_rows($GLOBALS['db']) > 0) {
-            echo json_encode(['success' => true]);
+            echo json_encode(['success' => true, 'record_id' => mysqli_insert_id($GLOBALS['db'])]);
         } else {
             http_response_code(422);
             echo json_encode(['success' => false, 'error' => 'Bill could not be added.']);
@@ -82,8 +82,9 @@ if (isset($_POST['add-bill'])) {
 
 
 # Delete a bill from a portfolio.
-if (isset($_GET['delete-bill'])) {
-    $tmp = mysqli_real_escape_string($GLOBALS['db'], $_GET['delete-bill']);
+if (isset($_GET['delete-bill']) || isset($_POST['delete-bill'])) {
+    $raw = isset($_POST['delete-bill']) ? $_POST['delete-bill'] : $_GET['delete-bill'];
+    $tmp = mysqli_real_escape_string($GLOBALS['db'], $raw);
     $tmp = explode('-', $tmp);
     $portfolio_hash = $tmp[0];
     $record_id = $tmp[1];
@@ -109,6 +110,13 @@ if (isset($_GET['delete-bill'])) {
         $mc = new Memcached();
         $mc->addServer("127.0.0.1", 11211);
         $mc->delete('comments-' . $bill['id']);
+    }
+
+    # If this is an AJAX request, return JSON instead of redirecting.
+    if (@$_SERVER['HTTP_X_REQUESTED_WITH'] === 'XMLHttpRequest') {
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true]);
+        exit;
     }
 
     # Return the user to the dashboard.

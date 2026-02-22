@@ -13,9 +13,9 @@ php_value session.save_path "127.0.0.1:11211"
 # Instruct browsers to cache and proxies not to cache, timing out cookies after a year. Affects only
 # PHP.
 php_value session.cache_limiter private
-php_value session.gc_maxlifetime 7776000
-php_value session_cache_expire 7776000
-php_value session.cookie_lifetime 7776000
+php_value session.gc_maxlifetime 2592000
+php_value session.cache_expire 2592000
+php_value session.cookie_lifetime 2592000
 
 # Security settings
 php_flag expose_php off

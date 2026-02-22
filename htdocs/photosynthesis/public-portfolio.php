@@ -29,7 +29,8 @@ $site_section = 'photosynthesis';
 $hash = $_GET['hash'];
 
 # ADDITIONAL HTML HEADERS
-$html_head = '<link rel="alternate" type="application/rss+xml" title="RSS 0.92" href="/photosynthesis/rss/portfolio/' . $hash . '/" />';
+$html_head = '<link rel="stylesheet" href="/css/photosynthesis.css" type="text/css" />
+<link rel="alternate" type="application/rss+xml" title="RSS 0.92" href="/photosynthesis/rss/portfolio/' . $hash . '/" />';
 
 # INITIALIZE SESSION
 session_start();
@@ -56,7 +57,9 @@ $result = mysqli_query($GLOBALS['db'], $sql);
 
 # If this portfolio doesn't exist or isn't visible.
 if (mysqli_num_rows($result) == 0) {
-    die('Invalid ID.');
+    http_response_code(404);
+    include $_SERVER['DOCUMENT_ROOT'] . '/404.php';
+    exit();
 }
 
 # If this portfolio does exist.
@@ -129,31 +132,15 @@ else {
     $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0) {
         $page_sidebar .= '
-		<a href="/help/tag-clouds/" class="help-icon-link" data-help-url="/help/tag-clouds/" title="Help"><img src="/images/help-gray.gif" class="help-icon" alt="?" /></a>
 		<h3>These Bills Are About .&thinsp;.&thinsp;.</h3>
 		<div class="box">
-			<div class="tags">';
-        $top_tag = 1;
-        $top_tag_size = 3;
+			<ul class="tag-list">';
         while ($tag = mysqli_fetch_array($result)) {
-            $tags[] = array_map('stripslashes', $tag);
-            if ($tag['count'] > $top_tag) {
-                $top_tag = $tag['count'];
-            }
-        }
-        if ($top_tag == 1) {
-            $top_tag_size = 1;
-        }
-        for ($i = 0; $i < count($tags); $i++) {
-            $font_size = round(($tags[$i]['count'] / $top_tag * $top_tag_size), 2);
-            if ($font_size >= '.75') {
-                $page_sidebar .= '<span style="font-size: ' . $font_size . 'em;">
-					<a href="/bills/tags/' . urlencode($tags[$i]['tag']) . '/">' . $tags[$i]['tag'] . '</a>
-				</span>';
-            }
+            $tag = array_map('stripslashes', $tag);
+            $page_sidebar .= '<li><a href="/bills/tags/' . urlencode($tag['tag']) . '/">' . $tag['tag'] . '</a></li>';
         }
         $page_sidebar .= '
-			</div>
+			</ul>
 		</div>';
     }
 
@@ -181,7 +168,7 @@ else {
     $result = mysqli_query($GLOBALS['db'], $sql);
     $bill_count = mysqli_num_rows($result);
     if ($bill_count == 0) {
-        die('Empty portfolio.');
+        $page_body = '<p>This portfolio has no bills.</p>';
     }
 
     # We've found bills in this portfolio.
@@ -211,9 +198,8 @@ else {
 			<div class="bill' . $bill['status_class'] . '">
 				<h4><a href="/bill/' . $bill['year'] . '/' . $bill['number'] . '/">' . $bill['catch_line']
                 . ' (' . mb_strtoupper($bill['number']) . ')</a></h4>
-				<p>Patron: <a href="/legislator/' . $bill['patron_shortname'] . '/">'
-                    . $bill['patron'] . '</a><br />
-				Status: ' . $bill['status'] . '</p>';
+				<p class="bill-meta"><span class="label">Patron:</span> <a href="/legislator/' . $bill['patron_shortname'] . '/">'
+                    . $bill['patron'] . '</a> &middot; <span class="label">Status:</span> ' . $bill['status'] . '</p>';
 
             # If the portfolio creator has provided notes on this bill.
             if (!empty($bill['notes'])) {
