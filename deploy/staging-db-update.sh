@@ -105,12 +105,16 @@ if ${MYSQLDUMP_CMD} \
   --lock-tables=false \
   --skip-add-locks \
   --skip-comments \
+  --compress \
+  --net-buffer-length=16384 \
+  --skip-ssl \
   --ignore-table="${DB_PROD}.logs" \
   -h "${DB_HOST}" \
   -u "${DB_USER}" \
   -p"${DB_PASS}" \
   "${DB_PROD}" \
   | ${MYSQL_CMD} \
+      --skip-ssl \
       -h "${DB_HOST}" \
       -u "${DB_USER}" \
       -p"${DB_PASS}" \
