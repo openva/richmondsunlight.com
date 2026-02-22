@@ -254,7 +254,7 @@ if (mysqli_num_rows($result) == 0) {
         $page_body .= '
 			<div id="video">
 				<div class="video" style="width: 100%;">
-					' . $video['html'] . '
+					' . str_replace('/embed/', '/embed/?origin=https://www.richmondsunlight.com', $video['html']) . '
 				</div>';
 
         $video2->fuzz = VIDEO_CLIP_FUZZ_SECONDS;
