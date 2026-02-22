@@ -135,6 +135,22 @@ test('process-polls.php redirects after a valid poll vote', async ({ page }) => 
 });
 
 // ---------------------------------------------------------------------------
+// Legislators listing
+// ---------------------------------------------------------------------------
+
+test('/legislators/ lists current House and Senate members', async ({ page }) => {
+  await page.goto('/legislators/');
+  // The Names tab is inside jQuery UI tabs, so elements may not be "visible"
+  // until the tab is activated. Check the page HTML content instead.
+  const html = await page.content();
+  expect(html).toContain('House of Delegates');
+  expect(html).toContain('Senate');
+  // Verify a reasonable number of legislator links are present (100 House + 40 Senate)
+  const links = page.locator('#names a[href*="/legislator/"]');
+  expect(await links.count()).toBeGreaterThanOrEqual(100);
+});
+
+// ---------------------------------------------------------------------------
 // Your Legislators — address geocoding
 // ---------------------------------------------------------------------------
 
