@@ -22,15 +22,16 @@ fi
 echo "Reading database credentials from settings.inc.php..."
 DB_CREDENTIALS=$(php -r "
   require_once '${SETTINGS_FILE}';
-  echo PDO_SERVER . '|' . PDO_USERNAME . '|' . PDO_PASSWORD . '|' . MYSQL_DATABASE;
+  echo PDO_SERVER . '|' . PDO_USERNAME . '|' . PDO_PASSWORD;
 ")
 
-IFS='|' read -r DB_HOST DB_USER DB_PASS DB_PROD <<< "${DB_CREDENTIALS}"
+IFS='|' read -r DB_HOST DB_USER DB_PASS <<< "${DB_CREDENTIALS}"
 
 # Allow override from environment variables
 DB_HOST="${DB_HOST_OVERRIDE:-${DB_HOST}}"
 DB_USER="${DB_USER_OVERRIDE:-${DB_USER}}"
 DB_PASS="${DB_PASS_OVERRIDE:-${DB_PASS}}"
+DB_PROD="richmondsunlight"
 DB_STAGING="rs-staging"
 
 echo "Production DB: ${DB_PROD}"
