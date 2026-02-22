@@ -107,6 +107,9 @@ if ${MYSQLDUMP_CMD} \
   --skip-comments \
   --compress \
   --net-buffer-length=16384 \
+  --net-read-timeout=3600 \
+  --net-write-timeout=3600 \
+  --max-allowed-packet=64M \
   --skip-ssl \
   --ignore-table="${DB_PROD}.logs" \
   -h "${DB_HOST}" \
@@ -115,6 +118,9 @@ if ${MYSQLDUMP_CMD} \
   "${DB_PROD}" \
   | ${MYSQL_CMD} \
       --skip-ssl \
+      --net-read-timeout=3600 \
+      --net-write-timeout=3600 \
+      --max-allowed-packet=64M \
       -h "${DB_HOST}" \
       -u "${DB_USER}" \
       -p"${DB_PASS}" \
