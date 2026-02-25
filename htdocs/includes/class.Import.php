@@ -1438,7 +1438,7 @@ class Import
                     3
                 );
             }
-            return false;
+            return null;
         }
 
         $term_sql = 'INSERT INTO terms

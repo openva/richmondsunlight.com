@@ -41,7 +41,7 @@ $page_sidebar = '
 		<p><a href="/your-legislators/">Find out who represents you in the General Assembly!</a></p>
 
 		<p>House members serve just two-year terms, and are reelected every November in odd-numbered
-		years—2013, 2015, etc. Senate members serve four-year terms, reelected in 2011, 2015,
+		years—2025, 2027, etc. Senate members serve four-year terms, reelected in 2023, 2027,
 		etc.</p>
 	</div>
 ';
@@ -58,9 +58,23 @@ $page_body = '
 
 $page_body .= '<div id="names">';
 
-# Fetch all legislators from the API and filter to those currently in office.
-$legislators_json = get_content(API_URL . '1.1/legislators.json');
-$all_legislators = ($legislators_json !== false) ? json_decode($legislators_json, true) : array();
+# Fetch all legislators from the API (cached in Memcached for 1 hour).
+$all_legislators = null;
+if (MEMCACHED_SERVER != '') {
+    $mc = new Memcached();
+    $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+    $cached = $mc->get('legislators-list-json');
+    if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
+        $all_legislators = unserialize($cached);
+    }
+}
+if ($all_legislators === null) {
+    $legislators_json = get_content(API_URL . '1.1/legislators.json');
+    $all_legislators = ($legislators_json !== false) ? json_decode($legislators_json, true) : array();
+    if (MEMCACHED_SERVER != '' && !empty($all_legislators)) {
+        $mc->set('legislators-list-json', serialize($all_legislators), 3600);
+    }
+}
 $now = date('Y-m-d');
 $current_legislators = array_filter($all_legislators, function ($leg) use ($now) {
     return empty($leg['date_ended']) || $leg['date_ended'] > $now;
@@ -288,12 +302,50 @@ if (mysqli_num_rows($result) > 0) {
                 };
                 map.on("click", "boundaries", clickHandler);
                 map.on("click", "boundaries-fill", clickHandler);
-                var enterHandler = function() { map.getCanvas().style.cursor = "pointer"; };
-                var leaveHandler = function() { map.getCanvas().style.cursor = ""; };
-                map.on("mouseenter", "boundaries", enterHandler);
-                map.on("mouseleave", "boundaries", leaveHandler);
-                map.on("mouseenter", "boundaries-fill", enterHandler);
-                map.on("mouseleave", "boundaries-fill", leaveHandler);
+                var popup = new mapboxgl.Popup({ closeButton: false, closeOnClick: false, maxWidth: "300px" });
+                var popupShortname = null;
+
+                map.on("mouseenter", "boundaries-fill", function(e) {
+                    map.getCanvas().style.cursor = "pointer";
+                    if (!e.features || !e.features.length) return;
+                    var props = e.features[0].properties || {};
+                    if (!props.shortname) return;
+
+                    popupShortname = props.shortname;
+                    var label = (props.chamber === "house" ? "House" : "Senate") + " District " + props.number;
+                    popup.setLngLat(e.lngLat)
+                        .setHTML("<strong>" + (props.name || label) + "</strong><br>" + label + "<br><em>Loading…</em>")
+                        .addTo(map);
+
+                    $.ajax({ url: "<?php echo API_URL; ?>1.1/legislator/" + props.shortname + ".json" })
+                        .then(function(data) {
+                            if (popupShortname !== props.shortname) return;
+                            var html = "<img src=\"/images/legislators/thumbnails/" + props.shortname + ".jpg\" height=\"50\" style=\"float:left;margin:0 .5em .5em 0\" />"
+                                + "<strong>" + data.name_formatted + "</strong><br>"
+                                + label + "<br>"
+                                + "Represents: " + data.district_description + "<br>"
+                                + "Took Office: " + data.date_started;
+                            popup.setHTML(html);
+                        });
+                });
+
+                map.on("mousemove", "boundaries-fill", function(e) {
+                    if (e.features && e.features.length) {
+                        var props = e.features[0].properties || {};
+                        if (props.shortname !== popupShortname) {
+                            // Moved to a different district; trigger fresh popup
+                            map.fire("mouseenter", { features: e.features, lngLat: e.lngLat, point: e.point });
+                        } else {
+                            popup.setLngLat(e.lngLat);
+                        }
+                    }
+                });
+
+                map.on("mouseleave", "boundaries-fill", function() {
+                    map.getCanvas().style.cursor = "";
+                    popup.remove();
+                    popupShortname = null;
+                });
 
                 map.on("mousemove", function(e) {
                     var features = map.queryRenderedFeatures(e.point, { layers: ["boundaries", "boundaries-fill"] });
