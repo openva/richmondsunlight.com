@@ -46,9 +46,7 @@ if (isset($_GET['op'])) {
 $page_body = '
 		<div>
 			<a href="/admin/comments/">Comments</a> |
-			<a href="/admin/tag.php">Tag Bills</a> |
 			<a href="/admin/video/">Video</a> |
-			<a href="apc.php">APC</a> |
 			<a href="memcache.php">Memcached</a> |
 			<a href="districts.php">Districts</a>
 		</div>';

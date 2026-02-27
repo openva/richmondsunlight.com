@@ -375,9 +375,7 @@ else {
     # List all of the videos that we have in the database.
     $page_body .= '
 	<p><a href="/admin/video/?new">Add New Video</a> |
-	<a href="/utilities/resolve_chyrons.php">Resolve Chyrons</a> |
-	<a href="/admin/video/orphaned-chyrons.php">Orphaned Chyrons</a> |
-	<a href="/utilities/internet_archive_video.php">IA Export</a></p>
+	<a href="/admin/video/orphaned-chyrons.php">Orphaned Chyrons</a>
 
 	<table>
 		<thead>

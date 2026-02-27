@@ -12,19 +12,19 @@ include_once '../../includes/functions.inc.php';
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific
-# page.
+# page to function.
 $database = new Database();
 $database->connect_mysqli();
 
 if (count($_POST) == 0) {
-    # Generate pulldown
-    $sql = 'SELECT id, name
-			FROM representatives
-			ORDER BY name ASC';
+    # Generate pulldown from terms table.
+    $sql = 'SELECT id, name_formatted
+			FROM terms
+			ORDER BY name_formatted ASC';
     $result = mysqli_query($GLOBALS['db'], $sql);
-    $legislator_select = '<option value=""></option><option value="ignore">Ignore</option>';
+    $legislator_select = '<option value=""></option>';
     while ($legislator = mysqli_fetch_array($result)) {
-        $legislator_select .= '<option value="' . $legislator['id'] . '">' .  stripslashes($legislator['name'])
+        $legislator_select .= '<option value="' . $legislator['id'] . '">' . stripslashes($legislator['name_formatted'])
             . '</option>';
     }
 
@@ -72,6 +72,7 @@ if (count($_POST) == 0) {
 				<tr>
 					<th>Chyron</th>
 					<th>#</th>
+					<th>Ignore</th>
 					<th>Legislator</th>
 				</tr>
 			<tbody>';
@@ -81,12 +82,13 @@ if (count($_POST) == 0) {
             'https://video.richmondsunlight.com/',
             $chyron['url']
         );
+        $key = md5($chyron['raw_text']);
 
         echo '<tr>
 			<td><a href="' . $chyron['url'] . '" target="_new">' . stripslashes($chyron['raw_text']) . '</a></td>
 			<td>' . $chyron['number'] . '</td>
-			<td><select name="chyron[' . md5($chyron['raw_text']) . ']">' . $legislator_select
-                . '</select></td>
+			<td><input type="checkbox" name="ignore[' . $key . ']" value="y" /></td>
+			<td><select name="chyron[' . $key . ']">' . $legislator_select . '</select></td>
 			</tr>';
     }
 
@@ -98,12 +100,14 @@ if (count($_POST) == 0) {
 # If $_POST is set.
 else {
     foreach ($_POST['chyron'] as $chyron_md5 => $legislator_id) {
-        if (empty($legislator_id)) {
+        $ignored = !empty($_POST['ignore'][$chyron_md5]);
+
+        if (!$ignored && empty($legislator_id)) {
             continue;
         }
 
         # Ignore this chyron.
-        if ($legislator_id == 'ignore') {
+        if ($ignored) {
             $sql = 'UPDATE video_index
 					SET ignored = "y"
 					WHERE linked_id IS NULL
@@ -114,7 +118,7 @@ else {
         # Associate this chyron with a given legislator.
         else {
             $sql = 'UPDATE video_index
-					SET linked_id = ' . $legislator_id . '
+					SET linked_id = ' . (int)$legislator_id . '
 					WHERE linked_id IS NULL
 					AND type = "legislator"
 					AND md5(raw_text) = "' . $chyron_md5 . '"';
