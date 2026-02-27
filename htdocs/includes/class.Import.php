@@ -1427,7 +1427,7 @@ class Import
                 $this->log->put(
                     'Not creating a record for ' . $legislator['name_formatted']
                     . ' because there is already an active term for LIS ID ' . $legislator['lis_id'] . '.',
-                    3
+                    2
                 );
             } else {
                 $this->log->put(
