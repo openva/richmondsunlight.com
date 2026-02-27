@@ -1138,6 +1138,10 @@ class Import
          * Try to identify the file format
          */
         $filetype = mime_content_type($filepath);
+        if (stristr($filetype, 'text/html')) {
+            unlink($filepath);
+            return false;
+        }
         if (stristr($filetype, 'image/jpeg')) {
             rename($filepath, $filepath . '.jpg');
             $filepath = $filepath . '.jpg';
