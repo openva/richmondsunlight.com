@@ -1431,9 +1431,9 @@ class Import
                 );
             } else {
                 $this->log->put(
-                    'Warning: Legislature servers report ' . $legislator['name_formatted']
+                    'Warning: The LIS API reports ' . $legislator['name_formatted']
                     . ' (LIS ID ' . $legislator['lis_id'] . ') as active, but their term ended on '
-                    . $existing_term['date_ended'] . '. This appears to be stale data from the legislature. '
+                    . $existing_term['date_ended'] . '. This appears to be stale data from the LIS API. '
                     . 'Not creating a duplicate term.',
                     3
                 );
