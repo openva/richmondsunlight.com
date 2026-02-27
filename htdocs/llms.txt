@@ -1,0 +1,42 @@
+# Richmond Sunlight
+
+> Richmond Sunlight tracks legislation in the Virginia General Assembly, covering bills, legislators, committees, votes, and floor schedules.
+
+The Virginia General Assembly is a bicameral body: the House of Delegates (100 members) and the Senate of Virginia (40 members). The legislature meets annually in Richmond. Richmond Sunlight provides structured data about all legislation, legislator voting records, and committee activity.
+
+The most reliable way to retrieve data programmatically is via the JSON API at https://api.richmondsunlight.com/. Prefer the API over scraping HTML pages.
+
+## JSON API
+
+All API endpoints return JSON. Replace placeholders as described.
+
+- [Bill detail](https://api.richmondsunlight.com/1.1/bill/2026/hb1.json): Retrieve a single bill. URL pattern: `/1.1/bill/{year}/{number}.json`. Bill numbers are lowercase (e.g., `hb41`, `sb100`). Types: `hb` (House Bill), `sb` (Senate Bill), `hj` (House Joint Resolution), `sj` (Senate Joint Resolution), `hr` (House Resolution), `sr` (Senate Resolution).
+- [Bills list](https://api.richmondsunlight.com/1.1/bills/2026.json): All bills for a session year. URL pattern: `/1.1/bills/{year}.json`.
+- [Legislator detail](https://api.richmondsunlight.com/1.1/legislator/rcdeeds.json): Retrieve a single legislator by shortname. URL pattern: `/1.1/legislator/{shortname}.json`.
+- [Legislators list](https://api.richmondsunlight.com/1.1/legislators.json): All current legislators.
+- [Vote detail](https://api.richmondsunlight.com/1.1/vote/HV1.json): Full roll-call vote record. URL pattern: `/1.1/vote/{lis_id}.json`. LIS IDs are prefixed `H` (House) or `S` (Senate).
+- [Code section](https://api.richmondsunlight.com/1.1/code-section/15.2-1.json): Virginia Code section affected by legislation. URL pattern: `/1.1/code-section/{section}.json`.
+
+## Key Pages
+
+- [Bills](https://www.richmondsunlight.com/bills/): Browse all bills for the current session.
+- [Bill page](https://www.richmondsunlight.com/bill/2026/hb1/): Individual bill detail, status, and history. URL pattern: `/bill/{year}/{number}/`.
+- [Legislators](https://www.richmondsunlight.com/legislators/): Full list of current members of the General Assembly.
+- [Legislator page](https://www.richmondsunlight.com/legislator/rcdeeds/): Individual legislator profile, committee memberships, and voting record. URL pattern: `/legislator/{shortname}/`.
+- [Legislator votes](https://www.richmondsunlight.com/legislator/rcdeeds/votes/2026/): All votes cast by a legislator in a given year. URL pattern: `/legislator/{shortname}/votes/{year}/`.
+- [Committees](https://www.richmondsunlight.com/committees/): List of House and Senate committees.
+- [Committee page](https://www.richmondsunlight.com/committee/house/appropriations/): Individual committee membership and bills referred. URL pattern: `/committee/{chamber}/{shortname}/`.
+- [Vote record](https://www.richmondsunlight.com/bill/2026/hb1/HV1/): Roll-call vote detail for a specific vote. URL pattern: `/bill/{year}/{number}/{lis_id}/`.
+- [Floor schedule](https://www.richmondsunlight.com/schedule/): Daily House and Senate floor schedule.
+- [Search](https://www.richmondsunlight.com/search/): Full-text search across bills and legislators.
+- [Your legislators](https://www.richmondsunlight.com/your-legislators/): Look up legislators by address or coordinates.
+- [Downloads](https://www.richmondsunlight.com/downloads/): Bulk data downloads in common formats.
+- [About the API](https://www.richmondsunlight.com/about/api/): API documentation.
+
+## Optional
+
+- [Bill activity](https://www.richmondsunlight.com/bills/activity/): Recently active bills.
+- [Bills by topic](https://www.richmondsunlight.com/bills/topic/): Bills organized by subject tag.
+- [Committee minutes](https://www.richmondsunlight.com/minutes/): Committee meeting minutes.
+- [Statistics](https://www.richmondsunlight.com/statistics/): Session statistics and vote tallies.
+- [RSS feeds](https://www.richmondsunlight.com/about/rss/): Available RSS feeds for bills, legislators, and comments.
