@@ -4,6 +4,7 @@ services:
     build:
       context: .
       dockerfile: deploy/Web.Dockerfile
+    image: rs_web:latest
     depends_on:
       memcached:
         condition: service_healthy

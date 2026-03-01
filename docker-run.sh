@@ -45,6 +45,7 @@ if docker image inspect rs_web:ci >/dev/null 2>&1; then
     docker compose up -d
 else
     docker compose build && docker compose up -d
+    docker image prune -f
 fi
 
 # Wait for MariaDB to be available
