@@ -77,15 +77,21 @@ if (count($_POST) == 0) {
 				</tr>
 			<tbody>';
     while ($chyron = mysqli_fetch_array($result)) {
-        $chyron['url'] = str_replace(
-            '/video/',
-            'https://video.richmondsunlight.com/',
-            $chyron['url']
-        );
+        if ($chyron['url'] !== null) {
+            $chyron['url'] = str_replace(
+                '/video/',
+                'https://video.richmondsunlight.com/',
+                $chyron['url']
+            );
+        }
         $key = md5($chyron['raw_text']);
+        $raw_text = stripslashes($chyron['raw_text']);
+        $chyron_cell = $chyron['url'] !== null
+            ? '<a href="' . $chyron['url'] . '" target="_new">' . $raw_text . '</a>'
+            : $raw_text;
 
         echo '<tr>
-			<td><a href="' . $chyron['url'] . '" target="_new">' . stripslashes($chyron['raw_text']) . '</a></td>
+			<td>' . $chyron_cell . '</td>
 			<td>' . $chyron['number'] . '</td>
 			<td><input type="checkbox" name="ignore[' . $key . ']" value="y" /></td>
 			<td><select name="chyron[' . $key . ']">' . $legislator_select . '</select></td>
