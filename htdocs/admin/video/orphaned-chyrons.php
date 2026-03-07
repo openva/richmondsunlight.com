@@ -17,10 +17,12 @@ $database = new Database();
 $database->connect_mysqli();
 
 if (count($_POST) == 0) {
-    # Generate pulldown from terms table.
-    $sql = 'SELECT id, name_formatted
+    # Generate legislator pulldown
+    $sql = 'SELECT terms.id, terms.name_formatted
 			FROM terms
-			ORDER BY name_formatted ASC';
+			LEFT JOIN people
+				ON terms.person_id=people.id
+			ORDER BY terms.chamber ASC, people.name ASC;';
     $result = mysqli_query($GLOBALS['db'], $sql);
     $legislator_select = '<option value=""></option>';
     while ($legislator = mysqli_fetch_array($result)) {
