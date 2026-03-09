@@ -1714,6 +1714,33 @@ class Import
         $stmt->execute([':shortname' => $shortname]);
         $existing = $stmt->fetch(PDO::FETCH_ASSOC);
 
+        // If shortname lookup failed, try to find the person via their LIS ID in the terms table.
+        // This handles returning legislators whose display name changed between sessions.
+        if (!$existing && !empty($legislator['lis_id']) && !empty($legislator['chamber'])) {
+            $normalized_id = $this->normalizeLisNumericIdentifier($legislator['lis_id']);
+            if ($normalized_id !== null) {
+                $stmt2 = $GLOBALS['dbh']->prepare(
+                    'SELECT p.id FROM people p
+                     INNER JOIN terms t ON t.person_id = p.id
+                     WHERE t.lis_id = :lis_id AND t.chamber = :chamber
+                     LIMIT 1'
+                );
+                $stmt2->execute([
+                    ':lis_id' => $normalized_id,
+                    ':chamber' => strtolower($legislator['chamber']),
+                ]);
+                $existing = $stmt2->fetch(PDO::FETCH_ASSOC);
+                if ($existing) {
+                    $this->log->put(
+                        'Found existing person for ' . $legislator['name_formal']
+                        . ' via lis_id lookup (generated shortname "' . $shortname
+                        . '" did not match stored shortname).',
+                        2
+                    );
+                }
+            }
+        }
+
         $birthday = $this->sanitizeDateValue($legislator['birthday'] ?? null);
         $race = isset($legislator['race']) ? strtolower((string)$legislator['race']) : null;
         $sex = isset($legislator['sex']) ? strtolower((string)$legislator['sex']) : null;
