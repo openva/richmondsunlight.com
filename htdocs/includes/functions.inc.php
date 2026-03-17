@@ -154,6 +154,17 @@ if (!function_exists('create_user')) {
         parse_str($options, $options);
 
         $options = array_map('urldecode', $options);
+
+        # Only allow known column names to prevent parameter injection attacks, where
+        # an attacker injects extra keys into the query string (e.g., via an unencoded
+        # form value like "22030&malicious_col=value") that then get used as SQL column
+        # names.
+        $allowed_keys = [
+            'dashboard', 'name', 'email', 'password', 'private_hash',
+            'organization', 'type', 'expires', 'url', 'zip', 'mailing_list',
+            'latitude', 'longitude',
+        ];
+        $options = array_intersect_key($options, array_flip($allowed_keys));
         $is_dashboard_user = (isset($options['dashboard']) && $options['dashboard'] == 'y');
         $sql_inserts = '';
         $users_inserts = '';
@@ -293,6 +304,14 @@ function get_user()
 function update_user($options)
 {
     parse_str($options, $options);
+
+    # Only allow known column names to prevent parameter injection attacks.
+    $allowed_keys = [
+        'name', 'email', 'password', 'url', 'zip', 'mailing_list',
+        'latitude', 'longitude', 'organization',
+    ];
+    $options = array_intersect_key($options, array_flip($allowed_keys));
+
     if (count($options) < 1) {
         return false;
     }

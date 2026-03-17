@@ -245,16 +245,16 @@ if (isset($_POST['submit'])) {
         $hash = mb_substr(str_shuffle($chars), 0, 8);
 
         # Assemble the URL-style account creation/update data.
-        $user_query = 'dashboard=y&type=free&name=' . urlencode($form_data['name']) . '&email=' . $form_data['email'] .
-            '&password=' . $form_data['password'] . '&private_hash=' . $hash;
+        $user_query = 'dashboard=y&type=free&name=' . urlencode($form_data['name']) . '&email=' . urlencode($form_data['email']) .
+            '&password=' . urlencode($form_data['password']) . '&private_hash=' . urlencode($hash);
         if (!empty($form_data['organization'])) {
             $user_query .= '&organization=' . urlencode($form_data['organization']);
         }
         if (!empty($form_data['url'])) {
-            $user_query .= '&url=' . $form_data['url'];
+            $user_query .= '&url=' . urlencode($form_data['url']);
         }
         if (!empty($form_data['zip'])) {
-            $user_query .= '&zip=' . $form_data['zip'];
+            $user_query .= '&zip=' . urlencode($form_data['zip']);
 
             # Get this user's coordinates.
             $location = new Location();
@@ -265,7 +265,7 @@ if (isset($_POST['submit'])) {
             }
         }
         if (!empty($form_data['mailing_list'])) {
-            $user_query .= '&mailing_list=' . $form_data['mailing_list'];
+            $user_query .= '&mailing_list=' . urlencode($form_data['mailing_list']);
         }
 
         # Create a brand-new account. Though it's tempting to merge this new account with
