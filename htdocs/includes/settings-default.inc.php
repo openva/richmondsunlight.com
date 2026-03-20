@@ -43,7 +43,7 @@ rs_define('SESSION_YEAR', 2026);
 
 # Start and end of this session.
 rs_define('SESSION_START', '2026-01-14');
-rs_define('SESSION_END', '2026-03-15');
+rs_define('SESSION_END', '2026-03-14');
 
 # ENVIRONMENT
 # Set to false for Docker/development, true for production
