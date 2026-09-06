@@ -305,7 +305,11 @@ if (isset($_POST['submit'])) {
 
 				<p>(Or, if you prefer, you can just <a href="/">go back to the home page</a>.)';
 
-            $log->put('New user registration: ' . $user['name'], 3);
+            $log_message = 'New user registration: ' . $user['name'] . ' (' . $user['email'] . ')';
+            if (!empty($user['url'])) {
+                $log_message .= ' with website: ' . $user['url'];
+            }
+            $log->put($log_message, 3);
         }
     }
 }
