@@ -1427,7 +1427,9 @@ class Import
 
         $existing_term = $active_check->fetch(PDO::FETCH_ASSOC);
         if ($existing_term) {
-            if ($existing_term['date_ended'] === null) {
+            if ($existing_term['date_ended'] === null
+                || strtotime($existing_term['date_ended']) >= time()
+            ) {
                 $this->log->put(
                     'Not creating a record for ' . $legislator['name_formatted']
                     . ' because there is already an active term for LIS ID ' . $legislator['lis_id'] . '.',
