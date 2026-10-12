@@ -1084,6 +1084,46 @@ CREATE TABLE `video_index_faces` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `video_jobs`
+--
+
+DROP TABLE IF EXISTS `video_jobs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `video_jobs` (
+  `file_id` smallint(5) unsigned NOT NULL,
+  `stage` varchar(20) NOT NULL,
+  `status` varchar(10) NOT NULL,
+  `attempts` tinyint(3) unsigned NOT NULL DEFAULT 0,
+  `claimed_at` datetime DEFAULT NULL,
+  `next_attempt_at` datetime DEFAULT NULL,
+  `last_error` text DEFAULT NULL,
+  `date_modified` datetime NOT NULL,
+  PRIMARY KEY (`file_id`,`stage`),
+  KEY `status` (`status`),
+  CONSTRAINT `video_jobs_file` FOREIGN KEY (`file_id`) REFERENCES `files` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Used by rs-video-processor: per-video, per-stage job state. Timestamps are UTC, written by PHP.';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `video_sources`
+--
+
+DROP TABLE IF EXISTS `video_sources`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `video_sources` (
+  `source` varchar(20) NOT NULL,
+  `source_id` varchar(64) NOT NULL,
+  `file_id` smallint(5) unsigned NOT NULL,
+  `date_created` datetime NOT NULL,
+  PRIMARY KEY (`source`,`source_id`),
+  KEY `file_id` (`file_id`),
+  CONSTRAINT `video_sources_file` FOREIGN KEY (`file_id`) REFERENCES `files` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Used by rs-video-processor: the upstream ID of each video, for exact import dedupe.';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `video_transcript`
 --
 
