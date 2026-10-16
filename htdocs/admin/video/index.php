@@ -23,6 +23,7 @@ $db = $database->connect_mysqli();
 # PAGE METADATA
 $page_title = 'Videos';
 $site_section = 'videos';
+$page_body = '<p><a href="/admin/video/pipeline.php">Video pipeline status</a></p>';
 
 # CUSTOM FUNCTIONS
 function show_form($form_data)
