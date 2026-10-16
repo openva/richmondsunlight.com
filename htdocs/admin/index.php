@@ -47,6 +47,7 @@ $page_body = '
 		<div>
 			<a href="/admin/comments/">Comments</a> |
 			<a href="/admin/video/">Video</a> |
+			<a href="/admin/video/pipeline.php">Video pipeline</a> |
 			<a href="memcache.php">Memcached</a> |
 			<a href="districts.php">Districts</a>
 		</div>';
