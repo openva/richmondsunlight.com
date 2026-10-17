@@ -25,6 +25,12 @@ fi
 sudo chown -R ubuntu:www-data "$SITE_PATH"/htdocs/
 sudo chmod -R g+w "$SITE_PATH"/htdocs/
 
+# Files populated with secrets at deploy time must not be world-readable (the
+# appspec sets everything to 755)
+sudo chmod 640 "$SITE_PATH"/htdocs/includes/settings.inc.php
+sudo chmod o-rwx "$SITE_PATH"/deploy/sphinx.conf "$SITE_PATH"/deploy/database_export.sh \
+    "$SITE_PATH"/deploy/postfix/sasl_passwd
+
 # Make sure the cache directories exist and are world-writeable
 mkdir -p "$SITE_PATH"/htdocs/cache/
 mkdir -p "$SITE_PATH"/htdocs/rss/cache/
@@ -70,6 +76,10 @@ if [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Fleet" ]
 then
     # Copy over the Sphinx configuration, restart Sphinx
     sudo cp "$SITE_PATH"/deploy/sphinx.conf /etc/sphinxsearch/sphinx.conf
+    if getent group sphinxsearch > /dev/null; then
+        sudo chown root:sphinxsearch /etc/sphinxsearch/sphinx.conf
+        sudo chmod 640 /etc/sphinxsearch/sphinx.conf
+    fi
     sudo /etc/init.d/sphinxsearch restart
     
     # If we have an existing index, update it
