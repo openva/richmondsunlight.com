@@ -221,7 +221,6 @@ jobs:
           PDO_PASSWORD: ${{ secrets.PDO_PASSWORD }}
           MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
           MYSQL_DATABASE_STAGING: ${{ secrets.MYSQL_DATABASE_STAGING }}
-          GMAPS_KEY: ${{ secrets.GMAPS_KEY }}
           OPENSTATES_KEY: ${{ secrets.OPENSTATES_KEY }}
           OPENVA_KEY: ${{ secrets.OPENVA_KEY }}
           VA_DECODED_KEY: ${{ secrets.VA_DECODED_KEY }}

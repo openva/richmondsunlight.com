@@ -92,9 +92,6 @@ rs_define('CACHE_DIR', '/vol/www/richmondsunlight.com/html/cache/');
 
 # ESTABLISH API KEYS
 
-# Google Maps
-rs_define('GMAPS_KEY', '');
-
 # Open States (Sunlight Foundation) API Key
 rs_define('OPENSTATES_KEY', '');
 

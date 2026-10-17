@@ -95,9 +95,6 @@ rs_define('CACHE_DIR', sys_get_temp_dir());
 
 # ESTABLISH API KEYS
 
-# Google Maps
-rs_define('GMAPS_KEY', '');
-
 # Open States API Key
 rs_define('OPENSTATES_KEY', '');
 
