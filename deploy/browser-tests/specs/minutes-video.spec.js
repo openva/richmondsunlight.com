@@ -55,4 +55,10 @@ test.describe('Minutes video', () => {
     await expect(page.locator('#minutes')).toContainText('Called to order at 12 m. by Don Scott, Speaker');
     await expect(page.locator('#minutes a[href="/bill/2026/hb1384/"]').first()).toBeVisible();
   });
+
+  test('offers captions for the whole session', async ({ page }) => {
+    await page.goto(minutesPath);
+    const track = page.locator('#video video track[kind="captions"]');
+    await expect(track).toHaveAttribute('src', /format=vtt&file=15141&start=0&end=86399/);
+  });
 });

@@ -83,4 +83,33 @@ test.describe('Bill video', () => {
     await expect(section.locator('.clip-player-now')).toHaveText('Senate floor session, April 2, 2025');
     await expect(section.locator('.clip-player-transcript')).toContainText('child support');
   });
+
+  test('offers captions for each clip, and remembers whether they are on', async ({ page }) => {
+    await page.goto(multiClipBill);
+
+    const video = page.locator('#video video');
+    const button = page.locator('#video .clip-player-captions');
+    const track = () => page.evaluate(() => {
+      const v = document.querySelector('#video video');
+      const t = v.textTracks[0];
+      return { src: v.querySelector('track').getAttribute('src'), mode: t.mode, cues: t.cues ? t.cues.length : 0 };
+    });
+
+    await expect(button).toHaveAttribute('aria-pressed', 'false');
+    await expect.poll(async () => (await track()).cues).toBeGreaterThan(0);
+    expect(await track()).toMatchObject({ mode: 'hidden', src: expect.stringContaining('file=5175') });
+
+    await button.click();
+    await expect(button).toHaveAttribute('aria-pressed', 'true');
+    expect((await track()).mode).toBe('showing');
+
+    // Each clip has its own captions.
+    await page.locator('#video-clip-2 .clip-player-select').click();
+    await expect.poll(async () => (await track()).src).toContain('file=5159');
+    expect((await track()).mode).toBe('showing');
+
+    await page.reload();
+    await expect(button).toHaveAttribute('aria-pressed', 'true');
+    await expect(video).toHaveCount(1);
+  });
 });

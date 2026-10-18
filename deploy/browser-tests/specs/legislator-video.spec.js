@@ -59,4 +59,21 @@ test.describe('Legislator video', () => {
     expect(good.status()).toBe(200);
     expect(await good.text()).toContain('data-seek');
   });
+
+  test('hides the captions button for clips without captions', async ({ page }) => {
+    await openVideoTab(page, 'rcdeeds');
+    await expect(page.locator('#video .clip-player-captions')).toBeDisabled();
+
+    await openVideoTab(page, 'pekrizek');
+    await expect(page.locator('#video .clip-player-captions')).toBeEnabled();
+  });
+
+  test('serves captions as WebVTT, placed clear of the broadcast chyrons', async ({ request }) => {
+    const response = await request.get('/video-transcript.php?format=vtt&file=15141&start=1380&end=1430');
+    expect(response.status()).toBe(200);
+    expect(response.headers()['content-type']).toContain('text/vtt');
+    const vtt = await response.text();
+    expect(vtt.startsWith('WEBVTT')).toBe(true);
+    expect(vtt).toMatch(/\d\d:\d\d:\d\d\.\d{3} --> \d\d:\d\d:\d\d\.\d{3} line:5%/);
+  });
 });

@@ -825,6 +825,7 @@ if (count($video_clips) > 0) {
 				<li class="clip-player-clip' . ($i === 0 ? ' is-active' : '') . '" id="' . $id . '"
 					data-src="' . htmlspecialchars($clip['path']) . '"
 					data-start="' . $clip['start'] . '" data-end="' . $clip['end'] . '" data-poster=""
+					data-captions="' . htmlspecialchars(Video::captions_url($clip['file_id'], $clip['start'], $clip['end'])) . '"
 					data-label="' . htmlspecialchars($clip['meeting'] . ', ' . $date) . '">
 					<h3>
 						<button type="button" class="clip-player-select" aria-controls="' . $id . '-transcript"

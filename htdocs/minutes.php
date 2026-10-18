@@ -216,7 +216,10 @@ if (mysqli_num_rows($result) == 0) {
 		<section id="video" class="minutes-video" aria-labelledby="video-heading">
 			<h2 id="video-heading">Video</h2>
 			<div class="minutes-video-player">
-				<video controls preload="none" playsinline src="' . htmlspecialchars($video2->path) . '">
+				<video controls preload="none" playsinline src="' . htmlspecialchars($video2->path) . '">'
+            . (count($transcript) > 0 ? '
+					<track kind="captions" srclang="en" label="English"
+						src="' . htmlspecialchars(Video::captions_url((int) $video2->id, 0, 86399)) . '">' : '') . '
 					<p>Your browser can’t play this video.
 					<a href="' . htmlspecialchars($video2->path) . '">Download it instead.</a></p>
 				</video>

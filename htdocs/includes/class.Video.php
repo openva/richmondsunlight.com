@@ -285,11 +285,26 @@ class Video
     }
 
     /**
-     * Render the clip player's video and controls, starting on a given clip. The <video> has
-     * native controls and the clip as a media fragment, so it works without JavaScript;
-     * /js/clip-player.js replaces those controls with its own, which are scoped to each clip.
+     * The URL of WebVTT captions for a span of a video file.
      *
-     * @param array $clip The first clip, with path, start, end, and (optionally) screenshot
+     * @param int $file_id The files.id of the video
+     * @param float $start Start of the span, in seconds
+     * @param float $end End of the span, in seconds
+     * @return string
+     */
+    public static function captions_url(int $file_id, float $start, float $end): string
+    {
+        return '/video-transcript.php?format=vtt&file=' . $file_id . '&start=' . $start . '&end=' . $end;
+    }
+
+    /**
+     * Render the clip player's video and controls, starting on a given clip. The <video> has
+     * native controls, the clip as a media fragment, and the clip's captions, so it works without
+     * JavaScript; /js/clip-player.js replaces those controls with its own, which are scoped to
+     * each clip. (Each clip's captions URL should also be in its data-captions attribute.)
+     *
+     * @param array $clip The first clip, with file_id, path, start, end, and (optionally)
+     *                    screenshot
      * @return string
      */
     public static function player_html(array $clip): string
@@ -300,6 +315,8 @@ class Video
 				poster="' . htmlspecialchars($clip['screenshot'] ?? '') . '">
 				<source src="' . htmlspecialchars($clip['path']) . '#t=' . $clip['start'] . ',' . $clip['end'] . '"
 					type="video/mp4">
+				<track kind="captions" srclang="en" label="English"
+					src="' . htmlspecialchars(self::captions_url((int) $clip['file_id'], $clip['start'], $clip['end'])) . '">
 				<p>Your browser can’t play this video.
 				<a href="' . htmlspecialchars($clip['path']) . '">Download it instead.</a></p>
 			</video>
@@ -312,6 +329,9 @@ class Video
 					<input type="range" class="clip-player-scrubber" min="0" step="1" value="0"
 						aria-label="Position in this clip">
 					<span class="clip-player-time"></span>
+					<button type="button" class="clip-player-captions" aria-label="Captions" aria-pressed="false">
+						<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10.5 10.2a2.3 2.3 0 1 0 0 3.6M17 10.2a2.3 2.3 0 1 0 0 3.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+					</button>
 					<button type="button" class="clip-player-mute" aria-label="Mute" aria-pressed="false">
 						<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4.5v-15L8 9z"/><path class="icon-waves" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path class="icon-muted" d="M16.5 9.5l5 5M21.5 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
 					</button>
@@ -372,6 +392,49 @@ class Video
             $html .= '</p>';
         }
         return $html;
+    }
+
+    /**
+     * Render transcript turns (from transcript_span()) as a WebVTT captions file, for a <track>.
+     *
+     * Cue times are on the video file's own timeline. Each turn's first cue names the speaker,
+     * when they're known. Each cue lasts until the next one starts, so that captions don't blink
+     * off between lines, but no longer than seven seconds, so that they don't linger through
+     * silences (or poorly timed captions). Cues are placed at the top of the picture, because
+     * the General Assembly's broadcasts identify speakers and bills along the bottom.
+     *
+     * @param array $turns Turns, as returned by transcript_span()
+     * @return string
+     */
+    public static function transcript_vtt(array $turns): string
+    {
+        $lines = [];
+        foreach ($turns as $turn) {
+            foreach ($turn['lines'] as $i => $line) {
+                if ($i === 0 && !empty($turn['speaker'])) {
+                    $line['text'] = $turn['speaker'] . ': ' . $line['text'];
+                }
+                $lines[] = $line;
+            }
+        }
+
+        $timestamp = function (float $seconds): string {
+            $ms = (int) round($seconds * 1000);
+            return sprintf('%02d:%02d:%02d.%03d', intdiv($ms, 3600000), intdiv($ms, 60000) % 60, intdiv($ms, 1000) % 60, $ms % 1000);
+        };
+
+        $vtt = "WEBVTT\n";
+        foreach ($lines as $i => $line) {
+            $end = min(isset($lines[$i + 1]) ? $lines[$i + 1]['start'] : $line['end'], $line['start'] + 7);
+            if ($end <= $line['start']) {
+                $end = $line['start'] + 1;
+            }
+            $vtt .= "\n" . $timestamp($line['start']) . ' --> ' . $timestamp($end) . " line:5%\n"
+                . str_replace(['&', '<', '>'], ['&amp;', '&lt;', '&gt;'], trim(preg_replace('/\s+/', ' ', $line['text'])))
+                . "\n";
+        }
+
+        return $vtt;
     }
 
     /**

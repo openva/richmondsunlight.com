@@ -43,6 +43,7 @@
         var controls = root.querySelector('.clip-player-controls');
         var playButton = root.querySelector('.clip-player-play');
         var muteButton = root.querySelector('.clip-player-mute');
+        var captionsButton = root.querySelector('.clip-player-captions');
         var fullscreenButton = root.querySelector('.clip-player-fullscreen');
         var prevButton = root.querySelector('.clip-player-prev');
         var nextButton = root.querySelector('.clip-player-next');
@@ -58,6 +59,7 @@
                 start: parseFloat(el.dataset.start),
                 end: parseFloat(el.dataset.end),
                 poster: el.dataset.poster,
+                captions: el.dataset.captions,
                 label: el.dataset.label,
                 button: el.querySelector('.clip-player-select'),
                 transcript: el.querySelector('.clip-player-transcript'),
@@ -81,6 +83,11 @@
         var wantsToPlay = false;    // Whether the viewer last asked to play, rather than pause.
         var currentLine = null;
         var lastManualScroll = 0;
+        var captionsClip = null;    // The clip whose captions are loaded.
+        var captionsOn = false;
+        try {
+            captionsOn = window.localStorage.getItem('rs-captions') === 'on';
+        } catch (e) {}
 
         // Swap the native controls, whose timeline spans the whole recording, for our own.
         root.classList.add('is-enhanced');
@@ -177,8 +184,51 @@
                 });
         }
 
+        /*
+         * Captions: each clip has its own track, covering just that clip, which replaces the last
+         * one's. Whether they're shown is remembered from one visit to the next.
+         */
+        function setCaptions(clip) {
+            captionsClip = clip;
+            Array.prototype.forEach.call(video.querySelectorAll('track'), function (old) {
+                video.removeChild(old);
+            });
+            captionsButton.disabled = !clip.captions;
+            if (!clip.captions) {
+                return;
+            }
+            var track = document.createElement('track');
+            track.kind = 'captions';
+            track.srclang = 'en';
+            track.label = 'English';
+            track.src = clip.captions;
+            track.addEventListener('load', function () {
+                if (track.track.cues && track.track.cues.length === 0) {
+                    captionsButton.disabled = true;
+                }
+            });
+            track.addEventListener('error', function () {
+                captionsButton.disabled = true;
+            });
+            video.appendChild(track);
+            showCaptions(captionsOn);
+        }
+
+        function showCaptions(on) {
+            captionsOn = on;
+            Array.prototype.forEach.call(video.textTracks, function (track) {
+                track.mode = on ? 'showing' : 'hidden';
+            });
+            captionsButton.setAttribute('aria-pressed', on ? 'true' : 'false');
+            player.classList.toggle('has-captions', on);
+        }
+
         function render() {
             var clip = clips[current];
+
+            if (clip !== captionsClip) {
+                setCaptions(clip);
+            }
 
             var group = clip.el.closest('details');
             if (group && !group.open) {
@@ -340,6 +390,13 @@
 
         playButton.addEventListener('click', togglePlay);
         video.addEventListener('click', togglePlay);
+
+        captionsButton.addEventListener('click', function () {
+            showCaptions(!captionsOn);
+            try {
+                window.localStorage.setItem('rs-captions', captionsOn ? 'on' : 'off');
+            } catch (e) {}
+        });
 
         muteButton.addEventListener('click', function () {
             video.muted = !video.muted;

@@ -1204,6 +1204,7 @@ if (($bill['video'] !== false) && (count($bill['video']) > 0)) {
 				data-src="' . htmlspecialchars($clip['path']) . '"
 				data-start="' . $clip['start'] . '" data-end="' . $clip['end'] . '"
 				data-poster="' . htmlspecialchars($clip['screenshot']) . '"
+				data-captions="' . htmlspecialchars(Video::captions_url((int) $clip['file_id'], $clip['start'], $clip['end'])) . '"
 				data-label="' . htmlspecialchars($clip['meeting'] . ', ' . date('F j, Y', strtotime($clip['date']))) . '">
 				<h3>
 					<button type="button" class="clip-player-select" aria-controls="' . $id . '-transcript"

@@ -1244,3 +1244,11 @@ meter {
 	font-weight: bold;
 	pointer-events: none;
 }
+
+/* Clip player: the captions button, which is lit while captions are shown */
+.clip-player-captions[aria-pressed="true"] {
+	color: #c6a952;
+}
+.clip-player-captions:disabled {
+	visibility: hidden;
+}
