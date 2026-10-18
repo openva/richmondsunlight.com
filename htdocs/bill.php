@@ -1181,72 +1181,41 @@ if (($bill['video'] !== false) && (count($bill['video']) > 0)) {
     $clip_count = count($clips);
 
     $html_head .= '
-		<script src="/js/bill-video.js" defer></script>';
+		<script src="/js/clip-player.js" defer></script>';
 
     $first = $clips[0];
     $page_body .= '
-	<section id="video" class="bill-video" aria-labelledby="video-heading">
+	<section id="video" class="clip-player" aria-labelledby="video-heading">
 		<h2 id="video-heading">Video</h2>
 		<p>This bill was discussed in ' . ($clip_count === 1 ? 'one video clip' : $clip_count . ' video clips')
         . ', ' . str_replace(' ago', '', seconds_to_units($duration)) . ' in all.'
         . ($clip_count > 1 ? ' Choose a clip to watch it and follow along with its transcript.' : '')
         . '</p>
 
-		<div class="bill-video-player">
-			<video controls preload="metadata" playsinline
-				poster="' . htmlspecialchars($first['screenshot']) . '">
-				<source src="' . htmlspecialchars($first['path']) . '#t=' . $first['start'] . ',' . $first['end'] . '"
-					type="video/mp4">
-				<p>Your browser can’t play this video.
-				<a href="' . htmlspecialchars($first['path']) . '">Download it from the Internet Archive.</a></p>
-			</video>
-			<div class="bill-video-controls" hidden>
-				<div class="bill-video-transport">
-					<button type="button" class="bill-video-play" aria-label="Play">
-						<svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z"/></svg>
-						<svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h4v15H6zM14 4.5h4v15h-4z"/></svg>
-					</button>
-					<input type="range" class="bill-video-scrubber" min="0" step="1" value="0"
-						aria-label="Position in this clip">
-					<span class="bill-video-time"></span>
-					<button type="button" class="bill-video-mute" aria-label="Mute" aria-pressed="false">
-						<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4.5v-15L8 9z"/><path class="icon-waves" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path class="icon-muted" d="M16.5 9.5l5 5M21.5 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-					</button>
-					<button type="button" class="bill-video-fullscreen" aria-label="Full screen">
-						<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
-					</button>
-				</div>
-				<div class="bill-video-nav">
-					<button type="button" class="bill-video-prev">‹ <span>Previous clip</span></button>
-					<p class="bill-video-now" aria-live="polite"></p>
-					<button type="button" class="bill-video-next"><span>Next clip</span> ›</button>
-				</div>
-			</div>
-			<p class="bill-video-notice" hidden></p>
-		</div>
+' . Video::player_html($first) . '
 
-		<ol class="bill-video-clips">';
+		<ol class="clip-player-clips">';
 
     foreach ($clips as $i => $clip) {
         $number = $i + 1;
         $id = 'video-clip-' . $number;
         $page_body .= '
-			<li class="bill-video-clip' . ($i === 0 ? ' is-active' : '') . '" id="' . $id . '"
+			<li class="clip-player-clip' . ($i === 0 ? ' is-active' : '') . '" id="' . $id . '"
 				data-src="' . htmlspecialchars($clip['path']) . '"
 				data-start="' . $clip['start'] . '" data-end="' . $clip['end'] . '"
 				data-poster="' . htmlspecialchars($clip['screenshot']) . '"
 				data-label="' . htmlspecialchars($clip['meeting'] . ', ' . date('F j, Y', strtotime($clip['date']))) . '">
 				<h3>
-					<button type="button" class="bill-video-select" aria-controls="' . $id . '-transcript"
+					<button type="button" class="clip-player-select" aria-controls="' . $id . '-transcript"
 						aria-expanded="' . ($i === 0 ? 'true' : 'false') . '">
-						' . ($clip_count > 1 ? '<span class="bill-video-number">Clip ' . $number . '</span>' : '') . '
-						<span class="bill-video-meeting">' . htmlspecialchars($clip['meeting']) . '</span>
-						<span class="bill-video-meta"><time datetime="' . htmlspecialchars($clip['date']) . '">'
+						' . ($clip_count > 1 ? '<span class="clip-player-number">Clip ' . $number . '</span>' : '') . '
+						<span class="clip-player-meeting">' . htmlspecialchars($clip['meeting']) . '</span>
+						<span class="clip-player-meta"><time datetime="' . htmlspecialchars($clip['date']) . '">'
                             . date('F j, Y', strtotime($clip['date'])) . '</time>
 							· ' . Video::clock($clip['duration']) . '</span>
 					</button>
 				</h3>
-				<div class="bill-video-transcript video-transcript" id="' . $id . '-transcript">';
+				<div class="clip-player-transcript video-transcript" id="' . $id . '-transcript">';
 
         if (count($clip['transcript']) === 0) {
             $page_body .= '
@@ -1265,7 +1234,7 @@ if (($bill['video'] !== false) && (count($bill['video']) > 0)) {
 
     $page_body .= '
 		</ol>
-		<p class="bill-video-disclaimer">Transcripts are generated automatically from closed captions,
+		<p class="clip-player-disclaimer">Transcripts are generated automatically from closed captions,
 		and may contain errors.</p>
 	</section>';
 }

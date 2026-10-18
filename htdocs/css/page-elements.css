@@ -831,51 +831,51 @@ meter {
 	margin: .5em;
 }
 
-/* Bill video: player, clip list, and transcripts (see /js/bill-video.js) */
-#video.bill-video {
+/* Bill video: player, clip list, and transcripts (see /js/clip-player.js) */
+#video.clip-player {
 	margin-bottom: 2em;
 }
-	.bill-video-player {
+	.clip-player-stage {
 		background-color: #243a51;
 		border-radius: 4px;
 		overflow: hidden;
 		margin: 1em 0;
 	}
-	.bill-video-player video {
+	.clip-player-stage video {
 		display: block;
 		width: 100%;
 		aspect-ratio: 16 / 9;
 		background-color: #000;
 	}
-	.bill-video-player:fullscreen {
+	.clip-player-stage:fullscreen {
 		display: flex;
 		flex-direction: column;
 		border-radius: 0;
 	}
-		.bill-video-player:fullscreen video {
+		.clip-player-stage:fullscreen video {
 			flex: 1;
 			min-height: 0;
 			aspect-ratio: auto;
 		}
-	.bill-video.is-enhanced .bill-video-player video {
+	.clip-player.is-enhanced .clip-player-stage video {
 		cursor: pointer;
 	}
-	.bill-video-controls {
+	.clip-player-controls {
 		color: #fff;
 		padding: .4em .75em .6em;
 	}
-		.bill-video-transport,
-		.bill-video-nav {
+		.clip-player-transport,
+		.clip-player-nav {
 			display: flex;
 			align-items: center;
 			gap: .6em;
 		}
-		.bill-video-nav {
+		.clip-player-nav {
 			margin-top: .4em;
 			padding-top: .4em;
 			border-top: 1px solid rgba(255, 255, 255, .15);
 		}
-		.bill-video-controls button {
+		.clip-player-controls button {
 			flex: none;
 			font: inherit;
 			color: #fff;
@@ -886,48 +886,48 @@ meter {
 			cursor: pointer;
 			line-height: 1;
 		}
-		.bill-video-controls button:hover:not(:disabled),
-		.bill-video-controls button:focus-visible {
+		.clip-player-controls button:hover:not(:disabled),
+		.clip-player-controls button:focus-visible {
 			border-color: #c6a952;
 		}
-		.bill-video-controls button:disabled {
+		.clip-player-controls button:disabled {
 			opacity: .35;
 			cursor: default;
 		}
-		.bill-video-controls svg {
+		.clip-player-controls svg {
 			display: block;
 			width: 1.5em;
 			height: 1.5em;
 			fill: currentColor;
 		}
-		.bill-video-player .icon-pause,
-		.bill-video-player.is-playing .icon-play,
-		.bill-video-player .icon-muted,
-		.bill-video-player.is-muted .icon-waves {
+		.clip-player-stage .icon-pause,
+		.clip-player-stage.is-playing .icon-play,
+		.clip-player-stage .icon-muted,
+		.clip-player-stage.is-muted .icon-waves {
 			display: none;
 		}
-		.bill-video-player.is-playing .icon-pause,
-		.bill-video-player.is-muted .icon-muted {
+		.clip-player-stage.is-playing .icon-pause,
+		.clip-player-stage.is-muted .icon-muted {
 			display: block;
 		}
-		.bill-video-scrubber {
+		.clip-player-scrubber {
 			flex: 1;
 			min-width: 4em;
 			margin: 0;
 			accent-color: #c6a952;
 			cursor: pointer;
 		}
-		.bill-video-time {
+		.clip-player-time {
 			flex: none;
 			font-size: .9em;
 			color: #dccbaf;
 			font-variant-numeric: tabular-nums;
 		}
-		.bill-video-nav button {
+		.clip-player-nav button {
 			border-color: rgba(198, 169, 82, .6);
 			padding: .35em .7em;
 		}
-		.bill-video-now {
+		.clip-player-now {
 			flex: 1;
 			min-width: 0;
 			margin: 0;
@@ -937,38 +937,38 @@ meter {
 			overflow: hidden;
 			text-overflow: ellipsis;
 		}
-	.bill-video-notice:not([hidden]) {
+	.clip-player-notice:not([hidden]) {
 		margin: 0;
 		padding: .5em .75em;
 		background-color: #f4eee5;
 		border-top: 2px solid #c6a952;
 	}
-		.bill-video-notice button {
+		.clip-player-notice button {
 			font: inherit;
 			margin-left: .25em;
 			cursor: pointer;
 		}
 
-	ol.bill-video-clips {
+	ol.clip-player-clips {
 		list-style: none;
 		margin: 0;
 		padding: 0;
 	}
-	.bill-video-clip {
+	.clip-player-clip {
 		border: 1px solid #dccbaf;
 		border-left: 4px solid #dccbaf;
 		border-radius: 3px;
 		margin-bottom: .5em;
 	}
-	.bill-video-clip.is-active {
+	.clip-player-clip.is-active {
 		border-left-color: #790806;
 	}
-		.bill-video-clip h3 {
+		.clip-player-clip h3 {
 			margin: 0;
 			padding: 0;
 			font-size: 1em;
 		}
-		.bill-video-select {
+		.clip-player-select {
 			display: flex;
 			flex-wrap: wrap;
 			align-items: baseline;
@@ -982,21 +982,21 @@ meter {
 			border: 0;
 			cursor: pointer;
 		}
-		.bill-video-select:hover,
-		.bill-video-clip.is-active .bill-video-select {
+		.clip-player-select:hover,
+		.clip-player-clip.is-active .clip-player-select {
 			background-color: #f4eee5;
 		}
-		.bill-video-number {
+		.clip-player-number {
 			font-size: .85em;
 			font-weight: bold;
 			text-transform: uppercase;
 			letter-spacing: .05em;
 			color: #790806;
 		}
-		.bill-video-meeting {
+		.clip-player-meeting {
 			font: 1.15em Georgia, Times, serif;
 		}
-		.bill-video-meta {
+		.clip-player-meta {
 			margin-left: auto;
 			color: #666;
 			font-variant-numeric: tabular-nums;
@@ -1008,10 +1008,10 @@ meter {
 			font-family: Georgia, Times, serif;
 			line-height: 1.6;
 		}
-		.bill-video.is-enhanced .bill-video-clip:not(.is-active) .bill-video-transcript {
+		.clip-player.is-enhanced .clip-player-clip:not(.is-active) .clip-player-transcript {
 			display: none;
 		}
-		.bill-video.is-enhanced .bill-video-clip.is-active .bill-video-transcript {
+		.clip-player.is-enhanced .clip-player-clip.is-active .clip-player-transcript {
 			max-height: 18em;
 			overflow-y: auto;
 			border-top: 1px solid #dccbaf;
@@ -1063,13 +1063,13 @@ meter {
 				font-style: italic;
 				color: #666;
 			}
-	.bill-video-disclaimer {
+	.clip-player-disclaimer {
 		font-size: .9em;
 		color: #666;
 	}
 
 @media (max-width: 600px) {
-	.bill-video-controls button span {
+	.clip-player-controls button span {
 		position: absolute;
 		width: 1px;
 		height: 1px;
@@ -1199,4 +1199,48 @@ meter {
 .minutes-video-note {
 	font-size: .9em;
 	color: #666;
+}
+
+/* Clip player: clips grouped by year (e.g., on legislators' pages) */
+.clip-player-year {
+	margin-bottom: .5em;
+}
+	.clip-player-year > summary {
+		cursor: pointer;
+		padding: .4em .25em;
+		font: 1.2em Georgia, Times, serif;
+		border-bottom: 1px solid #dccbaf;
+		margin-bottom: .5em;
+	}
+		.clip-player-year > summary span {
+			font: .75em Verdana, Arial, sans-serif;
+			color: #666;
+			margin-left: .4em;
+		}
+.clip-player-topic {
+	flex-basis: 100%;
+	font-size: .9em;
+	color: #555;
+}
+.clip-player-about {
+	font-family: Verdana, Arial, sans-serif;
+	font-size: .9em;
+}
+
+/* Clip player: a notice while the video loads, since the native controls are hidden */
+.clip-player-stage {
+	position: relative;
+}
+.clip-player-stage.is-loading::after {
+	content: "Loading video…";
+	position: absolute;
+	top: 1em;
+	left: 50%;
+	transform: translateX(-50%);
+	padding: .4em .9em;
+	border-radius: 3px;
+	background-color: rgba(36, 58, 81, .9);
+	color: #fff;
+	font-weight: bold;
+	pointer-events: none;
 }

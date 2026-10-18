@@ -12,11 +12,11 @@ test.describe('Bill video', () => {
     await expect(section.locator('video')).toHaveCount(1);
     await expect(page.locator('script[src*="flowplayer"]')).toHaveCount(0);
 
-    const clips = section.locator('.bill-video-clip');
+    const clips = section.locator('.clip-player-clip');
     await expect(clips).toHaveCount(2);
-    await expect(clips.nth(0).locator('.bill-video-meeting')).toHaveText('Senate floor session');
+    await expect(clips.nth(0).locator('.clip-player-meeting')).toHaveText('Senate floor session');
     await expect(clips.nth(0).locator('time')).toHaveText('April 2, 2025');
-    await expect(clips.nth(1).locator('.bill-video-meeting')).toHaveText(
+    await expect(clips.nth(1).locator('.clip-player-meeting')).toHaveText(
       'Senate School Health Services Subcommittee to Study SB1303'
     );
   });
@@ -24,9 +24,9 @@ test.describe('Bill video', () => {
   test('shows only the current clip’s transcript, with speakers', async ({ page }) => {
     await page.goto(multiClipBill);
 
-    const clips = page.locator('#video .bill-video-clip');
-    const first = clips.nth(0).locator('.bill-video-transcript');
-    const second = clips.nth(1).locator('.bill-video-transcript');
+    const clips = page.locator('#video .clip-player-clip');
+    const first = clips.nth(0).locator('.clip-player-transcript');
+    const second = clips.nth(1).locator('.clip-player-transcript');
 
     await expect(first).toBeVisible();
     await expect(second).toBeHidden();
@@ -35,7 +35,7 @@ test.describe('Bill video', () => {
       'href',
       '/legislator/sgpekarsky/'
     );
-    await expect(page.locator('#video .bill-video-now')).toHaveText(
+    await expect(page.locator('#video .clip-player-now')).toHaveText(
       'Clip 1 of 2: Senate floor session, April 2, 2025'
     );
   });
@@ -44,21 +44,21 @@ test.describe('Bill video', () => {
     await page.goto(multiClipBill);
 
     const section = page.locator('#video');
-    const clips = section.locator('.bill-video-clip');
+    const clips = section.locator('.clip-player-clip');
     const video = section.locator('video');
-    const prev = section.locator('.bill-video-prev');
-    const next = section.locator('.bill-video-next');
+    const prev = section.locator('.clip-player-prev');
+    const next = section.locator('.clip-player-next');
 
     await expect(prev).toBeDisabled();
     await expect(next).toBeEnabled();
 
-    await clips.nth(1).locator('.bill-video-select').click();
+    await clips.nth(1).locator('.clip-player-select').click();
     await expect(clips.nth(1)).toHaveClass(/is-active/);
-    await expect(clips.nth(1).locator('.bill-video-select')).toHaveAttribute('aria-expanded', 'true');
-    await expect(clips.nth(0).locator('.bill-video-select')).toHaveAttribute('aria-expanded', 'false');
-    await expect(clips.nth(1).locator('.bill-video-transcript')).toBeVisible();
-    await expect(clips.nth(0).locator('.bill-video-transcript')).toBeHidden();
-    await expect(section.locator('.bill-video-now')).toHaveText(/^Clip 2 of 2: /);
+    await expect(clips.nth(1).locator('.clip-player-select')).toHaveAttribute('aria-expanded', 'true');
+    await expect(clips.nth(0).locator('.clip-player-select')).toHaveAttribute('aria-expanded', 'false');
+    await expect(clips.nth(1).locator('.clip-player-transcript')).toBeVisible();
+    await expect(clips.nth(0).locator('.clip-player-transcript')).toBeHidden();
+    await expect(section.locator('.clip-player-now')).toHaveText(/^Clip 2 of 2: /);
     await expect(video).toHaveAttribute('src', /rs-senate-20250915/);
     await expect(next).toBeDisabled();
 
@@ -70,17 +70,17 @@ test.describe('Bill video', () => {
   test('opens the clip named in the URL fragment', async ({ page }) => {
     await page.goto(multiClipBill + '#video-clip-2');
     await expect(page.locator('#video-clip-2')).toHaveClass(/is-active/);
-    await expect(page.locator('#video .bill-video-now')).toHaveText(/^Clip 2 of 2: /);
+    await expect(page.locator('#video .clip-player-now')).toHaveText(/^Clip 2 of 2: /);
   });
 
   test('omits clip navigation when there is only one clip', async ({ page }) => {
     await page.goto(singleClipBill);
 
     const section = page.locator('#video');
-    await expect(section.locator('.bill-video-clip')).toHaveCount(1);
-    await expect(section.locator('.bill-video-prev')).toBeHidden();
-    await expect(section.locator('.bill-video-next')).toBeHidden();
-    await expect(section.locator('.bill-video-now')).toHaveText('Senate floor session, April 2, 2025');
-    await expect(section.locator('.bill-video-transcript')).toContainText('child support');
+    await expect(section.locator('.clip-player-clip')).toHaveCount(1);
+    await expect(section.locator('.clip-player-prev')).toBeHidden();
+    await expect(section.locator('.clip-player-next')).toBeHidden();
+    await expect(section.locator('.clip-player-now')).toHaveText('Senate floor session, April 2, 2025');
+    await expect(section.locator('.clip-player-transcript')).toContainText('child support');
   });
 });

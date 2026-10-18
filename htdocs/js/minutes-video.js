@@ -30,6 +30,7 @@
     }
 
     root.classList.add('is-enhanced');
+    preloadAfterLoad(video);
 
     var bills = Array.prototype.map.call(root.querySelectorAll('#video-bills li'), function (el) {
         var link = el.querySelector('.minutes-video-item');
@@ -57,6 +58,25 @@
 
     var current = { bill: null, speaker: null, line: null };
     var lastManualScroll = 0;
+
+    /*
+     * The video is sent with preload="none", because browsers hold the page's load event until a
+     * video's metadata arrives, and video hosts can be slow. Once the page has loaded, ask for the
+     * metadata, so that the video shows its first frame.
+     */
+    function preloadAfterLoad(video) {
+        var preload = function () {
+            if (video.preload === 'none' && video.readyState === 0 && video.paused) {
+                video.preload = 'metadata';
+                video.load();
+            }
+        };
+        if (document.readyState === 'complete') {
+            preload();
+        } else {
+            window.addEventListener('load', preload, { once: true });
+        }
+    }
 
     /*
      * Tabs

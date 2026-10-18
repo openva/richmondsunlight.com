@@ -128,6 +128,208 @@ class Video
     }
 
     /**
+     * Get every clip of a legislator speaking, from floor sessions and committee meetings, in
+     * chronological order.
+     *
+     * Clips come from the chyrons that identify speakers (video_index), which rs-video-processor
+     * records, and, for recordings that predate that, from the older video_clips table. A chyron
+     * appears only as somebody begins to speak, so each clip runs from just before this
+     * legislator is identified until the next speaker is identified (up to three minutes after
+     * this legislator was last identified, or one minute when there's no record of other
+     * speakers). Each clip also names the bill under discussion: the one recorded in video_clips,
+     * or else the one whose chyron was shown in the five minutes beforehand.
+     *
+     * @param int $person_id The legislator's people.id
+     * @return array A list of clips, each with file_id, path, date, chamber, meeting, start, end,
+     *               duration, and bill (null, or an array of number, year, and catch_line)
+     */
+    public static function person_clips(int $person_id): array
+    {
+        $sightings = [];
+        $sql = 'SELECT video_index.file_id, video_index.time
+                FROM video_index
+                WHERE video_index.type = "legislator" AND video_index.linked_id = ' . $person_id . '
+                    AND video_index.ignored != "y"
+                ORDER BY video_index.file_id ASC, video_index.time ASC';
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        while ($result && $row = mysqli_fetch_assoc($result)) {
+            $sightings[(int) $row['file_id']][] = time_to_seconds($row['time']);
+        }
+
+        // Group each recording's sightings into segments, wherever there's a gap.
+        $segments = [];
+        foreach ($sightings as $file_id => $times) {
+            $first = $last = $times[0];
+            foreach (array_slice($times, 1) as $time) {
+                if ($time - $last > self::CLIP_BOUNDARY_THRESHOLD) {
+                    $segments[] = ['file_id' => $file_id, 'first' => $first, 'last' => $last, 'bill_id' => null];
+                    $first = $time;
+                }
+                $last = $time;
+            }
+            $segments[] = ['file_id' => $file_id, 'first' => $first, 'last' => $last, 'bill_id' => null];
+        }
+
+        // Add clips from video_clips for any recordings that aren't in the index.
+        $sql = 'SELECT file_id, time_start, time_end, bill_id
+                FROM video_clips
+                WHERE legislator_id = ' . $person_id
+            . (count($sightings) > 0 ? ' AND file_id NOT IN (' . implode(',', array_keys($sightings)) . ')' : '');
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        while ($result && $row = mysqli_fetch_assoc($result)) {
+            $segments[] = [
+                'file_id' => (int) $row['file_id'],
+                'first' => time_to_seconds($row['time_start']),
+                'last' => time_to_seconds($row['time_end']),
+                'bill_id' => $row['bill_id'] !== null ? (int) $row['bill_id'] : null,
+            ];
+        }
+
+        if (count($segments) === 0) {
+            return [];
+        }
+        $file_ids = implode(',', array_unique(array_column($segments, 'file_id')));
+
+        $files = [];
+        $result = mysqli_query($GLOBALS['db'], 'SELECT id, path, date, chamber, title
+            FROM files
+            WHERE id IN (' . $file_ids . ')');
+        while ($result && $file = mysqli_fetch_assoc($result)) {
+            $files[(int) $file['id']] = $file;
+        }
+
+        // When other people were identified as speaking, and when bills were taken up, in these
+        // recordings.
+        $others = [];
+        $bill_times = [];
+        $result = mysqli_query($GLOBALS['db'], 'SELECT file_id, time, type, linked_id
+            FROM video_index
+            WHERE file_id IN (' . $file_ids . ') AND ignored != "y"
+                AND ((type = "legislator" AND (linked_id IS NULL OR linked_id != ' . $person_id . '))
+                    OR (type = "bill" AND linked_id IS NOT NULL))
+            ORDER BY file_id ASC, time ASC');
+        while ($result && $row = mysqli_fetch_assoc($result)) {
+            if ($row['type'] === 'legislator') {
+                $others[(int) $row['file_id']][] = time_to_seconds($row['time']);
+            } else {
+                $bill_times[(int) $row['file_id']][] = [time_to_seconds($row['time']), (int) $row['linked_id']];
+            }
+        }
+
+        $clips = [];
+        foreach ($segments as $segment) {
+            $file = $files[$segment['file_id']] ?? null;
+            if ($file === null || empty($file['path'])) {
+                continue;
+            }
+
+            $end = $segment['last'] + (isset($others[$segment['file_id']]) ? 180 : 60);
+            foreach ($others[$segment['file_id']] ?? [] as $time) {
+                if ($time > $segment['last']) {
+                    $end = min($end, max($time - 1, $segment['last'] + 10));
+                    break;
+                }
+            }
+            $start = max(0, $segment['first'] - 5);
+
+            // Older clips record the bill; otherwise, find it from the chyrons.
+            $bill_id = $segment['bill_id'];
+            foreach ($bill_id === null ? ($bill_times[$segment['file_id']] ?? []) : [] as [$time, $id]) {
+                if ($time > $segment['first'] + 30) {
+                    break;
+                }
+                if ($time >= $segment['first'] - 300) {
+                    $bill_id = $id;
+                }
+            }
+
+            $clips[] = [
+                'file_id' => $segment['file_id'],
+                'path' => preg_replace(
+                    ['#^/video/#', '#^http://archive\.org/#'],
+                    ['https://video.richmondsunlight.com/', 'https://archive.org/'],
+                    $file['path']
+                ),
+                'date' => $file['date'],
+                'chamber' => $file['chamber'],
+                'meeting' => self::meeting_label($file['title'], $file['chamber']),
+                'start' => $start,
+                'end' => $end,
+                'duration' => $end - $start,
+                'bill_id' => $bill_id,
+                'bill' => null,
+            ];
+        }
+
+        $bill_ids = array_filter(array_unique(array_column($clips, 'bill_id')));
+        if (count($bill_ids) > 0) {
+            $bills = [];
+            $result = mysqli_query($GLOBALS['db'], 'SELECT bills.id, bills.number, bills.catch_line,
+                    sessions.year
+                FROM bills
+                LEFT JOIN sessions
+                    ON bills.session_id = sessions.id
+                WHERE bills.id IN (' . implode(',', $bill_ids) . ')');
+            while ($result && $bill = mysqli_fetch_assoc($result)) {
+                $bills[(int) $bill['id']] = $bill;
+            }
+            foreach ($clips as &$clip) {
+                $clip['bill'] = $bills[$clip['bill_id']] ?? null;
+            }
+            unset($clip);
+        }
+
+        usort($clips, fn($a, $b) => [$a['date'], $a['file_id'], $a['start']] <=> [$b['date'], $b['file_id'], $b['start']]);
+
+        return $clips;
+    }
+
+    /**
+     * Render the clip player's video and controls, starting on a given clip. The <video> has
+     * native controls and the clip as a media fragment, so it works without JavaScript;
+     * /js/clip-player.js replaces those controls with its own, which are scoped to each clip.
+     *
+     * @param array $clip The first clip, with path, start, end, and (optionally) screenshot
+     * @return string
+     */
+    public static function player_html(array $clip): string
+    {
+        return '
+		<div class="clip-player-stage">
+			<video controls preload="none" playsinline
+				poster="' . htmlspecialchars($clip['screenshot'] ?? '') . '">
+				<source src="' . htmlspecialchars($clip['path']) . '#t=' . $clip['start'] . ',' . $clip['end'] . '"
+					type="video/mp4">
+				<p>Your browser can’t play this video.
+				<a href="' . htmlspecialchars($clip['path']) . '">Download it instead.</a></p>
+			</video>
+			<div class="clip-player-controls" hidden>
+				<div class="clip-player-transport">
+					<button type="button" class="clip-player-play" aria-label="Play">
+						<svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z"/></svg>
+						<svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h4v15H6zM14 4.5h4v15h-4z"/></svg>
+					</button>
+					<input type="range" class="clip-player-scrubber" min="0" step="1" value="0"
+						aria-label="Position in this clip">
+					<span class="clip-player-time"></span>
+					<button type="button" class="clip-player-mute" aria-label="Mute" aria-pressed="false">
+						<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4.5v-15L8 9z"/><path class="icon-waves" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path class="icon-muted" d="M16.5 9.5l5 5M21.5 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+					</button>
+					<button type="button" class="clip-player-fullscreen" aria-label="Full screen">
+						<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+					</button>
+				</div>
+				<div class="clip-player-nav">
+					<button type="button" class="clip-player-prev">‹ <span>Previous clip</span></button>
+					<p class="clip-player-now" aria-live="polite"></p>
+					<button type="button" class="clip-player-next"><span>Next clip</span> ›</button>
+				</div>
+			</div>
+			<p class="clip-player-notice" hidden></p>
+		</div>';
+    }
+
+    /**
      * Format a number of seconds as a clock reading (e.g., "1:05" or "1:02:05").
      *
      * @param float $seconds

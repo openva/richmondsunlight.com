@@ -216,7 +216,7 @@ if (mysqli_num_rows($result) == 0) {
 		<section id="video" class="minutes-video" aria-labelledby="video-heading">
 			<h2 id="video-heading">Video</h2>
 			<div class="minutes-video-player">
-				<video controls preload="metadata" playsinline src="' . htmlspecialchars($video2->path) . '">
+				<video controls preload="none" playsinline src="' . htmlspecialchars($video2->path) . '">
 					<p>Your browser can’t play this video.
 					<a href="' . htmlspecialchars($video2->path) . '">Download it instead.</a></p>
 				</video>

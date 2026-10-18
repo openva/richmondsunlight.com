@@ -46,12 +46,8 @@ $legislator = (array) $legislator;
 // Externally, we call the shortname the "id," so rename that so it'll make sense here.
 $legislator['id'] = $legislator['rs_id'];
 
-// Create a new video object.
-$video = new Video();
-
-// Get a list of videos for this legislator.
-$video->legislator_id = $legislator['id'];
-$legislator['videos'] = $video->legislator_sample();
+// Get every video clip of this legislator speaking.
+$video_clips = Video::person_clips((int) $legislator['id']);
 
 // Gin up a meta description for search engines.
 $html_head = '<meta name="description" content="Information about ' . $legislator['name_formatted']
@@ -305,7 +301,7 @@ $page_body .= '<li><a href="#media">Media</a></li>';
 if (!empty($legislator['rss_url']) && empty($legislator['date_ended'])) {
     $page_body .= '<li><a href="#news">News</a></li>';
 }
-if (!empty($legislator['videos'])) {
+if (count($video_clips) > 0) {
     $page_body .= '<li><a href="#video">Video</a></li>';
 }
 $page_body .= '</ul>
@@ -794,69 +790,75 @@ if (!empty($legislator['rss_url']) && empty($legislator['date_ended'])) {
 	</div>';
 }
 
-if ($legislator['videos'] !== false) {
-    $video = new Video();
-    $video->legislator_id = $legislator['id'];
-    $video->by_legislator();
+if (count($video_clips) > 0) {
+    $html_head .= '
+		<script src="/js/clip-player.js" defer></script>';
 
-    // Start a new DIV for this legislator's highlights reel.
-    /*
-     * Add the Flowplayer code.
-     */
-    $html_head .= '<script src="/js/flowplayer-6.0.5/flowplayer.min.js"></script>
-		<link rel="stylesheet" href="/js/flowplayer-6.0.5/skin/minimalist.css">';
+    // Newest days first (but each day's clips in order), grouped by year.
+    usort($video_clips, fn($a, $b) => [$b['date'], $a['file_id'], $a['start']] <=> [$a['date'], $b['file_id'], $b['start']]);
+    $years = [];
+    foreach ($video_clips as $i => $clip) {
+        $years[mb_substr($clip['date'], 0, 4)][$i] = $clip;
+    }
+    $clip_count = count($video_clips);
 
-    $page_body .= '<div id="video" style="width: 100%; clear: left;">
-		<p>These are all of the video clips of ' . $legislator['name'] . '’s remarks on the floor of the
-		' . ucfirst($legislator['chamber']) . ' since ' . mb_substr($video->clips->{0}->date, 0, 4) . '.
-		There are ' . count((array) $video->clips) . ' video clips in all.</p>
+    $page_body .= '
+	<div id="video" class="clip-player" aria-label="Video of ' . htmlspecialchars($legislator['name']) . '">
+		<p>We have ' . ($clip_count === 1 ? 'one video clip' : $clip_count . ' video clips') . ' of '
+        . htmlspecialchars($legislator['name']) . ' speaking'
+        . (count($years) > 1 ? ', from ' . array_key_last($years) . ' through ' . array_key_first($years) : ', in ' . array_key_first($years))
+        . '. Choose one to watch it and follow along with its transcript.</p>
+		' . Video::player_html($video_clips[0]);
 
-		<div class="flowplayer" style="display:block; width:450px; height:337px;" id="player"></div>
-
-		<script>
-			/* Create the playlist. */
-			var allVideos = [';
-
-    foreach ($video->clips as $clip) {
-        $clip = (array) $clip;
+    foreach ($years as $year => $year_clips) {
         $page_body .= '
-			{
-				sources: [{
-					type: "video/mp4",
-					src: "' . $clip['path'] . '",
-					date: "' . $clip['date'] . '",
-					start: ' . $clip['start'] . ',
-					duration: ' . $clip['duration'] . ',
-					cuepoints: [' . ($clip['start'] + $clip['duration']) . ' ]
-				}]
-			},';
+		<details class="clip-player-year"' . ($year === array_key_first($years) ? ' open' : '') . '>
+			<summary>' . $year . ' <span>' . (count($year_clips) === 1 ? '1 clip' : count($year_clips) . ' clips') . '</span></summary>
+			<ol class="clip-player-clips">';
+
+        foreach ($year_clips as $i => $clip) {
+            $id = 'video-clip-' . ($i + 1);
+            $date = date('F j, Y', strtotime($clip['date']));
+            $bill = $clip['bill'];
+            $bill_number = $bill ? mb_strtoupper(preg_replace('/^([a-z]+)/', '$1 ', $bill['number'])) : null;
+            $page_body .= '
+				<li class="clip-player-clip' . ($i === 0 ? ' is-active' : '') . '" id="' . $id . '"
+					data-src="' . htmlspecialchars($clip['path']) . '"
+					data-start="' . $clip['start'] . '" data-end="' . $clip['end'] . '" data-poster=""
+					data-label="' . htmlspecialchars($clip['meeting'] . ', ' . $date) . '">
+					<h3>
+						<button type="button" class="clip-player-select" aria-controls="' . $id . '-transcript"
+							aria-expanded="' . ($i === 0 ? 'true' : 'false') . '">
+							<span class="clip-player-meeting">' . htmlspecialchars($clip['meeting']) . '</span>
+							<span class="clip-player-meta"><time datetime="' . htmlspecialchars($clip['date']) . '">'
+                . $date . '</time> · ' . Video::clock($clip['duration']) . '</span>'
+                . ($bill ? '
+							<span class="clip-player-topic">' . $bill_number . ': '
+                    . htmlspecialchars(html_entity_decode((string) $bill['catch_line'], ENT_QUOTES)) . '</span>' : '') . '
+						</button>
+					</h3>
+					<div class="clip-player-transcript video-transcript" id="' . $id . '-transcript">'
+                . ($bill ? '
+						<p class="clip-player-about">About <a href="/bill/' . $bill['year'] . '/' . $bill['number'] . '/">'
+                    . $bill_number . '</a>, ' . htmlspecialchars(html_entity_decode((string) $bill['catch_line'], ENT_QUOTES)) . '</p>' : '') . '
+						<div data-transcript-src="/video-transcript.php?file=' . $clip['file_id']
+                . '&amp;start=' . $clip['start'] . '&amp;end=' . $clip['end'] . '"></div>
+						<p class="video-transcript-source"><a href="' . htmlspecialchars($clip['path']) . '#t='
+                . $clip['start'] . '">Watch the full recording of this meeting</a></p>
+					</div>
+				</li>';
+        }
+
+        $page_body .= '
+			</ol>
+		</details>';
     }
 
-    $page_body .= "];
-
-			flowplayer(function (api, root) {
-					api.on('ready', function() {
-						firstplayer.seek(api.video.start);
-					});
-				});
-
-			/* Load the playlist into Flowplayer. */
-			flowplayer('#player', {
-				playlist: allVideos
-			});
-
-			/* When we hit the cuepoint, advance to the next video. */
-			var firstplayer = flowplayer('#player');
-			firstplayer.on('cuepoint', function(e, api, cuepoint) {
-				if (firstplayer.video.is_last == false) {
-					firstplayer.next();
-				}
-				else {
-					firstplayer.pause();
-				}
-			});
-		</script>
-	</div>";
+    $page_body .= '
+		<p class="clip-player-disclaimer">Transcripts are generated automatically from closed captions,
+		and may contain errors. Clips begin when ' . htmlspecialchars($legislator['name']) . ' is
+		identified on screen, and end when the next speaker is.</p>
+	</div>';
 }
 
 // Close the DIV that contains these tabs.

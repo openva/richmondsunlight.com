@@ -35,6 +35,7 @@ cp deploy/mysql/test-users.sql api/deploy/test-users.sql
 cp deploy/mysql/video-records.sql api/deploy/video-records.sql
 cp deploy/mysql/video-bill-fixtures.sql api/deploy/video-bill-fixtures.sql
 cp deploy/mysql/video-minutes-fixtures.sql api/deploy/video-minutes-fixtures.sql
+cp deploy/mysql/video-legislator-fixtures.sql api/deploy/video-legislator-fixtures.sql
 
 # Add local test records, if they exist
 if [ -f "deploy/mysql/local-test-records.sql" ]; then
