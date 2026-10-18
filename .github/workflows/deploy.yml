@@ -20,13 +20,13 @@ jobs:
     name: Lint and Build Assets
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set branch name as env var
         run: echo "GITHUB_REF_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: '8.4'
           extensions: mysqli, curl, memcached
@@ -35,7 +35,7 @@ jobs:
         run: mkdir -p ~/.composer/cache
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.composer/cache
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -49,7 +49,7 @@ jobs:
         run: composer install --no-interaction --prefer-dist
 
       - name: Cache Yarn dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cache/yarn
@@ -67,13 +67,13 @@ jobs:
     runs-on: ubuntu-24.04
     needs: lint_unit
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set branch name as env var
         run: echo "GITHUB_REF_NAME=${{ github.ref_name }}" >> $GITHUB_ENV
 
       - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
         with:
           php-version: '8.4'
           extensions: mysqli, curl, memcached
@@ -82,7 +82,7 @@ jobs:
         run: mkdir -p ~/.composer/cache
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.composer/cache
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
@@ -93,7 +93,7 @@ jobs:
         run: composer install --no-interaction --prefer-dist
 
       - name: Cache Yarn dependencies
-        uses: actions/cache@v3
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: |
             ~/.cache/yarn
@@ -112,7 +112,7 @@ jobs:
 
       - name: Cache API checkout
         id: api_cache
-        uses: actions/cache@v3
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: api
           key: ${{ runner.os }}-api-${{ steps.api_ref.outputs.sha }}
@@ -124,12 +124,12 @@ jobs:
           git clone --depth 1 https://github.com/openva/rs-api.git api
 
       - name: Setup Docker
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
         with:
           buildkitd-flags: --debug
 
       - name: Cache Docker layers
-        uses: actions/cache@v3
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: /tmp/.buildx-cache
           key: ${{ runner.os }}-buildx-${{ github.sha }}
@@ -137,7 +137,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Build Docker images with cache
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           file: ./deploy/Web.Dockerfile
@@ -186,7 +186,7 @@ jobs:
 
       - name: Upload codebase
         if: env.GITHUB_REF_NAME == 'master' || env.GITHUB_REF_NAME == 'deploy'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: codebase
           path: codebase.zip
@@ -201,7 +201,7 @@ jobs:
     
     steps:
       - name: Download artifact
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: codebase
           path: .
@@ -236,7 +236,7 @@ jobs:
         run: bash deploy/config_variables.sh
 
       - name: Configure AWS Credentials
-        uses: aws-actions/configure-aws-credentials@7474bc4690e29a8392af63c5b98e7449536d5c3a # v4.3.1
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}

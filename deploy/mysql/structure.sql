@@ -634,6 +634,8 @@ CREATE TABLE `files` (
   `srt` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
   `webvtt` mediumtext DEFAULT NULL,
   `transcript` mediumtext CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
+  `caption_offset` decimal(7,2) DEFAULT NULL COMMENT 'Seconds subtracted from the caption times to line them up with the audio',
+  `caption_alignment` enum('aligned','unaligned','not_needed','whisper') DEFAULT NULL COMMENT 'Whether the transcript was checked against the audio, and the result',
   `video_index_cache` mediumblob DEFAULT NULL,
   `raw_metadata` longtext DEFAULT NULL COMMENT 'If this record was scraped, the metadata that was extracted before being normalized, allowing a later re-analysis.',
   `date_created` datetime NOT NULL,

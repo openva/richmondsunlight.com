@@ -79,7 +79,8 @@ class VideoIntegrationTest extends TestCase
             $this->markTestSkipped("index_clips returned false");
         }
 
-        $firstClip = reset((array) $video->clips);
+        $clips = (array) $video->clips;
+        $firstClip = reset($clips);
         $this->assertTrue(isset($firstClip->screenshot), 'Clip should have screenshot property');
         $this->assertTrue(isset($firstClip->start), 'Clip should have start time');
         $this->assertTrue(isset($firstClip->end), 'Clip should have end time');
@@ -102,7 +103,8 @@ class VideoIntegrationTest extends TestCase
             $this->markTestSkipped("index_clips returned false");
         }
 
-        $firstClip = reset((array) $video->clips);
+        $clips = (array) $video->clips;
+        $firstClip = reset($clips);
         if (!isset($firstClip->screenshot)) {
             $this->markTestSkipped('No screenshot on first clip');
         }
@@ -126,7 +128,8 @@ class VideoIntegrationTest extends TestCase
             $this->markTestSkipped("index_clips returned false");
         }
 
-        $firstClip = reset((array) $video->clips);
+        $clips = (array) $video->clips;
+        $firstClip = reset($clips);
         if (!isset($firstClip->screenshot)) {
             $this->markTestSkipped('No screenshot on first clip');
         }

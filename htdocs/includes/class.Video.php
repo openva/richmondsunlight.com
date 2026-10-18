@@ -65,6 +65,445 @@ class Video
     }
 
     /**
+     * SQL to join the legislator identified by a column, and the term they were serving on the
+     * video's date. The query must already join `files`.
+     *
+     * Legislator IDs in video_index.linked_id (where type = "legislator") and in
+     * video_clips.legislator_id are people.id values; that's what rs-video-processor writes.
+     * Most people.id values happen to equal the person's terms.id, but not for anybody elected
+     * since 2024, so joining these columns directly to terms.id gets those people's names wrong.
+     *
+     * @param string $column The column holding a people.id
+     * @return string
+     */
+    private static function legislator_join(string $column): string
+    {
+        return '
+				LEFT JOIN people
+					ON people.id = ' . $column . '
+				LEFT JOIN terms
+					ON terms.id = (
+						SELECT t.id
+						FROM terms AS t
+						WHERE t.person_id = people.id AND t.date_started <= files.date
+						ORDER BY t.date_started DESC
+						LIMIT 1)';
+    }
+
+    /**
+     * Turn a video file's title into a short, human-readable name for the meeting it records.
+     *
+     * Titles come from several scrapers and take forms like:
+     * - "House Session" / "Senate April 2, 2025 - Session - 12:00 m." -> "Senate floor session"
+     * - "Senate January 22, 2025 - Courts of Justice - SR A (305) - ..." -> "Senate Courts of Justice"
+     * - "Senate Senate of Virginia: Rehabilitation Committee on 2025-09-16 [Finished]"
+     *       -> "Senate Rehabilitation Committee"
+     * - "House Criminal Subcommittee" -> (unchanged)
+     *
+     * @param string|null $title The files.title value
+     * @param string|null $chamber The files.chamber value ("house" or "senate")
+     * @return string
+     */
+    public static function meeting_label(?string $title, ?string $chamber): string
+    {
+        $chamber_name = ucfirst((string) $chamber);
+        $meeting = trim((string) $title);
+
+        if (preg_match('/^(?:House|Senate)\s+Senate of Virginia:\s*(.+?)(?:\s+on\s+\d{4}-\d{2}-\d{2}.*)?$/', $meeting, $matches)) {
+            $meeting = $matches[1];
+        } elseif (preg_match('/^(?:House|Senate)\s+[A-Z][a-z]+\s+\d{1,2},\s+\d{4}\s+-\s+(.+)$/', $meeting, $matches)) {
+            $parts = explode(' - ', $matches[1]);
+            $meeting = trim($parts[0]);
+        }
+
+        if ($meeting === '' || preg_match('/^(?:(?:House|Senate)\s+)?(?:Regular\s+)?Session\b/i', $meeting)) {
+            return trim($chamber_name . ' floor session');
+        }
+
+        if ($chamber_name !== '' && mb_stripos($meeting, $chamber_name) !== 0) {
+            $meeting = $chamber_name . ' ' . $meeting;
+        }
+
+        return $meeting;
+    }
+
+    /**
+     * Get every clip of a legislator speaking, from floor sessions and committee meetings, in
+     * chronological order.
+     *
+     * Clips come from the chyrons that identify speakers (video_index), which rs-video-processor
+     * records, and, for recordings that predate that, from the older video_clips table. A chyron
+     * appears only as somebody begins to speak, so each clip runs from just before this
+     * legislator is identified until the next speaker is identified (up to three minutes after
+     * this legislator was last identified, or one minute when there's no record of other
+     * speakers). Each clip also names the bill under discussion: the one recorded in video_clips,
+     * or else the one whose chyron was shown in the five minutes beforehand.
+     *
+     * @param int $person_id The legislator's people.id
+     * @return array A list of clips, each with file_id, path, date, chamber, meeting, start, end,
+     *               duration, and bill (null, or an array of number, year, and catch_line)
+     */
+    public static function person_clips(int $person_id): array
+    {
+        $sightings = [];
+        $sql = 'SELECT video_index.file_id, video_index.time
+                FROM video_index
+                WHERE video_index.type = "legislator" AND video_index.linked_id = ' . $person_id . '
+                    AND video_index.ignored != "y"
+                ORDER BY video_index.file_id ASC, video_index.time ASC';
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        while ($result && $row = mysqli_fetch_assoc($result)) {
+            $sightings[(int) $row['file_id']][] = time_to_seconds($row['time']);
+        }
+
+        // Group each recording's sightings into segments, wherever there's a gap.
+        $segments = [];
+        foreach ($sightings as $file_id => $times) {
+            $first = $last = $times[0];
+            foreach (array_slice($times, 1) as $time) {
+                if ($time - $last > self::CLIP_BOUNDARY_THRESHOLD) {
+                    $segments[] = ['file_id' => $file_id, 'first' => $first, 'last' => $last, 'bill_id' => null];
+                    $first = $time;
+                }
+                $last = $time;
+            }
+            $segments[] = ['file_id' => $file_id, 'first' => $first, 'last' => $last, 'bill_id' => null];
+        }
+
+        // Add clips from video_clips for any recordings that aren't in the index.
+        $sql = 'SELECT file_id, time_start, time_end, bill_id
+                FROM video_clips
+                WHERE legislator_id = ' . $person_id
+            . (count($sightings) > 0 ? ' AND file_id NOT IN (' . implode(',', array_keys($sightings)) . ')' : '');
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        while ($result && $row = mysqli_fetch_assoc($result)) {
+            $segments[] = [
+                'file_id' => (int) $row['file_id'],
+                'first' => time_to_seconds($row['time_start']),
+                'last' => time_to_seconds($row['time_end']),
+                'bill_id' => $row['bill_id'] !== null ? (int) $row['bill_id'] : null,
+            ];
+        }
+
+        if (count($segments) === 0) {
+            return [];
+        }
+        $file_ids = implode(',', array_unique(array_column($segments, 'file_id')));
+
+        $files = [];
+        $result = mysqli_query($GLOBALS['db'], 'SELECT id, path, date, chamber, title
+            FROM files
+            WHERE id IN (' . $file_ids . ')');
+        while ($result && $file = mysqli_fetch_assoc($result)) {
+            $files[(int) $file['id']] = $file;
+        }
+
+        // When other people were identified as speaking, and when bills were taken up, in these
+        // recordings.
+        $others = [];
+        $bill_times = [];
+        $result = mysqli_query($GLOBALS['db'], 'SELECT file_id, time, type, linked_id
+            FROM video_index
+            WHERE file_id IN (' . $file_ids . ') AND ignored != "y"
+                AND ((type = "legislator" AND (linked_id IS NULL OR linked_id != ' . $person_id . '))
+                    OR (type = "bill" AND linked_id IS NOT NULL))
+            ORDER BY file_id ASC, time ASC');
+        while ($result && $row = mysqli_fetch_assoc($result)) {
+            if ($row['type'] === 'legislator') {
+                $others[(int) $row['file_id']][] = time_to_seconds($row['time']);
+            } else {
+                $bill_times[(int) $row['file_id']][] = [time_to_seconds($row['time']), (int) $row['linked_id']];
+            }
+        }
+
+        $clips = [];
+        foreach ($segments as $segment) {
+            $file = $files[$segment['file_id']] ?? null;
+            if ($file === null || empty($file['path'])) {
+                continue;
+            }
+
+            $end = $segment['last'] + (isset($others[$segment['file_id']]) ? 180 : 60);
+            foreach ($others[$segment['file_id']] ?? [] as $time) {
+                if ($time > $segment['last']) {
+                    $end = min($end, max($time - 1, $segment['last'] + 10));
+                    break;
+                }
+            }
+            $start = max(0, $segment['first'] - 5);
+
+            // Older clips record the bill; otherwise, find it from the chyrons.
+            $bill_id = $segment['bill_id'];
+            foreach ($bill_id === null ? ($bill_times[$segment['file_id']] ?? []) : [] as [$time, $id]) {
+                if ($time > $segment['first'] + 30) {
+                    break;
+                }
+                if ($time >= $segment['first'] - 300) {
+                    $bill_id = $id;
+                }
+            }
+
+            $clips[] = [
+                'file_id' => $segment['file_id'],
+                'path' => preg_replace(
+                    ['#^/video/#', '#^http://archive\.org/#'],
+                    ['https://video.richmondsunlight.com/', 'https://archive.org/'],
+                    $file['path']
+                ),
+                'date' => $file['date'],
+                'chamber' => $file['chamber'],
+                'meeting' => self::meeting_label($file['title'], $file['chamber']),
+                'start' => $start,
+                'end' => $end,
+                'duration' => $end - $start,
+                'bill_id' => $bill_id,
+                'bill' => null,
+            ];
+        }
+
+        $bill_ids = array_filter(array_unique(array_column($clips, 'bill_id')));
+        if (count($bill_ids) > 0) {
+            $bills = [];
+            $result = mysqli_query($GLOBALS['db'], 'SELECT bills.id, bills.number, bills.catch_line,
+                    sessions.year
+                FROM bills
+                LEFT JOIN sessions
+                    ON bills.session_id = sessions.id
+                WHERE bills.id IN (' . implode(',', $bill_ids) . ')');
+            while ($result && $bill = mysqli_fetch_assoc($result)) {
+                $bills[(int) $bill['id']] = $bill;
+            }
+            foreach ($clips as &$clip) {
+                $clip['bill'] = $bills[$clip['bill_id']] ?? null;
+            }
+            unset($clip);
+        }
+
+        usort($clips, fn($a, $b) => [$a['date'], $a['file_id'], $a['start']] <=> [$b['date'], $b['file_id'], $b['start']]);
+
+        return $clips;
+    }
+
+    /**
+     * The URL of WebVTT captions for a span of a video file.
+     *
+     * @param int $file_id The files.id of the video
+     * @param float $start Start of the span, in seconds
+     * @param float $end End of the span, in seconds
+     * @return string
+     */
+    public static function captions_url(int $file_id, float $start, float $end): string
+    {
+        return '/video-transcript.php?format=vtt&file=' . $file_id . '&start=' . $start . '&end=' . $end;
+    }
+
+    /**
+     * Render the clip player's video and controls, starting on a given clip. The <video> has
+     * native controls, the clip as a media fragment, and the clip's captions, so it works without
+     * JavaScript; /js/clip-player.js replaces those controls with its own, which are scoped to
+     * each clip. (Each clip's captions URL should also be in its data-captions attribute.)
+     *
+     * @param array $clip The first clip, with file_id, path, start, end, and (optionally)
+     *                    screenshot
+     * @return string
+     */
+    public static function player_html(array $clip): string
+    {
+        return '
+		<div class="clip-player-stage">
+			<video controls preload="none" playsinline
+				poster="' . htmlspecialchars($clip['screenshot'] ?? '') . '">
+				<source src="' . htmlspecialchars($clip['path']) . '#t=' . $clip['start'] . ',' . $clip['end'] . '"
+					type="video/mp4">
+				<track kind="captions" srclang="en" label="English"
+					src="' . htmlspecialchars(self::captions_url((int) $clip['file_id'], $clip['start'], $clip['end'])) . '">
+				<p>Your browser can’t play this video.
+				<a href="' . htmlspecialchars($clip['path']) . '">Download it instead.</a></p>
+			</video>
+			<div class="clip-player-controls" hidden>
+				<div class="clip-player-transport">
+					<button type="button" class="clip-player-play" aria-label="Play">
+						<svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z"/></svg>
+						<svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h4v15H6zM14 4.5h4v15h-4z"/></svg>
+					</button>
+					<input type="range" class="clip-player-scrubber" min="0" step="1" value="0"
+						aria-label="Position in this clip">
+					<span class="clip-player-time"></span>
+					<button type="button" class="clip-player-captions" aria-label="Captions" aria-pressed="false">
+						<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="5" width="19" height="14" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10.5 10.2a2.3 2.3 0 1 0 0 3.6M17 10.2a2.3 2.3 0 1 0 0 3.6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+					</button>
+					<button type="button" class="clip-player-mute" aria-label="Mute" aria-pressed="false">
+						<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4.5v-15L8 9z"/><path class="icon-waves" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path class="icon-muted" d="M16.5 9.5l5 5M21.5 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+					</button>
+					<button type="button" class="clip-player-fullscreen" aria-label="Full screen">
+						<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+					</button>
+				</div>
+				<div class="clip-player-nav">
+					<button type="button" class="clip-player-prev">‹ <span>Previous clip</span></button>
+					<p class="clip-player-now" aria-live="polite"></p>
+					<button type="button" class="clip-player-next"><span>Next clip</span> ›</button>
+				</div>
+			</div>
+			<p class="clip-player-notice" hidden></p>
+		</div>';
+    }
+
+    /**
+     * Format a number of seconds as a clock reading (e.g., "1:05" or "1:02:05").
+     *
+     * @param float $seconds
+     * @return string
+     */
+    public static function clock($seconds): string
+    {
+        $seconds = max(0, (int) round($seconds));
+        if ($seconds >= 3600) {
+            return sprintf('%d:%02d:%02d', intdiv($seconds, 3600), intdiv($seconds, 60) % 60, $seconds % 60);
+        }
+        return sprintf('%d:%02d', intdiv($seconds, 60), $seconds % 60);
+    }
+
+    /**
+     * Render transcript turns (from transcript_span()) as paragraphs, one per turn, each opening
+     * with a button to play from that point. Every line is a span carrying its start time in
+     * data-seek, which the page's script uses to seek and to highlight the line being spoken.
+     *
+     * @param array $turns Turns, as returned by transcript_span()
+     * @param float $origin The time, in seconds, that the displayed timestamps count from
+     * @return string
+     */
+    public static function transcript_html(array $turns, float $origin = 0): string
+    {
+        $html = '';
+        foreach ($turns as $turn) {
+            $time = self::clock($turn['start'] - $origin);
+            $html .= '
+					<p><button type="button" class="video-timestamp" data-seek="' . $turn['start'] . '"
+						aria-label="Play from ' . $time . '">' . $time . '</button> ';
+            if (!empty($turn['speaker'])) {
+                $html .= '<a class="video-speaker" href="/legislator/'
+                    . htmlspecialchars($turn['shortname']) . '/">'
+                    . htmlspecialchars($turn['speaker']) . '</a> ';
+            }
+            foreach ($turn['lines'] as $line) {
+                $html .= '<span data-seek="' . $line['start'] . '">' . htmlspecialchars($line['text']) . '</span> ';
+            }
+            $html .= '</p>';
+        }
+        return $html;
+    }
+
+    /**
+     * Render transcript turns (from transcript_span()) as a WebVTT captions file, for a <track>.
+     *
+     * Cue times are on the video file's own timeline. Each turn's first cue names the speaker,
+     * when they're known. Each cue lasts until the next one starts, so that captions don't blink
+     * off between lines, but no longer than seven seconds, so that they don't linger through
+     * silences (or poorly timed captions). Cues are placed at the top of the picture, because
+     * the General Assembly's broadcasts identify speakers and bills along the bottom.
+     *
+     * @param array $turns Turns, as returned by transcript_span()
+     * @return string
+     */
+    public static function transcript_vtt(array $turns): string
+    {
+        $lines = [];
+        foreach ($turns as $turn) {
+            foreach ($turn['lines'] as $i => $line) {
+                if ($i === 0 && !empty($turn['speaker'])) {
+                    $line['text'] = $turn['speaker'] . ': ' . $line['text'];
+                }
+                $lines[] = $line;
+            }
+        }
+
+        $timestamp = function (float $seconds): string {
+            $ms = (int) round($seconds * 1000);
+            return sprintf('%02d:%02d:%02d.%03d', intdiv($ms, 3600000), intdiv($ms, 60000) % 60, intdiv($ms, 1000) % 60, $ms % 1000);
+        };
+
+        $vtt = "WEBVTT\n";
+        foreach ($lines as $i => $line) {
+            $end = min(isset($lines[$i + 1]) ? $lines[$i + 1]['start'] : $line['end'], $line['start'] + 7);
+            if ($end <= $line['start']) {
+                $end = $line['start'] + 1;
+            }
+            $vtt .= "\n" . $timestamp($line['start']) . ' --> ' . $timestamp($end) . " line:5%\n"
+                . str_replace(['&', '<', '>'], ['&amp;', '&lt;', '&gt;'], trim(preg_replace('/\s+/', ' ', $line['text'])))
+                . "\n";
+        }
+
+        return $vtt;
+    }
+
+    /**
+     * Get the transcript of a span of a video file, grouped into speaker turns.
+     *
+     * A new turn begins whenever the speaker changes, the captions mark a new speaker, or a turn
+     * runs past a minute (so that long stretches of unidentified speech stay readable).
+     *
+     * @param int $file_id The files.id of the video
+     * @param float $start Start of the span, in seconds
+     * @param float $end End of the span, in seconds
+     * @return array A list of turns, each with start, speaker, shortname, and lines (each with
+     *               start, end, and text)
+     */
+    public static function transcript_span(int $file_id, float $start, float $end): array
+    {
+        $sql = 'SELECT video_transcript.text, video_transcript.time_start,
+                    video_transcript.time_end, video_transcript.new_speaker,
+                    video_transcript.legislator_id, terms.name_formatted, people.shortname
+                FROM video_transcript
+                LEFT JOIN terms
+                    ON video_transcript.legislator_id = terms.id
+                LEFT JOIN people
+                    ON terms.person_id = people.id
+                WHERE video_transcript.file_id = ' . $file_id . '
+                    AND video_transcript.time_start < "' . seconds_to_time((int) ceil($end)) . '"
+                    AND video_transcript.time_end > "' . seconds_to_time((int) floor($start)) . '"
+                ORDER BY video_transcript.time_start ASC';
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        if ($result === false) {
+            return [];
+        }
+
+        $turns = [];
+        $turn = null;
+        while ($line = mysqli_fetch_assoc($result)) {
+            $line_start = time_to_seconds($line['time_start']);
+            $speaker_id = $line['legislator_id'];
+            if (
+                $turn === null
+                || $line['new_speaker'] === 'y'
+                || $speaker_id !== $turn['speaker_id']
+                || ($line_start - $turn['start']) > 60
+            ) {
+                if ($turn !== null) {
+                    $turns[] = $turn;
+                }
+                $turn = [
+                    'start' => $line_start,
+                    'speaker_id' => $speaker_id,
+                    'speaker' => $line['name_formatted'],
+                    'shortname' => $line['shortname'],
+                    'lines' => [],
+                ];
+            }
+            $turn['lines'][] = [
+                'start' => $line_start,
+                'end' => time_to_seconds($line['time_end']),
+                'text' => $line['text'],
+            ];
+        }
+        if ($turn !== null) {
+            $turns[] = $turn;
+        }
+
+        return $turns;
+    }
+
+    /**
      * Retrieve a single video.
      *
      * @return bool Returns false if no ID is set, true otherwise
@@ -601,7 +1040,7 @@ class Video
         if ($this->clip_type == 'bills') {
             $sql .= 'bills.number AS bill_number';
         } elseif ($this->clip_type == 'legislators') {
-            $sql .= 'terms.name_formatted AS legislator_name';
+            $sql .= 'COALESCE(terms.name_formatted, people.name_formal) AS legislator_name';
         }
         $sql .= '
 				FROM video_index
@@ -613,9 +1052,7 @@ class Video
 					ON video_index.linked_id = bills.id
 				WHERE video_index.type="bill"';
         } elseif ($this->clip_type == 'legislators') {
-            $sql .= '
-				LEFT JOIN terms
-					ON video_index.linked_id = terms.id
+            $sql .= self::legislator_join('video_index.linked_id') . '
 				WHERE video_index.type="legislator"';
         }
 
@@ -835,13 +1272,12 @@ class Video
         $database->connect_mysqli();
 
         $sql = 'SELECT files.path, files.date, DATE_FORMAT(files.date, "%b %e, %Y") AS date_formatted,
-				terms.name_formatted AS legislator_name, bills.number AS bill_number,
+				COALESCE(terms.name_formatted, people.name_formal) AS legislator_name, bills.number AS bill_number,
 				video_clips.bill_id, video_clips.time_start, video_clips.time_end, video_clips.screenshot
 				FROM video_clips
 				LEFT JOIN files
-					ON video_clips.file_id = files.id
-				LEFT JOIN terms
-					ON video_clips.legislator_id = terms.id
+					ON video_clips.file_id = files.id'
+                . self::legislator_join('video_clips.legislator_id') . '
 				LEFT JOIN bills
 					ON video_clips.bill_id = bills.id
 				WHERE ';
@@ -907,11 +1343,12 @@ class Video
         $database->connect_mysqli();
 
         if ($this->clip_type == 'legislators') {
-            $sql = 'SELECT terms.name_formatted AS legislator_name, video_clips.time_start,
+            $sql = 'SELECT COALESCE(terms.name_formatted, people.name_formal) AS legislator_name, video_clips.time_start,
 					video_clips.time_end, video_clips.screenshot
 					FROM video_clips
-					LEFT JOIN terms
-						ON video_clips.legislator_id = terms.id
+					LEFT JOIN files
+						ON video_clips.file_id = files.id'
+                    . self::legislator_join('video_clips.legislator_id') . '
 					WHERE legislator_id IS NOT NULL AND video_clips.file_id=' . $this->id;
         } elseif ($this->clip_type == 'bills') {
             $sql = 'SELECT bills.number AS bill_number, video_clips.time_start, video_clips.time_end,
@@ -922,13 +1359,14 @@ class Video
 					WHERE bill_id IS NOT NULL AND legislator_id IS NULL
 					AND video_clips.file_id=' . $this->id;
         } else {
-            $sql = 'SELECT terms.name_formatted AS legislator_name,
+            $sql = 'SELECT COALESCE(terms.name_formatted, people.name_formal) AS legislator_name,
 					bills.number AS bill_number,
 					video_clips.bill_id, video_clips.time_start, video_clips.time_end,
 					video_clips.screenshot
 					FROM video_clips
-					LEFT JOIN terms
-						ON video_clips.legislator_id = terms.id
+					LEFT JOIN files
+						ON video_clips.file_id = files.id'
+                    . self::legislator_join('video_clips.legislator_id') . '
 					LEFT JOIN bills
 						ON video_clips.bill_id = bills.id
 					WHERE video_clips.file_id=' . $this->id;
@@ -1112,11 +1550,12 @@ class Video
         }
 
         # SELECT A LIST OF EVERY SPEAKER AND BILL, BY TIME
-        $sql = 'SELECT terms.name_formatted AS legislator, bills.number AS bill,
+        $sql = 'SELECT COALESCE(terms.name_formatted, people.name_formal) AS legislator, bills.number AS bill,
 				video_clips.time_start, video_clips.time_end
 				FROM video_clips
-				LEFT JOIN terms
-					ON video_clips.legislator_id = terms.id
+				LEFT JOIN files
+					ON video_clips.file_id = files.id'
+                . self::legislator_join('video_clips.legislator_id') . '
 				LEFT JOIN bills
 					ON video_clips.bill_id = bills.id
 				WHERE video_clips.file_id = ' . $this->id . '

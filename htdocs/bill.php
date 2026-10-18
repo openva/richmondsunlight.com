@@ -1158,142 +1158,86 @@ if (isset($bill['places']) && (count($bill['places']) > 0)) {
 }
 
 if (($bill['video'] !== false) && (count($bill['video']) > 0)) {
-    /*
-     * Generate a text transcript of these clips in a single query.
-     */
-    $transcript = array();
-    $conditions = [];
-    foreach ($bill['video'] as $video) {
-        $conditions[] = '(video_transcript.file_id=' . (int)$video->file_id
-            . ' AND time_start >= "' . seconds_to_time($video->start) . '"'
-            . ' AND time_end <= "' . seconds_to_time($video->end) . '")';
-    }
-    if (count($conditions) > 0) {
-        $sql = 'SELECT video_transcript.file_id, representatives.name_formatted AS speaker,
-                    video_transcript.text
-                FROM video_transcript
-                LEFT JOIN representatives
-                    ON video_transcript.legislator_id = representatives.id
-                WHERE ' . implode(' OR ', $conditions) . '
-                ORDER BY video_transcript.file_id ASC, video_transcript.time_start ASC';
-        $result = mysqli_query($GLOBALS['db'], $sql);
-        if ($result && mysqli_num_rows($result) > 0) {
-            while ($line = mysqli_fetch_assoc($result)) {
-                $fid = $line['file_id'];
-                if (!isset($transcript[$fid])) {
-                    $transcript[$fid] = array();
-                }
-                $transcript[$fid][] = $line;
-            }
+    // Get the title of each video file, to say where each clip was recorded.
+    $file_ids = array_unique(array_map(fn($clip) => (int) $clip->file_id, $bill['video']));
+    $file_titles = [];
+    $result = mysqli_query($GLOBALS['db'], 'SELECT id, title FROM files
+        WHERE id IN (' . implode(',', $file_ids) . ')');
+    if ($result) {
+        while ($file = mysqli_fetch_assoc($result)) {
+            $file_titles[$file['id']] = $file['title'];
         }
     }
 
-    // Determine the cumulative duration of these clips.
+    $clips = [];
     $duration = 0;
     foreach ($bill['video'] as $clip) {
         $clip = (array) $clip;
-        $duration = $duration + $clip['duration'];
+        $clip['meeting'] = Video::meeting_label($file_titles[$clip['file_id']] ?? null, $clip['chamber']);
+        $clip['transcript'] = Video::transcript_span((int) $clip['file_id'], $clip['start'], $clip['end']);
+        $clips[] = $clip;
+        $duration += $clip['duration'];
     }
-    $duration = str_replace(' ago', '', seconds_to_units($duration));
+    $clip_count = count($clips);
 
-    /*
-     * Add the Flowplayer code.
-     */
     $html_head .= '
-		<script src="/js/flowplayer-6.0.5/flowplayer.min.js"></script>
-		<link rel="stylesheet" href="/js/flowplayer-6.0.5/skin/minimalist.css">';
+		<script src="/js/clip-player.js" defer></script>';
 
-    // Start a new DIV for this legislator's highlights reel.
+    $first = $clips[0];
     $page_body .= '
-	<div id="video">
-		<h2>Video</h2>
+	<section id="video" class="clip-player" aria-labelledby="video-heading">
+		<h2 id="video-heading">Video</h2>
+		<p>This bill was discussed in ' . ($clip_count === 1 ? 'one video clip' : $clip_count . ' video clips')
+        . ', ' . str_replace(' ago', '', seconds_to_units($duration)) . ' in all.'
+        . ($clip_count > 1 ? ' Choose a clip to watch it and follow along with its transcript.' : '')
+        . '</p>
 
-		<p>This bill was discussed on the floor of the General Assembly. Below is all of the
-		video that we have of that discussion, ' . count($bill['video']) . ' clip'
-        . ((count($bill['video']) > 1) ? 's' : '') . ' in all, totaling ' . $duration . '.</p>
+' . Video::player_html($first) . '
 
-		<div class="flowplayer" id="player">
-			<a class="fp-prev">←</a>
-			<a class="fp-next">→</a>
-		</div>
-		<div id="playlist">
-		</div>
+		<ol class="clip-player-clips">';
 
-		<script>
-			/* Create the playlist. */
-			var allVideos = [';
-    foreach ($bill['video'] as $num => $clip) {
-        $clip = (array) $clip;
+    foreach ($clips as $i => $clip) {
+        $number = $i + 1;
+        $id = 'video-clip-' . $number;
         $page_body .= '
-			{
-				sources: [{
-					type: "video/mp4",
-					src: "' . $clip['path'] . '",
-					date: "' . $clip['date'] . '",
-					start: ' . $clip['start'] . ',
-					duration: ' . $clip['duration'] . ',
-					cuepoints: [' . ($clip['start'] + $clip['duration']) . ' ]
-				}]
-			},';
-    }
-    $page_body .= "];
+			<li class="clip-player-clip' . ($i === 0 ? ' is-active' : '') . '" id="' . $id . '"
+				data-src="' . htmlspecialchars($clip['path']) . '"
+				data-start="' . $clip['start'] . '" data-end="' . $clip['end'] . '"
+				data-poster="' . htmlspecialchars($clip['screenshot']) . '"
+				data-captions="' . htmlspecialchars(Video::captions_url((int) $clip['file_id'], $clip['start'], $clip['end'])) . '"
+				data-label="' . htmlspecialchars($clip['meeting'] . ', ' . date('F j, Y', strtotime($clip['date']))) . '">
+				<h3>
+					<button type="button" class="clip-player-select" aria-controls="' . $id . '-transcript"
+						aria-expanded="' . ($i === 0 ? 'true' : 'false') . '">
+						' . ($clip_count > 1 ? '<span class="clip-player-number">Clip ' . $number . '</span>' : '') . '
+						<span class="clip-player-meeting">' . htmlspecialchars($clip['meeting']) . '</span>
+						<span class="clip-player-meta"><time datetime="' . htmlspecialchars($clip['date']) . '">'
+                            . date('F j, Y', strtotime($clip['date'])) . '</time>
+							· ' . Video::clock($clip['duration']) . '</span>
+					</button>
+				</h3>
+				<div class="clip-player-transcript video-transcript" id="' . $id . '-transcript">';
 
-			flowplayer(function (api, root) {
-					api.on('ready', function() {
-						firstplayer.seek(api.video.start);
-					});
-				});
-
-			/* Load the playlist into Flowplayer. */
-			flowplayer('#player', {
-				playlist: allVideos
-			});
-
-			/* When we hit the cuepoint, advance to the next video. */
-			var firstplayer = flowplayer('#player');
-			firstplayer.on('cuepoint', function(e, api, cuepoint) {
-				if (firstplayer.video.is_last == false) {
-					firstplayer.next();
-				}
-				else {
-					firstplayer.pause();
-				}
-			});
-
-			/* Create the playlist. */
-			/*var playlistHTML = '';
-			$.each(allVideos, function(i,data) {
-				playlistHTML += '<li><a href=javascript:play(' + i + ')>' + data['sources'][0]['date'] + ' ' + data['sources'][0]['duration'] + ' seconds</a></li>';
-			});
-			$('#playlist').html(playlistHTML);*/
-
-		</script>";
-
-    if (count($transcript) > 0) {
-        $page_body .= '<h3>Transcript</h3>
-			<div style="height: 15em; overflow: scroll;">
-			<p>This is a transcript of the video clips in which this bill is discussed.</p>';
-        $prior_speaker = '';
-
-        foreach ($transcript as $file) {
-            foreach ($file as $line) {
-                if ($prior_speaker != $line['speaker']) {
-                    $page_body .=  '<br><br>';
-                    if (!empty($line['speaker'])) {
-                        $page_body .=  '<strong>' . $line['speaker'] . ':</strong> ';
-                    } else {
-                        $page_body .=  '<strong>[Unknown]:</strong> ';
-                    }
-                    $prior_speaker = $line['speaker'];
-                }
-                $page_body .=  $line['text'] . ' ';
-            }
-            $page_body .= '<hr>';
+        if (count($clip['transcript']) === 0) {
+            $page_body .= '
+					<p class="video-transcript-empty">There’s no transcript of this clip.</p>';
+        } else {
+            $page_body .= Video::transcript_html($clip['transcript'], $clip['start']);
         }
-        $page_body .= '</div>';
+
+        $page_body .= '
+					<p class="video-transcript-source"><a href="' . htmlspecialchars($clip['path']) . '#t='
+                        . $clip['start'] . '">Watch the full recording of this meeting</a>
+					(Internet Archive)</p>
+				</div>
+			</li>';
     }
 
-    $page_body .= '</div>';
+    $page_body .= '
+		</ol>
+		<p class="clip-player-disclaimer">Transcripts are generated automatically from closed captions,
+		and may contain errors.</p>
+	</section>';
 }
 
 
