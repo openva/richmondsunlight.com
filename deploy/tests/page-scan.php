@@ -79,6 +79,11 @@ $pages =
         'string' => 'Placed on Finance Agenda',
     ],
     [
+        'url' => '/minutes/house/2026/01/26/',
+        'http_status' => '200',
+        'string' => 'State-facilitated IRA savings program',
+    ],
+    [
         'url' => '/bill/2025/sb738/',
         'http_status' => '200',
         'string' => 'cell phone usage policy',

@@ -1002,7 +1002,7 @@ meter {
 			font-variant-numeric: tabular-nums;
 		}
 
-		.bill-video-transcript {
+		.video-transcript {
 			position: relative;
 			padding: .25em .75em .5em;
 			font-family: Georgia, Times, serif;
@@ -1016,18 +1016,18 @@ meter {
 			overflow-y: auto;
 			border-top: 1px solid #dccbaf;
 		}
-			.bill-video-transcript p {
+			.video-transcript p {
 				margin: 0 0 .5em;
 				padding: 0;
 			}
-			.bill-video-transcript p:first-child {
+			.video-transcript p:first-child {
 				margin-top: .5em;
 			}
-			.bill-video-transcript p.bill-video-source {
+			.video-transcript p.video-transcript-source {
 				margin: .75em 0 .25em;
 				font: .9em Verdana, Arial, sans-serif;
 			}
-			.bill-video-timestamp {
+			.video-timestamp {
 				font: .8em Verdana, Arial, sans-serif;
 				font-variant-numeric: tabular-nums;
 				color: #243a51;
@@ -1039,27 +1039,27 @@ meter {
 				cursor: pointer;
 				vertical-align: .1em;
 			}
-			.bill-video-timestamp:hover {
+			.video-timestamp:hover {
 				border-color: #c6a952;
 			}
-			.bill-video-speaker {
+			.video-speaker {
 				font-weight: bold;
 			}
-			.bill-video-speaker::after {
+			.video-speaker::after {
 				content: ":";
 			}
-			.bill-video.is-enhanced .bill-video-transcript span[data-seek] {
+			.is-enhanced .video-transcript span[data-seek] {
 				cursor: pointer;
 				border-radius: 2px;
 			}
-			.bill-video.is-enhanced .bill-video-transcript span[data-seek]:hover {
+			.is-enhanced .video-transcript span[data-seek]:hover {
 				text-decoration: underline dotted #c6a952;
 			}
-			.bill-video-transcript span.is-current {
+			.video-transcript span.is-current {
 				background-color: #f6e6b4;
 				box-shadow: 0 0 0 2px #f6e6b4;
 			}
-			.bill-video-empty {
+			.video-transcript-empty {
 				font-style: italic;
 				color: #666;
 			}
@@ -1076,4 +1076,127 @@ meter {
 		overflow: hidden;
 		clip: rect(0 0 0 0);
 	}
+}
+
+/* Minutes video: player and guide to bills, speakers, and transcript (see /js/minutes-video.js) */
+.minutes-video-player {
+	background-color: #243a51;
+	border-radius: 4px;
+	overflow: hidden;
+	margin: 1em 0 .5em;
+}
+	.minutes-video-player video {
+		display: block;
+		width: 100%;
+		aspect-ratio: 16 / 9;
+		background-color: #000;
+	}
+	.minutes-video-now {
+		margin: 0;
+		padding: .5em .75em;
+		color: #fff;
+		font-weight: bold;
+	}
+.minutes-video-download {
+	margin: 0 0 1em;
+	font-size: .9em;
+}
+
+.minutes-video-tabs:not([hidden]) {
+	display: flex;
+	gap: .25em;
+	border-bottom: 2px solid #dccbaf;
+}
+	.minutes-video-tabs button {
+		font: inherit;
+		font-weight: bold;
+		color: #333;
+		background-color: transparent;
+		border: 1px solid transparent;
+		border-bottom: 0;
+		border-radius: 3px 3px 0 0;
+		padding: .45em .9em;
+		margin-bottom: -2px;
+		cursor: pointer;
+	}
+	.minutes-video-tabs button:hover {
+		background-color: #f4eee5;
+	}
+	.minutes-video-tabs button[aria-selected="true"] {
+		background-color: #f4eee5;
+		border-color: #dccbaf;
+		border-bottom: 2px solid #f4eee5;
+		color: #790806;
+	}
+		.minutes-video-tabs button span {
+			font-weight: normal;
+			color: #666;
+			margin-left: .2em;
+		}
+.minutes-video.is-enhanced .minutes-video-panel > h3 {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+}
+.minutes-video.is-enhanced .minutes-video-scroll {
+	position: relative;
+	max-height: 26em;
+	overflow-y: auto;
+	border: 1px solid #dccbaf;
+	border-top: 0;
+}
+	ol.minutes-video-list,
+	div#content ul.minutes-video-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		line-height: inherit;
+	}
+	.minutes-video-list li {
+		display: flex;
+		align-items: baseline;
+		gap: .6em;
+		padding: .45em .75em;
+		border-bottom: 1px solid #f0e8da;
+	}
+	.minutes-video-list li.is-current {
+		background-color: #fbf3dc;
+		box-shadow: inset 4px 0 0 #790806;
+	}
+		.minutes-video-item {
+			flex: 1;
+			min-width: 0;
+		}
+		.minutes-video-bill {
+			font-weight: bold;
+			margin-right: .25em;
+		}
+		.minutes-video-length {
+			flex: none;
+			color: #666;
+			font-size: .9em;
+			font-variant-numeric: tabular-nums;
+		}
+		.minutes-video-times {
+			flex: none;
+			max-width: 60%;
+			text-align: right;
+			line-height: 1.9;
+		}
+	.minutes-video-list .video-timestamp {
+		flex: none;
+	}
+	.video-timestamp.is-current {
+		background-color: #790806;
+		border-color: #790806;
+		color: #fff;
+	}
+	.minutes-video .video-transcript {
+		padding: .25em .75em .5em;
+	}
+.minutes-video-note {
+	font-size: .9em;
+	color: #666;
 }

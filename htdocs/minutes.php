@@ -34,26 +34,7 @@ $date = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['year']) . '-' . mys
 $page_title = date('m/d/Y', strtotime($date)) . ' ' . ucfirst($chamber) . ' Proceedings';
 $site_section = 'minutes';
 
-$html_head = '
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    var markers = document.querySelectorAll(".marker");
-    var video = document.querySelector("#player video");
-
-    if (!video || markers.length === 0) {
-        return;
-    }
-
-    markers.forEach(function(marker) {
-        marker.addEventListener("click", function(event) {
-            event.preventDefault();
-            var time = marker.getAttribute("data-time");
-            video.currentTime = time;
-            video.play();
-        });
-    });
-});
-</script>';
+$html_head = '';
 
 # RETRIEVE THE MINUTES FROM THE DATABASE
 $sql = 'SELECT text
@@ -67,22 +48,22 @@ if (mysqli_num_rows($result) == 0) {
     $minutes = stripslashes($minutes['text']);
 
     # Turn every bill number into a link.
-    // Unfortunately, this doesn't actually work for every bill number. Lists are often
-    // presented as "HRs 1 and 2," for instance, and this can't pick those up. Also, this
-    // links using the existing case (upper), and should be linking in lower, but preg_replace
-    // lacks a mechanism by which to make changes mid-replacement.
-    // CORRECTION TO ABOVE: It can make changes -- use preg_replace_callback();
-    $minutes = preg_replace('/(HR|HB|SJR|SB|HJ|HJR) ([0-9]+)/', '<a href="/bill/' . $_REQUEST['year'] . '/$1$2/">$1 $2</a>', $minutes);
+    // This doesn't catch every bill number. Lists are often presented as "HRs 1 and 2," for
+    // instance, and this can't pick those up.
+    $year = (int) $_REQUEST['year'];
+    $minutes = preg_replace_callback(
+        '/(HR|HB|SJR|SB|HJ|HJR) ([0-9]+)/',
+        fn($m) => '<a href="/bill/' . $year . '/' . mb_strtolower($m[1] . $m[2]) . '/">' . $m[0] . '</a>',
+        $minutes
+    );
 
-    # Retrieve a single video, if it's available.
-    $sql = 'SELECT id, author_name, title, html, path, description, license, length, sponsor,
-			video_index_cache AS index_cache, transcript, width, height,
-				(SELECT COUNT(*)
-				FROM video_index
-				WHERE file_id=files.id) AS index_data
+    # Retrieve the video of the floor session, if it's available. Committee meetings are recorded
+    # on the same day, so prefer the file that's titled as a session.
+    $sql = 'SELECT id, path, license, length, sponsor
 			FROM files
 			WHERE type="video" AND committee_id IS NULL AND date="' . $date . '"
 			AND chamber="' . $chamber . '"
+			ORDER BY (title LIKE "%Session%") DESC, id ASC
 			LIMIT 1';
     $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0) {
@@ -95,60 +76,6 @@ if (mysqli_num_rows($result) == 0) {
     if (isset($video['id'])) {
         $video2->id = $video['id'];
         $video2->get_video();
-    }
-
-    /*
-     * Retrieve a transcript.
-     */
-    if ($video2->generate_transcript() === true) {
-        $video['transcript'] = '
-		<style>
-			dl.transcript dt {
-				font-weight: bold;
-				float: left;
-				clear: left;
-				width: 10em;
-				text-align: right;
-			}
-			dl.transcript dd {
-				margin-left: 10.5em;
-			}
-			dl.transcript dt + dd {
-				margin-bottom: 1em;
-			}
-		</style>
-		<dl class="transcript">';
-        $i = 1;
-        foreach ($video2->transcript as $line) {
-            if (empty($line['name'])) {
-                $line['name'] = '[Unknown]';
-            }
-            $video['transcript'] .= '
-				<dt id="line-' . $i . '">';
-            if (!isset($line['shortname'])) {
-                $video['transcript'] .= $line['name'];
-            } else {
-                $video['transcript'] .= '<a href="/legislator/' . $line['shortname']
-                    . '/" class="legislator">' . $line['name'] . '</a>';
-            }
-            $video['transcript'] .= '</dt>
-				<dd data-time="' . $line['time_start'] . '" data-time-end="' . $line['time_end'] . '">' . $line['text'] . '</dd>';
-            $i++;
-        }
-        $video['transcript'] .= '</dl>';
-    }
-
-    # If we have a path, use that.
-    if (isset($video['path']) && mb_substr($video['path'], -3) == 'mp4') {
-        $video['html'] = '
-		<style>
-			#player, video {
-				width: 100%;
-			}
-		</style>
-		<div class="player" id="player">
-			<video src="' . $video['path'] . '" controls></video>
-		</div>';
     }
 
 
@@ -235,146 +162,163 @@ if (mysqli_num_rows($result) == 0) {
         }
     }
 
-    #  Create the tabs in the header.
-    $page_body = '
-		<div id="sources" class="tabs">
-		<ul>';
-    if (!empty($video['html'])) {
-        $page_body .= '<li><a href="#video">Video</a><li>';
-    }
-    if (!empty($video['transcript'])) {
-        $page_body .= '<li><a href="#transcript">Transcript</a><li>';
-    }
-    if (!empty($minutes)) {
-        $page_body .= '<li><a href="#minutes">Minutes</a><li>';
-    }
-    $page_body .= '</ul>';
+    $page_body = '';
 
-    if (!empty($video['html']) || !empty($video2->path)) {
+    if (!empty($video2->path)) {
+        $html_head .= '
+		<script src="/js/minutes-video.js" defer></script>';
+
+        # Find the bills and the legislators in this video, using the chyrons that identify them.
+        $video2->fuzz = VIDEO_CLIP_FUZZ_SECONDS;
+        $video2->clip_type = 'bills';
+        $bill_clips = $video2->index_clips() ? array_values((array) $video2->clips) : [];
+        unset($video2->clips);
+        $video2->clip_type = 'legislators';
+        $legislator_clips = $video2->index_clips() ? array_values((array) $video2->clips) : [];
+
+        $bills = [];
+        $bill_ids = array_unique(array_map(fn($clip) => (int) $clip->linked_id, $bill_clips));
+        if (count($bill_ids) > 0) {
+            $result = mysqli_query($GLOBALS['db'], 'SELECT bills.id, bills.number, bills.catch_line,
+                    sessions.year
+                FROM bills
+                LEFT JOIN sessions
+                    ON bills.session_id = sessions.id
+                WHERE bills.id IN (' . implode(',', $bill_ids) . ')');
+            while ($bill = mysqli_fetch_assoc($result)) {
+                $bills[$bill['id']] = $bill;
+            }
+        }
+
+        # Group each legislator's appearances, and list legislators by last name.
+        $speakers = [];
+        $person_ids = array_unique(array_map(fn($clip) => (int) $clip->linked_id, $legislator_clips));
+        if (count($person_ids) > 0) {
+            $result = mysqli_query($GLOBALS['db'], 'SELECT id, name, shortname
+                FROM people
+                WHERE id IN (' . implode(',', $person_ids) . ')');
+            while ($person = mysqli_fetch_assoc($result)) {
+                $speakers[$person['id']] = $person + ['label' => null, 'starts' => []];
+            }
+        }
+        foreach ($legislator_clips as $clip) {
+            if (!isset($speakers[$clip->linked_id])) {
+                continue;
+            }
+            $speakers[$clip->linked_id]['label'] = $clip->legislator_name;
+            $speakers[$clip->linked_id]['starts'][] = max(0, $clip->start);
+        }
+        uasort($speakers, fn($a, $b) => strcmp($a['name'], $b['name']));
+
+        $transcript = Video::transcript_span((int) $video2->id, 0, 86399);
+
         $page_body .= '
-			<div id="video">
-				<div class="video" style="width: 100%;">
-					' . str_replace('/embed/', '/embed/?origin=https://www.richmondsunlight.com', $video['html']) . '
+		<section id="video" class="minutes-video" aria-labelledby="video-heading">
+			<h2 id="video-heading">Video</h2>
+			<div class="minutes-video-player">
+				<video controls preload="metadata" playsinline src="' . htmlspecialchars($video2->path) . '">
+					<p>Your browser can’t play this video.
+					<a href="' . htmlspecialchars($video2->path) . '">Download it instead.</a></p>
+				</video>
+				<p class="minutes-video-now" aria-live="polite" hidden></p>
+			</div>
+			<p class="minutes-video-download"><a href="' . htmlspecialchars($video2->path) . '">Download this video</a>'
+            . (!empty($video['length']) ? ' (' . Video::clock(time_to_seconds($video['length'])) . ')' : '') . '</p>
+
+			<div class="minutes-video-guide">
+				<div class="minutes-video-tabs" role="tablist" aria-label="Find your way around this video" hidden>';
+        $panels = [];
+        if (count($bill_clips) > 0) {
+            $panels['video-bills'] = 'Bills <span>' . count($bill_clips) . '</span>';
+        }
+        if (count($speakers) > 0) {
+            $panels['video-speakers'] = 'Speakers <span>' . count($speakers) . '</span>';
+        }
+        if (count($transcript) > 0) {
+            $panels['transcript'] = 'Transcript';
+        }
+        foreach ($panels as $id => $label) {
+            $page_body .= '
+					<button type="button" role="tab" id="tab-' . $id . '" aria-controls="' . $id . '">' . $label . '</button>';
+        }
+        $page_body .= '
 				</div>';
 
-        $video2->fuzz = VIDEO_CLIP_FUZZ_SECONDS;
-
-        $bill_clips = [];
-        $legislator_clips = [];
-
-        $video2->clip_type = 'bills';
-        if (!$video2->get_clips()) {
-            $video2->index_clips();
-        }
-        $bill_clips = [];
-        if (isset($video2->clips)) {
-            $bill_clips = $video2->clips;
-        }
-
-        $video2->clip_type = 'legislators';
-        if (!$video2->get_clips()) {
-            $video2->index_clips();
-        }
-        $legislator_clips = [];
-        if (isset($video2->clips)) {
-            $legislator_clips = $video2->clips;
-        }
-
-        if (isset($video2->path)) {
-            $page_body .= '<p><a href="' . $video2->path . '">Download this Video</a></p>';
-        }
-
-        # Generate screenshots before checking if we should display the index
-        $video2->screenshots();
-
-        if (
-            isset($video['html']) &&
-            (count((array)$bill_clips) > 0 || count((array)$legislator_clips) > 0 || (isset($video2->screenshots) && count((array)$video2->screenshots) > 0))
-        ) {
-            // Derive thumbnail width from the video's stored dimensions.
-            // Height is fixed at 112px (set by CSS); width scales with the aspect ratio.
-            $thumb_height = 112;
-            if (!empty($video['width']) && !empty($video['height'])) {
-                $thumb_width = (int) round($thumb_height * $video['width'] / $video['height']);
-            } else {
-                $thumb_width = 150; // fallback: approximate 4:3
-            }
-            $thumb_style = "width:{$thumb_width}px; background-size:{$thumb_width}px {$thumb_height}px;";
-
-            $page_body .= '<h3>Index</h3>
-				<div id="video-index" class="tabs">
-				<ul>';
-            if (count((array)$bill_clips) > 0) {
-                $page_body .= '<li><a href="#bill">By Bill</a></li>';
-            }
-            if (count((array)$legislator_clips) > 0) {
-                $page_body .= '<li><a href="#legislator">By Legislator</a></li>';
-            }
-
-            if (isset($video2->screenshots) && count((array)$video2->screenshots) > 0) {
-                $page_body .= '<li><a href="#time">By Time</a></li>';
-            }
-
-            $page_body .= '</ul>
-
-				<div id="bill">';
-
+        if (count($bill_clips) > 0) {
+            $page_body .= '
+				<section id="video-bills" class="minutes-video-panel" role="tabpanel" aria-labelledby="tab-video-bills">
+					<h3>Bills</h3>
+					<ol class="minutes-video-scroll minutes-video-list">';
             foreach ($bill_clips as $clip) {
-                $page_body .= '<div class="marker" data-time="' . $clip->start . '" style="' . $thumb_style . ' background-image: url(' . $clip->screenshot . ')">
-					<span>' . mb_strtoupper($clip->bill_number) . '—' . seconds_to_time($clip->duration) . '</span></div>';
-            }
-            $page_body .= '</div>
-
-				<div id="legislator">';
-            foreach ($legislator_clips as $clip) {
-                $page_body .= '<div class="marker" data-time="' . $clip->start . '" style="' . $thumb_style . ' background-image: url(' . $clip->screenshot . ')">
-				<span>' . $clip->legislator_name . '—' . mb_substr(seconds_to_time($clip->duration), 3) . '</span></div>';
-            }
-            $page_body .= '</div>';
-
-            if (isset($video2->screenshots) && count((array)$video2->screenshots) > 0) {
-                $page_body .= '<div id="time">';
-                foreach ($video2->screenshots as $screenshot) {
-                    $page_body .= '<div class="marker" data-time="' . $screenshot->seconds . '" style="' . $thumb_style . ' background-image: url(' . $screenshot->filename . ')">
-					<span>' . mb_substr(seconds_to_time($screenshot->seconds), 0, 5) . '</span></div>';
+                $bill = $bills[$clip->linked_id] ?? null;
+                $start = max(0, $clip->start);
+                $page_body .= '
+						<li data-start="' . $start . '" data-end="' . $clip->end . '">
+							<button type="button" class="video-timestamp" data-seek="' . $start . '"
+								aria-label="Play from ' . Video::clock($start) . '">' . Video::clock($start) . '</button>
+							<span class="minutes-video-item">';
+                if ($bill !== null) {
+                    $page_body .= '<a class="minutes-video-bill" href="/bill/' . $bill['year'] . '/' . $bill['number'] . '/">'
+                        . mb_strtoupper(preg_replace('/^([a-z]+)/', '$1 ', $bill['number'])) . '</a> '
+                        . htmlspecialchars(html_entity_decode((string) $bill['catch_line'], ENT_QUOTES));
+                } else {
+                    $page_body .= htmlspecialchars($clip->bill_number ?? '');
                 }
-                $page_body .= '</div>';
+                $page_body .= '</span>
+							<span class="minutes-video-length" title="Length">' . Video::clock($clip->duration) . '</span>
+						</li>';
             }
-
-            $page_body .= '</div>';
+            $page_body .= '
+					</ol>
+				</section>';
         }
 
-        # Close the DIV for the video tab.
-        $page_body .= '</div>';
+        if (count($speakers) > 0) {
+            $page_body .= '
+				<section id="video-speakers" class="minutes-video-panel" role="tabpanel" aria-labelledby="tab-video-speakers">
+					<h3>Speakers</h3>
+					<ul class="minutes-video-scroll minutes-video-list">';
+            foreach ($speakers as $speaker) {
+                $page_body .= '
+						<li data-starts="' . implode(' ', $speaker['starts']) . '">
+							<a class="minutes-video-item" href="/legislator/' . htmlspecialchars($speaker['shortname']) . '/">'
+                    . htmlspecialchars($speaker['label']) . '</a>
+							<span class="minutes-video-times">';
+                foreach ($speaker['starts'] as $start) {
+                    $page_body .= '<button type="button" class="video-timestamp" data-seek="' . $start . '"
+								aria-label="Play from ' . Video::clock($start) . '">' . Video::clock($start) . '</button> ';
+                }
+                $page_body .= '</span>
+						</li>';
+            }
+            $page_body .= '
+					</ul>
+				</section>';
+        }
+
+        if (count($transcript) > 0) {
+            $page_body .= '
+				<section id="transcript" class="minutes-video-panel" role="tabpanel" aria-labelledby="tab-transcript">
+					<h3>Transcript</h3>
+					<div class="minutes-video-scroll video-transcript">'
+                . Video::transcript_html($transcript) . '
+					</div>
+					<p class="minutes-video-note">This transcript comes from the closed captions, which are
+					written in real time during the session, so it’s far from perfect.</p>
+				</section>';
+        }
+
+        $page_body .= '
+			</div>
+		</section>';
     }
 
     # Show the minutes.
     $page_body .= '
-		<div id="minutes">
+		<section id="minutes">
 			<h2>Minutes</h2>'
             . nl2p($minutes) . '
-		</div>';
-
-    # Show the transcript.
-    if (!empty($video['transcript'])) {
-        $page_body .= '
-
-			<div id="transcript">
-
-			<h2>Transcript</h2>
-			<p><em>What follows is a transcript of this day’s session that was created as
-			closed-captioning text, written in real time during the session. We have made
-			an effort to automatically clean up the text, but it is far from perfect.</em></p>';
-
-
-        $page_body .= $video['transcript'];
-
-        # Close the transcript DIV.
-        $page_body .= '</div>';
-    }
-
-    # Close the DIV for the tabbed interface.
-    $page_body .= '</div>';
+		</section>';
 }
 
 // OUTPUT THE PAGE

@@ -65,6 +65,32 @@ class Video
     }
 
     /**
+     * SQL to join the legislator identified by a column, and the term they were serving on the
+     * video's date. The query must already join `files`.
+     *
+     * Legislator IDs in video_index.linked_id (where type = "legislator") and in
+     * video_clips.legislator_id are people.id values; that's what rs-video-processor writes.
+     * Most people.id values happen to equal the person's terms.id, but not for anybody elected
+     * since 2024, so joining these columns directly to terms.id gets those people's names wrong.
+     *
+     * @param string $column The column holding a people.id
+     * @return string
+     */
+    private static function legislator_join(string $column): string
+    {
+        return '
+				LEFT JOIN people
+					ON people.id = ' . $column . '
+				LEFT JOIN terms
+					ON terms.id = (
+						SELECT t.id
+						FROM terms AS t
+						WHERE t.person_id = people.id AND t.date_started <= files.date
+						ORDER BY t.date_started DESC
+						LIMIT 1)';
+    }
+
+    /**
      * Turn a video file's title into a short, human-readable name for the meeting it records.
      *
      * Titles come from several scrapers and take forms like:
@@ -99,6 +125,51 @@ class Video
         }
 
         return $meeting;
+    }
+
+    /**
+     * Format a number of seconds as a clock reading (e.g., "1:05" or "1:02:05").
+     *
+     * @param float $seconds
+     * @return string
+     */
+    public static function clock($seconds): string
+    {
+        $seconds = max(0, (int) round($seconds));
+        if ($seconds >= 3600) {
+            return sprintf('%d:%02d:%02d', intdiv($seconds, 3600), intdiv($seconds, 60) % 60, $seconds % 60);
+        }
+        return sprintf('%d:%02d', intdiv($seconds, 60), $seconds % 60);
+    }
+
+    /**
+     * Render transcript turns (from transcript_span()) as paragraphs, one per turn, each opening
+     * with a button to play from that point. Every line is a span carrying its start time in
+     * data-seek, which the page's script uses to seek and to highlight the line being spoken.
+     *
+     * @param array $turns Turns, as returned by transcript_span()
+     * @param float $origin The time, in seconds, that the displayed timestamps count from
+     * @return string
+     */
+    public static function transcript_html(array $turns, float $origin = 0): string
+    {
+        $html = '';
+        foreach ($turns as $turn) {
+            $time = self::clock($turn['start'] - $origin);
+            $html .= '
+					<p><button type="button" class="video-timestamp" data-seek="' . $turn['start'] . '"
+						aria-label="Play from ' . $time . '">' . $time . '</button> ';
+            if (!empty($turn['speaker'])) {
+                $html .= '<a class="video-speaker" href="/legislator/'
+                    . htmlspecialchars($turn['shortname']) . '/">'
+                    . htmlspecialchars($turn['speaker']) . '</a> ';
+            }
+            foreach ($turn['lines'] as $line) {
+                $html .= '<span data-seek="' . $line['start'] . '">' . htmlspecialchars($line['text']) . '</span> ';
+            }
+            $html .= '</p>';
+        }
+        return $html;
     }
 
     /**
@@ -704,7 +775,7 @@ class Video
         if ($this->clip_type == 'bills') {
             $sql .= 'bills.number AS bill_number';
         } elseif ($this->clip_type == 'legislators') {
-            $sql .= 'terms.name_formatted AS legislator_name';
+            $sql .= 'COALESCE(terms.name_formatted, people.name_formal) AS legislator_name';
         }
         $sql .= '
 				FROM video_index
@@ -716,9 +787,7 @@ class Video
 					ON video_index.linked_id = bills.id
 				WHERE video_index.type="bill"';
         } elseif ($this->clip_type == 'legislators') {
-            $sql .= '
-				LEFT JOIN terms
-					ON video_index.linked_id = terms.id
+            $sql .= self::legislator_join('video_index.linked_id') . '
 				WHERE video_index.type="legislator"';
         }
 
@@ -938,13 +1007,12 @@ class Video
         $database->connect_mysqli();
 
         $sql = 'SELECT files.path, files.date, DATE_FORMAT(files.date, "%b %e, %Y") AS date_formatted,
-				terms.name_formatted AS legislator_name, bills.number AS bill_number,
+				COALESCE(terms.name_formatted, people.name_formal) AS legislator_name, bills.number AS bill_number,
 				video_clips.bill_id, video_clips.time_start, video_clips.time_end, video_clips.screenshot
 				FROM video_clips
 				LEFT JOIN files
-					ON video_clips.file_id = files.id
-				LEFT JOIN terms
-					ON video_clips.legislator_id = terms.id
+					ON video_clips.file_id = files.id'
+                . self::legislator_join('video_clips.legislator_id') . '
 				LEFT JOIN bills
 					ON video_clips.bill_id = bills.id
 				WHERE ';
@@ -1010,11 +1078,12 @@ class Video
         $database->connect_mysqli();
 
         if ($this->clip_type == 'legislators') {
-            $sql = 'SELECT terms.name_formatted AS legislator_name, video_clips.time_start,
+            $sql = 'SELECT COALESCE(terms.name_formatted, people.name_formal) AS legislator_name, video_clips.time_start,
 					video_clips.time_end, video_clips.screenshot
 					FROM video_clips
-					LEFT JOIN terms
-						ON video_clips.legislator_id = terms.id
+					LEFT JOIN files
+						ON video_clips.file_id = files.id'
+                    . self::legislator_join('video_clips.legislator_id') . '
 					WHERE legislator_id IS NOT NULL AND video_clips.file_id=' . $this->id;
         } elseif ($this->clip_type == 'bills') {
             $sql = 'SELECT bills.number AS bill_number, video_clips.time_start, video_clips.time_end,
@@ -1025,13 +1094,14 @@ class Video
 					WHERE bill_id IS NOT NULL AND legislator_id IS NULL
 					AND video_clips.file_id=' . $this->id;
         } else {
-            $sql = 'SELECT terms.name_formatted AS legislator_name,
+            $sql = 'SELECT COALESCE(terms.name_formatted, people.name_formal) AS legislator_name,
 					bills.number AS bill_number,
 					video_clips.bill_id, video_clips.time_start, video_clips.time_end,
 					video_clips.screenshot
 					FROM video_clips
-					LEFT JOIN terms
-						ON video_clips.legislator_id = terms.id
+					LEFT JOIN files
+						ON video_clips.file_id = files.id'
+                    . self::legislator_join('video_clips.legislator_id') . '
 					LEFT JOIN bills
 						ON video_clips.bill_id = bills.id
 					WHERE video_clips.file_id=' . $this->id;
@@ -1215,11 +1285,12 @@ class Video
         }
 
         # SELECT A LIST OF EVERY SPEAKER AND BILL, BY TIME
-        $sql = 'SELECT terms.name_formatted AS legislator, bills.number AS bill,
+        $sql = 'SELECT COALESCE(terms.name_formatted, people.name_formal) AS legislator, bills.number AS bill,
 				video_clips.time_start, video_clips.time_end
 				FROM video_clips
-				LEFT JOIN terms
-					ON video_clips.legislator_id = terms.id
+				LEFT JOIN files
+					ON video_clips.file_id = files.id'
+                . self::legislator_join('video_clips.legislator_id') . '
 				LEFT JOIN bills
 					ON video_clips.bill_id = bills.id
 				WHERE video_clips.file_id = ' . $this->id . '

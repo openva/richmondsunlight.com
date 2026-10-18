@@ -1158,15 +1158,6 @@ if (isset($bill['places']) && (count($bill['places']) > 0)) {
 }
 
 if (($bill['video'] !== false) && (count($bill['video']) > 0)) {
-    // Format a number of seconds as a clock reading (e.g., "1:05" or "1:02:05").
-    $clock = function ($seconds) {
-        $seconds = max(0, (int) round($seconds));
-        if ($seconds >= 3600) {
-            return sprintf('%d:%02d:%02d', intdiv($seconds, 3600), intdiv($seconds, 60) % 60, $seconds % 60);
-        }
-        return sprintf('%d:%02d', intdiv($seconds, 60), $seconds % 60);
-    };
-
     // Get the title of each video file, to say where each clip was recorded.
     $file_ids = array_unique(array_map(fn($clip) => (int) $clip->file_id, $bill['video']));
     $file_titles = [];
@@ -1252,35 +1243,20 @@ if (($bill['video'] !== false) && (count($bill['video']) > 0)) {
 						<span class="bill-video-meeting">' . htmlspecialchars($clip['meeting']) . '</span>
 						<span class="bill-video-meta"><time datetime="' . htmlspecialchars($clip['date']) . '">'
                             . date('F j, Y', strtotime($clip['date'])) . '</time>
-							· ' . $clock($clip['duration']) . '</span>
+							· ' . Video::clock($clip['duration']) . '</span>
 					</button>
 				</h3>
-				<div class="bill-video-transcript" id="' . $id . '-transcript">';
+				<div class="bill-video-transcript video-transcript" id="' . $id . '-transcript">';
 
         if (count($clip['transcript']) === 0) {
             $page_body .= '
-					<p class="bill-video-empty">There’s no transcript of this clip.</p>';
+					<p class="video-transcript-empty">There’s no transcript of this clip.</p>';
         } else {
-            foreach ($clip['transcript'] as $turn) {
-                $page_body .= '
-					<p><button type="button" class="bill-video-timestamp" data-seek="' . $turn['start'] . '"
-						aria-label="Play from ' . $clock($turn['start'] - $clip['start']) . '">'
-                        . $clock($turn['start'] - $clip['start']) . '</button> ';
-                if (!empty($turn['speaker'])) {
-                    $page_body .= '<a class="bill-video-speaker" href="/legislator/'
-                        . htmlspecialchars($turn['shortname']) . '/">'
-                        . htmlspecialchars($turn['speaker']) . '</a> ';
-                }
-                foreach ($turn['lines'] as $line) {
-                    $page_body .= '<span data-seek="' . $line['start'] . '" data-end="' . $line['end'] . '">'
-                        . htmlspecialchars($line['text']) . '</span> ';
-                }
-                $page_body .= '</p>';
-            }
+            $page_body .= Video::transcript_html($clip['transcript'], $clip['start']);
         }
 
         $page_body .= '
-					<p class="bill-video-source"><a href="' . htmlspecialchars($clip['path']) . '#t='
+					<p class="video-transcript-source"><a href="' . htmlspecialchars($clip['path']) . '#t='
                         . $clip['start'] . '">Watch the full recording of this meeting</a>
 					(Internet Archive)</p>
 				</div>

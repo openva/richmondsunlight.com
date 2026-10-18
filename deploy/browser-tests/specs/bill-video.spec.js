@@ -31,7 +31,7 @@ test.describe('Bill video', () => {
     await expect(first).toBeVisible();
     await expect(second).toBeHidden();
     await expect(first).toContainText('cell phone usage policy');
-    await expect(first.locator('a.bill-video-speaker').first()).toHaveAttribute(
+    await expect(first.locator('a.video-speaker').first()).toHaveAttribute(
       'href',
       '/legislator/sgpekarsky/'
     );

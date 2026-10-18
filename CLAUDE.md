@@ -12,7 +12,12 @@ There are three overlapping tables for legislators. Use the right one:
 | `terms` | Current | Per-term data — `chamber`, `party`, `district_id`, `name_formatted`, `lis_id`. FK to `people.id` via `terms.person_id` |
 | `representatives` | **Legacy** | Older queries only. Do not use for new code. |
 
-New code should JOIN `people` + `terms`. `video_index.linked_id` references `terms.id` when `type = 'legislator'`.
+New code should JOIN `people` + `terms`.
+
+Legislator IDs in video data are mixed:
+
+- `video_index.linked_id` (where `type = 'legislator'`) and `video_clips.legislator_id` are **`people.id`** values, as rs-video-processor writes them. Get the name from the term the person was serving on the video's date (see `Video::legislator_join()`). Most `people.id` values equal the person's `terms.id`, but not for anybody elected since 2024, so joining these straight to `terms.id` shows the wrong person.
+- `video_transcript.legislator_id` is a `terms.id` (written by `Video::identify_speakers()`).
 
 ## Bill Number Case Sensitivity
 
