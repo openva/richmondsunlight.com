@@ -79,6 +79,11 @@ $pages =
         'string' => 'Placed on Finance Agenda',
     ],
     [
+        'url' => '/bill/2025/sb738/',
+        'http_status' => '200',
+        'string' => 'cell phone usage policy',
+    ],
+    [
         'url' => '/bill/2025/sb738/s04v533/',
         'http_status' => '200',
         'string' => 'vote passed 9-6',

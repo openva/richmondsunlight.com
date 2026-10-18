@@ -830,3 +830,250 @@ meter {
 	padding: .5em;
 	margin: .5em;
 }
+
+/* Bill video: player, clip list, and transcripts (see /js/bill-video.js) */
+#video.bill-video {
+	margin-bottom: 2em;
+}
+	.bill-video-player {
+		background-color: #243a51;
+		border-radius: 4px;
+		overflow: hidden;
+		margin: 1em 0;
+	}
+	.bill-video-player video {
+		display: block;
+		width: 100%;
+		aspect-ratio: 16 / 9;
+		background-color: #000;
+	}
+	.bill-video-player:fullscreen {
+		display: flex;
+		flex-direction: column;
+		border-radius: 0;
+	}
+		.bill-video-player:fullscreen video {
+			flex: 1;
+			min-height: 0;
+			aspect-ratio: auto;
+		}
+	.bill-video.is-enhanced .bill-video-player video {
+		cursor: pointer;
+	}
+	.bill-video-controls {
+		color: #fff;
+		padding: .4em .75em .6em;
+	}
+		.bill-video-transport,
+		.bill-video-nav {
+			display: flex;
+			align-items: center;
+			gap: .6em;
+		}
+		.bill-video-nav {
+			margin-top: .4em;
+			padding-top: .4em;
+			border-top: 1px solid rgba(255, 255, 255, .15);
+		}
+		.bill-video-controls button {
+			flex: none;
+			font: inherit;
+			color: #fff;
+			background: transparent;
+			border: 1px solid transparent;
+			border-radius: 3px;
+			padding: .3em .5em;
+			cursor: pointer;
+			line-height: 1;
+		}
+		.bill-video-controls button:hover:not(:disabled),
+		.bill-video-controls button:focus-visible {
+			border-color: #c6a952;
+		}
+		.bill-video-controls button:disabled {
+			opacity: .35;
+			cursor: default;
+		}
+		.bill-video-controls svg {
+			display: block;
+			width: 1.5em;
+			height: 1.5em;
+			fill: currentColor;
+		}
+		.bill-video-player .icon-pause,
+		.bill-video-player.is-playing .icon-play,
+		.bill-video-player .icon-muted,
+		.bill-video-player.is-muted .icon-waves {
+			display: none;
+		}
+		.bill-video-player.is-playing .icon-pause,
+		.bill-video-player.is-muted .icon-muted {
+			display: block;
+		}
+		.bill-video-scrubber {
+			flex: 1;
+			min-width: 4em;
+			margin: 0;
+			accent-color: #c6a952;
+			cursor: pointer;
+		}
+		.bill-video-time {
+			flex: none;
+			font-size: .9em;
+			color: #dccbaf;
+			font-variant-numeric: tabular-nums;
+		}
+		.bill-video-nav button {
+			border-color: rgba(198, 169, 82, .6);
+			padding: .35em .7em;
+		}
+		.bill-video-now {
+			flex: 1;
+			min-width: 0;
+			margin: 0;
+			font-weight: bold;
+			text-align: center;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
+		}
+	.bill-video-notice:not([hidden]) {
+		margin: 0;
+		padding: .5em .75em;
+		background-color: #f4eee5;
+		border-top: 2px solid #c6a952;
+	}
+		.bill-video-notice button {
+			font: inherit;
+			margin-left: .25em;
+			cursor: pointer;
+		}
+
+	ol.bill-video-clips {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+	.bill-video-clip {
+		border: 1px solid #dccbaf;
+		border-left: 4px solid #dccbaf;
+		border-radius: 3px;
+		margin-bottom: .5em;
+	}
+	.bill-video-clip.is-active {
+		border-left-color: #790806;
+	}
+		.bill-video-clip h3 {
+			margin: 0;
+			padding: 0;
+			font-size: 1em;
+		}
+		.bill-video-select {
+			display: flex;
+			flex-wrap: wrap;
+			align-items: baseline;
+			gap: .25em .75em;
+			width: 100%;
+			padding: .6em .75em;
+			text-align: left;
+			font: inherit;
+			color: #333;
+			background-color: transparent;
+			border: 0;
+			cursor: pointer;
+		}
+		.bill-video-select:hover,
+		.bill-video-clip.is-active .bill-video-select {
+			background-color: #f4eee5;
+		}
+		.bill-video-number {
+			font-size: .85em;
+			font-weight: bold;
+			text-transform: uppercase;
+			letter-spacing: .05em;
+			color: #790806;
+		}
+		.bill-video-meeting {
+			font: 1.15em Georgia, Times, serif;
+		}
+		.bill-video-meta {
+			margin-left: auto;
+			color: #666;
+			font-variant-numeric: tabular-nums;
+		}
+
+		.bill-video-transcript {
+			position: relative;
+			padding: .25em .75em .5em;
+			font-family: Georgia, Times, serif;
+			line-height: 1.6;
+		}
+		.bill-video.is-enhanced .bill-video-clip:not(.is-active) .bill-video-transcript {
+			display: none;
+		}
+		.bill-video.is-enhanced .bill-video-clip.is-active .bill-video-transcript {
+			max-height: 18em;
+			overflow-y: auto;
+			border-top: 1px solid #dccbaf;
+		}
+			.bill-video-transcript p {
+				margin: 0 0 .5em;
+				padding: 0;
+			}
+			.bill-video-transcript p:first-child {
+				margin-top: .5em;
+			}
+			.bill-video-transcript p.bill-video-source {
+				margin: .75em 0 .25em;
+				font: .9em Verdana, Arial, sans-serif;
+			}
+			.bill-video-timestamp {
+				font: .8em Verdana, Arial, sans-serif;
+				font-variant-numeric: tabular-nums;
+				color: #243a51;
+				background-color: #f4eee5;
+				border: 1px solid #dccbaf;
+				border-radius: 3px;
+				padding: 0 .35em;
+				margin-right: .25em;
+				cursor: pointer;
+				vertical-align: .1em;
+			}
+			.bill-video-timestamp:hover {
+				border-color: #c6a952;
+			}
+			.bill-video-speaker {
+				font-weight: bold;
+			}
+			.bill-video-speaker::after {
+				content: ":";
+			}
+			.bill-video.is-enhanced .bill-video-transcript span[data-seek] {
+				cursor: pointer;
+				border-radius: 2px;
+			}
+			.bill-video.is-enhanced .bill-video-transcript span[data-seek]:hover {
+				text-decoration: underline dotted #c6a952;
+			}
+			.bill-video-transcript span.is-current {
+				background-color: #f6e6b4;
+				box-shadow: 0 0 0 2px #f6e6b4;
+			}
+			.bill-video-empty {
+				font-style: italic;
+				color: #666;
+			}
+	.bill-video-disclaimer {
+		font-size: .9em;
+		color: #666;
+	}
+
+@media (max-width: 600px) {
+	.bill-video-controls button span {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+	}
+}

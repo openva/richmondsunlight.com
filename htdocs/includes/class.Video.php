@@ -65,6 +65,109 @@ class Video
     }
 
     /**
+     * Turn a video file's title into a short, human-readable name for the meeting it records.
+     *
+     * Titles come from several scrapers and take forms like:
+     * - "House Session" / "Senate April 2, 2025 - Session - 12:00 m." -> "Senate floor session"
+     * - "Senate January 22, 2025 - Courts of Justice - SR A (305) - ..." -> "Senate Courts of Justice"
+     * - "Senate Senate of Virginia: Rehabilitation Committee on 2025-09-16 [Finished]"
+     *       -> "Senate Rehabilitation Committee"
+     * - "House Criminal Subcommittee" -> (unchanged)
+     *
+     * @param string|null $title The files.title value
+     * @param string|null $chamber The files.chamber value ("house" or "senate")
+     * @return string
+     */
+    public static function meeting_label(?string $title, ?string $chamber): string
+    {
+        $chamber_name = ucfirst((string) $chamber);
+        $meeting = trim((string) $title);
+
+        if (preg_match('/^(?:House|Senate)\s+Senate of Virginia:\s*(.+?)(?:\s+on\s+\d{4}-\d{2}-\d{2}.*)?$/', $meeting, $matches)) {
+            $meeting = $matches[1];
+        } elseif (preg_match('/^(?:House|Senate)\s+[A-Z][a-z]+\s+\d{1,2},\s+\d{4}\s+-\s+(.+)$/', $meeting, $matches)) {
+            $parts = explode(' - ', $matches[1]);
+            $meeting = trim($parts[0]);
+        }
+
+        if ($meeting === '' || preg_match('/^(?:(?:House|Senate)\s+)?(?:Regular\s+)?Session\b/i', $meeting)) {
+            return trim($chamber_name . ' floor session');
+        }
+
+        if ($chamber_name !== '' && mb_stripos($meeting, $chamber_name) !== 0) {
+            $meeting = $chamber_name . ' ' . $meeting;
+        }
+
+        return $meeting;
+    }
+
+    /**
+     * Get the transcript of a span of a video file, grouped into speaker turns.
+     *
+     * A new turn begins whenever the speaker changes, the captions mark a new speaker, or a turn
+     * runs past a minute (so that long stretches of unidentified speech stay readable).
+     *
+     * @param int $file_id The files.id of the video
+     * @param float $start Start of the span, in seconds
+     * @param float $end End of the span, in seconds
+     * @return array A list of turns, each with start, speaker, shortname, and lines (each with
+     *               start, end, and text)
+     */
+    public static function transcript_span(int $file_id, float $start, float $end): array
+    {
+        $sql = 'SELECT video_transcript.text, video_transcript.time_start,
+                    video_transcript.time_end, video_transcript.new_speaker,
+                    video_transcript.legislator_id, terms.name_formatted, people.shortname
+                FROM video_transcript
+                LEFT JOIN terms
+                    ON video_transcript.legislator_id = terms.id
+                LEFT JOIN people
+                    ON terms.person_id = people.id
+                WHERE video_transcript.file_id = ' . $file_id . '
+                    AND video_transcript.time_start < "' . seconds_to_time((int) ceil($end)) . '"
+                    AND video_transcript.time_end > "' . seconds_to_time((int) floor($start)) . '"
+                ORDER BY video_transcript.time_start ASC';
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        if ($result === false) {
+            return [];
+        }
+
+        $turns = [];
+        $turn = null;
+        while ($line = mysqli_fetch_assoc($result)) {
+            $line_start = time_to_seconds($line['time_start']);
+            $speaker_id = $line['legislator_id'];
+            if (
+                $turn === null
+                || $line['new_speaker'] === 'y'
+                || $speaker_id !== $turn['speaker_id']
+                || ($line_start - $turn['start']) > 60
+            ) {
+                if ($turn !== null) {
+                    $turns[] = $turn;
+                }
+                $turn = [
+                    'start' => $line_start,
+                    'speaker_id' => $speaker_id,
+                    'speaker' => $line['name_formatted'],
+                    'shortname' => $line['shortname'],
+                    'lines' => [],
+                ];
+            }
+            $turn['lines'][] = [
+                'start' => $line_start,
+                'end' => time_to_seconds($line['time_end']),
+                'text' => $line['text'],
+            ];
+        }
+        if ($turn !== null) {
+            $turns[] = $turn;
+        }
+
+        return $turns;
+    }
+
+    /**
      * Retrieve a single video.
      *
      * @return bool Returns false if no ID is set, true otherwise

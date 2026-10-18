@@ -1158,142 +1158,140 @@ if (isset($bill['places']) && (count($bill['places']) > 0)) {
 }
 
 if (($bill['video'] !== false) && (count($bill['video']) > 0)) {
-    /*
-     * Generate a text transcript of these clips in a single query.
-     */
-    $transcript = array();
-    $conditions = [];
-    foreach ($bill['video'] as $video) {
-        $conditions[] = '(video_transcript.file_id=' . (int)$video->file_id
-            . ' AND time_start >= "' . seconds_to_time($video->start) . '"'
-            . ' AND time_end <= "' . seconds_to_time($video->end) . '")';
-    }
-    if (count($conditions) > 0) {
-        $sql = 'SELECT video_transcript.file_id, representatives.name_formatted AS speaker,
-                    video_transcript.text
-                FROM video_transcript
-                LEFT JOIN representatives
-                    ON video_transcript.legislator_id = representatives.id
-                WHERE ' . implode(' OR ', $conditions) . '
-                ORDER BY video_transcript.file_id ASC, video_transcript.time_start ASC';
-        $result = mysqli_query($GLOBALS['db'], $sql);
-        if ($result && mysqli_num_rows($result) > 0) {
-            while ($line = mysqli_fetch_assoc($result)) {
-                $fid = $line['file_id'];
-                if (!isset($transcript[$fid])) {
-                    $transcript[$fid] = array();
-                }
-                $transcript[$fid][] = $line;
-            }
+    // Format a number of seconds as a clock reading (e.g., "1:05" or "1:02:05").
+    $clock = function ($seconds) {
+        $seconds = max(0, (int) round($seconds));
+        if ($seconds >= 3600) {
+            return sprintf('%d:%02d:%02d', intdiv($seconds, 3600), intdiv($seconds, 60) % 60, $seconds % 60);
+        }
+        return sprintf('%d:%02d', intdiv($seconds, 60), $seconds % 60);
+    };
+
+    // Get the title of each video file, to say where each clip was recorded.
+    $file_ids = array_unique(array_map(fn($clip) => (int) $clip->file_id, $bill['video']));
+    $file_titles = [];
+    $result = mysqli_query($GLOBALS['db'], 'SELECT id, title FROM files
+        WHERE id IN (' . implode(',', $file_ids) . ')');
+    if ($result) {
+        while ($file = mysqli_fetch_assoc($result)) {
+            $file_titles[$file['id']] = $file['title'];
         }
     }
 
-    // Determine the cumulative duration of these clips.
+    $clips = [];
     $duration = 0;
     foreach ($bill['video'] as $clip) {
         $clip = (array) $clip;
-        $duration = $duration + $clip['duration'];
+        $clip['meeting'] = Video::meeting_label($file_titles[$clip['file_id']] ?? null, $clip['chamber']);
+        $clip['transcript'] = Video::transcript_span((int) $clip['file_id'], $clip['start'], $clip['end']);
+        $clips[] = $clip;
+        $duration += $clip['duration'];
     }
-    $duration = str_replace(' ago', '', seconds_to_units($duration));
+    $clip_count = count($clips);
 
-    /*
-     * Add the Flowplayer code.
-     */
     $html_head .= '
-		<script src="/js/flowplayer-6.0.5/flowplayer.min.js"></script>
-		<link rel="stylesheet" href="/js/flowplayer-6.0.5/skin/minimalist.css">';
+		<script src="/js/bill-video.js" defer></script>';
 
-    // Start a new DIV for this legislator's highlights reel.
+    $first = $clips[0];
     $page_body .= '
-	<div id="video">
-		<h2>Video</h2>
+	<section id="video" class="bill-video" aria-labelledby="video-heading">
+		<h2 id="video-heading">Video</h2>
+		<p>This bill was discussed in ' . ($clip_count === 1 ? 'one video clip' : $clip_count . ' video clips')
+        . ', ' . str_replace(' ago', '', seconds_to_units($duration)) . ' in all.'
+        . ($clip_count > 1 ? ' Choose a clip to watch it and follow along with its transcript.' : '')
+        . '</p>
 
-		<p>This bill was discussed on the floor of the General Assembly. Below is all of the
-		video that we have of that discussion, ' . count($bill['video']) . ' clip'
-        . ((count($bill['video']) > 1) ? 's' : '') . ' in all, totaling ' . $duration . '.</p>
-
-		<div class="flowplayer" id="player">
-			<a class="fp-prev">←</a>
-			<a class="fp-next">→</a>
+		<div class="bill-video-player">
+			<video controls preload="metadata" playsinline
+				poster="' . htmlspecialchars($first['screenshot']) . '">
+				<source src="' . htmlspecialchars($first['path']) . '#t=' . $first['start'] . ',' . $first['end'] . '"
+					type="video/mp4">
+				<p>Your browser can’t play this video.
+				<a href="' . htmlspecialchars($first['path']) . '">Download it from the Internet Archive.</a></p>
+			</video>
+			<div class="bill-video-controls" hidden>
+				<div class="bill-video-transport">
+					<button type="button" class="bill-video-play" aria-label="Play">
+						<svg class="icon-play" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4.5v15l12.5-7.5z"/></svg>
+						<svg class="icon-pause" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 4.5h4v15H6zM14 4.5h4v15h-4z"/></svg>
+					</button>
+					<input type="range" class="bill-video-scrubber" min="0" step="1" value="0"
+						aria-label="Position in this clip">
+					<span class="bill-video-time"></span>
+					<button type="button" class="bill-video-mute" aria-label="Mute" aria-pressed="false">
+						<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4.5v-15L8 9z"/><path class="icon-waves" d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path class="icon-muted" d="M16.5 9.5l5 5M21.5 9.5l-5 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+					</button>
+					<button type="button" class="bill-video-fullscreen" aria-label="Full screen">
+						<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+					</button>
+				</div>
+				<div class="bill-video-nav">
+					<button type="button" class="bill-video-prev">‹ <span>Previous clip</span></button>
+					<p class="bill-video-now" aria-live="polite"></p>
+					<button type="button" class="bill-video-next"><span>Next clip</span> ›</button>
+				</div>
+			</div>
+			<p class="bill-video-notice" hidden></p>
 		</div>
-		<div id="playlist">
-		</div>
 
-		<script>
-			/* Create the playlist. */
-			var allVideos = [';
-    foreach ($bill['video'] as $num => $clip) {
-        $clip = (array) $clip;
+		<ol class="bill-video-clips">';
+
+    foreach ($clips as $i => $clip) {
+        $number = $i + 1;
+        $id = 'video-clip-' . $number;
         $page_body .= '
-			{
-				sources: [{
-					type: "video/mp4",
-					src: "' . $clip['path'] . '",
-					date: "' . $clip['date'] . '",
-					start: ' . $clip['start'] . ',
-					duration: ' . $clip['duration'] . ',
-					cuepoints: [' . ($clip['start'] + $clip['duration']) . ' ]
-				}]
-			},';
-    }
-    $page_body .= "];
+			<li class="bill-video-clip' . ($i === 0 ? ' is-active' : '') . '" id="' . $id . '"
+				data-src="' . htmlspecialchars($clip['path']) . '"
+				data-start="' . $clip['start'] . '" data-end="' . $clip['end'] . '"
+				data-poster="' . htmlspecialchars($clip['screenshot']) . '"
+				data-label="' . htmlspecialchars($clip['meeting'] . ', ' . date('F j, Y', strtotime($clip['date']))) . '">
+				<h3>
+					<button type="button" class="bill-video-select" aria-controls="' . $id . '-transcript"
+						aria-expanded="' . ($i === 0 ? 'true' : 'false') . '">
+						' . ($clip_count > 1 ? '<span class="bill-video-number">Clip ' . $number . '</span>' : '') . '
+						<span class="bill-video-meeting">' . htmlspecialchars($clip['meeting']) . '</span>
+						<span class="bill-video-meta"><time datetime="' . htmlspecialchars($clip['date']) . '">'
+                            . date('F j, Y', strtotime($clip['date'])) . '</time>
+							· ' . $clock($clip['duration']) . '</span>
+					</button>
+				</h3>
+				<div class="bill-video-transcript" id="' . $id . '-transcript">';
 
-			flowplayer(function (api, root) {
-					api.on('ready', function() {
-						firstplayer.seek(api.video.start);
-					});
-				});
-
-			/* Load the playlist into Flowplayer. */
-			flowplayer('#player', {
-				playlist: allVideos
-			});
-
-			/* When we hit the cuepoint, advance to the next video. */
-			var firstplayer = flowplayer('#player');
-			firstplayer.on('cuepoint', function(e, api, cuepoint) {
-				if (firstplayer.video.is_last == false) {
-					firstplayer.next();
-				}
-				else {
-					firstplayer.pause();
-				}
-			});
-
-			/* Create the playlist. */
-			/*var playlistHTML = '';
-			$.each(allVideos, function(i,data) {
-				playlistHTML += '<li><a href=javascript:play(' + i + ')>' + data['sources'][0]['date'] + ' ' + data['sources'][0]['duration'] + ' seconds</a></li>';
-			});
-			$('#playlist').html(playlistHTML);*/
-
-		</script>";
-
-    if (count($transcript) > 0) {
-        $page_body .= '<h3>Transcript</h3>
-			<div style="height: 15em; overflow: scroll;">
-			<p>This is a transcript of the video clips in which this bill is discussed.</p>';
-        $prior_speaker = '';
-
-        foreach ($transcript as $file) {
-            foreach ($file as $line) {
-                if ($prior_speaker != $line['speaker']) {
-                    $page_body .=  '<br><br>';
-                    if (!empty($line['speaker'])) {
-                        $page_body .=  '<strong>' . $line['speaker'] . ':</strong> ';
-                    } else {
-                        $page_body .=  '<strong>[Unknown]:</strong> ';
-                    }
-                    $prior_speaker = $line['speaker'];
+        if (count($clip['transcript']) === 0) {
+            $page_body .= '
+					<p class="bill-video-empty">There’s no transcript of this clip.</p>';
+        } else {
+            foreach ($clip['transcript'] as $turn) {
+                $page_body .= '
+					<p><button type="button" class="bill-video-timestamp" data-seek="' . $turn['start'] . '"
+						aria-label="Play from ' . $clock($turn['start'] - $clip['start']) . '">'
+                        . $clock($turn['start'] - $clip['start']) . '</button> ';
+                if (!empty($turn['speaker'])) {
+                    $page_body .= '<a class="bill-video-speaker" href="/legislator/'
+                        . htmlspecialchars($turn['shortname']) . '/">'
+                        . htmlspecialchars($turn['speaker']) . '</a> ';
                 }
-                $page_body .=  $line['text'] . ' ';
+                foreach ($turn['lines'] as $line) {
+                    $page_body .= '<span data-seek="' . $line['start'] . '" data-end="' . $line['end'] . '">'
+                        . htmlspecialchars($line['text']) . '</span> ';
+                }
+                $page_body .= '</p>';
             }
-            $page_body .= '<hr>';
         }
-        $page_body .= '</div>';
+
+        $page_body .= '
+					<p class="bill-video-source"><a href="' . htmlspecialchars($clip['path']) . '#t='
+                        . $clip['start'] . '">Watch the full recording of this meeting</a>
+					(Internet Archive)</p>
+				</div>
+			</li>';
     }
 
-    $page_body .= '</div>';
+    $page_body .= '
+		</ol>
+		<p class="bill-video-disclaimer">Transcripts are generated automatically from closed captions,
+		and may contain errors.</p>
+	</section>';
 }
 
 
