@@ -293,12 +293,22 @@ $page_sidebar .= '<div class="box">
 		please <a href="/contact/">correct it</a>.
 	</div>';
 
+// Get any posts from the legislator's website. Plenty of legislators' websites have a feed that's
+// empty, or that doesn't work, so we only show these if there are any.
+$website_posts = [];
+if (!empty($legislator['rss_url']) && empty($legislator['date_ended'])) {
+    $website_feed = new SimplePie();
+    $website_feed->set_feed_url($legislator['rss_url']);
+    $website_feed->init();
+    $website_posts = $website_feed->get_items();
+}
+
 // PAGE CONTENT
 $page_body = '<div class="tabs">
     <ul class="tabs">
 	<li><a href="#bio">Bio</a></li>';
 $page_body .= '<li><a href="#media">Media</a></li>';
-if (!empty($legislator['rss_url']) && empty($legislator['date_ended'])) {
+if (count($website_posts) > 0) {
     $page_body .= '<li><a href="#news">News</a></li>';
 }
 if (count($video_clips) > 0) {
@@ -765,19 +775,14 @@ $page_body .= '<tr><td><div style="float: right;">
 $page_body .= '</tbody></table></div>';
 
 // News from the legislator's website.
-if (!empty($legislator['rss_url']) && empty($legislator['date_ended'])) {
-    $newsfeed->set_feed_url($legislator['rss_url']);
-    $newsfeed->init();
-    $newsfeed->handle_content_type();
-
+if (count($website_posts) > 0) {
     // Start a new DIV for legislator's blogs, etc.
     $page_body .= '<div id="news">
 		<table style="width: 100%">
             <tbody>
             <caption>From the Legislator’s Website</caption>';
 
-    $rss_count = 0;
-    foreach ($newsfeed->get_items() as $item) {
+    foreach ($website_posts as $item) {
         $page_body .= '<tr><td>
             <h3><a href="' . $item->get_permalink() . '">' . $item->get_title() . '</a></h3>' .
             '<p>';
