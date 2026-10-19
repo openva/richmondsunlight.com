@@ -41,6 +41,7 @@ $page_title = ucfirst($chamber) . ' ' . $committee->name . ' Committee';
 $site_section = 'committees';
 
 # PAGE SIDEBAR
+$page_sidebar = '';
 if (!empty($committee->url)) {
     $page_sidebar .= '
 		<div class="box">
@@ -82,7 +83,7 @@ if (mysqli_num_rows($result) == 1) {
     $committee->meeting->time = $committee->meeting_time;
 }
 
-$page_sidebar = '
+$page_sidebar .= '
 		<div class="box">
 			<h3>Meeting Schedule</h3>
 			<p>The ' . $committee->name . ' committee meets when the ' . $committee->chamber . ' is '

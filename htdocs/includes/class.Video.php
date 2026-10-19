@@ -408,11 +408,19 @@ class Video
      */
     public static function transcript_vtt(array $turns): string
     {
+        // Leave out blank lines, which would end their cues early, and name each turn's speaker on
+        // its first line.
         $lines = [];
         foreach ($turns as $turn) {
-            foreach ($turn['lines'] as $i => $line) {
-                if ($i === 0 && !empty($turn['speaker'])) {
+            $named = empty($turn['speaker']);
+            foreach ($turn['lines'] as $line) {
+                $line['text'] = trim(preg_replace('/\s+/', ' ', $line['text']));
+                if ($line['text'] === '') {
+                    continue;
+                }
+                if (!$named) {
                     $line['text'] = $turn['speaker'] . ': ' . $line['text'];
+                    $named = true;
                 }
                 $lines[] = $line;
             }
@@ -430,7 +438,7 @@ class Video
                 $end = $line['start'] + 1;
             }
             $vtt .= "\n" . $timestamp($line['start']) . ' --> ' . $timestamp($end) . " line:5%\n"
-                . str_replace(['&', '<', '>'], ['&amp;', '&lt;', '&gt;'], trim(preg_replace('/\s+/', ' ', $line['text'])))
+                . str_replace(['&', '<', '>'], ['&amp;', '&lt;', '&gt;'], $line['text'])
                 . "\n";
         }
 

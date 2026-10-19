@@ -80,6 +80,13 @@ rs_define('MEMCACHED_PORT', '11211');
 ini_set('session.save_handler', 'memcached');
 ini_set('session.save_path', MEMCACHED_SERVER . ':' . MEMCACHED_PORT);
 
+# Log PHP errors to a file in the repository's (ignored) logs/ directory, instead of to Apache's
+# error log, so that tests can find any warnings that pages raise.
+rs_define('PHP_ERROR_LOG', dirname(__DIR__, 2) . '/logs/php-errors.log');
+if (is_writable(dirname(PHP_ERROR_LOG))) {
+    ini_set('error_log', PHP_ERROR_LOG);
+}
+
 # The House Speaker's IDs. This is used in update_vote.php to translate votes credited to
 # "H0000," which bizarrely indicates the speaker, to that legislator's ID, and in
 # Video::identify_speakers to match the speaker to her identity. Here, H322 and 455 indicate

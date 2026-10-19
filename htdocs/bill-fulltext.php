@@ -108,6 +108,7 @@ if ($result == false) {
     die('Bill text not found.');
 }
 
+$versions = [];
 while ($version = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
     $version = array_map('stripslashes', $version);
 
@@ -195,6 +196,13 @@ while ($version = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
 
     # Save all of this to an array.
     $versions[] = $version;
+}
+
+# There's nothing to show if we don't have the text of any version of this bill.
+if (count($versions) === 0) {
+    http_response_code(404);
+    include '404.php';
+    exit();
 }
 
 # PAGE METADATA

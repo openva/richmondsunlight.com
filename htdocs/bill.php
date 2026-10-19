@@ -898,11 +898,7 @@ if ($bill['word_count'] > 0) {
  * Show an anti-disinformation warning on vaccine bills.
  */
 if (
-        in_array('vaccine', array_values((array)$bill['tags']))
-        ||
-        in_array('vaccines', array_values((array)$bill['tags']))
-        ||
-        in_array('COVID', array_values((array)$bill['tags']))
+        array_intersect(['vaccine', 'vaccines', 'COVID'], array_values((array)($bill['tags'] ?? [])))
         ||
         stripos($bill['summary'], ' vaccin') !== false
         ||

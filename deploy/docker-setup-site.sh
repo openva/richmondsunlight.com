@@ -52,6 +52,10 @@ cd htdocs/js/vendor; yarn build; cd ../../..
 # Move over the settings file.
 cp deploy/settings-docker.inc.php htdocs/includes/settings.inc.php
 
+# Create a directory for the PHP error log (see settings-docker.inc.php), writable by Apache.
+mkdir -p logs
+chmod 777 logs
+
 # Create a test admin password for the HTTP-Basic-protected /admin/ directory.
 # The .htaccess hardcodes the path as /var/www/richmondsunlight.com/htdocs/admin/.users;
 # create the file there so Apache can validate credentials. Password is "password123".

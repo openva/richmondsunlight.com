@@ -22,7 +22,17 @@ The site can be run locally, in Docker:
 1. Run `./docker-run.sh`.
 1. In your browser, open `http://localhost:8000`.
 
-Tests can be run with `./docker-tests.sh`. There are additional tests meant to be run locally, meant to build atop additional MariaDB data that isn't stored in GitHub (you've got to export it with `deploy/database_export.sh` from data harvested by Machine), which are invoked with `./docker-tests.sh --local`.
+Tests can be run with `./docker-tests.sh`.
+
+### Local tests
+
+There are additional tests, in `tests/local/`, that run against a larger sample of the database than is stored in GitHub. They load every bill, legislator, committee, and minutes page in the sample, failing on any page that doesn't load or that raises a PHP warning, and check every legislator's video clips, every video's captions, and every bill's fiscal impact statements.
+
+1. Export the sample from the production database with `deploy/database_export.sh` (on the server, where its placeholders are filled in), which writes `deploy/mysql/local-test-records.sql`. It's a few hundred bills from the two most recent sessions, chosen to cover every type and status of bill, plus a dozen videos, so it's a few dozen megabytes. Copy it into `deploy/mysql/` here (it's ignored by Git).
+1. [Rebuild the database](#rebuilding-the-database), which loads it.
+1. Run `./docker-tests.sh --local`, or just the local tests, with `docker compose exec web /var/www/htdocs/includes/vendor/bin/phpunit --configuration /var/www/phpunit.xml --testsuite local`.
+
+Without the sample, the local tests are skipped, except for those in `LocalDataTest`, which fail to say that it's missing. In Docker, PHP logs errors to `logs/php-errors.log`, rather than to Apache's log, which is how the tests find them.
 
 When you are done, run `./docker-stop.sh` (or quit Docker).
 
