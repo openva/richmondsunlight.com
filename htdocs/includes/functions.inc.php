@@ -548,6 +548,57 @@ function district_to_id($number, $chamber)
     return false;
 }
 
+/**
+ * Reduce HTML or text to plain text of no more than a given number of sentences, ending with an
+ * ellipsis if it's been shortened. Tags become spaces (so that paragraphs don't run together),
+ * and entities are decoded, so escape the result before displaying it.
+ *
+ * A sentence ends with ".", "!", or "?" (and any closing quotes or brackets), followed by a space
+ * and then anything but a lowercase letter -- except after common abbreviations (e.g., "Del.",
+ * "Sen.", "Va."), initials, and words with periods inside them (e.g., "U.S.", "p.m."). When in
+ * doubt, it errs toward keeping text together.
+ *
+ * @param string $html
+ * @param int $count The most sentences to keep
+ * @return string
+ */
+function first_sentences($html, $count = 4)
+{
+    $abbreviations = ['del', 'sen', 'gov', 'lt', 'rep', 'reps', 'mr', 'mrs', 'ms', 'dr', 'st', 'jr',
+        'sr', 'va', 'no', 'vs', 'inc', 'co', 'corp', 'dept', 'hon', 'gen', 'sgt', 'capt', 'ave', 'rd',
+        'jan', 'feb', 'mar', 'apr', 'jun', 'jul', 'aug', 'sep', 'sept', 'oct', 'nov', 'dec'];
+
+    $text = preg_replace('/<[^>]*>/', ' ', (string) $html);
+    $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    $text = trim(preg_replace('/\s+/u', ' ', $text));
+
+    $sentences = 0;
+    preg_match_all('/[.!?]+["\'”’)\]]*(?= [^\p{Ll}]| ?$)/u', $text, $ends, PREG_OFFSET_CAPTURE);
+    foreach ($ends[0] as [$punctuation, $offset]) {
+        // The word that the punctuation ends.
+        preg_match('/(\S*)$/u', mb_strcut($text, 0, $offset), $word);
+        $word = $word[1];
+        if (
+            $punctuation[0] === '.'
+            && (
+                in_array(mb_strtolower(ltrim($word, '("“\'‘')), $abbreviations, true)
+                || preg_match('/^["“(]?\p{Lu}$/u', $word)
+                || mb_strpos($word, '.') !== false
+            )
+        ) {
+            continue;
+        }
+
+        $sentences++;
+        $end = $offset + strlen($punctuation);
+        if ($sentences === $count && $end < strlen($text)) {
+            return mb_strcut($text, 0, $end) . ' …';
+        }
+    }
+
+    return $text;
+}
+
 # nl2p is WordPress' wpautop(), renamed
 function nl2p($pee, $br = true)
 {

@@ -787,7 +787,11 @@ if (count($website_posts) > 0) {
             <h3><a href="' . $item->get_permalink() . '">' . $item->get_title() . '</a></h3>' .
             '<p>';
         $page_body .= $item->get_date('F j, Y') . '<br />';
-        $page_body .= strip_tags($item->get_description()) . '</p></td></tr>';
+
+        // Some feeds have entire posts, so show only the beginning, without WordPress's "The post
+        // ... appeared first on ..." line.
+        $excerpt = preg_replace('/\s*The post .+ appeared first on .+$/su', '', $item->get_description());
+        $page_body .= htmlspecialchars(first_sentences($excerpt, 4)) . '</p></td></tr>';
     }
     // End the DIV for news mentions.
     $page_body .= '</tbody>
