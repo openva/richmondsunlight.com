@@ -79,6 +79,11 @@ $pages =
         'string' => 'Placed on Finance Agenda',
     ],
     [
+        'url' => '/bill/2026/hb217/',
+        'http_status' => '200',
+        'string' => 'Fiscal Impact Statement (Virginia Criminal Sentencing Commission)',
+    ],
+    [
         'url' => '/minutes/house/2026/01/26/',
         'http_status' => '200',
         'string' => 'State-facilitated IRA savings program',

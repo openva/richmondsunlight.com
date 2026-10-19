@@ -647,7 +647,8 @@ if (isset($impact_statements)) {
                 . $impact_statement['lis_id'] . '+oth+' . mb_strtoupper($bill['number'])
                 . $impact_statement['lis_id'] . '+PDF';
         }
-        $page_sidebar .= '<li><a href="' . $url . '">Fiscal Impact Statement</a></li>';
+        $page_sidebar .= '<li><a href="' . htmlspecialchars($url) . '">'
+            . htmlspecialchars($impact_statement['title']) . '</a></li>';
     }
 }
 
