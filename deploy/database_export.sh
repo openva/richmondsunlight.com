@@ -75,15 +75,13 @@ rm -f mysql/structure.sql mysql/basic-contents.sql mysql/test-records.sql \
 
 # Export the structural data
 truncate --size 0 mysql/structure.sql
-STRUCTURE_LIST=$(printf "%s " "${STRUCTURE[@]}")
 mysqldump -d --routines --triggers -u "$USERNAME" \
-    --host "$HOST" "$DATABASE" $STRUCTURE_LIST > mysql/structure.sql
+    --host "$HOST" "$DATABASE" "${STRUCTURE[@]}" > mysql/structure.sql
 
 # Export the tables for which we want complete contents
 truncate --size 0 mysql/basic-contents.sql
-ALL_CONTENTS_LIST=$(printf "%s " "${ALL_CONTENTS[@]}")
 mysqldump --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
-    --host "$HOST" "$DATABASE" $ALL_CONTENTS_LIST > mysql/basic-contents.sql
+    --host "$HOST" "$DATABASE" "${ALL_CONTENTS[@]}" > mysql/basic-contents.sql
 
 # Export selected contents from the other tables
 truncate --size 0 mysql/test-records.sql

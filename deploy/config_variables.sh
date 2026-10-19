@@ -37,9 +37,9 @@ variables=(
 )
 
 # If this is our staging site, use the staging database, and don't use Memcached
+# shellcheck disable=SC2034 # read indirectly, via ${!i}, below
 if [[ "${GITHUB_REF_NAME:-}" == "master" ]]
 then
-	# shellcheck disable=SC2034 # read indirectly, via ${!i}, below
 	PDO_DSN="${PDO_DSN_STAGING:-}"
 	MYSQL_DATABASE="${MYSQL_DATABASE_STAGING:-}"
 	MEMCACHED_SERVER=
