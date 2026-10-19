@@ -2,9 +2,12 @@
 
 set -e
 
-HOST="{PDO_SERVER}"
-USERNAME="{PDO_USERNAME}"
-PASSWORD="{PDO_PASSWORD}"
+# The database to export from: from the environment (as when rs-machine runs this), or else from
+# the placeholders, which are filled in when this is deployed (see config_variables.sh).
+HOST="${PDO_SERVER:-"{PDO_SERVER}"}"
+USERNAME="${PDO_USERNAME:-"{PDO_USERNAME}"}"
+PASSWORD="${PDO_PASSWORD:-"{PDO_PASSWORD}"}"
+DATABASE="${MYSQL_DATABASE:-"{MYSQL_DATABASE}"}"
 
 export MYSQL_PWD="$PASSWORD"
 
@@ -74,56 +77,56 @@ rm -f mysql/structure.sql mysql/basic-contents.sql mysql/test-records.sql \
 truncate --size 0 mysql/structure.sql
 STRUCTURE_LIST=$(printf "%s " "${STRUCTURE[@]}")
 mysqldump -d --routines --triggers -u "$USERNAME" \
-    --host "$HOST" {MYSQL_DATABASE} $STRUCTURE_LIST > mysql/structure.sql
+    --host "$HOST" "$DATABASE" $STRUCTURE_LIST > mysql/structure.sql
 
 # Export the tables for which we want complete contents
 truncate --size 0 mysql/basic-contents.sql
 ALL_CONTENTS_LIST=$(printf "%s " "${ALL_CONTENTS[@]}")
 mysqldump --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
-    --host "$HOST" {MYSQL_DATABASE} $ALL_CONTENTS_LIST > mysql/basic-contents.sql
+    --host "$HOST" "$DATABASE" $ALL_CONTENTS_LIST > mysql/basic-contents.sql
 
 # Export selected contents from the other tables
 truncate --size 0 mysql/test-records.sql
 for BILL_ID in "${BILL_IDS[@]}"; do
-    mysqldump {MYSQL_DATABASE} --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
+    mysqldump "$DATABASE" --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
         --host "$HOST" bills --where "id=$BILL_ID" >> mysql/test-records.sql
 done
 
 # Files table
 for FILE_ID in "${FILE_IDS[@]}"; do
-    mysqldump {MYSQL_DATABASE} --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
+    mysqldump "$DATABASE" --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
         --host "$HOST" files --where "id=$FILE_ID" >> mysql/test-records.sql
 done
 
 # Video index
 for FILE_ID in "${FILE_IDS[@]}"; do
-    mysqldump {MYSQL_DATABASE} --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
+    mysqldump "$DATABASE" --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
         --host "$HOST" video_index --where "file_id=$FILE_ID" >> mysql/test-records.sql
 done
 
 # Video clips
 for FILE_ID in "${FILE_IDS[@]}"; do
-    mysqldump {MYSQL_DATABASE} --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
+    mysqldump "$DATABASE" --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
         --host "$HOST" video_clips --where "file_id=$FILE_ID" >> mysql/test-records.sql
 done
 
 # Video transcripts
 for FILE_ID in "${FILE_IDS[@]}"; do
-    mysqldump {MYSQL_DATABASE} --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
+    mysqldump "$DATABASE" --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
         --host "$HOST" video_transcript --where "file_id=$FILE_ID" >> mysql/test-records.sql
 done
 
 # Meetings and dockets from the 2025 session
-mysqldump {MYSQL_DATABASE} --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
+mysqldump "$DATABASE" --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
     --host "$HOST" meetings --where "session_id=31" >> mysql/test-records.sql
-mysqldump {MYSQL_DATABASE} --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
+mysqldump "$DATABASE" --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
     --host "$HOST" dockets --where "date_created > '2025-01-01' AND date_created < '2025-06-01'" >> mysql/test-records.sql
 
 
 for TABLE in "${SOME_CONTENTS[@]}"; do
     for BILL_ID in "${BILL_IDS[@]}"; do
         # Genericize all IP addresses and email addresses, to maintain privacy.
-        mysqldump {MYSQL_DATABASE} --no-create-info --complete-insert --insert-ignore --skip-lock-tables \
+        mysqldump "$DATABASE" --no-create-info --complete-insert --insert-ignore --skip-lock-tables \
             -u "$USERNAME" --host "$HOST" "$TABLE" \
             --where "bill_id=$BILL_ID" |perl -pe 's{[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}}{ sprintf "127.%01d.%01d.%01d", int(255*rand()), int(255*rand()), int(255*rand()) }ge' \
             |sed -E "s/\b[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b/example@example.com/g" \
@@ -133,17 +136,17 @@ done
 
 # Individual legislator vote records (representatives_votes links via votes.id, not bill_id)
 for BILL_ID in "${BILL_IDS[@]}"; do
-    mysqldump {MYSQL_DATABASE} --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
+    mysqldump "$DATABASE" --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
         --host "$HOST" representatives_votes \
         --where "vote_id IN (SELECT id FROM votes WHERE bill_id=$BILL_ID)" >> mysql/test-records.sql
 done
 
 # Export the local-only sample
 query() {
-    mysql {MYSQL_DATABASE} --batch --skip-column-names -u "$USERNAME" --host "$HOST" -e "$1"
+    mysql "$DATABASE" --batch --skip-column-names -u "$USERNAME" --host "$HOST" -e "$1"
 }
 dump() {
-    mysqldump {MYSQL_DATABASE} --no-create-info --complete-insert --insert-ignore --skip-lock-tables \
+    mysqldump "$DATABASE" --no-create-info --complete-insert --insert-ignore --skip-lock-tables \
         -u "$USERNAME" --host "$HOST" "$1" --where "$2"
 }
 # Genericize all IP addresses and email addresses, to maintain privacy.
@@ -303,7 +306,7 @@ dump minutes "(date, chamber) IN (SELECT date, chamber FROM files WHERE id IN ($
 truncate --size 0 mysql/video-records.sql
 for TABLE in video_index video_clips video_transcript; do
     for FILE_ID in "${VIDEO_CONTENTS[@]}"; do
-        mysqldump {MYSQL_DATABASE} --no-create-info --complete-insert --insert-ignore --skip-lock-tables \
+        mysqldump "$DATABASE" --no-create-info --complete-insert --insert-ignore --skip-lock-tables \
             -u "$USERNAME" --host "$HOST" "$TABLE" \
             --where "file_id=$FILE_ID" >> mysql/video-records.sql
     done
