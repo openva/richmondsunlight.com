@@ -34,10 +34,6 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-interaction --prefer-dist
 
-      - name: Install Node dependencies
-        working-directory: htdocs/js/vendor
-        run: yarn install && yarn build
-
       - name: Clone API repo
         run: git clone --depth 1 https://github.com/openva/rs-api.git api
 
