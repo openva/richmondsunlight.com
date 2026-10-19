@@ -60,7 +60,7 @@ jobs:
 
       - name: Install Node dependencies
         working-directory: htdocs/js/vendor
-        run: yarn install && yarn build
+        run: yarn install --ignore-scripts && yarn build
 
   integration:
     name: Integration Tests
@@ -104,7 +104,7 @@ jobs:
 
       - name: Install Node dependencies
         working-directory: htdocs/js/vendor
-        run: yarn install && yarn build
+        run: yarn install --ignore-scripts && yarn build
 
       - name: Determine API repo head
         id: api_ref

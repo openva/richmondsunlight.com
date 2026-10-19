@@ -16,6 +16,6 @@
 		"d3": "7.x"
 	},
 	"scripts": {
-		"build": "yarn install && cp -r node_modules/* . && rm -Rf node_modules/ && rm -Rf jquery-ui && mv jquery-ui-dist jquery-ui"
+		"build": "yarn install --ignore-scripts && cp -r node_modules/* . && rm -Rf node_modules/ && rm -Rf jquery-ui && mv jquery-ui-dist jquery-ui"
 	}
 }

@@ -46,9 +46,9 @@
     # Include the below JavaScript, but only if the browser is IE. We do an Opera check because
     # Opera can include the text "MSIE" in its user agent string.
 if (
-            mb_strpos($_SERVER['HTTP_USER_AGENT'], 'MSIE')
+            mb_strpos($_SERVER['HTTP_USER_AGENT'] ?? '', 'MSIE')
             &&
-            !mb_strpos($_SERVER['HTTP_USER_AGENT'], 'Opera')
+            !mb_strpos($_SERVER['HTTP_USER_AGENT'] ?? '', 'Opera')
 ) {
     ?>
 <script pagespeed_no_defer="">

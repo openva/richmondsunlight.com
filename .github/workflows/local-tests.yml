@@ -1,0 +1,97 @@
+name: Local Tests
+permissions:
+  contents: read
+
+# Run the local test suite (tests/local/) against the sample of the database that rs-machine
+# exports to S3 (see deploy/database_export.sh): daily during the session, when the data changes
+# most, and weekly otherwise. These sweep every page and record in the sample, so they mostly find
+# problems in the data, which aren't regressions in the code, so they don't gate deployment.
+#
+# This repository is public, so the sample must never be uploaded as an artifact, or printed.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '0 10 * 1-3 *'  # Daily, January through March
+    - cron: '0 10 * 4-12 1' # Mondays, otherwise
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  local_tests:
+    name: Local Tests
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.4'
+          extensions: mysqli, curl, memcached
+
+      - name: Install Composer dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Clone API repo
+        run: git clone --depth 1 https://github.com/openva/rs-api.git api
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
+          aws-region: us-east-1
+
+      # Fail if rs-machine has stopped exporting the sample (it should be no more than a week old).
+      - name: Download the local test data
+        env:
+          SAMPLE: s3://deploy.richmondsunlight.com/test-data/local-test-records.sql.gz
+        run: |
+          modified=$(aws s3api head-object --bucket deploy.richmondsunlight.com \
+            --key test-data/local-test-records.sql.gz --query LastModified --output text)
+          age_days=$(( ( $(date +%s) - $(date -d "$modified" +%s) ) / 86400 ))
+          echo "The local test data was exported $age_days days ago ($modified)."
+          if [ "$age_days" -gt 15 ]; then
+            echo "::error::The local test data is $age_days days old; is rs-machine's export_test_data.sh running?"
+            exit 1
+          fi
+          aws s3 cp "$SAMPLE" - --only-show-errors | gunzip > deploy/mysql/local-test-records.sql
+
+      - name: Setup Docker
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      # Reuse the image layers cached by the deployment workflow's builds of master.
+      - name: Build Docker image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: ./deploy/Web.Dockerfile
+          push: false
+          load: true
+          tags: rs_web:ci
+          cache-from: type=gha,scope=master
+
+      - name: Run Docker environment
+        run: ./docker-run.sh
+
+      - name: Run local tests
+        run: |
+          docker compose exec -T web /var/www/htdocs/includes/vendor/bin/phpunit \
+            --configuration /var/www/phpunit.xml --testsuite local
+
+      - name: Stop Docker
+        if: always()
+        run: ./docker-stop.sh
+
+      - name: Report failure to Slack
+        if: failure()
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          if [ -n "$SLACK_WEBHOOK" ]; then
+            jq -n --arg url "$RUN_URL" '{text: ("Richmond Sunlight’s local tests failed: " + $url)}' \
+              | curl -fsS -X POST -H 'Content-Type: application/json' --data @- "$SLACK_WEBHOOK"
+          fi

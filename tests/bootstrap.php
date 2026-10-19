@@ -23,3 +23,6 @@ $_bootstrap_prev_reporting = error_reporting(E_ERROR | E_PARSE);
 require_once __DIR__ . '/../htdocs/includes/settings.inc.php';
 error_reporting($_bootstrap_prev_reporting);
 unset($_bootstrap_prev_reporting);
+
+// The base class for the `local` test suite.
+require_once __DIR__ . '/local/LocalTestCase.php';

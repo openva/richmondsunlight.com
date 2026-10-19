@@ -803,7 +803,21 @@ class Bill2
     }
 
     /**
-     * Retrieve fiscal impact statements associated with the bill.
+     * The agencies that write impact statements, by the code that LIS uses for them, and what to
+     * call each one's statements.
+     */
+    public const IMPACT_STATEMENT_AGENCIES = [
+        '110' => ['Racial and Ethnic Impact Statement', null],
+        '122' => ['Fiscal Impact Statement', 'Department of Planning and Budget'],
+        '158' => ['Fiscal Impact Statement', 'Virginia Retirement System'],
+        '160' => ['Fiscal Impact Statement', 'Virginia Criminal Sentencing Commission'],
+        '161' => ['Fiscal Impact Statement', 'Department of Taxation'],
+        '171' => ['Fiscal Impact Statement', 'State Corporation Commission'],
+        '195' => ['Local Fiscal Impact Statement', 'Commission on Local Government'],
+    ];
+
+    /**
+     * Retrieve the bill's current impact statements: the most recent one from each agency.
      *
      * @return array|false Array of impact statements, or false when none exist.
      */
@@ -818,18 +832,76 @@ class Bill2
             return false;
         }
 
-        $sql = 'SELECT lis_id, pdf_url, summary
+        $sql = 'SELECT id, lis_id, pdf_url, summary
                 FROM fiscal_impact_statements
                 WHERE bill_id = :bill_id';
         $stmt = $this->getDb()->prepare($sql);
         $stmt->execute(['bill_id' => $id]);
-        $impact_statements = $stmt->fetchAll();
+        $impact_statements = self::latest_impact_statements($stmt->fetchAll());
 
         if (count($impact_statements) == 0) {
             return false;
         }
 
         return $impact_statements;
+    }
+
+    /**
+     * Reduce a bill's impact statements to the most recent one from each agency.
+     *
+     * Agencies write a new statement for each version of a bill, and sometimes revise one, so a
+     * bill can accumulate a dozen of them. Each statement's LIS ID names the agency (and the bill
+     * version): "SB738S1F122" is agency 122's statement on substitute S1 of SB738, and, in data
+     * from before 2025, "FS1122" is the same thing. LIS numbers its PDFs in the order that it
+     * publishes them, so the statement with the highest-numbered PDF is the most recent. Older
+     * statements have no PDF, and they're ordered by when we recorded them, but any statement
+     * with a PDF is more recent than any without one. Statements whose IDs can't be read are
+     * all kept.
+     *
+     * @param array $statements Rows with id, lis_id, pdf_url, and summary
+     * @return array The most recent statement from each agency, with agency_code, version,
+     *               agency (the agency's name, or null), and title added to each, ordered with
+     *               the Department of Planning and Budget's first
+     */
+    public static function latest_impact_statements(array $statements): array
+    {
+        $latest = [];
+        foreach ($statements as $statement) {
+            $lis_id = strtoupper(trim((string) $statement['lis_id']));
+            if (
+                preg_match('/^[A-Z]+\d+([A-Z][A-Z0-9]*)?F(\d{3})$/', $lis_id, $parts)
+                || preg_match('/^F([A-Z][A-Z0-9]*)?(\d{3})$/', $lis_id, $parts)
+            ) {
+                $statement['version'] = $parts[1] ?? '';
+                $statement['agency_code'] = $parts[2];
+                $key = $parts[2];
+            } else {
+                $statement['version'] = null;
+                $statement['agency_code'] = null;
+                $key = 'unknown-' . count($latest);
+            }
+
+            $pdf_number = preg_match('/(\d+)\.pdf$/i', (string) $statement['pdf_url'], $number) ? (int) $number[1] : 0;
+            $statement['rank'] = [$pdf_number, (int) ($statement['id'] ?? 0)];
+
+            if (!isset($latest[$key]) || $statement['rank'] > $latest[$key]['rank']) {
+                $latest[$key] = $statement;
+            }
+        }
+
+        foreach ($latest as &$statement) {
+            [$title, $agency] = self::IMPACT_STATEMENT_AGENCIES[$statement['agency_code']]
+                ?? ['Fiscal Impact Statement', null];
+            $statement['agency'] = $agency;
+            $statement['title'] = $title . ($agency !== null ? ' (' . $agency . ')' : '');
+            unset($statement['rank']);
+        }
+        unset($statement);
+
+        uasort($latest, fn($a, $b) => [$a['agency_code'] !== '122', (string) $a['agency_code']]
+            <=> [$b['agency_code'] !== '122', (string) $b['agency_code']]);
+
+        return array_values($latest);
     }
 
     /**

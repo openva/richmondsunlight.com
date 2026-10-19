@@ -365,7 +365,9 @@ class VideoIntegrationTest extends TestCase
     {
         $sql = 'SELECT id, fps, capture_rate, length, capture_directory
                 FROM files
-                WHERE type="video" AND fps > 0 AND capture_rate > 0 AND length IS NOT NULL
+                WHERE type="video" AND fps > 0 AND capture_rate > 0
+                    AND length > "00:00:00" AND capture_directory IS NOT NULL
+                ORDER BY id
                 LIMIT 1';
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (!$result || mysqli_num_rows($result) === 0) {

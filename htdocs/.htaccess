@@ -111,16 +111,16 @@ RewriteRule ^bills/([0-9]{4})/tags/([A-Za-z0-9+]+)?/?$ /list-bills.php?tag=$2&ye
 RewriteRule ^bills/committee/([A-Za-z]+)/([A-Za-z-]+)?/?$ /list-bills.php?chamber=$1&committee=$2 [QSA]
 
 # Legislators
-RewriteRule ^legislator/([a-z-]+)/votes/([0-9]{4}).csv$ /vote-csv.php?shortname=$1&year=$2 [QSA]
-RewriteRule ^legislator/([a-z-]+)/votes/([0-9]{4})/$ /legislator-vote.php?shortname=$1&year=$2 [QSA]
-RewriteRule ^legislator/([a-z-]+)?/?$ /legislator.php?shortname=$1 [QSA]
+RewriteRule ^legislator/([a-z0-9-]+)/votes/([0-9]{4}).csv$ /vote-csv.php?shortname=$1&year=$2 [QSA]
+RewriteRule ^legislator/([a-z0-9-]+)/votes/([0-9]{4})/$ /legislator-vote.php?shortname=$1&year=$2 [QSA]
+RewriteRule ^legislator/([a-z0-9-]+)?/?$ /legislator.php?shortname=$1 [QSA]
 RewriteRule ^legislators?/?$ /list-legislators.php [QSA]
 RewriteRule ^legislators/detailed?/?$ /list-legislators-detailed.php [QSA]
 RewriteRule ^committee/([a-z]+)/([a-z-]+)?/?$ /committee.php?chamber=$1&committee=$2 [QSA]
 RewriteRule ^committees?/?$ /list-committees.php [QSA]
 
 # RSS
-RewriteRule ^rss/legislator/([a-z-]+)?/?$ /rss/legislator.php?shortname=$1 [QSA]
+RewriteRule ^rss/legislator/([a-z0-9-]+)?/?$ /rss/legislator.php?shortname=$1 [QSA]
 RewriteRule ^rss/tag/([a-z0-9-+]+)?/?$ /rss/tag.php?tag=$1 [QSA]
 RewriteRule ^rss/bill/([a-z0-9-]+)?/?$ /rss/bill.php?number=$1 [QSA]
 RewriteRule ^rss/comments/?/?$ /rss/comments.php [QSA]

@@ -169,6 +169,25 @@ class VideoTest extends TestCase
         $this->assertStringContainsString('Caption two', $video->transcript);
     }
 
+    // --- transcript_vtt() ---
+
+    public function testTranscriptVttLeavesOutBlankLines(): void
+    {
+        $vtt = Video::transcript_vtt([[
+            'start' => 144,
+            'speaker' => 'Sen. Lucas',
+            'lines' => [
+                ['start' => 144, 'end' => 145, 'text' => ' '],
+                ['start' => 145, 'end' => 146, 'text' => "The Senate\nis adjourned."],
+                ['start' => 146, 'end' => 146, 'text' => ''],
+            ],
+        ]]);
+        $this->assertSame(
+            "WEBVTT\n\n00:02:25.000 --> 00:02:26.000 line:5%\nSen. Lucas: The Senate is adjourned.\n",
+            $vtt
+        );
+    }
+
     // --- Method signatures ---
 
     public function testSubmitTakesNoParameters(): void

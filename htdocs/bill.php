@@ -647,7 +647,8 @@ if (isset($impact_statements)) {
                 . $impact_statement['lis_id'] . '+oth+' . mb_strtoupper($bill['number'])
                 . $impact_statement['lis_id'] . '+PDF';
         }
-        $page_sidebar .= '<li><a href="' . $url . '">Fiscal Impact Statement</a></li>';
+        $page_sidebar .= '<li><a href="' . htmlspecialchars($url) . '">'
+            . htmlspecialchars($impact_statement['title']) . '</a></li>';
     }
 }
 
@@ -897,11 +898,7 @@ if ($bill['word_count'] > 0) {
  * Show an anti-disinformation warning on vaccine bills.
  */
 if (
-        in_array('vaccine', array_values((array)$bill['tags']))
-        ||
-        in_array('vaccines', array_values((array)$bill['tags']))
-        ||
-        in_array('COVID', array_values((array)$bill['tags']))
+        array_intersect(['vaccine', 'vaccines', 'COVID'], array_values((array)($bill['tags'] ?? [])))
         ||
         stripos($bill['summary'], ' vaccin') !== false
         ||
