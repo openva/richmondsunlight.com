@@ -37,7 +37,7 @@ variables=(
 )
 
 # If this is our staging site, use the staging database, and don't use Memcached
-if [ "${GITHUB_REF_NAME:-}" = "master" ]
+if [[ "${GITHUB_REF_NAME:-}" == "master" ]]
 then
 	# shellcheck disable=SC2034 # read indirectly, via ${!i}, below
 	PDO_DSN="${PDO_DSN_STAGING:-}"
@@ -64,7 +64,7 @@ for i in "${variables[@]}"
 do
 	value="${!i:-}"
 
-	if [ -z "$value" ]; then
+	if [[ -z "$value" ]]; then
 		echo "No value set for $i"
 	fi
 

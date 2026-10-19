@@ -249,7 +249,7 @@ SAMPLE_BILL_LIST=$(query "
 INCORPORATED_LIST=$(query "SELECT DISTINCT incorporated_into FROM bills
     WHERE id IN ($SAMPLE_BILL_LIST) AND incorporated_into IS NOT NULL
         AND incorporated_into NOT IN ($FIXTURE_BILL_LIST)" | paste -sd, -)
-if [ -n "$INCORPORATED_LIST" ]; then
+if [[ -n "$INCORPORATED_LIST" ]]; then
     SAMPLE_BILL_LIST="$SAMPLE_BILL_LIST,$INCORPORATED_LIST"
 fi
 
