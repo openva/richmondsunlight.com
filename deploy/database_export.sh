@@ -215,7 +215,7 @@ SAMPLE_BILL_LIST=$(query "
         OR (tags = 0 AND by_untagged <= 10)
         OR by_versions <= 10
         OR by_copatrons <= 5
-        OR (incorporated_into IS NOT NULL AND by_incorporated <= 5)
+        OR (status = 'incorporated' AND by_incorporated <= 5)
         OR by_votes <= 5
         OR by_comments <= 5
     UNION
