@@ -29,7 +29,7 @@ class Legislator
                     terms.name_formatted,
                     terms.chamber
                 FROM people
-                LEFT JOIN terms
+                INNER JOIN terms
                     ON people.id = terms.person_id';
         if ($subset == 'current') {
             $sql .= ' WHERE terms.date_ended IS NULL OR terms.date_ended >= now()';

@@ -128,4 +128,26 @@ class LegislatorTest extends TestCase
         }
         $this->assertSame('senatordeeds.com', self::$info['website_name']);
     }
+
+    /**
+     * A person with no term isn't a legislator, so isn't a current one.
+     */
+    public function testCurrentListExcludesPeopleWithoutTerms(): void
+    {
+        mysqli_query(
+            $GLOBALS['db'],
+            'INSERT INTO people (id, shortname, name, name_formal, date_created)
+            VALUES (65000, "zztestnoterm", "Noterm, Test", "Test Noterm", NOW())'
+        );
+
+        try {
+            $legislator = new Legislator();
+            $shortnames = array_column($legislator->get_list('current'), 'shortname');
+        } finally {
+            mysqli_query($GLOBALS['db'], 'DELETE FROM people WHERE id = 65000');
+        }
+
+        $this->assertContains('rcdeeds', $shortnames);
+        $this->assertNotContains('zztestnoterm', $shortnames);
+    }
 }
