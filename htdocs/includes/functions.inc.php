@@ -339,6 +339,17 @@ function update_user($options)
     return true;
 }
 
+# Resume the visitor's session, if they have one, without starting one for anybody who doesn't.
+# Starting a session sets a cookie, and Cloudflare won't cache a page that sets one. Only logging
+# in, registering, and commenting, tagging, or voting in a poll start a session (by calling
+# session_start() themselves), because those are the only things that store anything in one.
+function resume_session()
+{
+    if (session_status() === PHP_SESSION_NONE && !empty($_COOKIE[session_name()])) {
+        session_start();
+    }
+}
+
 # Generate a random session ID.
 function create_session_id()
 {

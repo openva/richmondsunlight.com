@@ -23,7 +23,7 @@ $database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 # LOCALIZE VARIABLES
 

@@ -21,7 +21,7 @@ $database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 # Grab the user data.
 if (logged_in() === true) {

@@ -52,7 +52,7 @@ class LocalDataTest extends LocalTestCase
     {
         $counts = self::rows('SELECT
                 (SELECT COUNT(*) FROM bills WHERE id NOT IN (SELECT bill_id FROM tags)) AS untagged,
-                (SELECT COUNT(*) FROM bills WHERE incorporated_into IS NOT NULL) AS incorporated,
+                (SELECT COUNT(*) FROM bills WHERE status = "incorporated") AS incorporated,
                 (SELECT COUNT(*) FROM (SELECT bill_id FROM bills_full_text GROUP BY bill_id HAVING COUNT(*) >= 3) AS t)
                     AS many_versions,
                 (SELECT COUNT(DISTINCT bill_id) FROM votes) AS voted_on,

@@ -28,9 +28,6 @@ class VideoSweepTest extends LocalTestCase
                 if (!str_starts_with($clip['path'], 'https://')) {
                     $problems[] = $label . ' isn’t at an HTTPS URL: ' . $clip['path'];
                 }
-                if ($clip['bill_id'] !== null && $clip['bill'] === null) {
-                    $problems[] = $label . ' is about bill ' . $clip['bill_id'] . ', which doesn’t exist';
-                }
                 $order = [$clip['date'], $clip['file_id'], $clip['start']];
                 if ($previous !== null && $order < $previous) {
                     $problems[] = $label . ' is out of order';

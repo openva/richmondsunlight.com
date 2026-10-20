@@ -21,7 +21,7 @@
     $database->connect_mysqli();
 
     # INITIALIZE SESSION
-    session_start();
+    resume_session();
 
     # PAGE METADATA
     $page_title = 'Photosynthesis Portfolios';

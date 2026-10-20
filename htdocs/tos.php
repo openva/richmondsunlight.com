@@ -19,7 +19,7 @@ $page_title = 'Terms of Service';
 $site_section = '';
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 # PAGE CONTENT
 $page_body = <<<EOD

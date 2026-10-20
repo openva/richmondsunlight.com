@@ -21,7 +21,7 @@ $database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 # LOCALIZE AND CLEAN UP VARIABLES
 if (isset($_POST['form_data'])) {

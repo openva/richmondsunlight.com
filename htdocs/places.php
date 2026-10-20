@@ -23,7 +23,7 @@ $db = $database->connect();
 /*
  * Initialize the sessio
  */
-session_start();
+resume_session();
 
 /*
  * Localize variables

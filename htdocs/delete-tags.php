@@ -48,7 +48,7 @@ $database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 header('Content-Type: application/json; charset=utf-8');
 

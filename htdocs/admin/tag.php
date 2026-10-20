@@ -20,7 +20,7 @@ $database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 # PAGE METADATA
 $page_title = 'Tag Bills';
@@ -79,7 +79,7 @@ if (!empty($_POST)) {
 							ip="' . $_SERVER['REMOTE_ADDR'] . '", user_id=
 								(SELECT id
 								FROM users
-								WHERE cookie_hash = "' . $_SESSION['id'] . '"),
+								WHERE cookie_hash = "' . ($_SESSION['id'] ?? '') . '"),
 							date_created=now()';
                     $page_body .= '.';
                     mysqli_query($GLOBALS['db'], $sql);

@@ -13,7 +13,7 @@ include_once 'settings.inc.php';
 include_once 'vendor/autoload.php';
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 # DECLARATIVE FUNCTIONS
 # Run those functions that are necessary prior to loading this specific

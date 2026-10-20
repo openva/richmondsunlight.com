@@ -19,7 +19,7 @@
     $site_section = '';
 
     # INITIALIZE SESSION
-    session_start();
+    resume_session();
 
     # PAGE CONTENT
     $page_body = <<<EOD

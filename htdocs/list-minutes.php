@@ -21,7 +21,7 @@ $database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 # LOCALIZE VARIABLES
 if (isset($_REQUEST['year']) && strlen($_REQUEST['year']) == 4 && is_numeric($_REQUEST['year'])) {

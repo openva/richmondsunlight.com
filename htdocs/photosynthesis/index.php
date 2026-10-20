@@ -26,7 +26,7 @@ $page_title = 'Photosynthesis';
 $site_section = 'photosynthesis';
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 # See if the user is logged in.
 $user = @get_user();

@@ -23,7 +23,7 @@ $page_title = 'Reset Your Password';
 $site_section = '';
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 # If we're receiving a request for a reset -- that is, somebody actually clicking on a
 # link in an e-mail after completing the first half of the process.
