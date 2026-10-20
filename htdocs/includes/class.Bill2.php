@@ -856,7 +856,9 @@ class Bill2
      * Agencies write a new statement for each version of a bill, and sometimes revise one, so a
      * bill can accumulate a dozen of them. Each statement's LIS ID names the agency (and the bill
      * version): "SB738S1F122" is agency 122's statement on substitute S1 of SB738, and, in data
-     * from before 2025, "FS1122" is the same thing. LIS numbers its PDFs in the order that it
+     * from before 2025, "FS1122" is the same thing. Bills carried over from a prior session have
+     * IDs that begin with that session's LIS ID, and sometimes the bill number, followed by the
+     * older form (e.g., "241FS1122" or "241SB280FS1122"). LIS numbers its PDFs in the order that it
      * publishes them, so the statement with the highest-numbered PDF is the most recent. Older
      * statements have no PDF, and they're ordered by when we recorded them, but any statement
      * with a PDF is more recent than any without one. Statements whose IDs can't be read are
@@ -873,8 +875,8 @@ class Bill2
         foreach ($statements as $statement) {
             $lis_id = strtoupper(trim((string) $statement['lis_id']));
             if (
-                preg_match('/^[A-Z]+\d+([A-Z][A-Z0-9]*)?F(\d{3})$/', $lis_id, $parts)
-                || preg_match('/^F([A-Z][A-Z0-9]*)?(\d{3})$/', $lis_id, $parts)
+                preg_match('/^(?:\d{3})?[A-Z]+\d+([A-Z][A-Z0-9]*)?F(\d{3})$/', $lis_id, $parts)
+                || preg_match('/^(?:\d{3})?(?:[A-Z]+\d+)?F([A-Z][A-Z0-9]*)?(\d{3})$/', $lis_id, $parts)
             ) {
                 $statement['version'] = $parts[1] ?? '';
                 $statement['agency_code'] = $parts[2];
