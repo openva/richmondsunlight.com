@@ -69,6 +69,30 @@ class ImpactStatementTest extends TestCase
         $this->assertSame('Substitute', $latest[0]['summary']);
     }
 
+    public function testReadsIdsPrefixedWithAPriorSession(): void
+    {
+        // SB280 (2025), carried over from 2024, whose LIS session ID is 241.
+        $latest = Bill2::latest_impact_statements([
+            self::statement(42561, '241FS1122'),
+            self::statement(136753, '241SB280F122', 'https://lis.blob.core.windows.net/legacy/1001781.PDF'),
+            self::statement(136754, '241SB280F160', 'https://lis.blob.core.windows.net/legacy/1001780.PDF'),
+            self::statement(136755, '241SB280FS1122', 'https://lis.blob.core.windows.net/legacy/1001783.PDF'),
+            self::statement(136756, '241SB280FS1160', 'https://lis.blob.core.windows.net/legacy/1001782.PDF'),
+        ]);
+
+        $this->assertSame(['241SB280FS1122', '241SB280FS1160'], array_column($latest, 'lis_id'));
+        $this->assertSame(['S1', 'S1'], array_column($latest, 'version'));
+        $this->assertSame(['122', '160'], array_column($latest, 'agency_code'));
+
+        // HB9 (2025), with the Commission on Local Government's 2024 code.
+        $latest = Bill2::latest_impact_statements([
+            self::statement(42365, '241F122'),
+            self::statement(136521, '241HB9F164', 'https://lis.blob.core.windows.net/legacy/1001264.PDF'),
+        ]);
+        $this->assertSame(['241F122', '241HB9F164'], array_column($latest, 'lis_id'));
+        $this->assertSame('Local Fiscal Impact Statement (Commission on Local Government)', $latest[1]['title']);
+    }
+
     public function testFindsTheNewestPdfOnAnyHost(): void
     {
         // LIS moved 2025's statements to another host, with the same file numbers.
