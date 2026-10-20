@@ -21,7 +21,7 @@ $database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 # LOCALIZE VARIABLES
 $days = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['days']);

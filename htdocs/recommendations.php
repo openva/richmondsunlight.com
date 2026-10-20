@@ -25,7 +25,7 @@ $page_title = 'Recommended Bills';
 $site_section = '';
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 # See if the user is logged in.
 if (@logged_in() === false) {

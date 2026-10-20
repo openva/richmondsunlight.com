@@ -33,7 +33,7 @@ $html_head = '<link rel="stylesheet" href="/css/photosynthesis.css" type="text/c
 <link rel="alternate" type="application/rss+xml" title="RSS 0.92" href="/photosynthesis/rss/portfolio/' . $hash . '/" />';
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 # If the user is logged in, get his data.
 if (@logged_in()) {

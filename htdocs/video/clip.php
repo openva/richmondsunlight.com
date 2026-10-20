@@ -22,7 +22,7 @@ $database = new Database();
 $database->connect_old();
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 # LOCALIZE AND CLEAN UP VARIABLES
 if (isset($_GET['hash']) && strlen($_GET['hash']) == 6) {

@@ -29,7 +29,7 @@ $site_section = 'photosynthesis';
 $html_head = '<link rel="stylesheet" href="/css/photosynthesis.css" />';
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 # Grab the user data. Bail if none is available.
 $user = get_user();

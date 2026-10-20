@@ -51,7 +51,7 @@ if (
             !mb_strpos($_SERVER['HTTP_USER_AGENT'] ?? '', 'Opera')
 ) {
     ?>
-<script pagespeed_no_defer="">
+<script>
     <!--//--><![CDATA[//><!--
     activateMenu = function(nav) {
         if(document.all && document.getElementById(nav).currentStyle){
@@ -96,8 +96,7 @@ if (
             <div id="header">
                 <div id="logo">
                     <a href="/"><img src="/images/templates/new/richmond-sunlight-logo.png"
-                        alt="Richmond Sunlight Logo" title="Richmond Sunlight" width="274" height="88"
-                        pagespeed_no_transform></a>
+                        alt="Richmond Sunlight Logo" title="Richmond Sunlight" width="274" height="88"></a>
                 </div>
 
                 <div id="from-and-search">
@@ -243,7 +242,7 @@ if (
         </div>
     </div>
 
-    <script pagespeed_no_defer="">
+    <script>
         /* Create tabs and add dropdown fallback when tabs overflow. */
         // Wait until the DOM has loaded before querying the document
         $(document).ready(function() {

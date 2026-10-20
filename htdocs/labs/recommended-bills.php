@@ -25,7 +25,7 @@
     $database->connect_mysqli();
 
     # INITIALIZE SESSION
-    session_start();
+    resume_session();
 
     # PAGE CONTENT
     $page_sidebar = <<<EOD

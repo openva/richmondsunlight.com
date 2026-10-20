@@ -29,7 +29,7 @@ $site_section = 'photosynthesis';
 $html_head = '<link rel="stylesheet" href="/css/photosynthesis.css" />';
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 # DEFINE FUNCTIONS
 function show_form($form_data)

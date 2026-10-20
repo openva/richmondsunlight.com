@@ -43,7 +43,7 @@ function notes_form($notes)
 }
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 # Grab the user data. Bail if none is available.
 $user = get_user();

@@ -37,9 +37,9 @@ if (isset($_SERVER['HTTP_USER_AGENT'])) {
     }
 }
 
-// Only start a session for real users.
+// Only resume a session for real users.
 if (!$is_bot) {
-    session_start();
+    resume_session();
     if (logged_in() === true) {
         $user = get_user();
     }

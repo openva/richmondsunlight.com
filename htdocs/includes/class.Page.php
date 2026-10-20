@@ -176,11 +176,13 @@ class Page
      */
     public function display()
     {
-
-        if (isset($_SESSION['registered']) && $_SESSION['registered'] === 'y') {
+        # Pages for anybody with a session (who has logged in, or commented, tagged, or voted in a
+        # poll) may be personalized, so mustn't be cached. Anybody else gets the same page, which
+        # Cloudflare may keep for 10 minutes, while browsers check back for a new one each time.
+        if (session_status() === PHP_SESSION_ACTIVE) {
             header('Cache-Control: private, no-store');
         } else {
-            header('Cache-Control: public, max-age=10800');
+            header('Cache-Control: public, max-age=0, s-maxage=600');
         }
 
         # Send the completed page to the browser by clearing the buffer and echoing

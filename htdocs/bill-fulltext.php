@@ -18,7 +18,7 @@ $database = new Database();
 $database->connect_mysqli();
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 # LOCALIZE AND CLEAN UP VARIABLES
 $year = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['year']);

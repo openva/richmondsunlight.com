@@ -25,7 +25,7 @@ $page_title = 'Account';
 $site_section = '';
 
 # INITIALIZE SESSION
-session_start();
+resume_session();
 
 # Include the password-strength-meter code.
 $html_head = '<script src="/js/vendor/zxcvbn/dist/zxcvbn.js"></script>
