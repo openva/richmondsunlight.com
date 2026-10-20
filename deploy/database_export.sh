@@ -181,8 +181,9 @@ SAMPLE_FILE_LIST=${SAMPLE_FILE_LIST:-0}
 # Bills from the recent sessions: the most interesting two of each type (HB, SJ, etc.) and status,
 # in each session, plus the most interesting (or most extreme) few without tags, with the most
 # versions, with the most copatrons, incorporated into other bills, with the most votes, and with
-# the most comments; the bills with the most impact statements from each agency; and the bills
-# taken up in the sampled videos.
+# the most comments; the bills with the most impact statements from each agency; and the most
+# interesting 30 of the bills taken up in the sampled videos (a floor session can take up
+# hundreds).
 SAMPLE_BILL_LIST=$(query "
     WITH recent AS ($RECENT_SESSIONS),
     candidates AS (
@@ -199,12 +200,12 @@ SAMPLE_BILL_LIST=$(query "
         WHERE bills.id NOT IN ($FIXTURE_BILL_LIST)
     ),
     ranked AS (
-        SELECT id, tags, incorporated_into,
+        SELECT id, tags, status,
             ROW_NUMBER() OVER (PARTITION BY session_id, type, status ORDER BY interestingness DESC, id) AS by_status,
             ROW_NUMBER() OVER (PARTITION BY session_id, tags = 0 ORDER BY interestingness DESC, id) AS by_untagged,
             ROW_NUMBER() OVER (PARTITION BY session_id ORDER BY versions DESC, id) AS by_versions,
             ROW_NUMBER() OVER (PARTITION BY session_id ORDER BY copatrons DESC, id) AS by_copatrons,
-            ROW_NUMBER() OVER (PARTITION BY session_id, incorporated_into IS NULL ORDER BY interestingness DESC, id) AS by_incorporated,
+            ROW_NUMBER() OVER (PARTITION BY session_id, status = 'incorporated' ORDER BY interestingness DESC, id) AS by_incorporated,
             ROW_NUMBER() OVER (PARTITION BY session_id ORDER BY votes DESC, id) AS by_votes,
             ROW_NUMBER() OVER (PARTITION BY session_id ORDER BY comments DESC, id) AS by_comments
         FROM candidates
@@ -236,12 +237,17 @@ SAMPLE_BILL_LIST=$(query "
     ) AS impact
     WHERE n <= 3
     UNION
-    SELECT DISTINCT video_index.linked_id
-    FROM video_index
-    JOIN bills
-        ON bills.id = video_index.linked_id
-    WHERE video_index.type = 'bill' AND video_index.file_id IN ($SAMPLE_FILE_LIST)
-        AND bills.id NOT IN ($FIXTURE_BILL_LIST)" | paste -sd, -)
+    SELECT id
+    FROM (
+        SELECT DISTINCT bills.id, bills.interestingness
+        FROM video_index
+        JOIN bills
+            ON bills.id = video_index.linked_id
+        WHERE video_index.type = 'bill' AND video_index.file_id IN ($SAMPLE_FILE_LIST)
+            AND bills.id NOT IN ($FIXTURE_BILL_LIST)
+        ORDER BY bills.interestingness DESC, bills.id
+        LIMIT 30
+    ) AS in_videos" | paste -sd, -)
 
 # Add the bills that any of those were incorporated into, so that links to them work
 INCORPORATED_LIST=$(query "SELECT DISTINCT incorporated_into FROM bills
