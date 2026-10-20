@@ -38,16 +38,6 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
     python python-pip s3cmd sphinxsearch wget awscli certbot \
     python3-certbot-apache yarn imagemagick
 
-    # Install mod_pagespeed
-    dpkg -s mod-pagespeed-beta
-    if [ $? -eq 1 ]; then
-        wget https://dl-ssl.google.com/dl/linux/direct/mod-pagespeed-stable_current_amd64.deb
-        sudo dpkg -i mod-pagespeed-stable_current_amd64.deb
-        sudo apt -f install
-        rm mod-pagespeed-stable_current_amd64.deb
-        sudo service apache2 restart
-    fi
-
     # Install Codedeploy
     # OK well this doesn't make any sense, because Codedeploy has to be installed before this
     # script can run. So this section will never be run.
@@ -89,4 +79,11 @@ if [ "$SITE_SET_UP" -eq "0" ]; then
     sudo cp /etc/sphinxsearch/sphinx-min.conf.dist /etc/sphinxsearch/sphinx.conf
     sudo service sphinxsearch start
     
+fi
+
+# mod_pagespeed is no longer used: its rewriting of caching headers kept Cloudflare from caching pages
+# for more than 10 seconds. Turn it off on any server where it's still on.
+if [[ -e /etc/apache2/mods-enabled/pagespeed.load ]]; then
+    sudo a2dismod -q pagespeed
+    sudo systemctl reload apache2
 fi
