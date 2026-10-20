@@ -809,9 +809,13 @@ class Bill2
     public const IMPACT_STATEMENT_AGENCIES = [
         '110' => ['Racial and Ethnic Impact Statement', null],
         '122' => ['Fiscal Impact Statement', 'Department of Planning and Budget'],
+        // An agency that we haven't identified (it wrote 2026's SB55's, whose PDF is gone).
+        '142' => ['Fiscal Impact Statement', null],
         '158' => ['Fiscal Impact Statement', 'Virginia Retirement System'],
         '160' => ['Fiscal Impact Statement', 'Virginia Criminal Sentencing Commission'],
         '161' => ['Fiscal Impact Statement', 'Department of Taxation'],
+        // The Commission on Local Government's code in 2024; it now uses 195.
+        '164' => ['Local Fiscal Impact Statement', 'Commission on Local Government'],
         '171' => ['Fiscal Impact Statement', 'State Corporation Commission'],
         '195' => ['Local Fiscal Impact Statement', 'Commission on Local Government'],
     ];
