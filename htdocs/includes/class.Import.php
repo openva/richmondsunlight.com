@@ -1749,22 +1749,31 @@ class Import
         $bio = $this->normalizeOptionalString($legislator['bio'] ?? null);
 
         if ($existing) {
-            $params = array(
-                ':name' => $legislator['name'],
-                ':name_formal' => $legislator['name_formal'],
-                ':birthday' => $birthday,
-                ':race' => $race === '' ? null : $race,
-                ':sex' => $sex === '' ? null : $sex,
-                ':bio' => $bio,
-                ':id' => (int)$existing['id'],
+            // Only update the fields that the import supplies, so that missing data doesn't erase
+            // what we already have.
+            $fields = array(
+                'name' => $this->normalizeOptionalString($legislator['name'] ?? null),
+                'name_formal' => $this->normalizeOptionalString($legislator['name_formal'] ?? null),
+                'birthday' => $birthday,
+                'race' => $race === '' ? null : $race,
+                'sex' => $sex === '' ? null : $sex,
+                'bio' => $bio,
             );
+            $fields = array_filter($fields, static function ($value) {
+                return $value !== null;
+            });
+            if (empty($fields)) {
+                return (int)$existing['id'];
+            }
+
+            $set = array();
+            $params = array(':id' => (int)$existing['id']);
+            foreach ($fields as $column => $value) {
+                $set[] = $column . ' = :' . $column;
+                $params[':' . $column] = $value;
+            }
             $sql = 'UPDATE people
-                    SET name = :name,
-                        name_formal = :name_formal,
-                        birthday = :birthday,
-                        race = :race,
-                        sex = :sex,
-                        bio = :bio,
+                    SET ' . implode(', ', $set) . ',
                         date_modified = NOW()
                     WHERE id = :id';
             $update = $GLOBALS['dbh']->prepare($sql);
