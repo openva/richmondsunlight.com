@@ -182,7 +182,10 @@ class Page
         if (session_status() === PHP_SESSION_ACTIVE) {
             header('Cache-Control: private, no-store');
         } else {
-            header('Cache-Control: public, max-age=0, s-maxage=600');
+            # Cloudflare may also serve a page for a while after those 10 minutes, while it fetches a
+            # new copy, so long as the legislature isn't in session and bills aren't changing daily.
+            $stale = (IN_SESSION == true) ? 600 : 86400;
+            header('Cache-Control: public, max-age=0, s-maxage=600, stale-while-revalidate=' . $stale);
         }
 
         # Send the completed page to the browser by clearing the buffer and echoing
