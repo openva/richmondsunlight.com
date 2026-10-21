@@ -1405,12 +1405,10 @@ class Import
             return false;
         }
 
-        $person_id = $this->ensurePersonRecord($legislator);
-        if ($person_id === false) {
-            return false;
-        }
-
-        // Check for any recent or active term for this lis_id/chamber combination
+        // Check for any recent or active term for this lis_id/chamber combination. This must happen
+        // before the person record is touched: ensurePersonRecord() can create a person, and a
+        // person created here and then abandoned is an orphan that the website lists as a current
+        // legislator.
         $active_check = $GLOBALS['dbh']->prepare(
             'SELECT id, date_ended
                 FROM terms
@@ -1447,6 +1445,52 @@ class Import
             return null;
         }
 
+        // Create the person and the term together, so that a failed term insert can't leave
+        // behind a person with no term.
+        $GLOBALS['dbh']->beginTransaction();
+        try {
+            $person_id = $this->ensurePersonRecord($legislator);
+            if ($person_id === false) {
+                $GLOBALS['dbh']->rollBack();
+                return false;
+            }
+
+            if ($this->insertTerm($person_id, $normalized_lis_id, $legislator) === false) {
+                $GLOBALS['dbh']->rollBack();
+                $this->log->put(
+                    'Error: Legislator term could not be added for ' . $legislator['name_formatted'] . '.',
+                    6
+                );
+                return false;
+            }
+
+            $GLOBALS['dbh']->commit();
+        } catch (Throwable $e) {
+            if ($GLOBALS['dbh']->inTransaction()) {
+                $GLOBALS['dbh']->rollBack();
+            }
+            $this->log->put(
+                'Error: Legislator could not be added for ' . $legislator['name_formatted'] . ': '
+                    . $e->getMessage(),
+                6
+            );
+            return false;
+        }
+
+        return true;
+    } // add_legislator()
+
+    /**
+     * Insert a term for a person.
+     *
+     * @param int   $person_id         ID of the person serving the term.
+     * @param int   $normalized_lis_id Numeric LIS ID.
+     * @param array $legislator        Legislator data array.
+     *
+     * @return bool Whether the term was inserted.
+     */
+    protected function insertTerm($person_id, $normalized_lis_id, array $legislator)
+    {
         $term_sql = 'INSERT INTO terms
                 (person_id, name_formatted, lis_shortname, lis_id, chamber, party, district_id,
                  date_started, date_ended, sbe_id, email, url, rss_url, place, partisanship,
@@ -1483,17 +1527,8 @@ class Import
         ];
 
         $stmt = $GLOBALS['dbh']->prepare($term_sql);
-        $result = $stmt->execute($term_params);
-        if ($result == false) {
-            $this->log->put(
-                'Error: Legislator term could not be added for ' . $legislator['name_formatted'] . '.',
-                6
-            );
-            return false;
-        }
-
-        return true;
-    } // add_legislator()
+        return $stmt->execute($term_params) != false;
+    }
 
     /**
      * Generate a shortname slug for a legislator.
@@ -1710,61 +1745,92 @@ class Import
             return false;
         }
 
-        $stmt = $GLOBALS['dbh']->prepare(
-            'SELECT id FROM people WHERE shortname = :shortname LIMIT 1'
-        );
-        $stmt->execute([':shortname' => $shortname]);
-        $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+        $chamber = strtolower((string)($legislator['chamber'] ?? ''));
+        $normalized_id = $this->normalizeLisNumericIdentifier($legislator['lis_id'] ?? null);
 
-        // If shortname lookup failed, try to find the person via their LIS ID in the terms table.
-        // This handles returning legislators whose display name changed between sessions.
-        if (!$existing && !empty($legislator['lis_id']) && !empty($legislator['chamber'])) {
-            $normalized_id = $this->normalizeLisNumericIdentifier($legislator['lis_id']);
-            if ($normalized_id !== null) {
-                $stmt2 = $GLOBALS['dbh']->prepare(
-                    'SELECT p.id FROM people p
-                     INNER JOIN terms t ON t.person_id = p.id
-                     WHERE t.lis_id = :lis_id AND t.chamber = :chamber
-                     LIMIT 1'
+        // Find the person by their LIS ID first. LIS doesn't provide legislators' legal names
+        // reliably (MemberDisplayName is often a preferred name, like "Bill Wiley" for William D.
+        // Wiley), so a generated shortname can't be trusted to match the one we've stored.
+        $existing = false;
+        if ($normalized_id !== null && $chamber !== '') {
+            $stmt = $GLOBALS['dbh']->prepare(
+                'SELECT p.id, p.shortname FROM people p
+                 INNER JOIN terms t ON t.person_id = p.id
+                 WHERE t.lis_id = :lis_id AND t.chamber = :chamber
+                 ORDER BY t.date_started DESC
+                 LIMIT 1'
+            );
+            $stmt->execute([
+                ':lis_id' => $normalized_id,
+                ':chamber' => $chamber,
+            ]);
+            $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+        }
+
+        // Fall back to the shortname, which finds a legislator moving to the other chamber (and
+        // so getting a new LIS ID).
+        if (!$existing) {
+            $stmt = $GLOBALS['dbh']->prepare(
+                'SELECT id, shortname FROM people WHERE shortname = :shortname LIMIT 1'
+            );
+            $stmt->execute([':shortname' => $shortname]);
+            $existing = $stmt->fetch(PDO::FETCH_ASSOC);
+
+            // If that person has served in this chamber under a different LIS ID, they're a
+            // different legislator who happens to have the same shortname.
+            if ($existing && $normalized_id !== null && $chamber !== '') {
+                $stmt = $GLOBALS['dbh']->prepare(
+                    'SELECT COUNT(*) FROM terms
+                     WHERE person_id = :person_id AND chamber = :chamber AND lis_id != :lis_id'
                 );
-                $stmt2->execute([
+                $stmt->execute([
+                    ':person_id' => (int)$existing['id'],
+                    ':chamber' => $chamber,
                     ':lis_id' => $normalized_id,
-                    ':chamber' => strtolower($legislator['chamber']),
                 ]);
-                $existing = $stmt2->fetch(PDO::FETCH_ASSOC);
-                if ($existing) {
+                if ((int)$stmt->fetchColumn() > 0) {
                     $this->log->put(
-                        'Found existing person for ' . $legislator['name_formal']
-                        . ' via lis_id lookup (generated shortname "' . $shortname
-                        . '" did not match stored shortname).',
-                        2
+                        'Error: Could not add ' . $legislator['name_formal'] . ' (LIS ID '
+                            . $legislator['lis_id'] . '), because their shortname, "' . $shortname
+                            . '", belongs to a different legislator. Add them manually.',
+                        6
                     );
+                    return false;
                 }
             }
         }
 
         $birthday = $this->sanitizeDateValue($legislator['birthday'] ?? null);
-        $race = isset($legislator['race']) ? strtolower((string)$legislator['race']) : null;
-        $sex = isset($legislator['sex']) ? strtolower((string)$legislator['sex']) : null;
+        $race = isset($legislator['race']) ? strtolower(trim((string)$legislator['race'])) : null;
+        $sex = isset($legislator['sex']) ? strtolower(trim((string)$legislator['sex'])) : null;
         $bio = $this->normalizeOptionalString($legislator['bio'] ?? null);
 
         if ($existing) {
-            $params = array(
-                ':name' => $legislator['name'],
-                ':name_formal' => $legislator['name_formal'],
-                ':birthday' => $birthday,
-                ':race' => $race === '' ? null : $race,
-                ':sex' => $sex === '' ? null : $sex,
-                ':bio' => $bio,
-                ':id' => (int)$existing['id'],
+            // Only update the fields that the import supplies, so that missing data doesn't erase
+            // what we already have.
+            $fields = array(
+                'name' => $this->normalizeOptionalString($legislator['name'] ?? null),
+                'name_formal' => $this->normalizeOptionalString($legislator['name_formal'] ?? null),
+                'birthday' => $birthday,
+                'race' => $race === '' ? null : $race,
+                'sex' => $sex === '' ? null : $sex,
+                'bio' => $bio,
             );
+            $fields = array_filter($fields, static function ($value) {
+                return $value !== null;
+            });
+            if (empty($fields)) {
+                return (int)$existing['id'];
+            }
+
+            $set = array();
+            $params = array(':id' => (int)$existing['id']);
+            foreach ($fields as $column => $value) {
+                $set[] = $column . ' = :' . $column;
+                $params[':' . $column] = $value;
+            }
             $sql = 'UPDATE people
-                    SET name = :name,
-                        name_formal = :name_formal,
-                        birthday = :birthday,
-                        race = :race,
-                        sex = :sex,
-                        bio = :bio,
+                    SET ' . implode(', ', $set) . ',
                         date_modified = NOW()
                     WHERE id = :id';
             $update = $GLOBALS['dbh']->prepare($sql);
@@ -1795,6 +1861,14 @@ class Import
             $this->log->put('Error: Person record could not be created for ' . $legislator['name_formal'], 6);
             return false;
         }
+
+        // LIS doesn't reliably provide legal names, so a person's shortname may need correcting.
+        $this->log->put(
+            'Created a new person, ' . $legislator['name_formal'] . ', with the shortname "'
+                . $shortname . '". Verify that it’s made of all of their initials and their last '
+                . 'name, and correct it before their photo is committed.',
+            5
+        );
 
         return (int)$GLOBALS['dbh']->lastInsertId();
     }
@@ -3238,9 +3312,14 @@ class Import
 
         // Use the legal first token for the leading initial; fall back to preferred name.
         $first_initial = '';
+        $first_is_initialism = false;
         if (!empty($display_parts)) {
             $token = $this->sanitize_name_token($display_parts[0]);
-            if ($token !== '') {
+            if ($this->is_initialism($token)) {
+                // e.g., "C.E. Cliff Hayes" is "cehayes"
+                $first_initial = strtolower(str_replace('.', '', $token));
+                $first_is_initialism = true;
+            } elseif ($token !== '') {
                 $first_initial = strtolower($token[0]);
             }
         }
@@ -3276,6 +3355,11 @@ class Import
                     continue;
                 }
 
+                // A whole word after initials is the name they go by, not a middle name
+                if ($first_is_initialism && !$this->is_initialism($token)) {
+                    continue;
+                }
+
                 if (preg_match('/^[A-Za-z]+$/', $token) === 1) {
                     $middle_initial .= strtolower($token[0]);
                 } elseif (preg_match_all('/[A-Za-z]/', $token, $matches)) {
@@ -3291,7 +3375,59 @@ class Import
             }
         }
 
+        // MemberDisplayName sometimes omits a middle initial that ListDisplayName has (e.g.,
+        // "Nicole Cole" and "Cole, Nicole T.").
+        if ($middle_initial === '' && !$first_is_initialism) {
+            $middle_initial = $this->middle_initials_from_list_display(
+                (string)($member['ListDisplayName'] ?? '')
+            );
+        }
+
         return $first_initial . $middle_initial . $sanitized_last;
+    }
+
+    /**
+     * Whether a name token is an initial or a run of initials (e.g., "T", "T.", "C.E").
+     *
+     * @param string $token Name token.
+     *
+     * @return bool
+     */
+    private function is_initialism(string $token)
+    {
+        return preg_match('/^[A-Za-z](\.[A-Za-z])*\.?$/', $token) === 1;
+    }
+
+    /**
+     * Extract middle initials from a list display string (e.g., "Cole, Nicole T." yields "t").
+     * Only initials are used, because whole words here are as likely to be preferred names as
+     * middle names.
+     *
+     * @param string $list_display Display string returned by the API.
+     *
+     * @return string Up to two lowercase initials, or an empty string.
+     */
+    private function middle_initials_from_list_display(string $list_display)
+    {
+        $segments = explode(',', $list_display);
+        if (count($segments) < 2) {
+            return '';
+        }
+
+        // The given names are between the first comma and any second one (before a suffix).
+        $parts = preg_split('/\s+/', trim($segments[1]));
+        array_shift($parts);
+
+        $initials = '';
+        foreach ($parts as $part) {
+            $token = $this->sanitize_name_token($part);
+            if ($token === '' || !$this->is_initialism($token)) {
+                continue;
+            }
+            $initials .= strtolower(str_replace('.', '', $token));
+        }
+
+        return substr($initials, 0, 2);
     }
 
     /**

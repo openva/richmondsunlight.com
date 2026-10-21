@@ -1,11 +1,10 @@
 <?php
 
-$root = realpath(__DIR__ . '/../htdocs');
-require $root . '/includes/settings.inc.php';
-require $root . '/includes/class.Database.php';
-require $root . '/includes/class.Legislator.php';
-require $root . '/includes/class.Log.php';
-require $root . '/includes/vendor/autoload.php';
+require __DIR__ . '/../htdocs/includes/settings.inc.php';
+require __DIR__ . '/../htdocs/includes/class.Database.php';
+require __DIR__ . '/../htdocs/includes/class.Legislator.php';
+require __DIR__ . '/../htdocs/includes/class.Log.php';
+require __DIR__ . '/../htdocs/includes/vendor/autoload.php';
 
 $database = new Database();
 $db = $database->connect_mysqli();
@@ -28,12 +27,19 @@ $sitemap_xml_header = '<?xml version="1.0" encoding="UTF-8"?>
 $sitemap_xml_footer = '</urlset>';
 
 /*
+ * Where the sitemaps go. These paths are relative to this script, not to the current directory,
+ * which, when this is run during a deployment, is CodeDeploy's.
+ */
+$sitemap_dir = __DIR__ . '/../htdocs/sitemaps';
+$sitemap_index = __DIR__ . '/../htdocs/sitemap.xml';
+
+/*
  * If the sitemaps directory doesn't exist, create it.
  */
-if (!file_exists(filename: '../htdocs/sitemaps')) {
+if (!file_exists(filename: $sitemap_dir)) {
     if (
-        !mkdir(directory: '../htdocs/sitemaps', permissions: 0755, recursive: true)
-        && !is_dir(filename: '../htdocs/sitemaps')
+        !mkdir(directory: $sitemap_dir, permissions: 0755, recursive: true)
+        && !is_dir(filename: $sitemap_dir)
     ) {
         $log->put(message: 'Failed to create sitemaps directory', level: 6);
         exit(1);
@@ -57,7 +63,7 @@ $sql = 'SELECT
         ORDER BY people.shortname ASC';
 $result = mysqli_query(mysql: $GLOBALS['db'], query: $sql);
 if ($result && mysqli_num_rows(result: $result) > 0) {
-    $filename = '../htdocs/sitemaps/legislators.xml';
+    $filename = $sitemap_dir . '/legislators.xml';
 
     // Create legislators.xml, if it doesn't already exist, or if it's old.
     if (file_exists(filename: $filename) === false || filemtime(filename: $filename) < strtotime(datetime: '-7 day')) {
@@ -117,13 +123,13 @@ for ($year = 2006; $year <= SESSION_YEAR; $year++) {
             ORDER BY year ASC, number ASC';
     $result = mysqli_query(mysql: $GLOBALS['db'], query: $sql);
     if ($result && mysqli_num_rows(result: $result) > 0) {
-        $filename = '../htdocs/sitemaps/bills-' . $year . '.xml';
-        // Create sitemap-bills-{year}.xml, if it doesn't already exist, or if it's from this year
-        // and also old.
+        $filename = $sitemap_dir . '/bills-' . $year . '.xml';
+        // Create bills-{year}.xml, if it doesn't already exist, or if it's from this year or last
+        // year (whose bills may have changed since it was last generated) and a day old.
         if (
                 file_exists(filename: $filename) === false
                 ||
-                $year == SESSION_YEAR && filemtime(filename: $filename) < strtotime(datetime: '-7 day')
+                $year >= SESSION_YEAR - 1 && filemtime(filename: $filename) < strtotime(datetime: '-1 day')
         ) {
             $sitemap_file = fopen(filename: $filename, mode: 'w');
 
@@ -167,7 +173,7 @@ for ($year = 2006; $year <= SESSION_YEAR; $year++) {
 /*
  * Create a master sitemap.xml that refers to all the other sitemaps.
  */
-$filename = '../htdocs/sitemap.xml';
+$filename = $sitemap_index;
 $sitemap_file = fopen(filename: $filename, mode: 'w');
 
 $sitemap_index_header = '<?xml version="1.0" encoding="UTF-8"?>
