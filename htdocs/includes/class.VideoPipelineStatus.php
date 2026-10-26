@@ -40,6 +40,15 @@ class VideoPipelineStatus
     private const OCR_FROM = '2020-01-01';
 
     /**
+     * The pipeline downloads floor sessions from FLOOR_FROM on and committee
+     * and subcommittee meetings from COMMITTEES_FROM on, and nothing older,
+     * to keep S3 costs down. These must match VideoDownloadQueue in
+     * rs-video-processor (its README explains the decision).
+     */
+    private const FLOOR_FROM = '2020-01-01';
+    private const COMMITTEES_FROM = '2024-01-01';
+
+    /**
      * One row per video, with a true/false flag for each thing the stage rules
      * look at. Large text columns are reduced to flags in SQL.
      *
@@ -53,6 +62,7 @@ class VideoPipelineStatus
                     (f.html IS NOT NULL AND f.html != '') AS embedded,
                     (f.video_index_cache LIKE '%youtube.com%' OR f.video_index_cache LIKE '%youtu.be%') AS youtube,
                     (f.video_index_cache LIKE '{%') AS has_source,
+                    (f.video_index_cache LIKE '%\"event_type\": \"floor\"%') AS floor_event,
                     (f.capture_directory LIKE '/%/%' OR f.capture_directory LIKE 'https://%') AS screenshots,
                     EXISTS (SELECT 1 FROM video_transcript vt WHERE vt.file_id = f.id) AS transcript,
                     EXISTS (SELECT 1 FROM video_index vi WHERE vi.file_id = f.id AND vi.type = 'bill') AS bills,
@@ -66,7 +76,7 @@ class VideoPipelineStatus
         $videos = [];
         $result = mysqli_query($db, $sql);
         while ($result && $row = mysqli_fetch_assoc($result)) {
-            foreach (['on_s3', 'archived', 'embedded', 'youtube', 'has_source', 'screenshots', 'transcript', 'bills', 'speakers', 'has_captions', 'has_transcript_text'] as $flag) {
+            foreach (['on_s3', 'archived', 'embedded', 'youtube', 'has_source', 'screenshots', 'transcript', 'bills', 'speakers', 'has_captions', 'has_transcript_text', 'floor_event'] as $flag) {
                 $row[$flag] = (bool) $row[$flag];
             }
             $videos[(int) $row['id']] = $row;
@@ -129,6 +139,10 @@ class VideoPipelineStatus
         $fixed = self::settledState($stage, $video);
         if ($fixed !== null) {
             return $fixed;
+        }
+
+        if (self::olderThanDownloads($video)) {
+            return ['state' => 'n/a', 'detail' => 'Not downloaded, by choice: the pipeline takes floor sessions from 2020 and committee meetings from 2024.'];
         }
 
         if ($job !== null) {
@@ -239,6 +253,21 @@ class VideoPipelineStatus
         }
 
         return null;
+    }
+
+    /**
+     * Whether a video that has not been downloaded is older than the pipeline
+     * downloads. One downloaded before the dates were set goes on as usual.
+     */
+    private static function olderThanDownloads(array $video): bool
+    {
+        if ($video['on_s3'] || $video['archived']) {
+            return false;
+        }
+        $date = (string) $video['date'];
+        $from = !empty($video['floor_event']) ? self::FLOOR_FROM : self::COMMITTEES_FROM;
+
+        return $date < $from;
     }
 
     /**

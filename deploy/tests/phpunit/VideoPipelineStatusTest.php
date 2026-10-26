@@ -27,6 +27,7 @@ class VideoPipelineStatusTest extends TestCase
             'speakers' => false,
             'has_captions' => false,
             'has_transcript_text' => false,
+            'floor_event' => false,
         ], $overrides);
     }
 
@@ -120,6 +121,37 @@ class VideoPipelineStatusTest extends TestCase
         $video = $this->video(['date' => '2016-01-20', 'on_s3' => false, 'archived' => true]);
         $this->assertSame('n/a', $this->state('screenshots', $video));
         $this->assertSame('n/a', $this->state('transcript', $video));
+    }
+
+    /**
+     * The pipeline downloads floor sessions from 2020 on and committee
+     * meetings from 2024 on (rs-video-processor README, "Which videos are
+     * processed"). Older ones wait for nothing.
+     */
+    public function testVideosOlderThanTheDownloadDatesAreNotDownloaded(): void
+    {
+        $committee2022 = $this->video(['date' => '2022-03-10', 'on_s3' => false]);
+        foreach (array_keys(VideoPipelineStatus::STAGES) as $stage) {
+            $this->assertSame('n/a', $this->state($stage, $committee2022), $stage);
+        }
+        $this->assertStringContainsString(
+            'committee meetings from 2024',
+            VideoPipelineStatus::stageState('download', $committee2022, null, self::NOW)['detail']
+        );
+
+        $this->assertSame('n/a', $this->state('download', $this->video(['date' => '2019-02-21', 'on_s3' => false, 'floor_event' => true])));
+        // Within the dates, they are downloaded as usual.
+        $this->assertSame('waiting', $this->state('download', $this->video(['date' => '2020-02-26', 'on_s3' => false, 'floor_event' => true])));
+        $this->assertSame('waiting', $this->state('download', $this->video(['date' => '2024-01-10', 'on_s3' => false])));
+    }
+
+    /** Videos downloaded before the dates were set carry on. */
+    public function testOldVideosAlreadyDownloadedAreStillProcessed(): void
+    {
+        $video = $this->video(['date' => '2018-05-30', 'floor_event' => true]);
+
+        $this->assertSame('done', $this->state('download', $video));
+        $this->assertSame('waiting', $this->state('screenshots', $video));
     }
 
     public function testADeletedSourceCannotBeScreenshotted(): void
