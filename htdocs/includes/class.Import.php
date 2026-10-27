@@ -1862,6 +1862,9 @@ class Import
             return false;
         }
 
+        // Get the ID before logging, because the log is written to the database too.
+        $person_id = (int)$GLOBALS['dbh']->lastInsertId();
+
         // LIS doesn't reliably provide legal names, so a person's shortname may need correcting.
         $this->log->put(
             'Created a new person, ' . $legislator['name_formal'] . ', with the shortname "'
@@ -1870,7 +1873,7 @@ class Import
             5
         );
 
-        return (int)$GLOBALS['dbh']->lastInsertId();
+        return $person_id;
     }
 
     /**
