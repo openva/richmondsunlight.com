@@ -99,6 +99,18 @@ class VideoPipelineStatusTest extends TestCase
         $this->assertSame('waiting', $this->state('screenshots', $video, $due));
     }
 
+    /** The archive stage waits for the Internet Archive to process an upload; that is not a failure. */
+    public function testAJobWaitingOnTheInternetArchiveIsWaiting(): void
+    {
+        $video = $this->video(['screenshots' => true, 'has_captions' => true, 'has_transcript_text' => true]);
+        $waiting = ['status' => 'waiting', 'attempts' => 0, 'claimed_at' => null, 'next_attempt_at' => '2026-03-13 13:00:00', 'last_error' => 'Uploaded; the Internet Archive is still processing it (archive.php queued).'];
+
+        $this->assertSame('waiting', $this->state('archive', $video, $waiting));
+        $detail = VideoPipelineStatus::stageState('archive', $video, $waiting, self::NOW)['detail'];
+        $this->assertStringContainsString('still processing', $detail);
+        $this->assertStringNotContainsString('failed', $detail);
+    }
+
     public function testDoneWinsOverAnOldJobRecord(): void
     {
         $failed = ['status' => 'failed', 'attempts' => 3, 'claimed_at' => null, 'next_attempt_at' => null, 'last_error' => 'x'];

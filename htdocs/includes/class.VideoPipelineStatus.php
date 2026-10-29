@@ -225,7 +225,7 @@ class VideoPipelineStatus
     }
 
     /**
-     * Running, retrying or failed, from the job record; null when the record
+     * Running, retrying, waiting or failed, from the job record; null when the record
      * no longer holds the job back (a stale claim, or a retry that is due).
      */
     private static function jobState(array $job, int $now): ?array
@@ -247,6 +247,12 @@ class VideoPipelineStatus
                     return ['state' => 'retry', 'detail' => 'Attempt ' . $attempts . ' failed: ' . $error . ' Next try after ' . self::local($next) . '.'];
                 }
                 return null;
+
+            case 'waiting':
+                // Put aside while someone else finishes (the Internet Archive
+                // processing an upload); not a failure. The instance is not
+                // started for it, so it is checked on the next pipeline run.
+                return ['state' => 'waiting', 'detail' => $error . ' Checked again on the next pipeline run.'];
 
             case 'failed':
                 return ['state' => 'failed', 'detail' => 'Gave up after ' . $attempts . ' attempt(s): ' . $error];

@@ -1619,8 +1619,15 @@ class Import
             'sex' => true,
         );
 
-        $term_changes = array_intersect_key($term_fields, $legislator);
-        $person_changes = array_intersect_key($person_fields, $legislator);
+        /*
+         * Blank values are ignored, rather than stored, so that data that a scraper failed to find
+         * isn't erased.
+         */
+        $provided = array_filter($legislator, function ($value) {
+            return $value !== null && trim((string)$value) !== '';
+        });
+        $term_changes = array_intersect_key($term_fields, $provided);
+        $person_changes = array_intersect_key($person_fields, $provided);
         if (count($term_changes) === 0 && count($person_changes) === 0) {
             return;
         }
@@ -1975,102 +1982,62 @@ class Import
          * Fetch delegate information
          */
         if ($chamber == 'house') {
+            $url_id = 'H' . str_pad(preg_replace('/[^0-9]/', '', (string)$lis_id), 4, '0', STR_PAD_LEFT);
+
             /*
-             * Fetch the HTML and save parse the DOM.
+             * The House's member pages. (Until late 2025 they were at
+             * virginiageneralassembly.gov/house/members/members.php?id=H0000, which now redirects
+             * to the list of all members. That page was parsed as though it were the member's,
+             * which yielded nothing, and blanked delegates' websites, races, and sexes.)
              */
-            if (stripos($lis_id, 'H') === false) {
-                $url_id = 'H' . str_pad($lis_id, 4, '0', STR_PAD_LEFT);
-            } else {
-                $url_id = $lis_id;
-            }
-
-            $url = 'https://virginiageneralassembly.gov/house/members/members.php?id=' . $url_id;
-            $html = file_get_contents($url);
-
+            $html = $this->http_get('https://house.vga.virginia.gov/members/' . $url_id);
             if ($html === false) {
                 return false;
             }
 
-            $dom = HtmlDomParser::str_get_html($html);
-            if ($dom === false) {
+            /*
+             * Make sure that this is the member's page, and not some other page that we were
+             * redirected to.
+             */
+            if (strpos($html, '/delegate_photos/' . $url_id . '.') === false) {
+                $this->log->put('The House\'s page for ' . $url_id . ' isn\'t a member page.', 4);
                 return false;
             }
 
-            /*
-             * The array we'll store legislator data in.
-             */
             $legislator = array();
-
             $legislator['chamber'] = 'house';
-            $legislator['lis_id'] = preg_replace('[HS]', '', $lis_id);
+            $legislator['lis_id'] = ltrim(substr($url_id, 1), '0');
+            $legislator['photo_url'] = 'https://house.vga.virginia.gov/delegate_photos/' . $url_id . '.jpg';
 
-            /*
-             * Get delegate's preferred first name.
-             */
-            preg_match('/>Preferred Name: ([a-zA-Z]+)</', $html, $matches);
-            if (!empty($matches)) {
+            if (preg_match('/>Preferred Name: ([a-zA-Z]+)</', $html, $matches)) {
                 $legislator['nickname'] = trim($matches[1]);
-                unset($matches);
             }
 
-            /*
-             * Get delegate's start date.
-             */
-            preg_match('/Member Since: (.+)</', $html, $matches);
-            $legislator['date_started'] = date('Y-m-d', strtotime(trim($matches[1])));
-            unset($matches);
-
-            /*
-             * Get delegate's photo URL.
-             */
-            preg_match('/https:\/\/memdata\.virginiageneralassembly\.gov\/images\/display_image\/H[0-9]{4}/', $html, $matches);
-            $legislator['photo_url'] = $matches[0];
-            unset($matches);
-
-            /*
-             * Get gender.
-             */
-            preg_match('/Gender:<\/span> ([A-Za-z]+)/', $html, $matches);
-            $legislator['sex'] = strtolower($matches[1]);
-            unset($matches);
-
-            /*
-             * Get delegate's race.
-             */
-            preg_match('/Race\(s\):<\/span> (.+)</', $html, $matches);
-            $legislator['race'] = trim(strtolower($matches[1]));
-            $races = array(
-                'african american' => 'black',
-                'caucasian' => 'white',
-                'Asian American' => 'asian',
-                'Asian American, Indian' => 'asian',
-                'Hispanic, Latino' => 'latino',
-                'none given' => '',
-            );
-            foreach ($races as $find => $replace) {
-                if ($legislator['race'] == $find) {
-                    $legislator['race'] = $replace;
-                    break;
+            if (preg_match('/Member Since: ([^<]+)</', $html, $matches)) {
+                $timestamp = strtotime(trim($matches[1]));
+                if ($timestamp !== false) {
+                    $legislator['date_started'] = date('Y-m-d', $timestamp);
                 }
             }
-            unset($matches);
 
-            /*
-             * Get delegate's personal website.
-             */
-            preg_match('/Delegate\'s Personal Website[\s\S]+(http(.+))"/U', $html, $matches);
-            $legislator['url'] = trim($matches[1]);
-            if (stripos($legislator['url'], '.gov') !== false) {
-                unset($legislator['url']);
+            if (preg_match('/Gender:<\/span>\s*([A-Za-z]+)/', $html, $matches)) {
+                $legislator['sex'] = strtolower($matches[1]);
             }
-            unset($matches);
 
             /*
-             * Turn district number into a district ID
+             * Race is standardized below, along with the Senate's.
              */
-            $district = new District();
-            $d = $district->info('house', $legislator['district_number']);
-            $legislator['district_id'] = $d['id'];
+            if (preg_match('/Race\(s\)(?:\/Ethnicity)?:<\/span>\s*([^<]+?)\s*</', $html, $matches)) {
+                $legislator['race'] = strtolower(trim($matches[1]));
+                if ($legislator['race'] === 'none given') {
+                    unset($legislator['race']);
+                }
+            }
+
+            /*
+             * The House no longer lists delegates' personal websites, so we don't get those here.
+             * Districts come from the LIS API (see fetch_legislator_data_api()).
+             */
         } // fetch delegate
 
         /*
@@ -2270,18 +2237,20 @@ class Import
             elseif (stristr($legislator['race'], ',')) {
                 $legislator['race'] = '';
             }
-        }
 
-        /*
-         * Drop any array elements with blank contents.
-         */
-        foreach ($legislator as $key => $value) {
-            if (!empty($value)) {
-                $newLegislator[$key] = $value;
+            // Nor anything that people.race can't store.
+            $races = ['american indian', 'asian', 'pacific islander', 'white', 'black', 'latino', 'other'];
+            if (!in_array($legislator['race'], $races, true)) {
+                $legislator['race'] = '';
             }
         }
 
-        return $legislator;
+        /*
+         * Drop any array elements with blank contents, so that they can't overwrite stored data.
+         */
+        return array_filter($legislator, function ($value) {
+            return !empty($value);
+        });
     }
 
     /**
