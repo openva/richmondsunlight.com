@@ -40,14 +40,13 @@ When you are done, run `./docker-stop.sh` (or quit Docker).
 
 ### Rebuilding the database
 
-The database is initialized from SQL dumps when the MariaDB container is first created. If you change any SQL files under `deploy/mysql/`, those changes won't take effect until you destroy the existing database volume and rebuild:
+The database is initialized from SQL dumps when the MariaDB container is first created. If any SQL files under `deploy/mysql/` change (including when you download a new local sample), those changes won't take effect until you delete the database and load it again:
 
 ```sh
-docker compose down && docker volume rm richmondsunlightcom_db_data
-./docker-run.sh
+./docker-run.sh --fresh
 ```
 
-Removing the `db_data` volume forces MariaDB to re-run the init scripts on the next startup.
+That deletes the `db_data` volume and rebuilds the database's image, which holds a copy of the SQL files, so that MariaDB loads them again.
 
 ## Architecture
 ```mermaid

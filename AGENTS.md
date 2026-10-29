@@ -295,7 +295,7 @@ Legislative videos from Archive.org:
 
 1. Modify `deploy/mysql/structure.sql` for schema changes
 2. Update seed data in `deploy/mysql/basic-contents.sql` if needed
-3. Test with fresh Docker build: `docker compose down -v && ./docker-run.sh`
+3. Test with a freshly loaded database: `./docker-run.sh --fresh`
 4. Document migration path for production database
 
 ### Updating Dependencies
