@@ -11,4 +11,15 @@
             <directory>tests/local</directory>
         </testsuite>
     </testsuites>
+    <!-- The code that test coverage is reported for (see deploy/tests/run-all.sh) -->
+    <source>
+        <include>
+            <directory suffix=".php">htdocs</directory>
+        </include>
+        <exclude>
+            <directory>htdocs/includes/vendor</directory>
+            <directory>htdocs/js</directory>
+            <directory>htdocs/admin</directory>
+        </exclude>
+    </source>
 </phpunit>

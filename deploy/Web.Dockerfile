@@ -34,6 +34,10 @@ RUN apt-get install -y git zip sphinxsearch zlib1g-dev jq
 # Install PHP memcached extension
 RUN pecl install memcached && docker-php-ext-enable memcached
 
+# Install PCOV, which measures what code the PHPUnit tests run, for SonarQube Cloud
+RUN pecl install pcov && docker-php-ext-enable pcov \
+    && echo 'pcov.directory=/var/www/htdocs' > /usr/local/etc/php/conf.d/pcov-directory.ini
+
 # Install Composer
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
