@@ -74,8 +74,10 @@ services:
       timeout: 5s
       retries: 3
 
-  # Security testing service
+  # Security testing service. In the "tools" profile, so that it's started only by docker-tests.sh
+  # (with "docker compose run"), for the scan, rather than with everything else.
   owasp_zap:
+    profiles: [tools]
     build:
       context: deploy/
       dockerfile: ZAP.Dockerfile
@@ -100,8 +102,9 @@ services:
       timeout: 5s
       retries: 3
 
-  # Headless browser for interaction tests
+  # Headless browser for interaction tests. Also in the "tools" profile, for docker-tests.sh.
   playwright:
+    profiles: [tools]
     image: mcr.microsoft.com/playwright:v1.57.0-jammy
     working_dir: /workspace
     volumes:
