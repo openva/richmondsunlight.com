@@ -234,7 +234,7 @@ The pipeline runs on:
 - **Integration tests** - Page scanning for errors/warnings (`deploy/tests/page-scan.php`)
 - **Local tests** - Sweeps of every page and record in the local-only sample (`tests/local/`, run with `./docker-tests.sh --local`)
 - **Browser tests** - Playwright tests for user flows (`deploy/browser-tests/*.spec.ts`)
-- **Security tests** - OWASP ZAP baseline scan (full scan on schedule and deploy PRs)
+- **Security tests** - OWASP ZAP baseline scan (full scan on schedule and deploy PRs). Any finding rated Low risk or higher fails the build, unless it's in `deploy/tests/zap-allowed-alerts.txt` (checked by `deploy/tests/check-zap-alerts.sh`)
 
 ## Important Patterns
 

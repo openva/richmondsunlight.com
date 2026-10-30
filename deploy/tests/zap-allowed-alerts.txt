@@ -1,0 +1,30 @@
+# The OWASP ZAP findings that are allowed: that is, that don't fail the build.
+#
+# docker-tests.sh scans the site with ZAP, and then deploy/tests/check-zap-alerts.sh fails the
+# build for any finding rated Low risk or higher that isn't listed here. (ZAP's own way of
+# ignoring findings, the -c rules file, can only ignore a whole scan rule, such as every CSP
+# problem at once, which would hide new problems along with these.)
+#
+# Each line is a finding's alert reference, then why it's allowed. The reference is the
+# "alertRef" in ZAP's JSON report (zap-reports/zap-baseline.json): the scan rule's ID, and, for a
+# rule that can report several kinds of problem, a hyphen and the number of the kind. To allow
+# another finding, add its reference here, with the reason, rather than ignoring its whole rule.
+#
+# A finding is allowed wherever it occurs. For example, allowing 10055-4 allows a wildcard in any
+# CSP directive, not just in the ones that have one now.
+
+# The Content Security Policy (in htdocs/.htaccess) deliberately leaves scripts and styles loose,
+# because the site's pages use inline JavaScript and styles, and scripts and styles from other
+# sites. Tightening it is a bigger job than adding a header.
+10055-4     CSP: Wildcard Directive (https: in script-src, style-src, img-src, and connect-src)
+10055-5     CSP: script-src unsafe-inline
+10055-6     CSP: style-src unsafe-inline
+10055-10    CSP: script-src unsafe-eval
+
+# Requiring cross-origin resources to opt in to being embedded would break the videos from YouTube
+# and the Internet Archive, which don't.
+90004-2     Cross-Origin-Embedder-Policy Header Missing or Invalid
+
+# The Docker site that's scanned has no HTTPS, unlike the real site, which only serves HTTPS.
+# (Only the full scan reports this.)
+10106       HTTP Only Site

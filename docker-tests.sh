@@ -85,6 +85,8 @@ else
 fi
 
 mkdir -p "${ZAP_REPORT_DIR}"
+# Remove the last scan's report, so that it can't be mistaken for this one's
+rm -f "${ZAP_REPORT_DIR}/$(basename "${ZAP_REPORT_JSON}")"
 
 # Normalize and validate ZAP fail level
 ZAP_FAIL_LEVEL=$(echo "${ZAP_FAIL_LEVEL_RAW}" | tr '[:lower:]' '[:upper:]')
@@ -96,9 +98,15 @@ case "${ZAP_FAIL_LEVEL}" in
     ;;
 esac
 
-# Run an OWASP ZAP scan against the site
+# Run an OWASP ZAP scan against the site.
+#
+# ZAP itself is told not to fail on warnings (-I), because its only way of allowing a finding is to
+# ignore its whole scan rule (every CSP problem, for instance). Instead, once it's done,
+# deploy/tests/check-zap-alerts.sh fails the build for any finding rated Low risk or higher that
+# isn't in deploy/tests/zap-allowed-alerts.txt, which lists the few that are allowed, and why.
+# (ZAP_FAIL_LEVEL is only the lowest level of finding that ZAP lists in its output.)
 if [ "${FULL_SCAN}" = true ]; then
-  echo "Running OWASP ZAP full scan against ${ZAP_TARGET} (fail on ${ZAP_FAIL_LEVEL}+ alerts)..."
+  echo "Running OWASP ZAP full scan against ${ZAP_TARGET} (listing ${ZAP_FAIL_LEVEL}+ alerts)..."
   $COMPOSE_BINARY run --rm --entrypoint="" -v "${ZAP_REPORT_DIR}:/zap/wrk" owasp_zap \
     zap-full-scan.py \
       -t "${ZAP_TARGET}" \
@@ -109,7 +117,7 @@ if [ "${FULL_SCAN}" = true ]; then
       -l "${ZAP_FAIL_LEVEL}"
   echo "ZAP full scan complete. Reports available in ${ZAP_REPORT_DIR}."
 else
-  echo "Running OWASP ZAP baseline scan against ${ZAP_TARGET} (fail on ${ZAP_FAIL_LEVEL}+ alerts)..."
+  echo "Running OWASP ZAP baseline scan against ${ZAP_TARGET} (listing ${ZAP_FAIL_LEVEL}+ alerts)..."
   $COMPOSE_BINARY run --rm --entrypoint="" -v "${ZAP_REPORT_DIR}:/zap/wrk" owasp_zap \
     zap-baseline.py \
       -t "${ZAP_TARGET}" \
@@ -120,5 +128,9 @@ else
       -l "${ZAP_FAIL_LEVEL}"
   echo "ZAP baseline scan complete. Reports available in ${ZAP_REPORT_DIR}."
 fi
+
+# Fail if the scan found anything that isn't allowed. The JSON report that ZAP wrote to
+# ${ZAP_REPORT_JSON}, in its container, is in ${ZAP_REPORT_DIR} here.
+./deploy/tests/check-zap-alerts.sh "${ZAP_REPORT_DIR}/$(basename "${ZAP_REPORT_JSON}")"
 
 echo "All tests completed successfully."
