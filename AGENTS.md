@@ -234,7 +234,7 @@ The pipeline runs on:
 - **Integration tests** - Page scanning for errors/warnings (`deploy/tests/page-scan.php`)
 - **Local tests** - Sweeps of every page and record in the local-only sample (`tests/local/`, run with `./docker-tests.sh --local`)
 - **Browser tests** - Playwright tests for user flows (`deploy/browser-tests/*.spec.ts`)
-- **Security tests** - OWASP ZAP baseline scan (full scan on schedule and deploy PRs)
+- **Security tests** - OWASP ZAP baseline scan (full scan on schedule and deploy PRs). Any finding rated Low risk or higher fails the build, unless it's in `deploy/tests/zap-allowed-alerts.txt` (checked by `deploy/tests/check-zap-alerts.sh`)
 
 ## Important Patterns
 
@@ -295,7 +295,7 @@ Legislative videos from Archive.org:
 
 1. Modify `deploy/mysql/structure.sql` for schema changes
 2. Update seed data in `deploy/mysql/basic-contents.sql` if needed
-3. Test with fresh Docker build: `docker compose down -v && ./docker-run.sh`
+3. Test with a freshly loaded database: `./docker-run.sh --fresh`
 4. Document migration path for production database
 
 ### Updating Dependencies

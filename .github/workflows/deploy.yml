@@ -163,6 +163,16 @@ jobs:
         if: always()
         run: ./docker-stop.sh
 
+      # For the SonarQube Cloud analysis, below. It names files by their paths in the container.
+      - name: Upload test coverage
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: coverage
+          path: coverage/clover.xml
+          retention-days: 1
+          if-no-files-found: ignore
+
       - name: Configure deployment type
         run: |
           if [ "$GITHUB_REF_NAME" = "master" ]; then
@@ -182,7 +192,7 @@ jobs:
       # deploy job, immediately before the code is pushed to AWS.
       - name: Compress codebase
         if: env.GITHUB_REF_NAME == 'master' || env.GITHUB_REF_NAME == 'deploy'
-        run: zip -r codebase.zip . -x ".git/*" ".pw-browsers/*" "deploy/browser-tests/*"
+        run: zip -r codebase.zip . -x ".git/*" ".pw-browsers/*" "deploy/browser-tests/*" "coverage/*"
 
       - name: Upload codebase
         if: env.GITHUB_REF_NAME == 'master' || env.GITHUB_REF_NAME == 'deploy'
@@ -192,6 +202,42 @@ jobs:
           path: codebase.zip
           retention-days: 1
           if-no-files-found: error
+
+  # Analyze the code, with the integration tests' coverage of it, on SonarQube Cloud. (To run this
+  # analysis locally, before pushing, see deploy/sonar-scan.sh.)
+  sonar:
+    name: SonarQube Cloud Analysis
+    needs: integration
+    runs-on: ubuntu-24.04
+    # Not for the nightly redeployment, which changes nothing
+    if: ${{ !cancelled() && github.event_name != 'schedule' }}
+    permissions:
+      contents: read
+      pull-requests: read # allows SonarQube Cloud to decorate pull requests with its results
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The full history, so that SonarQube Cloud can tell which code is new
+          fetch-depth: 0
+
+      # Missing if the tests stopped before PHPUnit ran, in which case coverage reads as 0%
+      - name: Download test coverage
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        continue-on-error: true
+        with:
+          name: coverage
+          path: coverage
+
+      - name: Point the coverage report at this checkout
+        run: |
+          if [ -f coverage/clover.xml ]; then
+            sed -i "s#/var/www/#${GITHUB_WORKSPACE}/#g" coverage/clover.xml
+          fi
+
+      - name: Analyze with SonarQube Cloud
+        uses: SonarSource/sonarqube-scan-action@d209202bc7d53ff1cc128f7f907dac145c9d6ae9 # v8.3.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
   deploy:
     name: Deploy to AWS

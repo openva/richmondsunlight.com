@@ -15,6 +15,8 @@ class Import
     private $pdo;
     private $preferredNameCache = [];
     private $ga_member_page_cache = [];
+    /** @var array<string,bool> Whether each email domain checked so far exists. */
+    private $emailDomainCache = [];
 
     /** @var string|null */
     public $bill_number;
@@ -1389,6 +1391,11 @@ class Import
             'email' => true,
         );
 
+        // An invalid email address counts as a missing one.
+        if (array_key_exists('email', $legislator) && $this->validEmail($legislator['email']) === null) {
+            unset($legislator['email']);
+        }
+
         /*
          * If any required values are missing, give up.
          */
@@ -1626,6 +1633,10 @@ class Import
         $provided = array_filter($legislator, function ($value) {
             return $value !== null && trim((string)$value) !== '';
         });
+        // An invalid email address is ignored, like a blank one, rather than replacing a good one.
+        if (isset($provided['email']) && $this->validEmail($provided['email']) === null) {
+            unset($provided['email']);
+        }
         $term_changes = array_intersect_key($term_fields, $provided);
         $person_changes = array_intersect_key($person_fields, $provided);
         if (count($term_changes) === 0 && count($person_changes) === 0) {
@@ -1897,6 +1908,53 @@ class Import
         }
         $value = trim((string)$value);
         return $value === '' ? null : $value;
+    }
+
+    /**
+     * Return an email address, trimmed, or null if it isn't usable.
+     *
+     * FILTER_VALIDATE_EMAIL checks only an address's form, and an address that LIS has cut off
+     * ("senatorsturtevant@senate.virginia.g") is well-formed, so the domain must also exist.
+     *
+     * @param mixed $email Possible email address.
+     *
+     * @return string|null The address, or null when it's malformed or its domain doesn't exist.
+     */
+    private function validEmail($email)
+    {
+        if (!is_string($email)) {
+            return null;
+        }
+        $email = trim($email);
+        if ($email === '') {
+            return null;
+        }
+
+        if (filter_var($email, FILTER_VALIDATE_EMAIL) !== false) {
+            $domain = strtolower(substr($email, strrpos($email, '@') + 1));
+            if (!array_key_exists($domain, $this->emailDomainCache)) {
+                $this->emailDomainCache[$domain] = $this->emailDomainExists($domain);
+            }
+            if ($this->emailDomainCache[$domain]) {
+                return $email;
+            }
+        }
+
+        $this->log->put('Ignoring invalid email address: ' . $email, 4);
+        return null;
+    }
+
+    /**
+     * Whether a domain can receive email: that it has an MX record, or else an A record.
+     *
+     * @param string $domain Domain name.
+     *
+     * @return bool
+     */
+    protected function emailDomainExists($domain)
+    {
+        // The trailing dot keeps the resolver from appending a search domain.
+        return checkdnsrr($domain . '.', 'MX') || checkdnsrr($domain . '.', 'A');
     }
 
     /**
@@ -2770,11 +2828,18 @@ class Import
             'email' => null,
             'place' => null,
         ];
+        $email_candidates = [];
 
         foreach ($contacts as $contact) {
             if (!is_array($contact)) {
                 continue;
             }
+
+            /*
+             * Prefer GABEmailAddress. Each contact entry's EmailAddress is cut off at 35
+             * characters ("senatorsturtevant@senate.virginia.g"), so it's only a fallback.
+             */
+            $email_candidates[] = $contact['GABEmailAddress'] ?? null;
 
             $entries = [];
             if (isset($contact['ContactInformation']) && is_array($contact['ContactInformation'])) {
@@ -2811,19 +2876,21 @@ class Import
                     }
                 }
 
-                if ($details['email'] === null && !empty($entry['EmailAddress'])) {
-                    $details['email'] = $entry['EmailAddress'];
-                }
+                $email_candidates[] = $entry['EmailAddress'] ?? null;
             }
 
             if ($details['phone_richmond'] === null && !empty($contact['GABPhoneNumber'])) {
                 $details['phone_richmond'] = $this->normalizePhone($contact['GABPhoneNumber']);
             }
-            if ($details['email'] === null && !empty($contact['GABEmailAddress'])) {
-                $details['email'] = $contact['GABEmailAddress'];
-            }
             if ($details['address_richmond'] === null && !empty($contact['RoomNumber'])) {
                 $details['address_richmond'] = 'Room ' . trim($contact['RoomNumber']) . ', General Assembly Building, Richmond, VA';
+            }
+        }
+
+        foreach ($email_candidates as $candidate) {
+            $details['email'] = $this->validEmail($candidate);
+            if ($details['email'] !== null) {
+                break;
             }
         }
 
@@ -3086,7 +3153,7 @@ class Import
             'district_number' => $district_number,
             'party' => $party_code,
             'date_started' => $date_started,
-            'email' => $contact_details['email'] ?? ($member['GABEmailAddress'] ?? null),
+            'email' => $contact_details['email'] ?? $this->validEmail($member['GABEmailAddress'] ?? null),
             'address_richmond' => $contact_details['address_richmond'] ?? null,
             'phone_richmond' => $contact_details['phone_richmond'] ?? null,
             'address_district' => $contact_details['address_district'] ?? null,

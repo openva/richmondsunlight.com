@@ -29,9 +29,16 @@ Header always set X-Frame-Options "SAMEORIGIN"
 Header always set X-Xss-Protection "1; mode=block"
 Header always set X-Content-Type-Options "nosniff"
 Header always set Referrer-Policy "strict-origin-when-cross-origin"
+# Other sites may embed our images and the like (as RSS readers do, and sites that show legislators'
+# photos), so this states that explicitly, rather than limiting them to our own sites ("same-site")
+Header always set Cross-Origin-Resource-Policy "cross-origin"
+# Keep pages from other sites, opened from ours or opening ours, from reaching into our windows
+Header always set Cross-Origin-Opener-Policy "same-origin"
 
-Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.richmondsunlight.com https:; media-src 'self' https://*.richmondsunlight.com https://archive.org https://*.archive.org https://*.sliq.net https://archive-video.granicus.com https://*.youtube-nocookie.com https://*.youtube.com https://*.googlevideo.com https://i.ytimg.com; frame-src 'self' https://*.youtube-nocookie.com https://*.youtube.com https://*.richmondsunlight.com https://*.archive.org; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; frame-ancestors 'self';"
+Header always set Content-Security-Policy "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https:; style-src 'self' 'unsafe-inline' https:; img-src 'self' data: blob: https:; font-src 'self' data:; connect-src 'self' https://*.richmondsunlight.com https:; media-src 'self' https://*.richmondsunlight.com https://archive.org https://*.archive.org https://*.sliq.net https://archive-video.granicus.com https://*.youtube-nocookie.com https://*.youtube.com https://*.googlevideo.com https://i.ytimg.com; frame-src 'self' https://*.youtube-nocookie.com https://*.youtube.com https://*.richmondsunlight.com https://*.archive.org; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self';"
+# PHP adds this to the headers sent on success, which "always" alone doesn't reach
 Header always unset X-Powered-By
+Header unset X-Powered-By
 Header always edit Set-Cookie (.*) "$1; SameSite=Strict"
 
 <IfModule mod_deflate.c>

@@ -1,7 +1,20 @@
 const { test, expect } = require('@playwright/test');
 
 // Fixtures: Deeds's older clips are in deploy/mysql/video-legislator-fixtures.sql; Krizek's come
-// from the video index in deploy/mysql/video-minutes-fixtures.sql.
+// from the video index in deploy/mysql/video-minutes-fixtures.sql. Both of them also speak in some
+// of the videos in the local sample (deploy/mysql/local-test-records.sql), when it's loaded, and
+// those change with every export, so these tests don't count on how many clips there are.
+
+// Deeds's clips from the fixtures alone
+const DEEDS_FIXTURE_CLIPS = 281;
+
+// Open the year that a clip is listed under, unless it already is.
+async function openYear(page, clip) {
+  const year = page.locator('.clip-player-year', { has: clip });
+  if ((await year.getAttribute('open')) === null) {
+    await year.locator('summary').click();
+  }
+}
 
 async function openVideoTab(page, shortname) {
   await page.goto(`/legislator/${shortname}/`);
@@ -15,15 +28,25 @@ test.describe('Legislator video', () => {
 
     const section = page.locator('#video');
     await expect(page.locator('script[src*="flowplayer"]')).toHaveCount(0);
-    await expect(section).toContainText('We have 281 video clips of Creigh Deeds speaking, from 2009 through 2017.');
-    await expect(section.locator('.clip-player-clip')).toHaveCount(281);
 
-    const years = section.locator('.clip-player-year');
-    await expect(years).toHaveCount(9);
-    await expect(years.first().locator('summary')).toContainText('2017');
+    // The summary's count is the number of clips listed.
+    const summary = section.getByText(/We have \d+ video clips of Creigh Deeds speaking, from 2009 through \d{4}\./);
+    await expect(summary).toBeVisible();
+    const total = Number((await summary.textContent()).match(/We have (\d+) video clips/)[1]);
+    expect(total).toBeGreaterThanOrEqual(DEEDS_FIXTURE_CLIPS);
+    await expect(section.locator('.clip-player-clip')).toHaveCount(total);
+
+    // Years run newest first, and only the first is open.
+    const years = await section.locator('.clip-player-year summary').evaluateAll((summaries) =>
+      summaries.map((element) => Number(element.textContent.match(/\d{4}/)[0]))
+    );
+    expect(years.length).toBeGreaterThanOrEqual(9);
+    expect(years).toEqual([...years].sort((a, b) => b - a));
+    expect(years).toContain(2009);
     await expect(section.locator('.clip-player-year[open]')).toHaveCount(1);
+    await expect(section.locator('.clip-player-year').first()).toHaveAttribute('open', '');
     await expect(section.locator('.clip-player-now')).toHaveText(
-      'Clip 1 of 281: Senate floor session, February 25, 2017'
+      new RegExp(`^Clip 1 of ${total}: .+, \\w+ \\d{1,2}, ${years[0]}$`)
     );
 
     // Older clips stored as http:// must be upgraded, or the CSP blocks them.
@@ -39,15 +62,19 @@ test.describe('Legislator video', () => {
     await clip.locator('.clip-player-select').click();
 
     await expect(clip).toHaveClass(/is-active/);
-    await expect(page.locator('.clip-player-now')).toHaveText(/^Clip \d+ of 281: Senate floor session, .+ 2012$/);
+    await expect(page.locator('.clip-player-now')).toHaveText(/^Clip \d+ of \d+: Senate floor session, .+ 2012$/);
     await expect(clip.locator('[data-transcript-src]')).toHaveAttribute('data-loaded', 'yes');
   });
 
   test('builds clips from the speaker index, with transcripts', async ({ page }) => {
     await openVideoTab(page, 'pekrizek');
 
-    const floor = page.locator('.clip-player-clip', { hasText: 'House floor session' }).first();
-    await expect(floor).toContainText('January 26, 2026');
+    // The fixture's clip, among however many others the sample adds
+    const floor = page
+      .locator('.clip-player-clip', { hasText: 'House floor session' })
+      .filter({ hasText: 'January 26, 2026' })
+      .first();
+    await openYear(page, floor);
     await floor.locator('.clip-player-select').click();
     await expect(floor.locator('[data-transcript-src]')).toContainText('House Bill 368');
   });
@@ -61,10 +88,21 @@ test.describe('Legislator video', () => {
   });
 
   test('hides the captions button for clips without captions', async ({ page }) => {
+    // The button follows the current clip. The fixtures' clips of Deeds have no captions...
     await openVideoTab(page, 'rcdeeds');
+    const year = page.locator('.clip-player-year', { hasText: '2012' });
+    await year.locator('summary').click();
+    await year.locator('.clip-player-clip').first().locator('.clip-player-select').click();
     await expect(page.locator('#video .clip-player-captions')).toBeDisabled();
 
+    // ...and the fixture's clip of Krizek does.
     await openVideoTab(page, 'pekrizek');
+    const clip = page
+      .locator('.clip-player-clip', { hasText: 'House floor session' })
+      .filter({ hasText: 'January 26, 2026' })
+      .first();
+    await openYear(page, clip);
+    await clip.locator('.clip-player-select').click();
     await expect(page.locator('#video .clip-player-captions')).toBeEnabled();
   });
 

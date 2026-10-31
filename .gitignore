@@ -32,6 +32,8 @@ deploy/mysql/local-*.sql
 htdocs/sitemap.xml
 /htdocs/sitemaps
 zap-reports/
+/coverage/
+/.scannerwork/
 deploy/browser-tests/node_modules/
 /.pw-browsers
 llm-instructions.md

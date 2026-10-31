@@ -8,10 +8,18 @@ cd "$DIR" || exit
 
 REPO_ROOT="$( cd "$DIR/../.." >/dev/null 2>&1 && pwd )"
 
+# Report the tests' coverage, for SonarQube Cloud, wherever PCOV is installed to measure it (as it
+# is in the Docker image)
+COVERAGE=()
+if php -m | grep -qx pcov; then
+    mkdir -p "$REPO_ROOT/coverage"
+    COVERAGE=(--coverage-clover "$REPO_ROOT/coverage/clover.xml")
+fi
+
 # Run PHPUnit test suite (unit + integration tests)
 if ! "$REPO_ROOT/htdocs/includes/vendor/bin/phpunit" \
         --configuration "$REPO_ROOT/phpunit.xml" \
-        --testsuite default; then
+        --testsuite default "${COVERAGE[@]}"; then
     ERRORED=true
 fi
 
