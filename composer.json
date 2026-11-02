@@ -7,7 +7,7 @@
     },
     "require": {
         "php": "^8.0",
-        "phpmailer/phpmailer": "^6.5",
+        "phpmailer/phpmailer": "^7.1",
         "ezyang/htmlpurifier": "^4.13",
         "doctrine/instantiator": "^2.0",
         "simplepie/simplepie": "^1.7",
