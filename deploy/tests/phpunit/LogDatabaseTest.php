@@ -1,5 +1,6 @@
 <?php
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class LogDatabaseTest extends TestCase
@@ -64,9 +65,7 @@ class LogDatabaseTest extends TestCase
         $this->assertSame(3, (int) $row['level']);
     }
 
-    /**
-     * @dataProvider severityLevelProvider
-     */
+    #[DataProvider('severityLevelProvider')]
     public function testDatabaseStoresCorrectSeverityLevel(int $level): void
     {
         $log = new Log();
