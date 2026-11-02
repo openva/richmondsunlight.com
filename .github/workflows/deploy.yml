@@ -209,8 +209,9 @@ jobs:
     name: SonarQube Cloud Analysis
     needs: integration
     runs-on: ubuntu-24.04
-    # Not for the nightly redeployment, which changes nothing
-    if: ${{ !cancelled() && github.event_name != 'schedule' }}
+    # Not for the nightly redeployment, which changes nothing, or for Dependabot's PRs, which can't
+    # read SONAR_TOKEN (GitHub withholds Actions secrets from them) and change only vendored code
+    if: ${{ !cancelled() && github.event_name != 'schedule' && github.actor != 'dependabot[bot]' }}
     permissions:
       contents: read
       pull-requests: read # allows SonarQube Cloud to decorate pull requests with its results
