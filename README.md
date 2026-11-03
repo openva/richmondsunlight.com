@@ -32,7 +32,7 @@ There are additional tests, in `tests/local/`, that run against a larger sample 
 1. [Rebuild the database](#rebuilding-the-database), which loads it.
 1. Run `./docker-tests.sh --local`, or just the local tests, with `docker compose exec web /var/www/htdocs/includes/vendor/bin/phpunit --configuration /var/www/phpunit.xml --testsuite local`.
 
-The "Local Tests" GitHub Actions workflow runs these on the same schedule, against the latest sample, and reports failures to Slack. They don't block deployment, because what they find is mostly problems in the data.
+The "Production Data Tests" GitHub Actions workflow runs these on the same schedule, against the latest sample, and reports failures to Slack. They don't block deployment, because what they find is mostly problems in the data.
 
 Without the sample, the local tests are skipped, except for those in `LocalDataTest`, which fail to say that it's missing. In Docker, PHP logs errors to `logs/php-errors.log`, rather than to Apache's log, which is how the tests find them.
 
