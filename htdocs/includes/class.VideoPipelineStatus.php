@@ -19,6 +19,9 @@ class VideoPipelineStatus
         'bills' => 'Bills',
         'speakers' => 'Speakers',
         'archive' => 'Archive',
+        // New captions sent to a video already on the Internet Archive. Its
+        // jobs exist only when something asks for one, so no job means done.
+        'archive_captions' => 'IA captions',
     ];
 
     /** Every state stageState() returns, in the order the dashboard lists them. */
@@ -40,6 +43,12 @@ class VideoPipelineStatus
     private const OCR_FROM = '2020-01-01';
 
     /**
+     * Archived videos are transcribed, from archive.org, from this date on.
+     * Must match TranscriptJobQueue::ARCHIVED_FROM in rs-video-processor.
+     */
+    private const TRANSCRIBE_ARCHIVED_FROM = '2020-01-01';
+
+    /**
      * The pipeline downloads floor sessions from FLOOR_FROM on and committee
      * and subcommittee meetings from COMMITTEES_FROM on, and nothing older,
      * to keep S3 costs down. These must match VideoDownloadQueue in
@@ -59,6 +68,7 @@ class VideoPipelineStatus
         $sql = "SELECT f.id, f.chamber, f.title, f.date, f.capture_directory,
                     f.path LIKE 'https://video.richmondsunlight.com/%' AS on_s3,
                     f.path LIKE 'https://archive.org/%' AS archived,
+                    f.path LIKE 'https://archive.org/download/%' AS archived_download,
                     (f.html IS NOT NULL AND f.html != '') AS embedded,
                     (f.video_index_cache LIKE '%youtube.com%' OR f.video_index_cache LIKE '%youtu.be%') AS youtube,
                     (f.video_index_cache LIKE '{%') AS has_source,
@@ -68,6 +78,7 @@ class VideoPipelineStatus
                     EXISTS (SELECT 1 FROM video_index vi WHERE vi.file_id = f.id AND vi.type = 'bill') AS bills,
                     EXISTS (SELECT 1 FROM video_index vi WHERE vi.file_id = f.id AND vi.type = 'legislator') AS speakers,
                     (f.webvtt IS NOT NULL OR f.srt IS NOT NULL) AS has_captions,
+                    f.caption_alignment IS NOT NULL AS captions_checked,
                     f.transcript IS NOT NULL AS has_transcript_text
                 FROM files f
                 WHERE f.type = 'video'" . ($fileId !== null ? ' AND f.id = ' . (int) $fileId : '') . '
@@ -76,7 +87,7 @@ class VideoPipelineStatus
         $videos = [];
         $result = mysqli_query($db, $sql);
         while ($result && $row = mysqli_fetch_assoc($result)) {
-            foreach (['on_s3', 'archived', 'embedded', 'youtube', 'has_source', 'screenshots', 'transcript', 'bills', 'speakers', 'has_captions', 'has_transcript_text', 'floor_event'] as $flag) {
+            foreach (['on_s3', 'archived', 'archived_download', 'captions_checked', 'embedded', 'youtube', 'has_source', 'screenshots', 'transcript', 'bills', 'speakers', 'has_captions', 'has_transcript_text', 'floor_event'] as $flag) {
                 $row[$flag] = (bool) $row[$flag];
             }
             $videos[(int) $row['id']] = $row;
@@ -145,6 +156,10 @@ class VideoPipelineStatus
             return ['state' => 'n/a', 'detail' => 'Not downloaded, by choice: the pipeline takes floor sessions from 2020 and committee meetings from 2024.'];
         }
 
+        if ($stage === 'archive_captions' && $job === null) {
+            return ['state' => 'done', 'detail' => ''];
+        }
+
         if ($job !== null) {
             $fromJob = self::jobState($job, $now);
             if ($fromJob !== null) {
@@ -199,8 +214,11 @@ class VideoPipelineStatus
                 if ($video['transcript']) {
                     return ['state' => 'done', 'detail' => ''];
                 }
-                if ($video['archived']) {
-                    return ['state' => 'n/a', 'detail' => 'Archived before it was transcribed; transcripts need the copy on S3.'];
+                if ($video['archived'] && (string) $video['date'] < self::TRANSCRIBE_ARCHIVED_FROM) {
+                    return ['state' => 'n/a', 'detail' => 'Archived, and from before 2020; archived videos are transcribed from 2020 on.'];
+                }
+                if ($video['archived'] && empty($video['archived_download'])) {
+                    return ['state' => 'n/a', 'detail' => 'Archived under an old details URL, which names no file to transcribe.'];
                 }
                 return null;
 
@@ -217,6 +235,18 @@ class VideoPipelineStatus
             case 'archive':
                 if ($video['archived']) {
                     return ['state' => 'done', 'detail' => ''];
+                }
+                return null;
+
+            case 'archive_captions':
+                if (empty($video['archived_download'])) {
+                    return ['state' => 'n/a', 'detail' => 'Not on the Internet Archive.'];
+                }
+                if (!$video['has_captions']) {
+                    return ['state' => 'n/a', 'detail' => 'No captions.'];
+                }
+                if (empty($video['captions_checked'])) {
+                    return ['state' => 'n/a', 'detail' => 'Captions are sent once their timing has been checked (by the transcript stage, or bin/align_transcripts.php).'];
                 }
                 return null;
         }
@@ -254,6 +284,10 @@ class VideoPipelineStatus
                 // started for it, so it is checked on the next pipeline run.
                 return ['state' => 'waiting', 'detail' => $error . ' Checked again on the next pipeline run.'];
 
+            case 'pending':
+                // Asked for, not yet tried (rs-video-processor's JobLedger::request()).
+                return ['state' => 'waiting', 'detail' => 'New captions to send to the Internet Archive; will run on the next pass.'];
+
             case 'failed':
                 return ['state' => 'failed', 'detail' => 'Gave up after ' . $attempts . ' attempt(s): ' . $error];
         }
@@ -289,7 +323,8 @@ class VideoPipelineStatus
                 }
                 break;
             case 'transcript':
-                if (!$video['on_s3']) {
+                // An archived video is transcribed from its archive.org copy.
+                if (!$video['on_s3'] && empty($video['archived_download'])) {
                     $missing[] = 'download';
                 }
                 break;
@@ -307,17 +342,13 @@ class VideoPipelineStatus
                 }
                 break;
             case 'archive':
+                // A transcript and captions are not waited for; the
+                // archive_captions stage sends captions to the item later.
                 if (!$video['on_s3']) {
                     $missing[] = 'download';
                 }
                 if (!$video['screenshots']) {
                     $missing[] = 'screenshots';
-                }
-                if (!$video['has_transcript_text']) {
-                    $missing[] = 'transcript';
-                }
-                if (!$video['has_captions']) {
-                    $missing[] = 'captions';
                 }
                 break;
         }
