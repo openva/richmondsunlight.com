@@ -76,6 +76,73 @@ class ImportLegislatorDataTest extends TestCase
         $this->assertFalse($this->importReturning(false)->fetch_legislator_data('house', 'H0402'));
     }
 
+    /**
+     * A year alone isn't a date: strtotime() reads "2024" as 20:24 today.
+     */
+    public function testIgnoresAYearWithoutADate(): void
+    {
+        $page = str_replace('January 17, 2026', '2024', self::MEMBER_PAGE);
+        $data = @$this->importReturning($page)->fetch_legislator_data('house', 'H0402');
+
+        $this->assertArrayNotHasKey('date_started', $data);
+    }
+
+    /**
+     * The parts of https://apps.senate.virginia.gov/Senator/memberpage.php?id=S99 that are parsed.
+     */
+    private const SENATE_MEMBER_PAGE = <<<HTML
+        <h1 class="display-4 fw-bold mb-4">Virginia Senate Members</h1>
+        <img src="https://apps.senate.virginia.gov/Senator/images/member_photos/Sturtevant12" class="profile_pic img-fluid" alt="Photo of Senator Glen H. Sturtevant, Jr.">
+        <h2 class="section-title">Glen H. &quot;Tex&quot; Sturtevant, Jr.</h2>
+        <h4>Biography</h4>
+        <div class="lrgblacktext">
+            Born in Wilmington, Delaware on September 13, 1982; Education: Catholic University, B.A.;
+            Occupation: Attorney; Member of the Senate: 2016-2020, 2024-
+        </div>
+        HTML;
+
+    /**
+     * What a malformed ID gets: the list of all senators.
+     */
+    private const SENATE_LIST_PAGE = <<<HTML
+        <img src="https://apps.senate.virginia.gov/Senator/images/member_photos/Aird13" alt="">
+        <a href="//apps.senate.virginia.gov/Senator/memberpage.php?id=S99 ">Sturtevant</a>
+        <img src="https://apps.senate.virginia.gov/Senator/images/member_photos/Sturtevant12" alt="">
+        HTML;
+
+    public function testParsesASenateMemberPage(): void
+    {
+        $import = $this->importReturning(self::SENATE_MEMBER_PAGE);
+        $data = $import->fetch_legislator_data('senate', 'S0099');
+
+        // The Senate's site needs the ID in the form S99.
+        $this->assertSame(['https://apps.senate.virginia.gov/Senator/memberpage.php?id=S99'], $import->requested);
+        $this->assertSame('senate', $data['chamber']);
+        $this->assertSame('99', $data['lis_id']);
+        $this->assertSame('Tex', $data['nickname']);
+        $this->assertSame(
+            'https://apps.senate.virginia.gov/Senator/images/member_photos/Sturtevant12',
+            $data['photo_url']
+        );
+        $this->assertStringStartsWith('Born in Wilmington, Delaware', $data['bio']);
+        $this->assertStringEndsWith('Member of the Senate: 2016-2020, 2024-', $data['bio']);
+        $this->assertArrayNotHasKey('name', $data, 'The page’s name isn’t in "Last, First" form.');
+    }
+
+    /**
+     * A malformed ID redirects to the list of all senators, whose first photo was taken to be
+     * every senator's.
+     */
+    public function testRejectsTheListOfSenators(): void
+    {
+        $this->assertFalse($this->importReturning(self::SENATE_LIST_PAGE)->fetch_legislator_data('senate', '99'));
+    }
+
+    public function testRejectsAFailedSenateRequest(): void
+    {
+        $this->assertFalse($this->importReturning(false)->fetch_legislator_data('senate', '99'));
+    }
+
     public function testOmitsWhatIsntOnThePage(): void
     {
         $page = preg_replace('/<p[^>]*>\s*<span[^>]*>(Gender|Race)[\s\S]+?<\/p>/', '', self::MEMBER_PAGE);

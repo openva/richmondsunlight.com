@@ -1,7 +1,5 @@
 <?php
 
-use Sunra\PhpSimple\HtmlDomParser;
-
 require_once(__DIR__ . '/class.Import.Minutes.php');
 
 /**
@@ -1114,7 +1112,9 @@ class Import
         /*
          * Retrieve the photo from the remote server
          */
-        $photo = file_get_contents($url);
+        $photo = @file_get_contents($url, false, stream_context_create([
+            'http' => ['timeout' => 30],
+        ]));
 
         if ($photo == false) {
             return false;
@@ -1158,94 +1158,139 @@ class Import
     /**
      * Mark a legislator as having left office.
      *
-     * @param string $id Legislator LIS identifier.
+     * @param string $id Legislator LIS identifier, with its chamber's prefix (e.g., "H0108").
      *
-     * @return bool True on success, false on failure.
+     * @return bool True when a term was ended, false otherwise.
      */
     public function deactivate_legislator($id)
     {
-
-        if (!isset($id)) {
+        /*
+         * The prefix is needed, because House and Senate numbers overlap: H0108 and S0108 are
+         * different legislators. Our database stores the number alone (108), and the chamber.
+         */
+        if (!is_string($id) || preg_match('/^([HS])0*([0-9]+)$/i', trim($id), $matches) !== 1) {
+            $this->log->put('Error: Can’t mark ' . var_export($id, true) . ' as out of office, '
+                . 'because it isn’t an LIS ID with a chamber prefix (e.g., "H0108").', 5);
             return false;
         }
+        $chamber = (strtoupper($matches[1]) === 'S') ? 'senate' : 'house';
+        $lis_id = (int)$matches[2];
 
         /*
-         * LIS IDs are preceded with an H or an S, but we don't use those within the database,
-         * so strip those out.
+         * Use the date LIS gives, if it gives one. Otherwise, after an election, departing
+         * legislators serve until the next session starts, and at any other time (a death, a
+         * resignation), they left yesterday, as far as we know.
          */
-        $id = preg_replace('/[H,S]/', '', $id);
-
-        /*
-         * LIS has started sometimes left-padding with 0s, confusingly. Strip those out.
-         */
-        $id = ltrim($id, '0');
-
-        /*
-         * Determine what date to use to mark the legislator as no longer in office.
-         *
-         * If it's November or December of an odd-numbered year, then the legislator's end date is
-         * the day before the next session starts.
-         */
-        if (date('m') >= 11 && date('Y') % 2 == 1) {
-            /*
-            * See if we know when the next session starts.
-            */
-            $sql = 'SELECT date_started
-					FROM sessions
-					WHERE date_started > now()';
-            $stmt = $GLOBALS['db']->prepare($sql);
-            $session = false;
-            if ($stmt && $stmt->execute()) {
-                $session = $stmt->fetch(PDO::FETCH_OBJ);
-            }
-            if (!empty($session) && !empty($session->date_started)) {
-                $date_ended = $session->date_started;
-            }
-
-            /*
-             * If we don't know when the next session starts, go with January 1.
-             */
-            else {
-                $date_ended = date('Y') + 1 . '-01-01';
+        $date_ended = $this->lisServiceEndDate($chamber, $lis_id);
+        if ($date_ended === null) {
+            if ($this->isPostElection()) {
+                $date_ended = $this->nextSessionStart();
+            } else {
+                $date_ended = $this->now()->modify('-1 day')->format('Y-m-d');
             }
         }
 
-        /*
-         * If this is not post-election, just make the date yesterday.
-         */
-        else {
-            $date_ended = date('Y-m-d', strtotime('-1 day'));
-        }
-
-        if ($id === '') {
-            $id = '0';
-        }
-
-        $sql = 'UPDATE terms
+        $stmt = $GLOBALS['dbh']->prepare(
+            'UPDATE terms
                 SET date_ended = :date_ended,
                     date_modified = NOW()
                 WHERE lis_id = :lis_id
-                    AND date_ended IS NULL';
-        $stmt = $GLOBALS['dbh']->prepare($sql);
-        $result = $stmt->execute([
+                    AND chamber = :chamber
+                    AND date_ended IS NULL'
+        );
+        if ($stmt->execute([
             ':date_ended' => $date_ended,
-            ':lis_id' => (int)$id,
-        ]);
+            ':lis_id' => $lis_id,
+            ':chamber' => $chamber,
+        ]) === false) {
+            return false;
+        }
 
-        return $result;
+        return $stmt->rowCount() > 0;
     } // deactivate_legislator()
+
+    /**
+     * When LIS says that a member's service ended, if it says.
+     *
+     * @param string $chamber "house" or "senate".
+     * @param int    $lis_id  The member's number.
+     *
+     * @return string|null Date (Y-m-d), or null if LIS doesn't give one.
+     */
+    private function lisServiceEndDate($chamber, $lis_id)
+    {
+        $member_number = $this->normalize_member_number($chamber, (string)$lis_id);
+        if ($member_number === false) {
+            return null;
+        }
+
+        $member = $this->fetch_member_record($member_number, '20' . SESSION_LIS_ID);
+        if ($member === false || empty($member['ServiceEndDate'])) {
+            return null;
+        }
+
+        $timestamp = strtotime($member['ServiceEndDate']);
+        return $timestamp === false ? null : date('Y-m-d', $timestamp);
+    }
+
+    /**
+     * The current time. Tests override this.
+     *
+     * @return DateTimeImmutable
+     */
+    protected function now()
+    {
+        return new DateTimeImmutable();
+    }
+
+    /**
+     * Whether it's November or December of an odd-numbered year: after the election, and
+     * before the newly elected take office when the next session starts.
+     *
+     * @return bool
+     */
+    private function isPostElection()
+    {
+        $now = $this->now();
+        return (int)$now->format('n') >= 11 && (int)$now->format('Y') % 2 === 1;
+    }
+
+    /**
+     * The date the next session starts, or January 1 if it isn't in the database yet.
+     *
+     * @return string Date (Y-m-d).
+     */
+    private function nextSessionStart()
+    {
+        $stmt = $GLOBALS['dbh']->prepare(
+            'SELECT date_started
+                FROM sessions
+                WHERE date_started > :today
+                ORDER BY date_started ASC
+                LIMIT 1'
+        );
+        if ($stmt->execute([':today' => $this->now()->format('Y-m-d')])) {
+            $date_started = $stmt->fetchColumn();
+            if (!empty($date_started)) {
+                return $date_started;
+            }
+        }
+
+        return ((int)$this->now()->format('Y') + 1) . '-01-01';
+    }
 
 
 
     /**
      * Verify that a legislator is still listed on the General Assembly's official member pages.
      *
-     * The GA's House and Senate websites are used as the primary source of truth. If the page
-     * cannot be fetched, the method falls back to the LIS API to avoid false negatives from a
-     * transient network issue.
+     * The GA's House and Senate websites are used as the primary source of truth: a legislator is
+     * listed if their chamber's page links to their member page, by their ID. (Not by their name,
+     * which another member, or another word on the page, may share.) If the page can't be fetched,
+     * or links to no members at all, the method falls back to the LIS API.
      *
      * @param string      $lis_id Legislator LIS identifier (e.g. "H0100", "S0050").
-     * @param string|null $name   Legislator name in "Last, First" format.
+     * @param string|null $name   Unused. (Legislators were once found by name.)
      *
      * @return bool True when the legislator remains active, false otherwise.
      *
@@ -1260,16 +1305,29 @@ class Import
         }
 
         $chamber = ($lis_id[0] === 'S') ? 'senate' : 'house';
+        $number = (int)substr($lis_id, 1);
 
-        if (!empty($name)) {
-            $last_name = trim(explode(',', $name)[0]);
-            $page_text = $this->fetch_ga_member_page($chamber);
-
-            if ($page_text !== false) {
-                return (bool) preg_match('/\b' . preg_quote($last_name, '/') . '\b/i', $page_text);
+        $page = $this->fetch_ga_member_page($chamber);
+        if ($page !== false) {
+            /*
+             * The House links to /members/H0314, and the Senate to memberpage.php?id=S99.
+             */
+            if ($chamber === 'senate') {
+                $any_member = '/memberpage\.php\?id=S[0-9]+/i';
+                $this_member = '/memberpage\.php\?id=S0*' . $number . '(?![0-9])/i';
+            } else {
+                $any_member = '/\/members\/H[0-9]+/i';
+                $this_member = '/\/members\/H0*' . $number . '(?![0-9])/i';
             }
 
-            $this->log->put('GA member page unavailable; falling back to LIS API for ' . $last_name, 3);
+            if (preg_match($any_member, $page) === 1) {
+                return preg_match($this_member, $page) === 1;
+            }
+
+            $this->log->put('The ' . $chamber . '’s member page links to no members by ID, so its '
+                . 'layout may have changed. Falling back to the LIS API for ' . $lis_id . '.', 5);
+        } else {
+            $this->log->put('GA member page unavailable; falling back to LIS API for ' . $lis_id, 3);
         }
 
         $member_number = $this->normalize_member_number($chamber, $lis_id);
@@ -1298,11 +1356,11 @@ class Import
     } //
 
     /**
-     * Fetch and cache the plain-text content of a GA chamber's official member page.
+     * Fetch and cache a GA chamber's official list of members.
      *
      * @param string $chamber "house" or "senate".
      *
-     * @return string|false Stripped page text, or false on failure.
+     * @return string|false The page's HTML, or false on failure.
      */
     protected function fetch_ga_member_page($chamber)
     {
@@ -1323,7 +1381,7 @@ class Import
             return false;
         }
 
-        $this->ga_member_page_cache[$chamber] = strip_tags($html);
+        $this->ga_member_page_cache[$chamber] = $html;
         return $this->ga_member_page_cache[$chamber];
     } //
 
@@ -1401,8 +1459,8 @@ class Import
          */
         $missing_fields = array_diff_key($required_fields, $legislator);
         if (count($missing_fields) > 0) {
-            $this->log->put('Missing one or more required fields (' . implode(',', $missing_fields)
-                . ') to add a record for ' . $legislator['name_formal'], 6);
+            $this->log->put('Missing one or more required fields (' . implode(', ', array_keys($missing_fields))
+                . ') to add a record for ' . ($legislator['name_formal'] ?? $legislator['lis_id'] ?? 'a legislator'), 6);
             return false;
         }
 
@@ -1462,6 +1520,8 @@ class Import
                 return false;
             }
 
+            $legislator['date_started'] = $this->termStartDate($person_id, $legislator);
+
             if ($this->insertTerm($person_id, $normalized_lis_id, $legislator) === false) {
                 $GLOBALS['dbh']->rollBack();
                 $this->log->put(
@@ -1486,6 +1546,59 @@ class Import
 
         return true;
     } // add_legislator()
+
+    /**
+     * When a new term started.
+     *
+     * LIS's ServiceBeginDate is when a member first took office in their chamber, not when their
+     * current term started: for Sen. Sturtevant, who served 2016–2020 and returned in 2024, it's
+     * 2015-11-16. So for somebody returning to a chamber, whose earlier term there ended after
+     * that date, the term is taken to start with the current session.
+     *
+     * @param int   $person_id  The person serving the term.
+     * @param array $legislator Legislator data array.
+     *
+     * @return string Date (Y-m-d).
+     */
+    private function termStartDate($person_id, array $legislator)
+    {
+        $date_started = $this->sanitizeDateValue($legislator['date_started'] ?? null)
+            ?? $this->now()->format('Y-m-d');
+
+        $stmt = $GLOBALS['dbh']->prepare(
+            'SELECT MAX(date_ended)
+                FROM terms
+                WHERE person_id = :person_id
+                    AND chamber = :chamber
+                    AND date_ended IS NOT NULL'
+        );
+        $stmt->execute([':person_id' => $person_id, ':chamber' => $legislator['chamber']]);
+        $previous_end = $stmt->fetchColumn();
+        if (empty($previous_end) || $date_started > $previous_end) {
+            return $date_started;
+        }
+
+        $stmt = $GLOBALS['dbh']->prepare(
+            'SELECT MAX(date_started)
+                FROM sessions
+                WHERE date_started <= :today
+                    AND date_started >= :previous_end'
+        );
+        $stmt->execute([
+            ':today' => $this->now()->format('Y-m-d'),
+            ':previous_end' => $previous_end,
+        ]);
+        $corrected = $stmt->fetchColumn() ?: $this->now()->format('Y-m-d');
+
+        $this->log->put(
+            'LIS says that ' . $legislator['name_formatted'] . ' took office on ' . $date_started
+                . ', which is during an earlier term of theirs, ending ' . $previous_end . '. Their '
+                . 'new term is recorded as starting on ' . $corrected . ' instead. Verify that.',
+            5
+        );
+
+        return $corrected;
+    }
 
     /**
      * Insert a term for a person.
@@ -1619,6 +1732,7 @@ class Import
             'sbe_id' => true,
             'place' => true,
             'district_id' => true,
+            'party' => true,
         );
 
         $person_fields = array(
@@ -1643,17 +1757,23 @@ class Import
             return;
         }
 
-        if (count($term_changes) > 0) {
+        $term_values = array();
+        foreach ($term_changes as $field => $unused) {
+            $term_values[$field] = ($field === 'district_id')
+                ? (int)$legislator[$field]
+                : $this->normalizeOptionalString($legislator[$field]);
+        }
+
+        if (isset($term_values['party']) || isset($term_values['place'])) {
+            $term_values = $this->reconcileTermChanges((int)$legislator['id'], $term_values);
+        }
+
+        if (count($term_values) > 0) {
             $set = array();
             $params = array(':term_id' => (int)$legislator['id']);
-            foreach ($term_changes as $field => $unused) {
-                $placeholder = ':' . $field;
-                $set[] = $field . ' = ' . $placeholder;
-                if ($field === 'district_id') {
-                    $params[$placeholder] = (int)$legislator[$field];
-                } else {
-                    $params[$placeholder] = $this->normalizeOptionalString($legislator[$field]);
-                }
+            foreach ($term_values as $field => $value) {
+                $set[] = $field . ' = :' . $field;
+                $params[':' . $field] = $value;
             }
             $set[] = 'date_modified = NOW()';
 
@@ -1693,10 +1813,60 @@ class Import
             }
         }
 
-        $log->put('Refreshed the legislator record for ' . $legislator['name_formatted'] . '.', 2);
+        $log->put('Refreshed the legislator record for '
+            . ($legislator['name_formatted'] ?? 'term #' . $legislator['id']) . '.', 2);
 
         return true;
     } // update_legislator
+
+    /**
+     * Adjust a refresh's changes to a term to what's stored.
+     *
+     * - A place is kept once there is one. LIS's comes from the city of a legislator's district or
+     *   mailing address, often a P.O. box's town, so a place entered by hand is better.
+     * - A change of party also changes the party in name_formatted ("Del. Jane Doe (D-Fairfax)").
+     *   The rest of name_formatted is kept, since it may have been corrected by hand.
+     *
+     * @param int   $term_id     The term.
+     * @param array $term_values The new values, by column.
+     *
+     * @return array The values to store.
+     */
+    private function reconcileTermChanges($term_id, array $term_values)
+    {
+        $stmt = $GLOBALS['dbh']->prepare('SELECT party, place, name_formatted FROM terms WHERE id = :id');
+        $stmt->execute([':id' => $term_id]);
+        $stored = $stmt->fetch(PDO::FETCH_ASSOC);
+        if ($stored === false) {
+            return $term_values;
+        }
+
+        if (isset($term_values['place']) && trim((string)$stored['place']) !== '') {
+            unset($term_values['place']);
+        }
+
+        if (isset($term_values['party'])) {
+            $party = strtoupper($term_values['party']);
+            if (!in_array($party, ['D', 'R', 'I'], true) || $party === $stored['party']) {
+                unset($term_values['party']);
+            } else {
+                $term_values['party'] = $party;
+                $term_values['name_formatted'] = preg_replace(
+                    '/\((?:D|R|I)(?=[-)])/',
+                    '(' . $party,
+                    (string)$stored['name_formatted'],
+                    1
+                );
+                $this->log->put(
+                    $stored['name_formatted'] . ' changed parties, from ' . $stored['party'] . ' to '
+                        . $party . ', according to LIS.',
+                    5
+                );
+            }
+        }
+
+        return $term_values;
+    }
 
     /**
      * Convert an LIS identifier into its numeric portion.
@@ -2067,13 +2237,19 @@ class Import
             $legislator['lis_id'] = ltrim(substr($url_id, 1), '0');
             $legislator['photo_url'] = 'https://house.vga.virginia.gov/delegate_photos/' . $url_id . '.jpg';
 
-            if (preg_match('/>Preferred Name: ([a-zA-Z]+)</', $html, $matches)) {
-                $legislator['nickname'] = trim($matches[1]);
+            $nickname = $this->parse_house_preferred_name($html);
+            if ($nickname !== null) {
+                $legislator['nickname'] = $nickname;
             }
 
+            /*
+             * Usually a date ("January 17, 2026"), but sometimes only a year, which isn't one:
+             * strtotime() reads "2024" as 20:24 today.
+             */
             if (preg_match('/Member Since: ([^<]+)</', $html, $matches)) {
-                $timestamp = strtotime(trim($matches[1]));
-                if ($timestamp !== false) {
+                $since = trim($matches[1]);
+                $timestamp = strtotime($since);
+                if (preg_match('/^[0-9]{4}$/', $since) !== 1 && $timestamp !== false) {
                     $legislator['date_started'] = date('Y-m-d', $timestamp);
                 }
             }
@@ -2102,152 +2278,64 @@ class Import
          * Fetch senator data
          */
         elseif ($chamber == 'senate') {
-            /*
-             * Fetch the HTML and save parse the DOM. We use this page, as opposed to either of
-             * the other two legislator records on the GA's site, because it is available before
-             * either of the other two. It's nowhere near as detailed as apps.senate.virginia.gov,
-             * but it exists so it's got that going for it.
-             */
-            if ($lis_id[0] == 'S') {
-                $lis_id = substr($lis_id, 1);
+            $number = (int)preg_replace('/[^0-9]/', '', (string)$lis_id);
+            if ($number === 0) {
+                return false;
             }
-            $url = 'https://legacylis.virginia.gov/cgi-bin/legp604.exe?' . SESSION_LIS_ID . '+mbr+S'
-                . $lis_id;
-            $html = @file_get_contents($url);
 
+            /*
+             * The Senate's member page. Its ID must be in the form S99: any other (S0099, 0099,
+             * 99) redirects to the list of all senators. (The other source used until 2026,
+             * legacylis.virginia.gov, no longer answers.)
+             */
+            $html = $this->http_get('https://apps.senate.virginia.gov/Senator/memberpage.php?id=S' . $number);
             if ($html === false) {
                 return false;
             }
 
-            $dom = HtmlDomParser::str_get_html($html);
-            if ($dom === false) {
+            /*
+             * Make sure that this is the member's page, and not the list of all senators: a
+             * member's page has their biography, and only their photo.
+             */
+            preg_match_all('/Senator\/images\/member_photos\/([A-Za-z0-9-]+)/', $html, $matches);
+            $photos = array_values(array_unique($matches[1]));
+            if (count($photos) !== 1 || strpos($html, '<h4>Biography</h4>') === false) {
+                $this->log->put('The Senate\'s page for S' . $number . ' isn\'t a member page.', 4);
                 return false;
             }
 
             $legislator = [];
-
-            $legislator['lis_id'] = $lis_id;
             $legislator['chamber'] = 'senate';
+            $legislator['lis_id'] = (string)$number;
+            $legislator['photo_url'] = 'https://apps.senate.virginia.gov/Senator/images/member_photos/'
+                . $photos[0];
 
             /*
-             * Get the senator's name.
+             * Their name, as the page gives it ("Glen H. Sturtevant, Jr."), for the preferred
+             * first name it may include in quotes.
              */
-            $tmp = $dom->find('h3.subttl');
-            preg_match('/Senator(.+)&/', $tmp[0], $matches);
-            $legislator['name'] = trim($matches[1]);
-
-            /*
-             * Get senator's preferred first name.
-             */
-            preg_match('/ "(.+)" /', $legislator['name'], $matches);
-            if (!empty($matches)) {
-                $legislator['nickname'] = trim($matches[1]);
-                unset($matches);
-            }
-
-            /*
-             * Get district number.
-             */
-            if (preg_match('/Senate District ([0-9]{1,2})/', $html, $matches) == 1) {
-                $legislator['district_number'] = trim($matches[1]);
-                unset($matches);
-            }
-
-            /*
-             * Now fetch data from apps.senate.virginia.gov, which has a lot more data (albeit
-             * unavailable until a legislator is actually sworn in).
-             */
-            $url = 'https://apps.senate.virginia.gov/Senator/memberpage.php?id=' . $lis_id;
-            $html = file_get_contents($url);
-
-            if ($html !== false) {
-                $dom = HtmlDomParser::str_get_html($html);
-                if ($dom === false) {
-                    return false;
-                }
-
-                /*
-                 * Get legislator photo.
-                 */
-                if (
-                    preg_match(
-                        '/(Senator\/images\/member_photos\/[a-zA-Z0-9-]+)/',
-                        $html,
-                        $matches
-                    ) == 1
-                ) {
-                    $legislator['photo_url'] = 'https://apps.senate.virginia.gov/' . trim($matches[0]);
-                    unset($matches);
-                }
-
-                /*
-                 * Get legislator biography.
-                 */
-                if (
-                    preg_match(
-                        '/Biography(.+?)<div class="lrgblacktext">(.+?)<\/div>/s',
-                        $html,
-                        $matches
-                    ) == 1
-                ) {
-                    $legislator['bio'] = trim($matches[2]);
-                    $legislator['bio'] = str_replace("\n", ' ', $legislator['bio']);
-                    $legislator['bio'] = preg_replace('/\s+/', ' ', $legislator['bio']);
-                    unset($matches);
-                }
-            } // end fetching from apps.senate.virginia.gov
-
-            /*
-             * Determine what date to use as the senator's start date. We have to do this because the
-             * senate provides no information anywhere whatsoever about when a senator started their
-             * term in office, bafflingly.
-             *
-             * If it's November or December of an odd-numbered year, then the legislator's start date
-             * is the day the next session starts.
-             */
-            if (date('m') >= 11 && date('Y') % 2 == 1) {
-                /*
-                 * See if we know when the next session starts.
-                 */
-                $sql = 'SELECT date_started
-						FROM sessions
-						WHERE date_started > now()';
-                $stmt = $GLOBALS['db']->prepare($sql);
-                $session = false;
-                if ($stmt && $stmt->execute()) {
-                    $session = $stmt->fetch(PDO::FETCH_OBJ);
-                }
-                if (!empty($session) && !empty($session->date_started)) {
-                    $legislator['date_started'] = $session->date_started;
-                }
-
-                /*
-                 * If we don't know when the next session starts, go with January 1.
-                 */
-                else {
-                    $legislator['date_started'] = date('Y') + 1 . '-01-01';
+            if (preg_match('/<h2 class="section-title">([^<]+)<\/h2>/', $html, $matches) === 1) {
+                $name = html_entity_decode(trim($matches[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                if (preg_match('/"([^"]+)"/', $name, $matches) === 1) {
+                    $legislator['nickname'] = trim($matches[1]);
                 }
             }
 
-            /*
-             * If this is not post-election, just make the date yesterday.
-             */
-            else {
-                $legislator['date_started'] = date('Y-m-d', strtotime('-1 day'));
+            if (preg_match('/<h4>Biography<\/h4>\s*<div class="lrgblacktext">(.+?)<\/div>/s', $html, $matches) === 1) {
+                $bio = html_entity_decode(strip_tags($matches[1]), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                $legislator['bio'] = trim(preg_replace('/\s+/', ' ', $bio));
             }
 
             /*
-             * Turn district number into a district ID
+             * The Senate doesn't say when a senator's term started. If it's November or December
+             * of an odd-numbered year, it's the day the next session starts. Otherwise, assume
+             * that it was yesterday.
              */
-            $district = new District();
-            $d = $district->info('senate', $legislator['district_number']);
-            $legislator['district_id'] = $d['id'];
-            $district = null;
-
-            /*
-             * We no longer need the district number.
-             */
-            unset($legislator['district_number']);
+            if ($this->isPostElection()) {
+                $legislator['date_started'] = $this->nextSessionStart();
+            } else {
+                $legislator['date_started'] = $this->now()->modify('-1 day')->format('Y-m-d');
+            }
         } // fetch senator
 
         /*
@@ -2256,16 +2344,6 @@ class Import
          * Instead of repeating identical data transformations for delegates and senators, perform
          * common transformations here.
          */
-
-         /*
-          * Get location coordinates
-          */
-        $location = new Location();
-        if (!empty($legislator['address_district'])) {
-            $location->address = $legislator['address_district'];
-        } elseif (!empty($legislator['place'])) {
-            $location->address = $legislator['place'] . ', VA';
-        }
 
         /*
          * Standardize racial descriptions
@@ -2354,7 +2432,8 @@ class Import
             $member,
             $contact_details,
             $member_number,
-            $chamber_normalized
+            $chamber_normalized,
+            true
         );
     }
 
@@ -2543,6 +2622,8 @@ class Import
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_FAILONERROR, false);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'WebAPIKey: ' . LIS_KEY,
             'Accept: application/json'
@@ -2882,8 +2963,12 @@ class Import
             if ($details['phone_richmond'] === null && !empty($contact['GABPhoneNumber'])) {
                 $details['phone_richmond'] = $this->normalizePhone($contact['GABPhoneNumber']);
             }
-            if ($details['address_richmond'] === null && !empty($contact['RoomNumber'])) {
-                $details['address_richmond'] = 'Room ' . trim($contact['RoomNumber']) . ', General Assembly Building, Richmond, VA';
+            /*
+             * The website shows this as "Room 604 of the General Assembly Building", so it's the
+             * room number alone, when there is one.
+             */
+            if (!empty($contact['RoomNumber'])) {
+                $details['address_richmond'] = trim($contact['RoomNumber']);
             }
         }
 
@@ -3098,6 +3183,9 @@ class Import
      * @param array  $contact_details Normalized contact details.
      * @param string $member_number   Normalized member number.
      * @param string $chamber         Chamber identifier.
+     * @param bool   $look_up_preferred_name Whether to get a delegate's preferred first name from
+     *                                       the House's page, when LIS doesn't give it. That's a
+     *                                       request per delegate, so it isn't done for the roster.
      *
      * @return array Normalized legislator payload.
      */
@@ -3105,7 +3193,8 @@ class Import
         array $member,
         array $contact_details,
         string $member_number,
-        string $chamber
+        string $chamber,
+        bool $look_up_preferred_name = false
     ) {
         $member_number = strtoupper($member_number);
         $chamber_normalized = ($chamber === 'senate') ? 'senate' : 'house';
@@ -3114,7 +3203,8 @@ class Import
         $preferred_first_name = $this->determine_preferred_first_name(
             $member_number,
             $member,
-            $chamber_normalized
+            $chamber_normalized,
+            $look_up_preferred_name
         );
         $last_name = $this->extract_last_name($member);
 
@@ -3171,13 +3261,6 @@ class Import
             $legislator['address_richmond'] = trim((string)$member['RoomNumber']);
         }
 
-        $location = new Location();
-        if (!empty($legislator['address_district'])) {
-            $location->address = $legislator['address_district'];
-        } elseif (!empty($legislator['place'])) {
-            $location->address = $legislator['place'] . ', VA';
-        }
-
         return array_filter($legislator, function ($value) {
             if (is_string($value)) {
                 return trim($value) !== '';
@@ -3192,12 +3275,17 @@ class Import
      * @param string $member_number Member number identifier.
      * @param array  $member        Member data array.
      * @param string $chamber       Chamber identifier.
+     * @param bool   $look_up       Whether to ask the House's page for a delegate's preferred name.
      *
      * @return string Preferred first name.
      */
-    private function determine_preferred_first_name(string $member_number, array $member, string $chamber)
-    {
-        $cache_key = $member_number . ':' . $chamber;
+    private function determine_preferred_first_name(
+        string $member_number,
+        array $member,
+        string $chamber,
+        bool $look_up = false
+    ) {
+        $cache_key = $member_number . ':' . $chamber . ':' . ($look_up ? 'page' : 'api');
         if (isset($this->preferredNameCache[$cache_key])) {
             return $this->preferredNameCache[$cache_key];
         }
@@ -3208,7 +3296,7 @@ class Import
             $preferred = trim($matches[1]);
         }
 
-        if ($preferred === '' && $chamber === 'house') {
+        if ($preferred === '' && $chamber === 'house' && $look_up) {
             $preferred = (string)$this->fetch_house_preferred_name($member_number);
         }
 
@@ -3243,22 +3331,38 @@ class Import
     private function fetch_house_preferred_name(string $member_number)
     {
         $member_number = strtoupper($member_number);
-        if (strpos($member_number, 'H') !== 0) {
+        if (preg_match('/^H[0-9]{4}$/', $member_number) !== 1) {
             return null;
         }
 
-        $url = 'https://virginiageneralassembly.gov/house/members/members.php?id=' . $member_number;
-        $html = @file_get_contents($url);
+        $html = $this->http_get('https://house.vga.virginia.gov/members/' . $member_number);
         if ($html === false) {
-            $this->log->put('Could not fetch House member page for ' . $member_number, 4);
             return null;
         }
 
-        if (preg_match('/Preferred Name:\s*([^<]+)/i', $html, $matches) === 1) {
-            return trim($matches[1]);
+        // Make sure that this is the member's page, and not one we were redirected to.
+        if (strpos($html, '/delegate_photos/' . $member_number . '.') === false) {
+            return null;
         }
 
-        return null;
+        return $this->parse_house_preferred_name($html);
+    }
+
+    /**
+     * Get the preferred first name from a delegate's page on the House's website.
+     *
+     * @param string $html The page.
+     *
+     * @return string|null Their preferred name, or null if the page doesn't give one.
+     */
+    private function parse_house_preferred_name(string $html)
+    {
+        if (preg_match('/>\s*Preferred Name:\s*([^<]+?)\s*</', $html, $matches) !== 1) {
+            return null;
+        }
+        $name = trim(html_entity_decode($matches[1], ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+
+        return $name === '' ? null : $name;
     }
 
     /**
