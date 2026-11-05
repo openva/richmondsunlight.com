@@ -911,73 +911,62 @@ class Bill2
     }
 
     /**
-     * Whether a bill passed committee, from its status history: "passed", "failed", or null if
-     * no committee has acted on it.
+     * The steps on the bill page's Progress box, and the translations that mean a bill passed or
+     * failed each one.
      *
-     * A committee failure counts only if no committee reported the bill on the same day or
-     * later. LIS records some motions that fail as though they'd happened: Senate committees'
-     * histories have "Continued to 2027 in Finance and Appropriations" or "Passed by indefinitely
-     * in Courts of Justice" on the same day as "Reported from" that committee. And a bill that
-     * was reported from one committee and then left in another failed committee.
-     *
-     * @param array $status_history Rows with translation and date_raw (Y-m-d), in any order
+     * A bill the governor signs became law, though only bills that the governor amended and that
+     * were reenrolled get an "Enacted" history entry (as do vetoes that are overridden): LIS
+     * records a signature as "Approved by Governor-Chapter 634", translated as "signed by
+     * governor".
      */
-    public static function committee_outcome(array $status_history): ?string
-    {
-        return self::latest_outcome(
-            $status_history,
-            ['passed committee'],
-            ['failed committee', 'failed subcommittee']
-        );
-    }
+    private const PROGRESS_STEPS = [
+        'committee' => [['passed committee'], ['failed committee', 'failed subcommittee']],
+        'house'     => [['passed house'], ['failed house']],
+        'senate'    => [['passed senate'], ['failed senate']],
+        'governor'  => [['signed by governor'], ['vetoed by governor']],
+        'law'       => [['signed by governor', 'enacted'], ['vetoed by governor']],
+    ];
 
     /**
-     * Whether a bill became law, from its status history: "passed", "failed" (vetoed), or null
-     * if neither has happened yet.
+     * How far a bill has gotten, from its status history, for the bill page's Progress box:
+     * whether it passed committee, the House, and the Senate, was signed by the governor, and
+     * became law.
      *
-     * A bill the governor signs is law, though LIS records it as "Approved by Governor-Chapter
-     * 634", which is translated as "signed by governor". Only bills that the governor amended and
-     * that were reenrolled get "Enacted, Chapter 637", translated as "enacted", as do vetoes that
-     * are overridden. A veto counts only if the bill wasn't signed or enacted that day or later.
+     * Each step is "passed", "failed", or null if neither has happened, decided by whichever came
+     * last, with passing winning a tie. A bill can fail a step and then pass it: LIS records some
+     * motions that fail as though they'd happened ("Continued to 2027 in Finance and
+     * Appropriations", on the day that committee reported the bill), a bill continued from the
+     * previous year can be reported, and a veto can be overridden. And a bill reported from one
+     * committee and then left in another failed committee.
      *
-     * @param array $status_history Rows with translation and date_raw (Y-m-d), in any order
+     * @param array $status_history Rows (arrays or objects) with translation and date_raw
+     *                              (Y-m-d), in any order
+     * @return array<string, ?string> committee, house, senate, governor, and law
      */
-    public static function became_law(array $status_history): ?string
+    public static function progress(array $status_history): array
     {
-        return self::latest_outcome(
-            $status_history,
-            ['signed by governor', 'enacted'],
-            ['vetoed by governor']
-        );
-    }
-
-    /**
-     * "passed" or "failed", whichever of the history's passing and failing translations came last,
-     * with passing winning a tie, or null if the history has neither.
-     *
-     * @param string[] $passing
-     * @param string[] $failing
-     */
-    private static function latest_outcome(array $status_history, array $passing, array $failing): ?string
-    {
-        $passed = null;
-        $failed = null;
+        // The date each translation last appears.
+        $latest = [];
         foreach ($status_history as $status) {
             $status = (array) $status;
-            $date = (string) ($status['date_raw'] ?? '');
             $translation = $status['translation'] ?? null;
-            if (in_array($translation, $passing, true)) {
-                $passed = max($passed ?? '', $date);
-            } elseif (in_array($translation, $failing, true)) {
-                $failed = max($failed ?? '', $date);
+            if ($translation !== null) {
+                $latest[$translation] = max($latest[$translation] ?? '', (string) ($status['date_raw'] ?? ''));
             }
         }
 
-        if ($failed !== null && ($passed === null || $failed > $passed)) {
-            return 'failed';
+        $progress = [];
+        foreach (self::PROGRESS_STEPS as $step => [$passing, $failing]) {
+            $passed = max(array_intersect_key($latest, array_flip($passing)) ?: [null]);
+            $failed = max(array_intersect_key($latest, array_flip($failing)) ?: [null]);
+            if ($failed !== null && ($passed === null || $failed > $passed)) {
+                $progress[$step] = 'failed';
+            } else {
+                $progress[$step] = $passed !== null ? 'passed' : null;
+            }
         }
 
-        return $passed !== null ? 'passed' : null;
+        return $progress;
     }
 
     /**

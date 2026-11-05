@@ -783,6 +783,12 @@ if (isset($bill['status_history'])) {
     $passed = '<div class="checkbox passed">✓</div>';
     $failed = '<div class="checkbox failed">✗</div>';
     $neither = '<div class="checkbox">☐</div>';
+    $progress = Bill2::progress($bill['status_history']);
+    $checkbox = fn(string $step): string => match ($progress[$step]) {
+        'passed' => $passed,
+        'failed' => $failed,
+        default  => $neither,
+    };
     $page_body .= '
 	<div id="bill-progress">
 		<h2>Progress</h2>
@@ -792,43 +798,20 @@ if (isset($bill['status_history'])) {
 				<td class="text">Introduced</td>
 			</tr>
 			<tr>
-				<td>';
-    $committee_outcome = Bill2::committee_outcome($bill['status_history']);
-    if ($committee_outcome === 'failed') {
-        $page_body .= $failed;
-    } elseif ($committee_outcome === 'passed') {
-        $page_body .= $passed;
-    } else {
-        $page_body .= $neither;
-    }
-    $page_body .= '</td>
+				<td>' . $checkbox('committee') . '</td>
 				<td class="text">Passed Committee</td>
 			</tr>
 			<tr class="alt">
 				<td>';
     if (mb_substr($bill['number'], 0, 2) != 'SR') {
-        if (in_array('passed house', $statuses)) {
-            $page_body .= $passed;
-        } elseif (in_array('failed house', $statuses)) {
-            $page_body .= $failed;
-        } else {
-            $page_body .= $neither;
-        }
-        $page_body .= '</td>
+        $page_body .= $checkbox('house') . '</td>
 					<td class="text">Passed House</td>
 				</tr>
 				<tr>
 					<td>';
     }
     if (mb_substr($bill['number'], 0, 2) != 'HR') {
-        if (in_array('passed senate', $statuses)) {
-            $page_body .= $passed;
-        } elseif (in_array('failed senate', $statuses)) {
-            $page_body .= $failed;
-        } else {
-            $page_body .= $neither;
-        }
-        $page_body .= '</td>
+        $page_body .= $checkbox('senate') . '</td>
 					<td class="text">Passed Senate</td>
                 </tr>';
     }
@@ -841,27 +824,11 @@ if (isset($bill['status_history'])) {
             ((mb_substr($bill['number'], 0, 2) != 'HR') && (mb_substr($bill['number'], 0, 2) != 'SR'))
             && (mb_substr($bill['number'], 0, 2) != 'SJ') && (mb_substr($bill['number'], 0, 2) != 'HJ')
         ) {
-            if (in_array('vetoed by governor', $statuses)) {
-                $page_body .= $failed;
-            } elseif (in_array('signed by governor', $statuses)) {
-                $page_body .= $passed;
-            } else {
-                $page_body .= $neither;
-            }
-            $page_body .= '</td>
+            $page_body .= $checkbox('governor') . '</td>
                         <td class="text">Signed by Governor</td>
                     </tr>
                     <tr>
-                        <td>';
-            $became_law = Bill2::became_law($bill['status_history']);
-            if ($became_law === 'passed') {
-                $page_body .= $passed;
-            } elseif ($became_law === 'failed') {
-                $page_body .= $failed;
-            } else {
-                $page_body .= $neither;
-            }
-            $page_body .= '</td>
+                        <td>' . $checkbox('law') . '</td>
                         <td class="text">Became Law</td>
                     </tr>';
         }
