@@ -302,17 +302,6 @@ elseif (isset($_GET['id']) && ($_GET['op'] == 'identify')) {
 }
 
 /*
- * Generate clips for this video.
- */
-elseif (isset($_GET['id']) && ($_GET['op'] == 'clips')) {
-    $video = new Video();
-    $video->id = $_GET['id'];
-    $video->store_clips();
-    header('Location: https://www.richmondsunlight.com/admin/video/');
-    exit();
-}
-
-/*
  * Reextract metadata about this file (e.g., after a file has been replaced with
  * a new one, such as a captured webstream being replaced with a DVD rip).
  */
@@ -386,7 +375,6 @@ else {
 			<th>Committee</th>
 			<th>Title</th>
 			<th>Length</th>
-			<th>Parse</th>
 			<th>Captions</th>
 			<th>Edit</th>
 		</tr>
@@ -401,7 +389,6 @@ else {
 				<td>' . $video['committee_name'] . '</td>
 				<td>' . $video['title'] . '</a></td>
 				<td>' . $video['length'] . '</td>
-				<td><a href="/utilities/resolve_chyrons.php?id=' . $video['id'] . '">redo</a></td>
 				<td>';
         if (empty($video['srt'])) {
             $page_body .= '<a href="?op=srt&id=' . $video['id'] . '" title="Store SRT in database">import</a>';
@@ -414,9 +401,6 @@ else {
             } else {
                 $page_body .= '<a href="?op=identify&id=' . $video['id'] . '" title="Identify speakers that were not previously IDed">Re-ID</a>';
             }
-
-            $page_body .= '
-				<a href="?op=clips&id=' . $video['id'] . '" title="Rebuild clips">re-clip</a>';
         }
 
         $page_body .= '</td>

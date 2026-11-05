@@ -232,6 +232,46 @@ class VideoIntegrationTest extends TestCase
         $this->assertMatchesRegularExpression('/^\d{8}\.jpg$/', $filename, 'Screenshot filename should be 8 digits padded');
     }
 
+    /**
+     * video_clips is the only record of some older video's bills, so by_bill() uses it for
+     * recordings with no chyrons for the bill, and only there.
+     */
+    public function testByBillAddsStoredClipsForVideoWithoutChyrons(): void
+    {
+        $db = $GLOBALS['db'];
+        $bill = mysqli_fetch_row(mysqli_query($db, 'SELECT id FROM bills
+            WHERE id NOT IN (SELECT linked_id FROM video_index WHERE type = "bill" AND linked_id IS NOT NULL)
+            AND id NOT IN (SELECT bill_id FROM video_clips WHERE bill_id IS NOT NULL) LIMIT 1'));
+        $files = mysqli_fetch_all(mysqli_query($db, 'SELECT id FROM files ORDER BY date LIMIT 2'));
+        if ($bill === null || count($files) < 2) {
+            $this->markTestSkipped('Needs a bill without video and two files');
+        }
+        [$billId, $archivedFile, $indexedFile] = [(int) $bill[0], (int) $files[0][0], (int) $files[1][0]];
+
+        mysqli_begin_transaction($db);
+        try {
+            // The newer video has a chyron for the bill, so its stored clips are not used.
+            mysqli_query($db, "INSERT INTO video_index (file_id, time, screenshot, raw_text, type, linked_id, ignored, date_created)
+                VALUES ($indexedFile, '00:10:00', '600', 'HB1', 'bill', $billId, 'n', NOW())");
+            mysqli_query($db, "INSERT INTO video_clips (legislator_id, bill_id, file_id, time_start, time_end, screenshot, date_created) VALUES
+                (NULL, $billId, $archivedFile, '00:01:40', '00:02:10', '//video.richmondsunlight.com/senate/floor/20090210/00000100.jpg', NOW()),
+                (NULL, $billId, $indexedFile, '00:20:00', '00:21:00', 'x', NOW()),
+                (269, $billId, $archivedFile, '00:05:00', '00:06:00', 'x', NOW())");
+
+            $video = new Video();
+            $video->bill_id = $billId;
+            $clips = $video->by_bill();
+        } finally {
+            mysqli_rollback($db);
+        }
+
+        $this->assertIsArray($clips);
+        $this->assertSame([$archivedFile, $indexedFile], array_map(fn($clip) => (int) $clip['file_id'], $clips));
+        $this->assertSame(90, $clips[0]['start']);
+        $this->assertSame(140, $clips[0]['end']);
+        $this->assertSame('https://video.richmondsunlight.com/senate/floor/20090210/00000100.jpg', $clips[0]['screenshot']);
+    }
+
     // --- screenshots() ---
 
     public function testScreenshotsGeneratesUrls(): void

@@ -783,12 +783,34 @@ class Video
         }
     }
 
-    # Get all of the video clips, in order, that involve this bill.
+    /**
+     * Every video clip, in order, that involves this bill: built from the bill's chyrons in
+     * video_index, plus clips stored in video_clips for videos that have no chyrons for it.
+     * video_clips has not been written since 2020, and for some older video it is the only
+     * record of when a bill was under discussion.
+     *
+     * @return array|false the clips, or false if there are none
+     */
     public function by_bill()
     {
         if (!isset($this->bill_id)) {
             return false;
         }
+
+        $clips = array_merge($this->indexed_bill_clips(), $this->archived_bill_clips());
+        if (count($clips) === 0) {
+            return false;
+        }
+        usort($clips, fn($a, $b) => [$a['date'], $a['chamber'], $a['start']] <=> [$b['date'], $b['chamber'], $b['start']]);
+
+        return $clips;
+    }
+
+    /**
+     * Clips built from the bill's chyrons in video_index.
+     */
+    private function indexed_bill_clips(): array
+    {
 
         $database = new Database();
         $database->connect_mysqli();
@@ -798,11 +820,11 @@ class Video
 				FROM video_index
 				LEFT JOIN files
 					ON video_index.file_id = files.id
-				WHERE video_index.linked_id=' . $this->bill_id . ' AND video_index.type="bill"
+				WHERE video_index.linked_id=' . (int) $this->bill_id . ' AND video_index.type="bill"
 				ORDER BY files.date ASC, files.chamber ASC, video_index.time ASC';
         $result = mysqli_query($GLOBALS['db'], $sql);
-        if (mysqli_num_rows($result) == 0) {
-            return false;
+        if (!$result || mysqli_num_rows($result) == 0) {
+            return array();
         } else {
             while ($moment = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
                 $index[] = $moment;
@@ -841,7 +863,7 @@ class Video
 
             # In the unlikely event that we have nothing left.
             if (count($index2) == 0) {
-                return false;
+                return array();
             }
 
             # If we've saved an odd number of frames, then drop the last one. We really shouldn't
@@ -873,6 +895,66 @@ class Video
 
             return $clips;
         }
+    }
+
+    /**
+     * Clips of this bill stored in video_clips, for videos with no chyrons for it in video_index.
+     * Only the bill's own clips are used; speaker clips there that name the bill cover the same time.
+     */
+    private function archived_bill_clips(): array
+    {
+        $bill_id = (int) $this->bill_id;
+        $sql = 'SELECT files.id, files.path, files.date, files.chamber,
+                video_clips.time_start, video_clips.time_end, video_clips.screenshot
+                FROM video_clips
+                INNER JOIN files
+                    ON video_clips.file_id = files.id
+                WHERE video_clips.bill_id = ' . $bill_id . '
+                    AND video_clips.legislator_id IS NULL
+                    AND NOT EXISTS (
+                        SELECT 1 FROM video_index
+                        WHERE video_index.file_id = video_clips.file_id
+                            AND video_index.type = "bill" AND video_index.linked_id = ' . $bill_id . '
+                    )';
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        if (!$result) {
+            return array();
+        }
+
+        $clips = array();
+        while ($row = mysqli_fetch_assoc($result)) {
+            $start = max(0, time_to_seconds($row['time_start']) - self::CLIP_PADDING_SECONDS);
+            $end = time_to_seconds($row['time_end']) + self::CLIP_PADDING_SECONDS;
+            $clips[] = array(
+                'file_id' => $row['id'],
+                'path' => $row['path'],
+                'date' => $row['date'],
+                'chamber' => $row['chamber'],
+                'screenshot' => $this->archived_screenshot_url($row['screenshot']),
+                'start' => $start,
+                'end' => $end,
+                'duration' => $end - $start,
+            );
+        }
+
+        return $clips;
+    }
+
+    /**
+     * video_clips screenshots were stored as written at the time: a full URL, a
+     * protocol-relative one, an http:// one, or a path.
+     */
+    private function archived_screenshot_url(?string $screenshot): string
+    {
+        $screenshot = trim((string) $screenshot);
+        if (strpos($screenshot, '//') === 0) {
+            return 'https:' . $screenshot;
+        }
+        if (strpos($screenshot, 'http://') === 0) {
+            return 'https://' . substr($screenshot, 7);
+        }
+
+        return $this->normalize_screenshot_url($screenshot);
     }
 
     # Get return an array of tag data for a given video file, scaled on the basis of the amount of
@@ -1171,99 +1253,6 @@ class Video
         return true;
     }
 
-    # Indexes and stores clips.
-    public function store_clips()
-    {
-
-        # Create a counter, so that we can report the total number of clips indexed and stored.
-        $this->clip_count = 0;
-
-        # We must have a file ID.
-        if (!isset($this->id)) {
-            return false;
-        }
-
-        $database = new Database();
-        $database->connect_mysqli();
-
-        # First, remove every clip already stored for this file.
-        $sql = 'DELETE FROM video_clips
-				WHERE file_id = ' . $this->id;
-        mysqli_query($GLOBALS['db'], $sql);
-
-        # Get a list of all bill clips.
-        $this->clip_type = 'bills';
-        $this->index_clips();
-
-        # If there no clips were identified by index_clips(), then we're done here.
-        if (!isset($this->clips) || count($this->clips) == 0) {
-            return false;
-        }
-
-        # Increment our counter.
-        $this->clip_count = $this->clip_count + count($this->clips);
-
-        foreach ($this->clips as $clip) {
-            $sql = 'INSERT INTO video_clips
-					SET bill_id = ' . $clip->linked_id . ',
-					file_id = ' . $this->id . ',
-					time_start = "' . seconds_to_time($clip->start, true) . '",
-					time_end = "' . seconds_to_time($clip->end, true) . '",
-					screenshot = "' . $clip->screenshot . '",
-					date_created = now()';
-            mysqli_query($GLOBALS['db'], $sql);
-        }
-
-        # Get a list of all legislators clips.
-        $this->clip_type = 'legislators';
-        $this->index_clips();
-
-        # If there no clips were identified by index_clips(), then we're done here.
-        if (!isset($this->clips) || count($this->clips) == 0) {
-            return true;
-        }
-
-        # Increment our counter.
-        $this->clip_count = $this->clip_count + count($this->clips);
-
-        foreach ($this->clips as $clip) {
-            # If the legislator was talking about a bill (as opposed to, for instance, introducing
-            # a visitor in the gallery), gather that bill ID. We actually generate a list of all
-            # bills that were discussed within the prescribed time range, but only retrieve the one
-            # that was discussed the most.
-            $sql = 'SELECT linked_id AS id, COUNT(*) AS number
-					FROM video_index
-					WHERE file_id =' . $this->id . ' AND type="bill"
-					AND TIME >= "' . seconds_to_time($clip->start, true) . '"
-					AND TIME <= "' . seconds_to_time($clip->end, true) . '"
-					GROUP BY linked_id
-					ORDER BY number DESC
-					LIMIT 1';
-            $result = mysqli_query($GLOBALS['db'], $sql);
-            if (mysqli_num_rows($result) === 1) {
-                $bill = mysqli_fetch_array($result);
-                $clip->bill_id = $bill['id'];
-            }
-
-            $sql = 'INSERT INTO video_clips
-					SET legislator_id = ' . $clip->linked_id . ',
-					file_id = ' . $this->id . ',
-					time_start = "' . seconds_to_time($clip->start, true) . '",
-					time_end = "' . seconds_to_time($clip->end, true) . '",
-					screenshot = "' . $clip->screenshot . '",
-					date_created = now()';
-
-            if (isset($clip->bill_id)) {
-                $sql .= ', bill_id = ' . $clip->bill_id;
-            }
-
-            mysqli_query($GLOBALS['db'], $sql);
-        }
-
-        return true;
-    }
-
-
     # Get a single clip.
     public function get_clip()
     {
@@ -1321,7 +1310,8 @@ class Video
     /**
      * Retrieve pre-stored video clips from the video_clips table.
      *
-     * Gets clips that were previously indexed and stored via store_clips().
+     * Gets clips stored in video_clips, which has not been written since 2020 and is
+     * kept as the only record of some older video.
      * Unlike index_clips(), this reads from the database rather than
      * analyzing video_index data.
      *
