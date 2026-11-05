@@ -911,6 +911,40 @@ class Bill2
     }
 
     /**
+     * Whether a bill passed committee, from its status history: "passed", "failed", or null if
+     * no committee has acted on it.
+     *
+     * A committee failure counts only if no committee reported the bill on the same day or
+     * later. LIS records some motions that fail as though they'd happened: Senate committees'
+     * histories have "Continued to 2027 in Finance and Appropriations" or "Passed by indefinitely
+     * in Courts of Justice" on the same day as "Reported from" that committee. And a bill that
+     * was reported from one committee and then left in another failed committee.
+     *
+     * @param array $status_history Rows with translation and date_raw (Y-m-d), in any order
+     */
+    public static function committee_outcome(array $status_history): ?string
+    {
+        $passed = null;
+        $failed = null;
+        foreach ($status_history as $status) {
+            $status = (array) $status;
+            $date = (string) ($status['date_raw'] ?? '');
+            $translation = $status['translation'] ?? null;
+            if ($translation === 'passed committee') {
+                $passed = max($passed ?? '', $date);
+            } elseif ($translation === 'failed committee' || $translation === 'failed subcommittee') {
+                $failed = max($failed ?? '', $date);
+            }
+        }
+
+        if ($failed !== null && ($passed === null || $failed > $passed)) {
+            return 'failed';
+        }
+
+        return $passed !== null ? 'passed' : null;
+    }
+
+    /**
      * Retrieve third-party news articles that mention this bill.
      *
      * @return array|false Array of news articles, or false when none exist.

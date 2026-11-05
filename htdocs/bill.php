@@ -793,9 +793,10 @@ if (isset($bill['status_history'])) {
 			</tr>
 			<tr>
 				<td>';
-    if ((in_array('failed committee', $statuses)) || (in_array('failed subcommittee', $statuses))) {
+    $committee_outcome = Bill2::committee_outcome($bill['status_history']);
+    if ($committee_outcome === 'failed') {
         $page_body .= $failed;
-    } elseif (in_array('passed committee', $statuses)) {
+    } elseif ($committee_outcome === 'passed') {
         $page_body .= $passed;
     } else {
         $page_body .= $neither;
