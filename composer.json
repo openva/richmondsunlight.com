@@ -6,7 +6,7 @@
         "phpunit/phpunit": "^13.4"
     },
     "require": {
-        "php": "^8.0",
+        "php": "^8.4",
         "phpmailer/phpmailer": "^7.1",
         "ezyang/htmlpurifier": "^4.13",
         "doctrine/instantiator": "^2.0",
