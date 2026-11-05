@@ -246,6 +246,9 @@ class Import
     /**
      * Store normalized status history rows into bills_status.
      *
+     * A row that's already stored keeps any value the new one lacks. In particular, LIS's history
+     * has no translation: rs-machine's cleanup adds those, and the website shows them.
+     *
      * @param int   $bill_id  Internal bills.id value.
      * @param array $history  Normalized rows from normalize_status_history().
      * @param int|null $session_id Session identifier (defaults to SESSION_ID).
@@ -276,9 +279,9 @@ class Import
             'INSERT INTO bills_status (bill_id, session_id, status, chamber, translation, date, lis_vote_id, date_created)
                 VALUES (:bill_id, :session_id, :status, :chamber, :translation, :date, :lis_vote_id, :date_created)
             ON DUPLICATE KEY UPDATE
-                chamber = VALUES(chamber),
-                translation = VALUES(translation),
-                lis_vote_id = VALUES(lis_vote_id),
+                chamber = COALESCE(VALUES(chamber), chamber),
+                translation = COALESCE(VALUES(translation), translation),
+                lis_vote_id = COALESCE(VALUES(lis_vote_id), lis_vote_id),
                 date_modified = CURRENT_TIMESTAMP()'
         );
 
