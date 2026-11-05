@@ -911,6 +911,65 @@ class Bill2
     }
 
     /**
+     * The steps on the bill page's Progress box, and the translations that mean a bill passed or
+     * failed each one.
+     *
+     * A bill the governor signs became law, though only bills that the governor amended and that
+     * were reenrolled get an "Enacted" history entry (as do vetoes that are overridden): LIS
+     * records a signature as "Approved by Governor-Chapter 634", translated as "signed by
+     * governor".
+     */
+    private const PROGRESS_STEPS = [
+        'committee' => [['passed committee'], ['failed committee', 'failed subcommittee']],
+        'house'     => [['passed house'], ['failed house']],
+        'senate'    => [['passed senate'], ['failed senate']],
+        'governor'  => [['signed by governor'], ['vetoed by governor']],
+        'law'       => [['signed by governor', 'enacted'], ['vetoed by governor']],
+    ];
+
+    /**
+     * How far a bill has gotten, from its status history, for the bill page's Progress box:
+     * whether it passed committee, the House, and the Senate, was signed by the governor, and
+     * became law.
+     *
+     * Each step is "passed", "failed", or null if neither has happened, decided by whichever came
+     * last, with passing winning a tie. A bill can fail a step and then pass it: LIS records some
+     * motions that fail as though they'd happened ("Continued to 2027 in Finance and
+     * Appropriations", on the day that committee reported the bill), a bill continued from the
+     * previous year can be reported, and a veto can be overridden. And a bill reported from one
+     * committee and then left in another failed committee.
+     *
+     * @param array $status_history Rows (arrays or objects) with translation and date_raw
+     *                              (Y-m-d), in any order
+     * @return array<string, ?string> committee, house, senate, governor, and law
+     */
+    public static function progress(array $status_history): array
+    {
+        // The date each translation last appears.
+        $latest = [];
+        foreach ($status_history as $status) {
+            $status = (array) $status;
+            $translation = $status['translation'] ?? null;
+            if ($translation !== null) {
+                $latest[$translation] = max($latest[$translation] ?? '', (string) ($status['date_raw'] ?? ''));
+            }
+        }
+
+        $progress = [];
+        foreach (self::PROGRESS_STEPS as $step => [$passing, $failing]) {
+            $passed = max(array_intersect_key($latest, array_flip($passing)) ?: [null]);
+            $failed = max(array_intersect_key($latest, array_flip($failing)) ?: [null]);
+            if ($failed !== null && ($passed === null || $failed > $passed)) {
+                $progress[$step] = 'failed';
+            } else {
+                $progress[$step] = $passed !== null ? 'passed' : null;
+            }
+        }
+
+        return $progress;
+    }
+
+    /**
      * Retrieve third-party news articles that mention this bill.
      *
      * @return array|false Array of news articles, or false when none exist.
