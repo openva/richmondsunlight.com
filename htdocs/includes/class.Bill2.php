@@ -924,15 +924,51 @@ class Bill2
      */
     public static function committee_outcome(array $status_history): ?string
     {
+        return self::latest_outcome(
+            $status_history,
+            ['passed committee'],
+            ['failed committee', 'failed subcommittee']
+        );
+    }
+
+    /**
+     * Whether a bill became law, from its status history: "passed", "failed" (vetoed), or null
+     * if neither has happened yet.
+     *
+     * A bill the governor signs is law, though LIS records it as "Approved by Governor-Chapter
+     * 634", which is translated as "signed by governor". Only bills that the governor amended and
+     * that were reenrolled get "Enacted, Chapter 637", translated as "enacted", as do vetoes that
+     * are overridden. A veto counts only if the bill wasn't signed or enacted that day or later.
+     *
+     * @param array $status_history Rows with translation and date_raw (Y-m-d), in any order
+     */
+    public static function became_law(array $status_history): ?string
+    {
+        return self::latest_outcome(
+            $status_history,
+            ['signed by governor', 'enacted'],
+            ['vetoed by governor']
+        );
+    }
+
+    /**
+     * "passed" or "failed", whichever of the history's passing and failing translations came last,
+     * with passing winning a tie, or null if the history has neither.
+     *
+     * @param string[] $passing
+     * @param string[] $failing
+     */
+    private static function latest_outcome(array $status_history, array $passing, array $failing): ?string
+    {
         $passed = null;
         $failed = null;
         foreach ($status_history as $status) {
             $status = (array) $status;
             $date = (string) ($status['date_raw'] ?? '');
             $translation = $status['translation'] ?? null;
-            if ($translation === 'passed committee') {
+            if (in_array($translation, $passing, true)) {
                 $passed = max($passed ?? '', $date);
-            } elseif ($translation === 'failed committee' || $translation === 'failed subcommittee') {
+            } elseif (in_array($translation, $failing, true)) {
                 $failed = max($failed ?? '', $date);
             }
         }

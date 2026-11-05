@@ -853,9 +853,10 @@ if (isset($bill['status_history'])) {
                     </tr>
                     <tr>
                         <td>';
-            if (in_array('enacted', $statuses)) {
+            $became_law = Bill2::became_law($bill['status_history']);
+            if ($became_law === 'passed') {
                 $page_body .= $passed;
-            } elseif (in_array('vetoed by governor', $statuses)) {
+            } elseif ($became_law === 'failed') {
                 $page_body .= $failed;
             } else {
                 $page_body .= $neither;

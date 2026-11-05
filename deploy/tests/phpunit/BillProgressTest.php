@@ -3,10 +3,10 @@
 use PHPUnit\Framework\TestCase;
 
 /**
- * Bill2::committee_outcome(), which says whether a bill passed committee, for the bill page's
- * Progress box. The histories here are real ones, abridged.
+ * Bill2::committee_outcome() and Bill2::became_law(), which fill in the bill page's
+ * Progress box. The histories here are real ones, abridged, except the overridden veto.
  */
-class CommitteeOutcomeTest extends TestCase
+class BillProgressTest extends TestCase
 {
     private static function entry(string $date, ?string $translation): array
     {
@@ -66,5 +66,52 @@ class CommitteeOutcomeTest extends TestCase
     public function testRowsMayBeObjects(): void
     {
         $this->assertSame('passed', Bill2::committee_outcome([(object) self::entry('2026-02-11', 'passed committee')]));
+    }
+
+    /**
+     * SB382 (2026), signed by the governor. LIS never records "Enacted" for a bill like this.
+     */
+    public function testASignedBillBecameLaw(): void
+    {
+        $this->assertSame('passed', Bill2::became_law([
+            self::entry('2026-04-13', null),                  // Acts of Assembly Chapter text (CHAP0634)
+            self::entry('2026-04-13', 'signed by governor'),  // Approved by Governor-Chapter 634
+            self::entry('2026-03-30', 'passed'),              // Signed by President
+        ]));
+    }
+
+    /**
+     * HB1642 (2025), whose amendments from the governor were adopted.
+     */
+    public function testAnEnactedBillBecameLaw(): void
+    {
+        $this->assertSame('passed', Bill2::became_law([
+            self::entry('2025-04-02', 'enacted'),             // Enacted, Chapter 637
+            self::entry('2025-04-02', 'signed by governor'),  // Governor's recommendation adopted
+        ]));
+    }
+
+    public function testAVetoedBillDidNot(): void
+    {
+        $this->assertSame('failed', Bill2::became_law([
+            self::entry('2026-04-13', 'vetoed by governor'),
+            self::entry('2026-03-30', 'passed'),
+        ]));
+    }
+
+    public function testAnOverriddenVetoBecameLaw(): void
+    {
+        $this->assertSame('passed', Bill2::became_law([
+            self::entry('2026-04-22', 'enacted'),             // House and Senate: veto overridden
+            self::entry('2026-04-13', 'vetoed by governor'),
+        ]));
+    }
+
+    public function testABillAwaitingTheGovernorHasNoOutcome(): void
+    {
+        $this->assertNull(Bill2::became_law([
+            self::entry('2026-03-30', 'passed'),
+            self::entry('2026-03-04', 'passed committee'),
+        ]));
     }
 }
