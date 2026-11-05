@@ -101,7 +101,7 @@ $sql = 'SELECT
 		FROM bills_status
 		LEFT JOIN bills
 			ON bills_status.bill_id = bills.id
-		WHERE bills.session_id =14
+		WHERE bills.session_id = ' . SESSION_ID . '
 		AND (bills_status.translation = "passed house"
 			OR bills_status.translation = "passed senate"
 			OR bills_status.translation = "passed committee"
@@ -405,12 +405,8 @@ $page_sidebar .= '
 	</div>';
 
 # Most interesting bills
-$sql = 'SELECT bills.number, bills.catch_line,
-		DATE_FORMAT(bills.date_introduced, "%M %d, %Y") AS date_introduced,
-		representatives.name AS patron, bills.status, bills.hotness
+$sql = 'SELECT bills.number, bills.catch_line
 		FROM bills
-		LEFT JOIN representatives
-			ON bills.chief_patron_id = representatives.id
 		WHERE bills.session_id = ' . SESSION_ID . '
 		ORDER BY bills.hotness DESC
 		LIMIT 5';
@@ -438,21 +434,10 @@ if (LEGISLATIVE_SEASON == true) {
     $sql = 'SELECT
 				bills.number,
 				bills.catch_line,
-				sessions.year,
-				DATE_FORMAT(bills.date_introduced, "%M %d, %Y") AS date_introduced,
-				representatives.name AS patron,
-				(
-					SELECT status
-					FROM bills_status
-					WHERE bill_id=bills.id
-					ORDER BY date DESC, id DESC
-					LIMIT 1
-				) AS status
+				sessions.year
 			FROM bills
 			LEFT JOIN sessions
 				ON bills.session_id=sessions.id
-			LEFT JOIN representatives
-				ON bills.chief_patron_id = representatives.id
 			WHERE
 				bills.date_introduced >= CURDATE() - INTERVAL 4 DAY
 			ORDER BY
@@ -467,7 +452,6 @@ if (LEGISLATIVE_SEASON == true) {
 				<ul>';
         while ($bill = mysqli_fetch_array($result)) {
             $bill = array_map('stripslashes', $bill);
-            $bill['summary'] = mb_substr($bill['summary'], 0, 175) . '...';
             $page_sidebar .= '
 				<li><a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number'])
                     . '/" class="balloon">' . mb_strtoupper($bill['number'])

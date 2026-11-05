@@ -1,4 +1,4 @@
-name: Local Tests
+name: Production Data Tests
 permissions:
   contents: read
 
@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   local_tests:
-    name: Local Tests
+    name: Production Data Tests
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -92,6 +92,6 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           if [ -n "$SLACK_WEBHOOK" ]; then
-            jq -n --arg url "$RUN_URL" '{text: ("Richmond Sunlight’s local tests failed: " + $url)}' \
+            jq -n --arg url "$RUN_URL" '{text: ("Richmond Sunlight’s production data tests failed: " + $url)}' \
               | curl -fsS -X POST -H 'Content-Type: application/json' --data @- "$SLACK_WEBHOOK"
           fi

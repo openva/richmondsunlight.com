@@ -18,6 +18,8 @@ class VideoPipelineStatusTest extends TestCase
             'capture_directory' => null,
             'on_s3' => true,
             'archived' => false,
+            'archived_download' => false,
+            'captions_checked' => false,
             'embedded' => false,
             'youtube' => false,
             'has_source' => true,
@@ -117,15 +119,25 @@ class VideoPipelineStatusTest extends TestCase
         $this->assertSame('done', $this->state('transcript', $this->video(['transcript' => true]), $failed));
     }
 
-    public function testArchiveNeedsCaptionsScreenshotsAndATranscript(): void
+    /** A transcript and captions are not waited for; they are sent to the item later. */
+    public function testArchiveNeedsOnlyTheDownloadAndScreenshots(): void
     {
-        $ready = $this->video(['screenshots' => true, 'has_captions' => true, 'has_transcript_text' => true]);
-        $this->assertSame('waiting', $this->state('archive', $ready));
+        $this->assertSame('waiting', $this->state('archive', $this->video(['screenshots' => true])));
         $this->assertSame('done', $this->state('archive', $this->video(['on_s3' => false, 'archived' => true])));
 
-        $noCaptions = VideoPipelineStatus::stageState('archive', $this->video(['screenshots' => true, 'has_transcript_text' => true]), null, self::NOW);
-        $this->assertSame('blocked', $noCaptions['state']);
-        $this->assertStringContainsString('captions', $noCaptions['detail']);
+        $noScreenshots = VideoPipelineStatus::stageState('archive', $this->video(), null, self::NOW);
+        $this->assertSame('blocked', $noScreenshots['state']);
+        $this->assertSame('Needs screenshots first.', $noScreenshots['detail']);
+    }
+
+    /** Archived videos are transcribed from archive.org, from 2020 on. */
+    public function testArchivedVideosFrom2020OnAreTranscribed(): void
+    {
+        $archived = ['on_s3' => false, 'archived' => true, 'archived_download' => true];
+        $this->assertSame('waiting', $this->state('transcript', $this->video($archived)));
+        $this->assertSame('done', $this->state('transcript', $this->video($archived + ['transcript' => true])));
+        $this->assertSame('n/a', $this->state('transcript', $this->video(['date' => '2019-12-31'] + $archived)));
+        $this->assertSame('n/a', $this->state('transcript', $this->video(['on_s3' => false, 'archived' => true])), 'A details URL.');
     }
 
     public function testVideosArchivedBefore2020WereNeverScreenshotted(): void
@@ -164,6 +176,27 @@ class VideoPipelineStatusTest extends TestCase
 
         $this->assertSame('done', $this->state('download', $video));
         $this->assertSame('waiting', $this->state('screenshots', $video));
+    }
+
+    public function testArchivedCaptionsAreDoneUnlessAJobAsksForThem(): void
+    {
+        $archived = $this->video([
+            'on_s3' => false, 'archived' => true, 'archived_download' => true,
+            'has_captions' => true, 'captions_checked' => true,
+        ]);
+
+        $this->assertSame('done', $this->state('archive_captions', $archived));
+        $this->assertSame('waiting', $this->state('archive_captions', $archived, ['status' => 'pending', 'attempts' => 0]));
+        $this->assertSame('failed', $this->state('archive_captions', $archived, ['status' => 'failed', 'attempts' => 3, 'last_error' => 'x']));
+    }
+
+    public function testArchivedCaptionsDoNotApplyWithoutAnythingToSend(): void
+    {
+        $this->assertSame('n/a', $this->state('archive_captions', $this->video(['has_captions' => true, 'captions_checked' => true])), 'Not archived.');
+        $this->assertSame('n/a', $this->state('archive_captions', $this->video(['on_s3' => false, 'archived' => true, 'has_captions' => true, 'captions_checked' => true])), 'A details URL.');
+        $base = ['on_s3' => false, 'archived' => true, 'archived_download' => true];
+        $this->assertSame('n/a', $this->state('archive_captions', $this->video($base)), 'No captions.');
+        $this->assertSame('n/a', $this->state('archive_captions', $this->video($base + ['has_captions' => true])), 'Timing not checked.');
     }
 
     public function testADeletedSourceCannotBeScreenshotted(): void

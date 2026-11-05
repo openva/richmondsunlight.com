@@ -30,11 +30,13 @@ $shortname = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['committee']);
 $committee = new Committee();
 $committee->chamber = $chamber;
 $committee->shortname = $shortname;
-if (!$committee->info() || !$committee->members()) {
+if (!$committee->info()) {
     http_response_code(404);
     include '404.php';
     exit();
 }
+# A committee can briefly have no members, such as when its membership hasn't been imported yet
+$committee->members();
 
 # PAGE METADATA
 $page_title = ucfirst($chamber) . ' ' . $committee->name . ' Committee';
@@ -273,6 +275,10 @@ if (is_array($committee->members)) {
     }
     $page_body .= '
 			</ul>';
+} else {
+    $page_body = '
+			<h2>Members</h2>
+			<p>We don’t have a list of this committee’s current members.</p>';
 }
 
 
