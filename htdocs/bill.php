@@ -1052,14 +1052,21 @@ if (isset($bill['places']) && (count($bill['places']) > 0)) {
 
     $place_count = count($bill['places']);
     $i = 0;
+    $localities = new Places();
     foreach ($bill['places'] as $place) {
         $place = (array) $place;
         $i++;
+
+        // Link counties and cities to their pages.
+        $locality = $localities->findByName($place['name']);
+        $label = $locality === false ? htmlspecialchars($place['name'])
+            : '<a href="/places/' . $locality['slug'] . '/">' . htmlspecialchars($locality['display_name']) . '</a>';
+
         if ($i == $place_count && $place_count > 1) {
-            $page_body .= ' and ' . $place['name'];
+            $page_body .= ' and ' . $label;
         } else {
-            $page_body .= ' ' . $place['name'];
-            if ($i < $place_count) {
+            $page_body .= ' ' . $label;
+            if ($i < $place_count && $place_count > 2) {
                 $page_body .= ',';
             }
         }

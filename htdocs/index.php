@@ -175,12 +175,14 @@ if (mysqli_num_rows($result) > 0) {
     // Try to get boundaries from Memcached first
     $memcached = new Memcached();
     $memcached->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-    $cache_key = 'municipal_boundaries_geojson';
+    $cache_key = 'municipal_boundaries_geojson_v2';
     $boundaries_geojson = $memcached->get($cache_key);
 
     if ($boundaries_geojson === false) {
         // Not in cache, query from database
-        $boundaries_sql = "SELECT name, ST_AsGeoJSON(boundaries) as geometry
+        // Counties and independent cities link to their places pages, but towns don't
+        $boundaries_sql = "SELECT name, ST_AsGeoJSON(boundaries) as geometry,
+                               (municipality IS NULL OR municipality = CONCAT(name, ' (city)')) AS is_locality
                            FROM gazetteer
                            WHERE boundaries IS NOT NULL";
         $boundaries_result = mysqli_query($GLOBALS['db'], $boundaries_sql);
@@ -192,7 +194,8 @@ if (mysqli_num_rows($result) > 0) {
                     'type' => 'Feature',
                     'geometry' => json_decode($boundary['geometry'], true),
                     'properties' => [
-                        'name' => $boundary['name']
+                        'name' => $boundary['name'],
+                        'url' => $boundary['is_locality'] ? '/places/' . Places::slug($boundary['name']) . '/' : null,
                     ]
                 ];
             }
@@ -346,6 +349,17 @@ if (mysqli_num_rows($result) > 0) {
 				});
 
 				map.on("click", "places", function (e) {
+					var url = e.features[0].properties.url;
+					if (url) {
+						window.location.href = url;
+					}
+				});
+
+				// Clicking a county or city (but not a bill marker on it) opens its page
+				map.on("click", "boundaries-fill", function (e) {
+					if (map.queryRenderedFeatures(e.point, { layers: ["places"] }).length > 0) {
+						return;
+					}
 					var url = e.features[0].properties.url;
 					if (url) {
 						window.location.href = url;

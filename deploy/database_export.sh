@@ -120,6 +120,13 @@ mysqldump "$DATABASE" --no-create-info --complete-insert --insert-ignore --skip-
 mysqldump "$DATABASE" --no-create-info --complete-insert --insert-ignore --skip-lock-tables -u "$USERNAME" \
     --host "$HOST" dockets --where "date_created > '2025-01-01' AND date_created < '2025-06-01'" >> mysql/test-records.sql
 
+# Every county and independent city in the gazetteer (but not towns), with its boundaries, for the
+# places pages. A county's municipality is NULL, and an independent city's is its name followed by
+# " (city)". --hex-blob writes the boundaries as hex, so that they survive as text.
+mysqldump "$DATABASE" --no-create-info --complete-insert --insert-ignore --skip-lock-tables --hex-blob \
+    -u "$USERNAME" --host "$HOST" gazetteer \
+    --where "municipality IS NULL OR municipality = CONCAT(name, ' (city)')" \
+    >> mysql/test-records.sql
 
 for TABLE in "${SOME_CONTENTS[@]}"; do
     for BILL_ID in "${BILL_IDS[@]}"; do

@@ -334,6 +334,23 @@ if (!empty($legislator['district_description'])) {
 $page_body .= '</div>
         </div>';
 
+// The counties and cities that a current legislator's district represents.
+if (empty($legislator['date_ended']) && !empty($legislator['district_id'])) {
+    $localities = (new Places())->forDistrict((int) $legislator['district_id']);
+    if (count($localities) > 0) {
+        $links = [];
+        foreach ($localities as $locality) {
+            $links[] = '<a href="/places/' . $locality['slug'] . '/">' . htmlspecialchars($locality['name'])
+                . '</a>' . ($locality['whole'] ? '' : ' (part)');
+        }
+        $page_body .= '
+        <div class="pair">
+            <div class="label">Represents</div>
+            <div class="content">' . implode(', ', $links) . '</div>
+        </div>';
+    }
+}
+
 // Get the batting average data.  Use the current session's year if the session
 // is finished.  Otherwise, use the prior year.
 if (IN_SESSION == true) {
