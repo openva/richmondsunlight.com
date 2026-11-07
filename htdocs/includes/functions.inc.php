@@ -68,6 +68,15 @@ function pivot($text)
     return $text;
 }
 
+/**
+ * stripslashes(), but a NULL (an empty database column, say) stays NULL instead of triggering a
+ * deprecation warning. Meant for array_map() over database rows.
+ */
+function stripslashes_nullsafe($value)
+{
+    return is_string($value) ? stripslashes($value) : $value;
+}
+
 function array_map_multi($func, $arr)
 {
     $newArr = array();
@@ -290,7 +299,7 @@ function get_user()
         return false;
     }
     $user = mysqli_fetch_array($result, MYSQLI_ASSOC);
-    $user = array_map('stripslashes', $user);
+    $user = array_map('stripslashes_nullsafe', $user);
 
     # Cache this user's data, and save it for one hour. (User sessions are unlikely to last longer.)
     if (MEMCACHED_SERVER != '') {
@@ -627,6 +636,28 @@ function first_sentences($html, $count = 4)
     }
 
     return $text;
+}
+
+/**
+ * Write an RSS feed to the cache and send it, with Last-Modified and ETag headers. If the cache
+ * can't be written to, the feed is still sent, with headers based on the current time.
+ */
+function send_rss_and_cache(string $cache_file, string $rss, string $content_type = 'application/xml'): void
+{
+    // Only write directly inside the cache directory, whatever the file name was built from.
+    $in_cache_dir = dirname($cache_file) === rtrim(CACHE_DIR, '/');
+    if ($in_cache_dir && @file_put_contents($cache_file, $rss) !== false) {
+        $last_modified = date('r', filemtime($cache_file));
+        $etag = md5_file($cache_file);
+    } else {
+        $last_modified = date('r');
+        $etag = md5($rss);
+    }
+
+    header('Content-Type: ' . $content_type);
+    header('Last-Modified: ' . $last_modified);
+    header('ETag: ' . $etag);
+    echo $rss;
 }
 
 # nl2p is WordPress' wpautop(), renamed

@@ -119,7 +119,7 @@ if (isset($_POST['form_data'])) {
     $form_data['name'] = preg_replace("/\n/", "", $form_data['name']);
 
     # Limit the string length and strip slashes; the former being to, again, block injection attacks.
-    $form_data = array_map('stripslashes', $form_data);
+    $form_data = array_map('stripslashes_nullsafe', $form_data);
     $form_data = array_map('trim', $form_data);
     $form_data['subject'] = mb_substr($form_data['subject'], 0, 80);
     $form_data['name'] = mb_substr($form_data['name'], 0, 80);

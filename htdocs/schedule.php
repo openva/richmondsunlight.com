@@ -45,6 +45,8 @@ if (isset($_GET['date'])) {
     }
 }
 
+$page_body = '';
+
 # PAGE METADATA
 $page_title = 'Schedule for ' . $date_formatted;
 $site_section = 'schedule';
@@ -64,7 +66,7 @@ if (mysqli_num_rows($result) > 0) {
     $page_body .= '
 		<h2 id="calendar">The Day’s Calendar</h2>';
     while ($meeting = mysqli_fetch_array($result)) {
-        $meeting = array_map('stripslashes', $meeting);
+        $meeting = array_map('stripslashes_nullsafe', $meeting);
         $page_body .= '<p><strong>';
         if (!empty($meeting['timedesc'])) {
             $page_body .= $meeting['timedesc'];
@@ -112,7 +114,7 @@ if (mysqli_num_rows($result) < 1) {
     # Step through each scheduled meeting.
     while ($meeting = mysqli_fetch_array($result)) {
         # Clean up the data.
-        $meeting = array_map('stripslashes', $meeting);
+        $meeting = array_map('stripslashes_nullsafe', $meeting);
 
         # Select a listing of the bills being heard in this committee on this date.
         // We use SELECT DISTINCT to work around a bug that exists as of this writing (January
@@ -139,7 +141,7 @@ if (mysqli_num_rows($result) < 1) {
 
             while ($bill = mysqli_fetch_array($result2)) {
                 # Save the bills into an array to use later.
-                $bill = array_map('stripslashes', $bill);
+                $bill = array_map('stripslashes_nullsafe', $bill);
                 $bills[] = $bill;
             }
         }

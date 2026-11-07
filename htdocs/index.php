@@ -62,7 +62,7 @@ if ($tag_count >= 10) {
     $page_body .= '<h2>Bill Topics</h2><div class="tags">';
     # Build up an array of tags, with the key being the tag and the value being the count.
     while ($tag = mysqli_fetch_array($result)) {
-        $tag = array_map('stripslashes', $tag);
+        $tag = array_map('stripslashes_nullsafe', $tag);
         $tags[$tag['tag']] = $tag['count'];
     }
 
@@ -175,12 +175,14 @@ if (mysqli_num_rows($result) > 0) {
     // Try to get boundaries from Memcached first
     $memcached = new Memcached();
     $memcached->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-    $cache_key = 'municipal_boundaries_geojson';
+    $cache_key = 'municipal_boundaries_geojson_v2';
     $boundaries_geojson = $memcached->get($cache_key);
 
     if ($boundaries_geojson === false) {
         // Not in cache, query from database
-        $boundaries_sql = "SELECT name, ST_AsGeoJSON(boundaries) as geometry
+        // Counties and independent cities link to their places pages, but towns don't
+        $boundaries_sql = "SELECT name, ST_AsGeoJSON(boundaries) as geometry,
+                               (municipality IS NULL OR municipality = CONCAT(name, ' (city)')) AS is_locality
                            FROM gazetteer
                            WHERE boundaries IS NOT NULL";
         $boundaries_result = mysqli_query($GLOBALS['db'], $boundaries_sql);
@@ -192,7 +194,8 @@ if (mysqli_num_rows($result) > 0) {
                     'type' => 'Feature',
                     'geometry' => json_decode($boundary['geometry'], true),
                     'properties' => [
-                        'name' => $boundary['name']
+                        'name' => $boundary['name'],
+                        'url' => $boundary['is_locality'] ? '/places/' . Places::slug($boundary['name']) . '/' : null,
                     ]
                 ];
             }
@@ -352,6 +355,17 @@ if (mysqli_num_rows($result) > 0) {
 					}
 				});
 
+				// Clicking a county or city (but not a bill marker on it) opens its page
+				map.on("click", "boundaries-fill", function (e) {
+					if (map.queryRenderedFeatures(e.point, { layers: ["places"] }).length > 0) {
+						return;
+					}
+					var url = e.features[0].properties.url;
+					if (url) {
+						window.location.href = url;
+					}
+				});
+
 				// Add boundary hover effects
 				map.on("mouseenter", "boundaries-fill", (e) => {
 					map.getCanvas().style.cursor = "pointer";
@@ -417,7 +431,7 @@ if (mysqli_num_rows($result) > 0) {
 		<div class="box" id="interesting">
 			<ul>';
     while ($bill = mysqli_fetch_array($result)) {
-        $bill = array_map('stripslashes', $bill);
+        $bill = array_map('stripslashes_nullsafe', $bill);
         $page_sidebar .= '
 			<li><a href="/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/" class="balloon">'
                 . mb_strtoupper($bill['number']) . balloon($bill, 'bill') . '</a>: '
@@ -451,7 +465,7 @@ if (LEGISLATIVE_SEASON == true) {
 			<div class="box" id="newest">
 				<ul>';
         while ($bill = mysqli_fetch_array($result)) {
-            $bill = array_map('stripslashes', $bill);
+            $bill = array_map('stripslashes_nullsafe', $bill);
             $page_sidebar .= '
 				<li><a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number'])
                     . '/" class="balloon">' . mb_strtoupper($bill['number'])

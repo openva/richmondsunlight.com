@@ -4,6 +4,7 @@ require __DIR__ . '/../htdocs/includes/settings.inc.php';
 require __DIR__ . '/../htdocs/includes/class.Database.php';
 require __DIR__ . '/../htdocs/includes/class.Legislator.php';
 require __DIR__ . '/../htdocs/includes/class.Log.php';
+require __DIR__ . '/../htdocs/includes/class.Places.php';
 require __DIR__ . '/../htdocs/includes/vendor/autoload.php';
 
 $database = new Database();
@@ -168,6 +169,34 @@ for ($year = 2006; $year <= SESSION_YEAR; $year++) {
             continue;
         }
     }
+}
+
+/*
+ * Generate a sitemap of the places pages: the list of places, and every county and independent
+ * city (but not towns) in the gazetteer.
+ */
+$sql = 'SELECT name
+        FROM gazetteer
+        WHERE municipality IS NULL OR municipality = CONCAT(name, " (city)")
+        ORDER BY name ASC';
+$result = mysqli_query(mysql: $GLOBALS['db'], query: $sql);
+if ($result && mysqli_num_rows(result: $result) > 0) {
+    $sitemap_file = fopen(filename: $sitemap_dir . '/places.xml', mode: 'w');
+    fwrite(stream: $sitemap_file, data: $sitemap_xml_header . "\n");
+    fwrite(stream: $sitemap_file, data: '<url><loc>https://www.richmondsunlight.com/places/</loc></url>' . "\n");
+    while ($place = $result->fetch_assoc()) {
+        fwrite(stream: $sitemap_file, data: '<url><loc>https://www.richmondsunlight.com/places/'
+            . Places::slug($place['name']) . '/</loc></url>' . "\n");
+    }
+    fwrite(stream: $sitemap_file, data: $sitemap_xml_footer . "\n");
+    fclose(stream: $sitemap_file);
+    $sitemap_list[] = 'places.xml';
+    $log->put(message: 'Regenerated places sitemap', level: 3);
+} else {
+    $log->put(
+        message: 'Places sitemap query failed or found no places: ' . mysqli_error(mysql: $GLOBALS['db']),
+        level: 5
+    );
 }
 
 /*

@@ -57,7 +57,7 @@ if ($tag_count > 0) {
 	<div class="tags">';
     # Build up an array of tags, with the key being the tag and the value being the count.
     while ($tag = mysqli_fetch_array($result)) {
-        $tag = array_map('stripslashes', $tag);
+        $tag = array_map('stripslashes_nullsafe', $tag);
         $tags[$tag['tag']] = $tag['count'];
     }
 

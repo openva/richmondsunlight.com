@@ -117,7 +117,7 @@ function display_form($form_data)
 $page_body = '';
 
 if (isset($_POST['submit'])) {
-    $form_data = array_map('stripslashes', $_POST['form_data']);
+    $form_data = array_map('stripslashes_nullsafe', $_POST['form_data']);
     $form_data = array_map('trim', $form_data);
 
     # If somebody filled out this form in an implausibly short time (five seconds), then it's a

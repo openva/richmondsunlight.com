@@ -155,7 +155,7 @@ if (mysqli_num_rows($result) > 0) {
 		</thead>
 		<tbody>';
     while ($legislator = mysqli_fetch_array($result)) {
-        $legislator = array_map('stripslashes', $legislator);
+        $legislator = array_map('stripslashes_nullsafe', $legislator);
 
         if (!empty($legislator['cash'])) {
             $legislator['cash'] = '$' . number_format($legislator['cash']);

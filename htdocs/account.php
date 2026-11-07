@@ -120,7 +120,7 @@ function display_form($form_data)
 }
 
 if (isset($_POST['submit'])) {
-    $form_data = array_map('stripslashes', $_POST['form_data']);
+    $form_data = array_map('stripslashes_nullsafe', $_POST['form_data']);
     $form_data = array_map('trim', $_POST['form_data']);
 
     # Alert users to mistakes.
@@ -206,7 +206,7 @@ if (isset($_POST['submit'])) {
 
 
 if (!isset($_POST['submit'])) {
-    $page_body .= '
+    $page_body = '
 	<div class="tabs">
 	<ul class="tabs">
 		<li><a href="#settings">Settings</a></li>
@@ -242,7 +242,7 @@ if (!isset($_POST['submit'])) {
     }
     $user_data = mysqli_fetch_array($result);
 
-    $user_data = array_map('stripslashes', $user_data);
+    $user_data = array_map('stripslashes_nullsafe', $user_data);
 
     # Display the account editing form.
     $page_body .= @display_form($user_data);

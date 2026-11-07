@@ -15,7 +15,13 @@
     include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/functions.inc.php';
 
     # LOCALIZE VARIABLES
-    $legislator['shortname'] = $_REQUEST['shortname'];
+    $legislator['shortname'] = $_REQUEST['shortname'] ?? '';
+
+    # The shortname becomes part of a cache file's name, so allow only what the URL rewrite rule does.
+if (!preg_match('/^[a-z0-9-]{1,100}$/', $legislator['shortname'])) {
+    http_response_code(404);
+    exit();
+}
 
     # PAGE CONTENT
 
@@ -52,7 +58,7 @@ if (mysqli_num_rows($result) == 0) {
 }
     $legislator = mysqli_fetch_array($result);
     # Clean up some data.
-    $legislator = array_map('stripslashes', $legislator);
+    $legislator = array_map('stripslashes_nullsafe', $legislator);
     $legislator['suffix'] = '(' . $legislator['party'] . '-' . $legislator['district'] . ')';
 if ($legislator['chamber'] == 'house') {
     $legislator['prefix'] = 'Del.';
@@ -118,9 +124,4 @@ while ($bill = mysqli_fetch_array($result)) {
 
 
     # Cache the RSS file.
-    $fp = @file_put_contents(CACHE_DIR . '/' . $legislator['shortname'] . '.xml', $rss);
-
-    header('Content-Type: application/xml');
-    header('Last-Modified: ' . date('r', filemtime(CACHE_DIR . '/' . $legislator['shortname'] . '.xml')));
-    header('ETag: ' . md5_file(CACHE_DIR . '/' . $legislator['shortname'] . '.xml'));
-    echo $rss;
+    send_rss_and_cache(CACHE_DIR . '/' . $legislator['shortname'] . '.xml', $rss);

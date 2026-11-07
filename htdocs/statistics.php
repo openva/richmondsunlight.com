@@ -565,7 +565,7 @@ if (mysqli_num_rows($result) > 0) {
 			<h3>Republican Tag Cloud</h3>
 			<div class="tags">';
     while ($tag = mysqli_fetch_array($result)) {
-        $tags[] = array_map('stripslashes', $tag);
+        $tags[] = array_map('stripslashes_nullsafe', $tag);
     }
     for ($i = 0; $i < count($tags); $i++) {
         $font_size = round((log($tags[$i]['count']) / 3), 2);
@@ -608,7 +608,7 @@ if (mysqli_num_rows($result) > 0) {
 			<h3>Democratic Tag Cloud</h3>
 			<div class="tags">';
     while ($tag = mysqli_fetch_array($result)) {
-        $tags[] = array_map('stripslashes', $tag);
+        $tags[] = array_map('stripslashes_nullsafe', $tag);
     }
     for ($i = 0; $i < count($tags); $i++) {
         $font_size = round((log($tags[$i]['count']) / 3), 2);

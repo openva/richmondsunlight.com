@@ -87,7 +87,7 @@ $bill['summary'] = str_replace('\u00a0', ' ', $bill['summary']);
  * to amend (if, indeed, it is amending the Code).
  */
 $bill_text = new Bill2();
-$bill_text->bill_id = $bill['id'];
+$bill_text->id = $bill['id'];
 if ($bill_text->get_terms() === true) {
     /* Send a bit of JavaScript to the browser, which we use in each API call. */
     $html_head .= $bill_text->javascript;
@@ -193,7 +193,7 @@ if ($bill['session_id'] == SESSION_ID) {
         // If this bill is being tracked, notify this user.
         if (mysqli_num_rows($result) > 0) {
             $portfolio = mysqli_fetch_array($result);
-            $portfolio = array_map('stripslashes', $portfolio);
+            $portfolio = array_map('stripslashes_nullsafe', $portfolio);
             $ps_status = '<div id="track-bill-container">
                 <button type="button" id="track-bill-btn"
                     data-record-id="' . $portfolio['dashboard_bills_id'] . '"
@@ -319,7 +319,7 @@ $(document).ready(function() {
         }
         $i = 2;
         while ($portfolio = mysqli_fetch_array($result)) {
-            $portfolio = array_map('stripslashes', $portfolio);
+            $portfolio = array_map('stripslashes_nullsafe', $portfolio);
 
             // Quasi-anonymize the user.
             $tmp = explode(' ', $portfolio['user_name']);
@@ -1020,7 +1020,7 @@ $sql = 'SELECT DATE_FORMAT(dockets.date, "%m/%d/%Y") AS date, committees.name AS
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $docket = mysqli_fetch_array($result);
-    $docket = array_map('stripslashes', $docket);
+    $docket = array_map('stripslashes_nullsafe', $docket);
 
     $page_body .= '
 		<div class="docket">
@@ -1052,14 +1052,21 @@ if (isset($bill['places']) && (count($bill['places']) > 0)) {
 
     $place_count = count($bill['places']);
     $i = 0;
+    $localities = new Places();
     foreach ($bill['places'] as $place) {
         $place = (array) $place;
         $i++;
+
+        // Link counties and cities to their pages.
+        $locality = $localities->findByName($place['name']);
+        $label = $locality === false ? htmlspecialchars($place['name'])
+            : '<a href="/places/' . $locality['slug'] . '/">' . htmlspecialchars($locality['display_name']) . '</a>';
+
         if ($i == $place_count && $place_count > 1) {
-            $page_body .= ' and ' . $place['name'];
+            $page_body .= ' and ' . $label;
         } else {
-            $page_body .= ' ' . $place['name'];
-            if ($i < $place_count) {
+            $page_body .= ' ' . $label;
+            if ($i < $place_count && $place_count > 2) {
                 $page_body .= ',';
             }
         }

@@ -134,7 +134,7 @@ class User
 
         # Build up an array of tags, with the key being the tag and the value being the count.
         while ($tag = mysqli_fetch_array($result)) {
-            $tag = array_map('stripslashes', $tag);
+            $tag = array_map('stripslashes_nullsafe', $tag);
             $tags[$tag['tag']] = $tag['count'];
         }
 
@@ -261,7 +261,7 @@ class User
             return false;
         } else {
             while ($bill = mysqli_fetch_assoc($result)) {
-                $bill = array_map('stripslashes', $bill);
+                $bill = array_map('stripslashes_nullsafe', $bill);
                 if (!isset($bills_seen[$bill['id']])) {
                     $bills[] = $bill;
                 }
@@ -339,7 +339,7 @@ class User
         $bills = array();
 
         while ($bill = mysqli_fetch_array($result)) {
-            $bills[] = array_map('stripslashes', $bill);
+            $bills[] = array_map('stripslashes_nullsafe', $bill);
         }
 
         return $bills;

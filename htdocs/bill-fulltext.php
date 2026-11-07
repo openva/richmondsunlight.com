@@ -92,7 +92,7 @@ if ($bill['amends'] == false) {
  * proposes to amend (if, indeed, it is amending the Code).
  */
 $bill_text = new Bill2();
-$bill_text->bill_id = $bill['id'];
+$bill_text->id = $bill['id'];
 if ($bill_text->get_terms() === true) {
     $html_head .= $bill_text->javascript;
     $term_pcres = $bill_text->term_pcres;
@@ -110,7 +110,7 @@ if ($result == false) {
 
 $versions = [];
 while ($version = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
-    $version = array_map('stripslashes', $version);
+    $version = array_map('stripslashes_nullsafe', $version);
 
     # The HTML for amended versions of bills is beastly. Clean it up.
     $version['text'] = str_replace('<center><b><br><center><b>', '<center><b>', $version['text']);

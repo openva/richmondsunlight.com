@@ -93,7 +93,7 @@ if ((mysqli_num_rows($result) > 0) || ($bypass == 1)) {
     # Store the portfolio ID in a hidden form field, if there's just one portfolio.
     if (mysqli_num_rows($result) == 1) {
         $portfolio = mysqli_fetch_array($result);
-        $portfolio = array_map('stripslashes', $portfolio);
+        $portfolio = array_map('stripslashes_nullsafe', $portfolio);
         $page_body .= '<input type="hidden" name="portfolio" value="' . $portfolio['hash'] . '" />';
 
         # Store the name and ID of this portfolio in the session, for use on the
@@ -107,7 +107,7 @@ if ((mysqli_num_rows($result) > 0) || ($bypass == 1)) {
 					<select name="portfolio" size="1">
 					<option disabled>Select a Portfolio</option>';
         while ($portfolio = mysqli_fetch_array($result)) {
-            $portfolio = array_map('stripslashes', $portfolio);
+            $portfolio = array_map('stripslashes_nullsafe', $portfolio);
             $page_body .= '
 						<option value="' . $portfolio['hash'] . '">' . $portfolio['name'] . '</option>';
 
@@ -135,7 +135,7 @@ $result = mysqli_query($GLOBALS['db'], $sql);
 
 if (mysqli_num_rows($result) > 0) {
     while ($portfolio = mysqli_fetch_array($result)) {
-        $portfolio = array_map('stripslashes', $portfolio);
+        $portfolio = array_map('stripslashes_nullsafe', $portfolio);
 
         if (!empty($portfolio['watch_list_id'])) {
             $portfolio['type'] = 'smart';

@@ -15,7 +15,13 @@
     include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/functions.inc.php';
 
     # LOCALIZE VARIABLES
-    $tag = urldecode($_REQUEST['tag']);
+    $tag = urldecode($_REQUEST['tag'] ?? '');
+
+    # The tag becomes part of a cache file's name, so allow only what the URL rewrite rule does.
+if (!preg_match('/^[a-z0-9 +-]{1,100}$/', $tag)) {
+    http_response_code(404);
+    exit();
+}
 
     # PAGE CONTENT
 
@@ -87,9 +93,4 @@ while ($bill = mysqli_fetch_array($result)) {
 
 
     # Cache the RSS file.
-    $fp = @file_put_contents(CACHE_DIR . '/tag-' . $tag . '.xml', $rss);
-
-    header('Content-Type: application/xml');
-    header('Last-Modified: ' . date('r', filemtime(CACHE_DIR . '/tag-' . $tag . '.xml')));
-    header('ETag: ' . md5_file(CACHE_DIR . '/tag-' . $tag . '.xml'));
-    echo $rss;
+    send_rss_and_cache(CACHE_DIR . '/tag-' . $tag . '.xml', $rss);
