@@ -62,7 +62,7 @@ if ($tag_count >= 10) {
     $page_body .= '<h2>Bill Topics</h2><div class="tags">';
     # Build up an array of tags, with the key being the tag and the value being the count.
     while ($tag = mysqli_fetch_array($result)) {
-        $tag = array_map('stripslashes', $tag);
+        $tag = array_map('stripslashes_nullsafe', $tag);
         $tags[$tag['tag']] = $tag['count'];
     }
 
@@ -431,7 +431,7 @@ if (mysqli_num_rows($result) > 0) {
 		<div class="box" id="interesting">
 			<ul>';
     while ($bill = mysqli_fetch_array($result)) {
-        $bill = array_map('stripslashes', $bill);
+        $bill = array_map('stripslashes_nullsafe', $bill);
         $page_sidebar .= '
 			<li><a href="/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/" class="balloon">'
                 . mb_strtoupper($bill['number']) . balloon($bill, 'bill') . '</a>: '
@@ -465,7 +465,7 @@ if (LEGISLATIVE_SEASON == true) {
 			<div class="box" id="newest">
 				<ul>';
         while ($bill = mysqli_fetch_array($result)) {
-            $bill = array_map('stripslashes', $bill);
+            $bill = array_map('stripslashes_nullsafe', $bill);
             $page_sidebar .= '
 				<li><a href="/bill/' . $bill['year'] . '/' . mb_strtolower($bill['number'])
                     . '/" class="balloon">' . mb_strtoupper($bill['number'])

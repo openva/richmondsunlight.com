@@ -70,7 +70,7 @@ if ($num_results > 0) {
     $date = '';
     $i = 0;
     while ($bill = mysqli_fetch_assoc($result)) {
-        $bill = array_map('stripslashes', $bill);
+        $bill = array_map('stripslashes_nullsafe', $bill);
         if ($bill['date_introduced'] != $date) {
             if ($i > 0) {
                 $page_body .= '</ul>';

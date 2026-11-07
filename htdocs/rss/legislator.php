@@ -52,7 +52,7 @@ if (mysqli_num_rows($result) == 0) {
 }
     $legislator = mysqli_fetch_array($result);
     # Clean up some data.
-    $legislator = array_map('stripslashes', $legislator);
+    $legislator = array_map('stripslashes_nullsafe', $legislator);
     $legislator['suffix'] = '(' . $legislator['party'] . '-' . $legislator['district'] . ')';
 if ($legislator['chamber'] == 'house') {
     $legislator['prefix'] = 'Del.';

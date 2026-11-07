@@ -60,7 +60,7 @@ if (mysqli_num_rows($result) > 0) {
 
     # Generate the RSS.
     while ($status = mysqli_fetch_array($result)) {
-        $status = array_map('stripslashes', $status);
+        $status = array_map('stripslashes_nullsafe', $status);
 
         # Aggregate the variables into their RSS components.
         $title = '<![CDATA[' . $status['status'] . ']]>';

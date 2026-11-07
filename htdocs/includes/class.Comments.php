@@ -70,7 +70,7 @@ class Comments
             if (mysqli_num_rows($result) > 0) {
                 while ($comment = mysqli_fetch_array($result)) {
                     // Clean up the data.
-                    $comment = array_map('stripslashes', $comment);
+                    $comment = array_map('stripslashes_nullsafe', $comment);
 
                     // Convert newlines to paragraphs.
                     $comment['comment'] = nl2p($comment['comment']);
@@ -103,7 +103,7 @@ class Comments
             if (mysqli_num_rows($result) > 0) {
                 while ($comment = mysqli_fetch_array($result)) {
                     // Clean up the data.
-                    $comment = array_map('stripslashes', $comment);
+                    $comment = array_map('stripslashes_nullsafe', $comment);
                     $comment['comment'] = nl2p($comment['comment']);
 
                     // Convert $seconds_since to minutes, hours, days, weeks or months.

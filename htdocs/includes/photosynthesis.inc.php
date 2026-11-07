@@ -579,7 +579,7 @@ function show_portfolio($portfolio, $user_id)
 			</thead>
 			<tbody>';
         while ($bill = mysqli_fetch_array($result)) {
-            $bill = array_map('stripslashes', $bill);
+            $bill = array_map('stripslashes_nullsafe', $bill);
             $bill['timestamp'] = strtotime($bill['last_date']);
 
             $content .= '

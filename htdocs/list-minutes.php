@@ -79,7 +79,7 @@ if (mysqli_num_rows($result) == 0) {
 
     # Iterate through the query results.
     while ($minutes = mysqli_fetch_array($result)) {
-        $minutes = array_map('stripslashes', $minutes);
+        $minutes = array_map('stripslashes_nullsafe', $minutes);
         if (!isset($chamber)) {
             $chamber = $minutes['chamber'];
             $page_body .= '

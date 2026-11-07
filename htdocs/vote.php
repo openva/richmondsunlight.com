@@ -75,7 +75,7 @@ if (mysqli_num_rows($result) == 0) {
 }
 
 $bill = mysqli_fetch_assoc($result);
-$bill = array_map('stripslashes', $bill);
+$bill = array_map('stripslashes_nullsafe', $bill);
 $bill = array_map('trim', $bill);
 
 /*
@@ -310,7 +310,7 @@ foreach ($legislators as $legislator) {
 			<h2>' . $display_vote . '</h2>
 		<ul>';
     }
-    $legislator = array_map('stripslashes', $legislator);
+    $legislator = array_map('stripslashes_nullsafe', $legislator);
     $legislator['patron'] = $legislator['name'];
     $legislator['patron_suffix'] = '(' . $legislator['party'] . '-' . $legislator['district'] . ')';
     $legislator['patron_chamber'] = $legislator['chamber'];

@@ -104,7 +104,7 @@ if (mysqli_num_rows($result) > 0) {
 			</thead>
 			<tbody>';
     while ($vote = mysqli_fetch_array($result)) {
-        $vote = array_map('stripslashes', $vote);
+        $vote = array_map('stripslashes_nullsafe', $vote);
         $page_body .= '
 			<tr>
 				<td><a href="/bill/' . $year . '/' . $vote['bill_number'] . '/">'

@@ -35,6 +35,6 @@ class District
             return null;
         }
 
-        return array_map('stripslashes', $district);
+        return array_map('stripslashes_nullsafe', $district);
     }
 }

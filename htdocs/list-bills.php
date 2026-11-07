@@ -178,7 +178,7 @@ if ($num_results > 0) {
 
     # Loop through the bill results.
     while ($bill = mysqli_fetch_array($result)) {
-        $bill = array_map('stripslashes', $bill);
+        $bill = array_map('stripslashes_nullsafe', $bill);
 
         # Simplify the status text.
         if (mb_stristr($bill['status'], 'failed') !== false) {
@@ -366,7 +366,7 @@ if (!empty($year)) {
         $top_tag = 1;
         $top_tag_size = 3;
         while ($tag = mysqli_fetch_array($result)) {
-            $tags[] = array_map('stripslashes', $tag);
+            $tags[] = array_map('stripslashes_nullsafe', $tag);
             if (($tag['count'] > $top_tag) && ($tag['tag'] != 'commendation')) {
                 $top_tag = $tag['count'];
             }
@@ -411,7 +411,7 @@ if (!empty($tag)) {
 		<h3>Related Tag Cloud</h3>
 		<div class="tags">';
         while ($tag_data = mysqli_fetch_array($result)) {
-            $tags[] = array_map('stripslashes', $tag_data);
+            $tags[] = array_map('stripslashes_nullsafe', $tag_data);
         }
         for ($i = 0; $i < count($tags); $i++) {
             $font_size = round(sqrt($tags[$i]['count']), 2);

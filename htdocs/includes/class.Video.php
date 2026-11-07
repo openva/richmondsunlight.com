@@ -564,7 +564,7 @@ class Video
         $database->connect_mysqli();
 
         # Clean up the data.
-        $this->video = array_map('stripslashes', $this->video);
+        $this->video = array_map('stripslashes_nullsafe', $this->video);
         $this->video = array_map(function ($field) {
             return mysqli_real_escape_string($GLOBALS['db'], $field);
         }, $this->video);
@@ -990,7 +990,7 @@ class Video
 
         # Build up an array of tags, with the key being the tag and the value being the count.
         while ($tag = mysqli_fetch_array($result)) {
-            $tag = array_map('stripslashes', $tag);
+            $tag = array_map('stripslashes_nullsafe', $tag);
             $tag_text = $tag['tag'];
             $tags[$tag_text] = $tag['number'];
         }

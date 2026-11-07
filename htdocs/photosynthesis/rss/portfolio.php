@@ -46,7 +46,7 @@ if (mysqli_num_rows($result) == 0) {
     die();
 }
 $portfolio = mysqli_fetch_array($result);
-$portfolio = array_map('stripslashes', $portfolio);
+$portfolio = array_map('stripslashes_nullsafe', $portfolio);
 
 # Query the database for all bills in that portfolio.
 $sql = 'SELECT bills.number, bills.catch_line, bills.summary,

@@ -221,7 +221,7 @@ if (mysqli_num_rows($result) > 0) {
 			<h3>Newest Comments</h3>
 			<ul>';
     while ($comment = mysqli_fetch_array($result)) {
-        $comment = array_map('stripslashes', $comment);
+        $comment = array_map('stripslashes_nullsafe', $comment);
         if (mb_strlen($comment['comment']) > 175) {
             $comment['comment'] = preg_replace('#<blockquote>(.*)</blockquote>#D', '', $comment['comment']);
             $comment['comment'] = strip_tags($comment['comment']);
@@ -674,7 +674,7 @@ if ($tag_count > 0) {
 			<div class="tags">';
     // Build up an array of tags, with the key being the tag and the value being the count.
     while ($tag = mysqli_fetch_array($result)) {
-        $tag = array_map('stripslashes', $tag);
+        $tag = array_map('stripslashes_nullsafe', $tag);
         $tags[$tag['tag']] = $tag['count'];
     }
 

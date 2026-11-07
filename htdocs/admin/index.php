@@ -71,7 +71,7 @@ if (mysqli_num_rows($result) > 0) {
 		<p>The following tags have been applied to bills in the last three days by non-trusted
 		users.</p>';
     while ($tag = mysqli_fetch_array($result)) {
-        $tag = array_map('stripslashes', $tag);
+        $tag = array_map('stripslashes_nullsafe', $tag);
         $tag['bill'] = strtolower($tag['bill']);
         $page_body .= '<div class="tag"><a href="/bill/' . $tag['year'] . '/' . $tag['bill'] . '/" title="'
             . $tag['author'] . '">' . $tag['tag'] . '</a> <a href="/process-tags.php?delete='
@@ -121,7 +121,7 @@ if (mysqli_num_rows($result) > 0) {
 		<h2>Recent Registrants</h2>
 		<p>The following people have signed up in the past 30 days.</p>';
     while ($user = mysqli_fetch_assoc($result)) {
-        $user = array_map('stripslashes', $user);
+        $user = array_map('stripslashes_nullsafe', $user);
         $page_body .= '<div class="user">';
         if (!empty($user['url'])) {
             $page_body .= '<a href="' . $user['url'] . '">';
@@ -222,7 +222,7 @@ if (mysqli_num_rows($result) > 0) {
 		<p>These are the last ten organizations to sign up for Photosynthesis.</p>
 		<p>';
     while ($organization = mysqli_fetch_array($result)) {
-        $organization = array_map('stripslashes', $organization);
+        $organization = array_map('stripslashes_nullsafe', $organization);
         $page_body .= '<a href="/photosynthesis/' . $organization['url'] . '/">'
             . $organization['name'] . '</a>, ';
     }
@@ -281,7 +281,7 @@ if (mysqli_num_rows($result) > 0) {
 			<thead><tr><th>Year</th><th>Title</th><th>Views</th></tr></thead>
 			<tbody>';
     while ($bill = mysqli_fetch_array($result)) {
-        $bill = array_map('stripslashes', $bill);
+        $bill = array_map('stripslashes_nullsafe', $bill);
         $bill['number'] = strtolower($bill['number']);
         $page_body .= '
 			<tr>

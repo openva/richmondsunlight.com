@@ -68,6 +68,15 @@ function pivot($text)
     return $text;
 }
 
+/**
+ * stripslashes(), but a NULL (an empty database column, say) stays NULL instead of triggering a
+ * deprecation warning. Meant for array_map() over database rows.
+ */
+function stripslashes_nullsafe($value)
+{
+    return is_string($value) ? stripslashes($value) : $value;
+}
+
 function array_map_multi($func, $arr)
 {
     $newArr = array();
@@ -279,7 +288,7 @@ function get_user()
         return false;
     }
     $user = mysqli_fetch_array($result, MYSQLI_ASSOC);
-    $user = array_map('stripslashes', $user);
+    $user = array_map('stripslashes_nullsafe', $user);
 
     # Cache this user's data, and save it for one hour. (User sessions are unlikely to last longer.)
     if (MEMCACHED_SERVER != '') {
