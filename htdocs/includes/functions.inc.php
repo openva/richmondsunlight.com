@@ -610,6 +610,26 @@ function first_sentences($html, $count = 4)
     return $text;
 }
 
+/**
+ * Write an RSS feed to the cache and send it, with Last-Modified and ETag headers. If the cache
+ * can't be written to, the feed is still sent, with headers based on the current time.
+ */
+function send_rss_and_cache(string $cache_file, string $rss, string $content_type = 'application/xml'): void
+{
+    if (@file_put_contents($cache_file, $rss) !== false) {
+        $last_modified = date('r', filemtime($cache_file));
+        $etag = md5_file($cache_file);
+    } else {
+        $last_modified = date('r');
+        $etag = md5($rss);
+    }
+
+    header('Content-Type: ' . $content_type);
+    header('Last-Modified: ' . $last_modified);
+    header('ETag: ' . $etag);
+    echo $rss;
+}
+
 # nl2p is WordPress' wpautop(), renamed
 function nl2p($pee, $br = true)
 {

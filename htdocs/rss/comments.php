@@ -14,19 +14,6 @@
 include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/settings.inc.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/functions.inc.php';
 
-    # LOCALIZE VARIABLES
-if (isset($_REQUEST['year'])) {
-    $year = $_REQUEST['year'];
-}
-if (isset($_REQUEST['bill'])) {
-    $bill = $_REQUEST['bill'];
-}
-
-    # Make sure that the year and bill number are valid-looking.
-if ((!preg_match('/([0-9]{4})/D', $year)) || (!preg_match('/([b-s]{2})([0-9]+)/D', $year))) {
-    unset($bill, $year);
-}
-
 # PAGE CONTENT
 # Open a database connection.
 $database = new Database();

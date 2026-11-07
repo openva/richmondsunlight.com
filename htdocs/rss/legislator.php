@@ -118,9 +118,4 @@ while ($bill = mysqli_fetch_array($result)) {
 
 
     # Cache the RSS file.
-    $fp = @file_put_contents(CACHE_DIR . '/' . $legislator['shortname'] . '.xml', $rss);
-
-    header('Content-Type: application/xml');
-    header('Last-Modified: ' . date('r', filemtime(CACHE_DIR . '/' . $legislator['shortname'] . '.xml')));
-    header('ETag: ' . md5_file(CACHE_DIR . '/' . $legislator['shortname'] . '.xml'));
-    echo $rss;
+    send_rss_and_cache(CACHE_DIR . '/' . $legislator['shortname'] . '.xml', $rss);

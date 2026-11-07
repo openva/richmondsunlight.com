@@ -102,9 +102,4 @@ $rss = '<?xml version="1.0" encoding=\'iso-8859-1\'?>
 
 
 # Cache the RSS file.
-$fp = @file_put_contents(CACHE_DIR . '/portfolio-' . $hash . '.xml', $rss);
-
-header('Content-Type: application/rss+xml');
-header('Last-Modified: ' . date('r', filemtime(CACHE_DIR . '/portfolio-' . $hash . '.xml')));
-header('ETag: ' . md5_file(CACHE_DIR . '/portfolio-' . $hash . '.xml'));
-echo $rss;
+send_rss_and_cache(CACHE_DIR . '/portfolio-' . $hash . '.xml', $rss, 'application/rss+xml');
