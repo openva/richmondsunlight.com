@@ -161,10 +161,12 @@ $legislators = $vote_info->get_detailed();
 
 # Step through the legislators data to establish which party voted which way, building up
 # an array of data.
+$graph = [];
+$parties = [];
 foreach ($legislators as $legislator) {
     $legislator['vote'] = mb_strtolower($legislator['vote']);
     $legislator['party'] = mb_strtolower($legislator['party']);
-    $graph[$legislator['vote']][$legislator['party']]++;
+    $graph[$legislator['vote']][$legislator['party']] = ($graph[$legislator['vote']][$legislator['party']] ?? 0) + 1;
     $parties[$legislator['party']] = 1;
 }
 
@@ -178,6 +180,7 @@ foreach ($parties as $party => $blargh) {
             $vote[$party] = 0;
         }
     }
+    unset($vote);
 }
 
 # Sort our parties in the same order. Otherwise they won't match up.

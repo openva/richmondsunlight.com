@@ -47,7 +47,8 @@ if (!empty($_GET['tagless'])) {
     $tagless = true;
 }
 
-# Initialize variables.
+# Initialize variables. Committee and tag listings aren't for a single year.
+$year = $year ?? null;
 $html_head = '';
 $page_body = '';
 
@@ -230,7 +231,13 @@ if ($num_results > 0) {
     }
     $page_body .= '</tbody></table></div></div>';
 } else {
-    $page_body = '<p>No bills have yet been filed for the ' . $year . ' session.</p>';
+    if (!empty($committee) && !empty($chamber)) {
+        $page_body = '<p>There are no bills currently in this committee.</p>';
+    } elseif (!empty($year)) {
+        $page_body = '<p>No bills have yet been filed for the ' . $year . ' session.</p>';
+    } else {
+        $page_body = '<p>No bills were found.</p>';
+    }
 }
 
 # PAGE SIDEBAR

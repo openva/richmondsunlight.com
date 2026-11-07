@@ -583,7 +583,7 @@ function show_portfolio($portfolio, $user_id)
             $bill['timestamp'] = strtotime($bill['last_date']);
 
             $content .= '
-				<tr' . (($_SESSION['last_access'] < $bill['timestamp']) ? ' class="changed"' : '') . '>
+				<tr' . ((isset($_SESSION['last_access']) && $_SESSION['last_access'] < $bill['timestamp']) ? ' class="changed"' : '') . '>
 					<td><a href="/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/">'
                     . mb_strtoupper($bill['number']) . '</a></td>
 					<td>' . $bill['catch_line'] . '</td>
