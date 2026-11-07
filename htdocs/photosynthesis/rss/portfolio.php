@@ -16,9 +16,15 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/functions.inc.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/photosynthesis.inc.php';
 
 # LOCALIZE VARIABLES
-$hash = urldecode($_REQUEST['hash']);
+$hash = urldecode($_REQUEST['hash'] ?? '');
 if (empty($hash)) {
     die('No hash found.');
+}
+
+# The hash becomes part of a cache file's name, so allow only what the URL rewrite rule does.
+if (!preg_match('/^[a-z0-9]{5}$/', $hash)) {
+    http_response_code(404);
+    exit();
 }
 
 # PAGE CONTENT

@@ -15,7 +15,13 @@
     include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/functions.inc.php';
 
     # LOCALIZE VARIABLES
-    $legislator['shortname'] = $_REQUEST['shortname'];
+    $legislator['shortname'] = $_REQUEST['shortname'] ?? '';
+
+    # The shortname becomes part of a cache file's name, so allow only what the URL rewrite rule does.
+if (!preg_match('/^[a-z0-9-]{1,100}$/', $legislator['shortname'])) {
+    http_response_code(404);
+    exit();
+}
 
     # PAGE CONTENT
 

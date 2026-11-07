@@ -15,7 +15,13 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/settings.inc.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/functions.inc.php';
 
 # LOCALIZE VARIABLES
-$bill['number'] = strtolower($_REQUEST['number']);
+$bill['number'] = strtolower($_REQUEST['number'] ?? '');
+
+# The number becomes part of a cache file's name, so allow only what the URL rewrite rule does.
+if (!preg_match('/^[a-z0-9-]{1,10}$/', $bill['number'])) {
+    http_response_code(404);
+    exit();
+}
 
 # PAGE CONTENT
 
