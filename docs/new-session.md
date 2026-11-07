@@ -52,7 +52,9 @@ SELECT * FROM sessions ORDER BY id DESC LIMIT 3;
 
 Do this before deploying the new settings (step 5), so the site never points at a session that doesn't exist. Take note of the new row's `id`. Don't assume it is one more than the last regular session's: special sessions also get rows, so the number can skip.
 
-For a special session, set `suffix` to the session's name (for example, `Special Session I`).
+For a special session, set `suffix` to the special session's number (`'1'` for Special Session I, `'2'` for Special Session II), and use `YY2`, `YY3`, and so on for `lis_id`.
+
+Before adding the new session, compare LIS's session list with the `sessions` table. Add a row for any special session that has been held since the last regular session.
 
 ## 3. Update the settings in this repo
 

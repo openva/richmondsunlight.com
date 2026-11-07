@@ -27,7 +27,7 @@ if (is_readable($rs_local_settings_file)) {
 
 # THE CURRENT SESSION
 # As defined by Richmond Sunlight's database
-rs_define('SESSION_ID', 33);
+rs_define('SESSION_ID', 34);
 
 # Is this the main session or a special session? As defined by Richmond Sunlight's database.
 rs_define('SESSION_SUFFIX', '');
