@@ -124,9 +124,9 @@ class Page
 
         # Step through and replace each variable in the template with the
         # contents of the page.
-        $page = str_replace('%browser_title%', $this->browser_title, $page);
-        $page = str_replace('%page_title%', $this->page_title, $page);
-        $page = str_replace('%page_body%', $this->page_body, $page);
+        $page = str_replace('%browser_title%', (string) $this->browser_title, $page);
+        $page = str_replace('%page_title%', (string) $this->page_title, $page);
+        $page = str_replace('%page_body%', (string) $this->page_body, $page);
         if (!isset($this->page_sidebar) || empty($this->page_sidebar)) {
             if (empty($this->html_head)) {
                 $this->html_head = '';
@@ -138,7 +138,7 @@ class Page
         } else {
             $page = str_replace('%page_sidebar%', $this->page_sidebar, $page);
         }
-        $page = str_replace('%html_head%', $this->html_head, $page);
+        $page = str_replace('%html_head%', (string) $this->html_head, $page);
         $page = str_replace('%account%', $account, $page);
         if (isset($this->body_tag)) {
             $page = str_replace('%body_tag%', $this->body_tag, $page);

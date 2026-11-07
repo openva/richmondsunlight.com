@@ -75,7 +75,7 @@ if (mysqli_num_rows($result) == 0) {
 }
 
 $bill = mysqli_fetch_assoc($result);
-$bill = array_map('stripslashes', $bill);
+$bill = array_map('stripslashes_nullsafe', $bill);
 $bill = array_map('trim', $bill);
 
 /*
@@ -161,10 +161,12 @@ $legislators = $vote_info->get_detailed();
 
 # Step through the legislators data to establish which party voted which way, building up
 # an array of data.
+$graph = [];
+$parties = [];
 foreach ($legislators as $legislator) {
     $legislator['vote'] = mb_strtolower($legislator['vote']);
     $legislator['party'] = mb_strtolower($legislator['party']);
-    $graph[$legislator['vote']][$legislator['party']]++;
+    $graph[$legislator['vote']][$legislator['party']] = ($graph[$legislator['vote']][$legislator['party']] ?? 0) + 1;
     $parties[$legislator['party']] = 1;
 }
 
@@ -178,6 +180,7 @@ foreach ($parties as $party => $blargh) {
             $vote[$party] = 0;
         }
     }
+    unset($vote);
 }
 
 # Sort our parties in the same order. Otherwise they won't match up.
@@ -307,7 +310,7 @@ foreach ($legislators as $legislator) {
 			<h2>' . $display_vote . '</h2>
 		<ul>';
     }
-    $legislator = array_map('stripslashes', $legislator);
+    $legislator = array_map('stripslashes_nullsafe', $legislator);
     $legislator['patron'] = $legislator['name'];
     $legislator['patron_suffix'] = '(' . $legislator['party'] . '-' . $legislator['district'] . ')';
     $legislator['patron_chamber'] = $legislator['chamber'];

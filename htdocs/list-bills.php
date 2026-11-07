@@ -47,7 +47,8 @@ if (!empty($_GET['tagless'])) {
     $tagless = true;
 }
 
-# Initialize variables.
+# Initialize variables. Committee and tag listings aren't for a single year.
+$year = $year ?? null;
 $html_head = '';
 $page_body = '';
 
@@ -177,7 +178,7 @@ if ($num_results > 0) {
 
     # Loop through the bill results.
     while ($bill = mysqli_fetch_array($result)) {
-        $bill = array_map('stripslashes', $bill);
+        $bill = array_map('stripslashes_nullsafe', $bill);
 
         # Simplify the status text.
         if (mb_stristr($bill['status'], 'failed') !== false) {
@@ -230,10 +231,17 @@ if ($num_results > 0) {
     }
     $page_body .= '</tbody></table></div></div>';
 } else {
-    $page_body = '<p>No bills have yet been filed for the ' . $year . ' session.</p>';
+    if (!empty($committee) && !empty($chamber)) {
+        $page_body = '<p>There are no bills currently in this committee.</p>';
+    } elseif (!empty($year)) {
+        $page_body = '<p>No bills have yet been filed for the ' . $year . ' session.</p>';
+    } else {
+        $page_body = '<p>No bills were found.</p>';
+    }
 }
 
 # PAGE SIDEBAR
+$page_sidebar = '';
 if (!empty($year)) {
     $page_sidebar = '
 	<div class="box" id="options">
@@ -358,7 +366,7 @@ if (!empty($year)) {
         $top_tag = 1;
         $top_tag_size = 3;
         while ($tag = mysqli_fetch_array($result)) {
-            $tags[] = array_map('stripslashes', $tag);
+            $tags[] = array_map('stripslashes_nullsafe', $tag);
             if (($tag['count'] > $top_tag) && ($tag['tag'] != 'commendation')) {
                 $top_tag = $tag['count'];
             }
@@ -403,7 +411,7 @@ if (!empty($tag)) {
 		<h3>Related Tag Cloud</h3>
 		<div class="tags">';
         while ($tag_data = mysqli_fetch_array($result)) {
-            $tags[] = array_map('stripslashes', $tag_data);
+            $tags[] = array_map('stripslashes_nullsafe', $tag_data);
         }
         for ($i = 0; $i < count($tags); $i++) {
             $font_size = round(sqrt($tags[$i]['count']), 2);

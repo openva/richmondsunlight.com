@@ -579,11 +579,11 @@ function show_portfolio($portfolio, $user_id)
 			</thead>
 			<tbody>';
         while ($bill = mysqli_fetch_array($result)) {
-            $bill = array_map('stripslashes', $bill);
+            $bill = array_map('stripslashes_nullsafe', $bill);
             $bill['timestamp'] = strtotime($bill['last_date']);
 
             $content .= '
-				<tr' . (($_SESSION['last_access'] < $bill['timestamp']) ? ' class="changed"' : '') . '>
+				<tr' . ((isset($_SESSION['last_access']) && $_SESSION['last_access'] < $bill['timestamp']) ? ' class="changed"' : '') . '>
 					<td><a href="/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/">'
                     . mb_strtoupper($bill['number']) . '</a></td>
 					<td>' . $bill['catch_line'] . '</td>

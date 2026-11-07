@@ -53,7 +53,7 @@ if (mysqli_num_rows($result) > 0) {
         'procedural votes. Verify the context of votes at richmondsunlight.com' . "\n" .
         'when in doubt.' . "\n\n" . 'Bill #, Title, Vote, Outcome, Committee, Date' . "\n";
     while ($vote = mysqli_fetch_array($result)) {
-        $vote = array_map('stripslashes', $vote);
+        $vote = array_map('stripslashes_nullsafe', $vote);
         $vote['catch_line'] = str_replace('"', '""', $vote['catch_line']);
         echo mb_strtoupper($vote['bill_number']) . ',"' . $vote['catch_line'] . '",' . $vote['vote'] . ',' .
         $vote['outcome'] . ',"' . $vote['committee'] . '",' . $vote['date'] . "\n";

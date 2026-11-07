@@ -221,7 +221,7 @@ if (mysqli_num_rows($result) > 0) {
 			<h3>Newest Comments</h3>
 			<ul>';
     while ($comment = mysqli_fetch_array($result)) {
-        $comment = array_map('stripslashes', $comment);
+        $comment = array_map('stripslashes_nullsafe', $comment);
         if (mb_strlen($comment['comment']) > 175) {
             $comment['comment'] = preg_replace('#<blockquote>(.*)</blockquote>#D', '', $comment['comment']);
             $comment['comment'] = strip_tags($comment['comment']);
@@ -333,6 +333,23 @@ if (!empty($legislator['district_description'])) {
 }
 $page_body .= '</div>
         </div>';
+
+// The counties and cities that a current legislator's district represents.
+if (empty($legislator['date_ended']) && !empty($legislator['district_id'])) {
+    $localities = (new Places())->forDistrict((int) $legislator['district_id']);
+    if (count($localities) > 0) {
+        $links = [];
+        foreach ($localities as $locality) {
+            $links[] = '<a href="/places/' . $locality['slug'] . '/">' . htmlspecialchars($locality['name'])
+                . '</a>' . ($locality['whole'] ? '' : ' (part)');
+        }
+        $page_body .= '
+        <div class="pair">
+            <div class="label">Represents</div>
+            <div class="content">' . implode(', ', $links) . '</div>
+        </div>';
+    }
+}
 
 // Get the batting average data.  Use the current session's year if the session
 // is finished.  Otherwise, use the prior year.
@@ -657,7 +674,7 @@ if ($tag_count > 0) {
 			<div class="tags">';
     // Build up an array of tags, with the key being the tag and the value being the count.
     while ($tag = mysqli_fetch_array($result)) {
-        $tag = array_map('stripslashes', $tag);
+        $tag = array_map('stripslashes_nullsafe', $tag);
         $tags[$tag['tag']] = $tag['count'];
     }
 

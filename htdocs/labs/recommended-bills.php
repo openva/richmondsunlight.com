@@ -89,7 +89,7 @@ if (logged_in() === false) {
 
         # Build up an array of tags, with the key being the tag and the value being the count.
         while ($tag = mysqli_fetch_array($result)) {
-            $tag = array_map('stripslashes', $tag);
+            $tag = array_map('stripslashes_nullsafe', $tag);
             $tags[$tag['tag']] = $tag['count'];
         }
 
@@ -188,7 +188,7 @@ if (logged_in() === false) {
         } else {
             $page_body .= '<ul>';
             while ($bill = mysqli_fetch_array($result)) {
-                $bill = array_map('stripslashes', $bill);
+                $bill = array_map('stripslashes_nullsafe', $bill);
                 $page_body .= '<li><a href="/bill/' . $bill['year'] . '/' . $bill['number'] . '/">'
                     . strtoupper($bill['number']) . '</a>: ' . $bill['catch_line'] . '</li>';
             }

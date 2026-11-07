@@ -16,9 +16,15 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/functions.inc.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/photosynthesis.inc.php';
 
 # LOCALIZE VARIABLES
-$hash = urldecode($_REQUEST['hash']);
+$hash = urldecode($_REQUEST['hash'] ?? '');
 if (empty($hash)) {
     die('No hash found.');
+}
+
+# The hash becomes part of a cache file's name, so allow only what the URL rewrite rule does.
+if (!preg_match('/^[a-z0-9]{5}$/', $hash)) {
+    http_response_code(404);
+    exit();
 }
 
 # PAGE CONTENT
@@ -46,7 +52,7 @@ if (mysqli_num_rows($result) == 0) {
     die();
 }
 $portfolio = mysqli_fetch_array($result);
-$portfolio = array_map('stripslashes', $portfolio);
+$portfolio = array_map('stripslashes_nullsafe', $portfolio);
 
 # Query the database for all bills in that portfolio.
 $sql = 'SELECT bills.number, bills.catch_line, bills.summary,
@@ -102,9 +108,4 @@ $rss = '<?xml version="1.0" encoding=\'iso-8859-1\'?>
 
 
 # Cache the RSS file.
-$fp = @file_put_contents(CACHE_DIR . '/portfolio-' . $hash . '.xml', $rss);
-
-header('Content-Type: application/rss+xml');
-header('Last-Modified: ' . date('r', filemtime(CACHE_DIR . '/portfolio-' . $hash . '.xml')));
-header('ETag: ' . md5_file(CACHE_DIR . '/portfolio-' . $hash . '.xml'));
-echo $rss;
+send_rss_and_cache(CACHE_DIR . '/portfolio-' . $hash . '.xml', $rss, 'application/rss+xml');

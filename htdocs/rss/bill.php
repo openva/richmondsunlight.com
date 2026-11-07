@@ -15,7 +15,13 @@ include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/settings.inc.php';
 include_once $_SERVER['DOCUMENT_ROOT'] . '/includes/functions.inc.php';
 
 # LOCALIZE VARIABLES
-$bill['number'] = strtolower($_REQUEST['number']);
+$bill['number'] = strtolower($_REQUEST['number'] ?? '');
+
+# The number becomes part of a cache file's name, so allow only what the URL rewrite rule does.
+if (!preg_match('/^[a-z0-9-]{1,10}$/', $bill['number'])) {
+    http_response_code(404);
+    exit();
+}
 
 # PAGE CONTENT
 
@@ -60,7 +66,7 @@ if (mysqli_num_rows($result) > 0) {
 
     # Generate the RSS.
     while ($status = mysqli_fetch_array($result)) {
-        $status = array_map('stripslashes', $status);
+        $status = array_map('stripslashes_nullsafe', $status);
 
         # Aggregate the variables into their RSS components.
         $title = '<![CDATA[' . $status['status'] . ']]>';

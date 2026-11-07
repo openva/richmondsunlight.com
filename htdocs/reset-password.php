@@ -98,7 +98,7 @@ if (!empty($_POST['email']) && $reset_user === null && !isset($page_body)) {
         } else {
             $user_data = mysqli_fetch_array($result);
 
-            $user_data = array_map('stripslashes', $user_data);
+            $user_data = array_map('stripslashes_nullsafe', $user_data);
 
             # Assemble the e-mail body.
             $email_body = $user_data['name'] . ",\n\n" .
@@ -157,7 +157,7 @@ if ($reset_user !== null && !isset($page_body)) {
 }
 
 if ($reset_user === null && !isset($page_body)) {
-    $page_body .= '
+    $page_body = '
     	<p>Forgot your password? No problem. Enter your e-mail address here and we’ll e-mail you
     	a link so you can reset it.</p>
 

@@ -68,7 +68,7 @@ if (mysqli_num_rows($result) == 0) {
     $result = mysqli_query($GLOBALS['db'], $sql);
     if (mysqli_num_rows($result) > 0) {
         $video = mysqli_fetch_array($result);
-        $video = array_map('stripslashes', $video);
+        $video = array_map('stripslashes_nullsafe', $video);
     }
 
     # Create a new video object.
@@ -141,7 +141,7 @@ if (mysqli_num_rows($result) == 0) {
             # Build up an array of tags, with the key being the tag and the value being the count.
             $tags = array();
             while ($tag = mysqli_fetch_array($result)) {
-                $tag = array_map('stripslashes', $tag);
+                $tag = array_map('stripslashes_nullsafe', $tag);
                 $tags[$tag['tag']] = $tag['count'];
             }
 

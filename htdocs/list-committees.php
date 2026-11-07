@@ -74,7 +74,7 @@ if (mysqli_num_rows($result) > 0) {
 						<h2>Senate</h2>
 						<ul>';
     while ($committee = mysqli_fetch_array($result)) {
-        $committee = array_map('stripslashes', $committee);
+        $committee = array_map('stripslashes_nullsafe', $committee);
         $page_body .= '<li><a href="/committee/senate/' . $committee['shortname'] . '/">' . $committee['name'] . '</a>';
         if ($committee['count'] > 0) {
             $page_body .= ' (<a href="/bills/committee/' . $committee['chamber'] . '/' . $committee['shortname'] . '/"
@@ -107,7 +107,7 @@ if (mysqli_num_rows($result) > 0) {
 						<h2>House</h2>
 						<ul>';
     while ($committee = mysqli_fetch_array($result)) {
-        $committee = array_map('stripslashes', $committee);
+        $committee = array_map('stripslashes_nullsafe', $committee);
         $page_body .= '<li><a href="/committee/house/' . $committee['shortname'] . '/">' . $committee['name'] . '</a>';
         if ($committee['count'] > 0) {
             $page_body .= ' (<a href="/bills/committee/' . $committee['chamber'] . '/' . $committee['shortname'] . '/"

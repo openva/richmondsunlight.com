@@ -79,7 +79,7 @@ if ($has_address || $has_coordinates) {
 					<p>Your two legislators have been identified. They are:</p>
 					<ul>';
                     while ($legislator = mysqli_fetch_assoc($result)) {
-                        $legislator = array_map('stripslashes', $legislator);
+                        $legislator = array_map('stripslashes_nullsafe', $legislator);
                         $page_body .= '<li><a href="/legislator/' . $legislator['shortname'] . '/">'
                             . $legislator['name'] . '</a></li>';
 

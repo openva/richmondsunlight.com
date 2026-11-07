@@ -75,7 +75,7 @@ class CommentSubscription
 
         # Build up that array.
         while ($subscriber = mysqli_fetch_array($result)) {
-            $subscriber = array_map('stripslashes', $subscriber);
+            $subscriber = array_map('stripslashes_nullsafe', $subscriber);
             $subscriptions[] = $subscriber;
         }
 

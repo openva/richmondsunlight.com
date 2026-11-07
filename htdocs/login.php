@@ -47,7 +47,7 @@ if (!isset($_POST['submit']) && empty($_GET['return_uri']) && !empty($_SERVER['H
 }
 
 if (isset($_POST['submit'])) {
-    $form_data = array_map('stripslashes', $_POST['form_data']);
+    $form_data = array_map('stripslashes_nullsafe', $_POST['form_data']);
     if (empty($form_data['password'])) {
         $errors[] = 'your password';
     }
@@ -98,7 +98,7 @@ if (isset($_POST['submit'])) {
             $result = mysqli_query($GLOBALS['db'], $sql);
             if (mysqli_num_rows($result) > 0) {
                 while ($portfolio = mysqli_fetch_array($result)) {
-                    $portfolio = array_map('stripslashes', $portfolio);
+                    $portfolio = array_map('stripslashes_nullsafe', $portfolio);
 
                     # Store the name and ID of this portfolio in the session, for use on the
                     # rest of the site.

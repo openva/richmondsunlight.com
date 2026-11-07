@@ -45,7 +45,7 @@ $bill = mysqli_fetch_array($result, MYSQLI_ASSOC);
 while ($bill = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
     $bill['url'] = 'https://www.richmondsunlight.com/bill/' . $bill['year'] . '/' . $bill['number'] . '/';
     $bill['number'] = mb_strtoupper($bill['number']);
-    $bills[] = array_map('stripslashes', $bill);
+    $bills[] = array_map('stripslashes_nullsafe', $bill);
 }
 
 # Send an HTTP header defining the content as JSON.

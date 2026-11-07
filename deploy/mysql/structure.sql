@@ -126,6 +126,7 @@ CREATE TABLE `bills` (
   `date_introduced` date DEFAULT NULL,
   `date_modified` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `date_created` datetime NOT NULL,
+  `places_checked` datetime DEFAULT NULL COMMENT 'When the bill was last checked for the places it names (see bills_places). NULL means it needs checking.',
   PRIMARY KEY (`id`),
   UNIQUE KEY `bills` (`number`,`session_id`),
   UNIQUE KEY `lis_id` (`lis_id`),
@@ -139,7 +140,8 @@ CREATE TABLE `bills` (
   KEY `copatrons` (`copatrons`),
   KEY `duplicates` (`session_id`,`summary_hash`,`id`),
   KEY `interestingness` (`interestingness`),
-  KEY `dls_prepared` (`dls_prepared`)
+  KEY `dls_prepared` (`dls_prepared`),
+  KEY `places_checked` (`places_checked`)
 ) ENGINE=InnoDB AUTO_INCREMENT=86314 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 

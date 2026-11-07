@@ -23,6 +23,9 @@ html
 composer.phar
 *.cache
 
+# Local overrides of the settings, such as a Mapbox token
+htdocs/includes/settings.local.inc.php
+
 # Local-only SQL data for the PHPUnit `local` test group (not committed to git)
 deploy/mysql/local-*.sql
 

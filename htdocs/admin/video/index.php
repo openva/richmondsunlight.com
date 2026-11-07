@@ -359,7 +359,7 @@ else {
     $videos = array();
     $video_paths = array();
     while ($video = mysqli_fetch_array($result)) {
-        $videos[] = array_map('stripslashes', $video);
+        $videos[] = array_map('stripslashes_nullsafe', $video);
     }
 
     # List all of the videos that we have in the database.

@@ -1252,3 +1252,100 @@ meter {
 .clip-player-captions:disabled {
 	visibility: hidden;
 }
+
+/* Places: a county's or city's legislators */
+ul.place-legislators {
+	display: flex;
+	flex-wrap: wrap;
+	gap: .75em;
+	margin: 0 0 1.5em;
+	padding: 0;
+	list-style: none;
+}
+ul.place-legislators li {
+	width: 15em;
+	padding: .5em;
+	border: 1px solid #c6a952;
+	border-left: 6px solid #c6a952;
+	background-color: #f4eee5;
+	overflow: hidden;
+}
+ul.place-legislators li.house {
+	border-left-color: #1f5fbf;
+}
+ul.place-legislators li.senate {
+	border-left-color: #c0392b;
+}
+ul.place-legislators img {
+	float: left;
+	margin-right: .5em;
+}
+.place-legislator-name {
+	display: block;
+	font-weight: bold;
+}
+.place-legislator-district {
+	display: block;
+	font-size: .9em;
+}
+
+/* Places: the list of every county and city */
+ul.place-list {
+	columns: 3 14em;
+	margin-bottom: 1.5em;
+}
+.place-bill-count {
+	color: #666;
+	font-size: .9em;
+}
+
+/* Places: the map of a county or city and the districts that represent it */
+ul.place-map-legend {
+	display: flex;
+	gap: 1.5em;
+	margin: 0 0 .5em;
+	padding: 0;
+	list-style: none;
+}
+ul.place-map-legend .swatch {
+	display: inline-block;
+	width: 1.1em;
+	height: 1.1em;
+	vertical-align: -.2em;
+	border: 2px solid;
+}
+.place-map-legend .swatch.house,
+.place-map-popup .house {
+	border-color: #1f5fbf;
+	background-color: rgba(31, 95, 191, .22);
+}
+.place-map-legend .swatch.senate,
+.place-map-popup .senate {
+	border-color: #c0392b;
+	background-color: rgba(192, 57, 43, .22);
+}
+.place-map-legend .swatch.senate {
+	border-style: dashed;
+}
+#place-map {
+	max-height: 80vh;
+	margin-bottom: 1.5em;
+	border: 1px solid #c6a952;
+}
+ul.place-map-popup {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	font-family: Verdana, Arial, sans-serif;
+	font-size: .85em;
+}
+ul.place-map-legend li,
+ul.place-map-popup li {
+	list-style: none;
+}
+ul.place-map-popup li {
+	margin: 2px 0;
+	padding: 2px 6px;
+	border-left-width: 4px;
+	border-left-style: solid;
+}

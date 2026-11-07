@@ -138,10 +138,10 @@ if (mysqli_num_rows($result) == 0) {
     login_redirect();
 }
 $preferences = mysqli_fetch_array($result);
-$preferences = array_map('stripslashes', $preferences);
+$preferences = array_map('stripslashes_nullsafe', $preferences);
 
 # Display the preferences form.
-$page_body .= @show_form($preferences);
+$page_body = ($page_body ?? '') . @show_form($preferences);
 
 // OUTPUT THE PAGE
 $page = new Page();

@@ -65,7 +65,7 @@ if (mysqli_num_rows($result) == 0) {
 # If this portfolio does exist.
 else {
     $portfolio = mysqli_fetch_array($result);
-    $portfolio = array_map('stripslashes', $portfolio);
+    $portfolio = array_map('stripslashes_nullsafe', $portfolio);
 
     # Increment the view count.
     $sql = 'UPDATE dashboard_portfolios
@@ -136,7 +136,7 @@ else {
 		<div class="box">
 			<ul class="tag-list">';
         while ($tag = mysqli_fetch_array($result)) {
-            $tag = array_map('stripslashes', $tag);
+            $tag = array_map('stripslashes_nullsafe', $tag);
             $page_sidebar .= '<li><a href="/bills/tags/' . urlencode($tag['tag']) . '/">' . $tag['tag'] . '</a></li>';
         }
         $page_sidebar .= '
@@ -181,7 +181,7 @@ else {
         }
 
         while ($bill = mysqli_fetch_array($result)) {
-            $bill = array_map('stripslashes', $bill);
+            $bill = array_map('stripslashes_nullsafe', $bill);
 
             # Remove the bit of the bill summary that just duplicates the catch line.
             $bill['summary'] = str_replace($bill['catch_line'], '', $bill['summary']);

@@ -2,6 +2,10 @@
 
 class Vote
 {
+    public $lis_id;
+    public $session_id;
+    public $session_year;
+
     # Take an LIS ID, return a vote tally.
     public function get_aggregate()
     {
@@ -56,7 +60,7 @@ class Vote
         }
 
         $vote = mysqli_fetch_assoc($result);
-        $vote = array_map('stripslashes', $vote);
+        $vote = array_map('stripslashes_nullsafe', $vote);
         return $vote;
     }
 

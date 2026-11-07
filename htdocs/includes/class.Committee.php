@@ -112,7 +112,7 @@ class Committee
             $this->members[] = $member;
         }
 
-        $this->members = array_map_multi('stripslashes', $this->members);
+        $this->members = array_map_multi('stripslashes_nullsafe', $this->members);
 
         return true;
     }

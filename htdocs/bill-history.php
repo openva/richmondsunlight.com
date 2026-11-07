@@ -46,7 +46,7 @@ $sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber,
 $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $bill = mysqli_fetch_array($result);
-    $bill = array_map('stripslashes', $bill);
+    $bill = array_map('stripslashes_nullsafe', $bill);
     $bill['word_count'] = str_word_count($bill['full_text']);
     $bill['patron_suffix'] = '(' . $bill['patron_party'] . '-' . $bill['patron_district'] . ')';
     if ($bill['patron_chamber'] == 'house') {

@@ -202,7 +202,7 @@ if (mysqli_num_rows($result) > 0) {
 		<ul>';
     $i = 0;
     while ($bill = mysqli_fetch_array($result)) {
-        $bill = array_map('stripslashes', $bill);
+        $bill = array_map('stripslashes_nullsafe', $bill);
         $page_sidebar .= '<li><a href="/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/" class="bill">'
             . mb_strtoupper($bill['number']) . '</a>: ' . $bill['catch_line'] . '</li>';
         if ($i >= $listed_bills) {
@@ -235,7 +235,7 @@ if (mysqli_num_rows($result) > 0) {
     $top_tag = 1;
     $top_tag_size = 3;
     while ($tag = mysqli_fetch_array($result)) {
-        $tags[] = array_map('stripslashes', $tag);
+        $tags[] = array_map('stripslashes_nullsafe', $tag);
         if ($tag['count'] > $top_tag) {
             $top_tag = $tag['count'];
         }
@@ -302,7 +302,7 @@ if (mysqli_num_rows($result) == 0) {
 else {
     $page_body .= '<ul>';
     while ($subcommittee = mysqli_fetch_array($result)) {
-        $subcommittee = array_map('stripslashes', $subcommittee);
+        $subcommittee = array_map('stripslashes_nullsafe', $subcommittee);
         $page_body .= '<li>' . $subcommittee['name'];
         if (!empty($subcommittee['meeting_time'])) {
             $page_body .= '<br /><small>' . $subcommittee['meeting_time'] . '</small>';

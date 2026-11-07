@@ -73,7 +73,7 @@ if ($num_results > 0) {
     $i = 0;
 
     while ($bill = mysqli_fetch_assoc($result)) {
-        $bill = array_map('stripslashes', $bill);
+        $bill = array_map('stripslashes_nullsafe', $bill);
 
         if ($bill['date'] != $date) {
             $date = $bill['date'];
