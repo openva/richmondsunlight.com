@@ -139,7 +139,7 @@ test('place URLs without a trailing slash redirect to ones with it', async ({ pa
   ]) {
     const response = await page.request.get(from, { maxRedirects: 0 });
     expect(response.status(), from).toBe(301);
-    expect(response.headers()['location'], from).toMatch(new RegExp(to.replace(/\//g, '\\/') + '$'));
+    expect(response.headers()['location'], from).toMatch(new RegExp(to.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'));
   }
 });
 
