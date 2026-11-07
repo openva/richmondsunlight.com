@@ -1130,6 +1130,25 @@ class Bill2
     }
 
     /**
+     * How long to wait to connect to recordedvote.org, in seconds. With no limit, curl waits for
+     * minutes, and so does the request for the bill, which can't be answered until this is.
+     */
+    private const RECORDEDVOTE_CONNECT_TIMEOUT = 2;
+
+    /** The most seconds that the whole call to recordedvote.org may take, answer included. */
+    private const RECORDEDVOTE_TIMEOUT = 5;
+
+    /**
+     * The URL at which recordedvote.org lists legislation similar to a bill.
+     *
+     * @param string $number A bill's number, such as "hb41".
+     */
+    protected function recordedvoteUrl(string $number): string
+    {
+        return 'https://api.recordedvote.org/v1/bill/similarity/' . $number . '?remove_duplicates=1';
+    }
+
+    /**
      * Query the recordedvote.org API for similar legislation.
      *
      * @param array $bill Bill data array providing the number for the API request.
@@ -1139,13 +1158,12 @@ class Bill2
     private function related_recordedvote($bill)
     {
 
-        $url = 'https://api.recordedvote.org/v1/bill/similarity/' . $bill['number']
-            . '?remove_duplicates=1';
-
         // Initialize cURL session
-        $curl = curl_init($url);
+        $curl = curl_init($this->recordedvoteUrl($bill['number']));
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($curl, CURLOPT_HEADER, false);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, self::RECORDEDVOTE_CONNECT_TIMEOUT);
+        curl_setopt($curl, CURLOPT_TIMEOUT, self::RECORDEDVOTE_TIMEOUT);
         $json = curl_exec($curl);
 
         if ($json === false) {
@@ -1157,7 +1175,8 @@ class Bill2
 
         $related_bills = json_decode($json, true);
 
-        if ($related_bills === false) {
+        // A reply that isn't a list (an error page, say) is a failure, so the internal lookup is used.
+        if (!is_array($related_bills)) {
             return false;
         }
 
