@@ -151,6 +151,7 @@ if (
                                     <li><a href="/bills/2023/">2023</a></li>
                                     <li><a href="/bills/2024/">2024</a></li>
                                     <li><a href="/bills/2025/">2025</a></li>
+                                    <li><a href="/bills/2026/">2026</a></li>
                                 </ul>
                             </li>
                         </ul>
@@ -164,6 +165,7 @@ if (
                         <li><a href="/your-legislators/">Your Legislators</a></li>
                         </ul>
                     </li>
+                    <li id="t-places"><a href="/places/" accesskey="w">Places</a></li>
                     <li id="t-tools">Tools
                         <ul>
                         <li><a href="/photosynthesis/" accesskey="p">Photosynthesis</a></li>
