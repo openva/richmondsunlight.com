@@ -87,7 +87,7 @@ $bill['summary'] = str_replace('\u00a0', ' ', $bill['summary']);
  * to amend (if, indeed, it is amending the Code).
  */
 $bill_text = new Bill2();
-$bill_text->bill_id = $bill['id'];
+$bill_text->id = $bill['id'];
 if ($bill_text->get_terms() === true) {
     /* Send a bit of JavaScript to the browser, which we use in each API call. */
     $html_head .= $bill_text->javascript;

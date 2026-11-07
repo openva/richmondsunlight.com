@@ -92,7 +92,7 @@ if ($bill['amends'] == false) {
  * proposes to amend (if, indeed, it is amending the Code).
  */
 $bill_text = new Bill2();
-$bill_text->bill_id = $bill['id'];
+$bill_text->id = $bill['id'];
 if ($bill_text->get_terms() === true) {
     $html_head .= $bill_text->javascript;
     $term_pcres = $bill_text->term_pcres;

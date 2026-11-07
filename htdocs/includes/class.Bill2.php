@@ -9,6 +9,7 @@
 class Bill2
 {
     public $id;
+    public $bill_id;
     public $javascript;
     public $term_pcres;
     public $text;
@@ -516,6 +517,25 @@ class Bill2
     }
 
     /**
+     * Get the dictionary terms for a section of the Code from the Virginia Decoded API. This is on
+     * the path of every bill page view, so it gives up quickly rather than hold the page up.
+     *
+     * @return string|false The raw JSON, or false on any failure.
+     */
+    protected function fetchTerms(string $url)
+    {
+        $curl = curl_init($url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, self::TERMS_CONNECT_TIMEOUT);
+        curl_setopt($curl, CURLOPT_TIMEOUT, self::TERMS_TIMEOUT);
+        curl_setopt($curl, CURLOPT_USERAGENT, 'rs-bot');
+        $response = curl_exec($curl);
+        curl_close($curl);
+
+        return empty($response) ? false : $response;
+    }
+
+    /**
      * Build PCRE patterns for defined terms referenced within the bill text.
      *
      * @return bool True when term patterns are available, false if they cannot be determined.
@@ -568,7 +588,7 @@ class Bill2
              * works.
              */
             $url .= $code_sections[0]['section_number'];
-            $terms = get_content(urldecode($url), 1);
+            $terms = $this->fetchTerms(urldecode($url));
             $terms = (array) json_decode($terms);
             if (count($terms) == 0) {
                 return false;
@@ -1133,6 +1153,11 @@ class Bill2
      * How long to wait to connect to recordedvote.org, in seconds. With no limit, curl waits for
      * minutes, and so does the request for the bill, which can't be answered until this is.
      */
+    private const TERMS_CONNECT_TIMEOUT = 2;
+
+    /** The most seconds that the whole call to the Virginia Decoded API may take. */
+    private const TERMS_TIMEOUT = 5;
+
     private const RECORDEDVOTE_CONNECT_TIMEOUT = 2;
 
     /** The most seconds that the whole call to recordedvote.org may take, answer included. */
