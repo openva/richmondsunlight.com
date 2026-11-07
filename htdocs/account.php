@@ -206,7 +206,7 @@ if (isset($_POST['submit'])) {
 
 
 if (!isset($_POST['submit'])) {
-    $page_body .= '
+    $page_body = '
 	<div class="tabs">
 	<ul class="tabs">
 		<li><a href="#settings">Settings</a></li>

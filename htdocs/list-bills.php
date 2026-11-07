@@ -241,6 +241,7 @@ if ($num_results > 0) {
 }
 
 # PAGE SIDEBAR
+$page_sidebar = '';
 if (!empty($year)) {
     $page_sidebar = '
 	<div class="box" id="options">

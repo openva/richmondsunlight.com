@@ -45,6 +45,8 @@ if (isset($_GET['date'])) {
     }
 }
 
+$page_body = '';
+
 # PAGE METADATA
 $page_title = 'Schedule for ' . $date_formatted;
 $site_section = 'schedule';

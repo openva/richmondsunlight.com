@@ -157,7 +157,7 @@ if ($reset_user !== null && !isset($page_body)) {
 }
 
 if ($reset_user === null && !isset($page_body)) {
-    $page_body .= '
+    $page_body = '
     	<p>Forgot your password? No problem. Enter your e-mail address here and we’ll e-mail you
     	a link so you can reset it.</p>
 

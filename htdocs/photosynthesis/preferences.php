@@ -141,7 +141,7 @@ $preferences = mysqli_fetch_array($result);
 $preferences = array_map('stripslashes', $preferences);
 
 # Display the preferences form.
-$page_body .= @show_form($preferences);
+$page_body = ($page_body ?? '') . @show_form($preferences);
 
 // OUTPUT THE PAGE
 $page = new Page();

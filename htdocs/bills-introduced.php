@@ -36,6 +36,8 @@ if (empty($days)) {
     $days = 7;
 }
 
+$page_body = '';
+
 # PAGE METADATA
 $page_title = 'Bills Introduced in Past ' . $days . ' Days';
 $site_section = 'bills';
