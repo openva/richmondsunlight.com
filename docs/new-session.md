@@ -54,7 +54,23 @@ Do this before deploying the new settings (step 5), so the site never points at 
 
 For a special session, set `suffix` to the special session's number (`'1'` for Special Session I, `'2'` for Special Session II), and use `YY2`, `YY3`, and so on for `lis_id`.
 
-Before adding the new session, compare LIS's session list with the `sessions` table. Add a row for any special session that has been held since the last regular session.
+Before adding the new session, compare LIS's session list with the `sessions` table. Add a row for any special session that has been held since the last regular session, then import its bills (see below).
+
+### Importing a session that isn't the current one
+
+rs-machine only collects data for the current session. To import a special session after the fact, or to fill in any other past session, add its `sessions` row and then run rs-machine's per-session tasks against it on the rs-machine server:
+
+```bash
+php cron/run.php --session=<sessions.id> bills copatrons summaries history full_text vote tags code_sections cleanup
+```
+
+Before running it, make sure every legislator who served in that session is in the database (step 8). A bill whose patron is missing isn't stored, and a missing member's votes aren't recorded. Run `bills` first, because the other tasks work on bills that are already in the database. If a task fails because LIS has no copy of one of its files for that session (often `fiscal_impact`), that's expected. `cleanup` comes last: it fills in each bill's full text and outcome. See rs-machine's README for details.
+
+Pages on the site cache bills' IDs by number. Flush Memcached after the import, so that bill numbers the session shares with another session in the same year lead to the right bill.
+
+Some bills show up in LIS under more than one session. LIS sometimes carries a bill from a regular session into a special session (often the budget bill) under the same LIS legislation ID. `bills.lis_id` must be unique, so rs-machine logs an error for such a bill ("Storing … failed: Duplicate entry") and leaves it under the session where it was first stored.
+
+Bill URLs (`/bill/YYYY/hb1/`) include only the year. When a special session reuses a bill number from that year's regular session, the URL shows the one whose session started later.
 
 ## 3. Update the settings in this repo
 
