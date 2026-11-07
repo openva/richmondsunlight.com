@@ -130,6 +130,19 @@ test('an unknown place is a 404', async ({ page }) => {
   expect(response.status()).toBe(404);
 });
 
+test('place URLs without a trailing slash redirect to ones with it', async ({ page }) => {
+  for (const [from, to] of [
+    ['/places', '/places/'],
+    ['/places/richmond', '/places/richmond/'],
+    ['/places/richmond-county', '/places/richmond-county/'],
+    ['/places/Richmond', '/places/richmond/'],   // Lowercased, in the same redirect
+  ]) {
+    const response = await page.request.get(from, { maxRedirects: 0 });
+    expect(response.status(), from).toBe(301);
+    expect(response.headers()['location'], from).toMatch(new RegExp(to.replace(/\//g, '\\/') + '$'));
+  }
+});
+
 test('old place URLs redirect to the new ones', async ({ page }) => {
   const response = await page.request.get('/places/fairfax+county/', { maxRedirects: 0 });
   expect(response.status()).toBe(301);

@@ -10,11 +10,6 @@
 class Places
 {
     /**
-     * The first session year whose bills are listed. Bills before this weren't tagged with places.
-     */
-    public const FIRST_YEAR = 2024;
-
-    /**
      * A district is counted as representing a locality when their overlap is at least this share
      * of the locality or of the district. Checking both keeps districts that are a sliver of a big
      * county (House District 4 is 0.65% of Fairfax County, but 44% of the district), while leaving
@@ -86,14 +81,14 @@ class Places
     }
 
     /**
-     * List every county and independent city, alphabetically, with how many bills have named it
-     * since FIRST_YEAR.
+     * List every county and independent city, alphabetically, with how many bills (from any year)
+     * have named it.
      *
      * @return array<int, array{id: int, name: string, display_name: string, type: string, slug: string, bill_count: int}>
      */
     public function listAll(): array
     {
-        return $this->cached('places-list', self::CACHE_BILLS, function () {
+        return $this->cached('places-list-v2', self::CACHE_BILLS, function () {
             $sql = 'SELECT
                         gazetteer.id,
                         gazetteer.name,
@@ -105,13 +100,11 @@ class Places
                         JOIN sessions
                             ON sessions.id = bills.session_id
                         WHERE
-                            bills_places.placename = gazetteer.name COLLATE utf8mb3_bin
-                            AND sessions.year >= :first_year) AS bill_count
+                            bills_places.placename = gazetteer.name COLLATE utf8mb3_bin) AS bill_count
                     FROM gazetteer
                     WHERE ' . self::LOCALITY_SQL . '
                     ORDER BY gazetteer.name ASC';
             $stmt = $this->db->prepare($sql);
-            $stmt->bindValue(':first_year', self::FIRST_YEAR, PDO::PARAM_INT);
             $stmt->execute();
 
             $places = [];
@@ -386,14 +379,14 @@ class Places
     }
 
     /**
-     * List the bills that name a locality since FIRST_YEAR, grouped by session year, newest year
-     * first, and by bill number within each year.
+     * List the bills that name a locality, from every year that we have, grouped by session year,
+     * newest year first, and by bill number within each year.
      *
      * @return array<int, array<int, array<string, mixed>>>
      */
     public function bills(string $name): array
     {
-        return $this->cached('places-bills-' . self::slug($name), self::CACHE_BILLS,
+        return $this->cached('places-bills-v2-' . self::slug($name), self::CACHE_BILLS,
             function () use ($name) {
                 $sql = 'SELECT DISTINCT
                             bills.number,
@@ -412,14 +405,12 @@ class Places
                             ON people.id = bills.chief_patron_id
                         WHERE
                             bills_places.placename = :name
-                            AND sessions.year >= :first_year
                         ORDER BY
                             sessions.year DESC,
                             SUBSTRING(bills.number FROM 1 FOR 2) ASC,
                             CAST(SUBSTRING(bills.number FROM 3) AS UNSIGNED) ASC';
                 $stmt = $this->db->prepare($sql);
                 $stmt->bindValue(':name', $name, PDO::PARAM_STR);
-                $stmt->bindValue(':first_year', self::FIRST_YEAR, PDO::PARAM_INT);
                 $stmt->execute();
 
                 $bills = [];

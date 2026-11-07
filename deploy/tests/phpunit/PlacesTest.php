@@ -187,6 +187,36 @@ class PlacesTest extends TestCase
         $this->assertLessThan(300000, strlen(serialize($map)));
     }
 
+    /**
+     * Bills are listed from every year that has them, not only from 2024 on. (This adds a bill from
+     * 2010, and removes it afterward.)
+     */
+    public function testBillsFromOlderYearsAreListedAndCounted(): void
+    {
+        $this->places();   // Skips this test where there's no database
+        $db = (new Database())->connect();
+        $session = $db->query('SELECT id FROM sessions WHERE year = 2010 ORDER BY id LIMIT 1')->fetchColumn();
+        if (!$session) {
+            $this->markTestSkipped('There is no 2010 session in the database');
+        }
+
+        try {
+            $db->prepare('INSERT INTO bills (id, number, session_id, chief_patron_id, catch_line, date_created)
+                VALUES (990001, "hb9990", ?, 16, "A bill from 2010", NOW())')->execute([$session]);
+            $db->exec('INSERT INTO bills_places (bill_id, placename, latitude, longitude)
+                VALUES (990001, "Highland County", 38.3, -79.5)');
+
+            $places = new Places($db, false);
+            $bills = $places->bills('Highland County');
+            $this->assertSame([2010], array_keys($bills));
+            $this->assertSame('hb9990', $bills[2010][0]['number']);
+            $this->assertSame(1, $places->find('highland-county')['bill_count']);
+        } finally {
+            $db->exec('DELETE FROM bills_places WHERE bill_id = 990001');
+            $db->exec('DELETE FROM bills WHERE id = 990001');
+        }
+    }
+
     public function testADistrictListsThePlacesItRepresents(): void
     {
         $place = $this->places()->find('richmond-county');

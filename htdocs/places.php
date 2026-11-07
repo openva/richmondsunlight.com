@@ -78,10 +78,11 @@ if ($requested !== '') {
         . $count(count($delegates), 'delegate', 'delegates') . ' and '
         . $count(count($senators), 'senator', 'senators') . '. ';
     if ($bill_count > 0) {
-        $intro .= 'Since ' . Places::FIRST_YEAR . ', ' . $count($bill_count, 'bill has', 'bills have')
+        // Our records go back as far as the oldest bill that names the place.
+        $intro .= 'Since ' . min(array_keys($bills)) . ', ' . $count($bill_count, 'bill has', 'bills have')
             . ' named ' . $name_in_sentence . '.';
     } else {
-        $intro .= 'No bills have named ' . $name_in_sentence . ' since ' . Places::FIRST_YEAR . '.';
+        $intro .= 'No bills have named ' . $name_in_sentence . '.';
     }
     $intro = ucfirst($intro);
 
@@ -375,8 +376,7 @@ if ($requested !== '') {
      */
     $page_body .= '<h2>Bills</h2>';
     if ($bill_count === 0) {
-        $page_body .= '<p>No bills have named ' . htmlspecialchars($name_in_sentence) . ' since '
-            . Places::FIRST_YEAR . '.</p>';
+        $page_body .= '<p>No bills have named ' . htmlspecialchars($name_in_sentence) . '.</p>';
     } else {
         $page_body .= '<div class="tabs" id="place-bills"><ul>';
         foreach ($bills as $year => $year_bills) {
@@ -425,7 +425,7 @@ if ($requested !== '') {
 else {
     $page_title = 'Virginia Counties and Cities';
     $intro = 'The legislators who represent each of Virginia’s 95 counties and 38 independent '
-        . 'cities, and the bills that have named them since ' . Places::FIRST_YEAR . '.';
+        . 'cities, and the bills that have named them.';
     $html_head .= '
         <meta name="description" content="' . htmlspecialchars($intro) . '">
         <link rel="canonical" href="https://www.richmondsunlight.com/places/">';

@@ -89,6 +89,11 @@ RewriteRule \.(?:js|css|png|jpe?g|gif|svg|ico|json|map|woff2?|ttf|eot)$ - [L]
 RewriteCond %{HTTP_HOST} ^richmondsunlight.com [NC]
 RewriteRule ^(.*)$ https://www.richmondsunlight.com/$1 [L,R=301,NC]
 
+# Places: always end in a slash. These URLs aren't directories, so the slash rule below doesn't
+# apply to them. They're also lowercased here, so that /places/Richmond is one redirect, not two.
+RewriteRule ^places$ /places/ [R=301,L]
+RewriteRule ^places/([A-Za-z0-9+-]+)$ /places/${tolower:$1}/ [R=301,L,NE]
+
 # Canonicalize paths to lowercase for consistency
 RewriteCond %{REQUEST_URI} [A-Z]
 RewriteRule ^(.*)$ /${tolower:$1} [L,R=301,NE]
