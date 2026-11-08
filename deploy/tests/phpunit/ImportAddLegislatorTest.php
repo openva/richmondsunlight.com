@@ -77,6 +77,15 @@ class ImportAddLegislatorTest extends TestCase
         $this->assertSame('2098-01-14', $this->newTermStart($person_id));
     }
 
+    public function testANewLegislatorsTermHasTheirLisShortname(): void
+    {
+        $legislator = $this->legislator('2098-01-14') + ['lis_shortname' => 'Legislator, T.'];
+        $this->assertTrue($this->import()->add_legislator($legislator));
+
+        $this->assertSame('legislator, t.', (string) $this->dbh->query('SELECT lis_shortname FROM terms
+            WHERE lis_id = ' . self::LIS_ID . ' AND date_ended IS NULL')->fetchColumn());
+    }
+
     /** @return array<string,mixed> */
     private function legislator(string $service_begin_date): array
     {

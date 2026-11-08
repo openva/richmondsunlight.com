@@ -1736,6 +1736,7 @@ class Import
             'place' => true,
             'district_id' => true,
             'party' => true,
+            'lis_shortname' => true,
         );
 
         $person_fields = array(
@@ -1762,9 +1763,13 @@ class Import
 
         $term_values = array();
         foreach ($term_changes as $field => $unused) {
-            $term_values[$field] = ($field === 'district_id')
-                ? (int)$legislator[$field]
-                : $this->normalizeOptionalString($legislator[$field]);
+            if ($field === 'district_id') {
+                $term_values[$field] = (int)$legislator[$field];
+            } elseif ($field === 'lis_shortname') {
+                $term_values[$field] = $this->normalizeLisShortname($legislator[$field]);
+            } else {
+                $term_values[$field] = $this->normalizeOptionalString($legislator[$field]);
+            }
         }
 
         if (isset($term_values['party']) || isset($term_values['place'])) {
@@ -1900,8 +1905,9 @@ class Import
      */
     private function deriveLisShortname(array $legislator)
     {
-        if (!empty($legislator['lis_shortname'])) {
-            return substr(trim((string)$legislator['lis_shortname']), 0, 32);
+        $lis_shortname = $this->normalizeLisShortname($legislator['lis_shortname'] ?? null);
+        if ($lis_shortname !== null) {
+            return $lis_shortname;
         }
 
         $candidates = array(
@@ -1919,6 +1925,74 @@ class Import
         }
 
         return 'unknown';
+    }
+
+    /**
+     * An LIS shortname as it's stored: lowercased, at most 32 characters.
+     *
+     * The LIS shortname is LIS's PatronDisplayName, the name it uses for a member in vote tallies
+     * and lists of patrons: their surname ("Cole"), with an initial while another member of their
+     * chamber has the same surname ("Scott, D."). LIS changes it as members come and go.
+     *
+     * @param mixed $value The name.
+     *
+     * @return string|null The name, or null when it's blank.
+     */
+    private function normalizeLisShortname($value)
+    {
+        $value = trim((string)$value);
+        if ($value === '') {
+            return null;
+        }
+
+        return mb_substr(mb_strtolower($value), 0, 32);
+    }
+
+    /**
+     * Store LIS's current shortnames for the members of a roster, on their open terms.
+     *
+     * The daily refresh updates only a few legislators at a time, but when a member joins with the
+     * same surname as another, LIS changes the other's shortname too, so the whole roster is
+     * checked at once.
+     *
+     * @param array $legislators Legislators, as fetch_active_members() returns them.
+     *
+     * @return int How many terms were changed.
+     */
+    public function update_lis_shortnames(array $legislators)
+    {
+        $select = $GLOBALS['dbh']->prepare(
+            'SELECT id, lis_shortname, name_formatted FROM terms
+             WHERE chamber = :chamber AND lis_id = :lis_id
+                AND (date_ended IS NULL OR date_ended >= CURDATE())'
+        );
+        $update = $GLOBALS['dbh']->prepare('UPDATE terms SET lis_shortname = :lis_shortname WHERE id = :id');
+
+        $changed = 0;
+        foreach ($legislators as $legislator) {
+            $lis_shortname = $this->normalizeLisShortname($legislator['lis_shortname'] ?? null);
+            $lis_id = $this->normalizeLisNumericIdentifier($legislator['lis_id'] ?? null);
+            $chamber = strtolower((string)($legislator['chamber'] ?? ''));
+            if ($lis_shortname === null || $lis_id === null || !in_array($chamber, ['house', 'senate'], true)) {
+                continue;
+            }
+
+            $select->execute([':chamber' => $chamber, ':lis_id' => $lis_id]);
+            foreach ($select->fetchAll(PDO::FETCH_ASSOC) as $term) {
+                if ($term['lis_shortname'] === $lis_shortname) {
+                    continue;
+                }
+                if ($update->execute([':lis_shortname' => $lis_shortname, ':id' => $term['id']]) == false) {
+                    $this->log->put('Error: Could not update the LIS shortname of ' . $term['name_formatted'] . '.', 5);
+                    continue;
+                }
+                $this->log->put('Changed the LIS shortname of ' . $term['name_formatted'] . ' from "'
+                    . $term['lis_shortname'] . '" to "' . $lis_shortname . '".', 3);
+                $changed++;
+            }
+        }
+
+        return $changed;
     }
 
     /**
@@ -3242,6 +3316,7 @@ class Import
                 $place
             ),
             'shortname' => $shortname,
+            'lis_shortname' => $this->normalizeLisShortname($member['PatronDisplayName'] ?? null),
             'district_id' => $district_id,
             'district_number' => $district_number,
             'party' => $party_code,
