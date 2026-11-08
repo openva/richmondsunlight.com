@@ -95,6 +95,7 @@
 			<li><a href="https://downloads.richmondsunlight.com/bills/2022.zip">2022</a></li>
 			<li><a href="https://downloads.richmondsunlight.com/bills/2023.zip">2023</a></li>
 			<li><a href="https://downloads.richmondsunlight.com/bills/2024.zip">2024</a></li>
+			<li><a href="https://downloads.richmondsunlight.com/bills/2026.zip">2026</a></li>
 		</ul>
 
 		<h2>Legislators</h2>
