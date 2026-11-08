@@ -255,18 +255,18 @@ foreach ($chambers as $chamber_key => $chamber_label) {
     }
 
     // Edges: copatroning pairs within this chamber for the current session
-    // bills_copatrons.legislator_id = terms.id (not person_id),
-    // so join on terms.id and return person_id to match the node index.
-    $sql = 'SELECT ta.person_id AS source, tb.person_id AS target, COUNT(*) AS weight
+    // bills_copatrons.legislator_id is a person's ID (people.id). Joining each to their open term
+    // in this chamber (they have at most one) limits pairs to the nodes above.
+    $sql = 'SELECT a.legislator_id AS source, b.legislator_id AS target, COUNT(*) AS weight
             FROM bills_copatrons a
             JOIN bills_copatrons b ON a.bill_id = b.bill_id AND a.legislator_id < b.legislator_id
             JOIN bills ON a.bill_id = bills.id
-            JOIN terms ta ON a.legislator_id = ta.id
-            JOIN terms tb ON b.legislator_id = tb.id
+            JOIN terms ta ON ta.person_id = a.legislator_id
+                AND ta.chamber = "' . $chamber_sql . '" AND ta.date_ended IS NULL
+            JOIN terms tb ON tb.person_id = b.legislator_id
+                AND tb.chamber = "' . $chamber_sql . '" AND tb.date_ended IS NULL
             WHERE bills.session_id = ' . SESSION_ID . '
-              AND ta.chamber = "' . $chamber_sql . '"
-              AND tb.chamber = "' . $chamber_sql . '"
-            GROUP BY ta.person_id, tb.person_id
+            GROUP BY a.legislator_id, b.legislator_id
             HAVING weight >= 2
             ORDER BY weight DESC';
     $result = mysqli_query($GLOBALS['db'], $sql);
