@@ -27,23 +27,23 @@ if (is_readable($rs_local_settings_file)) {
 
 # THE CURRENT SESSION
 # As defined by Richmond Sunlight's database
-rs_define('SESSION_ID', 32);
+rs_define('SESSION_ID', 34);
 
 # Is this the main session or a special session? As defined by Richmond Sunlight's database.
 rs_define('SESSION_SUFFIX', '');
 
 # As defined by the GA LIS' database, based on the year.
-rs_define('SESSION_LIS_ID', '261');
+rs_define('SESSION_LIS_ID', '271');
 
 # As defined by the GA LIS' database, based on an internal ID.
-rs_define('SESSION_LIS_API_ID', '59');
+rs_define('SESSION_LIS_API_ID', '61');
 
 # As defined by the year.
-rs_define('SESSION_YEAR', 2026);
+rs_define('SESSION_YEAR', 2027);
 
 # Start and end of this session.
-rs_define('SESSION_START', '2026-01-14');
-rs_define('SESSION_END', '2026-03-14');
+rs_define('SESSION_START', '2027-01-13');
+rs_define('SESSION_END', '2027-02-27');
 
 # ENVIRONMENT
 # Set to false for Docker/development, true for production
