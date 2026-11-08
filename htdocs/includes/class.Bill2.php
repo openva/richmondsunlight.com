@@ -959,6 +959,10 @@ class Bill2
      * previous year can be reported, and a veto can be overridden. And a bill reported from one
      * committee and then left in another failed committee.
      *
+     * A committee failure followed by the bill being back in committee doesn't count. LIS gives a
+     * bill continued from the previous year that year's history too, so it has "Continued to 2027
+     * in Rules" (failed committee) and then "Continued from last session" (in committee).
+     *
      * @param array $status_history Rows (arrays or objects) with translation and date_raw
      *                              (Y-m-d), in any order
      * @return array<string, ?string> committee, house, senate, governor, and law
@@ -977,8 +981,11 @@ class Bill2
 
         $progress = [];
         foreach (self::PROGRESS_STEPS as $step => [$passing, $failing]) {
-            $passed = max(array_intersect_key($latest, array_flip($passing)) ?: [null]);
-            $failed = max(array_intersect_key($latest, array_flip($failing)) ?: [null]);
+            $passed = self::latestOf($latest, $passing);
+            $failed = self::latestOf($latest, $failing);
+            if ($step === 'committee' && $failed !== null && $failed < (string) self::latestOf($latest, ['in committee', 'in subcommittee'])) {
+                $failed = null;
+            }
             if ($failed !== null && ($passed === null || $failed > $passed)) {
                 $progress[$step] = 'failed';
             } else {
@@ -987,6 +994,17 @@ class Bill2
         }
 
         return $progress;
+    }
+
+    /**
+     * The latest of the dates on which any of these translations appear, or null if none do.
+     *
+     * @param array<string, string> $latest Each translation's latest date (Y-m-d)
+     * @param string[] $translations
+     */
+    private static function latestOf(array $latest, array $translations): ?string
+    {
+        return max(array_intersect_key($latest, array_flip($translations)) ?: [null]);
     }
 
     /**
