@@ -54,6 +54,33 @@ class BillProgressTest extends TestCase
         ])['committee']);
     }
 
+    /**
+     * HB9 (2027): continued from 2026, whose history LIS includes, and not yet acted on.
+     */
+    public function testABillContinuedFromLastSessionHasNoOutcomeYet(): void
+    {
+        $this->assertNull(Bill2::progress([
+            self::entry('2026-07-21', 'in committee'),         // Continued from last session
+            self::entry('2026-02-06', 'failed committee'),     // Continued to 2027 in Rules
+            self::entry('2026-02-02', 'failed subcommittee'),  // Subcommittee recommends continuing to 2028
+            self::entry('2026-01-30', 'in subcommittee'),
+            self::entry('2025-12-19', 'in committee'),
+        ])['committee']);
+    }
+
+    /**
+     * Continued in the second chamber's committee, after passing the first chamber's.
+     */
+    public function testABillContinuedInTheSecondChamberStillPassedTheFirstCommittee(): void
+    {
+        $this->assertSame('passed', Bill2::progress([
+            self::entry('2026-07-21', 'in committee'),         // Continued from last session
+            self::entry('2026-03-02', 'failed committee'),     // Continued to 2027 in Finance
+            self::entry('2026-02-10', 'passed house'),
+            self::entry('2026-02-03', 'passed committee'),
+        ])['committee']);
+    }
+
     public function testABillNoCommitteeHasActedOnHasNoOutcome(): void
     {
         $this->assertNull(Bill2::progress([

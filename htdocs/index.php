@@ -39,7 +39,7 @@ if (strtotime(SESSION_START) < time() && strtotime(SESSION_END) > time()) {
     $page_body = '<p>The ' . SESSION_YEAR . ' Virginia General Assembly session will begin on '
         . date('F j', strtotime(SESSION_START)) . ', scheduled to continue until '
         . date('F j', strtotime(SESSION_END)) . '. Here you can read <a href="/bills/">the '
-        . 'bills are proposed</a>.</p>';
+        . 'bills that are proposed</a>.</p>';
 } else {
     $page_body = '<p>The ' . SESSION_YEAR . ' Virginia General Assembly session began on '
         . date('F j', strtotime(SESSION_START)) . ' and continued through '
