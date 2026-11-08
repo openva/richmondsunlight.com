@@ -190,9 +190,9 @@ if (!empty($comment['url'])) {
 
 # See if they're logged in and deal with them accordingly.
 if (logged_in() === true) {
-    update_user('name=' . $comment['name'] . '&email=' . $comment['email'] . '&url=' . $comment['url']);
+    update_user('name=' . urlencode($comment['name']) . '&email=' . urlencode($comment['email']) . '&url=' . urlencode($comment['url']));
 } else {
-    create_user('name=' . $comment['name'] . '&email=' . $comment['email'] . '&url=' . $comment['url']);
+    create_user('name=' . urlencode($comment['name']) . '&email=' . urlencode($comment['email']) . '&url=' . urlencode($comment['url']));
     $user = @get_user();
 }
 
