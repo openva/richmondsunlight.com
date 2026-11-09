@@ -47,7 +47,14 @@ if (!isset($_POST['submit']) && empty($_GET['return_uri']) && !empty($_SERVER['H
 }
 
 if (isset($_POST['submit'])) {
-    $form_data = array_map('stripslashes_nullsafe', $_POST['form_data']);
+    $form_data = $_POST['form_data'] ?? [];
+    if (!is_array($form_data)) {
+        $form_data = [];
+    }
+    $form_data = array_map(fn ($field) => is_string($field) ? $field : '', $form_data);
+    $form_data += ['email' => '', 'password' => '', 'return_uri' => ''];
+    $form_data['email'] = trim($form_data['email']);
+
     if (empty($form_data['password'])) {
         $errors[] = 'your password';
     }
@@ -67,15 +74,21 @@ if (isset($_POST['submit'])) {
 				</ul>
 			</div>';
     } else {
-        $form_data = array_map(function ($field) {
-            return mysqli_real_escape_string($GLOBALS['db'], $field);
-        }, $_POST['form_data']);
-
-        $form_data['password_hash'] = md5($form_data['password']);
+        # Passwords have been hashed in three ways: as typed (resetting a password, and registering
+        # from now on); after being escaped for SQL (changing it in account settings or
+        # Photosynthesis, and logging in until now); and after being escaped and then URL-decoded
+        # (registering, until now). Accept any of them, so that nobody gets locked out.
+        $password = $form_data['password'];
+        $escaped = mysqli_real_escape_string($GLOBALS['db'], $password);
         $sql = 'SELECT id, name, cookie_hash
 				FROM users
-				WHERE email = "' . $form_data['email'] . '" AND password = "' . $form_data['password_hash'] . '"';
-        $result = mysqli_query($GLOBALS['db'], $sql);
+				WHERE email = ? AND password IN (?, ?, ?)';
+        $result = mysqli_execute_query($GLOBALS['db'], $sql, [
+            $form_data['email'],
+            md5($password),
+            md5($escaped),
+            md5(urldecode($escaped)),
+        ]);
 
         if (mysqli_num_rows($result) == 0) {
             $page_body = '<div id="messages" class="errors">That email/password combination didn’t work.</div>';
@@ -111,11 +124,14 @@ if (isset($_POST['submit'])) {
 
             $log->put('User ' . $user['name'] . ' has logged in.', 2);
 
-            if (empty($form_data['return_uri'])) {
-                $form_data['return_uri'] = '/';
+            # Only send people back to a page on this site. (A path that doesn't start with a
+            # slash, like "@example.com", would make the browser go to another site.)
+            $return_uri = urldecode($form_data['return_uri']);
+            if (!str_starts_with($return_uri, '/')) {
+                $return_uri = '/';
             }
 
-            header('Location: ' . SITE_BASE_URL . urldecode($form_data['return_uri']));
+            header('Location: ' . SITE_BASE_URL . $return_uri);
             exit();
         }
     }

@@ -159,10 +159,9 @@ function seconds_to_time($seconds, $lpad = false)
 if (!function_exists('create_user')) {
     function create_user($options = '')
     {
-        # Turn the URL-style options into an array.
+        # Turn the URL-style options into an array. (parse_str() decodes the values. Decoding them
+        # again would turn, e.g., a "+" in a name or password into a space.)
         parse_str($options, $options);
-
-        $options = array_map('urldecode', $options);
 
         # Only allow known column names to prevent parameter injection attacks, where
         # an attacker injects extra keys into the query string (e.g., via an unencoded
@@ -938,10 +937,8 @@ function get_html_split_regex()
 
 function login_form()
 {
-    if (isset($_GET['return_uri'])) {
-        $return_uri = $_GET['return_uri'];
-    } elseif (isset($form_data) && isset($form_data['return_uri'])) {
-        $return_uri = $_GET['return_uri'];
+    if (isset($_GET['return_uri']) && is_string($_GET['return_uri'])) {
+        $return_uri = htmlspecialchars($_GET['return_uri'], ENT_QUOTES, 'UTF-8');
     }
     // If the port of the requested URL is anything other than 80 or 443, we need to include in
     // the form's post action value.
