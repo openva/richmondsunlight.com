@@ -150,4 +150,44 @@ class LegislatorTest extends TestCase
         $this->assertContains('rcdeeds', $shortnames);
         $this->assertNotContains('zztestnoterm', $shortnames);
     }
+
+    public function testStatisticsCountBillsCopatronsAndTopics(): void
+    {
+        if (self::$id === false) {
+            $this->markTestSkipped('getid returned false');
+        }
+
+        $statistics = Legislator::statistics((int) self::$id, SESSION_YEAR, true);
+
+        $this->assertSame(['batting', 'copatroned', 'copatrons', 'pool', 'tags'], array_keys($statistics));
+        $this->assertLessThanOrEqual($statistics['batting']['total'], $statistics['batting']['passed']);
+        foreach (['copatroned', 'copatrons', 'pool', 'tags'] as $counts) {
+            $this->assertContainsOnlyInt($statistics[$counts]);
+        }
+        $tag_counts = array_values($statistics['tags']);
+        $sorted = $tag_counts;
+        rsort($sorted);
+        $this->assertSame($sorted, $tag_counts, 'Tags should be listed most-used first');
+    }
+
+    /**
+     * The second time, the statistics come from Memcached, and must be the same.
+     */
+    public function testCachedStatisticsAreTheSame(): void
+    {
+        if (self::$id === false) {
+            $this->markTestSkipped('getid returned false');
+        }
+        if (MEMCACHED_SERVER == '' || !class_exists('Memcached')) {
+            $this->markTestSkipped('Memcached not available');
+        }
+
+        $mc = new Memcached();
+        $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+        $mc->delete('legislator-statistics-' . self::$id . '-' . SESSION_YEAR);
+
+        $first = Legislator::statistics((int) self::$id, SESSION_YEAR, true);
+        $this->assertSame($first, $mc->get('legislator-statistics-' . self::$id . '-' . SESSION_YEAR));
+        $this->assertSame($first, Legislator::statistics((int) self::$id, SESSION_YEAR, true));
+    }
 }

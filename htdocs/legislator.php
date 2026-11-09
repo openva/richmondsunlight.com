@@ -360,37 +360,9 @@ if (IN_SESSION == true) {
 } else {
     $batting_year = SESSION_YEAR;
 }
-$sql = 'SELECT
-            COUNT(*) AS passed,
-		(
-			SELECT
-                COUNT(*)
-			FROM bills
-                LEFT JOIN sessions
-                    ON bills.session_id = sessions.id
-			WHERE sessions.year = ' . $batting_year . '
-            AND chief_patron_id = ' . $legislator['id'] . '
-            AND
-                (bills.number LIKE "hb%"
-                OR
-                bills.number LIKE "sb%")
-		) AS total
-		FROM bills
-            LEFT JOIN representatives
-                ON bills.chief_patron_id = representatives.id
-            LEFT JOIN sessions
-                ON bills.session_id = sessions.id
-		WHERE sessions.year = ' . $batting_year . '
-        AND chief_patron_id = ' . $legislator['id'] . '
-        AND (bills.outcome = "passed")
-        AND
-            (bills.number LIKE "hb%"
-            OR
-            bills.number LIKE "sb%")';
-$result = mysqli_query($GLOBALS['db'], $sql);
-$legislator['batting'] = mysqli_fetch_array($result);
-if ($legislator['batting']['total'] == 0) {
-    unset($legislator['batting']);
+$statistics = Legislator::statistics((int) $legislator['id'], $batting_year, empty($legislator['date_ended']));
+if ($statistics['batting']['total'] > 0) {
+    $legislator['batting'] = $statistics['batting'];
 }
 
 if (!empty($legislator['date_started'])) {
@@ -506,22 +478,7 @@ if (!empty($legislator['activity']) && IN_SESSION == true) {
 // COPATRONING STATS
 // Calculate the percentage of the bills copatroned by this legislator that were introduced by
 // each party.
-$sql = 'SELECT
-            representatives.party,
-            COUNT(*) AS number
-		FROM bills_copatrons
-		LEFT JOIN bills
-			ON bills_copatrons.bill_id=bills.id
-		LEFT JOIN representatives
-			ON bills.chief_patron_id=representatives.id
-		WHERE bills_copatrons.legislator_id=' . $legislator['id'] . '
-		GROUP BY representatives.party';
-
-$result = mysqli_query($GLOBALS['db'], $sql);
-$tmp = array();
-while ($copatron = mysqli_fetch_array($result)) {
-    $tmp[$copatron['party']] = $copatron['number'];
-}
+$tmp = $statistics['copatroned'];
 $total = array_sum($tmp);
 if ($total > 0) {
     arsort($tmp);
@@ -545,23 +502,7 @@ if ($total > 0) {
 
 // Calculate the percentages of the legislators' party memberships who have cosponsored any bill
 // introduced by this legislator.
-$sql = 'SELECT
-            representatives.party,
-            COUNT(*) AS number
-		FROM bills_copatrons
-		LEFT JOIN representatives
-			ON bills_copatrons.legislator_id = representatives.id
-		WHERE bills_copatrons.bill_id
-		IN
-			(SELECT id
-			FROM bills
-			WHERE chief_patron_id = ' . $legislator['id'] . ')
-		GROUP BY representatives.party';
-$result = mysqli_query($GLOBALS['db'], $sql);
-$tmp = array();
-while ($copatron = mysqli_fetch_array($result)) {
-    $tmp[$copatron['party']] = $copatron['number'];
-}
+$tmp = $statistics['copatrons'];
 $total = array_sum($tmp);
 if ($total > 0) {
     arsort($tmp);
@@ -587,23 +528,7 @@ if ($total > 0) {
 // of bills copatroned by this legislator. Meaning, look at every bill that this legislator has
 // copatroned, and look at every other copatron of those bills, and calculate the percentage of
 // those copatrons that are Democrats, Republicans, and independents.
-$sql = 'SELECT
-            representatives.party,
-            COUNT(*) AS number
-		FROM bills_copatrons
-			LEFT JOIN representatives
-				ON bills_copatrons.legislator_id=representatives.id
-		WHERE
-			bills_copatrons.bill_id IN
-				(SELECT bill_id
-				FROM bills_copatrons
-				WHERE legislator_id=' . $legislator['id'] . ')
-		GROUP BY representatives.party';
-$result = mysqli_query($GLOBALS['db'], $sql);
-$tmp = array();
-while ($copatron = mysqli_fetch_array($result)) {
-    $tmp[$copatron['party']] = $copatron['number'];
-}
+$tmp = $statistics['pool'];
 $total = array_sum($tmp);
 if ($total > 0) {
     arsort($tmp);
@@ -658,28 +583,13 @@ if (isset($partisanship)) {
 }
 
 // Tag Cloud
-$sql = 'SELECT COUNT(*) AS count, tags.tag
-		FROM tags
-		LEFT JOIN bills
-			ON tags.bill_id = bills.id
-		LEFT JOIN representatives
-			ON bills.chief_patron_id = representatives.id
-		WHERE representatives.id = ' . $legislator['id'] . '
-		GROUP BY tags.tag
-		ORDER BY count DESC';
-$result = mysqli_query($GLOBALS['db'], $sql);
-$tag_count = mysqli_num_rows($result);
+$tags = $statistics['tags'];
+$tag_count = count($tags);
 if ($tag_count > 0) {
     $page_body .= '<div class="pair">
 		<div class="label">Bill Topics <a href="/help/tag-clouds/" class="help-icon-link" data-help-url="/help/tag-clouds/" title="Help"><img src="/images/help-f4eee5.gif" class="help-icon" alt="?" /></a></div>
 		<div class="content">
 			<div class="tags">';
-    // Build up an array of tags, with the key being the tag and the value being the count.
-    while ($tag = mysqli_fetch_array($result)) {
-        $tag = array_map('stripslashes_nullsafe', $tag);
-        $tags[$tag['tag']] = $tag['count'];
-    }
-
     // Sort the tags in reverse order by key (their count), shave off the top 30, and then
     // resort alphabetically.
     arsort($tags);
