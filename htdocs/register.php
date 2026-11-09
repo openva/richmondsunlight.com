@@ -110,7 +110,7 @@ function display_form($form_data)
 			</fieldset>
 			<div style="display: none;">
 				<p>Please leave this blank.</p>
-				<input type="text" name="age" size="3" />
+				<input type="text" name="form_data[age]" size="3" tabindex="-1" autocomplete="off" />
 			</div>
 			<input type="hidden" name="form_data[time]" value="' . time() . '" />
 		</form>
