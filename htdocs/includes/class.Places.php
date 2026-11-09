@@ -101,19 +101,24 @@ class Places
     public function listAll(): array
     {
         return $this->cached('places-list-v2', self::CACHE_BILLS, function () {
+            # Count every place's bills in one pass, rather than once per place, which, with no
+            # index on bills_places.placename, read the whole table 133 times.
             $sql = 'SELECT
                         gazetteer.id,
                         gazetteer.name,
                         gazetteer.municipality IS NULL AS is_county,
-                        (SELECT COUNT(DISTINCT bills_places.bill_id)
+                        COALESCE(counts.bill_count, 0) AS bill_count
+                    FROM gazetteer
+                    LEFT JOIN (
+                        SELECT bills_places.placename, COUNT(DISTINCT bills_places.bill_id) AS bill_count
                         FROM bills_places
                         JOIN bills
                             ON bills.id = bills_places.bill_id
                         JOIN sessions
                             ON sessions.id = bills.session_id
-                        WHERE
-                            bills_places.placename = gazetteer.name COLLATE utf8mb3_bin) AS bill_count
-                    FROM gazetteer
+                        GROUP BY bills_places.placename
+                    ) AS counts
+                        ON counts.placename = gazetteer.name COLLATE utf8mb3_bin
                     WHERE ' . self::LOCALITY_SQL . '
                     ORDER BY gazetteer.name ASC';
             $stmt = $this->db()->prepare($sql);
