@@ -211,7 +211,8 @@ CREATE TABLE `bills_places` (
   `date_modified` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
   UNIQUE KEY `bill_place` (`bill_id`,`placename`),
-  KEY `bill_id` (`bill_id`,`latitude`,`longitude`)
+  KEY `bill_id` (`bill_id`,`latitude`,`longitude`),
+  KEY `placename` (`placename`,`bill_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=13513 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
