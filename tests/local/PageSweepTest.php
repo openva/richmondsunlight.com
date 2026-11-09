@@ -88,12 +88,22 @@ class PageSweepTest extends LocalTestCase
     /**
      * Load each page, collecting every problem found.
      *
-     * @param string[] $paths
+     * @param (string|null)[] $paths
      */
     private function sweep(array $paths, string $subject): void
     {
         $problems = [];
+
+        # A query's path is NULL when a record it's built from is missing (e.g., a bill's session).
+        $unbuildable = count(array_filter($paths, 'is_null'));
+        if ($unbuildable > 0) {
+            $problems[] = $unbuildable . ' URLs couldn’t be built, because records that they need '
+                . '(e.g., bills’ sessions) aren’t in the database';
+            $paths = array_filter($paths, 'is_string');
+        }
+
         foreach ($paths as $path) {
+
             $log_offset = self::logSize();
             [$status, $body] = self::fetch($path);
 
