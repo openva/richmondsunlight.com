@@ -48,9 +48,9 @@ BILL_IDS=(
 )
 
 # The local-only sample (local-test-records.sql, which isn't stored in GitHub, and which the tests
-# in tests/local/ need) is a few hundred bills from the two most recent regular sessions, chosen
-# to include as many kinds of bills as possible, plus a few videos from each chamber. See "Export
-# the local-only sample," below.
+# in tests/local/ need) is a few hundred bills from the two most recent regular sessions that have
+# started, chosen to include as many kinds of bills as possible, plus a few videos from each
+# chamber. See "Export the local-only sample," below.
 #
 # The committed fixtures (deploy/mysql/*-fixtures.sql) provide their own versions of these bills'
 # and videos' records, so they're left out of the sample, lest both versions be loaded.
@@ -162,7 +162,11 @@ scrub() {
 
 FIXTURE_BILL_LIST=$(IFS=,; echo "${FIXTURE_BILL_IDS[*]}")
 FIXTURE_FILE_LIST=$(IFS=,; echo "${FIXTURE_FILE_IDS[*]}")
-RECENT_SESSIONS="SELECT id, date_started FROM sessions WHERE suffix IS NULL ORDER BY date_started DESC LIMIT 2"
+# The two most recent regular sessions that have started. (Before a session starts, it has only a
+# few prefiled bills, with no votes, history, or video, which make for poor test data.)
+RECENT_SESSIONS="SELECT id, date_started FROM sessions
+    WHERE suffix IS NULL AND date_started <= CURDATE()
+    ORDER BY date_started DESC LIMIT 2"
 
 # The videos from the recent sessions, with transcripts, in which the most bills were taken up
 SAMPLE_FILE_LIST=$(query "
@@ -271,6 +275,16 @@ VERSIONED_BILL_LIST=$(query "SELECT bill_id FROM bills_full_text WHERE bill_id I
 VERSIONED_BILL_LIST=${VERSIONED_BILL_LIST:-0}
 
 truncate --size 0 mysql/local-test-records.sql
+
+# The sessions, legislators, and committees that the sampled records refer to. The committed
+# basic-contents.sql has these too, but it's only as current as its last commit, while this sample is
+# made daily. (When a new session starts, its bills are sampled long before basic-contents.sql has
+# that session.) This is loaded after basic-contents.sql, and its rows are INSERT IGNOREs, so this
+# only adds what that's missing.
+for TABLE in "${ALL_CONTENTS[@]}"; do
+    dump "$TABLE" "1" >> mysql/local-test-records.sql
+done
+
 dump bills "id IN ($SAMPLE_BILL_LIST)" >> mysql/local-test-records.sql
 
 for TABLE in "${SOME_CONTENTS[@]}"; do
