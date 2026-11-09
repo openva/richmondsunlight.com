@@ -8,4 +8,10 @@
 </VirtualHost>
 <Directory "/var/www/staging.richmondsunlight.com">
 	AllowOverride All
+	# Password-protect staging. This block covers both the HTTP and HTTPS (Certbot) vhosts.
+	# Create the password file with: sudo htpasswd -c /etc/apache2/.htpasswd-staging <username>
+	AuthType Basic
+	AuthName "Richmond Sunlight staging"
+	AuthUserFile /etc/apache2/.htpasswd-staging
+	Require valid-user
 </Directory>
