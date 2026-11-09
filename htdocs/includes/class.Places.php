@@ -35,22 +35,34 @@ class Places
     private const LOCALITY_SQL = '(gazetteer.municipality IS NULL
         OR gazetteer.municipality = CONCAT(gazetteer.name, " (city)"))';
 
-    protected PDO $db;
+    protected ?PDO $db;
     protected ?Memcached $cache;
 
     /**
-     * @param PDO|null             $db    A database connection, or null to open one.
+     * @param PDO|null             $db    A database connection, or null to open one when it's first
+     *                                    needed (which, if everything is cached, it isn't).
      * @param Memcached|false|null $cache A cache connection, null to open one, or false not to cache.
      */
     public function __construct(?PDO $db = null, Memcached|false|null $cache = null)
     {
-        $this->db = $db ?? (new Database())->connect();
+        $this->db = $db;
         if ($cache === null && defined('MEMCACHED_SERVER') && MEMCACHED_SERVER != ''
             && class_exists('Memcached')) {
             $cache = new Memcached();
             $cache->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
         }
         $this->cache = $cache ?: null;
+    }
+
+    /**
+     * The database connection, opened the first time a query needs it.
+     */
+    private function db(): PDO
+    {
+        if ($this->db === null) {
+            $this->db = (new Database())->connect();
+        }
+        return $this->db;
     }
 
     /**
@@ -104,7 +116,7 @@ class Places
                     FROM gazetteer
                     WHERE ' . self::LOCALITY_SQL . '
                     ORDER BY gazetteer.name ASC';
-            $stmt = $this->db->prepare($sql);
+            $stmt = $this->db()->prepare($sql);
             $stmt->execute();
 
             $places = [];
@@ -200,7 +212,7 @@ class Places
                         ) AS overlaps
                         WHERE overlap / place_area >= :min_share OR overlap / district_area >= :min_share2
                         ORDER BY chamber ASC, number ASC';
-                $stmt = $this->db->prepare($sql);
+                $stmt = $this->db()->prepare($sql);
                 $stmt->bindValue(':id', $gazetteer_id, PDO::PARAM_INT);
                 $stmt->bindValue(':min_share', self::MIN_SHARE);
                 $stmt->bindValue(':min_share2', self::MIN_SHARE);
@@ -237,7 +249,7 @@ class Places
     {
         return $this->cached('places-map-v3-' . $gazetteer_id, self::CACHE_DISTRICTS,
             function () use ($gazetteer_id) {
-                $stmt = $this->db->prepare('SELECT ST_AsGeoJSON(boundaries, 5) FROM gazetteer WHERE id = ?');
+                $stmt = $this->db()->prepare('SELECT ST_AsGeoJSON(boundaries, 5) FROM gazetteer WHERE id = ?');
                 $stmt->execute([$gazetteer_id]);
                 $place = PlaceMap::polygons(json_decode((string) $stmt->fetchColumn(), true));
                 $bounds = PlaceMap::bounds($place);
@@ -265,7 +277,7 @@ class Places
                 $districts = [];
                 if (count($ids) > 0) {
                     $placeholders = implode(',', array_fill(0, count($ids), '?'));
-                    $stmt = $this->db->prepare(
+                    $stmt = $this->db()->prepare(
                         'SELECT districts.id,
                             ST_AsGeoJSON(ST_Intersection(districts.geom, ST_GeomFromText(?)), 5) AS shape,
                             ST_AsGeoJSON(ST_Intersection(gazetteer.boundaries, districts.geom), 5) AS inside
@@ -356,7 +368,7 @@ class Places
                     AND terms.date_started <= CURDATE()
                     AND (terms.date_ended IS NULL OR terms.date_ended > CURDATE())
                 ORDER BY terms.date_started DESC';
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->db()->prepare($sql);
         $stmt->execute(array_keys($shares));
 
         $legislators = [];
@@ -409,7 +421,7 @@ class Places
                             sessions.year DESC,
                             SUBSTRING(bills.number FROM 1 FOR 2) ASC,
                             CAST(SUBSTRING(bills.number FROM 3) AS UNSIGNED) ASC';
-                $stmt = $this->db->prepare($sql);
+                $stmt = $this->db()->prepare($sql);
                 $stmt->bindValue(':name', $name, PDO::PARAM_STR);
                 $stmt->execute();
 
@@ -449,7 +461,7 @@ class Places
                         ) AS overlaps
                         WHERE overlap / place_area >= :min_share OR overlap / district_area >= :min_share2
                         ORDER BY name ASC';
-                $stmt = $this->db->prepare($sql);
+                $stmt = $this->db()->prepare($sql);
                 $stmt->bindValue(':id', $district_id, PDO::PARAM_INT);
                 $stmt->bindValue(':min_share', self::MIN_SHARE);
                 $stmt->bindValue(':min_share2', self::MIN_SHARE);

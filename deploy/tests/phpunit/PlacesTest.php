@@ -237,4 +237,16 @@ class PlacesTest extends TestCase
         rsort($sorted);
         $this->assertSame($sorted, $years, 'The newest year should be first');
     }
+
+    /**
+     * Places opens a database connection only when a query needs one, so that a page whose places
+     * are all in Memcached doesn't take up a connection.
+     */
+    public function testNoConnectionIsOpenedUntilOneIsNeeded(): void
+    {
+        $places = new Places(null, false);
+        $db = new ReflectionProperty(Places::class, 'db');
+
+        $this->assertNull($db->getValue($places));
+    }
 }
