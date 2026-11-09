@@ -65,7 +65,7 @@ $user = get_user();
 # LOCALIZE VARIABLES
 $tags = $_POST['tags'];
 if (isset($_GET['delete']) && is_numeric($_GET['delete']) && strlen($_GET['delete']) < 10) {
-    $delete = $_GET['delete'];
+    $delete = (int) $_GET['delete'];
 } elseif (!isset($_POST['bill_id'])) {
     header('HTTP/1.0 500 Internal Server Error');
     $message = array('error' => 'No tags provided.');
@@ -73,7 +73,7 @@ if (isset($_GET['delete']) && is_numeric($_GET['delete']) && strlen($_GET['delet
     exit();
 }
 if (isset($_POST['bill_id']) && is_numeric($_POST['bill_id']) && strlen($_POST['bill_id']) < 10) {
-    $bill_id = $_POST['bill_id'];
+    $bill_id = (int) $_POST['bill_id'];
 } else {
     die();
 }
@@ -84,8 +84,8 @@ if (empty($tags)) {
     if (!empty($delete) && ($user['trusted'] == 'y')) {
         # Delete the tag.
         $sql = 'DELETE FROM tags
-				WHERE id=' . $delete;
-        mysqli_query($GLOBALS['db'], $sql);
+				WHERE id = ?';
+        mysqli_execute_query($GLOBALS['db'], $sql, [$delete]);
 
         # Delete the bill from Memcached.
         if (MEMCACHED_SERVER != '') {
@@ -151,19 +151,24 @@ if (!empty($_SESSION['id'])) {// && !blacklisted())
         if (!empty($tag[$i])) {
             # Make sure it's safe.
             $tag[$i] = preg_replace("/[[:punct:]]/D", '', $tag[$i]);
-            $tag[$i] = trim(mysqli_real_escape_string($GLOBALS['db'], $tag[$i]));
+            $tag[$i] = trim($tag[$i]);
 
             # Check one more time to make sure it's not empty.
             if (!empty($tag[$i])) {
                 # Assemble the insertion SQL
                 $sql = 'INSERT INTO tags
-						SET bill_id=' . $bill_id . ', tag="' . $tag[$i] . '",
-						ip="' . $_SERVER['REMOTE_ADDR'] . '", user_id=
+						SET bill_id = ?, tag = ?, ip = ?,
+						user_id =
 							(SELECT id
 							FROM users
-							WHERE cookie_hash = "' . $_SESSION['id'] . '"),
-						date_created=now()';
-                $result = mysqli_query($GLOBALS['db'], $sql);
+							WHERE cookie_hash = ?),
+						date_created = now()';
+                $result = mysqli_execute_query($GLOBALS['db'], $sql, [
+                    $bill_id,
+                    $tag[$i],
+                    $_SERVER['REMOTE_ADDR'],
+                    $_SESSION['id'],
+                ]);
 
                 /*
                  * If there was a database-insertion error.

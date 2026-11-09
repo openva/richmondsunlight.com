@@ -54,13 +54,18 @@ if (!logged_in()) {
 if (!empty($_SESSION['id'])) {
     # ASSEMBLE THE INSERTION SQL
     $sql = 'INSERT INTO polls
-			SET bill_id=' . $poll['bill_id'] . ', vote="' . $poll['vote'] . '",
-			ip="' . $_SERVER['REMOTE_ADDR'] . '", user_id=
+			SET bill_id = ?, vote = ?, ip = ?,
+			user_id =
 				(SELECT id
 				FROM users
-				WHERE cookie_hash = "' . $_SESSION['id'] . '"),
-			date_created=now()';
-    $result = mysqli_query($GLOBALS['db'], $sql);
+				WHERE cookie_hash = ?),
+			date_created = now()';
+    $result = mysqli_execute_query($GLOBALS['db'], $sql, [
+        $bill_id,
+        $poll['vote'],
+        $_SERVER['REMOTE_ADDR'],
+        $_SESSION['id'],
+    ]);
     if (!$result) {
         die("Poll vote could not be cast.");
     }
@@ -71,7 +76,7 @@ if (!empty($_SESSION['id'])) {
     if (MEMCACHED_SERVER != '') {
         $mc = new Memcached();
         $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-        $mc->delete('poll-' . $poll['bill_id']);
+        $mc->delete('poll-' . $bill_id);
     }
 
     # If the insert was successful, redirect the user back to the page of

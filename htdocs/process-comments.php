@@ -129,7 +129,14 @@ $user = @get_user();
 # CLEAN UP THE DATA
 $comment = array_map('trim', $comment);
 $comment['comment'] = strip_tags($comment['comment'], '<a><em><strong><i><b><s><blockquote>');
-$comment = array_map('addslashes', $comment);
+
+$comment['bill_id'] = filter_var($comment['bill_id'], FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+if ($comment['bill_id'] === false) {
+    header('HTTP/1.0 400 Bad Request');
+    $message = array('error' => 'No bill provided.');
+    echo json_encode($message);
+    exit();
+}
 
 if (empty($comment['comment'])) {
     header('HTTP/1.0 500 Internal Server Error');
@@ -167,7 +174,7 @@ if (!empty($comment['url'])) {
         # their URL.
         if (mb_strstr($comment['url'], '@')) {
             $comment['email'] = $comment['url'];
-            unset($comment['url']);
+            $comment['url'] = '';
         }
 
         # Otherwise, just figure somebody neglected the prefix.
@@ -218,9 +225,9 @@ foreach ($comment_words AS $word)
 # Make sure that this person hasn't posted in the past 5 seconds.
 $sql = 'SELECT id
 		FROM comments
-		WHERE (email="' . $comment['email'] . '" OR ip="' . $remote_addr . '")
+		WHERE (email = ? OR ip = ?)
 		AND (TIMESTAMPDIFF(SECOND, date_created, now()) < 5)';
-$result = mysqli_query($GLOBALS['db'], $sql);
+$result = mysqli_execute_query($GLOBALS['db'], $sql, [$comment['email'], $remote_addr]);
 if (mysqli_num_rows($result) > 0) {
     header('HTTP/1.0 409 Conflict');
     $message = array('error' => 'Slow down, cowboy: Only one comment is allowed every five seconds. That’s pretty reasonable.');
@@ -229,11 +236,11 @@ if (mysqli_num_rows($result) > 0) {
 }
 
 # Make sure that this person hasn't posted too many times recently.
-$sql = 'SELECT *
+$sql = 'SELECT id
 		FROM comments
-		WHERE (email="' . $comment['email'] . '" OR ip="' . $remote_addr . '")
+		WHERE (email = ? OR ip = ?)
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 5)';
-$result = mysqli_query($GLOBALS['db'], $sql);
+$result = mysqli_execute_query($GLOBALS['db'], $sql, [$comment['email'], $remote_addr]);
 if (mysqli_num_rows($result) > 10) {
     header('HTTP/1.0 409 Conflict');
     $message = array('error' => 'Slow down, cowboy: You’re posting way too many comments too fast. Relax, think, then write.');
@@ -244,10 +251,10 @@ if (mysqli_num_rows($result) > 10) {
 # Make sure that this person hasn't posted this precise same comment within the past hour.
 $sql = 'SELECT id
 		FROM comments
-		WHERE (email="' . $comment['email'] . '" OR ip="' . $remote_addr . '")
+		WHERE (email = ? OR ip = ?)
 		AND (TIMESTAMPDIFF(MINUTE, date_created, now()) < 60)
-		AND comment="' . $comment['comment'] . '"';
-$result = mysqli_query($GLOBALS['db'], $sql);
+		AND comment = ?';
+$result = mysqli_execute_query($GLOBALS['db'], $sql, [$comment['email'], $remote_addr, $comment['comment']]);
 if (mysqli_num_rows($result) > 0) {
     header('HTTP/1.0 409 Conflict');
     $message = array('error' => 'You’ve already posted that exact comment. You may not post it again. And, no, don’t '
@@ -261,17 +268,18 @@ if (mysqli_num_rows($result) > 0) {
 
 # ASSEMBLE THE INSERTION SQL
 $sql = 'INSERT INTO comments
-		SET bill_id=' . $comment['bill_id'] . ', name="' . $comment['name'] . '",
-		email="' . $comment['email'] . '", ip="' . $remote_addr . '",
-		comment="' . $comment['comment'] . '", status="published",
-		date_created=now()';
+		SET bill_id = ?, name = ?, email = ?, ip = ?, comment = ?, status = "published",
+		date_created = now()';
+$params = [$comment['bill_id'], $comment['name'], $comment['email'], $remote_addr, $comment['comment']];
 if (!empty($comment['url'])) {
-    $sql .= ', url="' . $comment['url'] . '"';
+    $sql .= ', url = ?';
+    $params[] = $comment['url'];
 }
 if (!empty($user['id'])) {
-    $sql .= ', user_id=' . $user['id'];
+    $sql .= ', user_id = ?';
+    $params[] = (int) $user['id'];
 }
-$result = mysqli_query($GLOBALS['db'], $sql);
+$result = mysqli_execute_query($GLOBALS['db'], $sql, $params);
 if (!$result) {
     header('HTTP/1.0 500 Internal Server Error');
     $message = array('error' => 'Your comment could not be added, though for no good reason. Richmond Sunlight has
@@ -308,8 +316,8 @@ $subscriptions = $subscription->listing();
 # subscribers.
 if ($subscriptions !== false) {
     # Pass the comment data to $subscriptions, first removing the HTML and any slashes.
-    $comment['name'] = strip_tags(stripslashes($comment['name']));
-    $comment['comment'] = strip_tags(stripslashes($comment['comment']));
+    $comment['name'] = strip_tags($comment['name']);
+    $comment['comment'] = strip_tags($comment['comment']);
     $subscription->comment = $comment;
 
     # And pass the subscription data to $subscriptions.
@@ -343,8 +351,8 @@ if (MEMCACHED_SERVER != '') {
 
 $log = new Log();
 $http_host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-$log->put('New comment posted, by ' . stripslashes($comment['name']) . ':'
-    . "\n\n" . str_replace("\r\n", ' ¶ ', stripslashes($comment['comment']))
+$log->put('New comment posted, by ' . $comment['name'] . ':'
+    . "\n\n" . str_replace("\r\n", ' ¶ ', $comment['comment'])
     . ' https://' . $http_host . '/admin/comments/#comment-' . $comment['id'], 3);
 
 /*

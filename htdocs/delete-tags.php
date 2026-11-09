@@ -65,7 +65,7 @@ if ($user == false || $user['trusted'] == 'n') {
 
 // LOCALIZE VARIABLES
 if (isset($_POST['tag_id']) && is_numeric($_POST['tag_id']) && strlen($_POST['tag_id']) < 10) {
-    $tag_id = $_POST['tag_id'];
+    $tag_id = (int) $_POST['tag_id'];
 } else {
     header('HTTP/1.0 400 Bad Request');
     $message = array('error' => 'Missing or invalid tag ID.');
@@ -73,7 +73,7 @@ if (isset($_POST['tag_id']) && is_numeric($_POST['tag_id']) && strlen($_POST['ta
     exit();
 }
 if (isset($_POST['bill_id']) && is_numeric($_POST['bill_id']) && strlen($_POST['bill_id']) < 10) {
-    $bill_id = $_POST['bill_id'];
+    $bill_id = (int) $_POST['bill_id'];
 } else {
     header('HTTP/1.0 400 Bad Request');
     $message = array('error' => 'Missing or invalid bill ID.');
@@ -86,8 +86,8 @@ if (isset($_POST['tag']) && strlen($_POST['tag']) <= 30) {
 
 # Assemble the delete SQL
 $sql = 'DELETE FROM tags
-        WHERE id=' . $tag_id .' AND bill_id=' . $bill_id;
-$result = mysqli_query($GLOBALS['db'], $sql);
+        WHERE id = ? AND bill_id = ?';
+$result = mysqli_execute_query($GLOBALS['db'], $sql, [$tag_id, $bill_id]);
 
 /*
 * If there was a database error.
