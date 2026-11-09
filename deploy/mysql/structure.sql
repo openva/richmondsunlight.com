@@ -252,7 +252,8 @@ CREATE TABLE `bills_section_numbers` (
   `date_modified` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
   KEY `bill_id` (`bill_id`,`section_number`),
-  KEY `full_text_id` (`full_text_id`)
+  KEY `full_text_id` (`full_text_id`),
+  KEY `section_number` (`section_number`)
 ) ENGINE=InnoDB AUTO_INCREMENT=170219 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
