@@ -47,6 +47,7 @@ $result = mysqli_query($GLOBALS['db'], $sql);
 if (mysqli_num_rows($result) > 0) {
     $bill = mysqli_fetch_array($result);
     $bill = array_map('stripslashes_nullsafe', $bill);
+    $session_year = $bill['year'];
     $bill['word_count'] = str_word_count($bill['full_text']);
     $bill['patron_suffix'] = '(' . $bill['patron_party'] . '-' . $bill['patron_district'] . ')';
     if ($bill['patron_chamber'] == 'house') {
@@ -93,6 +94,7 @@ foreach ([
     'browser_title',
     'html_head',
     'body_tag',
+    'session_year',
 ] as $prop) {
     if (isset(${$prop})) {
         $page->{$prop} = ${$prop};

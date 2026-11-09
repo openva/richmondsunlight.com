@@ -30,12 +30,14 @@ $bill = mysqli_real_escape_string($GLOBALS['db'], $_REQUEST['bill']);
 # We append a query string, containing the current time, to avoid getting a cached copy.
 $json_url = API_URL . '1.1/bill/' . $year . '/' . $bill . '.json?' . time();
 $json = get_content($json_url);
-if ($json === false) {
+$bill = ($json === false) ? null : json_decode($json);
+
+# The API says that there's no such bill (or returned nothing we can use).
+if (!is_object($bill) || isset($bill->error) || empty($bill->id)) {
     http_response_code(404);
     include '404.php';
     exit();
 }
-$bill = json_decode($json);
 
 # Cast this bill as an array, rather than an object, in which the array is wrapped as a result of
 # being stored in JSON.
@@ -204,6 +206,7 @@ if (count($versions) === 0) {
     include '404.php';
     exit();
 }
+$session_year = $bill['year'];
 
 # PAGE METADATA
 $page_title = mb_strtoupper($bill['number']) . ': ' . $bill['catch_line'];
@@ -279,6 +282,7 @@ foreach ([
     'browser_title',
     'html_head',
     'body_tag',
+    'session_year',
 ] as $prop) {
     if (isset(${$prop})) {
         $page->{$prop} = ${$prop};

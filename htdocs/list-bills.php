@@ -160,6 +160,9 @@ else {
 $result = mysqli_query($GLOBALS['db'], $sql);
 $num_results = mysqli_num_rows($result);
 if ($num_results > 0) {
+    $session_year = $year;
+}
+if ($num_results > 0) {
     $page_body .= '<p>' . number_format($num_results) . ' bill' . ($num_results > 1 ? 's' : '') . ' found.</p>';
 
     # If this is a listing of bills currently in a given committee.
@@ -467,6 +470,7 @@ foreach ([
     'browser_title',
     'html_head',
     'body_tag',
+    'session_year',
 ] as $prop) {
     if (isset(${$prop})) {
         $page->{$prop} = ${$prop};

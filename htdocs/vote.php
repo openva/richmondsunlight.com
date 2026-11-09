@@ -77,6 +77,7 @@ if (mysqli_num_rows($result) == 0) {
 $bill = mysqli_fetch_assoc($result);
 $bill = array_map('stripslashes_nullsafe', $bill);
 $bill = array_map('trim', $bill);
+$session_year = $bill['year'];
 
 /*
  * Create a new instance of the Vote class, and get aggregate data about the outcome.
@@ -336,6 +337,7 @@ foreach ([
     'browser_title',
     'html_head',
     'body_tag',
+    'session_year',
 ] as $prop) {
     if (isset(${$prop})) {
         $page->{$prop} = ${$prop};

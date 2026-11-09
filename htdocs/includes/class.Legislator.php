@@ -242,4 +242,142 @@ class Legislator
 
         return $legislator;
     } // end method "info"
+
+    /**
+     * How long to cache a legislator's statistics, in seconds. A current legislator's change as
+     * bills are introduced, tagged, and copatroned. A former legislator's hardly ever do.
+     */
+    public const STATISTICS_CACHE_CURRENT = 60 * 60;
+    public const STATISTICS_CACHE_FORMER = 60 * 60 * 24 * 7;
+
+    /**
+     * Retrieve the statistics shown on a legislator's page, with caching support: how many of
+     * their bills passed, the parties of the legislators they copatron bills with, and the
+     * topics of their bills.
+     *
+     * @param int  $id           The legislator's people.id.
+     * @param int  $batting_year The year for which to count how many bills passed.
+     * @param bool $current      Whether they're serving now, which determines how long to cache.
+     *
+     * @return array{batting: array{passed: int, total: int}, copatroned: array<string, int>,
+     *     copatrons: array<string, int>, pool: array<string, int>, tags: array<string, int>}
+     *     The copatron counts are keyed by party. "copatroned" is the parties of the patrons of
+     *     the bills they copatroned, "copatrons" the parties of the copatrons of their bills, and
+     *     "pool" the parties of everybody who copatroned the bills they copatroned. Tags are
+     *     keyed by tag, with the number of their bills with that tag, most first.
+     */
+    public static function statistics(int $id, int $batting_year, bool $current): array
+    {
+        $key = 'legislator-statistics-' . $id . '-' . $batting_year;
+
+        if (MEMCACHED_SERVER != '') {
+            $mc = new Memcached();
+            $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+
+            $statistics = $mc->get($key);
+            if ($mc->getResultCode() == Memcached::RES_SUCCESS && is_array($statistics)) {
+                return $statistics;
+            }
+        }
+
+        $database = new Database();
+        $database->connect_mysqli();
+
+        $statistics = [];
+
+        # How many of their bills (not resolutions) passed.
+        $sql = 'SELECT
+                    COUNT(*) AS passed,
+                    (
+                        SELECT COUNT(*)
+                        FROM bills
+                        LEFT JOIN sessions
+                            ON bills.session_id = sessions.id
+                        WHERE sessions.year = ' . $batting_year . '
+                        AND chief_patron_id = ' . $id . '
+                        AND (bills.number LIKE "hb%" OR bills.number LIKE "sb%")
+                    ) AS total
+                FROM bills
+                LEFT JOIN representatives
+                    ON bills.chief_patron_id = representatives.id
+                LEFT JOIN sessions
+                    ON bills.session_id = sessions.id
+                WHERE sessions.year = ' . $batting_year . '
+                AND chief_patron_id = ' . $id . '
+                AND (bills.outcome = "passed")
+                AND (bills.number LIKE "hb%" OR bills.number LIKE "sb%")';
+        $batting = mysqli_fetch_assoc(mysqli_query($GLOBALS['db'], $sql));
+        $statistics['batting'] = [
+            'passed' => (int) ($batting['passed'] ?? 0),
+            'total' => (int) ($batting['total'] ?? 0),
+        ];
+
+        # The parties of the patrons of the bills that they copatroned.
+        $statistics['copatroned'] = self::party_counts('SELECT representatives.party, COUNT(*) AS number
+                FROM bills_copatrons
+                LEFT JOIN bills
+                    ON bills_copatrons.bill_id = bills.id
+                LEFT JOIN representatives
+                    ON bills.chief_patron_id = representatives.id
+                WHERE bills_copatrons.legislator_id = ' . $id . '
+                GROUP BY representatives.party');
+
+        # The parties of the copatrons of their bills.
+        $statistics['copatrons'] = self::party_counts('SELECT representatives.party, COUNT(*) AS number
+                FROM bills_copatrons
+                LEFT JOIN representatives
+                    ON bills_copatrons.legislator_id = representatives.id
+                WHERE bills_copatrons.bill_id IN
+                    (SELECT id FROM bills WHERE chief_patron_id = ' . $id . ')
+                GROUP BY representatives.party');
+
+        # The parties of everybody who copatroned the bills that they copatroned.
+        $statistics['pool'] = self::party_counts('SELECT representatives.party, COUNT(*) AS number
+                FROM bills_copatrons
+                LEFT JOIN representatives
+                    ON bills_copatrons.legislator_id = representatives.id
+                WHERE bills_copatrons.bill_id IN
+                    (SELECT bill_id FROM bills_copatrons WHERE legislator_id = ' . $id . ')
+                GROUP BY representatives.party');
+
+        # The topics of their bills.
+        $sql = 'SELECT COUNT(*) AS count, tags.tag
+                FROM tags
+                LEFT JOIN bills
+                    ON tags.bill_id = bills.id
+                LEFT JOIN representatives
+                    ON bills.chief_patron_id = representatives.id
+                WHERE representatives.id = ' . $id . '
+                GROUP BY tags.tag
+                ORDER BY count DESC';
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        $statistics['tags'] = [];
+        while ($tag = mysqli_fetch_assoc($result)) {
+            $statistics['tags'][stripslashes((string) $tag['tag'])] = (int) $tag['count'];
+        }
+
+        if (isset($mc)) {
+            $mc->set($key, $statistics, $current ? self::STATISTICS_CACHE_CURRENT : self::STATISTICS_CACHE_FORMER);
+        }
+
+        return $statistics;
+    } // end method "statistics"
+
+    /**
+     * Run a query that counts something by party.
+     *
+     * @param string $sql A query returning the columns "party" and "number."
+     *
+     * @return array<string, int> The counts, keyed by party.
+     */
+    private static function party_counts(string $sql): array
+    {
+        $counts = [];
+        $result = mysqli_query($GLOBALS['db'], $sql);
+        while ($row = mysqli_fetch_assoc($result)) {
+            $counts[(string) $row['party']] = (int) $row['number'];
+        }
+
+        return $counts;
+    }
 }

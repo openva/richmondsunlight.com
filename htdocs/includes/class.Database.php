@@ -42,27 +42,18 @@ class Database
             PDO::ATTR_EMULATE_PREPARES => false,
             PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci"
         ];
-        $this->db = new PDO(PDO_DSN, PDO_USERNAME, PDO_PASSWORD, $options);
+        try {
+            $this->db = new PDO(PDO_DSN, PDO_USERNAME, PDO_PASSWORD, $options);
+        } catch (PDOException $e) {
+            $this->db = false;
+        }
 
         if ($this->db !== false) {
             $GLOBALS['db_pdo'] = $this->db;
             return $this->db;
         }
 
-        /*
-         * If this is isn't a request to the API, send the browser to an error page.
-         */
-        if (mb_stristr($_GET['REQUEST_URI'], 'api.richmondsunlight.com') === false) {
-            header('Location: ' . SITE_BASE_URL . '/site-down/');
-            exit;
-        }
-
-        /*
-         * If this is a request to the API, just return false.
-         */
-        else {
-            return false;
-        }
+        return self::connection_failed();
     }
 
     /**
@@ -99,21 +90,37 @@ class Database
             return $this->db;
         }
 
-        /*
-         * If this is isn't a request to the API, send the browser to an error page.
-         */
-        if (mb_stristr($_GET['REQUEST_URI'], 'api.richmondsunlight.com') === false) {
-            http_response_code(503);
-            header('Location: ' . SITE_BASE_URL . '/site-down/');
-            exit;
-        }
-
-        /*
-         * If this is a request to the API, just return false.
-         */
-        else {
-            return false;
-        }
+        return self::connection_failed();
     }
 
+    /**
+     * Handle a failure to connect. The site sends the browser to an error page, but the API (whose
+     * clients want JSON, not a page) and command-line scripts are left to handle it themselves.
+     *
+     * @return false For the API or the command line. Otherwise, it doesn't return.
+     */
+    private static function connection_failed()
+    {
+        if (PHP_SAPI === 'cli' || self::is_api_request()) {
+            return false;
+        }
+
+        header('Location: ' . SITE_BASE_URL . '/site-down/', true, 302);
+        exit;
+    }
+
+    /**
+     * Whether this is a request to the API, judging by the host it was made to.
+     */
+    private static function is_api_request(): bool
+    {
+        $host = mb_strtolower(preg_replace('/:\d+$/', '', $_SERVER['HTTP_HOST'] ?? ''));
+        if ($host === '') {
+            return false;
+        }
+
+        $api_host = defined('API_URL') ? mb_strtolower((string) parse_url((string) API_URL, PHP_URL_HOST)) : '';
+
+        return $host === 'api.richmondsunlight.com' || ($api_host !== '' && $host === $api_host);
+    }
 }

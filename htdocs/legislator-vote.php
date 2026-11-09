@@ -52,6 +52,7 @@ if ($leg_id === false) {
 }
 # Return the legislator's data as an array.
 $legislator = $leg->info($leg_id);
+$session_year = $year ?? null;
 
 # Establish a more descriptive page title.
 $page_title = $legislator['prefix'] . ' ' . $legislator['name'] . '’s ' . $year . ' Voting Record';
@@ -143,6 +144,7 @@ foreach ([
     'browser_title',
     'html_head',
     'body_tag',
+    'session_year',
 ] as $prop) {
     if (isset(${$prop})) {
         $page->{$prop} = ${$prop};

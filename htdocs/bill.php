@@ -76,6 +76,7 @@ if ($json === null || $bill == false || isset($bill->error)) {
 // Cast this bill as an array, rather than an object, in which the array is wrapped as a result of
 // being stored in JSON.
 $bill = (array) $bill;
+$session_year = $bill['year'];
 
 // There's a bit of Unicode (a non-breaking space) included in summaries. Realistically, those
 // all need to be stripped out at the time of import, and retroactively, and summary hashes need
@@ -1498,6 +1499,7 @@ foreach ([
     'browser_title',
     'html_head',
     'body_tag',
+    'session_year',
 ] as $prop) {
     if (isset(${$prop})) {
         $page->{$prop} = ${$prop};

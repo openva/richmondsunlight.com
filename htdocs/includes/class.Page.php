@@ -14,6 +14,10 @@ class Page
     public $site_section;
     public $body_tag;
 
+    # The year of the session the page is about, if it's about only one, for which the page is
+    # complete and found. A page about a session that's long over may be cached for much longer.
+    public $session_year;
+
     protected $output;
 
     /**
@@ -181,6 +185,10 @@ class Page
         # Cloudflare may keep for 10 minutes, while browsers check back for a new one each time.
         if (session_status() === PHP_SESSION_ACTIVE) {
             header('Cache-Control: private, no-store');
+        } elseif ($this->is_archival()) {
+            # A page about a session that's long over doesn't change, so Cloudflare may keep it
+            # for a week. That keeps crawlers working through old bills off of the server.
+            header('Cache-Control: public, max-age=0, s-maxage=604800, stale-while-revalidate=604800');
         } else {
             # Cloudflare may also serve a page for a while after those 10 minutes, while it fetches a
             # new copy, so long as the legislature isn't in session and bills aren't changing daily.
@@ -195,5 +203,21 @@ class Page
         echo $this->output;
 
         return true;
+    }
+
+    /**
+     * Whether the page is about a session that's long over. Last year's sessions don't count,
+     * since a special session may still be under way, and continued bills, video, and the
+     * governor's actions can still arrive for them.
+     *
+     * @return bool True if the page's session ended before last year.
+     */
+    public function is_archival()
+    {
+        if (empty($this->session_year) || !is_numeric($this->session_year)) {
+            return false;
+        }
+
+        return (int) $this->session_year < (SESSION_YEAR - 1);
     }
 }

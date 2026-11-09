@@ -307,7 +307,9 @@ if (!empty($legislator['rss_url']) && empty($legislator['date_ended'])) {
 $page_body = '<div class="tabs">
     <ul class="tabs">
 	<li><a href="#bio">Bio</a></li>';
-$page_body .= '<li><a href="#media">Media</a></li>';
+if (empty($legislator['date_ended'])) {
+    $page_body .= '<li><a href="#media">Media</a></li>';
+}
 if (count($website_posts) > 0) {
     $page_body .= '<li><a href="#news">News</a></li>';
 }
@@ -358,37 +360,9 @@ if (IN_SESSION == true) {
 } else {
     $batting_year = SESSION_YEAR;
 }
-$sql = 'SELECT
-            COUNT(*) AS passed,
-		(
-			SELECT
-                COUNT(*)
-			FROM bills
-                LEFT JOIN sessions
-                    ON bills.session_id = sessions.id
-			WHERE sessions.year = ' . $batting_year . '
-            AND chief_patron_id = ' . $legislator['id'] . '
-            AND
-                (bills.number LIKE "hb%"
-                OR
-                bills.number LIKE "sb%")
-		) AS total
-		FROM bills
-            LEFT JOIN representatives
-                ON bills.chief_patron_id = representatives.id
-            LEFT JOIN sessions
-                ON bills.session_id = sessions.id
-		WHERE sessions.year = ' . $batting_year . '
-        AND chief_patron_id = ' . $legislator['id'] . '
-        AND (bills.outcome = "passed")
-        AND
-            (bills.number LIKE "hb%"
-            OR
-            bills.number LIKE "sb%")';
-$result = mysqli_query($GLOBALS['db'], $sql);
-$legislator['batting'] = mysqli_fetch_array($result);
-if ($legislator['batting']['total'] == 0) {
-    unset($legislator['batting']);
+$statistics = Legislator::statistics((int) $legislator['id'], $batting_year, empty($legislator['date_ended']));
+if ($statistics['batting']['total'] > 0) {
+    $legislator['batting'] = $statistics['batting'];
 }
 
 if (!empty($legislator['date_started'])) {
@@ -504,22 +478,7 @@ if (!empty($legislator['activity']) && IN_SESSION == true) {
 // COPATRONING STATS
 // Calculate the percentage of the bills copatroned by this legislator that were introduced by
 // each party.
-$sql = 'SELECT
-            representatives.party,
-            COUNT(*) AS number
-		FROM bills_copatrons
-		LEFT JOIN bills
-			ON bills_copatrons.bill_id=bills.id
-		LEFT JOIN representatives
-			ON bills.chief_patron_id=representatives.id
-		WHERE bills_copatrons.legislator_id=' . $legislator['id'] . '
-		GROUP BY representatives.party';
-
-$result = mysqli_query($GLOBALS['db'], $sql);
-$tmp = array();
-while ($copatron = mysqli_fetch_array($result)) {
-    $tmp[$copatron['party']] = $copatron['number'];
-}
+$tmp = $statistics['copatroned'];
 $total = array_sum($tmp);
 if ($total > 0) {
     arsort($tmp);
@@ -543,23 +502,7 @@ if ($total > 0) {
 
 // Calculate the percentages of the legislators' party memberships who have cosponsored any bill
 // introduced by this legislator.
-$sql = 'SELECT
-            representatives.party,
-            COUNT(*) AS number
-		FROM bills_copatrons
-		LEFT JOIN representatives
-			ON bills_copatrons.legislator_id = representatives.id
-		WHERE bills_copatrons.bill_id
-		IN
-			(SELECT id
-			FROM bills
-			WHERE chief_patron_id = ' . $legislator['id'] . ')
-		GROUP BY representatives.party';
-$result = mysqli_query($GLOBALS['db'], $sql);
-$tmp = array();
-while ($copatron = mysqli_fetch_array($result)) {
-    $tmp[$copatron['party']] = $copatron['number'];
-}
+$tmp = $statistics['copatrons'];
 $total = array_sum($tmp);
 if ($total > 0) {
     arsort($tmp);
@@ -585,23 +528,7 @@ if ($total > 0) {
 // of bills copatroned by this legislator. Meaning, look at every bill that this legislator has
 // copatroned, and look at every other copatron of those bills, and calculate the percentage of
 // those copatrons that are Democrats, Republicans, and independents.
-$sql = 'SELECT
-            representatives.party,
-            COUNT(*) AS number
-		FROM bills_copatrons
-			LEFT JOIN representatives
-				ON bills_copatrons.legislator_id=representatives.id
-		WHERE
-			bills_copatrons.bill_id IN
-				(SELECT bill_id
-				FROM bills_copatrons
-				WHERE legislator_id=' . $legislator['id'] . ')
-		GROUP BY representatives.party';
-$result = mysqli_query($GLOBALS['db'], $sql);
-$tmp = array();
-while ($copatron = mysqli_fetch_array($result)) {
-    $tmp[$copatron['party']] = $copatron['number'];
-}
+$tmp = $statistics['pool'];
 $total = array_sum($tmp);
 if ($total > 0) {
     arsort($tmp);
@@ -656,28 +583,13 @@ if (isset($partisanship)) {
 }
 
 // Tag Cloud
-$sql = 'SELECT COUNT(*) AS count, tags.tag
-		FROM tags
-		LEFT JOIN bills
-			ON tags.bill_id = bills.id
-		LEFT JOIN representatives
-			ON bills.chief_patron_id = representatives.id
-		WHERE representatives.id = ' . $legislator['id'] . '
-		GROUP BY tags.tag
-		ORDER BY count DESC';
-$result = mysqli_query($GLOBALS['db'], $sql);
-$tag_count = mysqli_num_rows($result);
+$tags = $statistics['tags'];
+$tag_count = count($tags);
 if ($tag_count > 0) {
     $page_body .= '<div class="pair">
 		<div class="label">Bill Topics <a href="/help/tag-clouds/" class="help-icon-link" data-help-url="/help/tag-clouds/" title="Help"><img src="/images/help-f4eee5.gif" class="help-icon" alt="?" /></a></div>
 		<div class="content">
 			<div class="tags">';
-    // Build up an array of tags, with the key being the tag and the value being the count.
-    while ($tag = mysqli_fetch_array($result)) {
-        $tag = array_map('stripslashes_nullsafe', $tag);
-        $tags[$tag['tag']] = $tag['count'];
-    }
-
     // Sort the tags in reverse order by key (their count), shave off the top 30, and then
     // resort alphabetically.
     arsort($tags);
@@ -723,73 +635,78 @@ $page_body .= '</div>
 	</div>';
 
 
-// Start a new DIV for news mentions.
-$page_body .= '<div id="media">
-	<table style="width: 100%">
-	<caption>Recent Mentions in the Media</caption>
-	<tbody>';
+// Recent news coverage, which we look up only for current legislators. (Each lookup is a
+// request to Google News, which crawlers going through former legislators' pages would make by
+// the hundreds.)
+if (empty($legislator['date_ended'])) {
+    // Start a new DIV for news mentions.
+    $page_body .= '<div id="media">
+    	<table style="width: 100%">
+    	<caption>Recent Mentions in the Media</caption>
+    	<tbody>';
 
-// Assemble the Google News URL.
-$google_rss = 'https://news.google.com/news/rss/search/section/q/%22+' .
-    urlencode($legislator['name']) . '%22+' . (($legislator['chamber'] == 'house') ? 'del+OR+delegate' : 'sen+OR+senator');
-$google_link = 'https://news.google.com/news/search/section/q/%22' . urlencode($legislator['name']) .
-    '%22+' . (($legislator['chamber'] == 'house') ? 'del+OR+delegate' : 'sen+OR+senator');
+    // Assemble the Google News URL.
+    $google_rss = 'https://news.google.com/news/rss/search/section/q/%22+' .
+        urlencode($legislator['name']) . '%22+' . (($legislator['chamber'] == 'house') ? 'del+OR+delegate' : 'sen+OR+senator');
+    $google_link = 'https://news.google.com/news/search/section/q/%22' . urlencode($legislator['name']) .
+        '%22+' . (($legislator['chamber'] == 'house') ? 'del+OR+delegate' : 'sen+OR+senator');
 
-/*
- * Instantiate SimplePie
- */
-$newsfeed = new SimplePie();
-$newsfeed->set_feed_url($google_rss);
-$newsfeed->init();
-$newsfeed->handle_content_type();
+    /*
+     * Instantiate SimplePie
+     */
+    $newsfeed = new SimplePie();
+    $newsfeed->set_feed_url($google_rss);
+    $newsfeed->init();
+    $newsfeed->handle_content_type();
 
-/*
- * Iterate through the returned feed, limited to 5 items.
- */
-$rss_count = 0;
-foreach ($newsfeed->get_items() as $item) {
-    $tmp = explode(' - ', $item->get_title());
-    $title = '';
-    for ($i = 0; $i < count($tmp); $i++) {
-        if ($i < (count($tmp) - 1)) {
-            $title .= $tmp[$i];
-        } else {
-            $source = $tmp[$i];
+    /*
+     * Iterate through the returned feed, limited to 5 items.
+     */
+    $rss_count = 0;
+    foreach ($newsfeed->get_items() as $item) {
+        $tmp = explode(' - ', $item->get_title());
+        $title = '';
+        for ($i = 0; $i < count($tmp); $i++) {
+            if ($i < (count($tmp) - 1)) {
+                $title .= $tmp[$i];
+            } else {
+                $source = $tmp[$i];
+            }
+        }
+
+        /*
+         * Clean up the description into a decent summary.
+         */
+        $summary = strip_tags($item->get_description());
+        $summary = str_replace($tmp, '', $summary);
+        // Don't trail off if we already have a period at the end.
+        $summary = str_replace('. ...', '.', $summary);
+        // Hack off the dateline.
+        $summary = preg_replace('/([a-z]{3}) ([0-9]+), 20([0-9]{2})/Di', '', $summary);
+        // Remove the indication of how many hours ago this news item was written.
+        $summary = preg_replace('/([0-9]*) hour(s*) ago/Di', '', $summary);
+        // Hack off the state that often leads off the article.
+        $summary = preg_replace('/,&nbsp;([A-Z]{2})&nbsp;- /D', '', $summary);
+
+        $page_body .= '<tr><td>
+            <h3>' . $source . ': <a href="' . $item->get_permalink() . '">' . $title . '</a></h3>' .
+            '<p>' . $item->get_date('F j, Y | g:i a') . '<br />' . $summary . '</p>
+            </td></tr>';
+
+        $rss_count++;
+        if ($rss_count == 5) {
+            break;
         }
     }
 
-    /*
-     * Clean up the description into a decent summary.
-     */
-    $summary = strip_tags($item->get_description());
-    $summary = str_replace($tmp, '', $summary);
-    // Don't trail off if we already have a period at the end.
-    $summary = str_replace('. ...', '.', $summary);
-    // Hack off the dateline.
-    $summary = preg_replace('/([a-z]{3}) ([0-9]+), 20([0-9]{2})/Di', '', $summary);
-    // Remove the indication of how many hours ago this news item was written.
-    $summary = preg_replace('/([0-9]*) hour(s*) ago/Di', '', $summary);
-    // Hack off the state that often leads off the article.
-    $summary = preg_replace('/,&nbsp;([A-Z]{2})&nbsp;- /D', '', $summary);
+    // Provide a link to read more.
+    $page_body .= '<tr><td><div style="float: right;">
+            <a href="' . $google_link . '">More Media Mentions &gt;&gt;</a>
+        </div></td></tr>';
 
-    $page_body .= '<tr><td>
-        <h3>' . $source . ': <a href="' . $item->get_permalink() . '">' . $title . '</a></h3>' .
-        '<p>' . $item->get_date('F j, Y | g:i a') . '<br />' . $summary . '</p>
-        </td></tr>';
-
-    $rss_count++;
-    if ($rss_count == 5) {
-        break;
-    }
+    // End the DIV for news mentions.
+    $page_body .= '</tbody></table></div>';
 }
-
-// Provide a link to read more.
-$page_body .= '<tr><td><div style="float: right;">
-        <a href="' . $google_link . '">More Media Mentions &gt;&gt;</a>
-    </div></td></tr>';
-
-// End the DIV for news mentions.
-$page_body .= '</tbody></table></div>';
 
 // News from the legislator's website.
 if (count($website_posts) > 0) {

@@ -75,6 +75,7 @@ if (mysqli_num_rows($result) == 0) {
     $page_body = '<p>No minutes are yet available for ' . $year . ', but you may select minutes
 		from past years using the menu at right.</p>';
 } elseif (mysqli_num_rows($result) > 0) {
+    $session_year = $year;
     # PAGE CONTENT
 
     # Iterate through the query results.
@@ -121,6 +122,7 @@ foreach ([
     'browser_title',
     'html_head',
     'body_tag',
+    'session_year',
 ] as $prop) {
     if (isset(${$prop})) {
         $page->{$prop} = ${$prop};
