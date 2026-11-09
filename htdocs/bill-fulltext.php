@@ -204,6 +204,7 @@ if (count($versions) === 0) {
     include '404.php';
     exit();
 }
+$session_year = $bill['year'];
 
 # PAGE METADATA
 $page_title = mb_strtoupper($bill['number']) . ': ' . $bill['catch_line'];
@@ -279,6 +280,7 @@ foreach ([
     'browser_title',
     'html_head',
     'body_tag',
+    'session_year',
 ] as $prop) {
     if (isset(${$prop})) {
         $page->{$prop} = ${$prop};

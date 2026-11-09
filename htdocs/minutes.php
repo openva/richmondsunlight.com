@@ -51,6 +51,7 @@ if (mysqli_num_rows($result) == 0) {
     // This doesn't catch every bill number. Lists are often presented as "HRs 1 and 2," for
     // instance, and this can't pick those up.
     $year = (int) $_REQUEST['year'];
+    $session_year = $year;
     $minutes = preg_replace_callback(
         '/(HR|HB|SJR|SB|HJ|HJR) ([0-9]+)/',
         fn($m) => '<a href="/bill/' . $year . '/' . mb_strtolower($m[1] . $m[2]) . '/">' . $m[0] . '</a>',
@@ -334,6 +335,7 @@ foreach ([
     'browser_title',
     'html_head',
     'body_tag',
+    'session_year',
 ] as $prop) {
     if (isset(${$prop})) {
         $page->{$prop} = ${$prop};

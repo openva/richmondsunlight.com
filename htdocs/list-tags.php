@@ -53,6 +53,9 @@ $sql = 'SELECT COUNT(*) AS count, tags.tag
 $result = mysqli_query($GLOBALS['db'], $sql);
 $tag_count = mysqli_num_rows($result);
 if ($tag_count > 0) {
+    $session_year = $year;
+}
+if ($tag_count > 0) {
     $page_body .= '
 	<div class="tags">';
     # Build up an array of tags, with the key being the tag and the value being the count.
@@ -101,6 +104,7 @@ foreach ([
     'browser_title',
     'html_head',
     'body_tag',
+    'session_year',
 ] as $prop) {
     if (isset(${$prop})) {
         $page->{$prop} = ${$prop};
