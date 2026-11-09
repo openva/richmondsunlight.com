@@ -3,10 +3,8 @@
 // Load Composer autoloader (also loads functions.inc.php via the "files" autoload entry)
 require_once __DIR__ . '/../htdocs/includes/vendor/autoload.php';
 
-// The Database class checks $_GET['REQUEST_URI'] on connection failure and calls exit() if it
-// doesn't look like an API request. Setting a fake API URL here causes it to return false
-// instead, letting test classes handle missing DB gracefully via markTestSkipped().
-$_GET['REQUEST_URI'] = 'api.richmondsunlight.com/test';
+// On the command line, the Database class returns false when it can't connect (rather than
+// redirecting to /site-down/), letting test classes handle a missing DB via markTestSkipped().
 
 // Register an autoloader for project classes (class.ClassName.php convention)
 spl_autoload_register(function (string $class): void {
