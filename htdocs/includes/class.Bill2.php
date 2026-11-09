@@ -104,12 +104,14 @@ class Bill2
         $number = mb_strtolower($number);
 
         /*
-         * If this bill is from the present year, try to retrieve the bill ID from Memcached.
+         * If this bill is from the present year, try to retrieve the bill ID from Memcached. The
+         * key includes the year, because bill numbers repeat every session. (rs-machine's
+         * cron/cache.php stores these too.)
          */
         if ($year == SESSION_YEAR) {
             $cache = $this->getCache();
             if ($cache !== null) {
-                $result = $cache->get('bill-' . $number);
+                $result = $cache->get('bill-' . $year . '-' . $number);
                 if ($cache->getResultCode() == Memcached::RES_SUCCESS) {
                     return $result;
                 }
@@ -510,9 +512,9 @@ class Bill2
         // Cache this bill for one week
         $cache->set('bill-' . $id, serialize($bill), (60 * 60 * 24 * 7));
 
-        // Cache the bill's number indefinitely if from this year
+        // Cache the bill's ID by its year and number indefinitely, if it's from this year
         if ($bill['year'] == SESSION_YEAR) {
-            $cache->set('bill-' . $bill['number'], $bill['id']);
+            $cache->set('bill-' . $bill['year'] . '-' . $bill['number'], $bill['id']);
         }
     }
 
