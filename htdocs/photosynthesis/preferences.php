@@ -102,9 +102,9 @@ if (isset($_POST['submit'])) {
             return mysqli_real_escape_string($GLOBALS['db'], $field);
         }, $_POST['form_data']);
 
-        # Create a password hash from the password and store that.
+        # Create a password hash from the password, exactly as typed, and store that.
         if (!empty($form_data['password'])) {
-            $form_data['password_hash'] = md5($form_data['password']);
+            $form_data['password_hash'] = Password::hash((string) $_POST['form_data']['password']);
         }
 
         # Conduct the actual query.

@@ -58,7 +58,7 @@ if (!empty($_POST['reset_password'])) {
         } elseif ($password !== $password_2) {
             $reset_error = 'Please enter the same password twice.';
         } else {
-            $password_hash = md5($password);
+            $password_hash = Password::hash($password);
             $chars = 'bcdfghjklmnpqrstvxyz0123456789';
             $new_hash = mb_substr(str_shuffle($chars), 0, 8);
             $sql = 'UPDATE users

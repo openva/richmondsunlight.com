@@ -74,26 +74,33 @@ if (isset($_POST['submit'])) {
 				</ul>
 			</div>';
     } else {
-        # Passwords have been hashed in three ways: as typed (resetting a password, and registering
-        # from now on); after being escaped for SQL (changing it in account settings or
-        # Photosynthesis, and logging in until now); and after being escaped and then URL-decoded
-        # (registering, until now). Accept any of them, so that nobody gets locked out.
+        # Look up the account by email address, then check the password. (Somebody who has only
+        # commented has no password, so isn't a match.)
         $password = $form_data['password'];
-        $escaped = mysqli_real_escape_string($GLOBALS['db'], $password);
-        $sql = 'SELECT id, name, cookie_hash
+        $sql = 'SELECT id, name, cookie_hash, password
 				FROM users
-				WHERE email = ? AND password IN (?, ?, ?)';
-        $result = mysqli_execute_query($GLOBALS['db'], $sql, [
-            $form_data['email'],
-            md5($password),
-            md5($escaped),
-            md5(urldecode($escaped)),
-        ]);
+				WHERE email = ? AND password IS NOT NULL';
+        $result = mysqli_execute_query($GLOBALS['db'], $sql, [$form_data['email']]);
+        $user = null;
+        while ($result !== false && ($row = mysqli_fetch_assoc($result))) {
+            if (Password::verify($password, $row['password'])) {
+                $user = $row;
+                break;
+            }
+        }
 
-        if (mysqli_num_rows($result) == 0) {
+        if ($user === null) {
             $page_body = '<div id="messages" class="errors">That email/password combination didn’t work.</div>';
         } else {
-            $user = mysqli_fetch_array($result);
+            # Replace an old MD5 hash (or one made with an outdated algorithm) with a new one.
+            if (Password::needs_upgrade($user['password'])) {
+                mysqli_execute_query(
+                    $GLOBALS['db'],
+                    'UPDATE users SET password = ? WHERE id = ?',
+                    [Password::hash($password), $user['id']]
+                );
+            }
+
             $_SESSION['id'] = $user['cookie_hash'];
 
             # We store the user's name in session data because it's a handy shortcut to refer

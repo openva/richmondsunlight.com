@@ -84,7 +84,8 @@ class ResetPasswordTest extends TestCase
 
         $result = mysqli_query($GLOBALS['db'], 'SELECT password FROM users WHERE id=' . self::USER_ID);
         $row = mysqli_fetch_assoc($result);
-        $this->assertSame(md5(self::NEW_PASSWORD), $row['password'], 'Password should be updated by reset flow');
+        $this->assertTrue(Password::verify(self::NEW_PASSWORD, $row['password']), 'Password should be updated by reset flow');
+        $this->assertFalse(Password::needs_upgrade($row['password']), 'The new password should get a salted hash');
     }
 
     public function testResetPasswordRotatesPrivateHash(): void

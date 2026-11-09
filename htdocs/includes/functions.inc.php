@@ -173,6 +173,16 @@ if (!function_exists('create_user')) {
             'latitude', 'longitude',
         ];
         $options = array_intersect_key($options, array_flip($allowed_keys));
+
+        # Store a hash of the password, never the password. (A blank one is no password at all.)
+        if (isset($options['password'])) {
+            if (trim($options['password']) === '') {
+                unset($options['password']);
+            } else {
+                $options['password'] = Password::hash($options['password']);
+            }
+        }
+
         $is_dashboard_user = (isset($options['dashboard']) && $options['dashboard'] == 'y');
         $sql_inserts = '';
         $users_inserts = '';
@@ -205,20 +215,7 @@ if (!function_exists('create_user')) {
                     } elseif ($key == 'dashboard') {
                         while (false);
                     } else {
-                        /*
-                         * Handle passwords differently, since they need to be hashed.
-                         */
-                        if ($key == 'password') {
-                            /*
-                             * Sometimes we're getting blank passwords. I'm not sure what that's
-                             * about. So make sure they're not empty.
-                             */
-                            if (trim($value) != '') {
-                                $users_inserts .= ', ' . $key . ' = MD5("' . $value . '")';
-                            }
-                        } else {
-                            $users_inserts .= ', ' . $key . ' = "' . $value . '"';
-                        }
+                        $users_inserts .= ', ' . $key . ' = "' . $value . '"';
                     }
                 }
             }
@@ -319,6 +316,15 @@ function update_user($options)
         'latitude', 'longitude', 'organization',
     ];
     $options = array_intersect_key($options, array_flip($allowed_keys));
+
+    # Store a hash of the password, never the password.
+    if (isset($options['password'])) {
+        if (trim($options['password']) === '') {
+            unset($options['password']);
+        } else {
+            $options['password'] = Password::hash($options['password']);
+        }
+    }
 
     if (count($options) < 1) {
         return false;

@@ -158,9 +158,9 @@ if (isset($_POST['submit'])) {
             $form_data['mailing_list'] = 'n';
         }
 
-        # MD5 the password.
+        # Hash the password, exactly as typed.
         if (!empty($form_data['password'])) {
-            $form_data['password'] = md5($form_data['password']);
+            $form_data['password'] = Password::hash((string) $_POST['form_data']['password']);
         }
 
         # Assembly the SQL string.

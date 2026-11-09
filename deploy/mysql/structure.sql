@@ -964,7 +964,7 @@ CREATE TABLE `users` (
   `id` int(5) unsigned NOT NULL AUTO_INCREMENT,
   `cookie_hash` char(32) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
   `name` varchar(60) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
-  `password` varchar(60) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
+  `password` varchar(255) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
   `email` varchar(60) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
   `url` varchar(60) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
   `zip` char(10) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
