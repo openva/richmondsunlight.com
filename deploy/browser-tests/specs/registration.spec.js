@@ -196,17 +196,42 @@ test.describe('Account Registration Form', () => {
     // The actual spam detection happens server-side and is difficult to test reliably
     // in an automated browser environment
 
-    const honeypotField = page.locator('input[name="age"]');
+    const honeypotField = page.locator('input[name="form_data[age]"]');
     await expect(honeypotField).toBeAttached();
 
     // Verify the honeypot is hidden (in a div with display: none)
     const isHidden = await page.evaluate(() => {
-      const field = document.querySelector('input[name="age"]');
+      const field = document.querySelector('input[name="form_data[age]"]');
       const parent = field.closest('div');
       const style = window.getComputedStyle(parent);
       return style.display === 'none';
     });
 
     expect(isHidden).toBe(true);
+  });
+
+  test('12. Filling in the honeypot field prevents registration', async ({ request }) => {
+    const email = `honeypot-${Date.now()}@example.com`;
+    const fields = {
+      'form_data[name]': 'Honey Pot',
+      'form_data[email]': email,
+      'form_data[password]': 'correct-horse-battery',
+      'form_data[password_2]': 'correct-horse-battery',
+      'form_data[zip]': '23219',
+      // Long enough ago to pass the check for forms filled out implausibly fast.
+      'form_data[time]': String(Math.floor(Date.now() / 1000) - 60),
+      submit: 'Create My Account',
+    };
+
+    const spam = await request.post('/account/register/', {
+      form: { ...fields, 'form_data[age]': '42' },
+    });
+    expect(await spam.text()).not.toContain('Thanks for Registering');
+
+    // The same registration, without the honeypot filled in, goes through.
+    const genuine = await request.post('/account/register/', {
+      form: { ...fields, 'form_data[email]': `not-${email}` },
+    });
+    expect(await genuine.text()).toContain('Thanks for Registering');
   });
 });

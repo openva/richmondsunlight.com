@@ -47,7 +47,14 @@ if (!isset($_POST['submit']) && empty($_GET['return_uri']) && !empty($_SERVER['H
 }
 
 if (isset($_POST['submit'])) {
-    $form_data = array_map('stripslashes_nullsafe', $_POST['form_data']);
+    $form_data = $_POST['form_data'] ?? [];
+    if (!is_array($form_data)) {
+        $form_data = [];
+    }
+    $form_data = array_map(fn ($field) => is_string($field) ? $field : '', $form_data);
+    $form_data += ['email' => '', 'password' => '', 'return_uri' => ''];
+    $form_data['email'] = trim($form_data['email']);
+
     if (empty($form_data['password'])) {
         $errors[] = 'your password';
     }
@@ -67,20 +74,33 @@ if (isset($_POST['submit'])) {
 				</ul>
 			</div>';
     } else {
-        $form_data = array_map(function ($field) {
-            return mysqli_real_escape_string($GLOBALS['db'], $field);
-        }, $_POST['form_data']);
-
-        $form_data['password_hash'] = md5($form_data['password']);
-        $sql = 'SELECT id, name, cookie_hash
+        # Look up the account by email address, then check the password. (Somebody who has only
+        # commented has no password, so isn't a match.)
+        $password = $form_data['password'];
+        $sql = 'SELECT id, name, cookie_hash, password
 				FROM users
-				WHERE email = "' . $form_data['email'] . '" AND password = "' . $form_data['password_hash'] . '"';
-        $result = mysqli_query($GLOBALS['db'], $sql);
+				WHERE email = ? AND password IS NOT NULL';
+        $result = mysqli_execute_query($GLOBALS['db'], $sql, [$form_data['email']]);
+        $user = null;
+        while ($result !== false && ($row = mysqli_fetch_assoc($result))) {
+            if (Password::verify($password, $row['password'])) {
+                $user = $row;
+                break;
+            }
+        }
 
-        if (mysqli_num_rows($result) == 0) {
+        if ($user === null) {
             $page_body = '<div id="messages" class="errors">That email/password combination didn’t work.</div>';
         } else {
-            $user = mysqli_fetch_array($result);
+            # Replace an old MD5 hash (or one made with an outdated algorithm) with a new one.
+            if (Password::needs_upgrade($user['password'])) {
+                mysqli_execute_query(
+                    $GLOBALS['db'],
+                    'UPDATE users SET password = ? WHERE id = ?',
+                    [Password::hash($password), $user['id']]
+                );
+            }
+
             $_SESSION['id'] = $user['cookie_hash'];
 
             # We store the user's name in session data because it's a handy shortcut to refer
@@ -111,11 +131,14 @@ if (isset($_POST['submit'])) {
 
             $log->put('User ' . $user['name'] . ' has logged in.', 2);
 
-            if (empty($form_data['return_uri'])) {
-                $form_data['return_uri'] = '/';
+            # Only send people back to a page on this site. (A path that doesn't start with a
+            # slash, like "@example.com", would make the browser go to another site.)
+            $return_uri = urldecode($form_data['return_uri']);
+            if (!str_starts_with($return_uri, '/')) {
+                $return_uri = '/';
             }
 
-            header('Location: ' . SITE_BASE_URL . urldecode($form_data['return_uri']));
+            header('Location: ' . SITE_BASE_URL . $return_uri);
             exit();
         }
     }

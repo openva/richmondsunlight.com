@@ -159,10 +159,9 @@ function seconds_to_time($seconds, $lpad = false)
 if (!function_exists('create_user')) {
     function create_user($options = '')
     {
-        # Turn the URL-style options into an array.
+        # Turn the URL-style options into an array. (parse_str() decodes the values. Decoding them
+        # again would turn, e.g., a "+" in a name or password into a space.)
         parse_str($options, $options);
-
-        $options = array_map('urldecode', $options);
 
         # Only allow known column names to prevent parameter injection attacks, where
         # an attacker injects extra keys into the query string (e.g., via an unencoded
@@ -174,6 +173,16 @@ if (!function_exists('create_user')) {
             'latitude', 'longitude',
         ];
         $options = array_intersect_key($options, array_flip($allowed_keys));
+
+        # Store a hash of the password, never the password. (A blank one is no password at all.)
+        if (isset($options['password'])) {
+            if (trim($options['password']) === '') {
+                unset($options['password']);
+            } else {
+                $options['password'] = Password::hash($options['password']);
+            }
+        }
+
         $is_dashboard_user = (isset($options['dashboard']) && $options['dashboard'] == 'y');
         $sql_inserts = '';
         $users_inserts = '';
@@ -206,20 +215,7 @@ if (!function_exists('create_user')) {
                     } elseif ($key == 'dashboard') {
                         while (false);
                     } else {
-                        /*
-                         * Handle passwords differently, since they need to be hashed.
-                         */
-                        if ($key == 'password') {
-                            /*
-                             * Sometimes we're getting blank passwords. I'm not sure what that's
-                             * about. So make sure they're not empty.
-                             */
-                            if (trim($value) != '') {
-                                $users_inserts .= ', ' . $key . ' = MD5("' . $value . '")';
-                            }
-                        } else {
-                            $users_inserts .= ', ' . $key . ' = "' . $value . '"';
-                        }
+                        $users_inserts .= ', ' . $key . ' = "' . $value . '"';
                     }
                 }
             }
@@ -320,6 +316,15 @@ function update_user($options)
         'latitude', 'longitude', 'organization',
     ];
     $options = array_intersect_key($options, array_flip($allowed_keys));
+
+    # Store a hash of the password, never the password.
+    if (isset($options['password'])) {
+        if (trim($options['password']) === '') {
+            unset($options['password']);
+        } else {
+            $options['password'] = Password::hash($options['password']);
+        }
+    }
 
     if (count($options) < 1) {
         return false;
@@ -938,10 +943,8 @@ function get_html_split_regex()
 
 function login_form()
 {
-    if (isset($_GET['return_uri'])) {
-        $return_uri = $_GET['return_uri'];
-    } elseif (isset($form_data) && isset($form_data['return_uri'])) {
-        $return_uri = $_GET['return_uri'];
+    if (isset($_GET['return_uri']) && is_string($_GET['return_uri'])) {
+        $return_uri = htmlspecialchars($_GET['return_uri'], ENT_QUOTES, 'UTF-8');
     }
     // If the port of the requested URL is anything other than 80 or 443, we need to include in
     // the form's post action value.

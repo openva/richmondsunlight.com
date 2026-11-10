@@ -35,6 +35,11 @@ $html_head = '<script src="/js/vendor/zxcvbn/dist/zxcvbn.js"></script>
 # CUSTOM FUNCTIONS
 function display_form($form_data)
 {
+    # Escape what people typed before putting it back into the form.
+    $value = function ($field) use ($form_data) {
+        return htmlspecialchars((string) ($form_data[$field] ?? ''), ENT_QUOTES, 'UTF-8');
+    };
+
     $returned_data = '
 		<form method="post" action="/account/register/" id="registration">
 			<fieldset>
@@ -43,21 +48,21 @@ function display_form($form_data)
 					<tr>
 						<th><label for="name">Name</label></th>
 						<td>
-							<input type="text" id="name" name="form_data[name]" size="30" maxlength="60" value="' . $form_data['name'] . '" required /><br />
+							<input type="text" id="name" name="form_data[name]" size="30" maxlength="60" value="' . $value('name') . '" required /><br />
 							<small>Only your first name and last initial will be shown publicly.</small>
 						</td>
 					</tr>
 					<tr>
 						<th><label for="organization">Organization/Company</label></th>
 						<td>
-							<input type="text" id="organization" name="form_data[organization]" size="30" maxlength="128" value="' . $form_data['organization'] . '" /><br />
+							<input type="text" id="organization" name="form_data[organization]" size="30" maxlength="128" value="' . $value('organization') . '" /><br />
 							<small>If you do this stuff professionally and want that known publicly.</small>
 						</td>
 					</tr>
 					<tr>
 						<th><label for="email">E-Mail</label></th>
 						<td>
-							<input type="email" id="email" name="form_data[email]" size="30" maxlength="60" value="' . $form_data['email'] . '" required /><br />
+							<input type="email" id="email" name="form_data[email]" size="30" maxlength="60" value="' . $value('email') . '" required /><br />
 							<small>It’s our secret. No spam, ever. We promise.</small>
 						</td>
 					</tr>
@@ -79,21 +84,21 @@ function display_form($form_data)
 					<tr>
 						<th><label for="url">Website Address</label></th>
 						<td>
-							<input type="url" id="url" name="form_data[url]" size="30" maxlength="60" value="' . $form_data['url'] . '" /><br />
+							<input type="url" id="url" name="form_data[url]" size="30" maxlength="60" value="' . $value('url') . '" /><br />
 							<small>Only, of course, if you have a website.</small>
 						</td>
 					</tr>
 					<tr>
 						<th><label for="zip">ZIP</label></th>
 						<td>
-							<input type="text" id="zip" name="form_data[zip]" size="30" maxlength="5" value="' . $form_data['zip'] . '" pattern="[0-9]{5}" /><br />
+							<input type="text" id="zip" name="form_data[zip]" size="30" maxlength="5" value="' . $value('zip') . '" pattern="[0-9]{5}" /><br />
 							<small>So we can ID your legislators, for site customization.</small>
 						</td>
 					</tr>
 					<tr>
 						<th><label for="mailing_list">Mailing List</label></th>
 						<td>
-							<input type="checkbox" id="mailing_list" name="form_data[mailing_list]" value="y" ' . (($form_data['mailing_list'] == 'y') ? 'checked="checked"' : '') . ' />
+							<input type="checkbox" id="mailing_list" name="form_data[mailing_list]" value="y" ' . ((($form_data['mailing_list'] ?? '') == 'y') ? 'checked="checked"' : '') . ' />
 							<small>May we e-mail you (very rarely)?</small>
 						</td>
 					</tr>
@@ -105,7 +110,7 @@ function display_form($form_data)
 			</fieldset>
 			<div style="display: none;">
 				<p>Please leave this blank.</p>
-				<input type="text" name="age" size="3" />
+				<input type="text" name="form_data[age]" size="3" tabindex="-1" autocomplete="off" />
 			</div>
 			<input type="hidden" name="form_data[time]" value="' . time() . '" />
 		</form>
@@ -117,8 +122,22 @@ function display_form($form_data)
 $page_body = '';
 
 if (isset($_POST['submit'])) {
-    $form_data = array_map('stripslashes_nullsafe', $_POST['form_data']);
-    $form_data = array_map('trim', $form_data);
+    $form_data = $_POST['form_data'] ?? [];
+    if (!is_array($form_data)) {
+        $form_data = [];
+    }
+    $form_data = array_map(fn ($field) => is_string($field) ? $field : '', $form_data);
+    $form_data += array_fill_keys(
+        ['name', 'organization', 'email', 'password', 'password_2', 'url', 'zip', 'mailing_list', 'time', 'age'],
+        ''
+    );
+
+    # Trim everything but the passwords, which are kept exactly as typed.
+    foreach ($form_data as $field => $content) {
+        if ($field !== 'password' && $field !== 'password_2') {
+            $form_data[$field] = trim($content);
+        }
+    }
 
     # If somebody filled out this form in an implausibly short time (five seconds), then it's a
     # spammer.
@@ -187,11 +206,11 @@ if (isset($_POST['submit'])) {
         $errors[] = 'a valid e-mail address';
     } else {
         # Make sure that this isn't a duplicate user account.
-        $sql = 'SELECT *
+        $sql = 'SELECT id
 				FROM users
-				WHERE email = "' . mysqli_real_escape_string($GLOBALS['db'], $form_data['email']) . '"
+				WHERE email = ?
 				AND password IS NOT NULL';
-        $result = mysqli_query($GLOBALS['db'], $sql);
+        $result = mysqli_execute_query($GLOBALS['db'], $sql, [$form_data['email']]);
         if (mysqli_num_rows($result) > 0) {
             $errors[] = 'an e-mail address that’s not already in use; better yet,
 				<a href="/account/reset-password/">reset your password</a> and use your existing
@@ -210,10 +229,8 @@ if (isset($_POST['submit'])) {
 			</div>';
 
         # Display the registration form again.
-        $page_body .= @display_form($form_data);
+        $page_body .= display_form($form_data);
     } else {
-        $form_data['password_hash'] = md5($form_data['password']);
-
         # Validate any provided URL, and silently drop it if it's invalid.
         if (!empty($form_data['url'])) {
             # If there's an at sign in this URL, then it's probably somebody entering an e-mail
@@ -235,10 +252,6 @@ if (isset($_POST['submit'])) {
                 }
             }
         }
-
-        $form_data = array_map(function ($field) {
-            return mysqli_real_escape_string($GLOBALS['db'], $field);
-        }, $_POST['form_data']);
 
         # Generate a random eight-digit hash in case this user has to recover his password.
         $chars = 'bcdfghjklmnpqrstvxyz0123456789';
@@ -318,7 +331,7 @@ if (isset($_POST['submit'])) {
 else {
     # Display the login form, checking off the "y" for the mailing list by default.
     $form_data['mailing_list'] = 'y';
-    $page_body .= @display_form($form_data);
+    $page_body .= display_form($form_data);
 }
 
 // OUTPUT THE PAGE
