@@ -87,10 +87,13 @@ class Password
     {
         $escaped = self::escape($password);
 
+        # MD5 is used here only to recognize the old hashes, so that they can be replaced with
+        # password_hash(). No new MD5 hash is ever stored. (Hence the NOSONARs for SonarCloud's
+        # "weak hash algorithm" rule.)
         return array_unique([
-            md5($password),
-            md5($escaped),
-            md5(urldecode($escaped)),
+            md5($password), // NOSONAR
+            md5($escaped), // NOSONAR
+            md5(urldecode($escaped)), // NOSONAR
         ]);
     }
 
