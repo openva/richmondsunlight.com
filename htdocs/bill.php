@@ -560,7 +560,7 @@ JS;
 if (isset($user) && ($user['trusted'] == 'y')) {
     $maxlength = '200';
 } else {
-    $maxlength = '40';
+    $maxlength = '30';
 }
 // Allow people to add tags.
 $html_head .= '
