@@ -309,13 +309,13 @@ foreach ($chambers as $chamber_key => $chamber_label) {
 
 <h2>{$chamber_label} Copatroning Network</h2>
 <p>Legislators who copatron bills together are linked below. Thicker lines mean
-more bills copatroned together. Drag to rearrange, scroll to zoom, hover for
-names, click to visit a legislator's page.</p>
+more bills copatroned together. Drag to rearrange, scroll or pinch to zoom, hover
+for full names, click to visit a legislator's page.</p>
 <div class="copatron-legend">
     <span style="background:#c0392b;"></span> Republican
     <span style="background:#2980b9; margin-left:8px;"></span> Democrat
     <span style="background:#7f8c8d; margin-left:8px;"></span> Independent
-    <em>Drag nodes &middot; Scroll to zoom</em>
+    <em>Drag nodes &middot; Scroll or pinch to zoom</em>
 </div>
 <div class="copatron-network" id="{$container_id}">
     <div class="copatron-tooltip" id="{$container_id}-tip"></div>
@@ -341,11 +341,17 @@ names, click to visit a legislator's page.</p>
 
     var g = svg.append('g');
 
-    // Zoom
+    // Zoom. On touch screens, only with two fingers (pinching), so that one finger can still
+    // scroll the page, which d3 would otherwise prevent anywhere on the chart.
     svg.call(d3.zoom()
         .scaleExtent([0.3, 5])
+        .filter(function(event) {
+            return (!event.ctrlKey || event.type === 'wheel') && !event.button
+                && (!event.touches || event.touches.length > 1);
+        })
         .on('zoom', function(event) { g.attr('transform', event.transform); })
     );
+    svg.style('touch-action', 'pan-x pan-y');
 
     // Weight scales for edge thickness and opacity
     var weights = links.map(function(l) { return l.weight; });
@@ -438,9 +444,17 @@ names, click to visit a legislator's page.</p>
         var xs = nodes.map(function(n) { return n.x; });
         var ys = nodes.map(function(n) { return n.y; });
         var pad = 30;
-        var minX = d3.min(xs) - pad, maxX = d3.max(xs) + pad;
+        var labelWidth = 60; // Room for the names, which are to the right of the nodes
+        var minX = d3.min(xs) - pad, maxX = d3.max(xs) + pad + labelWidth;
         var minY = d3.min(ys) - pad, maxY = d3.max(ys) + pad;
         svg.attr('viewBox', minX + ' ' + minY + ' ' + (maxX - minX) + ' ' + (maxY - minY));
+
+        // Shrink the chart's height to fit the network (on a phone, it's much narrower than it
+        // is tall), but never grow it.
+        var fitted = width * (maxY - minY) / (maxX - minX);
+        if (fitted < height) {
+            svg.attr('height', Math.round(fitted));
+        }
     });
 })();
 </script>

@@ -744,6 +744,15 @@ if (isset($bill['status_history'])) {
 
     $statuses = [];
 
+    // On phones, only the most recent actions are shown at first (see #status-history in
+    // page-elements.css), when there are enough earlier ones to be worth hiding.
+    $history_shown = 10;
+    $history_earlier = count($bill['status_history']) - $history_shown;
+    if ($history_earlier < 5) {
+        $history_earlier = 0;
+    }
+    $history_count = 0;
+
     foreach ($bill['status_history'] as $status) {
         // Cast this object as an array.
         $status = (array) $status;
@@ -761,7 +770,10 @@ if (isset($bill['status_history'])) {
                 . 'see vote tally</a>)';
             $status['status'] = $tmp;
         }
-        $bill['history'] = '<tr><td>' . $status['date'] . '</td><td>' . $status['status'] . '</td></tr>' . $bill['history'];
+        // (status_history is newest first, and the table oldest first.)
+        $history_count++;
+        $row_class = ($history_earlier && $history_count > $history_shown) ? ' class="earlier"' : '';
+        $bill['history'] = '<tr' . $row_class . '><td>' . $status['date'] . '</td><td>' . $status['status'] . '</td></tr>' . $bill['history'];
 
         // Build up an array of status translations to use to create our checkbox list.
         if (!empty($status['translation'])) {
@@ -780,6 +792,17 @@ if (isset($bill['status_history'])) {
                             <thead><th>Date</th><th>Action</th></thead>
                             <tbody>' . $bill['history'] . '</tbody>
                         </table>';
+
+    if ($history_earlier) {
+        $bill['history'] = '<button type="button" class="history-show-earlier">Show the '
+            . $history_earlier . ' earlier actions</button>' . $bill['history']
+            . '<script>
+                $(".history-show-earlier").on("click", function() {
+                    $("#status-history").addClass("show-earlier");
+                    $(this).remove();
+                });
+            </script>';
+    }
 
     $passed = '<div class="checkbox passed">✓</div>';
     $failed = '<div class="checkbox failed">✗</div>';
@@ -1379,9 +1402,9 @@ if (($bill['session_id'] == SESSION_ID)) {
     $page_body .= '
 	<h2>Post a Public Comment About this Bill</h2>
 	<form method="post" action="/process-comments.php" id="comment-form">
-		<input type="text" size="30" maxlength="50" name="comment[expiration_date]" id="expiration_date" value="' . (isset($user) ? $user['name'] : '') . '" required /> <label for="expiration_date"><strong>Name</strong> <small>required</small></label><br />
-		<input type="email" size="30" maxlength="50" name="comment[zip]" id="zip" value="' . (isset($user) ? $user['email'] : '') . '" required /> <label for="zip"><strong>Email</strong> <small>won’t be published, required</small></label><br />
-		<input type="url" size="30" maxlength="50" name="comment[age]" id="age" value="' . (isset($user) ? $user['url'] : '') . '" /> <label for="age"><strong>Website</strong></label> <small>if you have one</small><br />
+		<div class="comment-field"><input type="text" size="30" maxlength="50" name="comment[expiration_date]" id="expiration_date" value="' . (isset($user) ? $user['name'] : '') . '" required /> <label for="expiration_date"><strong>Name</strong> <small>required</small></label></div>
+		<div class="comment-field"><input type="email" size="30" maxlength="50" name="comment[zip]" id="zip" value="' . (isset($user) ? $user['email'] : '') . '" required /> <label for="zip"><strong>Email</strong> <small>won’t be published, required</small></label></div>
+		<div class="comment-field"><input type="url" size="30" maxlength="50" name="comment[age]" id="age" value="' . (isset($user) ? $user['url'] : '') . '" /> <label for="age"><strong>Website</strong> <small>if you have one</small></label></div>
 		<div style="display: none;"><input type="text" size="2" maxlength="2" name="comment[state]" id="state" /> <label for="state">Leave this field empty</label><br /></div>
 		<textarea rows="16" cols="60" name="comment[comment]" id="comment" required></textarea><br />
 		<small>(Limited HTML is OK: &lt;a&gt;, &lt;em&gt;, &lt;strong&gt;, &lt;s&gt)</small><br />';

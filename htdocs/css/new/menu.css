@@ -104,52 +104,178 @@ ul#nav > li > ul > li {
 	text-decoration: none;
 }
 
-#nav a:hover,                 /* top-level hovering properties */
-#nav li:hover {
-	display: block;
-	color: #999;
-	/* background-color: transparent !important; */
-}
+/* Submenus open on hover, or when something in them has keyboard focus (which is also how taps
+   open them on iPads). Only on wider screens: phones get the menu below. */
+@media screen and (min-width: 761px) {
+	#nav a:hover,
+	#nav li:hover {
+		color: #999;
+	}
 
-#nav ul li:hover,             /* higher level hovering properties */
-#nav ul li a:hover {
-	display: block;
-	width: 114px;               /* should be set to the same value as #nav ul li width */
-	color: #999;
-	/* background-color: transparent !important; */
+	#nav ul li:hover,
+	#nav ul li a:hover {
+		width: 114px;               /* should be set to the same value as #nav ul li width */
+		color: #999;
+	}
+
+	#nav li:hover > ul,
+	#nav li:focus-within > ul {
+		display: block;
+	}
+
+	#nav-toggle,
+	#nav .nav-section-link {
+		display: none;
+	}
 }
 
 #nav ul ul {                   /* higher-level list containers */
-	display: none;              /* don't display by default */
 	position: absolute;
 	margin-left: 114px;         /* this should be the width of #nav ul li */
-	/*width: 194px;*/
-	margin-top: -1.8em;           /* this will push the sub-menu up to the level of its parent */
+	margin-top: -1.8em;         /* this will push the sub-menu up to the level of its parent */
 }
 
-/* only non-MSIE browsers use this */
-#nav ul li>ul,
-#nav ul ul li>ul {
-	margin-top: -1.8em;           /* should be set to the same as #nav ul ul margin-top */
-}
-
-/* additional sub-menu levels in the next 2 blocks. (For up to 5 levels of drop menus) */
-#nav li:hover ul ul,
-#nav li:hover ul ul ul,
-#nav li:hover ul ul ul ul,
-#nav li:hover ul ul ul ul ul {
-	display:none;
-}
-
-#nav li:hover ul,
-#nav ul li:hover ul,
-#nav ul ul li:hover ul,
-#nav ul ul ul li:hover ul,
-#nav ul ul ul ul li:hover ul {
-	display:block;
+#nav .nav-label {
+	cursor: default;
 }
 
 li>ul {
 	top: auto;
 	left: auto;
+}
+
+/* Phones: a "Menu" button opens the menu as a full-width list, and tapping a section (Bills,
+   Legislators, ...) opens its submenu. Functions in new.inc.php do the opening. Third-level
+   submenus are left out, except for Bills' Past Years. */
+@media screen and (max-width: 760px) {
+	/* Tells the menu's JavaScript that the phone menu is showing. */
+	:root {
+		--nav-mode: phone;
+	}
+
+	/* (The button is hidden in the HTML, for browsers with an older menu.css; this shows it.) */
+	#nav-toggle {
+		display: block;
+		width: 100%;
+		min-height: 44px;
+		padding: 0 16px;
+		border: 0;
+		border-bottom: 1px solid #404040;
+		background: #234053 url('/images/templates/new/navbar-background.png') repeat-x;
+		background-size: auto 100%;
+		color: white;
+		font: bold 16px Verdana, Arial, sans-serif;
+		text-align: left;
+		cursor: pointer;
+	}
+		#nav-toggle::before {
+			content: "☰";
+			margin-right: .5em;
+		}
+		#nav-toggle[aria-expanded="true"]::before {
+			content: "✕";
+		}
+
+	ul#nav {
+		display: none;
+		height: auto;
+		overflow: visible;
+		line-height: 1.4;
+		padding: 0;
+		background: #234053;
+		font-size: 16px;
+	}
+		ul#nav.open {
+			display: block;
+		}
+
+	#nav li,
+	#nav ul li {
+		float: none;
+		width: auto;
+		padding: 0;
+		margin: 0;
+		font-size: 100%;
+		line-height: 1.4;
+		background: transparent;
+		border-top: 1px solid rgba(255, 255, 255, .12);
+	}
+
+	#nav a,
+	#nav ul a,
+	#nav .nav-label {
+		display: block;
+		width: auto;
+		padding: 11px 16px;
+		color: white;
+	}
+
+	/* The current section (overriding master.css's #body-bills #t-bills, etc.) */
+	#page #nav > li[id] {
+		margin-top: 0;
+		line-height: 1.4;
+	}
+
+	/* Sections with submenus get an arrow, which turns when they're open. */
+	#nav > li:has(> ul) > a::after,
+	#nav > li:has(> ul) > .nav-label::after {
+		content: "▸";
+		float: right;
+	}
+	#nav > li.open > a::after,
+	#nav > li.open > .nav-label::after {
+		content: "▾";
+	}
+	#nav > li > a,
+	#nav > li > .nav-label {
+		cursor: pointer;
+	}
+
+	#nav ul,
+	#nav ul ul,
+	#nav > li > ul {
+		display: none;
+		position: static;
+		width: auto;
+		margin: 0;
+		padding: 0;
+		border: 0;
+		background: #1b3242;
+	}
+		#nav li.open > ul {
+			display: block;
+		}
+		#nav ul a,
+		#nav ul .nav-label {
+			padding-left: 32px;
+		}
+		ul#nav > li > ul > li {
+			border-bottom: 0;
+			background: transparent;
+		}
+
+	/* Past Years: a grid of years. */
+	#nav li.past-years > ul {
+		display: none;
+	}
+		#nav li.past-years.open > ul {
+			display: flex;
+			flex-wrap: wrap;
+			padding: 4px 16px 8px 32px;
+		}
+		#nav li.past-years > ul > li {
+			flex: 0 0 25%;
+			border: 0;
+			background: transparent;
+		}
+		#nav li.past-years > ul > li > a {
+			padding: 10px 0;
+		}
+
+	/* Left out on phones: the legislators by chamber and letter (the "All Legislators" link
+	   replaces them), and About's House and Senate. */
+	#nav li.by-chamber,
+	#t-about ul ul {
+		display: none !important;
+	}
 }

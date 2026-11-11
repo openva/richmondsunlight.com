@@ -46,13 +46,23 @@ class Page
             $this->template = 'new';
         }
 
+        # The cache key includes when the template (and the legislators menu that it includes, which
+        # is regenerated on deploy) last changed, so that a deploy doesn't leave the old template
+        # cached, out of step with the new CSS.
+        $template_file = __DIR__ . '/templates/' . $this->template . '.inc.php';
+        $modified = filemtime($template_file);
+        if ($this->template == 'new') {
+            $modified = max($modified, filemtime(__DIR__ . '/templates/legislators.html'));
+        }
+        $cache_key = 'template-' . $this->template . '-' . (int) $modified;
+
         if (MEMCACHED_SERVER != '') {
             # Connect to Memcached.
             $mc = new Memcached();
             $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
 
             # Try to retrieve this template from Memcached.
-            $result = $mc->get('template-' . $this->template);
+            $result = $mc->get($cache_key);
             if ($mc->getResultCode() == Memcached::RES_SUCCESS) {
                 $page = unserialize($result);
             }
@@ -62,12 +72,12 @@ class Page
         if (!isset($page)) {
             # Get the contents of the template.
             ob_start();
-            include __DIR__ . '/templates/' . $this->template . '.inc.php';
+            include $template_file;
             $page = ob_get_contents();
 
             # Cache this template, with a 24-hour expiration date.
             if (MEMCACHED_SERVER != '') {
-                $mc->set('template-' . $this->template, serialize($page), (60 * 60 * 24));
+                $mc->set($cache_key, serialize($page), (60 * 60 * 24));
             }
         }
 
@@ -136,13 +146,14 @@ class Page
                 $this->html_head = '';
             }
             $this->html_head .= "\r\t" . '<style>' . "\r\t\t" . '#sidebar { display: none; }'
-                . "\r\t\t" . '#content { width: 62em; }'
+                . "\r\t\t" . '@media screen and (min-width: 761px) { #content { width: 62em; } }'
                 . "\r\t" . '</style>';
             $page = str_replace('%page_sidebar%', '', $page);
         } else {
             $page = str_replace('%page_sidebar%', $this->page_sidebar, $page);
         }
         $page = str_replace('%html_head%', (string) $this->html_head, $page);
+        $page = str_replace('%css_version%', (string) self::css_version(), $page);
         $page = str_replace('%account%', $account, $page);
         if (isset($this->body_tag)) {
             $page = str_replace('%body_tag%', $this->body_tag, $page);
@@ -219,5 +230,16 @@ class Page
         }
 
         return (int) $this->session_year < (SESSION_YEAR - 1);
+    }
+
+    /**
+     * When the site's stylesheets last changed, for their URLs. Browsers cache CSS for a month
+     * (see .htaccess), so this makes them fetch it again after a deploy changes it.
+     */
+    private static function css_version(): int
+    {
+        $css = dirname(__DIR__) . '/css';
+        $files = array_merge(glob($css . '/*.css') ?: [], glob($css . '/new/*.css') ?: []);
+        return $files ? max(array_map('filemtime', $files)) : 0;
     }
 }
