@@ -125,7 +125,8 @@ if (mysqli_num_rows($result) > 0) {
 						<td>' . $bill['status_translation'] . '</td>
 					</tr>';
     }
-    $page_body .= '</table></div>';
+    $page_body .= '</table></div>
+		<p class="updates-more"><a href="/bills/activity/">More bill activity »</a></p>';
 }
 
 # Legislative Map
