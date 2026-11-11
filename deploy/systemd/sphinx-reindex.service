@@ -1,0 +1,14 @@
+# Rebuilds the Sphinx search index. Run nightly by sphinx-reindex.timer, or by hand with
+# `sudo systemctl start sphinx-reindex`. It takes ~40 minutes. Installed by deploy/postdeploy.sh.
+
+[Unit]
+Description=Rebuild the Sphinx search index
+After=sphinxsearch.service
+
+[Service]
+Type=oneshot
+# Update the existing index in place (--rotate), or, on a new server, create it.
+ExecStart=/bin/bash -c 'if [ -f /var/lib/sphinxsearch/data/bills.sph ]; then exec indexer --all --rotate; else exec indexer --all; fi'
+# Give the web server priority over the indexer.
+Nice=10
+IOSchedulingClass=idle

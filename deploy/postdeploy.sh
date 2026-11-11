@@ -80,17 +80,21 @@ then
         sudo chown root:sphinxsearch /etc/sphinxsearch/sphinx.conf
         sudo chmod 640 /etc/sphinxsearch/sphinx.conf
     fi
-    sudo /etc/init.d/sphinxsearch restart
-    
-    # If we have an existing index, update it
-    if [[ -f /var/lib/sphinxsearch/data/bills.sph ]]; then
+    # Sphinx and the indexer are started through systemd, not directly from this script. Anything
+    # this script starts belongs to codedeploy-agent, as far as systemd is concerned, so when the
+    # OOM killer killed Sphinx or the indexer, systemd stopped codedeploy-agent too, and every
+    # deployment after that failed.
+    sudo systemctl restart sphinxsearch
 
-        # Reindex, continuing after logout, because it takes ~40 minutes to run
-        nohup sudo indexer --all --rotate > /dev/null 2>&1 &
+    # Reindex nightly, rather than on every deployment.
+    sudo cp "$SITE_PATH"/deploy/systemd/sphinx-reindex.service "$SITE_PATH"/deploy/systemd/sphinx-reindex.timer \
+        /etc/systemd/system/
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now sphinx-reindex.timer
 
-    # If there is no index, create a new one
-    else
-        nohup sudo indexer --all > /dev/null 2>&1 &
+    # But if there's no index at all (a new server), build one now, without waiting for it.
+    if [[ ! -f /var/lib/sphinxsearch/data/bills.sph ]]; then
+        sudo systemctl start --no-block sphinx-reindex.service
     fi
 
     if ! systemctl is-active --quiet memcached; then
