@@ -553,14 +553,66 @@ a.balloon div {
 	}
 }
 
-/* Responsive layout: phones */
-@media only screen and (max-device-width: 480px), only screen and (min-device-width: 640px) and (max-device-width: 1136px) and (-webkit-min-device-pixel-ratio: 2) {
+/* Responsive layout: phones. (Keep the 760px breakpoint in step with menu.css, and with the
+   no-sidebar width that class.Page.php sets.) */
+@media only screen and (max-width: 760px) {
+	/* iOS zooms in on any field with text under 16px. (!important, because some pages' fields are
+	   sized with more specific selectors.) */
+	input, select, textarea, button {
+		font-size: 16px !important;
+	}
 	body {
 		background-color: #243a51;
 		background-image: none;
 	}
 	#page-wrap {
-		width: 100%
+		width: 100%;
+		font-size: 88.9%; /* 16px, since body is "large" (18px) */
+	}
+
+	/* A shorter header: a smaller logo, with the search box on one row beneath it. */
+	#header #logo {
+		float: none;
+		padding-top: .5em;
+	}
+		#header #logo img {
+			width: 200px;
+			height: auto;
+		}
+	#header #from-and-search {
+		float: none;
+		margin: 0;
+		padding-bottom: .5em;
+	}
+		#header #search {
+			display: flex;
+			align-items: center;
+			gap: 6px;
+		}
+		/* The "Search:" image, hidden but left for screen readers. */
+		#header #search label {
+			position: absolute;
+			width: 1px;
+			height: 1px;
+			overflow: hidden;
+			clip: rect(0 0 0 0);
+		}
+		#header #search-box {
+			flex: 1;
+			min-width: 0;
+			height: 36px;
+			box-sizing: border-box;
+		}
+		#header #search input[type="image"] {
+			width: auto;
+			height: 30px;
+		}
+
+	/* Room to tap the links in lists. */
+	#content ul:not(.ui-tabs-nav) > li,
+	#content ol > li,
+	#sidebar ul > li {
+		padding: .3em 0;
 	}
 	#page {
 		width: 99%;
@@ -587,9 +639,23 @@ a.balloon div {
 		margin: 1em auto 0 auto;
 		width: 96%;
 		max-width: 34em;
-		padding: 1em;
+		padding: .5em 0;
 		box-sizing: border-box;
 	}
+
+	#footer {
+		padding: 1em;
+	}
+
+	/* The home page's bill updates: the first several, rather than a box that scrolls inside the
+	   page (the "More bill activity" link follows it). */
+	#body-home #updates {
+		height: auto;
+		overflow: visible;
+	}
+		#body-home #updates tr:nth-child(n+9) {
+			display: none;
+		}
 	#date, #status, p.quote, #bill-progress {
 		display: none;
 	}

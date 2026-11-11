@@ -83,7 +83,8 @@ function render_chamber_menu($title, array $categories, array $alphabet, array $
     }
 
     $segments = [];
-    $segments[] = '    <li>' . $title . '&nbsp;»';
+    // by-chamber: the phone menu hides these, and links to the full list of legislators instead.
+    $segments[] = '    <li class="by-chamber">' . $title . '&nbsp;»';
     $segments[] = '        <ul class="alphabetic">';
 
     $pending_categories = $categories;

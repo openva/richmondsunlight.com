@@ -1349,3 +1349,118 @@ ul.place-map-popup li {
 	border-left-width: 4px;
 	border-left-style: solid;
 }
+
+/*
+ * PHONES
+ * Page-specific changes for phones. (The site-wide ones are in new/master.css and new/menu.css;
+ * keep the 760px breakpoint in step with theirs.)
+ */
+@media only screen and (max-width: 760px) {
+
+	/* Forms: fields fill the width, with their labels above them. */
+	#content input[type="text"],
+	#content input[type="email"],
+	#content input[type="url"],
+	#content input[type="password"],
+	#content input[type="search"],
+	#content textarea {
+		max-width: 100%;
+		box-sizing: border-box;
+	}
+
+	/* Registration: one column, rather than a table of labels and fields. */
+	#registration fieldset {
+		width: auto;
+		padding: .5em 1em 1em;
+	}
+		#registration fieldset table,
+		#registration fieldset tbody,
+		#registration fieldset tr,
+		#registration fieldset th,
+		#registration fieldset td {
+			display: block;
+			width: auto;
+		}
+		#registration th {
+			text-align: left;
+			padding: .75em 0 .25em;
+		}
+		#registration td input[type="text"],
+		#registration td input[type="email"],
+		#registration td input[type="url"],
+		#registration td input[type="password"] {
+			width: 100%;
+		}
+		#registration td input.submit {
+			margin-top: 1em;
+		}
+
+	/* A bill's comment form: put each label above its field (they follow their fields in the
+	   HTML, which suits the desktop, where they sit to the right). */
+	#comment-form .comment-field {
+		display: flex;
+		flex-direction: column-reverse;
+		margin-bottom: .75em;
+	}
+		#comment-form .comment-field input {
+			width: 100%;
+		}
+
+	/* A bill's tags. (jQuery Tags Input sets the size inline, hence !important.) */
+	#tags_tagsinput {
+		width: 100% !important;
+		height: auto !important;
+		min-height: 44px;
+		box-sizing: border-box;
+	}
+
+	/* Your Legislators' address form. */
+	form.address fieldset {
+		width: auto !important;
+		max-width: 100%;
+	}
+		form.address input {
+			box-sizing: border-box;
+		}
+}
+
+/* A bill's history: on phones, only the most recent actions, until the button shows the rest (see
+   bill.php). */
+.history-show-earlier {
+	display: none;
+}
+@media only screen and (max-width: 760px) {
+	#status-history .history-show-earlier {
+		display: block;
+		width: 100%;
+		min-height: 44px;
+		margin: .5em 0;
+	}
+	#status-history:not(.show-earlier) tr.earlier {
+		display: none;
+	}
+
+	/* A smaller comment box. */
+	#comment-form textarea {
+		height: 12em;
+	}
+
+	/* A legislator's bio: the photo above, and each label above its value. */
+	img#legislator {
+		float: none;
+		display: block;
+		width: 50%;
+		margin: 0 auto 1em;
+	}
+	#bio .pair {
+		flex-direction: column;
+		padding: .4em .25em;
+	}
+		#bio .label {
+			width: auto;
+			text-align: left;
+		}
+		#bio .content {
+			margin-left: 0;
+		}
+}

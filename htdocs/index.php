@@ -120,12 +120,13 @@ if (mysqli_num_rows($result) > 0) {
         $bill['url'] = '/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/';
         $page_body .= '<tr>
 						<td><a href="' . $bill['url'] . '" class="balloon">'
-                            . mb_strtoupper($bill['number']) . '</td>
+                            . mb_strtoupper($bill['number']) . '</a></td>
 						<td>' . $bill['catch_line'] . '</td>
 						<td>' . $bill['status_translation'] . '</td>
 					</tr>';
     }
-    $page_body .= '</table></div>';
+    $page_body .= '</table></div>
+		<p class="updates-more"><a href="/bills/activity/">More bill activity »</a></p>';
 }
 
 # Legislative Map

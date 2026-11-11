@@ -6,15 +6,15 @@
 <title>%browser_title%</title>
 <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#790806">
-<link rel="stylesheet" href="/css/new/screen.css" media="screen">
-<link rel="stylesheet" href="/css/new/print.css" media="print">
-<link rel="stylesheet" href="/css/page-elements.css" media="screen">
+<link rel="stylesheet" href="/css/new/reset.css?v=%css_version%" media="screen">
+<link rel="stylesheet" href="/css/new/master.css?v=%css_version%" media="screen">
+<link rel="stylesheet" href="/css/new/menu.css?v=%css_version%" media="screen">
+<link rel="stylesheet" href="/css/new/print.css?v=%css_version%" media="print">
+<link rel="stylesheet" href="/css/page-elements.css?v=%css_version%" media="screen">
 <link rel="stylesheet" href="/css/jquery-ui.theme.min.css" media="screen">
 <link rel="stylesheet" href="/js/vendor/qtip2/dist/jquery.qtip.min.css" media="screen">
 <link rel="stylesheet" href="/js/vendor/jquery.tabSlideOut.js/jquery.tabSlideOut.css"> 
     
-<!--<link media="only screen and (max-device-width: 480px), only screen and (min-device-width: 560px) and (max-device-width: 1136px) and (-webkit-min-device-pixel-ratio: 2)"
-    href="/css/iphone.css" rel="stylesheet" />-->
 <script src="/js/vendor/jquery/dist/jquery.min.js"></script>
 <script src="/js/vendor/jquery-ui/jquery-ui.min.js"></script>
 <script src="/js/functions.js"></script>
@@ -42,50 +42,6 @@
 <!-- Safari Pinned Site -->
 <link rel="mask-icon" href="/images/favicons/safari_icon.svg">
 
-<?php
-    # Include the below JavaScript, but only if the browser is IE. We do an Opera check because
-    # Opera can include the text "MSIE" in its user agent string.
-if (
-            mb_strpos($_SERVER['HTTP_USER_AGENT'] ?? '', 'MSIE')
-            &&
-            !mb_strpos($_SERVER['HTTP_USER_AGENT'] ?? '', 'Opera')
-) {
-    ?>
-<script>
-    <!--//--><![CDATA[//><!--
-    activateMenu = function(nav) {
-        if(document.all && document.getElementById(nav).currentStyle){
-            // only MSIE supports document.all
-            var navroot = document.getElementById(nav);
-
-            /* Get all the list items within the menu */
-            var lis=navroot.getElementsByTagName("LI");
-            for(i=0;i<lis.length;i++){
-                /* If the LI has another menu level */
-                if(lis[i].lastChild.tagName=="UL"){
-                    /* assign the function to the LI */
-                    lis[i].onmouseover=function(){
-                        /* display the inner menu */
-                        this.lastChild.style.display="block";
-                    }
-                    lis[i].onmouseout=function(){
-                        this.lastChild.style.display="none";
-                    }
-                }
-            }
-        }
-    }
-    window.onload=function(){
-        // pass the function the id of the top level UL
-        // remove one, when only using one menu
-        activateMenu('nav');
-    }
-    //--><!]]>
-</script>
-    <?php
-    /* End the menu JavaScript conditional */
-}
-?>
 
 %html_head%
 </head>
@@ -106,7 +62,7 @@ if (
                     <form id="search" method="get" action="/search/">
                         <label for="search-box"><img src="/images/templates/new/search-label.gif"
                             width="56" height="20" alt="Search"></label>
-                        <input type="search" name="q" id="search-box">
+                        <input type="search" name="q" id="search-box" placeholder="Search bills">
                         <input type="image" src="/images/templates/new/go-search.gif" alt="Go">
                     </form>
                 </div>
@@ -120,16 +76,18 @@ if (
                 </div>
 
                 <nav>
+                <button type="button" id="nav-toggle" aria-controls="nav" aria-expanded="false" hidden>Menu</button>
                 <ul id="nav">
                     <li id="t-home"><a href="/" accesskey="h">Home</a></li>
                     <li id="t-bills"><a href="/bills/" accesskey="b">Bills</a>
                         <ul>
+                            <li class="nav-section-link"><a href="/bills/">All Bills</a></li>
                             <li><a href="/bills/topic/">By Topic</a></li>
                             <li><a href="/bills/introduced/">Newest</a></li>
                             <li><a href="/bills/activity/">Activity</a></li>
                             <li><a href="/bills/#house">House</a></li>
                             <li><a href="/bills/#senate">Senate</a></li>
-                            <li>Past Years »
+                            <li class="past-years"><span class="nav-label" role="button" tabindex="0">Past Years »</span>
                                 <ul>
                                     <li><a href="/bills/2006/">2006</a></li>
                                     <li><a href="/bills/2007/">2007</a></li>
@@ -160,14 +118,14 @@ if (
                     
                     <li id="t-legislators"><a href="/legislators/" accesskey="l">Legislators</a>
                         <?php require('legislators.html'); ?>
-                        </li>
+                        <li class="nav-section-link"><a href="/legislators/">All Legislators</a></li>
                         <li><a href="/legislators/detailed/">Detailed Listing</a></li>
                         <li><a href="/committees/">Committees</a></li>
                         <li><a href="/your-legislators/">Your Legislators</a></li>
                         </ul>
                     </li>
                     <li id="t-places"><a href="/places/" accesskey="w">Places</a></li>
-                    <li id="t-tools">Tools
+                    <li id="t-tools"><span class="nav-label" role="button" tabindex="0">Tools</span>
                         <ul>
                         <li><a href="/photosynthesis/" accesskey="p">Photosynthesis</a></li>
                         <li><a href="/photosynthesis/portfolios/">Public Portfolios</a></li>
@@ -177,6 +135,7 @@ if (
                     </li>
                     <li id="t-video"><a href="/minutes/" accesskey="v">Video</a>
                         <ul>
+                        <li class="nav-section-link"><a href="/minutes/">All Video</a></li>
                         <li><a href="/minutes/#house">House</a></li>
                         <li><a href="/minutes/#senate">Senate</a></li>
                         </ul>
@@ -246,6 +205,37 @@ if (
     </div>
 
     <script>
+        /* The menu on phones (see menu.css): the Menu button opens it, and tapping a section
+           opens that section's submenu, rather than going to the section's page. */
+        $(function() {
+            var $nav = $('#nav');
+
+            // Whether the phone menu is showing, which menu.css signals with --nav-mode. (Checking
+            // the CSS, rather than the screen width, means that this doesn't take over taps when
+            // a browser has an older, cached menu.css that has no phone menu.)
+            function phoneMenu() {
+                return getComputedStyle(document.documentElement).getPropertyValue('--nav-mode').trim() === 'phone';
+            }
+
+            $('#nav-toggle').on('click', function() {
+                $(this).attr('aria-expanded', $nav.toggleClass('open').hasClass('open'));
+            });
+
+            $nav.find('> li, li.past-years').each(function() {
+                var $li = $(this);
+                if (!$li.children('ul').length) {
+                    return;
+                }
+                $li.children('a, .nav-label').on('click keydown', function(e) {
+                    if (!phoneMenu() || (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ')) {
+                        return;
+                    }
+                    e.preventDefault();
+                    $(this).attr('aria-expanded', $li.toggleClass('open').hasClass('open'));
+                });
+            });
+        });
+
         /* Create tabs and add dropdown fallback when tabs overflow. */
         // Wait until the DOM has loaded before querying the document
         $(document).ready(function() {
@@ -316,6 +306,10 @@ if (
             });
         });
 
+        /* Tooltips open on hover, where there's a mouse. On touch screens, the ones on links are
+           left out, so that a tap goes straight to the link; the others open on a tap. */
+        var canHover = window.matchMedia('(hover: hover)').matches;
+
         /* Help icon tooltips */
         $(function(){
             $(".help-icon-link").each(function() {
@@ -335,9 +329,9 @@ if (
                             return "Loading…";
                         }
                     },
-                    position: { my: "top center", at: "bottom center" },
-                    show: { event: "mouseenter" },
-                    hide: { event: "mouseleave unfocus", delay: 200, fixed: true },
+                    position: { my: "top center", at: "bottom center", viewport: $(document.body), adjust: { method: "shift" } },
+                    show: { event: canHover ? "mouseenter" : "click" },
+                    hide: { event: canHover ? "mouseleave unfocus" : "unfocus", delay: 200, fixed: true },
                     style: { classes: "qtip-dark qtip-shadow" }
                 });
             });
@@ -356,7 +350,7 @@ if (
 
         $(function(){
             /* Mentions of bill numbers. */
-            $("a.balloon").each(function() {
+            $(canHover ? "a.balloon" : null).each(function() {
 
                 /* Use the URL to determine the bill year and number. */
                 var url = $(this).attr("href");
@@ -405,7 +399,7 @@ if (
             });
 
             /* Mentions of legislators. */
-            $("a.legislator").each(function() {
+            $(canHover ? "a.legislator" : null).each(function() {
 
                 /* Use the URL to determine the bill year and number. */
                 var url = $(this).attr("href");
@@ -451,7 +445,7 @@ if (
             });
 
             /* Mentions of sections of the Code of Virginia. */
-            $("a.code").each(function() {
+            $(canHover ? "a.code" : null).each(function() {
 
                 /* Use the URL to determine the section number. */
                 var url = $(this).attr("href");
@@ -509,6 +503,7 @@ if (
                 var term = $(this).text();
                 $(this).qtip({
                     tip: true,
+                    show: { event: canHover ? "mouseenter" : "click" },
                     hide: {
                         when: 'mouseout',
                         fixed: true,

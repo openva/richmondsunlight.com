@@ -151,7 +151,9 @@ if (!empty($_SESSION['id'])) {// && !blacklisted())
         if (!empty($tag[$i])) {
             # Make sure it's safe.
             $tag[$i] = preg_replace("/[[:punct:]]/D", '', $tag[$i]);
-            $tag[$i] = trim($tag[$i]);
+
+            # The tags.tag column holds 30 characters.
+            $tag[$i] = trim(mb_substr($tag[$i], 0, 30));
 
             # Check one more time to make sure it's not empty.
             if (!empty($tag[$i])) {
