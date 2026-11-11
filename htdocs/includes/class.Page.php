@@ -153,7 +153,7 @@ class Page
             $page = str_replace('%page_sidebar%', $this->page_sidebar, $page);
         }
         $page = str_replace('%html_head%', (string) $this->html_head, $page);
-        $page = str_replace('%css_version%', (string) self::css_version(), $page);
+        $page = str_replace('%css_version%', self::css_version(), $page);
         $page = str_replace('%account%', $account, $page);
         if (isset($this->body_tag)) {
             $page = str_replace('%body_tag%', $this->body_tag, $page);
@@ -233,13 +233,15 @@ class Page
     }
 
     /**
-     * When the site's stylesheets last changed, for their URLs. Browsers cache CSS for a month
-     * (see .htaccess), so this makes them fetch it again after a deploy changes it.
+     * A version for the site's stylesheets' URLs, which changes whenever one of them changes.
+     * Browsers cache CSS for a month (see .htaccess), so this makes them fetch it again after a
+     * deploy changes it. It's a hash of when they changed, rather than the time itself, because
+     * the security scan flags timestamps in pages.
      */
-    private static function css_version(): int
+    private static function css_version(): string
     {
         $css = dirname(__DIR__) . '/css';
         $files = array_merge(glob($css . '/*.css') ?: [], glob($css . '/new/*.css') ?: []);
-        return $files ? max(array_map('filemtime', $files)) : 0;
+        return substr(md5(implode(',', array_map('filemtime', $files))), 0, 8);
     }
 }
