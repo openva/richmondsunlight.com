@@ -368,82 +368,147 @@ $debug_timing['portfolio data retrieved'] = microtime(true);
 $poll = new Poll();
 $poll->bill_id = $bill['id'];
 
-$page_sidebar .= '<div class="box">';
+$page_sidebar .= '<div class="box" id="poll">';
 
 // Display the poll voting form, but only if this user hasn't voted on this bill and
-// this bill is from the current session.
-if (($bill['session_id'] == SESSION_ID) && ($poll->has_voted() === false)) {
+// this bill is from the current session. Voting replaces the form with the results, without
+// leaving the page (see the script below).
+$poll_open = ($bill['session_id'] == SESSION_ID) && ($poll->has_voted() === false);
+if ($poll_open) {
     $page_sidebar .= '
-		<h3>Cast Your Vote</h3>
+		<h3 id="poll-heading">Cast Your Vote</h3>
+		<div id="poll-vote">
 		<p>Do you think this bill should become law?</p>
-		<form method="post" action="/process-polls.php">
+		<form method="post" action="/process-polls.php" id="poll-form">
 			<input type="radio" name="poll[vote]" value="y" />Yes<br />
 			<input type="radio" name="poll[vote]" value="n" />No<br />
 			<div style="display: none;"><input type="radio" name="poll[vote]" value="x" />I’m a Spammer<br /></div>
 			<input type="hidden" name="poll[bill_id]" value="' . $bill['id'] . '">
-			<input type="hidden" name="poll[return_to]" value="' . $_SERVER['REQUEST_URI'] . '" />
+			<input type="hidden" name="poll[return_to]" value="' . htmlspecialchars($_SERVER['REQUEST_URI']) . '" />
 			<input type="submit" name="submit" value="Vote"><br />
+			<p id="poll-error" role="alert"></p>
 			<p><a id="show-poll-results" style="cursor: pointer;">View Results</a></p>
-		</form>';
+		</form>
+		</div>';
 } else {
-    $has_voted = 'yes';
     $page_sidebar .= '
 	<h3>Poll Results</h3>';
 }
 
-// Get poll results.
+// Get poll results. The script below draws the chart from the numbers in data-total and
+// data-yes.
 if ($poll->get_results() !== false) {
     $debug_timing['poll results retrieved'] = microtime(true);
 
-    $page_sidebar .= '<div id="poll-results"';
-    if (!isset($has_voted)) {
-        $page_sidebar .= ' style="display: none;">';
-    } else {
-        $page_sidebar .= '>';
-    }
-
-    if ($poll->results['total'] > 0) {
-        // Do the math to determine the percentage for each.
-        $poll->results['no'] = round((($poll->results['total'] - $poll->results['yes']) / $poll->results['total']) * 100);
-        $poll->results['yes'] = round(($poll->results['yes'] / $poll->results['total']) * 100);
-
-        // Establish the label text for the graph.
-        $poll->results['no_text'] = 'No ' . $poll->results['no'] . '%';
-        $poll->results['yes_text'] = 'Yes ' . $poll->results['yes'] . '%';
-
-        // Add a canvas element for the chart.
-        $page_sidebar .= '<canvas id="pollChart" width="215" height="115"></canvas>';
-        $page_sidebar .= '<p>' . $poll->results['total'] . ' vote' . ($poll->results['total'] > 1 ? 's' : '') . '</p>';
-
-        // Add the Chart.js script and initialize the chart.
-        $html_head .= '<script src="/js/vendor/chart.js/dist/chart.umd.js"></script>';
-        $page_sidebar .= '
-        <script>
-            var ctx = document.getElementById("pollChart").getContext("2d");
-            var pollChart = new Chart(ctx, {
-                type: "pie",
-                data: {
-                    labels: ["' . $poll->results['yes_text'] . '", "' . $poll->results['no_text'] . '"],
-                    datasets: [{
-                        data: [' . $poll->results['yes'] . ', ' . $poll->results['no'] . '],
-                        backgroundColor: ["#4CAF50", "#F44336"]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: true
-                }
-            });
-        </script>';
-    } else {
+    $poll_total = (int) $poll->results['total'];
+    $page_sidebar .= '<div id="poll-results" data-total="' . $poll_total . '" data-yes="'
+        . (int) $poll->results['yes'] . '"' . ($poll_open ? ' style="display: none;"' : '') . '>';
+    if ($poll_total === 0) {
         if ($bill['session_id'] == SESSION_ID) {
             $page_sidebar .= '<p>No Richmond Sunlight visitors have voted on this bill yet.</p>';
         } else {
             $page_sidebar .= '<p>No Richmond Sunlight visitors voted on this bill while voting was open.</p>';
         }
     }
+    $page_sidebar .= '</div>';
+
+    // The chart is needed if there are votes, or if this person can vote now, and add one.
+    if (($poll_total > 0) || $poll_open) {
+        $html_head .= '<script src="/js/vendor/chart.js/dist/chart.umd.js"></script>';
+        $page_sidebar .= <<<'JS'
+        <script>
+        (function () {
+            var results = document.getElementById('poll-results');
+            var chart;
+
+            // Show the poll's results: a pie chart of the yes and no votes, and how many there were.
+            function showResults(total, yes) {
+                if (total < 1) {
+                    return;
+                }
+                var yesPercent = Math.round((yes / total) * 100);
+                var noPercent = 100 - yesPercent;
+                var canvas = document.createElement('canvas');
+                canvas.width = 215;
+                canvas.height = 115;
+                var count = document.createElement('p');
+                count.textContent = total + ' vote' + (total > 1 ? 's' : '');
+                results.replaceChildren(canvas, count);
+                if (chart) {
+                    chart.destroy();
+                }
+                chart = new Chart(canvas.getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: ['Yes ' + yesPercent + '%', 'No ' + noPercent + '%'],
+                        datasets: [{
+                            data: [yesPercent, noPercent],
+                            backgroundColor: ['#4CAF50', '#F44336']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true
+                    }
+                });
+            }
+
+            showResults(Number(results.dataset.total), Number(results.dataset.yes));
+
+            // Send the vote as JSON, and then show the results in place of the form.
+            var form = document.getElementById('poll-form');
+            if (!form) {
+                return;
+            }
+            var error = document.getElementById('poll-error');
+            var button = form.querySelector('input[type="submit"]');
+            var failed = 'Your vote could not be counted. Please try again.';
+            form.addEventListener('submit', function (event) {
+                event.preventDefault();
+                var vote = form.querySelector('input[name="poll[vote]"]:checked');
+                if (!vote) {
+                    error.textContent = 'Choose yes or no.';
+                    return;
+                }
+                error.textContent = '';
+                button.disabled = true;
+                fetch(form.action, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    body: JSON.stringify({
+                        bill_id: Number(form.elements['poll[bill_id]'].value),
+                        vote: vote.value
+                    })
+                })
+                    .then(function (response) {
+                        return response.json().catch(function () {
+                            return {};
+                        });
+                    })
+                    .then(function (data) {
+                        if (!data.results) {
+                            error.textContent = data.error || failed;
+                            button.disabled = false;
+                            return;
+                        }
+                        // The results, which follow a vote that was counted, or one that
+                        // already had been.
+                        document.getElementById('poll-vote').remove();
+                        document.getElementById('poll-heading').textContent = 'Poll Results';
+                        showResults(data.results.total, data.results.yes);
+                        results.style.display = '';
+                    })
+                    .catch(function () {
+                        error.textContent = failed;
+                        button.disabled = false;
+                    });
+            });
+        })();
+        </script>
+JS;
+    }
 }
-$page_sidebar .= '</div></div>';
+$page_sidebar .= '</div>';
 
 // Tags
 $page_sidebar .= '

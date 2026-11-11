@@ -110,8 +110,9 @@ test('process-comments.php returns JSON error for empty comment', async ({ reque
   expect(json.error).toBeTruthy();
 });
 
-test('process-polls.php redirects after a valid poll vote', async ({ page }) => {
-  // Clean up any prior poll votes for this bill so the unique constraint doesn't block us.
+// Clear this bill's poll votes, so that the database's one-vote-per-person rule doesn't block
+// a test's vote.
+async function clearPollVotes() {
   const mysql = require('mysql2/promise');
   const db = await mysql.createConnection({
     host: process.env.DB_HOST || 'db',
@@ -121,6 +122,10 @@ test('process-polls.php redirects after a valid poll vote', async ({ page }) => 
   });
   await db.execute('DELETE FROM polls WHERE bill_id = ?', [billId]);
   await db.end();
+}
+
+test('process-polls.php redirects after a poll vote posted without JavaScript', async ({ page }) => {
+  await clearPollVotes();
 
   // page.request shares the browser session so PHP can track the new anonymous user.
   const resp = await page.request.post('/process-polls.php', {
@@ -132,6 +137,55 @@ test('process-polls.php redirects after a valid poll vote', async ({ page }) => 
     maxRedirects: 0,
   });
   expect(resp.status()).toBe(302);
+});
+
+test('process-polls.php answers a JSON vote with the results', async ({ page }) => {
+  await clearPollVotes();
+
+  const vote = () => page.request.post('/process-polls.php', {
+    headers: { 'Content-Type': 'application/json' },
+    data: JSON.stringify({ bill_id: Number(billId), vote: 'n' }),
+  });
+  let resp = await vote();
+  expect(resp.status()).toBe(200);
+  expect(await resp.json()).toEqual({ results: { total: 1, yes: 0 } });
+
+  // A second vote isn't counted, but still gets the results.
+  resp = await vote();
+  expect(resp.status()).toBe(409);
+  expect((await resp.json()).results).toEqual({ total: 1, yes: 0 });
+
+  // A vote that isn't yes or no is refused.
+  resp = await page.request.post('/process-polls.php', {
+    headers: { 'Content-Type': 'application/json' },
+    data: JSON.stringify({ bill_id: Number(billId), vote: 'maybe' }),
+  });
+  expect(resp.status()).toBe(400);
+});
+
+test('voting in a bill page\'s poll shows the results without leaving the page', async ({ page }) => {
+  await clearPollVotes();
+  await page.goto(billPath);
+
+  const poll = page.locator('#poll');
+  await expect(poll.locator('h3')).toHaveText('Cast Your Vote');
+
+  // Voting without choosing an answer asks for one.
+  await poll.locator('input[type="submit"]').click();
+  await expect(page.locator('#poll-error')).toHaveText('Choose yes or no.');
+
+  await poll.locator('input[value="y"]').check();
+  const [response] = await Promise.all([
+    page.waitForResponse('**/process-polls.php'),
+    poll.locator('input[type="submit"]').click(),
+  ]);
+  expect(response.status()).toBe(200);
+
+  await expect(page).toHaveURL(new RegExp(billPath.replace(/\//g, '\\/') + '$'));
+  await expect(poll.locator('h3')).toHaveText('Poll Results');
+  await expect(page.locator('#poll-form')).toHaveCount(0);
+  await expect(page.locator('#poll-results canvas')).toBeVisible();
+  await expect(page.locator('#poll-results')).toContainText('1 vote');
 });
 
 // ---------------------------------------------------------------------------
