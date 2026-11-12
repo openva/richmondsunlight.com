@@ -1078,36 +1078,39 @@ meter {
 	}
 }
 
-/* Minutes video: player and guide to bills, speakers, and transcript (see /js/minutes-video.js) */
-.minutes-video-player {
+/* Video player, on video and minutes pages: the video, and a guide to its bills, speakers, and
+   transcript (see /js/video-player.js) */
+.video-player-stage {
 	background-color: #243a51;
 	border-radius: 4px;
 	overflow: hidden;
 	margin: 1em 0 .5em;
 }
-	.minutes-video-player video {
+	.video-player-stage video,
+	.video-player-stage iframe {
 		display: block;
 		width: 100%;
 		aspect-ratio: 16 / 9;
 		background-color: #000;
+		border: 0;
 	}
-	.minutes-video-now {
+	.video-player-now {
 		margin: 0;
 		padding: .5em .75em;
 		color: #fff;
 		font-weight: bold;
 	}
-.minutes-video-download {
+.video-player-download {
 	margin: 0 0 1em;
 	font-size: .9em;
 }
 
-.minutes-video-tabs:not([hidden]) {
+.video-player-tabs:not([hidden]) {
 	display: flex;
 	gap: .25em;
 	border-bottom: 2px solid #dccbaf;
 }
-	.minutes-video-tabs button {
+	.video-player-tabs button {
 		font: inherit;
 		font-weight: bold;
 		color: #333;
@@ -1119,73 +1122,73 @@ meter {
 		margin-bottom: -2px;
 		cursor: pointer;
 	}
-	.minutes-video-tabs button:hover {
+	.video-player-tabs button:hover {
 		background-color: #f4eee5;
 	}
-	.minutes-video-tabs button[aria-selected="true"] {
+	.video-player-tabs button[aria-selected="true"] {
 		background-color: #f4eee5;
 		border-color: #dccbaf;
 		border-bottom: 2px solid #f4eee5;
 		color: #790806;
 	}
-		.minutes-video-tabs button span {
+		.video-player-tabs button span {
 			font-weight: normal;
 			color: #666;
 			margin-left: .2em;
 		}
-.minutes-video.is-enhanced .minutes-video-panel > h3 {
+.video-player.is-enhanced .video-player-panel > h3 {
 	position: absolute;
 	width: 1px;
 	height: 1px;
 	overflow: hidden;
 	clip: rect(0 0 0 0);
 }
-.minutes-video.is-enhanced .minutes-video-scroll {
+.video-player.is-enhanced .video-player-scroll {
 	position: relative;
 	max-height: 26em;
 	overflow-y: auto;
 	border: 1px solid #dccbaf;
 	border-top: 0;
 }
-	ol.minutes-video-list,
-	div#content ul.minutes-video-list {
+	ol.video-player-list,
+	div#content ul.video-player-list {
 		list-style: none;
 		margin: 0;
 		padding: 0;
 		line-height: inherit;
 	}
-	.minutes-video-list li {
+	.video-player-list li {
 		display: flex;
 		align-items: baseline;
 		gap: .6em;
 		padding: .45em .75em;
 		border-bottom: 1px solid #f0e8da;
 	}
-	.minutes-video-list li.is-current {
+	.video-player-list li.is-current {
 		background-color: #fbf3dc;
 		box-shadow: inset 4px 0 0 #790806;
 	}
-		.minutes-video-item {
+		.video-player-item {
 			flex: 1;
 			min-width: 0;
 		}
-		.minutes-video-bill {
+		.video-player-bill {
 			font-weight: bold;
 			margin-right: .25em;
 		}
-		.minutes-video-length {
+		.video-player-length {
 			flex: none;
 			color: #666;
 			font-size: .9em;
 			font-variant-numeric: tabular-nums;
 		}
-		.minutes-video-times {
+		.video-player-times {
 			flex: none;
 			max-width: 60%;
 			text-align: right;
 			line-height: 1.9;
 		}
-	.minutes-video-list .video-timestamp {
+	.video-player-list .video-timestamp {
 		flex: none;
 	}
 	.video-timestamp.is-current {
@@ -1193,11 +1196,22 @@ meter {
 		border-color: #790806;
 		color: #fff;
 	}
-	.minutes-video .video-transcript {
+	.video-player .video-transcript {
 		padding: .25em .75em .5em;
 	}
-.minutes-video-note {
+.video-player-note {
 	font-size: .9em;
+	color: #666;
+}
+
+.video-player-pending,
+.video-processing {
+	padding: .6em .8em;
+	background-color: #fbf3dc;
+	border-left: 4px solid #d9a521;
+}
+ul.video-same-day small,
+.video-list small {
 	color: #666;
 }
 
@@ -1464,3 +1478,13 @@ ul.place-map-popup li {
 			margin-left: 0;
 		}
 }
+
+/* Lists of videos (/video/, committee pages, minutes pages) */
+.video-list-group {
+	margin-bottom: .5em;
+}
+	.video-list-group > summary {
+		cursor: pointer;
+		font-weight: bold;
+		padding: .3em 0;
+	}

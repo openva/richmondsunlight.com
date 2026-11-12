@@ -59,6 +59,15 @@ test.describe('Minutes video', () => {
   test('offers captions for the whole session', async ({ page }) => {
     await page.goto(minutesPath);
     const track = page.locator('#video video track[kind="captions"]');
-    await expect(track).toHaveAttribute('src', /format=vtt&file=15141&start=0&end=86399/);
+    await expect(track).toHaveAttribute('src', '/video/b334/captions.vtt');
+  });
+
+  // The committee meetings are in deploy/mysql/video-page-fixtures.sql.
+  test('lists every video recorded that day, each linking to its page', async ({ page }) => {
+    await page.goto(minutesPath);
+    const videos = page.locator('#day-videos li');
+    await expect(videos).toHaveCount(4);
+    await expect(videos.first().locator('a')).toHaveAttribute('href', '/video/b334/2026-01-26-house-floor/');
+    await expect(page.locator('#day-videos')).toContainText('House Appropriations: Capital Outlay Subcommittee');
   });
 });

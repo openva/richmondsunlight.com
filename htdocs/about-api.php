@@ -242,13 +242,25 @@ EOD;
 	<h3>Example URI</h3>
 	<p><code>https://api.richmondsunlight.com/1.1/videos.json</code></p>
 	<p><code>https://api.richmondsunlight.com/1.1/videos.json?year=2025</code></p>
+	<p><code>https://api.richmondsunlight.com/1.1/videos.json?chamber=house&amp;committee=appropriations</code></p>
 
 	<h3>Instructions</h3>
-	<p>Returns all legislative videos. Optionally filter by year using the
-	<code>year</code> query parameter.</p>
+	<p>Returns legislative videos, oldest first. Filter them with any of these query parameters:
+	<code>year</code>; <code>date</code> (YYYY-MM-DD); <code>chamber</code> (<code>house</code> or
+	<code>senate</code>); and <code>committee</code>, a committee’s shortname, which includes its
+	subcommittees, and requires <code>chamber</code>. Filters that match no videos return an empty
+	list.</p>
 
 	<h3>Returns</h3>
 	<ul>
+		<li>slug (the video’s permanent ID)</li>
+		<li>url (the video’s page on Richmond Sunlight)</li>
+		<li>status (<code>available</code>, or <code>processing</code> if there’s nothing to play
+		yet)</li>
+		<li>meeting (its type—<code>floor</code>, <code>committee</code>, <code>subcommittee</code>,
+		or <code>unknown</code>—a label, and its committee and parent committee)</li>
+		<li>length (in seconds)</li>
+		<li>poster (a picture of the video)</li>
 		<li>id</li>
 		<li>date</li>
 		<li>chamber</li>
@@ -266,15 +278,34 @@ EOD;
 	<h2 id="video">Video detail</h2>
 
 	<h3>Example URI</h3>
-	<p><code>https://api.richmondsunlight.com/1.1/video/123.json</code></p>
+	<p><code>https://api.richmondsunlight.com/1.1/video/k7qm.json</code></p>
+	<p><code>https://api.richmondsunlight.com/1.1/video/k7qm.vtt</code> (captions)</p>
 
 	<h3>Instructions</h3>
-	<p>Replace the numeric ID with the ID of the video you want.</p>
+	<p>Replace <code>k7qm</code> with the slug of the video you want: four characters, found in
+	the video list or in the video’s URL on Richmond Sunlight. The <code>.vtt</code> version is the
+	video’s transcript as WebVTT captions.</p>
 
 	<h3>Returns</h3>
-	<p>Same fields as the videos list above.</p>
+	<ul>
+		<li>slug, url, status, meeting, date, chamber, title, and length, as in the videos list</li>
+		<li>pending (parts of the guide still being prepared: <code>transcript</code>,
+		<code>bills</code>, or <code>speakers</code>)</li>
+		<li>description, width/height, license, and sponsor</li>
+		<li>media (the MP4 address, a YouTube ID, and a poster image)</li>
+		<li>bills (each bill taken up, with when it was taken up)</li>
+		<li>speakers (each legislator who spoke, with when)</li>
+		<li>transcript (in turns, each with its speaker and timed lines)</li>
+		<li>captions (the WebVTT captions’ URL)</li>
+		<li>minutes (the chamber’s minutes for that day, if there are any)</li>
+		<li>same_day (the other videos recorded that day)</li>
+	</ul>
 
 	<p>Returns 404 if no video is found.</p>
+
+	<h3>Deprecated: video by ID</h3>
+	<p><code>https://api.richmondsunlight.com/1.1/video/123.json</code> still returns a video by its
+	numeric ID, with its slug and URL, but video IDs may change, so use the slug instead.</p>
 
 
 	<h2 id="tag-suggest">Tag suggestions</h2>

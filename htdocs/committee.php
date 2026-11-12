@@ -312,6 +312,42 @@ else {
     $page_body .= '</ul>';
 }
 
+# Video of this committee's meetings, and its subcommittees', newest first, by year.
+$videos = array_reverse(Video::list_from_api([
+    'chamber' => $committee->chamber,
+    'committee' => $committee->shortname,
+]));
+if (count($videos) > 0) {
+    $years = [];
+    foreach ($videos as $video) {
+        $years[substr($video['date'], 0, 4)][] = $video;
+    }
+    $page_body .= '
+		<h2 id="video">Video</h2>
+		<p>Video of ' . (count($videos) === 1 ? 'one meeting' : number_format(count($videos)) . ' meetings')
+        . ' of this committee and its subcommittees.</p>';
+    foreach ($years as $year => $year_videos) {
+        $page_body .= '
+		<details class="video-list-group"' . ($year === array_key_first($years) ? ' open' : '') . '>
+			<summary>' . $year . ' <small>(' . count($year_videos) . ')</small></summary>
+			<ul class="video-list">';
+        foreach ($year_videos as $video) {
+            $label = date('F j', strtotime($video['date']));
+            if ($video['meeting']['type'] === 'subcommittee') {
+                $label .= ': ' . $video['meeting']['committee']['name'] . ' Subcommittee';
+            }
+            $page_body .= '
+				<li><a href="' . htmlspecialchars(parse_url($video['url'], PHP_URL_PATH)) . '">'
+                . htmlspecialchars($label) . '</a>'
+                . (!empty($video['length']) ? ' <small>' . Video::clock($video['length']) . '</small>' : '')
+                . ($video['status'] !== 'available' ? ' <small>(processing)</small>' : '') . '</li>';
+        }
+        $page_body .= '
+			</ul>
+		</details>';
+    }
+}
+
 if (is_array($committee->members)) {
     # Generate a list of all e-mail addresses for the members of this committee.
     $page_body .= '

@@ -5,6 +5,7 @@ require __DIR__ . '/../htdocs/includes/class.Database.php';
 require __DIR__ . '/../htdocs/includes/class.Legislator.php';
 require __DIR__ . '/../htdocs/includes/class.Log.php';
 require __DIR__ . '/../htdocs/includes/class.Places.php';
+require __DIR__ . '/../htdocs/includes/class.Video.php';
 require __DIR__ . '/../htdocs/includes/vendor/autoload.php';
 
 $database = new Database();
@@ -197,6 +198,62 @@ if ($result && mysqli_num_rows(result: $result) > 0) {
         message: 'Places sitemap query failed or found no places: ' . mysqli_error(mysql: $GLOBALS['db']),
         level: 5
     );
+}
+
+/*
+ * Generate one sitemap of videos per year, from the API, with Google's video extensions
+ * (https://developers.google.com/search/docs/crawling-indexing/sitemaps/video-sitemaps), so that
+ * video of committee meetings, in particular, can be found.
+ */
+$video_xml_header = '<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">';
+$xml = fn($text) => htmlspecialchars((string) $text, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+for ($year = 2009; $year <= (int) date('Y'); $year++) {
+    $filename = $sitemap_dir . '/videos-' . $year . '.xml';
+
+    // Videos of this year or last year may still be being processed, so regenerate those daily.
+    if (
+        file_exists(filename: $filename)
+        && ($year < (int) date('Y') - 1 || filemtime(filename: $filename) > strtotime(datetime: '-1 day'))
+    ) {
+        $sitemap_list[] = 'videos-' . $year . '.xml';
+        continue;
+    }
+
+    $videos = Video::list_from_api(['year' => $year]);
+    if (count($videos) === 0) {
+        continue;
+    }
+
+    $sitemap_file = fopen(filename: $filename, mode: 'w');
+    fwrite(stream: $sitemap_file, data: $video_xml_header . "\n");
+    foreach ($videos as $video) {
+        fwrite(stream: $sitemap_file, data: '<url><loc>' . $xml($video['url']) . '</loc>');
+
+        // Google requires a thumbnail, and something to play.
+        $mp4 = Video::media_url($video['path']);
+        $youtube_id = Video::youtube_id(null, $video['path']);
+        if ($video['status'] === 'available' && !empty($video['poster']) && ($mp4 || $youtube_id)) {
+            $title = $video['meeting']['label'] . ', ' . date('F j, Y', strtotime($video['date']));
+            fwrite(stream: $sitemap_file, data: '<video:video>'
+                . '<video:thumbnail_loc>' . $xml($video['poster']) . '</video:thumbnail_loc>'
+                . '<video:title>' . $xml($title) . '</video:title>'
+                . '<video:description>' . $xml('Video of the ' . $video['meeting']['label'] . ' of the Virginia General Assembly, '
+                    . date('F j, Y', strtotime($video['date'])) . '.') . '</video:description>'
+                . ($mp4 ? '<video:content_loc>' . $xml($mp4) . '</video:content_loc>'
+                    : '<video:player_loc>' . $xml('https://www.youtube.com/embed/' . $youtube_id) . '</video:player_loc>')
+                . (!empty($video['length']) && $video['length'] <= 28800
+                    ? '<video:duration>' . (int) $video['length'] . '</video:duration>' : '')
+                . '<video:publication_date>' . $xml($video['date']) . '</video:publication_date>'
+                . '</video:video>');
+        }
+        fwrite(stream: $sitemap_file, data: '</url>' . "\n");
+    }
+    fwrite(stream: $sitemap_file, data: $sitemap_xml_footer . "\n");
+    fclose(stream: $sitemap_file);
+
+    $sitemap_list[] = 'videos-' . $year . '.xml';
+    $log->put(message: 'Regenerated videos sitemap for ' . $year, level: 3);
 }
 
 /*

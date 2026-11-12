@@ -786,9 +786,11 @@ if (count($video_clips) > 0) {
 						<p class="clip-player-about">About <a href="/bill/' . $bill['year'] . '/' . $bill['number'] . '/">'
                     . $bill_number . '</a>, ' . htmlspecialchars(html_entity_decode((string) $bill['catch_line'], ENT_QUOTES)) . '</p>' : '') . '
 						<div data-transcript-src="/video-transcript.php?file=' . $clip['file_id']
-                . '&amp;start=' . $clip['start'] . '&amp;end=' . $clip['end'] . '"></div>
-						<p class="video-transcript-source"><a href="' . htmlspecialchars($clip['path']) . '#t='
-                . $clip['start'] . '">Watch the full recording of this meeting</a></p>
+                . '&amp;start=' . $clip['start'] . '&amp;end=' . $clip['end'] . '"></div>'
+                . (!empty($clip['slug']) ? '
+						<p class="video-transcript-source"><a href="'
+                    . htmlspecialchars(Video::page_path($clip['slug'], max(0, $clip['start']))) . '">Watch the full
+						recording of this meeting</a></p>' : '') . '
 					</div>
 				</li>';
         }

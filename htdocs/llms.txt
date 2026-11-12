@@ -16,6 +16,8 @@ All API endpoints return JSON. Replace placeholders as described.
 - [Legislators list](https://api.richmondsunlight.com/1.1/legislators.json): All current legislators.
 - [Vote detail](https://api.richmondsunlight.com/1.1/vote/HV1.json): Full roll-call vote record. URL pattern: `/1.1/vote/{lis_id}.json`. LIS IDs are prefixed `H` (House) or `S` (Senate).
 - [Code section](https://api.richmondsunlight.com/1.1/code-section/15.2-1.json): Virginia Code section affected by legislation. URL pattern: `/1.1/code-section/{section}.json`.
+- [Videos list](https://api.richmondsunlight.com/1.1/videos.json?year=2026): Videos of floor sessions and committee meetings. Filter with `year`, `date` (YYYY-MM-DD), `chamber`, and `committee` (a committee's shortname, with `chamber`).
+- Video detail: A single video, by its four-character slug, with the bills taken up, the legislators who spoke, and the transcript. URL pattern: `/1.1/video/{slug}.json`. Captions: `/1.1/video/{slug}.vtt`.
 
 ## Key Pages
 
@@ -25,7 +27,8 @@ All API endpoints return JSON. Replace placeholders as described.
 - [Legislator page](https://www.richmondsunlight.com/legislator/rcdeeds/): Individual legislator profile, committee memberships, and voting record. URL pattern: `/legislator/{shortname}/`.
 - [Legislator votes](https://www.richmondsunlight.com/legislator/rcdeeds/votes/2026/): All votes cast by a legislator in a given year. URL pattern: `/legislator/{shortname}/votes/{year}/`.
 - [Committees](https://www.richmondsunlight.com/committees/): List of House and Senate committees.
-- [Committee page](https://www.richmondsunlight.com/committee/house/appropriations/): Individual committee membership and bills referred. URL pattern: `/committee/{chamber}/{shortname}/`.
+- [Committee page](https://www.richmondsunlight.com/committee/house/appropriations/): Individual committee membership, bills referred, and video of its meetings. URL pattern: `/committee/{chamber}/{shortname}/`.
+- [Video](https://www.richmondsunlight.com/video/): Video of floor sessions and committee meetings, by year. Each video's page is at `/video/{slug}/`, with a guide to the bills taken up, the legislators who spoke, and a transcript; `?t={seconds}` starts it at a given time.
 - [Vote record](https://www.richmondsunlight.com/bill/2026/hb1/HV1/): Roll-call vote detail for a specific vote. URL pattern: `/bill/{year}/{number}/{lis_id}/`.
 - [Floor schedule](https://www.richmondsunlight.com/schedule/): Daily House and Senate floor schedule.
 - [Search](https://www.richmondsunlight.com/search/): Full-text search across bills and legislators.
