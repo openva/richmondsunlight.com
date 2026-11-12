@@ -1223,11 +1223,13 @@ if (($bill['video'] !== false) && (count($bill['video']) > 0)) {
     // Get the title of each video file, to say where each clip was recorded.
     $file_ids = array_unique(array_map(fn($clip) => (int) $clip->file_id, $bill['video']));
     $file_titles = [];
-    $result = mysqli_query($GLOBALS['db'], 'SELECT id, title FROM files
+    $file_slugs = [];
+    $result = mysqli_query($GLOBALS['db'], 'SELECT id, title, slug FROM files
         WHERE id IN (' . implode(',', $file_ids) . ')');
     if ($result) {
         while ($file = mysqli_fetch_assoc($result)) {
             $file_titles[$file['id']] = $file['title'];
+            $file_slugs[$file['id']] = $file['slug'];
         }
     }
 
@@ -1236,6 +1238,7 @@ if (($bill['video'] !== false) && (count($bill['video']) > 0)) {
     foreach ($bill['video'] as $clip) {
         $clip = (array) $clip;
         $clip['meeting'] = Video::meeting_label($file_titles[$clip['file_id']] ?? null, $clip['chamber']);
+        $clip['slug'] = $file_slugs[$clip['file_id']] ?? null;
         $clip['transcript'] = Video::transcript_span((int) $clip['file_id'], $clip['start'], $clip['end']);
         $clips[] = $clip;
         $duration += $clip['duration'];
@@ -1287,10 +1290,13 @@ if (($bill['video'] !== false) && (count($bill['video']) > 0)) {
             $page_body .= Video::transcript_html($clip['transcript'], $clip['start']);
         }
 
+        if (!empty($clip['slug'])) {
+            $page_body .= '
+					<p class="video-transcript-source"><a href="'
+                        . htmlspecialchars(Video::page_path($clip['slug'], max(0, $clip['start']))) . '">Watch the
+					full recording of this meeting</a></p>';
+        }
         $page_body .= '
-					<p class="video-transcript-source"><a href="' . htmlspecialchars($clip['path']) . '#t='
-                        . $clip['start'] . '">Watch the full recording of this meeting</a>
-					(Internet Archive)</p>
 				</div>
 			</li>';
     }

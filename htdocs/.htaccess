@@ -160,8 +160,14 @@ RewriteRule ^account/reset-password?/?$ /reset-password.php [QSA]
 RewriteRule ^minutes/([A-Za-z]+)/([0-9]{4})/([0-9]{2})/([0-9]{2})/$ /minutes.php?year=$2&chamber=$1&date=$3-$4 [QSA]
 RewriteRule ^minutes/([0-9]{4})?/?$ /list-minutes.php?year=$1 [QSA]
 
-# Video Clips
-RewriteRule ^video/clip/([a-z0-9]{0,6})?/?$ /video/clip.php?hash=$1 [QSA]
+# Videos. A video's URL is its slug and a readable suffix (/video/k7qm/2026-01-20-house-appropriations/),
+# but only the slug identifies it: video.php redirects any other suffix (or none) to the right one.
+# Slugs are lowercase, but uppercase is accepted here, so that video.php can redirect it.
+RewriteRule ^video/?$ /list-videos.php [QSA,L]
+# A year (slugs are never all digits).
+RewriteRule ^video/([0-9]{4})/?$ /list-videos.php?year=$1 [QSA,L]
+RewriteRule ^video/([A-Za-z0-9]{4})/captions\.vtt$ /video-captions.php?slug=$1 [QSA,L]
+RewriteRule ^video/([A-Za-z0-9]{4})/(?:([a-z0-9-]+)/?)?$ /video.php?slug=$1&suffix=$2 [QSA,L]
 
 # Schedule
 RewriteRule ^schedule/$ /schedule.php [QSA]
@@ -197,6 +203,7 @@ RewriteRule ^legislator$ /bills/ [R]
 RewriteRule ^search$ /search/
 RewriteRule ^schedule$ /schedule/ [R]
 RewriteRule ^minutes$ /minutes/ [R]
+RewriteRule ^video$ /video/ [R]
 php_value error_reporting 7
 
 # Photosynthesis
