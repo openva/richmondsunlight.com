@@ -128,6 +128,809 @@ class Video
     }
 
     /**
+     * The characters that video slugs are made of: no vowels, so that a slug can't spell a word,
+     * and nothing that's easily misread (0/o, 1/l/i).
+     */
+    public const SLUG_ALPHABET = 'bcdfghjkmnpqrstvwxz23456789';
+    public const SLUG_LENGTH = 4;
+
+    /**
+     * The video processing stages whose results visitors see, as named in video_jobs.stage.
+     */
+    private const VISIBLE_STAGES = ['transcript', 'bills', 'speakers'];
+
+    /**
+     * Hosts whose video a page may play (they're in the site's Content-Security-Policy media-src).
+     */
+    private const PLAYABLE_HOSTS = '/^(video\.richmondsunlight\.com|archive\.org|[a-z0-9-]+\.archive\.org|[a-z0-9-]+\.sliq\.net|archive-video\.granicus\.com)$/';
+
+    /**
+     * Make a new, random video slug. Every slug has at least one letter, so that it can't be
+     * mistaken for a numeric video ID. It's up to the caller to make sure that it's not in use
+     * (files.slug has a unique index, so an insert with a slug that's taken fails).
+     *
+     * @return string
+     */
+    public static function new_slug(): string
+    {
+        $last = strlen(self::SLUG_ALPHABET) - 1;
+        do {
+            $slug = '';
+            for ($i = 0; $i < self::SLUG_LENGTH; $i++) {
+                $slug .= self::SLUG_ALPHABET[random_int(0, $last)];
+            }
+        } while (ctype_digit($slug));
+
+        return $slug;
+    }
+
+    /**
+     * Whether a string is in the form of a video slug.
+     *
+     * @param string $slug
+     * @return bool
+     */
+    public static function is_slug(string $slug): bool
+    {
+        return preg_match('/^[' . self::SLUG_ALPHABET . ']{' . self::SLUG_LENGTH . '}$/', $slug) === 1
+            && !ctype_digit($slug);
+    }
+
+    /**
+     * The URL of a video file that a page can play, or null if there isn't one (e.g., because the
+     * video hasn't been downloaded yet, or is only on YouTube).
+     *
+     * @param string|null $path The files.path value
+     * @return string|null
+     */
+    public static function media_url(?string $path): ?string
+    {
+        $path = trim((string) $path);
+        if ($path === '') {
+            return null;
+        }
+        $path = preg_replace(
+            ['#^/video/#', '#^http://archive\.org/#'],
+            ['https://video.richmondsunlight.com/', 'https://archive.org/'],
+            $path
+        );
+        $host = parse_url($path, PHP_URL_HOST);
+        if (strpos($path, 'https://') !== 0 || !is_string($host) || !preg_match(self::PLAYABLE_HOSTS, $host)) {
+            return null;
+        }
+
+        return $path;
+    }
+
+    /**
+     * The YouTube ID of a video, from files.youtube_id or, failing that, a YouTube URL in
+     * files.path (where the Senate's videos are recorded until they've been downloaded).
+     *
+     * @param string|null $youtube_id The files.youtube_id value
+     * @param string|null $path The files.path value
+     * @return string|null
+     */
+    public static function youtube_id(?string $youtube_id, ?string $path): ?string
+    {
+        if (!empty($youtube_id) && preg_match('/^[A-Za-z0-9_-]{11}$/', $youtube_id)) {
+            return $youtube_id;
+        }
+        if (preg_match('#^https?://(?:www\.|m\.)?(?:youtube\.com/(?:watch\?(?:.*&)?v=|live/|embed/)|youtu\.be/)([A-Za-z0-9_-]{11})#', (string) $path, $matches)) {
+            return $matches[1];
+        }
+
+        return null;
+    }
+
+    /**
+     * Turn text into the lowercase, hyphenated form used in URLs.
+     *
+     * @param string $text
+     * @return string
+     */
+    private static function url_words(string $text): string
+    {
+        $text = mb_strtolower(html_entity_decode($text, ENT_QUOTES));
+        $text = str_replace('&', ' and ', $text);
+        $text = preg_replace('/[^a-z0-9]+/', '-', $text);
+
+        return trim($text, '-');
+    }
+
+    /**
+     * The SQL that selects the videos described by summary(). More conditions can be appended to
+     * its WHERE clause.
+     *
+     * @param string $more_columns Any other columns to select
+     * @return string
+     */
+    private static function summary_sql(string $more_columns = ''): string
+    {
+        return 'SELECT ' . ($more_columns !== '' ? $more_columns . ', ' : '') . 'files.id, files.slug, files.date, files.chamber, files.title,
+                    files.description, files.path, files.youtube_id, files.length, files.width,
+                    files.height, files.license, files.sponsor, files.capture_directory,
+                    files.committee_id, committee.name AS committee_name,
+                    committee.shortname AS committee_shortname, committee.parent_id,
+                    parent.name AS parent_name, parent.shortname AS parent_shortname,
+                    EXISTS(
+                        SELECT 1 FROM committees AS current
+                        WHERE current.chamber = committee.chamber
+                            AND current.shortname = committee.shortname
+                            AND current.parent_id IS NULL AND current.date_ended IS NULL
+                    ) AS committee_has_page,
+                    EXISTS(
+                        SELECT 1 FROM committees AS current
+                        WHERE current.chamber = parent.chamber
+                            AND current.shortname = parent.shortname
+                            AND current.parent_id IS NULL AND current.date_ended IS NULL
+                    ) AS parent_has_page,
+                    (
+                        SELECT MIN(video_index.screenshot)
+                        FROM video_index
+                        WHERE video_index.file_id = files.id AND video_index.ignored != "y"
+                            AND video_index.screenshot != ""
+                    ) AS first_frame
+                FROM files
+                LEFT JOIN committees AS committee
+                    ON files.committee_id = committee.id
+                LEFT JOIN committees AS parent
+                    ON committee.parent_id = parent.id
+                WHERE files.type = "video" AND files.slug IS NOT NULL';
+    }
+
+    /**
+     * Describe the meeting that a video records: its type ("floor", "committee",
+     * "subcommittee", or "unknown", for a committee meeting whose committee hasn't been
+     * identified), a label, and its committee and parent committee, if any.
+     *
+     * A video with no committee is either a floor session or a committee meeting that the
+     * video processor couldn't match to a committee. They're told apart by the title.
+     *
+     * @param array $row A row from summary_sql()
+     * @return array
+     */
+    private static function meeting(array $row): array
+    {
+        $chamber = ucfirst((string) $row['chamber']);
+        $committee = function (?string $name, ?string $shortname, $has_page) use ($row) {
+            return [
+                'name' => html_entity_decode((string) $name, ENT_QUOTES),
+                'shortname' => $shortname,
+                'url' => $has_page ? 'https://www.richmondsunlight.com/committee/' . $row['chamber'] . '/' . $shortname . '/' : null,
+            ];
+        };
+
+        if (!empty($row['committee_id']) && $row['committee_name'] !== null) {
+            if (!empty($row['parent_id']) && $row['parent_name'] !== null) {
+                $parent = $committee($row['parent_name'], $row['parent_shortname'], $row['parent_has_page']);
+                $sub = $committee($row['committee_name'], null, false);
+                return [
+                    'type' => 'subcommittee',
+                    'label' => $chamber . ' ' . $parent['name'] . ': ' . $sub['name'] . ' Subcommittee',
+                    'committee' => $sub,
+                    'parent_committee' => $parent,
+                ];
+            }
+            $main = $committee($row['committee_name'], $row['committee_shortname'], $row['committee_has_page']);
+            return [
+                'type' => 'committee',
+                'label' => $chamber . ' ' . $main['name'] . ' Committee',
+                'committee' => $main,
+                'parent_committee' => null,
+            ];
+        }
+
+        $label = self::meeting_label($row['title'], $row['chamber']);
+        return [
+            'type' => $label === trim($chamber . ' floor session') ? 'floor' : 'unknown',
+            'label' => $label,
+            'committee' => null,
+            'parent_committee' => null,
+        ];
+    }
+
+    /**
+     * The readable part of a video page's URL, after the slug: the date, the chamber, and the
+     * meeting (e.g., "2026-01-20-house-appropriations"). It identifies nothing; a URL with the
+     * wrong one is redirected to the right one.
+     *
+     * @param array $row A row from summary_sql()
+     * @param array $meeting The video's meeting(), from that row
+     * @return string
+     */
+    private static function url_suffix(array $row, array $meeting): string
+    {
+        $words = match ($meeting['type']) {
+            'floor' => 'floor',
+            'committee' => self::url_words($meeting['committee']['name']),
+            'subcommittee' => self::url_words($meeting['parent_committee']['name'])
+                . '-' . self::url_words($meeting['committee']['name']),
+            default => 'committee',
+        };
+
+        return trim($row['date'] . '-' . $row['chamber'] . '-' . $words, '-');
+    }
+
+    /**
+     * Summarize a video for the API: its slug and page URL, whether it can be played, and the
+     * meeting it records. (These are added to the fields that the API has always listed.)
+     *
+     * @param array $row A row from summary_sql()
+     * @return array
+     */
+    private static function summary(array $row): array
+    {
+        $meeting = self::meeting($row);
+        $playable = self::media_url($row['path']) !== null
+            || self::youtube_id($row['youtube_id'], $row['path']) !== null;
+
+        // The first frame that the video processor indexed (a frame with a chyron) is a good
+        // picture of the video, and is known to exist.
+        $poster = null;
+        if (!empty($row['capture_directory']) && !empty($row['first_frame'])) {
+            $poster = (new self())->normalize_screenshot_url($row['capture_directory'])
+                . str_pad($row['first_frame'], 8, '0', STR_PAD_LEFT) . '.jpg';
+        }
+
+        return [
+            'slug' => $row['slug'],
+            'url' => 'https://www.richmondsunlight.com/video/' . $row['slug'] . '/'
+                . self::url_suffix($row, $meeting) . '/',
+            'status' => $playable ? 'available' : 'processing',
+            'date' => $row['date'],
+            'chamber' => $row['chamber'],
+            'meeting' => $meeting,
+            'title' => $row['title'],
+            'length' => !empty($row['length']) ? time_to_seconds($row['length']) : null,
+            'poster' => $poster,
+        ];
+    }
+
+    /**
+     * List videos for the API, oldest first, optionally limited to a year, a date, a chamber,
+     * and a committee (with its subcommittees).
+     *
+     * @param array $filters Any of year (int), date (Y-m-d), chamber, and committee (a shortname,
+     *                       which requires chamber)
+     * @return array Each video's summary() (with a poster: a picture of the video, if there is
+     *               one), plus the fields the API has always listed
+     */
+    public static function list_for_api(array $filters): array
+    {
+        $sql = self::summary_sql('(files.transcript IS NOT NULL) AS has_transcript,
+                    EXISTS(
+                        SELECT 1 FROM video_index
+                        WHERE video_index.file_id = files.id
+                        AND video_index.linked_id IS NOT NULL
+                    ) AS is_indexed');
+        $types = '';
+        $params = [];
+        if (isset($filters['year'])) {
+            $sql .= ' AND files.date BETWEEN ? AND ?';
+            $types .= 'ss';
+            $params[] = $filters['year'] . '-01-01';
+            $params[] = $filters['year'] . '-12-31';
+        }
+        if (isset($filters['date'])) {
+            $sql .= ' AND files.date = ?';
+            $types .= 's';
+            $params[] = $filters['date'];
+        }
+        if (isset($filters['chamber'])) {
+            $sql .= ' AND files.chamber = ?';
+            $types .= 's';
+            $params[] = $filters['chamber'];
+        }
+        if (isset($filters['committee'])) {
+            $sql .= ' AND files.committee_id IN (
+                        SELECT c.id
+                        FROM committees AS c
+                        LEFT JOIN committees AS p
+                            ON c.parent_id = p.id
+                        WHERE c.chamber = ? AND (c.shortname = ? OR p.shortname = ?))';
+            $types .= 'sss';
+            array_push($params, $filters['chamber'], $filters['committee'], $filters['committee']);
+        }
+        $sql .= ' ORDER BY files.date ASC, files.id ASC';
+
+        $stmt = mysqli_prepare($GLOBALS['db'], $sql);
+        if ($stmt === false) {
+            return [];
+        }
+        if ($types !== '') {
+            $stmt->bind_param($types, ...$params);
+        }
+        if (!$stmt->execute()) {
+            return [];
+        }
+        $result = $stmt->get_result();
+
+        // The fields that the API has always listed keep their old types (strings, as mysqli_query()
+        // returns them), so that nothing that uses them breaks.
+        $string = fn($value) => $value !== null ? stripslashes((string) $value) : null;
+
+        $videos = [];
+        while ($row = $result->fetch_assoc()) {
+            $video = [
+                'id' => (string) $row['id'],
+                'date' => $row['date'],
+                'chamber' => $row['chamber'],
+                'committee' => $string($row['committee_name']),
+                'title' => $string($row['title']),
+                'path' => $row['path'] !== null
+                    ? preg_replace('#^/video/#', 'https://video.richmondsunlight.com/', $row['path'])
+                    : null,
+                'description' => $string($row['description']),
+                'width' => $string($row['width']),
+                'height' => $string($row['height']),
+                'sponsor' => $string($row['sponsor']),
+                'has_transcript' => (bool) $row['has_transcript'],
+                'is_indexed' => (bool) $row['is_indexed'],
+            ];
+            $videos[] = $video + self::summary($row);
+        }
+
+        return $videos;
+    }
+
+    /**
+     * The slug and page URL of a video, by its files.id, for the API's (deprecated) numeric
+     * video endpoint.
+     *
+     * @param int $file_id
+     * @return array|null slug and url, or null if there's no such video
+     */
+    public static function slug_and_url(int $file_id): ?array
+    {
+        $stmt = mysqli_prepare($GLOBALS['db'], self::summary_sql() . ' AND files.id = ?');
+        if ($stmt === false) {
+            return null;
+        }
+        $stmt->bind_param('i', $file_id);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        if (!$row) {
+            return null;
+        }
+        $summary = self::summary($row);
+
+        return ['slug' => $summary['slug'], 'url' => $summary['url']];
+    }
+
+    /**
+     * Everything about a single video, for the API: its summary(), what it shows (description,
+     * dimensions, license, sponsor), where to play it, and a guide to it (the bills taken up, the
+     * legislators who spoke, and the transcript), along with the day's minutes and other videos.
+     *
+     * @param string $slug The video's slug
+     * @return array|null The video, or null if there's no such video
+     */
+    public static function record_for_api(string $slug): ?array
+    {
+        if (!self::is_slug($slug)) {
+            return null;
+        }
+        $stmt = mysqli_prepare($GLOBALS['db'], self::summary_sql() . ' AND files.slug = ?');
+        if ($stmt === false) {
+            return null;
+        }
+        $stmt->bind_param('s', $slug);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        if (!$row) {
+            return null;
+        }
+
+        $file_id = (int) $row['id'];
+        $video = self::summary($row);
+
+        $video['pending'] = [];
+        $result = mysqli_query($GLOBALS['db'], 'SELECT stage
+            FROM video_jobs
+            WHERE file_id = ' . $file_id . '
+                AND stage IN ("' . implode('","', self::VISIBLE_STAGES) . '")
+                AND status IN ("running", "retry", "waiting", "pending")');
+        while ($result && $job = mysqli_fetch_assoc($result)) {
+            $video['pending'][] = $job['stage'];
+        }
+        usort($video['pending'], fn($a, $b) => array_search($a, self::VISIBLE_STAGES) <=> array_search($b, self::VISIBLE_STAGES));
+
+        $video['description'] = $row['description'];
+        $video['width'] = $row['width'] !== null ? (int) $row['width'] : null;
+        $video['height'] = $row['height'] !== null ? (int) $row['height'] : null;
+        $video['license'] = $row['license'];
+        $video['sponsor'] = !empty($row['sponsor']) ? $row['sponsor'] : null;
+
+        $video['media'] = [
+            'mp4' => self::media_url($row['path']),
+            'youtube_id' => self::youtube_id($row['youtube_id'], $row['path']),
+            'poster' => $video['poster'],
+        ];
+        unset($video['poster']);
+
+        // The bills taken up, and the legislators who spoke, as identified by the chyrons.
+        $chapters = new self();
+        $chapters->id = $file_id;
+        $chapters->fuzz = self::DEFAULT_FUZZ_SECONDS;
+        $chapters->clip_type = 'bills';
+        $bill_clips = $chapters->index_clips() ? array_values((array) $chapters->clips) : [];
+        unset($chapters->clips);
+        $chapters->clip_type = 'legislators';
+        $legislator_clips = $chapters->index_clips() ? array_values((array) $chapters->clips) : [];
+
+        $bills = [];
+        $bill_ids = array_unique(array_map(fn($clip) => (int) $clip->linked_id, $bill_clips));
+        if (count($bill_ids) > 0) {
+            $result = mysqli_query($GLOBALS['db'], 'SELECT bills.id, bills.number, bills.catch_line,
+                    sessions.year
+                FROM bills
+                LEFT JOIN sessions
+                    ON bills.session_id = sessions.id
+                WHERE bills.id IN (' . implode(',', $bill_ids) . ')');
+            while ($result && $bill = mysqli_fetch_assoc($result)) {
+                $bills[(int) $bill['id']] = $bill;
+            }
+        }
+        $video['bills'] = [];
+        foreach ($bill_clips as $clip) {
+            $bill = $bills[(int) $clip->linked_id] ?? null;
+            $video['bills'][] = [
+                'start' => max(0, $clip->start),
+                'end' => $clip->end,
+                'number' => $bill['number'] ?? mb_strtolower(str_replace(' ', '', (string) ($clip->bill_number ?? ''))),
+                'year' => isset($bill['year']) ? (int) $bill['year'] : null,
+                'catch_line' => isset($bill['catch_line']) ? html_entity_decode((string) $bill['catch_line'], ENT_QUOTES) : null,
+                'url' => $bill !== null ? 'https://www.richmondsunlight.com/bill/' . $bill['year'] . '/' . $bill['number'] . '/' : null,
+            ];
+        }
+
+        // Each legislator's appearances, listed by name.
+        $speakers = [];
+        $person_ids = array_unique(array_map(fn($clip) => (int) $clip->linked_id, $legislator_clips));
+        if (count($person_ids) > 0) {
+            $result = mysqli_query($GLOBALS['db'], 'SELECT id, name, shortname
+                FROM people
+                WHERE id IN (' . implode(',', $person_ids) . ')');
+            while ($result && $person = mysqli_fetch_assoc($result)) {
+                $speakers[(int) $person['id']] = [
+                    'name' => $person['name'],
+                    'shortname' => $person['shortname'],
+                    'label' => null,
+                    'starts' => [],
+                ];
+            }
+        }
+        foreach ($legislator_clips as $clip) {
+            if (!isset($speakers[(int) $clip->linked_id])) {
+                continue;
+            }
+            $speakers[(int) $clip->linked_id]['label'] = $clip->legislator_name;
+            $speakers[(int) $clip->linked_id]['starts'][] = max(0, $clip->start);
+        }
+        uasort($speakers, fn($a, $b) => strcmp($a['name'], $b['name']));
+        $video['speakers'] = array_values($speakers);
+
+        $video['transcript'] = array_map(fn($turn) => [
+            'start' => $turn['start'],
+            'speaker' => !empty($turn['speaker']) ? ['name' => $turn['speaker'], 'shortname' => $turn['shortname']] : null,
+            'lines' => $turn['lines'],
+        ], self::transcript_span($file_id, 0, 86399));
+        $video['captions'] = count($video['transcript']) > 0
+            ? 'https://api.richmondsunlight.com/1.1/video/' . $row['slug'] . '.vtt'
+            : null;
+
+        // The day's minutes, and the day's other videos.
+        $video['minutes'] = null;
+        $result = mysqli_query($GLOBALS['db'], 'SELECT 1
+            FROM minutes
+            WHERE date = "' . $row['date'] . '" AND chamber = "' . $row['chamber'] . '"
+            LIMIT 1');
+        if ($result && mysqli_num_rows($result) > 0) {
+            $video['minutes'] = 'https://www.richmondsunlight.com/minutes/' . $row['chamber'] . '/'
+                . str_replace('-', '/', $row['date']) . '/';
+        }
+
+        $video['same_day'] = [];
+        foreach (self::list_for_api(['date' => $row['date']]) as $other) {
+            if ($other['slug'] !== $row['slug']) {
+                $video['same_day'][] = [
+                    'slug' => $other['slug'],
+                    'url' => $other['url'],
+                    'chamber' => $other['chamber'],
+                    'label' => $other['meeting']['label'],
+                    'status' => $other['status'],
+                ];
+            }
+        }
+
+        return $video;
+    }
+
+    /**
+     * Captions for a whole video, as WebVTT, for the API.
+     *
+     * @param string $slug The video's slug
+     * @return string|null The captions, or null if there's no such video or it has no transcript
+     */
+    public static function captions_for_api(string $slug): ?string
+    {
+        if (!self::is_slug($slug)) {
+            return null;
+        }
+        $stmt = mysqli_prepare($GLOBALS['db'], 'SELECT id FROM files WHERE slug = ?');
+        if ($stmt === false) {
+            return null;
+        }
+        $stmt->bind_param('s', $slug);
+        $stmt->execute();
+        $row = $stmt->get_result()->fetch_assoc();
+        if (!$row) {
+            return null;
+        }
+        $turns = self::transcript_span((int) $row['id'], 0, 86399);
+
+        return count($turns) > 0 ? self::transcript_vtt($turns) : null;
+    }
+
+    /**
+     * The address of a video's page on this site, from its API record. Pages link to just the slug
+     * (e.g., /video/k7qm/?t=120), and the video's page redirects to its full URL.
+     *
+     * @param string $slug The video's slug
+     * @param float|null $time Where to start playing, in seconds
+     * @return string
+     */
+    public static function page_path(string $slug, ?float $time = null): string
+    {
+        return '/video/' . $slug . '/' . ($time !== null && $time > 0 ? '?t=' . (int) floor($time) : '');
+    }
+
+    /**
+     * Get a video's record from the API.
+     *
+     * @param string $slug The video's slug
+     * @return array|null The record, or null if there's no such video (or the API can't be reached)
+     */
+    public static function from_api(string $slug): ?array
+    {
+        if (!self::is_slug($slug)) {
+            return null;
+        }
+        $json = get_content(API_URL . '1.1/video/' . $slug . '.json');
+        $video = $json !== false ? json_decode($json, true) : null;
+        if (!is_array($video) || isset($video['error']) || empty($video['slug'])) {
+            return null;
+        }
+
+        return $video;
+    }
+
+    /**
+     * Get a list of videos from the API.
+     *
+     * @param array $filters Any of year, date, chamber, and committee
+     * @return array The videos (none, if the API can't be reached)
+     */
+    public static function list_from_api(array $filters): array
+    {
+        $json = get_content(API_URL . '1.1/videos.json?' . http_build_query($filters));
+        $videos = $json !== false ? json_decode($json, true) : null;
+        if (!is_array($videos) || isset($videos['error'])) {
+            return [];
+        }
+
+        return $videos;
+    }
+
+    /**
+     * A sponsor's credit, which may include a link and a logo, reduced to just those: links and
+     * images with https:// addresses, and text.
+     *
+     * @param string|null $sponsor The files.sponsor value
+     * @return string HTML
+     */
+    public static function sponsor_html(?string $sponsor): string
+    {
+        $sponsor = trim((string) $sponsor);
+        if ($sponsor === '') {
+            return '';
+        }
+        if (strpos($sponsor, '<') === false) {
+            return htmlspecialchars($sponsor);
+        }
+
+        $doc = new DOMDocument();
+        libxml_use_internal_errors(true);
+        $doc->loadHTML('<?xml encoding="utf-8"?><div>' . $sponsor . '</div>', LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+        libxml_clear_errors();
+
+        $render = function (DOMNode $node) use (&$render): string {
+            $html = '';
+            foreach ($node->childNodes as $child) {
+                if ($child instanceof DOMText) {
+                    $html .= htmlspecialchars($child->textContent);
+                } elseif ($child instanceof DOMElement) {
+                    $inner = $render($child);
+                    $tag = strtolower($child->tagName);
+                    if ($tag === 'a' && preg_match('#^https?://#i', $child->getAttribute('href'))) {
+                        $html .= '<a href="' . htmlspecialchars($child->getAttribute('href')) . '">' . $inner . '</a>';
+                    } elseif ($tag === 'img' && preg_match('#^https://#i', $child->getAttribute('src'))) {
+                        $html .= '<img src="' . htmlspecialchars($child->getAttribute('src')) . '" alt="'
+                            . htmlspecialchars($child->getAttribute('alt')) . '">';
+                    } else {
+                        $html .= $inner;
+                    }
+                }
+            }
+            return $html;
+        };
+
+        return trim($render($doc->getElementsByTagName('div')->item(0)));
+    }
+
+    /**
+     * Render the video player used on video and minutes pages: the video, and a guide to it, in
+     * tabs: the bills taken up, the legislators who spoke, and the transcript. Any timestamp or
+     * transcript line plays the video from that point. /js/video-player.js makes that work.
+     *
+     * @param array $video The video's record from the API
+     * @param string|null $heading The section's heading, or null for none
+     * @return string HTML
+     */
+    public static function page_player_html(array $video, ?string $heading = 'Video'): string
+    {
+        $media = $video['media'] ?? [];
+        $length = !empty($video['length']) ? ' (' . self::clock($video['length']) . ')' : '';
+
+        $html = '
+		<section id="video" class="video-player"' . ($heading !== null ? ' aria-labelledby="video-heading"' : ' aria-label="Video"') . '>'
+            . ($heading !== null ? '
+			<h2 id="video-heading">' . htmlspecialchars($heading) . '</h2>' : '') . '
+			<div class="video-player-stage">';
+
+        if (!empty($media['mp4'])) {
+            $html .= '
+				<video controls preload="none" playsinline src="' . htmlspecialchars($media['mp4']) . '"'
+                . (!empty($media['poster']) ? ' poster="' . htmlspecialchars($media['poster']) . '"' : '') . '>'
+                . (!empty($video['captions']) ? '
+					<track kind="captions" srclang="en" label="English"
+						src="/video/' . htmlspecialchars($video['slug']) . '/captions.vtt">' : '') . '
+					<p>Your browser can’t play this video.
+					<a href="' . htmlspecialchars($media['mp4']) . '">Download it instead.</a></p>
+				</video>';
+        } elseif (!empty($media['youtube_id'])) {
+            $html .= '
+				<iframe class="video-player-youtube" title="' . htmlspecialchars($video['meeting']['label'] ?? 'Video') . '"
+					src="https://www.youtube-nocookie.com/embed/' . htmlspecialchars($media['youtube_id']) . '"
+					data-youtube="https://www.youtube-nocookie.com/embed/' . htmlspecialchars($media['youtube_id']) . '"
+					allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
+        }
+
+        $html .= '
+				<p class="video-player-now" aria-live="polite" hidden></p>
+			</div>';
+
+        if (!empty($media['mp4'])) {
+            $html .= '
+			<p class="video-player-download"><a href="' . htmlspecialchars($media['mp4']) . '">Download this video</a>' . $length . '</p>';
+        }
+
+        $pending = array_values(array_intersect(['transcript', 'bills', 'speakers'], $video['pending'] ?? []));
+        if (count($pending) > 0) {
+            $names = array_map(fn($stage) => [
+                'transcript' => 'transcript',
+                'bills' => 'list of bills',
+                'speakers' => 'list of speakers',
+            ][$stage], $pending);
+            $last = array_pop($names);
+            $list = count($names) > 0 ? implode(', ', $names) . ' and ' . $last : $last;
+            $html .= '
+			<p class="video-player-pending">The ' . $list . ' ' . (count($pending) === 1 ? 'is' : 'are')
+                . ' still being prepared.</p>';
+        }
+
+        $bills = $video['bills'] ?? [];
+        $speakers = $video['speakers'] ?? [];
+        $transcript = $video['transcript'] ?? [];
+
+        $html .= '
+			<div class="video-player-guide">
+				<div class="video-player-tabs" role="tablist" aria-label="Find your way around this video" hidden>';
+        $panels = [];
+        if (count($bills) > 0) {
+            $panels['video-bills'] = 'Bills <span>' . count($bills) . '</span>';
+        }
+        if (count($speakers) > 0) {
+            $panels['video-speakers'] = 'Speakers <span>' . count($speakers) . '</span>';
+        }
+        if (count($transcript) > 0) {
+            $panels['transcript'] = 'Transcript';
+        }
+        foreach ($panels as $id => $label) {
+            $html .= '
+					<button type="button" role="tab" id="tab-' . $id . '" aria-controls="' . $id . '">' . $label . '</button>';
+        }
+        $html .= '
+				</div>';
+
+        $timestamp = fn($start) => '<button type="button" class="video-timestamp" data-seek="' . $start . '"
+								aria-label="Play from ' . self::clock($start) . '">' . self::clock($start) . '</button>';
+
+        if (count($bills) > 0) {
+            $html .= '
+				<section id="video-bills" class="video-player-panel" role="tabpanel" aria-labelledby="tab-video-bills">
+					<h3>Bills</h3>
+					<ol class="video-player-scroll video-player-list">';
+            foreach ($bills as $bill) {
+                $number = mb_strtoupper(preg_replace('/^([a-z]+)/', '$1 ', (string) $bill['number']));
+                $html .= '
+						<li data-start="' . $bill['start'] . '" data-end="' . $bill['end'] . '">
+							' . $timestamp($bill['start']) . '
+							<span class="video-player-item">';
+                if (!empty($bill['url'])) {
+                    $html .= '<a class="video-player-bill" href="/bill/' . (int) $bill['year'] . '/'
+                        . htmlspecialchars($bill['number']) . '/">' . $number . '</a> '
+                        . htmlspecialchars((string) $bill['catch_line']);
+                } else {
+                    $html .= htmlspecialchars($number);
+                }
+                $html .= '</span>
+							<span class="video-player-length" title="Length">' . self::clock($bill['end'] - $bill['start']) . '</span>
+						</li>';
+            }
+            $html .= '
+					</ol>
+				</section>';
+        }
+
+        if (count($speakers) > 0) {
+            $html .= '
+				<section id="video-speakers" class="video-player-panel" role="tabpanel" aria-labelledby="tab-video-speakers">
+					<h3>Speakers</h3>
+					<ul class="video-player-scroll video-player-list">';
+            foreach ($speakers as $speaker) {
+                $html .= '
+						<li data-starts="' . implode(' ', $speaker['starts']) . '">
+							<a class="video-player-item" href="/legislator/' . htmlspecialchars($speaker['shortname']) . '/">'
+                    . htmlspecialchars($speaker['label'] ?? $speaker['name']) . '</a>
+							<span class="video-player-times">';
+                foreach ($speaker['starts'] as $start) {
+                    $html .= $timestamp($start) . ' ';
+                }
+                $html .= '</span>
+						</li>';
+            }
+            $html .= '
+					</ul>
+				</section>';
+        }
+
+        if (count($transcript) > 0) {
+            $turns = array_map(fn($turn) => [
+                'start' => $turn['start'],
+                'speaker' => $turn['speaker']['name'] ?? null,
+                'shortname' => $turn['speaker']['shortname'] ?? null,
+                'lines' => $turn['lines'],
+            ], $transcript);
+            $html .= '
+				<section id="transcript" class="video-player-panel" role="tabpanel" aria-labelledby="tab-transcript">
+					<h3>Transcript</h3>
+					<div class="video-player-scroll video-transcript">'
+                . self::transcript_html($turns) . '
+					</div>
+					<p class="video-player-note">This transcript comes from the closed captions, which are
+					written in real time, so it’s far from perfect.</p>
+				</section>';
+        }
+
+        $html .= '
+			</div>
+		</section>';
+
+        return $html;
+    }
+
+    /**
      * Get every clip of a legislator speaking, from floor sessions and committee meetings, in
      * chronological order.
      *
@@ -140,8 +943,8 @@ class Video
      * or else the one whose chyron was shown in the five minutes beforehand.
      *
      * @param int $person_id The legislator's people.id
-     * @return array A list of clips, each with file_id, path, date, chamber, meeting, start, end,
-     *               duration, and bill (null, or an array of number, year, and catch_line)
+     * @return array A list of clips, each with file_id, slug, path, date, chamber, meeting, start,
+     *               end, duration, and bill (null, or an array of number, year, and catch_line)
      */
     public static function person_clips(int $person_id): array
     {
@@ -191,7 +994,7 @@ class Video
         $file_ids = implode(',', array_unique(array_column($segments, 'file_id')));
 
         $files = [];
-        $result = mysqli_query($GLOBALS['db'], 'SELECT id, path, date, chamber, title
+        $result = mysqli_query($GLOBALS['db'], 'SELECT id, slug, path, date, chamber, title
             FROM files
             WHERE id IN (' . $file_ids . ')');
         while ($result && $file = mysqli_fetch_assoc($result)) {
@@ -245,6 +1048,7 @@ class Video
 
             $clips[] = [
                 'file_id' => $segment['file_id'],
+                'slug' => $file['slug'],
                 'path' => preg_replace(
                     ['#^/video/#', '#^http://archive\.org/#'],
                     ['https://video.richmondsunlight.com/', 'https://archive.org/'],
@@ -641,12 +1445,18 @@ class Video
         }
         if (isset($this->video['id'])) {
             $sql .= ' WHERE id=' . $this->video['id'];
+            $result = mysqli_query($GLOBALS['db'], $sql);
         } else {
             $sql .= ', date_created=now()';
-        }
 
-        # Perform the database query.
-        $result = mysqli_query($GLOBALS['db'], $sql);
+            # Give the new video a slug. If the slug is taken (a duplicate key error), try another.
+            for ($attempt = 0; $attempt < 10; $attempt++) {
+                $result = mysqli_query($GLOBALS['db'], $sql . ', slug="' . self::new_slug() . '"');
+                if ($result || mysqli_errno($GLOBALS['db']) !== 1062) {
+                    break;
+                }
+            }
+        }
 
         # If the query fails, complain,
         if (!$result) {

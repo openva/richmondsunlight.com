@@ -210,4 +210,76 @@ class VideoTest extends TestCase
         $video->id = self::$videoId;
         $this->assertTrue($video->get_video());
     }
+
+    // --- Slugs, playable addresses, and sponsors (for video pages) ---
+
+    public function testNewSlugsAreFourCharactersFromTheAlphabetWithALetter(): void
+    {
+        for ($i = 0; $i < 2000; $i++) {
+            $slug = Video::new_slug();
+            $this->assertMatchesRegularExpression('/^[bcdfghjkmnpqrstvwxz2-9]{4}$/', $slug);
+            $this->assertFalse(ctype_digit($slug), "All digits: {$slug}");
+            $this->assertTrue(Video::is_slug($slug));
+        }
+    }
+
+    public function testIsSlugRejectsOtherThings(): void
+    {
+        $this->assertTrue(Video::is_slug('k7qm'));
+        $this->assertFalse(Video::is_slug('2345'), 'all digits, like a video ID');
+        $this->assertFalse(Video::is_slug('kaqm'), 'a vowel');
+        $this->assertFalse(Video::is_slug('k1qm'), 'a 1');
+        $this->assertFalse(Video::is_slug('K7QM'), 'uppercase');
+        $this->assertFalse(Video::is_slug('k7q'), 'too short');
+        $this->assertFalse(Video::is_slug('k7qmx'), 'too long');
+    }
+
+    public function testMediaUrlAcceptsOnlyHostsThatPagesMayPlay(): void
+    {
+        $this->assertSame(
+            'https://video.richmondsunlight.com/senate/floor/20150212.mp4',
+            Video::media_url('/video/senate/floor/20150212.mp4')
+        );
+        $this->assertSame(
+            'https://archive.org/download/senate20150119/20150119.mp4',
+            Video::media_url('http://archive.org/download/senate20150119/20150119.mp4')
+        );
+        $this->assertSame(
+            'https://sg001-harmony01.sliq.net/00304archives/2026/01/26/a.mp4',
+            Video::media_url('https://sg001-harmony01.sliq.net/00304archives/2026/01/26/a.mp4')
+        );
+        $this->assertNull(Video::media_url('https://www.youtube.com/watch?v=dQw4w9WgXcQ'));
+        $this->assertNull(Video::media_url('https://example.com/video.mp4'));
+        $this->assertNull(Video::media_url('http://example.com/video.mp4'));
+        $this->assertNull(Video::media_url(''));
+        $this->assertNull(Video::media_url(null));
+    }
+
+    public function testYoutubeIdComesFromTheColumnOrAYoutubeUrl(): void
+    {
+        $this->assertSame('dQw4w9WgXcQ', Video::youtube_id('dQw4w9WgXcQ', null));
+        $this->assertSame('dQw4w9WgXcQ', Video::youtube_id(null, 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'));
+        $this->assertSame('dQw4w9WgXcQ', Video::youtube_id(null, 'https://youtu.be/dQw4w9WgXcQ'));
+        $this->assertNull(Video::youtube_id(null, 'https://archive.org/download/x/y.mp4'));
+        $this->assertNull(Video::youtube_id('not an id', null));
+    }
+
+    public function testSponsorHtmlKeepsOnlyLinksImagesAndText(): void
+    {
+        $this->assertSame('', Video::sponsor_html(null));
+        $this->assertSame('Smith &amp; Jones', Video::sponsor_html('Smith & Jones'));
+        $this->assertSame(
+            '<a href="https://example.com/"><img src="https://example.com/logo.png" alt="Example"></a>',
+            Video::sponsor_html('<a href="https://example.com/" onclick="evil()"><img src="https://example.com/logo.png" alt="Example" onerror="evil()"></a>')
+        );
+        $this->assertSame('Example', Video::sponsor_html('<a href="javascript:evil()">Example</a>'));
+        $this->assertSame('evil()', Video::sponsor_html('<script>evil()</script>'));
+    }
+
+    public function testPagePathLinksToTheSlugAndATime(): void
+    {
+        $this->assertSame('/video/k7qm/', Video::page_path('k7qm'));
+        $this->assertSame('/video/k7qm/?t=125', Video::page_path('k7qm', 125.6));
+        $this->assertSame('/video/k7qm/', Video::page_path('k7qm', 0));
+    }
 }
