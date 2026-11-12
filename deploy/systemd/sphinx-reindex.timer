@@ -1,0 +1,11 @@
+# Runs sphinx-reindex.service at 4 AM Eastern: after rs-machine's 2:30 AM task (which can run for up
+# to an hour), and before its 5:45 AM one. Installed by deploy/postdeploy.sh.
+
+[Unit]
+Description=Rebuild the Sphinx search index nightly
+
+[Timer]
+OnCalendar=*-*-* 04:00:00 America/New_York
+
+[Install]
+WantedBy=timers.target

@@ -296,11 +296,13 @@ jobs:
             --application-name RS-Web \
             --s3-location s3://deploy.richmondsunlight.com/rs-web-staging.zip \
             --no-ignore-hidden-files
-          aws deploy create-deployment \
+          deployment_id=$(aws deploy create-deployment \
             --application-name RS-Web \
             --deployment-group-name RS-Web-Staging \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --s3-location bucket=deploy.richmondsunlight.com,key=rs-web-staging.zip,bundleType=zip
+            --s3-location bucket=deploy.richmondsunlight.com,key=rs-web-staging.zip,bundleType=zip \
+            --query deploymentId --output text)
+          bash deploy/wait-for-deployment.sh "$deployment_id"
 
       - name: Deploy to production
         if: github.ref_name == 'deploy'
@@ -309,8 +311,10 @@ jobs:
             --application-name RS-Web \
             --s3-location s3://deploy.richmondsunlight.com/rs-web-deploy.zip \
             --no-ignore-hidden-files
-          aws deploy create-deployment \
+          deployment_id=$(aws deploy create-deployment \
             --application-name RS-Web \
             --deployment-group-name RS-Web-Fleet \
             --deployment-config-name CodeDeployDefault.OneAtATime \
-            --s3-location bucket=deploy.richmondsunlight.com,key=rs-web-deploy.zip,bundleType=zip
+            --s3-location bucket=deploy.richmondsunlight.com,key=rs-web-deploy.zip,bundleType=zip \
+            --query deploymentId --output text)
+          bash deploy/wait-for-deployment.sh "$deployment_id"

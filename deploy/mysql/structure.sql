@@ -617,6 +617,7 @@ DROP TABLE IF EXISTS `files`;
 /*!40101 SET character_set_client = utf8mb4 */;
 CREATE TABLE `files` (
   `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
+  `slug` char(4) CHARACTER SET ascii COLLATE ascii_bin DEFAULT NULL COMMENT 'Identifies the video in its URL (e.g., /video/k7qm/). Random; see Video::new_slug().',
   `chamber` enum('house','senate') CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
   `committee_id` smallint(5) unsigned DEFAULT NULL,
   `author_name` varchar(60) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL,
@@ -645,6 +646,7 @@ CREATE TABLE `files` (
   `date_created` datetime NOT NULL,
   `date_modified` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   PRIMARY KEY (`id`),
+  UNIQUE KEY `slug` (`slug`),
   KEY `chamber` (`chamber`),
   FULLTEXT KEY `description` (`description`)
 ) ENGINE=InnoDB AUTO_INCREMENT=15715 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
