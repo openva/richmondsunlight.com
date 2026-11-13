@@ -566,6 +566,30 @@ CREATE TABLE `dashboard_watch_lists` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `day_highlights`
+--
+
+DROP TABLE IF EXISTS `day_highlights`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `day_highlights` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `date` date NOT NULL,
+  `bill_id` mediumint(8) unsigned NOT NULL,
+  `chamber` enum('house','senate') DEFAULT NULL COMMENT 'Where its most important action that day was',
+  `score` float(7,2) NOT NULL,
+  `position` tinyint(3) unsigned DEFAULT NULL COMMENT 'Its place among the day''s highlights, or NULL if it isn''t one',
+  `hidden` enum('y','n') NOT NULL DEFAULT 'n' COMMENT 'Whether an admin has hidden it from the highlights',
+  `reasons` text NOT NULL COMMENT 'JSON: each signal''s value and points, and what was done to the bill',
+  `date_created` datetime NOT NULL,
+  `date_modified` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `date_bill` (`date`,`bill_id`),
+  KEY `bill_id` (`bill_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Each day''s bills, scored, and its highlights (see class.DayHighlights.php)';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `districts`
 --
 

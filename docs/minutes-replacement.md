@@ -2,9 +2,14 @@
 
 ## Status
 
-Phase 1 (the day's page, with no ranking) was built in November 2026, in this repo and rs-api, and
-tested locally. Nothing is committed or deployed. See "Phase 1, as built" (at the end) for where it
-differs from this proposal, and how to deploy it. Phases 2 through 5 aren't started.
+Phase 1 (the day's page, with no ranking) was built in November 2026, in this repo and rs-api. See
+"Phase 1, as built" for where it differs from this proposal, and how to deploy it.
+
+Phase 2 (highlights, "What People Said," and "In the News") was built next, in this repo, rs-api,
+and rs-machine, and tested locally. It isn't committed or deployed, and its weights haven't been
+tuned against real days yet. See "Phase 2, as built" (at the end).
+
+Phases 3 through 5 aren't started.
 
 ## Goal
 
@@ -401,3 +406,138 @@ repo's tests need rs-api's endpoints.
    JavaScript, the video page's links, the sitemap, `/about/api/`, the tests, and this document.
    Then purge Cloudflare's cache for `www.richmondsunlight.com/minutes/*`, so that the redirects
    take effect, and for the pages with the menu, or wait for them to expire.
+
+## Phase 2, as built
+
+### What a day shows now
+
+- **Highlights,** after the summary: up to ten of the day's bills, best first. Each shows the bill,
+  the most important thing done to it that day (with its tally), the reasons it was chosen ("Close
+  vote, 45–52," "Party-line vote," "12 minutes of discussion," "5 legislators spoke," "2 news
+  stories," "The most-viewed of the day's bills," "3 comments," "Added to 4 Photosynthesis
+  portfolios"), and a link to the longest discussion of it on video. Highlights follow the House
+  and Senate filter. For two weeks, a line says when they were chosen, and that they can change.
+- **What People Said,** after the meetings: comments posted that day on the day's bills, how those
+  bills are doing in our polls (if they have at least ten votes), and the five bills of that year
+  that the most people looked at that day (whether or not anything was done to them).
+- **In the News,** after that: stories about the day's bills, from two days before to three days
+  after, with the bills each one is about.
+- **No highlights outside of a session,** as for floor sessions.
+
+### How highlights are chosen
+
+The scoring is in `htdocs/includes/class.DayHighlights.php`. Its `WEIGHTS` are the settings to
+tune. It scores every bill that the day's page shows an action on, using the same reading of LIS's
+actions as the page (`Day::bills_acted_on()`), so the two can't disagree.
+
+| Signal | Points |
+|---|---|
+| What was done to it (its most important action that day) | Passed or failed on the floor, or vetoed: 10. Stopped in committee (continued, passed by indefinitely, tabled, defeated): 8. Reported: 6. A subcommittee's recommendation: 4. The governor's amendments, and acting on them: 4. A vote on a conference report: 3. Incorporated: 1. Anything else (readings, referrals, appointing conferees): 0, and the bill can't be a highlight. |
+| Its closest vote | 12 × (1 − margin ÷ votes cast)³: 51–47 is worth 10.6, and 9–5 is worth 4.4. |
+| Its most partisan roll call | 10 × how far apart the parties voted, from 0 (each party split the same way) to 1 (every Democrat one way, every Republican the other). Each legislator's party is the one in the term they were serving that day. |
+| How long it was discussed | 4 × log₂(1 + minutes), from its chyrons on the day's videos. Chyrons more than 30 seconds apart are separate discussions. |
+| Who discussed it | 2 for each legislator whose chyron appeared during the discussions, after the first, up to 8 legislators. |
+| News stories | 8 × log₂(1 + stories), from three days before the day to three days after. |
+| Interest here | 2.5 × log₂(1 + hotness), with hotness's formula (from rs-machine's `cleanup.php`) counted for the day and the next. |
+| Interestingness | 0.5 × log₂(1 + interestingness), as a tiebreaker. |
+
+Then the highlights are chosen from the bills that can be highlights:
+
+- The best ten, but past the fifth, only those with at least half the top bill's score.
+- No more than two of any legislator's bills.
+- At least two from each chamber that did anything, if it has them, replacing the weakest of a
+  chamber that has more than two.
+- Never a ceremonial resolution ("Commending…," "Celebrating the life of…").
+
+Differences from the proposal:
+
+- **`votes.partisanship` isn't used.** Its own comments say that it mismeasures party-line votes
+  (both parties voting the same way can count as partisan). Party-line voting is measured from
+  `representatives_votes` instead. Until rs-machine's `refetch_votes.php` has been run for a
+  session, some of its roll calls have voters stored under term IDs, so a few votes may count the
+  wrong party.
+- **`video_clips` isn't used.** It hasn't been written since 2020. Discussions are found by bills'
+  chyrons in `video_index`, as bill pages find them.
+- **Public testimony** isn't detected. It needs testing against transcripts first.
+- **The "surprise" signal** isn't built (as decided).
+
+### Where it's stored and computed
+
+- **`day_highlights`** (in `deploy/mysql/structure.sql`; `deploy/migrate-day-highlights.sql`
+  creates it in production) has a row for every bill scored on every day: its chamber, score,
+  position among the highlights (or NULL), whether an admin hid it, and its reasons (JSON: each
+  signal's value and points, the labels readers see, the action, the bill, and the clip).
+- **rs-machine's `cron/day_highlights.php`** (task `day_highlights`) scores today and yesterday
+  hourly (6 a.m. to 11 p.m.), and the past two weeks at 3 a.m. Earlier days don't change.
+- **rs-machine's `utilities/backfill_day_highlights.php [first year] [last year]`** scores every day
+  since 2008. Run it once after deploying, and again whenever the weights change. Locally, all of
+  2026's days took half a second.
+- **The API** adds `highlights`, `highlights_updated`, `news`, and `site_activity` to
+  `/1.1/day/{date}.json` (documented in rs-api's `openapi.yaml` and on `/about/api/`). Before
+  `day_highlights` exists, `highlights` is empty, and nothing breaks.
+
+### Hiding a highlight, and tuning
+
+- **`/admin/day-highlights.php?date=2026-01-26`** lists every bill scored that day, with each
+  signal's points, and a button to hide a highlight (a clip of the wrong bill, say, or a news story
+  that only mentions it), or to show it again. Hiding one chooses the day's highlights again, and
+  it stays hidden when rs-machine scores the day again.
+- **To tune the weights,** look at a dozen days you remember on that page. Then change `WEIGHTS`
+  (and the selection constants near it), deploy, and run the backfill again. Locally,
+  `php deploy/day-highlights.php [--all-bills] 2026-02-16` does the same from the command line.
+
+### News sources
+
+`articles.php` reads Virginia Mercury and Cardinal News. In November 2026, other Virginia
+publications' feeds were checked for full text (the whole article in each item, which matching
+bill numbers needs). None has been added: each needs a person's review first.
+
+| Publication | Feed | Full text? | Notes |
+|---|---|---|---|
+| VPM News | `https://www.vpm.org/index.rss` | Yes | Public radio; covers the legislature. The strongest candidate. |
+| Virginia Scope | `https://www.virginiascope.com/feed/` | Yes | State politics. The feed is slow (over 20 seconds). |
+| Virginia Dogwood | `https://vadogwood.com/feed/` | Yes | State politics, from a progressive network (Courier). Slow feed. |
+| Virginia Business | `https://virginiabusiness.com/feed/` | Yes | Business, and policy affecting it. |
+| Richmond BizSense | `https://richmondbizsense.com/feed/` | Yes | Richmond business; little legislative news. |
+| The Richmonder | `https://www.richmonder.org/rss/` | Yes | Richmond city news. |
+| Charlottesville Tomorrow | `https://www.cvilletomorrow.org/feed/` | Yes | Charlottesville news. |
+| Roanoke Rambler | `https://roanokerambler.com/feed/` | Yes | Roanoke news. |
+| Bacon's Rebellion | `https://www.baconsrebellion.com/feed/` | Yes | Opinion blog (conservative-leaning). |
+| Blue Virginia | `https://bluevirginia.us/feed` | Yes | Opinion blog (Democratic). |
+| WAMU | `https://wamu.org/feed/` | Partly | Some items are full, most aren't. |
+| Augusta Free Press, Royal Examiner, WRIC, ARLnow, FFXnow, The Daily Progress, Chesapeake Bay Journal | | No | Excerpts only. |
+| Richmond Times-Dispatch, Virginian-Pilot, Fauquier Times, Rappahannock News, VCU Capital News Service, VPAP | | Couldn't tell | Their feeds refused automated requests (403 or 429). |
+| WHRO, Radio IQ | | Couldn't tell | No feed found at the usual address. |
+
+Outside of session, few stories mention bills (Mercury had 3 of 100), so how often each source
+names bills is better judged in January. Adding a source is one line in `articles.php`'s `$feeds`.
+
+### Tests
+
+- `deploy/mysql/day-page-fixtures.sql` gives HB 341 a news story, a comment, page views, and poll
+  votes. `deploy/docker-setup-site.sh` chooses that day's highlights, with
+  `deploy/day-highlights.php`.
+- `deploy/tests/phpunit/DayHighlightsTest.php`: the signals, the choosing, the scoring of the
+  fixtures' day, storing and hiding, and the news and site activity.
+- `deploy/browser-tests/specs/day-page.spec.js` and rs-api's `deploy/tests/api.sh` check the new
+  sections and fields.
+
+### Deploying
+
+Phase 1 goes first. Then:
+
+1. **Production database:** run `deploy/migrate-day-highlights.sql`. It only creates a table.
+2. **This repo, part 1, to `deploy`:** `htdocs/includes/class.Day.php`,
+   `htdocs/includes/class.DayHighlights.php`, `deploy/mysql/structure.sql`,
+   `deploy/mysql/day-page-fixtures.sql`, `deploy/migrate-day-highlights.sql`,
+   `deploy/day-highlights.php`, `deploy/docker-setup-site.sh`, and
+   `deploy/tests/phpunit/DayHighlightsTest.php`. The API starts returning the new fields when rs-api
+   next deploys (it copies the includes), and rs-machine gets the class.
+3. **rs-api, to `master`:** `openapi.yaml` and `deploy/tests/api.sh`. (This repo's CI runs rs-api's
+   `api.sh`, and its new checks need part 1's fixtures and setup.)
+4. **rs-machine, to `master`:** `cron/day_highlights.php`, `cron/tasks.php`, and
+   `utilities/backfill_day_highlights.php`. Then run the backfill once:
+   `php utilities/backfill_day_highlights.php`.
+5. **This repo, part 2, to `deploy`:** `htdocs/day.php`, `htdocs/css/page-elements.css`,
+   `htdocs/admin/day-highlights.php`, `htdocs/about-api.php`, the browser tests, `CLAUDE.md`, and
+   this document.

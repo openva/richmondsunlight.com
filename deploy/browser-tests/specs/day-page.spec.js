@@ -83,6 +83,34 @@ test.describe('A day’s page', () => {
     await expect(page.locator('#floor-house')).toBeVisible();
   });
 
+  // docker-setup-site.sh chooses the day's highlights (deploy/day-highlights.php).
+  test('starts with the highlights, and says why each was chosen', async ({ page }) => {
+    await page.goto(day);
+    const first = page.locator('#highlights .day-highlights > li').first();
+    await expect(first).toContainText('HB 341');
+    await expect(first).toContainText('Read third time and defeated by House');
+    await expect(first.locator('.day-reasons')).toContainText('Close vote, 45–52');
+    await expect(first.locator('.day-reasons')).toContainText('1 news story');
+    await expect(first.locator('.day-highlight-clip a')).toHaveAttribute('href', /^\/video\/b334\/\?t=\d+$/);
+
+    // They follow the chamber filter.
+    await page.locator('.day-filter button', { hasText: /^Senate$/ }).click();
+    await expect(first).toBeHidden();
+  });
+
+  test('shows what people said here, and the news', async ({ page }) => {
+    await page.goto(day);
+    const said = page.locator('#what-people-said');
+    await expect(said.locator('.day-comments')).toContainText('Towns need this money');
+    await expect(said.locator('.day-comments a[href="/bill/2026/hb341/#comments"]')).toBeVisible();
+    await expect(said.locator('.day-polls')).toContainText('70% of 10 voters support it');
+    await expect(said.locator('.day-most-viewed')).toContainText('HB 341');
+
+    const news = page.locator('#in-the-news');
+    await expect(news.locator('a[href="https://example.com/news/plastic-bag-tax-fails"]')).toHaveText('House narrowly defeats plastic bag tax bill');
+    await expect(news.locator('.day-news-bills a[href="/bill/2026/hb341/"]')).toBeVisible();
+  });
+
   test('shows what’s coming up on the most recent day', async ({ page }) => {
     await page.goto('/day/latest/');
     expect(new URL(page.url()).pathname).toMatch(/^\/day\/\d{4}-\d{2}-\d{2}\/$/);

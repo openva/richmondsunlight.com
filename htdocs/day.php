@@ -6,8 +6,10 @@
 # PURPOSE
 # Shows what happened in the General Assembly on one day: each chamber's floor session (its video,
 # its votes, everything else it did, and its minutes), and every committee and subcommittee meeting
-# (its video, what it did with each bill, and the rest of its docket). On the most recent day, it
-# also shows what's scheduled next. See docs/minutes-replacement.md.
+# (its video, what it did with each bill, and the rest of its docket). It starts with the day's
+# highlights (the bills most likely to interest a reader, and why), and ends with what people said
+# about the day's bills here, and the news about them. On the most recent day, it also shows what's
+# scheduled next. See docs/minutes-replacement.md.
 #
 # The URL is /day/YYYY-MM-DD/, and /day/latest/ redirects to the most recent day. #house or #senate
 # shows only that chamber.
@@ -266,6 +268,62 @@ if (count($chambers_present) > 1) {
 	</div>';
 }
 
+/**
+ * One of this site's URLs, without its scheme and host.
+ */
+$local_url = function (string $url): string {
+    $parts = parse_url($url);
+    return ($parts['path'] ?? '/') . (isset($parts['query']) ? '?' . $parts['query'] : '')
+        . (isset($parts['fragment']) ? '#' . $parts['fragment'] : '');
+};
+
+# The day's highlights: the bills most likely to interest a reader, and why.
+$highlights = $day['highlights'] ?? [];
+if (count($highlights) > 0) {
+    $page_body .= '
+	<section id="highlights" class="day-section">
+		<h2>Highlights</h2>
+		<ol class="day-highlights">';
+    foreach ($highlights as $highlight) {
+        $action = $highlight['action'];
+        $page_body .= '
+			<li' . (!empty($highlight['chamber']) ? ' data-chamber="' . htmlspecialchars($highlight['chamber']) . '"' : '') . '>
+				<p class="day-highlight-bill">' . $bill_html($highlight['bill']) . '</p>
+				<p class="day-highlight-action">' . htmlspecialchars($action['text']) . $vote_html($action['vote'])
+            // A subcommittee's action doesn't say which subcommittee it was.
+            . (in_array($action['place'], ['subcommittee', 'other'], true) && !empty($action['where'])
+                ? ' <span class="day-highlight-where">(' . htmlspecialchars($action['where']) . ')</span>' : '')
+            . '</p>';
+        if (count($highlight['reasons']) > 0) {
+            $page_body .= '
+				<ul class="day-reasons" aria-label="Why it’s a highlight">';
+            foreach ($highlight['reasons'] as $reason) {
+                $page_body .= '<li>' . htmlspecialchars($reason) . '</li>';
+            }
+            $page_body .= '</ul>';
+        }
+        if (!empty($highlight['clip'])) {
+            $clip = $highlight['clip'];
+            $page_body .= '
+				<p class="day-highlight-clip"><a href="' . htmlspecialchars($local_url($clip['url'])) . '">Watch the discussion</a>
+				<small>(' . Video::clock($clip['duration']) . ', ' . htmlspecialchars($clip['label']) . ')</small></p>';
+        }
+        $page_body .= '
+			</li>';
+    }
+    $page_body .= '
+		</ol>';
+
+    // A recent day's highlights are still being recomputed (for two weeks).
+    if (!empty($day['highlights_updated']) && $day['date'] >= date('Y-m-d', strtotime('-14 days'))) {
+        $page_body .= '
+		<p class="day-updated">Chosen at ' . date('g:i a \o\n F j', strtotime($day['highlights_updated'])) . '.
+		They can change for a few days, as the day’s video, news, and comments arrive.</p>';
+    }
+    $page_body .= '
+	</section>';
+}
+
 # Each chamber's floor session, and any of its actions that weren't in a committee.
 if (count($day['chambers']) > 0) {
     $page_body .= '
@@ -368,6 +426,80 @@ if (count($day['meetings']) > 0) {
 	</section>';
 }
 
+# What people did with the day's bills on this site.
+$activity = $day['site_activity'] ?? ['comments' => [], 'polls' => [], 'most_viewed' => []];
+if (count($activity['comments']) + count($activity['polls']) + count($activity['most_viewed']) > 0) {
+    $page_body .= '
+	<section id="what-people-said" class="day-section">
+		<h2>What People Said</h2>';
+    if (count($activity['comments']) > 0) {
+        $page_body .= '
+		<h3>Comments on the Day’s Bills</h3>
+		<ul class="day-comments">';
+        foreach ($activity['comments'] as $comment) {
+            $page_body .= '
+			<li>
+				<p>' . $bill_html($comment['bill']) . '</p>
+				<blockquote><p>' . htmlspecialchars($comment['excerpt']) . '</p></blockquote>
+				<p class="day-comment-by">— ' . htmlspecialchars($comment['name'])
+                . ' <a href="' . htmlspecialchars($local_url($comment['url'])) . '">(all comments)</a></p>
+			</li>';
+        }
+        $page_body .= '
+		</ul>';
+    }
+    if (count($activity['polls']) > 0) {
+        $page_body .= '
+		<h3>Our Polls</h3>
+		<ul class="day-polls">';
+        foreach ($activity['polls'] as $poll) {
+            $total = $poll['yes'] + $poll['no'];
+            $page_body .= '
+			<li>' . $bill_html($poll['bill']) . ' <span class="day-poll-result">' . round(100 * $poll['yes'] / $total)
+                . '% of ' . number_format($total) . ' voters support it</span></li>';
+        }
+        $page_body .= '
+		</ul>';
+    }
+    if (count($activity['most_viewed']) > 0) {
+        $page_body .= '
+		<h3>The Most-Viewed Bills That Day</h3>
+		<ol class="day-most-viewed">';
+        foreach ($activity['most_viewed'] as $viewed) {
+            $page_body .= '
+			<li>' . $bill_html($viewed['bill']) . ' <small>(' . number_format($viewed['viewers']) . ' people)</small></li>';
+        }
+        $page_body .= '
+		</ol>';
+    }
+    $page_body .= '
+	</section>';
+}
+
+# News stories about the day's bills.
+if (count($day['news'] ?? []) > 0) {
+    $page_body .= '
+	<section id="in-the-news" class="day-section">
+		<h2>In the News</h2>
+		<ul class="day-news">';
+    foreach ($day['news'] as $story) {
+        $page_body .= '
+			<li>
+				<a href="' . htmlspecialchars($story['url']) . '">' . htmlspecialchars($story['title']) . '</a>
+				<span class="day-news-source">' . htmlspecialchars($story['publication']) . ', '
+            . date('F j', strtotime($story['date'])) . '</span>
+				<span class="day-news-bills">About ' . implode(', ', array_map(
+                fn($bill) => '<a href="' . htmlspecialchars($local_url($bill['url'])) . '">'
+                    . htmlspecialchars($bill_number($bill['number'])) . '</a>',
+                $story['bills']
+            )) . '</span>
+			</li>';
+    }
+    $page_body .= '
+		</ul>
+	</section>';
+}
+
 # On the most recent day, what's next.
 if (!empty($day['coming_up'])) {
     $next = $day['coming_up'];
@@ -408,6 +540,9 @@ $page_sidebar = '
 		<p>Everything that the General Assembly did on this day, gathered from the legislature’s
 		records: its votes and other actions on bills, its committees’ dockets and schedules, the
 		clerks’ minutes of each floor session, and video of the floor sessions and meetings.</p>
+		<p>The highlights are chosen automatically, from what was done to each bill, how close
+		and how partisan its votes were, how long it was debated, whether it was in the news, and
+		how many people looked at it here. Each one says why it was chosen.</p>
 		<p>A day’s records arrive over a day or two: votes during the day, video that evening, and
 		the minutes a day or so later.</p>
 	</div>

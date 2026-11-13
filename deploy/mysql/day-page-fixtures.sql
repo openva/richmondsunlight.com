@@ -14,7 +14,13 @@
 --                   nothing with HB 210. Met at 7:30 a.m.
 -- Rules:            HB 288 continued to 2027, by voice vote.
 -- A party caucus, which days leave out.
+-- A meeting on January 27, 2026, so that January 26 isn't the most recent day, even where there's
+-- nothing later (as in CI), since the most recent day is the only one that shows what's coming up.
 -- A meeting on January 14, 2099, so that the most recent day always has something coming up.
+--
+-- For the day's highlights and the sections after them, HB 341 also has a news story (the next
+-- day), a comment, page views from three people, and ten poll votes. (docker-setup-site.sh scores
+-- the day, with deploy/day-highlights.php.)
 --
 -- Rows use INSERT IGNORE so that existing local rows are kept.
 --
@@ -54,3 +60,27 @@ VALUES
 (995003,NULL,'2026-01-26','11:00:00',NULL,'House Democratic Caucus Caucus','House Room 2, The Capitol',32,'2026-01-23 12:00:00'),
 (995004,NULL,'2099-01-14','10:00:00',NULL,'Joint Subcommittee on Day Page Fixtures Other','Senate Room A, General Assembly Building',32,'2026-01-23 12:00:00'),
 (995005,NULL,'2026-01-27','10:00:00',NULL,'Joint Commission on Day Page Fixtures Other','Senate Room A, General Assembly Building',32,'2026-01-23 12:00:00');
+
+INSERT IGNORE INTO `bills_news` (`id`, `bill_id`, `url`, `title`, `publication`, `date`, `date_created`) VALUES
+(995001,84141,'https://example.com/news/plastic-bag-tax-fails','House narrowly defeats plastic bag tax bill','Day Page Fixture News','2026-01-27','2026-01-27 08:00:00');
+
+INSERT IGNORE INTO `comments` (`id`, `user_id`, `bill_id`, `name`, `ip`, `comment`, `type`, `status`, `date_created`) VALUES
+(995001,0,84141,'Day Page Fixture','127.0.0.1','Towns need this money as much as counties do. I hope it comes back next year.','comment','published','2026-01-26 14:00:00');
+
+INSERT IGNORE INTO `bills_views` (`id`, `bill_id`, `ip`, `date`) VALUES
+(99500001,84141,'192.0.2.1','2026-01-26 13:00:00'),
+(99500002,84141,'192.0.2.2','2026-01-26 13:05:00'),
+(99500003,84141,'192.0.2.3','2026-01-26 13:10:00'),
+(99500004,84141,'192.0.2.3','2026-01-26 13:11:00');
+
+INSERT IGNORE INTO `polls` (`id`, `bill_id`, `vote`, `user_id`, `ip`, `date_created`) VALUES
+(995001,84141,'y',NULL,'192.0.2.11','2026-01-20 10:00:00'),
+(995002,84141,'y',NULL,'192.0.2.12','2026-01-20 10:00:00'),
+(995003,84141,'y',NULL,'192.0.2.13','2026-01-21 10:00:00'),
+(995004,84141,'y',NULL,'192.0.2.14','2026-01-22 10:00:00'),
+(995005,84141,'y',NULL,'192.0.2.15','2026-01-23 10:00:00'),
+(995006,84141,'y',NULL,'192.0.2.16','2026-01-24 10:00:00'),
+(995007,84141,'y',NULL,'192.0.2.17','2026-01-25 10:00:00'),
+(995008,84141,'n',NULL,'192.0.2.18','2026-01-25 10:00:00'),
+(995009,84141,'n',NULL,'192.0.2.19','2026-01-26 10:00:00'),
+(995010,84141,'n',NULL,'192.0.2.20','2026-01-26 10:00:00');
