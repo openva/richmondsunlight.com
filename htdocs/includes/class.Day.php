@@ -714,12 +714,114 @@ class Day
     }
 
     /**
-     * Everything that happened on a day, for the API.
+     * Everything that happened on a day, for the API: what build() finds, plus the day's
+     * highlights, the news about its bills, and what people did with them on this site.
      *
      * @param string $date YYYY-MM-DD
      * @return array|null The day, or null if it hasn't happened yet, or nothing happened
      */
     public static function record_for_api(string $date): ?array
+    {
+        $day = self::build($date);
+        if ($day === null) {
+            return null;
+        }
+
+        $bill_ids = array_keys(self::actions_by_bill($day));
+        $highlights = $day['in_session'] ? DayHighlights::for_api($date) : ['highlights' => [], 'updated' => null];
+        $day['highlights'] = $highlights['highlights'];
+        $day['highlights_updated'] = $highlights['updated'];
+        $day['news'] = DayHighlights::news_for_api($date, $bill_ids);
+        $day['site_activity'] = DayHighlights::site_activity_for_api($date, $bill_ids);
+
+        return self::without_ids($day);
+    }
+
+    /**
+     * Each bill that something was done to on a day, and what was done to it, and where, for
+     * scoring (see DayHighlights). These are the actions that the day's page shows.
+     *
+     * @param string $date YYYY-MM-DD
+     * @return array|null in_session, and bills (by bill ID: the bill, its chief patron's ID, and
+     *                    its actions, each with chamber, where (the meeting's label, or null for
+     *                    the floor), place ("floor", "committee", "subcommittee", or "other"), and
+     *                    vote_id), or null if there's no page for the day
+     */
+    public static function bills_acted_on(string $date): ?array
+    {
+        $day = self::build($date);
+        if ($day === null) {
+            return null;
+        }
+
+        return ['in_session' => $day['in_session'], 'bills' => self::actions_by_bill($day)];
+    }
+
+    /**
+     * A built day's actions, by bill ID.
+     *
+     * @param array $day From build()
+     * @return array
+     */
+    private static function actions_by_bill(array $day): array
+    {
+        $bills = [];
+        $add = function (array $action, ?string $chamber, ?string $where, string $place) use (&$bills) {
+            $id = $action['_bill_id'];
+            $bills[$id] ??= ['bill' => $action['bill'], 'patron_id' => $action['_patron_id'], 'actions' => []];
+            $bills[$id]['actions'][] = array_merge($action, [
+                'chamber' => $chamber,
+                'where' => $where,
+                'place' => $place,
+                'vote_id' => $action['_vote_id'],
+            ]);
+        };
+        foreach ($day['chambers'] as $chamber) {
+            foreach ($chamber['actions'] as $action) {
+                $add($action, $chamber['chamber'], null, 'floor');
+            }
+        }
+        foreach ($day['meetings'] as $meeting) {
+            foreach ($meeting['actions'] as $action) {
+                $add($action, $meeting['chamber'], $meeting['label'], $meeting['type']);
+            }
+        }
+
+        return $bills;
+    }
+
+    /**
+     * A day without the IDs that build() keeps on each action, which the API doesn't show.
+     *
+     * @param array $day
+     * @return array
+     */
+    private static function without_ids(array $day): array
+    {
+        $strip = fn(array $actions) => array_map(
+            fn($action) => array_diff_key($action, ['_bill_id' => 0, '_vote_id' => 0, '_patron_id' => 0]),
+            $actions
+        );
+        foreach ($day['chambers'] as &$chamber) {
+            $chamber['actions'] = $strip($chamber['actions']);
+        }
+        unset($chamber);
+        foreach ($day['meetings'] as &$meeting) {
+            $meeting['actions'] = $strip($meeting['actions']);
+        }
+        unset($meeting);
+
+        return $day;
+    }
+
+    /**
+     * Everything that happened on a day, from the legislature's records. Each action keeps its
+     * bill's ID, its chief patron's ID, and its vote's ID (_bill_id, _patron_id, and _vote_id).
+     *
+     * @param string $date YYYY-MM-DD
+     * @return array|null The day, or null if it hasn't happened yet, or nothing happened
+     */
+    private static function build(string $date): ?array
     {
         if (!self::is_date($date) || $date > date('Y-m-d')) {
             return null;
@@ -778,7 +880,7 @@ class Day
         $rows = self::rows('SELECT bills_status.id, bills_status.status, bills_status.date,
                     bills_status.chamber, bills_status.lis_vote_id, votes.id AS vote_id,
                     votes.committee_id AS vote_committee_id, bills.id AS bill_id, bills.number,
-                    bills.chamber AS bill_chamber, bills.catch_line, sessions.year,
+                    bills.chamber AS bill_chamber, bills.catch_line, bills.chief_patron_id, sessions.year,
                     COALESCE(terms.name_formatted, people.name_formal) AS patron_name,
                     people.shortname AS patron_shortname
                 FROM bills_status
@@ -823,6 +925,9 @@ class Day
                 'outcome' => $what['outcome'],
                 'time' => $time !== '00:00' && $time !== '' ? $time : null,
                 'vote' => $vote,
+                '_bill_id' => (int) $row['bill_id'],
+                '_patron_id' => !empty($row['chief_patron_id']) ? (int) $row['chief_patron_id'] : null,
+                '_vote_id' => !empty($row['vote_id']) ? (int) $row['vote_id'] : null,
             ];
 
             // Where it happened: in a committee, a subcommittee, or the chamber.
@@ -893,6 +998,7 @@ class Day
                     if ($other['vote'] === null && $item['action']['vote'] !== null) {
                         $list[$i]['vote'] = $item['action']['vote'];
                     }
+                    $list[$i]['_vote_id'] ??= $item['action']['_vote_id'];
                     if ($other['time'] === null) {
                         $list[$i]['time'] = $item['action']['time'];
                     }
