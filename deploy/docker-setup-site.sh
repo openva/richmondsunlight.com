@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cd /var/www/
+cd /var/www/ || exit 1
 
 # What this image calls html, we call htdocs
 if [ -f html ]; then
@@ -8,20 +8,20 @@ if [ -f html ]; then
     ln -s htdocs html
 fi
 
-cd htdocs
+cd htdocs || exit 1
 
 # Set the include path.
-if [ $(grep include_path .htaccess |grep -v "#" |wc -l |xargs) -eq 0 ]; then
+if [ "$(grep include_path .htaccess | grep -vc "#")" -eq 0 ]; then
 	echo 'php_value include_path ".:includes/"' >> .htaccess
 fi
 
 # Have PHP report errors.
-if [ $(grep error_reporting .htaccess |grep -v "#" |wc -l |xargs) -eq 0 ]; then
+if [ "$(grep error_reporting .htaccess | grep -vc "#")" -eq 0 ]; then
 	echo 'php_value error_reporting 32767' >> .htaccess
 fi
 
 # Show errors in the browser for easier debugging inside Docker.
-if [ $(grep display_errors .htaccess |grep -v "#" |wc -l |xargs) -eq 0 ]; then
+if [ "$(grep display_errors .htaccess | grep -vc "#")" -eq 0 ]; then
 	echo 'php_flag display_errors On' >> .htaccess
 fi
 
@@ -30,7 +30,7 @@ mkdir -p /var/www/htdocs/logs
 chown -R www-data:www-data /var/www/htdocs/logs
 chmod -R 775 /var/www/htdocs/logs
 
-cd ..
+cd /var/www/ || exit 1
 
 # This keeps Composer from balking at the permissions of the directory
 git config --global --add safe.directory /var/www
@@ -40,14 +40,16 @@ composer install
 
 # Install Node
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+# shellcheck source=/dev/null
 source ~/.bashrc
 export NVM_DIR="$HOME/.nvm"
+# shellcheck source=/dev/null
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
 # Node 20 is the current LTS version with long-term support until 2026
 nvm install 20
 
 # Install Node dependencies
-cd htdocs/js/vendor; yarn build; cd ../../..
+(cd htdocs/js/vendor && yarn build)
 
 # Move over the settings file.
 cp deploy/settings-docker.inc.php htdocs/includes/settings.inc.php
