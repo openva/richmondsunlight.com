@@ -467,7 +467,7 @@ if (count($activity['comments']) + count($activity['polls']) + count($activity['
 		<ol class="day-most-viewed">';
         foreach ($activity['most_viewed'] as $viewed) {
             $page_body .= '
-			<li>' . $bill_html($viewed['bill']) . ' <small>(' . number_format($viewed['viewers']) . ' people)</small></li>';
+			<li>' . $bill_html($viewed['bill']) . '</li>';
         }
         $page_body .= '
 		</ol>';

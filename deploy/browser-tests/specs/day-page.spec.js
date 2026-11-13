@@ -105,6 +105,8 @@ test.describe('A day’s page', () => {
     await expect(said.locator('.day-comments a[href="/bill/2026/hb341/#comments"]')).toBeVisible();
     await expect(said.locator('.day-polls')).toContainText('70% of 10 voters support it');
     await expect(said.locator('.day-most-viewed')).toContainText('HB 341');
+    // How many people viewed them isn't shown.
+    await expect(said.locator('.day-most-viewed')).not.toContainText('people');
 
     const news = page.locator('#in-the-news');
     await expect(news.locator('a[href="https://example.com/news/plastic-bag-tax-fails"]')).toHaveText('House narrowly defeats plastic bag tax bill');
