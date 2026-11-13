@@ -140,6 +140,27 @@ test.describe('A day’s page', () => {
   });
 });
 
+test.describe('The RSS feed of days', () => {
+  test('is linked from days’ pages, and the calendar', async ({ page }) => {
+    for (const path of [day, '/day/2026/']) {
+      await page.goto(path);
+      await expect(page.locator('link[rel="alternate"][type="application/rss+xml"]')).toHaveAttribute('href', '/rss/days/');
+      await expect(page.locator('#sidebar a[href="/rss/days/"]')).toBeVisible();
+    }
+  });
+
+  test('lists past days, each linked to its page', async ({ request }) => {
+    const response = await request.get('/rss/days/');
+    expect(response.status()).toBe(200);
+    expect(response.headers()['content-type']).toContain('application/rss+xml');
+    const body = await response.text();
+    expect(body).toContain('<rss version="2.0"');
+    const links = [...body.matchAll(/<link>https:\/\/www\.richmondsunlight\.com(\/day\/\d{4}-\d{2}-\d{2}\/)<\/link>/g)].map((m) => m[1]);
+    expect(links.length).toBeGreaterThan(0);
+    expect((await request.get(links[0])).status()).toBe(200);
+  });
+});
+
 test.describe('The calendar of days', () => {
   test('links each day that has a page', async ({ page }) => {
     await page.goto('/day/2026/');

@@ -154,8 +154,12 @@ $page_sidebar .= '
 			<li><a href="/day/latest/">The most recent day</a></li>
 			<li><a href="/video/' . $year . '/">Every video of ' . $year . '</a></li>
 			<li><a href="/schedule/">The legislature’s schedule</a></li>
+			<li><a href="/rss/days/">Get each day by RSS</a>, the morning after</li>
 		</ul>
 	</div>';
+
+$html_head = '
+	<link rel="alternate" type="application/rss+xml" href="/rss/days/" title="Each day in the General Assembly (RSS)">';
 
 # OUTPUT THE PAGE
 $page = new Page();
@@ -164,6 +168,7 @@ foreach ([
     'page_body',
     'page_sidebar',
     'site_section',
+    'html_head',
     'session_year',
 ] as $prop) {
     if (isset(${$prop})) {

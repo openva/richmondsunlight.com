@@ -1161,6 +1161,51 @@ class Day
     }
 
     /**
+     * How much happened on a day, in a sentence or two each: which chambers met on the floor, how
+     * many committees met, and how many bills moved forward or were stopped.
+     *
+     * @param array $day From the API
+     * @return string[] Sentences
+     */
+    public static function summary(array $day): array
+    {
+        $floor_chambers = array_map(fn($c) => ucfirst($c['chamber']), array_filter($day['chambers'], fn($c) => $c['floor']));
+        $committee_meetings = array_filter($day['meetings'], fn($m) => $m['type'] !== 'other');
+        $outcomes = ['advanced' => [], 'stopped' => []];
+        foreach (array_merge(...array_map(fn($c) => $c['actions'], $day['chambers']), ...array_map(fn($m) => $m['actions'], $day['meetings'])) as $action) {
+            if (isset($outcomes[$action['outcome']])) {
+                $outcomes[$action['outcome']][$action['bill']['number']] = true;
+            }
+        }
+
+        $summary = [];
+        if (count($floor_chambers) === 2) {
+            $summary[] = 'The House and the Senate met in floor sessions.';
+        } elseif (count($floor_chambers) === 1) {
+            $summary[] = 'The ' . reset($floor_chambers) . ' met in a floor session.';
+        }
+        if (count($committee_meetings) > 0) {
+            $summary[] = count($committee_meetings) === 1
+                ? 'One committee or subcommittee met.'
+                : count($committee_meetings) . ' committees and subcommittees met.';
+        } elseif (count($day['meetings']) > 0) {
+            $summary[] = count($day['meetings']) === 1 ? 'One meeting was held.' : count($day['meetings']) . ' meetings were held.';
+        }
+        $advanced = count($outcomes['advanced']);
+        $stopped = count($outcomes['stopped']);
+        $bills = fn(int $n) => [0 => 'No bills', 1 => 'One bill'][$n] ?? $n . ' bills';
+        if ($advanced > 0 && $stopped > 0) {
+            $summary[] = $bills($advanced) . ' moved forward, and ' . ($stopped === 1 ? 'one was' : $stopped . ' were') . ' stopped.';
+        } elseif ($advanced > 0) {
+            $summary[] = $bills($advanced) . ' moved forward.';
+        } elseif ($stopped > 0) {
+            $summary[] = $bills($stopped) . ($stopped === 1 ? ' was stopped.' : ' were stopped.');
+        }
+
+        return $summary;
+    }
+
+    /**
      * Get a day from the API.
      *
      * @param string $date YYYY-MM-DD, or "latest" for the most recent day

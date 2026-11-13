@@ -55,6 +55,8 @@ Header always edit Set-Cookie (.*) "$1; SameSite=Strict"
 	ExpiresByType text/html "now"
 	ExpiresByType text/x-javascript "access 1 month"
 	ExpiresByType image/x-icon "access 1 year"
+	# RSS feeds change during the day (/rss/days/ every morning).
+	ExpiresByType application/rss+xml "access plus 30 minutes"
 	ExpiresDefault "access 1 month"
 </IfModule>
 
@@ -136,6 +138,7 @@ RewriteRule ^rss/legislator/([a-z0-9-]+)?/?$ /rss/legislator.php?shortname=$1 [Q
 RewriteRule ^rss/tag/([a-z0-9-+]+)?/?$ /rss/tag.php?tag=$1 [QSA]
 RewriteRule ^rss/bill/([a-z0-9-]+)?/?$ /rss/bill.php?number=$1 [QSA]
 RewriteRule ^rss/comments/?/?$ /rss/comments.php [QSA]
+RewriteRule ^rss/days/?$ /rss/days.php [QSA]
 
 # Misc. Pages
 RewriteRule ^search/(.*)$ /search.php?$1 [QSA]
