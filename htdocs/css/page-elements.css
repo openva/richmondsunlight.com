@@ -1652,6 +1652,116 @@ div#content ul.day-videos {
 		background-color: #243a51;
 	}
 
+/* The day's highlights */
+div#content ol.day-highlights {
+	list-style: none;
+	counter-reset: highlight;
+	margin: .5em 0;
+	padding: 0;
+	line-height: inherit;
+}
+	div#content .day-highlights > li {
+		counter-increment: highlight;
+		position: relative;
+		padding: .75em 0 .75em 2.4em;
+		border-top: 1px solid #dccbaf;
+	}
+	div#content .day-highlights > li:first-child {
+		border-top: 0;
+	}
+	div#content .day-highlights > li::before {
+		content: counter(highlight);
+		position: absolute;
+		left: 0;
+		top: .65em;
+		width: 1.7em;
+		height: 1.7em;
+		line-height: 1.7em;
+		text-align: center;
+		border-radius: 50%;
+		background-color: #790806;
+		color: #fff;
+		font-weight: bold;
+		font-size: .9em;
+	}
+	div#content .day-highlights p {
+		margin: 0 0 .3em;
+		padding: 0;
+	}
+	div#content .day-highlight-bill .day-bill-number {
+		font-size: 1.1em;
+	}
+	div#content .day-highlight-action {
+		color: #333;
+	}
+	div#content .day-highlight-where {
+		color: #666;
+		font-size: .92em;
+	}
+	div#content .day-highlight-clip small {
+		color: #666;
+	}
+div#content ul.day-reasons {
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+	gap: .3em;
+	margin: .2em 0 .4em;
+	padding: 0;
+	line-height: 1.4;
+}
+	div#content .day-reasons li {
+		padding: 0 .5em;
+		border-radius: 3px;
+		background-color: #f4eee5;
+		color: #4a3a22;
+		font-size: .85em;
+	}
+div#content .day-updated {
+	color: #666;
+	font-size: .9em;
+}
+
+/* What people said about the day's bills here, and the news about them */
+div#content ul.day-comments,
+div#content ul.day-news,
+div#content ul.day-polls {
+	list-style: none;
+	margin: .25em 0 1em;
+	padding: 0;
+	line-height: inherit;
+}
+	div#content .day-comments li,
+	div#content .day-news li,
+	div#content .day-polls li {
+		padding: .4em 0;
+	}
+	div#content .day-comments p {
+		margin: 0;
+		padding: 0;
+	}
+	div#content .day-comments blockquote {
+		margin: .3em 0;
+		padding: 0 .75em;
+		border-left: 3px solid #dccbaf;
+		font-style: italic;
+	}
+	div#content .day-comment-by {
+		color: #555;
+		font-size: .92em;
+	}
+	div#content .day-poll-result {
+		display: block;
+		font-size: .92em;
+		color: #333;
+	}
+	div#content .day-news-source,
+	div#content .day-news-bills {
+		display: block;
+		color: #666;
+		font-size: .9em;
+	}
+
 /* What's scheduled next */
 div#content ul.day-coming-up {
 	line-height: 1.5;

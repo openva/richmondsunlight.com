@@ -52,6 +52,10 @@ cd htdocs/js/vendor; yarn build; cd ../../..
 # Move over the settings file.
 cp deploy/settings-docker.inc.php htdocs/includes/settings.inc.php
 
+# Choose the highlights of the test fixtures' day (deploy/mysql/day-page-fixtures.sql), which the
+# browser tests expect. In production, rs-machine does this for every day.
+php deploy/day-highlights.php 2026-01-26 || echo "Couldn't choose the highlights of the fixtures' day."
+
 # Create a directory for the PHP error log (see settings-docker.inc.php), writable by Apache.
 mkdir -p logs
 chmod 777 logs

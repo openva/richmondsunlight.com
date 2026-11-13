@@ -69,3 +69,8 @@ pages (`/minutes/...` redirects to it). Like video pages, day pages get their da
 - Bill actions are matched to committees by the name in LIS's text, not by `votes.committee_id`
   (unreliable), and to subcommittees by the day's dockets.
 - `Day::classify()` decides what an action is. Add new LIS wording there (and to `DayTest.php`).
+- A day's highlights are scored by `htdocs/includes/class.DayHighlights.php` (its `WEIGHTS`), ahead
+  of time, by rs-machine's `cron/day_highlights.php`, into `day_highlights`. Locally,
+  `php deploy/day-highlights.php 2026-01-26` scores a day; `docker-setup-site.sh` does the
+  fixtures' day, which the tests expect. `/admin/day-highlights.php` shows the scores, and hides a
+  highlight.

@@ -350,6 +350,14 @@ EOD;
 		bills that weren’t in a committee)</li>
 		<li>meetings (each committee, subcommittee, or other meeting: its time and place, its
 		videos, its actions on bills, and the rest of its docket)</li>
+		<li>highlights (up to ten of the day’s bills that are most likely to interest a reader, best
+		first, chosen automatically: each one’s bill, the most important thing done to it, the
+		reasons it was chosen, such as “Close vote, 45–52” or “2 news stories,” and a clip of its
+		discussion, if there is one), and highlights_updated (when they were chosen; a day’s
+		highlights can change for two weeks)</li>
+		<li>news (news stories about the day’s bills, from two days before to three days after)</li>
+		<li>site_activity (comments posted that day on the day’s bills, how those bills are doing
+		in our polls, and the year’s bills that the most people looked at that day)</li>
 		<li>coming_up (on the most recent day only: the next day with anything scheduled, and its
 		meetings and dockets)</li>
 	</ul>
