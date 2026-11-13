@@ -50,6 +50,15 @@ class DayHighlightsTest extends TestCase
         $this->assertSame(0.0, DayHighlights::closeness(null));
     }
 
+    public function testSaysWhichChamberAnotherChambersCloseVoteWasIn(): void
+    {
+        $vote = ['yes' => 21, 'no' => 18, 'abstaining' => 0, 'voice' => false];
+        $this->assertSame('Close vote, 21–18', DayHighlights::close_vote_label($vote, 'senate', 'senate'));
+        // The highlight shows the House's vote, so the Senate's is named.
+        $this->assertSame('Close Senate vote, 21–18', DayHighlights::close_vote_label($vote, 'senate', 'house'));
+        $this->assertSame('Close vote, 21–18', DayHighlights::close_vote_label($vote, null, 'house'));
+    }
+
     public function testMeasuresHowFarApartThePartiesVoted(): void
     {
         $this->assertSame(1.0, DayHighlights::party_line(['D' => ['Y' => 51], 'R' => ['N' => 49]]));

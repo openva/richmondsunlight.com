@@ -192,33 +192,8 @@ $meeting_heading = function (array $meeting, string $tag): string {
 };
 
 # How much happened, in a sentence or two.
-$floor_chambers = array_map(fn($c) => ucfirst($c['chamber']), array_filter($day['chambers'], fn($c) => $c['floor']));
 $committee_meetings = array_filter($day['meetings'], fn($m) => $m['type'] !== 'other');
-$outcomes = ['advanced' => [], 'stopped' => []];
-foreach (array_merge(...array_map(fn($c) => $c['actions'], $day['chambers']), ...array_map(fn($m) => $m['actions'], $day['meetings'])) as $action) {
-    if (isset($outcomes[$action['outcome']])) {
-        $outcomes[$action['outcome']][$action['bill']['number']] = true;
-    }
-}
-$summary = [];
-if (count($floor_chambers) === 2) {
-    $summary[] = 'The House and the Senate met in floor sessions.';
-} elseif (count($floor_chambers) === 1) {
-    $summary[] = 'The ' . reset($floor_chambers) . ' met in a floor session.';
-}
-if (count($committee_meetings) > 0) {
-    $summary[] = count($committee_meetings) === 1
-        ? 'One committee or subcommittee met.'
-        : count($committee_meetings) . ' committees and subcommittees met.';
-} elseif (count($day['meetings']) > 0) {
-    $summary[] = count($day['meetings']) === 1 ? 'One meeting was held.' : count($day['meetings']) . ' meetings were held.';
-}
-$advanced = count($outcomes['advanced']);
-$stopped = count($outcomes['stopped']);
-if ($advanced + $stopped > 0) {
-    $summary[] = ($advanced === 1 ? 'One bill' : $advanced . ' bills') . ' moved forward, and '
-        . ($stopped === 1 ? 'one was' : $stopped . ' were') . ' stopped.';
-}
+$summary = Day::summary($day);
 $description = 'What happened in the Virginia General Assembly on ' . $long_date . '.';
 
 # PAGE METADATA
@@ -233,6 +208,7 @@ $html_head = '
 	<meta property="og:url" content="' . htmlspecialchars($day['url']) . '">
 	<meta property="og:type" content="website">
 	<meta property="og:site_name" content="Richmond Sunlight">
+	<link rel="alternate" type="application/rss+xml" href="/rss/days/" title="Each day in the General Assembly (RSS)">
 	<script src="/js/day.js" defer></script>';
 
 # PAGE BODY
@@ -249,7 +225,16 @@ $page_body = '
         : '<span></span>')
     . '</nav>';
 
-if (count($summary) > 0) {
+# The day's brief, if a language model has written one that passed its checks, and otherwise how
+# much happened.
+if (!empty($day['brief'])) {
+    $page_body .= '
+	<div class="day-brief">
+		<p class="day-summary">' . DayBrief::html($day['brief']['text'], $day) . '</p>
+		<p class="day-brief-note">Written automatically, by a language model, from this day’s records,
+		and checked against them. <a href="#about-this-page">How this works</a></p>
+	</div>';
+} elseif (count($summary) > 0) {
     $page_body .= '
 	<p class="day-summary">' . implode(' ', $summary) . '</p>';
 }
@@ -535,14 +520,19 @@ if (!empty($day['coming_up'])) {
 
 # PAGE SIDEBAR
 $page_sidebar = '
-	<div class="box">
+	<div class="box" id="about-this-page">
 		<h3>About This Page</h3>
 		<p>Everything that the General Assembly did on this day, gathered from the legislature’s
 		records: its votes and other actions on bills, its committees’ dockets and schedules, the
 		clerks’ minutes of each floor session, and video of the floor sessions and meetings.</p>
 		<p>The highlights are chosen automatically, from what was done to each bill, how close
 		and how partisan its votes were, how long it was debated, whether it was in the news, and
-		how many people looked at it here. Each one says why it was chosen.</p>
+		how many people looked at it here. Each one says why it was chosen.</p>' . (!empty($day['brief']) ? '
+		<p>The account at the top of the page is written by a language model (OpenAI’s
+		' . htmlspecialchars($day['brief']['model']) . '), the morning after, from this day’s records
+		alone: its summary, its highlights, and the news about them. Before it’s shown, every bill and
+		every number in it is checked against those records. If anything doesn’t match, it isn’t
+		shown.</p>' : '') . '
 		<p>A day’s records arrive over a day or two: votes during the day, video that evening, and
 		the minutes a day or so later.</p>
 	</div>
@@ -552,6 +542,7 @@ $page_sidebar = '
 			<li><a href="/day/' . $year . '/">Every day of ' . $year . '</a></li>
 			<li><a href="/video/' . $year . '/">Every video of ' . $year . '</a></li>
 			<li><a href="/schedule/">The legislature’s schedule</a></li>
+			<li><a href="/rss/days/">Get each day by RSS</a>, the morning after</li>
 		</ul>
 	</div>';
 

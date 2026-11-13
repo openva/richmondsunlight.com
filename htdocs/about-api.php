@@ -356,6 +356,9 @@ EOD;
 		discussion, if there is one), and highlights_updated (when they were chosen; a day’s
 		highlights can change for two weeks)</li>
 		<li>news (news stories about the day’s bills, from two days before to three days after)</li>
+		<li>brief (a few sentences about the day, written by a language model from the day’s
+		record alone, and checked against it, with the model that wrote it and when; null if there’s
+		none)</li>
 		<li>site_activity (comments posted that day on the day’s bills, how those bills are doing
 		in our polls, and the year’s bills that the most people looked at that day)</li>
 		<li>coming_up (on the most recent day only: the next day with anything scheduled, and its

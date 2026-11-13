@@ -83,9 +83,12 @@ while ! nc -z localhost 3306; do sleep 1; done
 WEB_ID=$(docker ps |grep rs_web |cut -d " " -f 1)
 docker exec "$WEB_ID" /var/www/deploy/docker-setup-site.sh
 
-# Copy over the API includes
+# Copy over the API includes, replacing any that are there. (CI restores api/ from a cache, includes
+# and all, and copying onto an existing directory nests the copy inside it on Linux, rather than
+# replacing it, which would leave the API running an old copy.)
 cd api/htdocs/ || exit
-cp -R ../../htdocs/includes/ includes/
+rm -rf includes
+cp -R ../../htdocs/includes includes
 cd ../../
 
 # Return to the original directory

@@ -158,6 +158,25 @@ class DayHighlights
     }
 
     /**
+     * The reason for a close vote, as readers see it: "Close vote, 45–52". If the vote was in the
+     * other chamber from the action that the highlight shows, it says so ("Close Senate vote,
+     * 21–18"), so that it isn't mistaken for that action's vote.
+     *
+     * @param array $vote From Day::classify()
+     * @param string|null $vote_chamber Where the vote was
+     * @param string|null $shown_chamber Where the action that the highlight shows was
+     * @return string
+     */
+    public static function close_vote_label(array $vote, ?string $vote_chamber, ?string $shown_chamber): string
+    {
+        $which = $vote_chamber !== null && $shown_chamber !== null && $vote_chamber !== $shown_chamber
+            ? ucfirst($vote_chamber) . ' '
+            : '';
+
+        return 'Close ' . $which . 'vote, ' . $vote['yes'] . '–' . $vote['no'];
+    }
+
+    /**
      * Whether a bill is a ceremonial resolution (commending someone, or celebrating a life), which
      * is never a highlight.
      *
@@ -468,10 +487,12 @@ class DayHighlights
 
             // Its closest vote, and its most partisan one.
             $closest = null;
+            $closest_chamber = null;
             $party_line = null;
             foreach ($bill['actions'] as $action) {
                 if (self::closeness($action['vote']) > self::closeness($closest)) {
                     $closest = $action['vote'];
+                    $closest_chamber = $action['chamber'];
                 }
                 if ($action['vote_id'] !== null && isset($party_votes[$action['vote_id']])) {
                     $line = self::party_line($party_votes[$action['vote_id']]);
@@ -484,7 +505,7 @@ class DayHighlights
                 $closeness = self::closeness($closest);
                 $add('close', round($closeness, 3), self::WEIGHTS['close'] * $closeness ** 3);
                 if (Day::is_close($closest)) {
-                    $labels[] = 'Close vote, ' . $closest['yes'] . '–' . $closest['no'];
+                    $labels[] = self::close_vote_label($closest, $closest_chamber, $best['chamber']);
                 }
             }
             if ($party_line !== null && $party_line > 0) {

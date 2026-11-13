@@ -566,6 +566,26 @@ CREATE TABLE `dashboard_watch_lists` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Table structure for table `day_briefs`
+--
+
+DROP TABLE IF EXISTS `day_briefs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `day_briefs` (
+  `date` date NOT NULL,
+  `text` text NOT NULL COMMENT 'The brief, as the model wrote it (plain text)',
+  `model` varchar(64) NOT NULL,
+  `input_hash` char(64) NOT NULL COMMENT 'A fingerprint of what the model was told, so that it''s asked again only if that changes',
+  `status` enum('published','rejected') NOT NULL COMMENT 'Whether it passed its checks against the day''s record; a rejected one is never shown',
+  `problems` text DEFAULT NULL COMMENT 'Why it was rejected',
+  `date_created` datetime NOT NULL,
+  `date_modified` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci COMMENT='Each day''s brief, written by a language model (see class.DayBrief.php)';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
 -- Table structure for table `day_highlights`
 --
 

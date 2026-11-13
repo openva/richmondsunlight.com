@@ -52,7 +52,7 @@ EOD;
     # PAGE CONTENT
     $page_body = <<<EOD
 
-	<p>There are four types of data that can be subscribed to on Richmond Sunlight using an
+	<p>There are five types of data that can be subscribed to on Richmond Sunlight using an
 	aggregator. Links to activate these subscriptions are embedded within the page—your RSS reader
 	should detect them. (If not, you can provide your RSS reader with the website address for the
 	page to which you want to subscribe—e.g., a bill’s page or a legislator’s page—and it’ll figure
@@ -81,6 +81,11 @@ EOD;
 	legislator”s bills.  This will provide a listing of every bill that has been introduced by
 	the legislator in the current session.  That listing will update whenever the status of any of
 	that legislator’s bills changes.</p>
+
+	<h2>Each Day in the General Assembly</h2>
+	<p>Every morning after the legislature does anything, a summary of what it did, and the day’s
+	highlights: the bills most likely to interest you, and why each was chosen.
+	<a href="/rss/days/">Subscribe now</a>, or see <a href="/day/">every day</a>.</p>
 
 	<h2>Comments</h2>
 	<p>Every comment posted to Richmond Sunlight about any topic.

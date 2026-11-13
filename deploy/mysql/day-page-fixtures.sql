@@ -22,6 +22,9 @@
 -- day), a comment, page views from three people, and ten poll votes. (docker-setup-site.sh scores
 -- the day, with deploy/day-highlights.php.)
 --
+-- The day's brief, as if a language model had written it. (Its numbers are all in the day's record,
+-- so it passes DayBrief::check().)
+--
 -- Rows use INSERT IGNORE so that existing local rows are kept.
 --
 
@@ -84,3 +87,6 @@ INSERT IGNORE INTO `polls` (`id`, `bill_id`, `vote`, `user_id`, `ip`, `date_crea
 (995008,84141,'n',NULL,'192.0.2.18','2026-01-25 10:00:00'),
 (995009,84141,'n',NULL,'192.0.2.19','2026-01-26 10:00:00'),
 (995010,84141,'n',NULL,'192.0.2.20','2026-01-26 10:00:00');
+
+INSERT IGNORE INTO `day_briefs` (`date`, `text`, `model`, `input_hash`, `status`, `problems`, `date_created`) VALUES
+('2026-01-26','The House narrowly defeated HB 341, which would have shared plastic bag tax revenue with towns, by a vote of 45–52. The bill also drew news coverage and a comment from a reader. In committee, House Rules continued HB 288 to 2027.','gpt-6-luna','fixture','published',NULL,'2026-01-27 06:41:00');
