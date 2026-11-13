@@ -2,8 +2,8 @@
 
 /**
  * The RSS feed of days in the General Assembly (/rss/days/): one item for each day that the
- * legislature did anything, with how much happened and the day's highlights, linking to the day's
- * page. See docs/minutes-replacement.md.
+ * legislature did anything, with its brief (see DayBrief) or how much happened, and the day's
+ * highlights, linking to the day's page. See docs/minutes-replacement.md.
  *
  * A day's record fills in over a day or two (votes during the day, video that evening, highlights
  * recomputed overnight), so a day is published at 7 a.m. the next morning, rather than as it
@@ -63,8 +63,12 @@ class DayFeed
         $e = fn($text) => htmlspecialchars((string) $text, ENT_QUOTES, 'UTF-8');
         $html = '';
 
+        // The day's brief, if it has one, and otherwise how much happened.
         $summary = Day::summary($day);
-        if (count($summary) > 0) {
+        if (!empty($day['brief'])) {
+            $html .= '<p>' . self::absolute(DayBrief::html($day['brief']['text'], $day)) . '</p>'
+                . '<p><small>(Written automatically, by a language model, from the day’s records.)</small></p>';
+        } elseif (count($summary) > 0) {
             $html .= '<p>' . $e(implode(' ', $summary)) . '</p>';
         }
 
@@ -99,6 +103,14 @@ class DayFeed
 
         return $html . '<p><a href="' . $e($day['url']) . '">Everything that happened on '
             . $e(date('l, F j', strtotime($day['date']))) . '</a></p>';
+    }
+
+    /**
+     * HTML with this site's links made absolute, as a feed reader needs them.
+     */
+    private static function absolute(string $html): string
+    {
+        return preg_replace('/href="\//', 'href="https://www.richmondsunlight.com/', $html);
     }
 
     /**

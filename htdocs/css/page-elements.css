@@ -1506,6 +1506,14 @@ ul.place-map-popup li {
 	font-size: 1.15em;
 	line-height: 1.5;
 }
+div#content .day-brief .day-summary {
+	margin-bottom: .25em;
+	padding-bottom: 0;
+}
+div#content .day-brief-note {
+	color: #666;
+	font-size: .85em;
+}
 .day-filter {
 	display: flex;
 	flex-wrap: wrap;

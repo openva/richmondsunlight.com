@@ -98,6 +98,15 @@ test.describe('A day’s page', () => {
     await expect(first).toBeHidden();
   });
 
+  test('starts with its brief, labeled as written by a language model', async ({ page }) => {
+    await page.goto(day);
+    const brief = page.locator('.day-brief');
+    await expect(brief).toContainText('The House narrowly defeated HB 341');
+    await expect(brief.locator('a[href="/bill/2026/hb341/"]')).toHaveText('HB 341');
+    await expect(brief.locator('.day-brief-note')).toContainText('Written automatically, by a language model');
+    await expect(page.locator('#about-this-page')).toContainText('gpt-6-luna');
+  });
+
   test('shows what people said here, and the news', async ({ page }) => {
     await page.goto(day);
     const said = page.locator('#what-people-said');

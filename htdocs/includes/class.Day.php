@@ -715,7 +715,8 @@ class Day
 
     /**
      * Everything that happened on a day, for the API: what build() finds, plus the day's
-     * highlights, the news about its bills, and what people did with them on this site.
+     * highlights, the news about its bills, what people did with them on this site, and its
+     * brief (see DayBrief).
      *
      * @param string $date YYYY-MM-DD
      * @return array|null The day, or null if it hasn't happened yet, or nothing happened
@@ -733,6 +734,7 @@ class Day
         $day['highlights_updated'] = $highlights['updated'];
         $day['news'] = DayHighlights::news_for_api($date, $bill_ids);
         $day['site_activity'] = DayHighlights::site_activity_for_api($date, $bill_ids);
+        $day['brief'] = $day['in_session'] ? DayBrief::for_api($date) : null;
 
         return self::without_ids($day);
     }

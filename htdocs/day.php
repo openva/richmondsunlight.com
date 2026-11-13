@@ -225,7 +225,16 @@ $page_body = '
         : '<span></span>')
     . '</nav>';
 
-if (count($summary) > 0) {
+# The day's brief, if a language model has written one that passed its checks, and otherwise how
+# much happened.
+if (!empty($day['brief'])) {
+    $page_body .= '
+	<div class="day-brief">
+		<p class="day-summary">' . DayBrief::html($day['brief']['text'], $day) . '</p>
+		<p class="day-brief-note">Written automatically, by a language model, from this day’s records,
+		and checked against them. <a href="#about-this-page">How this works</a></p>
+	</div>';
+} elseif (count($summary) > 0) {
     $page_body .= '
 	<p class="day-summary">' . implode(' ', $summary) . '</p>';
 }
@@ -511,14 +520,19 @@ if (!empty($day['coming_up'])) {
 
 # PAGE SIDEBAR
 $page_sidebar = '
-	<div class="box">
+	<div class="box" id="about-this-page">
 		<h3>About This Page</h3>
 		<p>Everything that the General Assembly did on this day, gathered from the legislature’s
 		records: its votes and other actions on bills, its committees’ dockets and schedules, the
 		clerks’ minutes of each floor session, and video of the floor sessions and meetings.</p>
 		<p>The highlights are chosen automatically, from what was done to each bill, how close
 		and how partisan its votes were, how long it was debated, whether it was in the news, and
-		how many people looked at it here. Each one says why it was chosen.</p>
+		how many people looked at it here. Each one says why it was chosen.</p>' . (!empty($day['brief']) ? '
+		<p>The account at the top of the page is written by a language model (OpenAI’s
+		' . htmlspecialchars($day['brief']['model']) . '), the morning after, from this day’s records
+		alone: its summary, its highlights, and the news about them. Before it’s shown, every bill and
+		every number in it is checked against those records. If anything doesn’t match, it isn’t
+		shown.</p>' : '') . '
 		<p>A day’s records arrive over a day or two: votes during the day, video that evening, and
 		the minutes a day or so later.</p>
 	</div>
