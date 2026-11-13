@@ -219,6 +219,7 @@ div#content ul {
 #body-committees #t-committees,
 #body-statistics #t-statistics,
 #body-photosynthesis #t-photosynthesis,
+#body-day #t-daily,
 #body-blog #t-blog {
 	background: #406e91 url('/images/templates/new/tab-hl-background.png') repeat-x;
 	margin-top: 0.2em;

@@ -156,9 +156,16 @@ RewriteRule ^account/logout?/?$ /logout.php [QSA]
 RewriteRule ^account/reset-password/([a-z0-9]{8})$ /reset-password.php?hash=$1 [QSA]
 RewriteRule ^account/reset-password?/?$ /reset-password.php [QSA]
 
-# Minutes
-RewriteRule ^minutes/([A-Za-z]+)/([0-9]{4})/([0-9]{2})/([0-9]{2})/$ /minutes.php?year=$2&chamber=$1&date=$3-$4 [QSA]
-RewriteRule ^minutes/([0-9]{4})?/?$ /list-minutes.php?year=$1 [QSA]
+# Days: everything that happened in the General Assembly on a day (/day/2026-01-26/), and a calendar of
+# a year's days. /day/latest/ redirects to the most recent day.
+RewriteRule ^day/?$ /list-days.php [QSA,L]
+RewriteRule ^day/([0-9]{4})/?$ /list-days.php?year=$1 [QSA,L]
+RewriteRule ^day/([0-9]{4}-[0-9]{2}-[0-9]{2}|latest)/?$ /day.php?date=$1 [QSA,L]
+
+# Minutes, which are now on each day's page. A chamber's minutes go to its part of the day.
+RewriteRule ^minutes/(house|senate)/([0-9]{4})/([0-9]{2})/([0-9]{2})/?$ /day/$2-$3-$4/#$1 [NC,NE,R=301,L]
+RewriteRule ^minutes/([0-9]{4})/?$ /day/$1/ [R=301,L]
+RewriteRule ^minutes/?$ /day/ [R=301,L]
 
 # Videos. A video's URL is its slug and a readable suffix (/video/k7qm/2026-01-20-house-appropriations/),
 # but only the slug identifies it: video.php redirects any other suffix (or none) to the right one.
@@ -202,7 +209,6 @@ RewriteRule ^legislator/$ /bills/ [R]
 RewriteRule ^legislator$ /bills/ [R]
 RewriteRule ^search$ /search/
 RewriteRule ^schedule$ /schedule/ [R]
-RewriteRule ^minutes$ /minutes/ [R]
 RewriteRule ^video$ /video/ [R]
 php_value error_reporting 7
 

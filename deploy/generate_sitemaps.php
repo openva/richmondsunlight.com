@@ -257,6 +257,39 @@ for ($year = 2009; $year <= (int) date('Y'); $year++) {
 }
 
 /*
+ * Generate one sitemap of days per year (/day/YYYY-MM-DD/), from the API, with each year's calendar.
+ */
+for ($year = 2008; $year <= (int) date('Y'); $year++) {
+    $filename = $sitemap_dir . '/days-' . $year . '.xml';
+
+    // This year's and last year's days may still be filling in, so regenerate those daily.
+    if (
+        file_exists(filename: $filename)
+        && ($year < (int) date('Y') - 1 || filemtime(filename: $filename) > strtotime(datetime: '-1 day'))
+    ) {
+        $sitemap_list[] = 'days-' . $year . '.xml';
+        continue;
+    }
+
+    $days = Day::list_from_api($year);
+    if (count($days) === 0) {
+        continue;
+    }
+
+    $sitemap_file = fopen(filename: $filename, mode: 'w');
+    fwrite(stream: $sitemap_file, data: $sitemap_xml_header . "\n");
+    fwrite(stream: $sitemap_file, data: '<url><loc>https://www.richmondsunlight.com/day/' . $year . '/</loc></url>' . "\n");
+    foreach ($days as $day) {
+        fwrite(stream: $sitemap_file, data: '<url><loc>' . $xml($day['url']) . '</loc></url>' . "\n");
+    }
+    fwrite(stream: $sitemap_file, data: $sitemap_xml_footer . "\n");
+    fclose(stream: $sitemap_file);
+
+    $sitemap_list[] = 'days-' . $year . '.xml';
+    $log->put(message: 'Regenerated days sitemap for ' . $year, level: 3);
+}
+
+/*
  * Create a master sitemap.xml that refers to all the other sitemaps.
  */
 $filename = $sitemap_index;

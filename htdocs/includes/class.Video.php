@@ -500,7 +500,8 @@ class Video
     /**
      * Everything about a single video, for the API: its summary(), what it shows (description,
      * dimensions, license, sponsor), where to play it, and a guide to it (the bills taken up, the
-     * legislators who spoke, and the transcript), along with the day's minutes and other videos.
+     * legislators who spoke, and the transcript), along with its day's page, its minutes, and the
+     * day's other videos.
      *
      * @param string $slug The video's slug
      * @return array|null The video, or null if there's no such video
@@ -619,15 +620,16 @@ class Video
             ? 'https://api.richmondsunlight.com/1.1/video/' . $row['slug'] . '.vtt'
             : null;
 
-        // The day's minutes, and the day's other videos.
+        // The page about everything that happened that day, the chamber's minutes (which are on
+        // that page), and the day's other videos.
+        $video['day'] = Day::url($row['date']);
         $video['minutes'] = null;
         $result = mysqli_query($GLOBALS['db'], 'SELECT 1
             FROM minutes
             WHERE date = "' . $row['date'] . '" AND chamber = "' . $row['chamber'] . '"
             LIMIT 1');
         if ($result && mysqli_num_rows($result) > 0) {
-            $video['minutes'] = 'https://www.richmondsunlight.com/minutes/' . $row['chamber'] . '/'
-                . str_replace('-', '/', $row['date']) . '/';
+            $video['minutes'] = $video['day'] . '#minutes-' . $row['chamber'];
         }
 
         $video['same_day'] = [];
@@ -769,7 +771,7 @@ class Video
     }
 
     /**
-     * Render the video player used on video and minutes pages: the video, and a guide to it, in
+     * Render the video player used on video pages: the video, and a guide to it, in
      * tabs: the bills taken up, the legislators who spoke, and the transcript. Any timestamp or
      * transcript line plays the video from that point. /js/video-player.js makes that work.
      *

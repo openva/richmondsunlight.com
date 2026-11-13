@@ -43,7 +43,7 @@ if ($year !== null) {
 
 # PAGE METADATA
 $page_title = 'Video » ' . $year;
-$site_section = 'minutes';
+$site_section = 'day';
 
 # Group the videos by chamber, then by floor session or committee (subcommittees with their
 # committees), newest first.

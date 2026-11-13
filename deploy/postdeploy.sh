@@ -43,6 +43,25 @@ sudo systemctl enable memcached
 # Ensure that Memcached will listen to other RS servers.
 sudo sed -i 's/-l 127.0.0.1/-l 0.0.0.0/' /etc/memcached.conf
 
+# Keep Memcached's contents in a file, so that they (sessions, above all) survive restarts and
+# reboots. See deploy/systemd/memcached-warm-restart.conf.
+sudo install -d -o memcache -g memcache /var/lib/memcached
+MEMCACHED_RESTART=0
+if ! grep -q '^-e ' /etc/memcached.conf; then
+    echo '-e /var/lib/memcached/memory_file' | sudo tee -a /etc/memcached.conf > /dev/null
+    MEMCACHED_RESTART=1
+fi
+sudo mkdir -p /etc/systemd/system/memcached.service.d
+if ! cmp -s "$SITE_PATH"/deploy/systemd/memcached-warm-restart.conf /etc/systemd/system/memcached.service.d/warm-restart.conf; then
+    sudo cp "$SITE_PATH"/deploy/systemd/memcached-warm-restart.conf /etc/systemd/system/memcached.service.d/warm-restart.conf
+    sudo systemctl daemon-reload
+fi
+# Memcached reads -e only when it starts. This first restart starts it empty (there's no saved
+# file yet); every one after that keeps its contents.
+if [ "$MEMCACHED_RESTART" -eq 1 ] && systemctl is-active --quiet memcached; then
+    sudo systemctl restart memcached
+fi
+
 # Set up Apache, if need be.
 SITE_SET_UP="$(sudo apache2ctl -S 2>&1 |grep -c " $SITE_URL ")"
 if [ "$SITE_SET_UP" -eq "0" ]; then

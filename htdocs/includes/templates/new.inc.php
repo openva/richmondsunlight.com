@@ -133,11 +133,11 @@
                         <li><a href="/downloads/">Bulk Downloads</a></li>
                         </ul>
                     </li>
-                    <li id="t-video"><a href="/minutes/" accesskey="v">Video</a>
+                    <li id="t-daily"><a href="/day/" accesskey="d">Daily</a>
                         <ul>
-                        <li class="nav-section-link"><a href="/minutes/">All Video</a></li>
-                        <li><a href="/minutes/#house">House</a></li>
-                        <li><a href="/minutes/#senate">Senate</a></li>
+                        <li class="nav-section-link"><a href="/day/">All Days</a></li>
+                        <li><a href="/day/latest/">Most Recent Day</a></li>
+                        <li><a href="/video/" accesskey="v">Video</a></li>
                         </ul>
                     </li>
                     <li id="t-schedule"><a href="/schedule/" accesskey="s">Schedule</a></li>

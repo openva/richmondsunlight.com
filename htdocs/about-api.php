@@ -75,6 +75,8 @@ EOD;
 		<li><a href="#section-video">Video clips by code section</a></li>
 		<li><a href="#videos">List of videos</a></li>
 		<li><a href="#video">Video detail</a></li>
+		<li><a href="#days">List of days</a></li>
+		<li><a href="#day">Day detail</a></li>
 		<li><a href="#tag-suggest">Tag suggestions</a></li>
 	</ul>
 
@@ -297,7 +299,8 @@ EOD;
 		<li>speakers (each legislator who spoke, with when)</li>
 		<li>transcript (in turns, each with its speaker and timed lines)</li>
 		<li>captions (the WebVTT captions’ URL)</li>
-		<li>minutes (the chamber’s minutes for that day, if there are any)</li>
+		<li>day (the page about everything that happened that day)</li>
+		<li>minutes (the chamber’s minutes for that day, on the day’s page, if there are any)</li>
 		<li>same_day (the other videos recorded that day)</li>
 	</ul>
 
@@ -306,6 +309,56 @@ EOD;
 	<h3>Deprecated: video by ID</h3>
 	<p><code>https://api.richmondsunlight.com/1.1/video/123.json</code> still returns a video by its
 	numeric ID, with its slug and URL, but video IDs may change, so use the slug instead.</p>
+
+
+	<h2 id="days">List of days</h2>
+
+	<h3>Example URI</h3>
+	<p><code>https://api.richmondsunlight.com/1.1/days.json?year=2026</code></p>
+
+	<h3>Instructions</h3>
+	<p>Replace <code>2026</code> with the year you want. Lists every day of that year that has
+	anything recorded (video, minutes, a meeting, or a vote or other decision on a bill), oldest
+	first.</p>
+
+	<h3>Returns</h3>
+	<ul>
+		<li>date</li>
+		<li>url (the day’s page on Richmond Sunlight)</li>
+		<li>floor (the chambers that met on the floor: <code>house</code>, <code>senate</code>)</li>
+		<li>videos, meetings, and actions (how many of each there were)</li>
+	</ul>
+
+	<p>Returns 400 if the year is missing or malformed.</p>
+
+
+	<h2 id="day">Day detail</h2>
+
+	<h3>Example URI</h3>
+	<p><code>https://api.richmondsunlight.com/1.1/day/2026-01-26.json</code></p>
+	<p><code>https://api.richmondsunlight.com/1.1/day/latest.json</code> (the most recent day)</p>
+
+	<h3>Instructions</h3>
+	<p>Replace <code>2026-01-26</code> with the date you want. A day’s record fills in over a day
+	or two, as its votes, video, and minutes arrive.</p>
+
+	<h3>Returns</h3>
+	<ul>
+		<li>date, url, and in_session (outside of a session, a day has only meetings)</li>
+		<li>previous and next (the nearest days before and after with records)</li>
+		<li>chambers (each chamber’s floor session: its videos, its minutes, and its actions on
+		bills that weren’t in a committee)</li>
+		<li>meetings (each committee, subcommittee, or other meeting: its time and place, its
+		videos, its actions on bills, and the rest of its docket)</li>
+		<li>coming_up (on the most recent day only: the next day with anything scheduled, and its
+		meetings and dockets)</li>
+	</ul>
+	<p>Each action has its bill, its text, its type (e.g., <code>passed</code>,
+	<code>committee</code>, <code>subcommittee</code>, <code>reading</code>), its outcome
+	(<code>advanced</code>, <code>stopped</code>, or <code>incorporated</code>), and its vote (the
+	tally, or that it was a voice vote, whether it was close, and the roll call’s URL).</p>
+
+	<p>Returns 404 if nothing is recorded for that date, or it hasn’t happened yet.</p>
 
 
 	<h2 id="tag-suggest">Tag suggestions</h2>

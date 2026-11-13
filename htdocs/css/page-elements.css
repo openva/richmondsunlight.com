@@ -1078,7 +1078,7 @@ meter {
 	}
 }
 
-/* Video player, on video and minutes pages: the video, and a guide to its bills, speakers, and
+/* Video player, on video pages: the video, and a guide to its bills, speakers, and
    transcript (see /js/video-player.js) */
 .video-player-stage {
 	background-color: #243a51;
@@ -1479,7 +1479,7 @@ ul.place-map-popup li {
 		}
 }
 
-/* Lists of videos (/video/, committee pages, minutes pages) */
+/* Lists of videos (/video/ and committee pages) */
 .video-list-group {
 	margin-bottom: .5em;
 }
@@ -1488,3 +1488,241 @@ ul.place-map-popup li {
 		font-weight: bold;
 		padding: .3em 0;
 	}
+
+/* A day's page (/day/YYYY-MM-DD/): what each chamber and committee did, and the calendar of days
+   (/day/). See /js/day.js. */
+.day-nav {
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: space-between;
+	gap: .5em 1em;
+	margin: 0 0 1em;
+	font-size: .95em;
+}
+	.day-nav-calendar {
+		text-align: center;
+	}
+.day-summary {
+	font-size: 1.15em;
+	line-height: 1.5;
+}
+.day-filter {
+	display: flex;
+	flex-wrap: wrap;
+	gap: .4em;
+	margin: 1em 0;
+}
+	.day-filter button {
+		font: inherit;
+		color: #790806;
+		background-color: #fff;
+		border: 1px solid #dccbaf;
+		border-radius: 999px;
+		padding: .3em .9em;
+		cursor: pointer;
+	}
+	.day-filter button:hover {
+		background-color: #f4eee5;
+	}
+	.day-filter button[aria-pressed="true"] {
+		color: #fff;
+		background-color: #790806;
+		border-color: #790806;
+	}
+.day-section {
+	margin-top: 1.5em;
+}
+.day-chamber,
+.day-meeting {
+	border-top: 1px solid #dccbaf;
+	padding: .75em 0 .5em;
+}
+	.day-chamber h4,
+	.day-meeting h4 {
+		margin: 1em 0 .25em;
+	}
+	.day-chamber h4 small,
+	.day-meeting h4 small,
+	.day-section summary small {
+		font-weight: normal;
+		color: #666;
+	}
+.day-meeting h3 a {
+	font: inherit;
+}
+.day-meeting-when {
+	margin: 0 0 .5em;
+	color: #555;
+	font-size: .95em;
+}
+.day-pending {
+	color: #666;
+	font-style: italic;
+}
+.day-section details {
+	margin: .75em 0;
+}
+	.day-section summary {
+		cursor: pointer;
+		font-weight: bold;
+		padding: .2em 0;
+	}
+.day-minutes-text {
+	max-height: 40em;
+	overflow-y: auto;
+	padding: 0 .75em;
+	border-left: 3px solid #dccbaf;
+}
+
+/* Bills, and what was done to them */
+div#content ul.day-actions {
+	list-style: none;
+	margin: .25em 0 .75em;
+	padding: 0;
+	line-height: inherit;
+}
+	.day-actions li {
+		padding: .4em 0 .4em .75em;
+		border-left: 3px solid #f0e8da;
+		margin-bottom: .2em;
+	}
+	.day-actions li.day-outcome-advanced {
+		border-left-color: #3f7d3f;
+	}
+	.day-actions li.day-outcome-stopped {
+		border-left-color: #790806;
+	}
+	.day-actions li.day-outcome-incorporated {
+		border-left-color: #b08d57;
+	}
+	.day-bill-number {
+		font-weight: bold;
+		white-space: nowrap;
+	}
+	.day-bill-patron {
+		color: #666;
+		font-size: .9em;
+	}
+	.day-action-text {
+		display: block;
+		font-size: .92em;
+		color: #333;
+	}
+.day-vote {
+	display: inline-block;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+	padding: 0 .4em;
+	border: 1px solid #dccbaf;
+	border-radius: 3px;
+	font-size: .9em;
+}
+.day-close {
+	display: inline-block;
+	padding: 0 .4em;
+	border-radius: 3px;
+	background-color: #fbf3dc;
+	color: #790806;
+	font-size: .85em;
+	font-weight: bold;
+	white-space: nowrap;
+}
+
+/* Videos of a floor session or a meeting */
+div#content ul.day-videos {
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+	gap: .75em;
+	margin: .5em 0 .75em;
+	padding: 0;
+	line-height: 1.3;
+}
+	.day-videos a {
+		display: flex;
+		align-items: center;
+		gap: .6em;
+	}
+	.day-videos img {
+		width: 120px;
+		height: auto;
+		aspect-ratio: 16 / 9;
+		object-fit: cover;
+		border-radius: 3px;
+		background-color: #243a51;
+	}
+
+/* What's scheduled next */
+div#content ul.day-coming-up {
+	line-height: 1.5;
+}
+	.day-coming-up .day-meeting-when {
+		display: inline;
+		font-size: .9em;
+	}
+
+/* The calendar of days (/day/) */
+.day-month {
+	display: inline-block;
+	vertical-align: top;
+	margin: 0 1.5em 1.5em 0;
+}
+	.day-month h2 {
+		margin-bottom: .3em;
+	}
+.day-calendar {
+	border-collapse: separate;
+	border-spacing: 3px;
+	font-variant-numeric: tabular-nums;
+}
+	.day-calendar caption {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+	}
+	.day-calendar th,
+	.day-calendar td {
+		background: none;
+		border: 0;
+	}
+	.day-calendar th {
+		font-size: .8em;
+		color: #666;
+		font-weight: normal;
+		text-align: center;
+	}
+	.day-calendar td {
+		width: 2.2em;
+		height: 2.2em;
+		padding: 0;
+		text-align: center;
+		color: #aaa;
+		font-size: .9em;
+	}
+		.day-calendar td a {
+			display: block;
+			line-height: 2.2em;
+			border-radius: 3px;
+			color: #333;
+			text-decoration: none;
+			font-weight: bold;
+		}
+		.day-calendar td a:hover,
+		.day-calendar td a:focus {
+			outline: 2px solid #406e91;
+		}
+		.day-calendar .day-level-1 a {
+			background-color: #f4eee5;
+		}
+		.day-calendar .day-level-2 a {
+			background-color: #e6d5b8;
+		}
+		.day-calendar .day-level-3 a {
+			background-color: #c99a6b;
+		}
+		.day-calendar .day-level-4 a {
+			background-color: #790806;
+			color: #fff;
+		}

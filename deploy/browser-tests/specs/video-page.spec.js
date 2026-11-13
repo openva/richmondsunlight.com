@@ -159,14 +159,15 @@ test.describe('Video page', () => {
     await expect(page.locator('#content a[href="/committee/house/appropriations/"]').first()).toBeVisible();
   });
 
-  test('lists the day’s other videos and its minutes', async ({ page }) => {
+  test('lists the day’s other videos, and links to its day and its minutes', async ({ page }) => {
     await page.goto(committee);
 
     const others = page.locator('.video-same-day li');
     await expect(others).toHaveCount(3);
     await expect(others.locator(`a[href="${floor}"]`)).toHaveText('House floor session');
     await expect(others.filter({ hasText: 'House Rules Committee' })).toContainText('processing');
-    await expect(page.locator('a[href="/minutes/house/2026/01/26/"]')).toBeVisible();
+    await expect(page.locator('a[href="/day/2026-01-26/"]')).toBeVisible();
+    await expect(page.locator('a[href="/day/2026-01-26/#minutes-house"]')).toBeVisible();
   });
 });
 
