@@ -74,7 +74,7 @@ $next = Day::adjacent($date, true);
 		<?php if ($previous) { ?><a href="?date=<?= h($previous) ?>">← <?= h($previous) ?></a><?php } ?>
 		<?php if ($next) { ?><a href="?date=<?= h($next) ?>"><?= h($next) ?> →</a><?php } ?>
 		<a href="<?= h(Day::page_path($date)) ?>">The day’s page</a>
-		<form method="get"><input type="date" name="date" value="<?= h($date) ?>"> <button>Go</button></form>
+		<form method="get"><label for="date">Another day</label> <input type="date" id="date" name="date" value="<?= h($date) ?>"> <button>Go</button></form>
 	</nav>
 <?php if (count($scores) === 0) { ?>
 	<p>No bills have been scored for this day. (rs-machine’s <code>cron/day_highlights.php</code>
@@ -83,7 +83,7 @@ $next = Day::adjacent($date, true);
 	<p>Scored at <?= h(max(array_column($scores, 'date_modified'))) ?>. The page’s API response is
 	cached for up to 15 minutes, so a change may take that long to show.</p>
 	<table>
-		<thead><tr><th>#</th><th>Bill</th><th>Score</th><th>What happened, and why</th><th></th></tr></thead>
+		<thead><tr><th>#</th><th>Bill</th><th>Score</th><th>What happened, and why</th><th>Highlight</th></tr></thead>
 		<tbody>
 <?php foreach ($scores as $row) {
     $reasons = $row['reasons'];
@@ -112,7 +112,7 @@ $next = Day::adjacent($date, true);
 					<form method="post">
 						<input type="hidden" name="bill_id" value="<?= h($row['bill_id']) ?>">
 						<input type="hidden" name="hidden" value="<?= $row['hidden'] === 'y' ? 'n' : 'y' ?>">
-						<button><?= $row['hidden'] === 'y' ? 'Show' : 'Hide' ?></button>
+						<button aria-label="<?= h(($row['hidden'] === 'y' ? 'Show ' : 'Hide ') . strtoupper($reasons['bill']['number'])) ?>"><?= $row['hidden'] === 'y' ? 'Show' : 'Hide' ?></button>
 					</form>
 				</td>
 			</tr>
