@@ -49,6 +49,7 @@ cp deploy/mysql/video-minutes-fixtures.sql api/deploy/video-minutes-fixtures.sql
 cp deploy/mysql/video-legislator-fixtures.sql api/deploy/video-legislator-fixtures.sql
 cp deploy/mysql/fiscal-impact-fixtures.sql api/deploy/fiscal-impact-fixtures.sql
 cp deploy/mysql/video-page-fixtures.sql api/deploy/video-page-fixtures.sql
+cp deploy/mysql/day-page-fixtures.sql api/deploy/day-page-fixtures.sql
 cp deploy/mysql/zz-video-slugs.sql api/deploy/zz-video-slugs.sql
 
 # Add local test records, if they exist, and otherwise remove any copy left from before

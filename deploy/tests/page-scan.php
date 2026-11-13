@@ -84,7 +84,7 @@ $pages =
         'string' => 'Fiscal Impact Statement (Virginia Criminal Sentencing Commission)',
     ],
     [
-        'url' => '/minutes/house/2026/01/26/',
+        'url' => '/day/2026-01-26/',
         'http_status' => '200',
         'string' => 'State-facilitated IRA savings program',
     ],

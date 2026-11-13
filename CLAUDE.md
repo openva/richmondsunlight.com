@@ -58,3 +58,14 @@ Every video (`files` row) has a `slug`, four random characters from `bcdfghjkmnp
 - Video pages, the minutes page's player, `/video/`, and committee pages' video lists get their data from the API (`/1.1/video/{slug}.json`, `/1.1/videos.json`), not the database.
 - That API's video logic is in this repo's `htdocs/includes/class.Video.php` (`record_for_api()`, `list_for_api()`): rs-api copies `htdocs/includes/` from this repo's `deploy` branch when it deploys. So a change there changes the API, and rs-api's endpoints can't use a method until it's on `deploy`.
 - Locally, `deploy/mysql/zz-video-slugs.sql` gives each video a slug made from its ID (15141 is `b334`), so tests can name them; production slugs are random. New video fixtures need no slug of their own.
+
+## Day Pages
+
+`/day/YYYY-MM-DD/` shows everything the General Assembly did on a day; it replaced the minutes
+pages (`/minutes/...` redirects to it). Like video pages, day pages get their data from the API
+(`/1.1/day/{date}.json`, `/1.1/days.json`), whose logic is in this repo's
+`htdocs/includes/class.Day.php`. See `docs/minutes-replacement.md`.
+
+- Bill actions are matched to committees by the name in LIS's text, not by `votes.committee_id`
+  (unreliable), and to subcommittees by the day's dockets.
+- `Day::classify()` decides what an action is. Add new LIS wording there (and to `DayTest.php`).

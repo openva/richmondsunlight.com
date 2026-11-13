@@ -59,7 +59,7 @@ $description = 'Video of ' . $meeting_phrase . ' on ' . $date . '.';
 
 # PAGE METADATA
 $page_title = $meeting['label'] . ', ' . date('F j, Y', strtotime($video['date']));
-$site_section = 'minutes';
+$site_section = 'day';
 
 $html_head = '
 	<link rel="canonical" href="' . htmlspecialchars($video['url']) . '">
@@ -170,10 +170,15 @@ if (!empty($video['sponsor'])) {
 			purchased it from the General Assembly for Richmond Sunlight, so that it may be freely
 			available to everybody.</p>';
 }
-if (!empty($video['minutes'])) {
+if (!empty($video['day'])) {
     $page_sidebar .= '
-			<p>See <a href="' . htmlspecialchars(parse_url($video['minutes'], PHP_URL_PATH)) . '">the '
-        . ucfirst($video['chamber']) . '’s minutes for this day</a>, as recorded by the clerk.</p>';
+			<p>See <a href="' . htmlspecialchars(parse_url($video['day'], PHP_URL_PATH)) . '">everything that
+			happened in the General Assembly this day</a>'
+        . (!empty($video['minutes'])
+            ? ', including <a href="' . htmlspecialchars(parse_url($video['minutes'], PHP_URL_PATH) . '#' . parse_url($video['minutes'], PHP_URL_FRAGMENT)) . '">the '
+                . ucfirst($video['chamber']) . '’s minutes</a>, as recorded by the clerk'
+            : '')
+        . '.</p>';
 }
 $page_sidebar .= '
 		</div>';

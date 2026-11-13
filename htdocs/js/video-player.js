@@ -1,10 +1,10 @@
 /*
  * Video player
  *
- * Connects a video (on a video page or a minutes page) to its guide: the bills taken up, the
- * legislators who spoke, and the transcript. Each is a tab; any timestamp or transcript line plays
- * the video from that point; and, as the video plays, the current bill, speaker, and transcript
- * line are highlighted (and kept in view), and summarized beneath the video.
+ * Connects a video (on a video page) to its guide: the bills taken up, the legislators who spoke,
+ * and the transcript. Each is a tab; any timestamp or transcript line plays the video from that
+ * point; and, as the video plays, the current bill, speaker, and transcript line are highlighted
+ * (and kept in view), and summarized beneath the video.
  *
  * ?t=SECONDS in the URL (or #t=SECONDS, or #t=H:MM:SS) starts the video at that time. As the video
  * plays, ?t= in the address bar is kept up to date, so that a copied URL starts where the viewer

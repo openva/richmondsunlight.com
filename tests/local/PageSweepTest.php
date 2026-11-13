@@ -3,7 +3,7 @@
 use PHPUnit\Framework\Attributes\Group;
 
 /**
- * Load every bill, legislator, committee, and minutes page in the local database, and fail on any
+ * Load every bill, legislator, committee, and day page in the local database, and fail on any
  * that don't return 200, or that raise a PHP warning (or notice, or error).
  *
  * Pages don't show PHP errors, so this reads them from the log (PHP_ERROR_LOG, set in
@@ -70,19 +70,24 @@ class PageSweepTest extends LocalTestCase
             ORDER BY id'), 'committee pages');
     }
 
-    public function testMinutesPages(): void
+    /**
+     * Every day with minutes, a video, or a docket has a page, as does each year's calendar.
+     */
+    public function testDayPages(): void
     {
-        $this->sweep(self::column('SELECT CONCAT("/minutes/", chamber, "/", DATE_FORMAT(date, "%Y/%m/%d"), "/")
+        $this->sweep(self::column('SELECT CONCAT("/day/", DATE_FORMAT(date, "%Y-%m-%d"), "/")
             FROM (
-                SELECT chamber, date
-                FROM minutes
+                SELECT date FROM minutes
                 UNION
-                SELECT chamber, date
-                FROM files
-                WHERE chamber IN ("house", "senate") AND title LIKE "%Session%"
-                    AND id IN (SELECT file_id FROM video_index)
+                SELECT date FROM files WHERE type = "video" AND slug IS NOT NULL
+                UNION
+                SELECT dockets.date FROM dockets JOIN bills ON bills.id = dockets.bill_id
             ) AS days
-            ORDER BY date, chamber'), 'minutes pages');
+            WHERE date <= CURDATE()
+            ORDER BY date'), 'day pages');
+        $this->sweep(self::column('SELECT DISTINCT CONCAT("/day/", YEAR(date), "/")
+            FROM minutes
+            ORDER BY 1'), 'calendars of days');
     }
 
     /**
