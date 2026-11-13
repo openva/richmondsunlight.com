@@ -53,3 +53,4 @@ VALUES
 (995002,2,'2026-01-26','07:30:00',NULL,'House Appropriations-Capital Outlay Subcommittee','House Appropriations Room, Room 1200, General Assembly Building',32,'2026-01-23 12:00:00'),
 (995003,NULL,'2026-01-26','11:00:00',NULL,'House Democratic Caucus Caucus','House Room 2, The Capitol',32,'2026-01-23 12:00:00'),
 (995004,NULL,'2099-01-14','10:00:00',NULL,'Joint Subcommittee on Day Page Fixtures Other','Senate Room A, General Assembly Building',32,'2026-01-23 12:00:00');
+(995005,NULL,'2026-01-27','10:00:00',NULL,'Joint Commission on Day Page Fixtures Other','Senate Room A, General Assembly Building',32,'2026-01-23 12:00:00');
