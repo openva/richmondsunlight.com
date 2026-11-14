@@ -70,7 +70,7 @@ else {
     # Increment the view count.
     $sql = 'UPDATE dashboard_portfolios
 			SET view_count = view_count + 1
-			WHERE id = ' . $portfolio['id'];
+			WHERE id = ' . (int) $portfolio['id'];
     mysqli_query($GLOBALS['db'], $sql);
 
     # Make the user closer to anonymous.

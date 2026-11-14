@@ -12,6 +12,8 @@
 # or to update an existing portfolio.
 function populate_smart_portfolio($portfolio_id)
 {
+    # It goes into the queries below.
+    $portfolio_id = (int) $portfolio_id;
 
     # Get the watch list ID.
     $sql = 'SELECT watch_list_id AS id

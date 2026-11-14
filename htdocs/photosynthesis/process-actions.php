@@ -87,7 +87,7 @@ if (isset($_GET['delete-bill']) || isset($_POST['delete-bill'])) {
     $tmp = mysqli_real_escape_string($GLOBALS['db'], $raw);
     $tmp = explode('-', $tmp);
     $portfolio_hash = $tmp[0];
-    $record_id = $tmp[1];
+    $record_id = (int) ($tmp[1] ?? 0);
 
     # Delete the bill record.
     $sql = 'DELETE FROM dashboard_bills
