@@ -644,14 +644,41 @@ function first_sentences($html, $count = 4)
 }
 
 /**
- * Write an RSS feed to the cache and send it, with Last-Modified and ETag headers. If the cache
- * can't be written to, the feed is still sent, with headers based on the current time.
+ * The path of a cached RSS feed, by the feed's name (e.g. "tag-education"). basename() keeps the
+ * file directly inside the cache directory, whatever the name was built from.
  */
-function send_rss_and_cache(string $cache_file, string $rss, string $content_type = 'application/rss+xml'): void
+function rss_cache_file(string $name): string
 {
-    // Only write directly inside the cache directory, whatever the file name was built from.
-    $in_cache_dir = dirname($cache_file) === rtrim(CACHE_DIR, '/');
-    if ($in_cache_dir && @file_put_contents($cache_file, $rss) !== false) {
+    return rtrim(CACHE_DIR, '/') . '/' . basename($name) . '.xml';
+}
+
+/**
+ * Send a cached RSS feed, with Last-Modified and ETag headers, if it's newer than $max_age
+ * seconds. Returns whether it was sent.
+ */
+function send_cached_rss(string $name, int $max_age, string $content_type = 'application/rss+xml'): bool
+{
+    $cache_file = rss_cache_file($name);
+    if (!is_file($cache_file) || (filemtime($cache_file) + $max_age) <= time()) {
+        return false;
+    }
+
+    header('Content-Type: ' . $content_type);
+    header('Last-Modified: ' . date('r', filemtime($cache_file)));
+    header('ETag: ' . hash_file('xxh128', $cache_file));
+    readfile($cache_file);
+    return true;
+}
+
+/**
+ * Write an RSS feed to the cache, by the feed's name (see rss_cache_file()), and send it, with
+ * Last-Modified and ETag headers. If the cache can't be written to, the feed is still sent, with
+ * headers based on the current time.
+ */
+function send_rss_and_cache(string $name, string $rss, string $content_type = 'application/rss+xml'): void
+{
+    $cache_file = rss_cache_file($name);
+    if (@file_put_contents($cache_file, $rss) !== false) {
         $last_modified = date('r', filemtime($cache_file));
         $etag = md5_file($cache_file);
     } else {

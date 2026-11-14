@@ -27,11 +27,7 @@ if (!preg_match('/^[a-z0-9 +-]{1,100}$/', $tag)) {
 
     # Check to see if there's any need to regenerate this RSS feed -- only do so
     # if it's more than a half hour old.
-if ((file_exists(CACHE_DIR . '/tag-' . $tag . '.xml')) && ((filemtime(CACHE_DIR . '/tag-' . $tag . '.xml') + 1800) > time())) {
-    header('Content-Type: application/rss+xml');
-    header('Last-Modified: ' . date('r', filemtime(CACHE_DIR . '/tag-' . $tag . '.xml')));
-    header('ETag: ' . md5_file(CACHE_DIR . '/tag-' . $tag . '.xml'));
-    readfile(CACHE_DIR . '/tag-' . $tag . '.xml');
+if (send_cached_rss('tag-' . $tag, 1800)) {
     exit();
 }
 
@@ -86,4 +82,4 @@ $rss = Rss::feed(
 );
 
     # Cache the RSS file.
-    send_rss_and_cache(CACHE_DIR . '/tag-' . $tag . '.xml', $rss);
+    send_rss_and_cache('tag-' . $tag, $rss);
