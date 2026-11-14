@@ -24,8 +24,16 @@ $database = new Database();
 $database->connect_mysqli();
 
 # LOCALIZE VARIABLES
-$section = mysqli_real_escape_string($GLOBALS['db'], urldecode($_REQUEST['section']));
-if (isset($_REQUEST['callback']) && !empty($_REQUEST['callback'])) {
+$section = urldecode((string) ($_REQUEST['section'] ?? ''));
+
+# A JSONP callback must be a JavaScript function name (e.g. "handle" or "jQuery123.cb"), since
+# it's sent back as code.
+if (!empty($_REQUEST['callback'])) {
+    $function_name = '/^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*)*$/';
+    if (!is_string($_REQUEST['callback']) || !preg_match($function_name, $_REQUEST['callback'])) {
+        http_response_code(400);
+        exit();
+    }
     $callback = $_REQUEST['callback'];
 }
 
