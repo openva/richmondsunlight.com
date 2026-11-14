@@ -90,6 +90,9 @@ function populate_smart_portfolio($portfolio_id)
 
     # Run the actual query;
     $result = mysqli_execute_query($GLOBALS['db'], $sql, $params);
+    if ($result === false) {
+        return false;
+    }
 
     # We don't want to fail when no bills are found. It's totally reasonable for somebody to
     # have a smart portfoilo that starts out blank. But we do want to erase any bills in the
