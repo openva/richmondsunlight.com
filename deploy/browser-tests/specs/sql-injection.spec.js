@@ -79,19 +79,45 @@ test.describe('Photosynthesis', () => {
   test('a portfolio can be named with quotes', async ({ page }) => {
     await loginTestUser(page);
     const name = `O"Brien's Portfolio ${Date.now()}`;
-    await page.request.post('/photosynthesis/process-actions.php', {
+    const resp = await page.request.post('/photosynthesis/process-actions.php', {
       form: { 'add-portfolio': 'y', 'form_data[name]': name },
       headers: { Referer: '/photosynthesis/' },
     });
+    expect(resp.status()).toBe(200);
     await page.goto('/photosynthesis/');
     await expect(page.locator('h1').filter({ hasText: name })).toBeVisible({ timeout: 15000 });
+  });
+
+  test('a portfolio can be edited, but not by an ID that is not a number', async ({ page }) => {
+    await loginTestUser(page);
+    await page.goto('/photosynthesis/portfolios/edit/pwt01/');
+    const id = await page.locator('#portfolio-id').inputValue();
+    const edit = (portfolioId, notes) => page.request.post('/photosynthesis/portfolios/edit/pwt01/', {
+      form: {
+        submit: 'y',
+        'form_data[id]': portfolioId,
+        'form_data[name]': 'Test Portfolio',
+        'form_data[notes]': notes,
+        'form_data[public]': 'n',
+        'form_data[notify]': 'none',
+      },
+      maxRedirects: 0,
+    });
+
+    // A successful edit redirects to the list of portfolios.
+    const notes = `Notes with "quotes" ${Date.now()}`;
+    expect((await edit(id, notes)).status()).toBe(302);
+    expect((await edit(`${id} OR 1=1`, 'Not saved')).status()).toBe(200);
+
+    await page.goto('/photosynthesis/portfolios/edit/pwt01/');
+    await expect(page.locator('#notes')).toHaveValue(notes);
   });
 
   test('a smart portfolio can have quotes in its keyword', async ({ page }) => {
     await loginTestUser(page);
     const name = `Smart Portfolio ${Date.now()}`;
     const started = Date.now();
-    await page.request.post('/photosynthesis/process-actions.php', {
+    const resp = await page.request.post('/photosynthesis/process-actions.php', {
       form: {
         'add-smart-portfolio': 'y',
         'form_data[name]': name,
@@ -99,6 +125,7 @@ test.describe('Photosynthesis', () => {
       },
       headers: { Referer: '/photosynthesis/' },
     });
+    expect(resp.status()).toBe(200);
     expect(Date.now() - started).toBeLessThan(2500);
     await page.goto('/photosynthesis/');
     await expect(page.locator('h1').filter({ hasText: name })).toBeVisible({ timeout: 15000 });
