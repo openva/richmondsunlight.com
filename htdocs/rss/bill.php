@@ -32,7 +32,7 @@ if (
         &&
         ((filemtime(CACHE_DIR . '/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml') + 1800) > time())
 ) {
-    header('Content-Type: application/xml');
+    header('Content-Type: application/rss+xml');
     header('Last-Modified: ' . date('r', filemtime(CACHE_DIR . '/bill-' . SESSION_YEAR . '-'
         . $bill['number'] . '.xml')));
     header('ETag: ' . md5_file(CACHE_DIR . '/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml'));
@@ -46,7 +46,9 @@ $database->connect_mysqli();
 
 # Query the database for all bills by that bill number.
 $sql = 'SELECT
+            bills_status.id,
             bills_status.status,
+            bills_status.date,
             bills.catch_line
         FROM bills_status
         LEFT JOIN bills
@@ -61,56 +63,35 @@ $sql = 'SELECT
 
 $result = mysqli_query($GLOBALS['db'], $sql);
 
-if (mysqli_num_rows($result) > 0) {
-    $rss_content = '';
+$link = 'https://www.richmondsunlight.com/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/';
+$rss_content = '';
+$latest = null;
 
-    # Generate the RSS.
-    while ($status = mysqli_fetch_array($result)) {
-        $status = array_map('stripslashes_nullsafe', $status);
-
-        # Aggregate the variables into their RSS components.
-        $title = '<![CDATA[' . $status['status'] . ']]>';
-        $link = 'https://www.richmondsunlight.com/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/';
-        $description = '<![CDATA[' . $status['status'] . ']]>';
-
-        # Now assemble those RSS components into an XML fragment.
-        $rss_content .= '
-        <item>
-            <title>' . $title . '</title>
-            <link>' . $link . '</link>
-            <description>' . $description . '</description>
-        </item>';
+# Generate the RSS.
+while ($status = mysqli_fetch_array($result)) {
+    $status = array_map('stripslashes_nullsafe', $status);
+    $date = Rss::timestamp($status['date']);
+    if ($date !== null) {
+        $latest = max($latest ?? 0, $date);
     }
+    $rss_content .= Rss::item(
+        $status['status'],
+        $link,
+        htmlspecialchars($status['status'], ENT_QUOTES, 'UTF-8'),
+        'richmondsunlight-bill-status-' . $status['id'],
+        $date
+    );
 }
 
-
-$rss = '<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN" "https://www.rssboard.org/rss-0.91.dtd">
-<rss version="0.91">
-	<channel>
-		<title>' . strtoupper($bill['number']) . ' Status</title>
-		<link>https://www.richmondsunlight.com/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/</link>
-		<description>The activity of bill ' . strtoupper($bill['number']) . ' in the '
-            . SESSION_YEAR . ' Virginia General Assembly session.</description>
-		<language>en-us</language>
-		' . $rss_content . '
-	</channel>
-</rss>';
-
+$rss = Rss::feed(
+    strtoupper($bill['number']) . ' Status',
+    $link,
+    'https://www.richmondsunlight.com/rss/bill/' . $bill['number'] . '/',
+    'The activity of bill ' . strtoupper($bill['number']) . ' in the ' . SESSION_YEAR
+        . ' Virginia General Assembly session.',
+    $rss_content,
+    $latest
+);
 
 # Cache the RSS file.
-$fp = file_put_contents(CACHE_DIR . '/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml', $rss);
-
-if ($fp !== false) {
-    $last_modified = date('r', filemtime(CACHE_DIR . '/bill-' . SESSION_YEAR . '-' . $bill['number']
-        . '.xml'));
-    $md5 = md5_file(CACHE_DIR . '/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml');
-} else {
-    $last_modified = date('r', time());
-    $md5 = md5($rss);
-}
-
-header('Content-Type: application/rss+xml');
-header('Last-Modified: ' . $last_modified);
-header('ETag: ' . $md5);
-echo $rss;
+send_rss_and_cache(CACHE_DIR . '/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml', $rss);
