@@ -106,7 +106,7 @@ ul#nav > li > ul > li {
 
 /* Submenus open on hover, or when something in them has keyboard focus (which is also how taps
    open them on iPads). Only on wider screens: phones get the menu below. */
-@media screen and (min-width: 761px) {
+@media screen and (min-width: 901px) {
 	#nav a:hover,
 	#nav li:hover {
 		color: #999;
@@ -147,7 +147,7 @@ li>ul {
 /* Phones: a "Menu" button opens the menu as a full-width list, and tapping a section (Bills,
    Legislators, ...) opens its submenu. Functions in new.inc.php do the opening. Third-level
    submenus are left out, except for Bills' Past Years. */
-@media screen and (max-width: 760px) {
+@media screen and (max-width: 900px) {
 	/* Tells the menu's JavaScript that the phone menu is showing. */
 	:root {
 		--nav-mode: phone;

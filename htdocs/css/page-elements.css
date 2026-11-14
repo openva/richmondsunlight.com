@@ -1367,9 +1367,9 @@ ul.place-map-popup li {
 /*
  * PHONES
  * Page-specific changes for phones. (The site-wide ones are in new/master.css and new/menu.css;
- * keep the 760px breakpoint in step with theirs.)
+ * keep the 900px breakpoint in step with theirs.)
  */
-@media only screen and (max-width: 760px) {
+@media only screen and (max-width: 900px) {
 
 	/* Forms: fields fill the width, with their labels above them. */
 	#content input[type="text"],
@@ -1443,7 +1443,7 @@ ul.place-map-popup li {
 .history-show-earlier {
 	display: none;
 }
-@media only screen and (max-width: 760px) {
+@media only screen and (max-width: 900px) {
 	#status-history .history-show-earlier {
 		display: block;
 		width: 100%;
