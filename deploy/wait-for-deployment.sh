@@ -7,7 +7,7 @@
 # Usage: wait-for-deployment.sh DEPLOYMENT_ID
 
 deployment_id="$1"
-if [ -z "$deployment_id" ]; then
+if [[ -z "$deployment_id" ]]; then
     echo "Usage: $0 DEPLOYMENT_ID"
     exit 1
 fi

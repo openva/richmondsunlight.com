@@ -58,7 +58,7 @@ if ! cmp -s "$SITE_PATH"/deploy/systemd/memcached-warm-restart.conf /etc/systemd
 fi
 # Memcached reads -e only when it starts. This first restart starts it empty (there's no saved
 # file yet); every one after that keeps its contents.
-if [ "$MEMCACHED_RESTART" -eq 1 ] && systemctl is-active --quiet memcached; then
+if [[ "$MEMCACHED_RESTART" -eq 1 ]] && systemctl is-active --quiet memcached; then
     sudo systemctl restart memcached
 fi
 
@@ -125,7 +125,7 @@ fi
 # Populate the template with the list of legislators. If that fails, keep the menu that's there,
 # because an empty one breaks the whole site's menu. (What it did write is left in the .new file.)
 MENU_FILE="$SITE_PATH"/htdocs/includes/templates/legislators.html
-if php "$SITE_PATH"/deploy/generate_menu.php > "$MENU_FILE.new" && [ -s "$MENU_FILE.new" ]; then
+if php "$SITE_PATH"/deploy/generate_menu.php > "$MENU_FILE.new" && [[ -s "$MENU_FILE.new" ]]; then
     mv "$MENU_FILE.new" "$MENU_FILE"
 else
     echo "Warning: Could not generate the legislators menu, so the existing one was kept." >&2

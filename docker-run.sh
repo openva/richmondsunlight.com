@@ -61,7 +61,7 @@ fi
 
 # Delete the database, and rebuild its image (which holds a copy of the SQL files), so that it's
 # loaded again from the files above
-if [ "$FRESH" = true ]; then
+if [[ "$FRESH" = true ]]; then
     echo "Deleting the database, to load it again..."
     docker compose down --volumes
     docker compose build db
