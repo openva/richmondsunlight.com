@@ -165,13 +165,54 @@ if (isset($_GET['delete-portfolio'])) {
 }
 
 
-# Create a portfolio.
-if (isset($_POST['add-portfolio'])) {
-    # Localize $form_data and clean it up.
-    if (!array($_POST['form_data'])) {
+/*
+ * The posted portfolio form's fields, trimmed, or false if there isn't a form.
+ */
+function posted_portfolio_form()
+{
+    if (!isset($_POST['form_data']) || !is_array($_POST['form_data'])) {
         return false;
     }
-    $form_data = array_map('addslashes', $_POST['form_data']);
+    $form_data = [];
+    foreach ($_POST['form_data'] as $field => $value) {
+        if (is_string($value)) {
+            $form_data[$field] = trim($value);
+        }
+    }
+    return $form_data;
+}
+
+/*
+ * Insert a portfolio for this user, with the posted form's name, notes, and settings. Returns the
+ * new portfolio's ID.
+ */
+function insert_portfolio($form_data, $user_id, $watch_list_id = null)
+{
+    # Generate a random five-digit hash to ID this portfolio. It's in base 30,
+    # allowing for a namespace of 24,300,000.
+    $chars = 'bcdfghjklmnpqrstvxyz0123456789';
+    $hash = mb_substr(str_shuffle($chars), 0, 5);
+
+    $sql = 'INSERT INTO dashboard_portfolios
+            SET name = ?, hash = ?, user_id = ?, date_created = now()';
+    $params = [$form_data['name'], $hash, (int) $user_id];
+    if (isset($watch_list_id)) {
+        $sql .= ', watch_list_id = ?';
+        $params[] = (int) $watch_list_id;
+    }
+    foreach (['notes', 'public', 'notify'] as $field) {
+        if (!empty($form_data[$field])) {
+            $sql .= ', ' . $field . ' = ?';
+            $params[] = $form_data[$field];
+        }
+    }
+    mysqli_execute_query($GLOBALS['db'], $sql, $params);
+    return mysqli_insert_id($GLOBALS['db']);
+}
+
+# Create a portfolio.
+if (isset($_POST['add-portfolio'])) {
+    $form_data = posted_portfolio_form();
 
     # Don't allow a nameless portfolio.
     if (empty($form_data['name'])) {
@@ -179,115 +220,41 @@ if (isset($_POST['add-portfolio'])) {
         exit;
     }
 
-    # Iterate through $form_data and prepare it to be inserted.
-    $form_data = array_map('trim', $_POST['form_data']);
-    $form_data = array_map(function ($field) {
-        return mysqli_real_escape_string($GLOBALS['db'], $field);
-    }, $_POST['form_data']);
-
-    # Generate a random five-digit hash to ID this portfolio. It's in base 30,
-    # allowing for a namespace of 24,300,000.
-    $chars = 'bcdfghjklmnpqrstvxyz0123456789';
-    $hash = mb_substr(str_shuffle($chars), 0, 5);
-
-    $sql = 'INSERT INTO dashboard_portfolios
-            SET name = "' . $_POST['form_data']['name'] . '", hash = "' . $hash . '",
-            user_id=' . $user['id'] . ', date_created=now()';
-    if (!empty($form_data['notes'])) {
-        $sql .= ', notes="' . $form_data['notes'] . '"';
-    }
-    if (!empty($form_data['public'])) {
-        $sql .= ', public="' . $form_data['public'] . '"';
-    }
-    if (!empty($form_data['notify'])) {
-        $sql .= ', notify="' . $form_data['notify'] . '"';
-    }
-    mysqli_query($GLOBALS['db'], $sql);
+    insert_portfolio($form_data, $user['id']);
     header('Location: ' . $_SERVER['HTTP_REFERER']);
     exit;
 }
 
 # Create a smart portfolio.
 if (isset($_POST['add-smart-portfolio'])) {
-    # Localize $form_data and clean it up.
-    if (!array($_POST['form_data'])) {
-        return false;
-    }
-    $form_data = array_map('addslashes', $_POST['form_data']);
+    $form_data = posted_portfolio_form();
 
-    # Don't allow a watch list with no criteria.
-    if (
-        empty($form_data['tag']) && empty($form_data['patron_id'])
-        && empty($form_data['committee_id']) && empty($form_data['keyword']) && empty($form_data['status'])
-        && empty($form_data['current_chamber'])
-    ) {
+    # The watch list's criteria. Legislators and committees are named by their IDs.
+    $criteria = [];
+    foreach (['tag', 'keyword', 'status', 'current_chamber'] as $field) {
+        if (!empty($form_data[$field])) {
+            $criteria[$field] = $form_data[$field];
+        }
+    }
+    foreach (['patron_id', 'committee_id'] as $field) {
+        if (!empty($form_data[$field]) && ctype_digit($form_data[$field])) {
+            $criteria[$field] = (int) $form_data[$field];
+        }
+    }
+
+    # Don't allow a watch list with no criteria, or a nameless portfolio.
+    if (empty($criteria) || empty($form_data['name'])) {
         header('Location: ' . $_SERVER['HTTP_REFERER']);
         exit;
     }
 
-    # Don't allow a nameless portfolio.
-    if (empty($form_data['name'])) {
-        header('Location: ' . $_SERVER['HTTP_REFERER']);
-        exit;
-    }
-
-    # Iterate through $form_data and prepare it to be inserted.
-    $form_data = array_map('trim', $_POST['form_data']);
-    $form_data = array_map(function ($field) {
-        return mysqli_real_escape_string($GLOBALS['db'], $field);
-    }, $_POST['form_data']);
-
-    # Create the watch list SQL.
+    # Create the watch list, and preserve its ID.
     $sql = 'INSERT INTO dashboard_watch_lists
-            SET';
-
-    # For each watch list field, create the SQL insert stanza.
-    if (!empty($form_data['tag'])) {
-        $sql .= ' tag="' . $form_data['tag'] . '",';
-    }
-    if (!empty($form_data['patron_id'])) {
-        $sql .= ' patron_id="' . $form_data['patron_id'] . '",';
-    }
-    if (!empty($form_data['committee_id'])) {
-        $sql .= ' committee_id="' . $form_data['committee_id'] . '",';
-    }
-    if (!empty($form_data['keyword'])) {
-        $sql .= ' keyword="' . $form_data['keyword'] . '",';
-    }
-    if (!empty($form_data['status'])) {
-        $sql .= ' status="' . $form_data['status'] . '",';
-    }
-    if (!empty($form_data['current_chamber'])) {
-        $sql .= ' current_chamber="' . $form_data['current_chamber'] . '",';
-    }
-
-    # Finish it up with the UID and timestamp.
-    $sql .= ' user_id=' . $user['id'] . ', date_created=now()';
-
-    # Perform the insert and preserve the watch list ID.
-    mysqli_query($GLOBALS['db'], $sql);
+            SET ' . implode(' = ?, ', array_keys($criteria)) . ' = ?, user_id = ?, date_created = now()';
+    mysqli_execute_query($GLOBALS['db'], $sql, [...array_values($criteria), (int) $user['id']]);
     $watch_list_id = mysqli_insert_id($GLOBALS['db']);
 
-    # Generate a random five-digit hash to ID this portfolio. It's in base 30,
-    # allowing for a namespace of 24,300,000.
-    $chars = 'bcdfghjklmnpqrstvxyz0123456789';
-    $hash = mb_substr(str_shuffle($chars), 0, 5);
-
-    $sql = 'INSERT INTO dashboard_portfolios
-            SET name = "' . $form_data['name'] . '", watch_list_id = ' . $watch_list_id . ',
-            user_id=' . $user['id'] . ', hash="' . $hash . '", date_created=now()';
-    if (!empty($form_data['notes'])) {
-        $sql .= ', notes="' . $form_data['notes'] . '"';
-    }
-    if (!empty($form_data['public'])) {
-        $sql .= ', public="' . $form_data['public'] . '"';
-    }
-    if (!empty($form_data['notify'])) {
-        $sql .= ', notify="' . $form_data['notify'] . '"';
-    }
-    $result = mysqli_query($GLOBALS['db'], $sql);
-    $portfolio_id = mysqli_insert_id($GLOBALS['db']);
-
+    $portfolio_id = insert_portfolio($form_data, $user['id'], $watch_list_id);
     populate_smart_portfolio($portfolio_id);
 
     header('Location: ' . $_SERVER['HTTP_REFERER']);
