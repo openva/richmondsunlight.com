@@ -26,7 +26,13 @@ $page_title = 'Photosynthesis';
 $site_section = 'photosynthesis';
 
 # LOCALIZE VARIABLES
-$hash = $_GET['hash'];
+# Portfolio hashes are five lowercase letters and numbers (see the URL rewrite rule).
+$hash = $_GET['hash'] ?? '';
+if (!is_string($hash) || !preg_match('/^[a-z0-9]{5}$/', $hash)) {
+    http_response_code(404);
+    include $_SERVER['DOCUMENT_ROOT'] . '/404.php';
+    exit();
+}
 
 # ADDITIONAL HTML HEADERS
 $html_head = '<link rel="stylesheet" href="/css/photosynthesis.css" type="text/css" />
