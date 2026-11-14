@@ -3912,39 +3912,44 @@ class Import
     }
 
     /**
-     * Construct a single-line mailing address from a contact entry.
+     * Construct a single-line mailing address from a contact entry: "P.O. Box 257, Keswick, VA
+     * 22947", with no comma between the state and the ZIP code.
+     *
+     * Legislator::get() puts a line break before the city by splitting on the last two commas, so
+     * there must be only those two after the street ("P.O. Box 257, Keswick, VA, 22947" would
+     * break after the city).
      *
      * @param array $contact Contact entry from the API.
      *
-     * @return string|null Address string or null when insufficient data.
+     * @return string|null Address string, or null when there's neither a street nor a city.
      */
     private function buildAddress(array $contact)
     {
         $segments = [];
 
         foreach (['Address1', 'Address2', 'Address3'] as $line) {
-            if (!empty($contact[$line])) {
-                $segments[] = trim($contact[$line]);
+            $value = trim((string) ($contact[$line] ?? ''));
+            if ($value !== '') {
+                $segments[] = $value;
             }
         }
 
-        $city_state = '';
-        if (!empty($contact['City'])) {
-            $city_state = $contact['City'];
-        }
-        if (!empty($contact['StateCode'])) {
-            $city_state = trim($city_state . ', ' . $contact['StateCode'], ', ');
-        }
-        if ($city_state !== '') {
-            $segments[] = $city_state;
-        }
+        $city = trim((string) ($contact['City'] ?? ''));
+        $state = trim((string) ($contact['StateCode'] ?? ''));
+        $zip = trim((string) ($contact['ZipCode'] ?? ''));
 
-        if (!empty($contact['ZipCode'])) {
-            $segments[] = trim($contact['ZipCode']);
-        }
-
-        if (empty($segments)) {
+        // The API lists some legislators' offices with nothing but the state.
+        if (empty($segments) && $city === '') {
             return null;
+        }
+
+        if ($city !== '') {
+            $segments[] = $city;
+        }
+
+        $state_zip = trim($state . ' ' . $zip);
+        if ($state_zip !== '') {
+            $segments[] = $state_zip;
         }
 
         return implode(', ', $segments);
