@@ -1063,39 +1063,6 @@ function tag_cloud($tags)
     return $html;
 }
 
-# As of this writing, the server is running PHP 5.1.8. So here's a function to substitute for
-# json_encode, which wasn't added until 5.2, courtesy of Anonymous, found at
-# http://www.php.net/manual/en/function.json-decode.php#100740.
-if (!function_exists('json_decode')) {
-    function json_decode($json)
-    {
-        $comment = false;
-        $out = '$x=';
-
-        for ($i = 0; $i < mb_strlen($json); $i++) {
-            if (!$comment) {
-                if (($json[$i] == '{') || ($json[$i] == '[')) {
-                    $out .= ' array(';
-                } elseif (($json[$i] == '}') || ($json[$i] == ']')) {
-                    $out .= ')';
-                } elseif ($json[$i] == ':') {
-                    $out .= '=>';
-                } else {
-                    $out .= $json[$i];
-                }
-            } else {
-                $out .= $json[$i];
-            }
-            if ($json[$i] == '"' && $json[($i - 1)] != "\\") {
-                $comment = !$comment;
-            }
-        }
-        eval($out . ';');
-        return $x;
-    }
-}
-
-
 # Return a listing of all sections of the Code of Virginia that are mentioned in the bill ID in
 # question.
 function bill_sections($bill_id)
