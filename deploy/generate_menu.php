@@ -17,14 +17,23 @@ require $root . '/includes/class.Database.php';
 require $root . '/includes/class.Legislator.php';
 require $root . '/includes/vendor/autoload.php';
 
+// Fail, printing nothing, if there's no database or no legislators, so that postdeploy.sh keeps
+// the menu it has, rather than replacing it with a broken one.
 $database = new Database();
-$database->connect_mysqli();
+if ($database->connect_mysqli() === false) {
+    fwrite(STDERR, "generate_menu: Could not connect to the database.\n");
+    exit(1);
+}
 
 /*
  * Get a list of all current legislators.
  */
 $legislator = new Legislator();
 $legislator_list = $legislator->get_list('current');
+if (empty($legislator_list)) {
+    fwrite(STDERR, "generate_menu: Found no current legislators.\n");
+    exit(1);
+}
 
 $alphabet = range('A', 'Z');
 $legislators = [
