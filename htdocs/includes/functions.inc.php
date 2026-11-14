@@ -367,7 +367,7 @@ function resume_session()
 # Generate a random session ID.
 function create_session_id()
 {
-    return md5(uniqid(rand(1000000, 9999999), true));
+    return bin2hex(random_bytes(16));
 }
 
 
@@ -680,10 +680,10 @@ function send_rss_and_cache(string $name, string $rss, string $content_type = 'a
     $cache_file = rss_cache_file($name);
     if (@file_put_contents($cache_file, $rss) !== false) {
         $last_modified = date('r', filemtime($cache_file));
-        $etag = md5_file($cache_file);
+        $etag = hash_file('xxh128', $cache_file);
     } else {
         $last_modified = date('r');
-        $etag = md5($rss);
+        $etag = hash('xxh128', $rss);
     }
 
     header('Content-Type: ' . $content_type);
