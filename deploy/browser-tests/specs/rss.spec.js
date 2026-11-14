@@ -1,10 +1,12 @@
 const { test, expect } = require('@playwright/test');
 
 // The site's RSS feeds, all RSS 2.0. (day-page.spec.js covers the feed of days in more detail.)
+// The tag and legislator are HB41's, which are in the committed fixtures (test-records.sql and
+// basic-contents.sql), rather than in the weekly sample, whose bills change.
 const feeds = [
   '/rss/bill/hb41/',
-  '/rss/tag/police/',
-  '/rss/legislator/nbennis/',
+  '/rss/tag/education/',
+  '/rss/legislator/wcgreen/',
   '/rss/comments/',
   '/photosynthesis/rss/portfolio/pwt01/',
   '/rss/days/',
