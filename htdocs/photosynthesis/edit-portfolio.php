@@ -42,13 +42,13 @@ if (!isset($_GET['hash'])) {
     exit;
 } else {
     # Clean up and localize the portfolio hash.
-    $portfolio['hash'] = mysqli_real_escape_string($GLOBALS['db'], $_GET['hash']);
+    $portfolio['hash'] = mysqli_real_escape_string($GLOBALS['db'], (string) $_GET['hash']);
 }
 
 if (isset($_POST['submit'])) {
     // When editing a smart portfolio, make sure to run populate_smart_portfolio() afterwards.
 
-    $form_data = array_map('stripslashes_nullsafe', $_POST['form_data']);
+    $form_data = array_map('trim', array_filter((array) ($_POST['form_data'] ?? []), 'is_string'));
     if (empty($form_data['name'])) {
         $errors[] = 'the name of this portfolio';
     }
@@ -67,15 +67,22 @@ if (isset($_POST['submit'])) {
 				</ul>
 			</div>';
     } else {
-        $form_data = array_map(function ($field) {
-            return mysqli_real_escape_string($GLOBALS['db'], $field);
-        }, $_POST['form_data']);
+        $portfolio_id = filter_var(
+            $form_data['id'] ?? null,
+            FILTER_VALIDATE_INT,
+            ['options' => ['min_range' => 1]]
+        );
         $sql = 'UPDATE dashboard_portfolios
-				SET name = "' . $form_data['name'] . '", notify = "' . $form_data['notify'] . '",
-				public = "' . $form_data['public'] . '",
-				notes = ' . (empty($form_data['notes']) ? 'NULL' : '"' . $form_data['notes'] . '"') . '
-				WHERE id="' . $form_data['id'] . '" AND user_id = ' . $user['id'];
-        $result = mysqli_query($GLOBALS['db'], $sql);
+				SET name = ?, notify = ?, public = ?, notes = ?
+				WHERE id = ? AND user_id = ?';
+        $result = $portfolio_id !== false && mysqli_execute_query($GLOBALS['db'], $sql, [
+            $form_data['name'],
+            $form_data['notify'],
+            $form_data['public'],
+            (empty($form_data['notes']) ? null : $form_data['notes']),
+            $portfolio_id,
+            (int) $user['id'],
+        ]);
 
         # If the update to the portfolio didn't work, say so.
         if (!$result) {
@@ -88,27 +95,36 @@ if (isset($_POST['submit'])) {
             // in a hidden form field, and only update the watch list row and repopulate the list
             // if that watch list has changed.
 
-            # If it's a smart portfolio, we need to update the watchlist.
-            if ($form_data['type'] == 'smart') {
+            # If it's a smart portfolio, we need to update the watchlist. Legislators and
+            # committees are named by their IDs.
+            if (($form_data['type'] ?? '') == 'smart') {
+                $criteria = [];
+                foreach (['tag', 'keyword', 'status', 'current_chamber'] as $field) {
+                    $criteria[] = empty($form_data[$field]) ? null : $form_data[$field];
+                }
+                foreach (['patron_id', 'committee_id'] as $field) {
+                    $id = (string) ($form_data[$field] ?? '');
+                    $criteria[] = ctype_digit($id) ? (int) $id : null;
+                }
                 $sql = 'UPDATE dashboard_watch_lists
-						SET tag = ' . (empty($form_data['tag']) ? 'NULL' : '"' . $form_data['tag'] . '"') . ',
-						patron_id = ' . (empty($form_data['patron_id']) ? 'NULL' : $form_data['patron_id']) . ',
-						committee_id = ' . (empty($form_data['committee_id']) ? 'NULL' : $form_data['committee_id']) . ',
-						keyword = ' . (empty($form_data['keyword']) ? 'NULL' : '"' . $form_data['keyword'] . '"') . ',
-						status = ' . (empty($form_data['status']) ? 'NULL' : '"' . $form_data['status'] . '"') . ',
-						current_chamber = ' . (empty($form_data['current_chamber']) ? 'NULL' : '"' . $form_data['current_chamber'] . '"') . '
+						SET tag = ?, keyword = ?, status = ?, current_chamber = ?, patron_id = ?,
+						committee_id = ?
 						WHERE
 							(SELECT watch_list_id
 							FROM dashboard_portfolios
-							WHERE id=' . $form_data['id'] . ') = dashboard_watch_lists.id
-						AND user_id = ' . $user['id'];
-                $result = mysqli_query($GLOBALS['db'], $sql);
+							WHERE id = ?) = dashboard_watch_lists.id
+						AND user_id = ?';
+                $result = mysqli_execute_query(
+                    $GLOBALS['db'],
+                    $sql,
+                    [...$criteria, $portfolio_id, (int) $user['id']]
+                );
                 # If the update to the portfolio didn't work, say so.
                 if (!$result) {
                     $message = '<div id="messages" class="errors">Sorry: This portfolio could not be edited.</div>';
                 } else {
                     # Now we have to repopulate the portfolio
-                    populate_smart_portfolio($form_data['id']);
+                    populate_smart_portfolio($portfolio_id);
                 }
             }
 

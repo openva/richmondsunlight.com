@@ -36,9 +36,9 @@ $sql = 'SELECT sessions.year, bills.number, bills.catch_line
 			ON bills.id = bills_section_numbers.bill_id
 		LEFT JOIN sessions
 			ON bills.session_id = sessions.id
-		WHERE bills_section_numbers.section_number =  "' . $section . '"
+		WHERE bills_section_numbers.section_number = ?
 		ORDER BY year ASC';
-$result = mysqli_query($GLOBALS['db'], $sql);
+$result = mysqli_execute_query($GLOBALS['db'], $sql, [$section]);
 $bill = mysqli_fetch_array($result, MYSQLI_ASSOC);
 
 # Build up a listing of all bills.

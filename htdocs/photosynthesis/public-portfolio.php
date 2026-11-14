@@ -52,8 +52,8 @@ $sql = 'SELECT dashboard_portfolios.id, dashboard_portfolios.hash, dashboard_por
 			ON dashboard_portfolios.user_id = users.id
 		LEFT JOIN dashboard_user_data
 			ON users.id = dashboard_user_data.user_id
-		WHERE dashboard_portfolios.public = "y" AND dashboard_portfolios.hash="' . $hash . '"';
-$result = mysqli_query($GLOBALS['db'], $sql);
+		WHERE dashboard_portfolios.public = "y" AND dashboard_portfolios.hash = ?';
+$result = mysqli_execute_query($GLOBALS['db'], $sql, [$hash]);
 
 # If this portfolio doesn't exist or isn't visible.
 if (mysqli_num_rows($result) == 0) {

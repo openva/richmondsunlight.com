@@ -52,33 +52,42 @@ function populate_smart_portfolio($portfolio_id)
     }
 
     # Get all bills that meet these criteria (up to 200). Start by assembling the query.
+    # The criteria were typed by the portfolio's owner, so they're passed as parameters.
     $sql = 'SELECT id
 			FROM bills
 			WHERE session_id=' . SESSION_ID;
+    $params = [];
     if (isset($portfolio['patron_id'])) {
-        $sql .= ' AND chief_patron_id=' . $portfolio['patron_id'];
+        $sql .= ' AND chief_patron_id = ?';
+        $params[] = (int) $portfolio['patron_id'];
     }
     if (isset($portfolio['committee_id'])) {
-        $sql .= ' AND last_committee_id=' . $portfolio['committee_id'];
+        $sql .= ' AND last_committee_id = ?';
+        $params[] = (int) $portfolio['committee_id'];
     }
     if (isset($portfolio['keyword'])) {
-        $sql .= ' AND MATCH (bills.catch_line, bills.summary, bills.full_text, bills.number, bills.notes) AGAINST ("' . $portfolio['keyword'] . '")';
+        $sql .= ' AND MATCH (bills.catch_line, bills.summary, bills.full_text, bills.number, bills.notes)
+            AGAINST (?)';
+        $params[] = $portfolio['keyword'];
     }
     if (isset($portfolio['status'])) {
-        $sql .= ' AND status="' . $portfolio['status'] . '"';
+        $sql .= ' AND status = ?';
+        $params[] = $portfolio['status'];
     }
     if (isset($portfolio['current_chamber'])) {
-        $sql .= ' AND current_chamber="' . $portfolio['current_chamber'] . '"';
+        $sql .= ' AND current_chamber = ?';
+        $params[] = $portfolio['current_chamber'];
     }
     if (isset($portfolio['tag'])) {
         $sql .= ' AND id IN
 			(SELECT bill_id
 			FROM tags
-			WHERE tag="' . $portfolio['tag'] . '")';
+			WHERE tag = ?)';
+        $params[] = $portfolio['tag'];
     }
 
     # Run the actual query;
-    $result = mysqli_query($GLOBALS['db'], $sql);
+    $result = mysqli_execute_query($GLOBALS['db'], $sql, $params);
 
     # We don't want to fail when no bills are found. It's totally reasonable for somebody to
     # have a smart portfoilo that starts out blank. But we do want to erase any bills in the

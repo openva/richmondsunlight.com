@@ -22,24 +22,24 @@ $database = new Database();
 $db = $database->connect_mysqli();
 
 # Make sure we have all of the appropriate data.
-if (!isset($_POST['user_hash']) || !isset($_POST['id']) || !isset($_POST['value'])) {
+$id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+if ($id === false || !is_string($_POST['user_hash'] ?? null) || !is_string($_POST['value'] ?? null)) {
     die(' ');
 }
 
 # Strip out all tags other than the following.
 $notes = trim(strip_tags($_POST['value'], '<a><em><strong><i><b><s><blockquote><ol><ul><li>'));
-$hash = mysqli_real_escape_string($GLOBALS['db'], $_POST['user_hash']);
 
 # Update the database.
 $sql = 'UPDATE dashboard_bills
-		SET notes = ' . (empty($notes) ? 'NULL' : '"' . mysqli_real_escape_string($GLOBALS['db'], $notes) . '"') . '
-		WHERE id=' . mysqli_real_escape_string($GLOBALS['db'], $_POST['id']) . '
+		SET notes = ?
+		WHERE id = ?
 		AND user_id = (
 			SELECT id
 			FROM users
-			WHERE private_hash="' . mysqli_real_escape_string($GLOBALS['db'], $hash) . '"
+			WHERE private_hash = ?
 			LIMIT 1)';
-$result = mysqli_query($GLOBALS['db'], $sql);
+$result = mysqli_execute_query($GLOBALS['db'], $sql, [($notes === '' ? null : $notes), $id, $_POST['user_hash']]);
 if ($result === false) {
     die(' ');
 }
@@ -53,8 +53,8 @@ else {
     if (MEMCACHED_SERVER != '') {
         $sql = 'SELECT bill_id AS id
                 FROM dashboard_bills
-                WHERE id=' . $_POST['id'];
-        $result = mysqli_query($GLOBALS['db'], $sql);
+                WHERE id = ?';
+        $result = mysqli_execute_query($GLOBALS['db'], $sql, [$id]);
         $bill = mysqli_fetch_array($result);
         $mc = new Memcached();
         $mc->addServer(MEMCACHED_SERVER, 11211);

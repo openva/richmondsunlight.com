@@ -66,8 +66,8 @@ $sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber, bills.ca
 			ON bills_status.lis_vote_id=votes.lis_id
 		LEFT JOIN committees
 			ON votes.committee_id=committees.id
-        WHERE bills.number="' . $bill . '" AND sessions.year=' . $year;
-$result = mysqli_query($GLOBALS['db'], $sql);
+        WHERE bills.number = ? AND sessions.year = ?';
+$result = mysqli_execute_query($GLOBALS['db'], $sql, [$bill, $year]);
 if (mysqli_num_rows($result) == 0) {
     http_response_code(404);
     include '404.php';
