@@ -122,8 +122,14 @@ then
     
 fi
 
-# Populate the template with the list of legislators
-php "$SITE_PATH"/deploy/generate_menu.php > "$SITE_PATH"/htdocs/includes/templates/legislators.html
+# Populate the template with the list of legislators. If that fails, keep the menu that's there,
+# because an empty one breaks the whole site's menu. (What it did write is left in the .new file.)
+MENU_FILE="$SITE_PATH"/htdocs/includes/templates/legislators.html
+if php "$SITE_PATH"/deploy/generate_menu.php > "$MENU_FILE.new" && [ -s "$MENU_FILE.new" ]; then
+    mv "$MENU_FILE.new" "$MENU_FILE"
+else
+    echo "Warning: Could not generate the legislators menu, so the existing one was kept." >&2
+fi
 
 # Report missing legislator photos
 if [ "$DEPLOYMENT_GROUP_NAME" == "RS-Web-Fleet" ]

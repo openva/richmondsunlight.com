@@ -311,9 +311,10 @@ div#content ul {
 	background-repeat: no-repeat;
 }
 
-/* The bill count */
+/* The bill count. (Sized in pixels, like the image it sits in, so that it stays in place when the
+   phone layout makes the text larger.) */
 .stat-number {
-	font: bold 240% Georgia, serif;
+	font: bold 29px Georgia, serif;
 	color: #333333;
 	position: absolute;
 	margin-top: 0.2em;
@@ -538,8 +539,10 @@ a.balloon div {
 	}
 
 
-/* Responsive layout: extra-wide display */
-@media screen and (min-width: 1100px) {
+/* Responsive layout: extra-wide display. (This page is about 1,192px wide, and the standard one about
+   898px, so each breakpoint has to be at least that, or the page scrolls sideways. See
+   deploy/browser-tests/specs/layout-widths.spec.js.) */
+@media screen and (min-width: 1200px) {
 	#page {
 		width: 86.947em;
 	}
@@ -554,9 +557,9 @@ a.balloon div {
 	}
 }
 
-/* Responsive layout: phones. (Keep the 760px breakpoint in step with menu.css, and with the
+/* Responsive layout: phones. (Keep the 900px breakpoint in step with menu.css, and with the
    no-sidebar width that class.Page.php sets.) */
-@media only screen and (max-width: 760px) {
+@media only screen and (max-width: 900px) {
 	/* iOS zooms in on any field with text under 16px. (!important, because some pages' fields are
 	   sized with more specific selectors.) */
 	input, select, textarea, button {

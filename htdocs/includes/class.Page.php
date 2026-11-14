@@ -146,7 +146,7 @@ class Page
                 $this->html_head = '';
             }
             $this->html_head .= "\r\t" . '<style>' . "\r\t\t" . '#sidebar { display: none; }'
-                . "\r\t\t" . '@media screen and (min-width: 761px) { #content { width: 62em; } }'
+                . "\r\t\t" . '@media screen and (min-width: 901px) { #content { width: 62em; } }'
                 . "\r\t" . '</style>';
             $page = str_replace('%page_sidebar%', '', $page);
         } else {

@@ -68,7 +68,7 @@ if ($legislator['chamber'] == 'house') {
 
 
     # Query the database for all bills.
-    $sql = 'SELECT bills.number, bills.catch_line, bills.summary, sessions.year,
+    $sql = 'SELECT bills.number, bills.catch_line, bills.summary, bills.date_modified, sessions.year,
 				(SELECT CONCAT_WS(", ", STATUS, DATE_FORMAT(DATE, "%m/%d/%Y"))
 				FROM bills_status
 				WHERE bills.id=bills_status.bill_id
@@ -87,41 +87,33 @@ if ($legislator['chamber'] == 'house') {
     // Don't check to make sure the query was successful -- we want to make sure that people can
     // even subscribe to feeds for legislators that have introduced nothing yet.
 
-    $rss_content = '';
+$rss_content = '';
+$latest = null;
 
-    # Generate the RSS.
+# Generate the RSS.
 while ($bill = mysqli_fetch_array($result)) {
-    # Aggregate the variables into their RSS components.
-    $title = '<![CDATA[' . $bill['catch_line'] . '(' . strtoupper($bill['number']) . ')]]>';
-    $link = 'https://www.richmondsunlight.com/bill/' . $bill['year'] . '/' . $bill['number'] . '/';
-    $description = '<![CDATA[<p>' . $bill['summary'] . '</p><p><strong>Status: ' . $bill['status'] . '</strong></p>]]>';
-
-    # Now assemble those RSS components into an XML fragment.
-    $rss_content .= '
-		<item>
-			<title>' . $title . '</title>
-			<link>' . $link . '</link>
-			<description>' . $description . '</description>
-		</item>';
-
-    # Unset those variables for reuse.
-    unset($item_completed, $title, $link, $description);
+    $date = Rss::timestamp($bill['date_modified']);
+    if ($date !== null) {
+        $latest = max($latest ?? 0, $date);
+    }
+    $rss_content .= Rss::item(
+        $bill['catch_line'] . ' (' . strtoupper($bill['number']) . ')',
+        'https://www.richmondsunlight.com/bill/' . $bill['year'] . '/' . $bill['number'] . '/',
+        '<p>' . $bill['summary'] . '</p><p><strong>Status: '
+            . htmlspecialchars((string) $bill['status'], ENT_QUOTES, 'UTF-8') . '</strong></p>',
+        null,
+        $date
+    );
 }
 
-
-
-    $rss = '<?xml version="1.0" encoding=\'utf-8\'?>
-<!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN" "http://www.rssboard.org/rss-0.91.dtd">
-<rss version="0.91">
-	<channel>
-		<title>' . $legislator['prefix'] . ' ' . pivot($legislator['name']) . ' ' . $legislator['suffix'] . '</title>
-		<link>https://www.richmondsunlight.com/bills/' . SESSION_YEAR . '/</link>
-		<description>The bills filed by ' . pivot($legislator['name']) . ' in the ' . SESSION_YEAR . ' Virginia General Assembly session.</description>
-		<language>en-us</language>
-		' . $rss_content . '
-	</channel>
-</rss>';
-
+$rss = Rss::feed(
+    $legislator['prefix'] . ' ' . pivot($legislator['name']) . ' ' . $legislator['suffix'],
+    'https://www.richmondsunlight.com/legislator/' . $legislator['shortname'] . '/',
+    'https://www.richmondsunlight.com/rss/legislator/' . $legislator['shortname'] . '/',
+    'The bills filed by ' . pivot($legislator['name']) . ' in the ' . SESSION_YEAR . ' Virginia General Assembly session.',
+    $rss_content,
+    $latest
+);
 
     # Cache the RSS file.
     send_rss_and_cache(CACHE_DIR . '/' . $legislator['shortname'] . '.xml', $rss);

@@ -55,7 +55,7 @@ $portfolio = mysqli_fetch_array($result);
 $portfolio = array_map('stripslashes_nullsafe', $portfolio);
 
 # Query the database for all bills in that portfolio.
-$sql = 'SELECT bills.number, bills.catch_line, bills.summary,
+$sql = 'SELECT bills.number, bills.catch_line, bills.summary, bills.date_modified,
 			(SELECT status
 			FROM bills_status
 			WHERE bills.id=bills_status.bill_id
@@ -74,38 +74,32 @@ $result = mysqli_query($GLOBALS['db'], $sql);
 # even subscribe to feeds for tags that have introduced nothing yet.
 
 $rss_content = '';
+$latest = null;
 
 # Generate the RSS.
 while ($bill = mysqli_fetch_array($result)) {
-    # Aggregate the variables into their RSS components.
-    $title = '<![CDATA[' . $bill['catch_line'] . ' (' . strtoupper($bill['number']) . ')]]>';
-    $link = 'https://www.richmondsunlight.com/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/';
-    $description = '<![CDATA[<p>' . $bill['summary'] . '</p><p><strong>Status: ' . $bill['status'] . '</strong></p>]]>';
-
-    # Now assemble those RSS components into an XML fragment.
-    $rss_content .= '
-	<item>
-		<title>' . $title . '</title>
-		<link>' . $link . '</link>
-		<description>' . $description . '</description>
-	</item>';
-
-    # Unset those variables for reuse.
-    unset($item_completed, $title, $link, $description);
+    $date = Rss::timestamp($bill['date_modified']);
+    if ($date !== null) {
+        $latest = max($latest ?? 0, $date);
+    }
+    $rss_content .= Rss::item(
+        $bill['catch_line'] . ' (' . strtoupper($bill['number']) . ')',
+        'https://www.richmondsunlight.com/bill/' . SESSION_YEAR . '/' . $bill['number'] . '/',
+        '<p>' . $bill['summary'] . '</p><p><strong>Status: '
+            . htmlspecialchars((string) $bill['status'], ENT_QUOTES, 'UTF-8') . '</strong></p>',
+        null,
+        $date
+    );
 }
 
-$rss = '<?xml version="1.0" encoding=\'iso-8859-1\'?>
-<!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN" "https://emacspeak.googlecode.com/svn/tags/release-social-dog/html/rss-0.91.dtd">
-<rss version="0.91">
-<channel>
-	<title>' . $portfolio['name'] . '</title>
-	<link>https://www.richmondsunlight.com/photosynthesis/' . $hash . '/</link>
-	<description>Bills you\'re tracking in the "' . $portfolio['name'] . '" portfolio.</description>
-	<language>en-us</language>
-	' . $rss_content . '
-</channel>
-</rss>';
-
+$rss = Rss::feed(
+    $portfolio['name'],
+    'https://www.richmondsunlight.com/photosynthesis/' . $hash . '/',
+    'https://www.richmondsunlight.com/photosynthesis/rss/portfolio/' . $hash . '/',
+    'Bills you’re tracking in the “' . $portfolio['name'] . '” portfolio.',
+    $rss_content,
+    $latest
+);
 
 # Cache the RSS file.
 send_rss_and_cache(CACHE_DIR . '/portfolio-' . $hash . '.xml', $rss, 'application/rss+xml');

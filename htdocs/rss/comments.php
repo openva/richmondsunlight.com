@@ -48,41 +48,33 @@ $sql = 'SELECT
 $result = mysqli_query($GLOBALS['db'], $sql);
 
 $rss_content = '';
+$latest = null;
 
 # Generate the RSS.
 while ($comment = mysqli_fetch_array($result)) {
-    # Aggregate the variables into their RSS components.
-    $title = '<![CDATA[' . ($comment['type'] == 'pingback' ? 'Pingback from ' : '') . $comment['name'] . ' ' . $comment['bill_number'] . ']]>';
-    $link = 'https://www.richmondsunlight.com/bill/' . $comment['year'] . '/' . $comment['bill_number'] . '/#comment-' . $comment['number'];
-    $description = '<![CDATA[
-			' . nl2p($comment['comment']) . '
-			]]>';
-
-    # Now assemble those RSS components into an XML fragment.
-    $rss_content .= '
-		<item>
-			<title>' . $title . '</title>
-			<link>' . $link . '</link>
-			<description>' . $description . '</description>
-		</item>';
-
-    # Unset those variables for reuse.
-    unset($item_completed, $title, $link, $description);
+    $date = Rss::timestamp($comment['date']);
+    if ($date !== null) {
+        $latest = max($latest ?? 0, $date);
+    }
+    $rss_content .= Rss::item(
+        ($comment['type'] == 'pingback' ? 'Pingback from ' : '') . $comment['name'] . ' '
+            . strtoupper($comment['bill_number']),
+        'https://www.richmondsunlight.com/bill/' . $comment['year'] . '/' . $comment['bill_number']
+            . '/#comment-' . $comment['number'],
+        nl2p($comment['comment']),
+        'richmondsunlight-comment-' . $comment['id'],
+        $date
+    );
 }
 
+$rss = Rss::feed(
+    'Richmond Sunlight Comments',
+    'https://www.richmondsunlight.com/',
+    'https://www.richmondsunlight.com/rss/comments/',
+    'The most recent comments posted to bills on Richmond Sunlight.',
+    $rss_content,
+    $latest
+);
 
-
-$rss = '<?xml version="1.0" encoding=\'utf-8\'?>
-<!DOCTYPE rss PUBLIC "-//Netscape Communications//DTD RSS 0.91//EN" "http://www.rssboard.org/rss-0.91.dtd">
-<rss version="0.91">
-	<channel>
-		<title>Richmond Sunlight Comments</title>
-		<link>https://www.richmondsunlight.com/</link>
-		<description>The most recent comments posted to bills on Richmond Sunlight.</description>
-		<language>en-us</language>
-		' . $rss_content . '
-	</channel>
-</rss>';
-
-header('Content-Type: application/xml');
+header('Content-Type: application/rss+xml');
 echo $rss;
