@@ -47,9 +47,9 @@ $sql = 'SELECT sessions.year, bills.number, bills.catch_line
 		WHERE bills_section_numbers.section_number = ?
 		ORDER BY year ASC';
 $result = mysqli_execute_query($GLOBALS['db'], $sql, [$section]);
-$bill = mysqli_fetch_array($result, MYSQLI_ASSOC);
 
 # Build up a listing of all bills.
+$bills = [];
 while ($bill = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
     $bill['url'] = 'https://www.richmondsunlight.com/bill/' . $bill['year'] . '/' . $bill['number'] . '/';
     $bill['number'] = mb_strtoupper($bill['number']);

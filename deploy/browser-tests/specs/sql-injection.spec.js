@@ -56,7 +56,8 @@ test.describe('code-section-json.php', () => {
   test('wraps the JSON in a JavaScript function name', async ({ request }) => {
     const resp = await request.get('/code-section-json.php?section=15.2-2286.2&callback=jQuery123.cb');
     expect(resp.status()).toBe(200);
-    expect(await resp.text()).toMatch(/^jQuery123\.cb \(\[/);
+    // SB839 cites this section, in test-records.sql.
+    expect(await resp.text()).toMatch(/^jQuery123\.cb \(\[.*"number":"SB839"/);
   });
 
   test('refuses a callback that is not a function name', async ({ request }) => {
