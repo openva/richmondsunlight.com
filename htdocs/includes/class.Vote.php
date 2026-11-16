@@ -37,9 +37,9 @@ class Vote
         if (empty($this->session_id) && !empty($this->session_year)) {
             $sql = 'SELECT id
 					FROM sessions
-					WHERE year="' . $this->session_year . '"
+					WHERE year = ?
 					AND suffix IS NULL';
-            $result = mysqli_query($GLOBALS['db'], $sql);
+            $result = mysqli_execute_query($GLOBALS['db'], $sql, [$this->session_year]);
             if (mysqli_num_rows($result) == 0) {
                 die('No such vote found.');
             }
@@ -52,9 +52,9 @@ class Vote
          */
         $sql = 'SELECT chamber, outcome, tally
 				FROM votes
-				WHERE lis_id="' . $this->lis_id . '"
-				AND session_id = ' . $this->session_id;
-        $result = mysqli_query($GLOBALS['db'], $sql);
+				WHERE lis_id = ?
+				AND session_id = ?';
+        $result = mysqli_execute_query($GLOBALS['db'], $sql, [$this->lis_id, $this->session_id]);
         if (mysqli_num_rows($result) == 0) {
             die('No such vote found.');
         }
@@ -109,9 +109,9 @@ class Vote
 					ON representatives_votes.representative_id = representatives.id
 				LEFT JOIN districts
 					ON representatives.district_id=districts.id
-				WHERE votes.lis_id="' . $this->lis_id . '" AND votes.session_id="' . $this->session_id . '"
+				WHERE votes.lis_id = ? AND votes.session_id = ?
 				ORDER BY vote ASC, name ASC';
-        $result = mysqli_query($GLOBALS['db'], $sql);
+        $result = mysqli_execute_query($GLOBALS['db'], $sql, [$this->lis_id, $this->session_id]);
         if (mysqli_num_rows($result) < 1) {
             return false;
         }

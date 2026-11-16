@@ -24,8 +24,16 @@ $database = new Database();
 $database->connect_mysqli();
 
 # LOCALIZE VARIABLES
-$section = mysqli_real_escape_string($GLOBALS['db'], urldecode($_REQUEST['section']));
-if (isset($_REQUEST['callback']) && !empty($_REQUEST['callback'])) {
+$section = urldecode((string) ($_REQUEST['section'] ?? ''));
+
+# A JSONP callback must be a JavaScript function name (e.g. "handle" or "jQuery123.cb"), since
+# it's sent back as code.
+if (!empty($_REQUEST['callback'])) {
+    $function_name = '/^[A-Za-z_$][\w$]*(\.[A-Za-z_$][\w$]*)*$/';
+    if (!is_string($_REQUEST['callback']) || !preg_match($function_name, $_REQUEST['callback'])) {
+        http_response_code(400);
+        exit();
+    }
     $callback = $_REQUEST['callback'];
 }
 
@@ -36,12 +44,12 @@ $sql = 'SELECT sessions.year, bills.number, bills.catch_line
 			ON bills.id = bills_section_numbers.bill_id
 		LEFT JOIN sessions
 			ON bills.session_id = sessions.id
-		WHERE bills_section_numbers.section_number =  "' . $section . '"
+		WHERE bills_section_numbers.section_number = ?
 		ORDER BY year ASC';
-$result = mysqli_query($GLOBALS['db'], $sql);
-$bill = mysqli_fetch_array($result, MYSQLI_ASSOC);
+$result = mysqli_execute_query($GLOBALS['db'], $sql, [$section]);
 
 # Build up a listing of all bills.
+$bills = [];
 while ($bill = mysqli_fetch_array($result, MYSQLI_ASSOC)) {
     $bill['url'] = 'https://www.richmondsunlight.com/bill/' . $bill['year'] . '/' . $bill['number'] . '/';
     $bill['number'] = mb_strtoupper($bill['number']);

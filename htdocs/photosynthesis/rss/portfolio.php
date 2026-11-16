@@ -31,11 +31,7 @@ if (!preg_match('/^[a-z0-9]{5}$/', $hash)) {
 
 # Check to see if there's any need to regenerate this RSS feed -- only do so if it's more than
 # three minutes old.
-if ((file_exists(CACHE_DIR . '/portfolio-' . $hash . '.xml')) && ((filemtime(CACHE_DIR . '/portfolio-' . $hash . '.xml') + 180) > time())) {
-    header('Content-Type: application/rss+xml');
-    header('Last-Modified: ' . date('r', filemtime(CACHE_DIR . '/portfolio-' . $hash . '.xml')));
-    header('ETag: ' . md5_file(CACHE_DIR . '/portfolio-' . $hash . '.xml'));
-    readfile(CACHE_DIR . '/portfolio-' . $hash . '.xml');
+if (send_cached_rss('portfolio-' . $hash, 180)) {
     exit();
 }
 
@@ -102,4 +98,4 @@ $rss = Rss::feed(
 );
 
 # Cache the RSS file.
-send_rss_and_cache(CACHE_DIR . '/portfolio-' . $hash . '.xml', $rss, 'application/rss+xml');
+send_rss_and_cache('portfolio-' . $hash, $rss);

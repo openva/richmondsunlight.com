@@ -64,6 +64,27 @@ class ImportStoreStatusHistoryTest extends TestCase
         $this->assertSame([['translation' => null, 'lis_vote_id' => 'H2345', 'chamber' => 'house']], $this->stored());
     }
 
+    /**
+     * A budget bill's history lists hundreds of the governor's amendments in one entry, more than
+     * bills_status.status holds. It's shortened, the same way each time it's fetched.
+     */
+    public function testAnEntryTooLongToStoreIsShortened(): void
+    {
+        $status = 'House passed by Governor\'s amendments #`s ' . implode(', ', range(1, 120));
+        $event = ['status' => $status, 'chamber' => 'house', 'date' => '2025-04-02 12:00:00'];
+        $import = $this->import();
+
+        $this->assertSame(1, $import->store_status_history(self::BILL_ID, [$event], 1));
+        $this->assertSame(1, $import->store_status_history(self::BILL_ID, [$event], 1));
+
+        $stored = $this->dbh->query('SELECT status FROM bills_status WHERE bill_id = ' . self::BILL_ID)
+            ->fetchAll(PDO::FETCH_COLUMN);
+        $this->assertCount(1, $stored);
+        $this->assertSame(255, mb_strlen($stored[0]));
+        $this->assertStringStartsWith('House passed by Governor\'s amendments #`s 1, 2, 3', $stored[0]);
+        $this->assertStringEndsWith('…', $stored[0]);
+    }
+
     private function import(): Import
     {
         $import = new Import(new class extends Log {

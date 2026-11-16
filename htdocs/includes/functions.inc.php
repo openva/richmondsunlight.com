@@ -367,7 +367,7 @@ function resume_session()
 # Generate a random session ID.
 function create_session_id()
 {
-    return md5(uniqid(rand(1000000, 9999999), true));
+    return bin2hex(random_bytes(16));
 }
 
 
@@ -644,19 +644,46 @@ function first_sentences($html, $count = 4)
 }
 
 /**
- * Write an RSS feed to the cache and send it, with Last-Modified and ETag headers. If the cache
- * can't be written to, the feed is still sent, with headers based on the current time.
+ * The path of a cached RSS feed, by the feed's name (e.g. "tag-education"). basename() keeps the
+ * file directly inside the cache directory, whatever the name was built from.
  */
-function send_rss_and_cache(string $cache_file, string $rss, string $content_type = 'application/rss+xml'): void
+function rss_cache_file(string $name): string
 {
-    // Only write directly inside the cache directory, whatever the file name was built from.
-    $in_cache_dir = dirname($cache_file) === rtrim(CACHE_DIR, '/');
-    if ($in_cache_dir && @file_put_contents($cache_file, $rss) !== false) {
+    return rtrim(CACHE_DIR, '/') . '/' . basename($name) . '.xml';
+}
+
+/**
+ * Send a cached RSS feed, with Last-Modified and ETag headers, if it's newer than $max_age
+ * seconds. Returns whether it was sent.
+ */
+function send_cached_rss(string $name, int $max_age, string $content_type = 'application/rss+xml'): bool
+{
+    $cache_file = rss_cache_file($name);
+    if (!is_file($cache_file) || (filemtime($cache_file) + $max_age) <= time()) {
+        return false;
+    }
+
+    header('Content-Type: ' . $content_type);
+    header('Last-Modified: ' . date('r', filemtime($cache_file)));
+    header('ETag: ' . hash_file('xxh128', $cache_file));
+    readfile($cache_file);
+    return true;
+}
+
+/**
+ * Write an RSS feed to the cache, by the feed's name (see rss_cache_file()), and send it, with
+ * Last-Modified and ETag headers. If the cache can't be written to, the feed is still sent, with
+ * headers based on the current time.
+ */
+function send_rss_and_cache(string $name, string $rss, string $content_type = 'application/rss+xml'): void
+{
+    $cache_file = rss_cache_file($name);
+    if (@file_put_contents($cache_file, $rss) !== false) {
         $last_modified = date('r', filemtime($cache_file));
-        $etag = md5_file($cache_file);
+        $etag = hash_file('xxh128', $cache_file);
     } else {
         $last_modified = date('r');
-        $etag = md5($rss);
+        $etag = hash('xxh128', $rss);
     }
 
     header('Content-Type: ' . $content_type);
@@ -1035,39 +1062,6 @@ function tag_cloud($tags)
 
     return $html;
 }
-
-# As of this writing, the server is running PHP 5.1.8. So here's a function to substitute for
-# json_encode, which wasn't added until 5.2, courtesy of Anonymous, found at
-# http://www.php.net/manual/en/function.json-decode.php#100740.
-if (!function_exists('json_decode')) {
-    function json_decode($json)
-    {
-        $comment = false;
-        $out = '$x=';
-
-        for ($i = 0; $i < mb_strlen($json); $i++) {
-            if (!$comment) {
-                if (($json[$i] == '{') || ($json[$i] == '[')) {
-                    $out .= ' array(';
-                } elseif (($json[$i] == '}') || ($json[$i] == ']')) {
-                    $out .= ')';
-                } elseif ($json[$i] == ':') {
-                    $out .= '=>';
-                } else {
-                    $out .= $json[$i];
-                }
-            } else {
-                $out .= $json[$i];
-            }
-            if ($json[$i] == '"' && $json[($i - 1)] != "\\") {
-                $comment = !$comment;
-            }
-        }
-        eval($out . ';');
-        return $x;
-    }
-}
-
 
 # Return a listing of all sections of the Code of Virginia that are mentioned in the bill ID in
 # question.

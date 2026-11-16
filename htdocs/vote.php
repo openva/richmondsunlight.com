@@ -24,16 +24,18 @@ $database->connect_mysqli();
 resume_session();
 
 # LOCALIZE AND CLEAN UP VARIABLES
-if (isset($_GET['lis_id'])) {
-    $lis_id = mb_strtoupper($_GET['lis_id']);
-} else {
-    die();
-}
-if (isset($_GET['year']) && (strlen($_GET['year']) == 4) && is_numeric($_GET['year'])) {
-    $year = $_GET['year'];
-}
-if (isset($_GET['bill']) && strlen($_GET['bill']) <= 7) {
-    $bill = $_GET['bill'];
+# Allow only what the URL rewrite rule does, since these all go into SQL queries.
+$lis_id = mb_strtoupper((string) ($_GET['lis_id'] ?? ''));
+$year = (string) ($_GET['year'] ?? '');
+$bill = strtolower((string) ($_GET['bill'] ?? ''));
+if (
+    !preg_match('/^[A-Z0-9]{6,8}$/', $lis_id)
+    || !preg_match('/^[0-9]{4}$/', $year)
+    || !preg_match('/^[hs][bjr]{1,2}[0-9]{1,4}$/', $bill)
+) {
+    http_response_code(404);
+    include '404.php';
+    exit();
 }
 
 $html_head = '';
@@ -66,8 +68,8 @@ $sql = 'SELECT bills.id, bills.number, bills.session_id, bills.chamber, bills.ca
 			ON bills_status.lis_vote_id=votes.lis_id
 		LEFT JOIN committees
 			ON votes.committee_id=committees.id
-        WHERE bills.number="' . $bill . '" AND sessions.year=' . $year;
-$result = mysqli_query($GLOBALS['db'], $sql);
+        WHERE bills.number = ? AND sessions.year = ?';
+$result = mysqli_execute_query($GLOBALS['db'], $sql, [$bill, $year]);
 if (mysqli_num_rows($result) == 0) {
     http_response_code(404);
     include '404.php';

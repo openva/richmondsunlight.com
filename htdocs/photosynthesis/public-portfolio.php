@@ -26,7 +26,13 @@ $page_title = 'Photosynthesis';
 $site_section = 'photosynthesis';
 
 # LOCALIZE VARIABLES
-$hash = $_GET['hash'];
+# Portfolio hashes are five lowercase letters and numbers (see the URL rewrite rule).
+$hash = $_GET['hash'] ?? '';
+if (!is_string($hash) || !preg_match('/^[a-z0-9]{5}$/', $hash)) {
+    http_response_code(404);
+    include $_SERVER['DOCUMENT_ROOT'] . '/404.php';
+    exit();
+}
 
 # ADDITIONAL HTML HEADERS
 $html_head = '<link rel="stylesheet" href="/css/photosynthesis.css" type="text/css" />
@@ -52,8 +58,8 @@ $sql = 'SELECT dashboard_portfolios.id, dashboard_portfolios.hash, dashboard_por
 			ON dashboard_portfolios.user_id = users.id
 		LEFT JOIN dashboard_user_data
 			ON users.id = dashboard_user_data.user_id
-		WHERE dashboard_portfolios.public = "y" AND dashboard_portfolios.hash="' . $hash . '"';
-$result = mysqli_query($GLOBALS['db'], $sql);
+		WHERE dashboard_portfolios.public = "y" AND dashboard_portfolios.hash = ?';
+$result = mysqli_execute_query($GLOBALS['db'], $sql, [$hash]);
 
 # If this portfolio doesn't exist or isn't visible.
 if (mysqli_num_rows($result) == 0) {
@@ -70,7 +76,7 @@ else {
     # Increment the view count.
     $sql = 'UPDATE dashboard_portfolios
 			SET view_count = view_count + 1
-			WHERE id = ' . $portfolio['id'];
+			WHERE id = ' . (int) $portfolio['id'];
     mysqli_query($GLOBALS['db'], $sql);
 
     # Make the user closer to anonymous.

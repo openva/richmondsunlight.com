@@ -27,17 +27,7 @@ if (!preg_match('/^[a-z0-9-]{1,100}$/', $legislator['shortname'])) {
 
     # Check to see if there's any need to regenerate this RSS feed -- only do so if it's more than
     # a half hour old.
-if (
-        (file_exists(CACHE_DIR . '/' . $legislator['shortname'] . '.xml'))
-        &&
-        (
-            (filemtime(CACHE_DIR . '/' . $legislator['shortname'] . '.xml') + 1800) > time()
-        )
-) {
-    header('Content-Type: application/rss+xml');
-    header('Last-Modified: ' . date('r', filemtime(CACHE_DIR . '/' . $legislator['shortname'] . '.xml')));
-    header('ETag: ' . md5_file(CACHE_DIR . '/' . $legislator['shortname'] . '.xml'));
-    readfile(CACHE_DIR . '/' . $legislator['shortname'] . '.xml');
+if (send_cached_rss($legislator['shortname'], 1800)) {
     exit();
 }
 
@@ -116,4 +106,4 @@ $rss = Rss::feed(
 );
 
     # Cache the RSS file.
-    send_rss_and_cache(CACHE_DIR . '/' . $legislator['shortname'] . '.xml', $rss);
+    send_rss_and_cache($legislator['shortname'], $rss);

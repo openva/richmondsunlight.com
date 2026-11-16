@@ -27,16 +27,7 @@ if (!preg_match('/^[a-z0-9-]{1,10}$/', $bill['number'])) {
 
 # Check to see if there's any need to regenerate this RSS feed -- only do so
 # if it's more than a half hour old.
-if (
-        (file_exists(CACHE_DIR . '/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml'))
-        &&
-        ((filemtime(CACHE_DIR . '/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml') + 1800) > time())
-) {
-    header('Content-Type: application/rss+xml');
-    header('Last-Modified: ' . date('r', filemtime(CACHE_DIR . '/bill-' . SESSION_YEAR . '-'
-        . $bill['number'] . '.xml')));
-    header('ETag: ' . md5_file(CACHE_DIR . '/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml'));
-    readfile(CACHE_DIR . '/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml');
+if (send_cached_rss('bill-' . SESSION_YEAR . '-' . $bill['number'], 1800)) {
     exit();
 }
 
@@ -94,4 +85,4 @@ $rss = Rss::feed(
 );
 
 # Cache the RSS file.
-send_rss_and_cache(CACHE_DIR . '/bill-' . SESSION_YEAR . '-' . $bill['number'] . '.xml', $rss);
+send_rss_and_cache('bill-' . SESSION_YEAR . '-' . $bill['number'], $rss);
