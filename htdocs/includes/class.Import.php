@@ -306,6 +306,13 @@ class Import
                 continue;
             }
 
+            // bills_status.status holds 255 characters, and a few entries are longer, such as a
+            // budget bill's listing hundreds of the governor's amendments. Shortened the same way
+            // each time, an entry still matches its stored copy.
+            if (mb_strlen($status) > 255) {
+                $status = rtrim(mb_substr($status, 0, 254)) . '…';
+            }
+
             $chamber = $entry['chamber'] ?? null;
             if ($chamber !== 'house' && $chamber !== 'senate') {
                 $chamber = null;
