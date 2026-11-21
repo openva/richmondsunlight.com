@@ -1086,10 +1086,10 @@ class Import
          * Turn this CSV into a proper, indexed array
          */
         $csv = explode("\n", $csv);
-        $labels = str_getcsv($csv[0]);
+        $labels = str_getcsv($csv[0], escape: '\\');
         unset($csv[0]);
         foreach ($csv as $row) {
-            $members[] = array_combine($labels, str_getcsv($row));
+            $members[] = array_combine($labels, str_getcsv($row, escape: '\\'));
         }
 
         if (!$members) {
