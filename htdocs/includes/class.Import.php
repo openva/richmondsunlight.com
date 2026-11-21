@@ -1149,20 +1149,76 @@ class Import
         /*
          * Try to identify the file format
          */
-        $filetype = mime_content_type($filepath);
-        if (stristr($filetype, 'text/html')) {
-            unlink($filepath);
-            return false;
-        }
+        $filetype = (string) mime_content_type($filepath);
         if (stristr($filetype, 'image/jpeg')) {
             rename($filepath, $filepath . '.jpg');
-            $filepath = $filepath . '.jpg';
-        } elseif (stristr($filetype, 'image/png')) {
+            return $filepath . '.jpg';
+        }
+        if (stristr($filetype, 'image/png')) {
             rename($filepath, $filepath . '.png');
-            $filepath = $filepath . '.png';
+            return $filepath . '.png';
         }
 
-        return $filepath;
+        /*
+         * The House serves some delegates' photos as WebP. Those (and GIFs) are converted to
+         * JPEGs. Anything else, such as the HTML page given for a member with no photo, isn't
+         * a photo, and is discarded.
+         */
+        if (stristr($filetype, 'image/webp') || stristr($filetype, 'image/gif')) {
+            $jpeg = $this->convert_photo_to_jpeg($filepath, $filetype);
+            unlink($filepath);
+            if ($jpeg === null) {
+                return false;
+            }
+            return $jpeg;
+        }
+
+        if (!stristr($filetype, 'text/html')) {
+            $this->log->put('The photo at ' . $url . ' is ' . ($filetype !== '' ? $filetype : 'of an '
+                . 'unknown type') . ', not a JPEG, PNG, WebP, or GIF, so it wasn\'t saved.', 4);
+        }
+        unlink($filepath);
+        return false;
+    }
+
+    /**
+     * Save a copy of a WebP or GIF photo as a JPEG, beside it.
+     *
+     * @param string $filepath The photo, with no extension.
+     * @param string $filetype Its MIME type.
+     *
+     * @return string|null The JPEG's path, or null if it couldn't be converted.
+     */
+    private function convert_photo_to_jpeg($filepath, $filetype)
+    {
+        $reader = stristr($filetype, 'image/webp') ? 'imagecreatefromwebp' : 'imagecreatefromgif';
+        if (!function_exists($reader) || !function_exists('imagejpeg')) {
+            $this->log->put('The photo ' . $filepath . ' is ' . $filetype . ', and PHP\'s GD extension, '
+                . 'with ' . $reader . '(), is needed to convert it to a JPEG.', 5);
+            return null;
+        }
+
+        $image = @$reader($filepath);
+        if ($image === false) {
+            $this->log->put('The photo ' . $filepath . ' couldn\'t be read as ' . $filetype . '.', 4);
+            return null;
+        }
+
+        // JPEGs have no transparency, so any transparent parts become white, not black.
+        $width = imagesx($image);
+        $height = imagesy($image);
+        $flattened = imagecreatetruecolor($width, $height);
+        imagefill($flattened, 0, 0, imagecolorallocate($flattened, 255, 255, 255));
+        imagecopy($flattened, $image, 0, 0, 0, 0, $width, $height);
+
+        $jpeg = $filepath . '.jpg';
+        $saved = imagejpeg($flattened, $jpeg, 90);
+        if (!$saved) {
+            $this->log->put('The photo ' . $filepath . ' couldn\'t be saved as a JPEG.', 4);
+            return null;
+        }
+
+        return $jpeg;
     }
 
     /**
