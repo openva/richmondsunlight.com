@@ -236,3 +236,24 @@ VALUES
 (900135,5175,'Senate Bill 838 be agreed to. And speaking to that.','02:17:19.32','02:17:21.62','n',NULL,'2026-10-17 00:00:00','2026-10-17 00:00:00'),
 (900136,5175,'The Senator MAY continue.','02:17:21.62','02:17:22.96','y',NULL,'2026-10-17 00:00:00','2026-10-17 00:00:00'),
 (900137,5175,'Thank you, MADAM PRESIDENT.','02:17:22.96','02:17:24.29','y',NULL,'2026-10-17 00:00:00','2026-10-17 00:00:00');
+
+--
+-- Clips of SB738 in video_clips, for the API's /1.1/section-video/{section}.json (rs-api), which
+-- lists clips of bills that cite a section of the Code. SB738 amends § 22.1-277. There are three
+-- clips: the April 2 discussion, a shorter clip that falls within it (which the API leaves out),
+-- and the September 15 testimony, which has no screenshot. The bill page doesn't use these,
+-- because both videos have chyrons for SB738 in video_index.
+--
+
+INSERT IGNORE INTO `bills_section_numbers`
+    (`id`, `full_text_id`, `bill_id`, `section_number`, `date_created`, `date_modified`)
+VALUES
+(1100001,1185914,76873,'22.1-277','2025-03-24 00:00:00','2025-03-24 00:00:00');
+
+INSERT IGNORE INTO `video_clips`
+    (`id`, `legislator_id`, `bill_id`, `file_id`, `time_start`, `time_end`, `screenshot`,
+     `date_created`)
+VALUES
+(1100001,NULL,76873,5175,'02:01:38','02:03:14','/video/senate/floor/20250402/00007306.jpg','2026-11-21 00:00:00'),
+(1100002,NULL,76873,5175,'02:01:50','02:02:43','','2026-11-21 00:00:00'),
+(1100003,NULL,76873,5159,'00:13:19','00:14:00','','2026-11-21 00:00:00');
