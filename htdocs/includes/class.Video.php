@@ -1633,6 +1633,7 @@ class Video
 				LEFT JOIN files
 					ON video_index.file_id = files.id
 				WHERE video_index.linked_id=' . (int) $this->bill_id . ' AND video_index.type="bill"
+					AND video_index.ignored != "y"
 				ORDER BY files.date ASC, files.chamber ASC, video_index.time ASC';
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (!$result || mysqli_num_rows($result) == 0) {
@@ -1727,6 +1728,7 @@ class Video
                         SELECT 1 FROM video_index
                         WHERE video_index.file_id = video_clips.file_id
                             AND video_index.type = "bill" AND video_index.linked_id = ' . $bill_id . '
+                            AND video_index.ignored != "y"
                     )';
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (!$result) {
