@@ -159,7 +159,9 @@ test.describe('Bill interactions', () => {
     const tagText = `pw-tag-delete-${Date.now()}`;
     const cleanTag = tagText.replace(/[^a-zA-Z0-9 ]/g, '').toLowerCase();
 
-    await page.goto(billPath);
+    // SB839 (in test-records.sql), not HB41: other specs load HB41's page while this runs, and a
+    // load that began before the delete can put the bill back in Memcached, tag and all.
+    await page.goto('/bill/2025/sb839/');
     await page.locator('#tags').evaluate((el, value) => {
       el.value = value;
     }, tagText);
