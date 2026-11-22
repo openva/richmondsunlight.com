@@ -255,6 +255,33 @@ class VideoTest extends TestCase
         $this->assertNull(Video::media_url(null));
     }
 
+    public function testScreenshotUrlIsAbsoluteOnTheVideoHost(): void
+    {
+        $this->assertSame(
+            'https://video.richmondsunlight.com/senate/floor/20250402/00007306.jpg',
+            Video::screenshot_url('/video/senate/floor/20250402/00007306.jpg')
+        );
+        $this->assertSame(
+            'https://video.richmondsunlight.com/house/floor/20190115/00001234.jpg',
+            Video::screenshot_url('house/floor/20190115/00001234.jpg')
+        );
+        $this->assertSame(
+            'https://video.richmondsunlight.com/house/floor/20190115/00001234.jpg',
+            Video::screenshot_url('//video.richmondsunlight.com/house/floor/20190115/00001234.jpg')
+        );
+        $this->assertSame(
+            'https://video.richmondsunlight.com/house/floor/20190115/00001234.jpg',
+            Video::screenshot_url('http://video.richmondsunlight.com/house/floor/20190115/00001234.jpg')
+        );
+        $this->assertSame(
+            'https://archive.org/download/x/00001234.jpg',
+            Video::screenshot_url('https://archive.org/download/x/00001234.jpg')
+        );
+        $this->assertNull(Video::screenshot_url(''));
+        $this->assertNull(Video::screenshot_url('  '));
+        $this->assertNull(Video::screenshot_url(null));
+    }
+
     public function testYoutubeIdComesFromTheColumnOrAYoutubeUrl(): void
     {
         $this->assertSame('dQw4w9WgXcQ', Video::youtube_id('dQw4w9WgXcQ', null));
