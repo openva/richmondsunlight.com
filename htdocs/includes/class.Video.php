@@ -177,24 +177,6 @@ class Video
     }
 
     /**
-     * The absolute URL of a screenshot, or null if there isn't one. Takes a video_clips.screenshot
-     * or a video_index screenshot path, in any of the forms they were stored in (a full URL, a
-     * protocol-relative or http:// one, or a path, with or without a /video/ prefix). Used by the
-     * API (rs-api), e.g., for /1.1/section-video/{section}.json.
-     *
-     * @param string|null $screenshot The stored screenshot
-     * @return string|null
-     */
-    public static function screenshot_url(?string $screenshot): ?string
-    {
-        if (trim((string) $screenshot) === '') {
-            return null;
-        }
-
-        return (new self())->archived_screenshot_url($screenshot);
-    }
-
-    /**
      * The URL of a video file that a page can play, or null if there isn't one (e.g., because the
      * video hasn't been downloaded yet, or is only on YouTube).
      *
@@ -1651,6 +1633,7 @@ class Video
 				LEFT JOIN files
 					ON video_index.file_id = files.id
 				WHERE video_index.linked_id=' . (int) $this->bill_id . ' AND video_index.type="bill"
+					AND video_index.ignored != "y"
 				ORDER BY files.date ASC, files.chamber ASC, video_index.time ASC';
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (!$result || mysqli_num_rows($result) == 0) {
@@ -1745,6 +1728,7 @@ class Video
                         SELECT 1 FROM video_index
                         WHERE video_index.file_id = video_clips.file_id
                             AND video_index.type = "bill" AND video_index.linked_id = ' . $bill_id . '
+                            AND video_index.ignored != "y"
                     )';
         $result = mysqli_query($GLOBALS['db'], $sql);
         if (!$result) {
