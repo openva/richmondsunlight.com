@@ -1,0 +1,97 @@
+name: Session Update
+# Proposes, as a pull request against master, changing the session settings in
+# htdocs/includes/settings-default.inc.php: to a new regular session once bills may be prefiled for
+# it, and otherwise to keep the current session's up to date (such as its end, once it adjourns).
+# The rules are in deploy/SessionSettings.php.
+#
+# The new session's ID comes from https://downloads.richmondsunlight.com/sessions.json, which
+# rs-machine's sessions task writes daily from the sessions table, after adding the sessions that
+# LIS lists. Until rs-machine has added it, the workflow waits.
+#
+# Secrets:
+#   LIS_KEY           LIS's API key, for its list of sessions.
+#   GH_ACTIONS_TOKEN  A fine-grained token for this repository, with read and write access to its
+#                     contents and pull requests. Without it, the workflow's own token is used,
+#                     but GitHub doesn't run workflows for pull requests that token opens, so the
+#                     pull request would get no tests, and the repository must allow GitHub Actions
+#                     to create pull requests.
+#
+# Each session's proposal is on its own branch, session-settings/<SESSION_LIS_ID>, and its pull
+# request is updated as the proposal changes. To decline one, close its pull request: the same
+# proposal isn't made again.
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '30 11 * * 1' # Mondays
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+
+jobs:
+  propose:
+    name: Propose session settings
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: master
+          persist-credentials: false
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@eb7c497e18156a6bbabfef1d3a82760b9eda3962 # 2.40.0
+        with:
+          php-version: '8.4'
+          coverage: none
+          tools: none
+
+      - name: Work out the session settings
+        id: settings
+        env:
+          LIS_KEY: ${{ secrets.LIS_KEY }}
+        run: |
+          php deploy/propose_session.php
+          php -l htdocs/includes/settings-default.inc.php
+
+      - name: Open or update the pull request
+        if: steps.settings.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GH_ACTIONS_TOKEN || github.token }}
+          GH_REPO: ${{ github.repository }}
+          BRANCH: ${{ steps.settings.outputs.branch }}
+          TITLE: ${{ steps.settings.outputs.title }}
+          BODY: ${{ steps.settings.outputs.body }}
+        run: |
+          set -euo pipefail
+
+          # A pull request with this title that was closed without being merged was declined.
+          declined=$(gh pr list --head "$BRANCH" --state closed --json title,mergedAt \
+            --jq "[.[] | select(.mergedAt == null and .title == env.TITLE)] | length")
+          if [ "$declined" != "0" ]; then
+            echo "::notice::“${TITLE}” was declined, so it isn't proposed again."
+            exit 0
+          fi
+
+          remote="https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          # If the branch already proposes exactly this, leave it, so its tests aren't rerun weekly.
+          if git fetch --quiet "$remote" "refs/heads/${BRANCH}:refs/remotes/origin/${BRANCH}" 2>/dev/null \
+            && git diff --quiet "origin/${BRANCH}" -- htdocs/includes/settings-default.inc.php; then
+            echo "The branch ${BRANCH} already proposes this."
+          else
+            git config user.name 'github-actions[bot]'
+            git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+            git switch --create "$BRANCH"
+            git commit --quiet --message "$TITLE" -- htdocs/includes/settings-default.inc.php
+            git push --force --quiet "$remote" "HEAD:refs/heads/${BRANCH}"
+          fi
+
+          if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq length)" != "0" ]; then
+            gh pr edit "$BRANCH" --title "$TITLE" --body-file "$BODY"
+          else
+            gh pr create --base master --head "$BRANCH" --title "$TITLE" --body-file "$BODY"
+          fi

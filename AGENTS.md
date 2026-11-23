@@ -200,7 +200,15 @@ Templates use placeholder replacement:
 ### Configuration
 
 Settings are in `htdocs/includes/settings.inc.php` (git-ignored). Copy from `settings-default.inc.php` to create. Key constants:
-- `SESSION_ID`, `SESSION_YEAR` - Current legislative session
+- `SESSION_ID`, `SESSION_YEAR` - Current legislative session (with `SESSION_SUFFIX`, `SESSION_LIS_ID`,
+  `SESSION_LIS_API_ID`, `SESSION_START` and `SESSION_END`). These needn't be changed by hand: the
+  session-update workflow (`.github/workflows/session-update.yml`) proposes the change as a pull
+  request each fall, once bills may be prefiled for the next regular session, and keeps the current
+  session's up to date, such as its end once it adjourns. The rules are in
+  `deploy/SessionSettings.php`. A session's ID is its row of `sessions`, which rs-machine adds from
+  LIS's list of sessions and publishes as https://downloads.richmondsunlight.com/sessions.json,
+  since the workflow can't reach the database. Special sessions are never switched to; rs-machine
+  announces them in Slack. The workflow needs the secrets `LIS_KEY` and `GH_ACTIONS_TOKEN`
 - `PDO_DSN` - Database connection string
 - `API_URL` - rs-api endpoint
 - `MEMCACHED_SERVER` - Cache server host/port
@@ -227,6 +235,9 @@ The pipeline runs on:
 - Push to master or deploy
 - Pull requests
 - Daily at 4 AM UTC (scheduled redeploy)
+
+`.github/workflows/session-update.yml` proposes changes to the session settings (see
+"Configuration"), weekly.
 
 ### Test Levels
 
