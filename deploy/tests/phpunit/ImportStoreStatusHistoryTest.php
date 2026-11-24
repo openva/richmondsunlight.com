@@ -85,6 +85,101 @@ class ImportStoreStatusHistoryTest extends TestCase
         $this->assertStringEndsWith('…', $stored[0]);
     }
 
+    /**
+     * LIS's CSV dated entries at midnight, and its API gives the same entries times. Fetched from
+     * the API, an entry from the CSV is the same entry: it takes the API's time, and keeps its
+     * translation and when it was recorded.
+     */
+    public function testTheSameEntryWithATimeIsNotStoredAgain(): void
+    {
+        $import = $this->import();
+        $import->store_status_history(self::BILL_ID, [
+            ['status' => 'Left in Finance', 'chamber' => 'house', 'date' => '2025-02-04 00:00:00'],
+        ], 1);
+        $this->dbh->exec('UPDATE bills_status SET translation = "failed committee",
+            date_created = "2025-02-05 02:02:03" WHERE bill_id = ' . self::BILL_ID);
+
+        $this->assertSame(1, $import->store_status_history(self::BILL_ID, [
+            ['status' => 'Left in Finance', 'chamber' => 'house', 'date' => '2025-02-04 14:18:00'],
+        ], 1));
+
+        $this->assertSame([[
+            'date' => '2025-02-04 14:18:00',
+            'translation' => 'failed committee',
+            'date_created' => '2025-02-05 02:02:03',
+        ]], $this->dates());
+    }
+
+    /**
+     * LIS gives some entries only a date, and changes some entries' times. A time isn't replaced
+     * with midnight.
+     */
+    public function testATimeIsNotReplacedWithMidnight(): void
+    {
+        $import = $this->import();
+        $import->store_status_history(self::BILL_ID, [
+            ['status' => 'Reported from Finance (12-Y 3-N)', 'date' => '2026-01-20 10:00:00'],
+        ], 1);
+
+        $import->store_status_history(self::BILL_ID, [
+            ['status' => 'Reported from Finance (12-Y 3-N)', 'date' => '2026-01-20 00:00:00'],
+        ], 1);
+        $this->assertSame(['2026-01-20 10:00:00'], array_column($this->dates(), 'date'));
+
+        $import->store_status_history(self::BILL_ID, [
+            ['status' => 'Reported from Finance (12-Y 3-N)', 'date' => '2026-01-20 14:30:00'],
+        ], 1);
+        $this->assertSame(['2026-01-20 14:30:00'], array_column($this->dates(), 'date'));
+    }
+
+    /**
+     * LIS's CSV began some entries with a space, and its API adds "Block Vote" to some. The stored
+     * entry takes LIS's current wording.
+     */
+    public function testTheSameEntryWordedDifferentlyIsNotStoredAgain(): void
+    {
+        $import = $this->import();
+        $import->store_status_history(self::BILL_ID, [
+            ['status' => 'Passed Senate (40-Y 0-N)', 'date' => '2025-01-28 00:00:00'],
+            ['status' => ' Governor\'s Action Deadline 11:59 p.m., May 2, 2025', 'date' => '2025-04-02 00:00:00'],
+        ], 1);
+
+        $import->store_status_history(self::BILL_ID, [
+            ['status' => 'Passed Senate  Block Vote (40-Y 0-N)', 'date' => '2025-01-28 12:01:00'],
+            ['status' => 'Governor\'s Action Deadline 11:59 p.m., May 2, 2025', 'date' => '2025-04-02 00:00:00'],
+        ], 1);
+
+        $this->assertSame(
+            ['Passed Senate  Block Vote (40-Y 0-N)', 'Governor\'s Action Deadline 11:59 p.m., May 2, 2025'],
+            array_column($this->dbh->query('SELECT status FROM bills_status WHERE bill_id = ' . self::BILL_ID
+                . ' ORDER BY date')->fetchAll(PDO::FETCH_ASSOC), 'status')
+        );
+    }
+
+    public function testTheSameTextOnAnotherDayIsAnotherEntry(): void
+    {
+        $import = $this->import();
+        $import->store_status_history(self::BILL_ID, [
+            ['status' => 'Passed by for the day', 'date' => '2026-02-10 12:00:00'],
+            ['status' => 'Passed by for the day', 'date' => '2026-02-11 12:00:00'],
+        ], 1);
+        $import->store_status_history(self::BILL_ID, [
+            ['status' => 'Passed by for the day', 'date' => '2026-02-11 12:05:00'],
+        ], 1);
+
+        $this->assertSame(
+            ['2026-02-10 12:00:00', '2026-02-11 12:05:00'],
+            array_column($this->dates(), 'date')
+        );
+    }
+
+    /** @return array<int,array<string,mixed>> */
+    private function dates(): array
+    {
+        return $this->dbh->query('SELECT date, translation, date_created FROM bills_status
+            WHERE bill_id = ' . self::BILL_ID . ' ORDER BY date')->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     private function import(): Import
     {
         $import = new Import(new class extends Log {
