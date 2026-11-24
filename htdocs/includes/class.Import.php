@@ -249,6 +249,16 @@ class Import
      * A row that's already stored keeps any value the new one lacks. In particular, LIS's history
      * has no translation: rs-machine's cleanup adds those, and the website shows them.
      *
+     * An entry is the one already stored if it has the same text on the same day, whatever its
+     * time, and ignoring "Block Vote" and surrounding or repeated spaces (status_history_key()):
+     * LIS's CSV dated entries at midnight, and began some with a space, and its API gives them
+     * times, and adds "Block Vote" to some, and LIS changes some entries' times, so matching them
+     * exactly stored such entries twice. The stored row takes the new wording and time, unless the
+     * new time is midnight and the stored one isn't, and keeps when it was recorded (date_created),
+     * which is how rs-machine tells which statuses are new. rs-machine's
+     * RsMachine\StatusHistoryDuplicates, which merged the entries stored twice, matches them the
+     * same way.
+     *
      * @param int   $bill_id  Internal bills.id value.
      * @param array $history  Normalized rows from normalize_status_history().
      * @param int|null $session_id Session identifier (defaults to SESSION_ID).
@@ -347,7 +357,65 @@ class Import
             ];
         }
 
+        // The entries already stored, by their text and day.
+        $stored = [];
+        $existing = $pdo->prepare(
+            'SELECT id, status, date FROM bills_status WHERE bill_id = :bill_id AND session_id = :session_id ORDER BY id'
+        );
+        if ($existing !== false && $existing->execute([':bill_id' => $bill_id, ':session_id' => $session_id])) {
+            foreach ($existing->fetchAll(PDO::FETCH_ASSOC) as $found) {
+                $stored[self::status_history_key((string)$found['status'], (string)$found['date'])][] = $found;
+            }
+        }
+
+        $same_entry = $pdo->prepare(
+            'UPDATE bills_status
+            SET
+                status = :status,
+                date = :date,
+                chamber = COALESCE(:chamber, chamber),
+                translation = COALESCE(:translation, translation),
+                lis_vote_id = COALESCE(:lis_vote_id, lis_vote_id),
+                date_modified = CURRENT_TIMESTAMP()
+            WHERE id = :id'
+        );
+
         foreach ($rows as $row) {
+            $key = self::status_history_key($row['status'], $row['date']);
+            $exact = false;
+            foreach ($stored[$key] ?? [] as $found) {
+                if ($found['status'] === $row['status'] && $found['date'] === $row['date']) {
+                    $exact = true;
+                }
+            }
+
+            // The same entry, stored with other wording or another time: update it.
+            if ($same_entry !== false && !$exact && isset($stored[$key])) {
+                $match = $stored[$key][0];
+                $date = (str_ends_with($row['date'], ' 00:00:00') && !str_ends_with((string)$match['date'], ' 00:00:00'))
+                    ? (string)$match['date']
+                    : $row['date'];
+                $updated = $same_entry->execute([
+                    ':status' => $row['status'],
+                    ':date' => $date,
+                    ':chamber' => $row['chamber'],
+                    ':translation' => $row['translation'],
+                    ':lis_vote_id' => $row['lis_vote_id'],
+                    ':id' => $match['id'],
+                ]);
+                if ($updated) {
+                    $stored[$key][0]['status'] = $row['status'];
+                    $stored[$key][0]['date'] = $date;
+                    $count++;
+                } else {
+                    $this->log->put(
+                        'Failed to update bill status "' . $row['status'] . '" for bill ID ' . $bill_id,
+                        7
+                    );
+                }
+                continue;
+            }
+
             $stmt->bindValue(':bill_id', $bill_id, PDO::PARAM_INT);
             $stmt->bindValue(':session_id', $session_id, PDO::PARAM_INT);
             $stmt->bindValue(':status', $row['status']);
@@ -371,6 +439,9 @@ class Import
 
             if ($stmt->execute()) {
                 $count++;
+                if (!$exact) {
+                    $stored[$key][] = ['id' => (int)$pdo->lastInsertId(), 'status' => $row['status'], 'date' => $row['date']];
+                }
             } else {
                 $this->log->put(
                     'Failed to persist bill status "' . $row['status'] . '" for bill ID ' . $bill_id,
@@ -380,6 +451,17 @@ class Import
         }
 
         return $count;
+    }
+
+    /**
+     * What identifies a history entry, with its day: its text, without "Block Vote" or surrounding
+     * or repeated spaces. (As rs-machine's RsMachine\StatusHistoryDuplicates::key().)
+     */
+    private static function status_history_key(string $status, string $date): string
+    {
+        $text = trim((string)preg_replace('/\s+/', ' ', str_replace('Block Vote', '', $status)));
+
+        return $text . '|' . substr($date, 0, 10);
     }
 
     /**
