@@ -40,17 +40,21 @@ if (!empty($op)) {
 
     /*
      * We're going to have to clear the Memcached cache of comments for the bill being affected
-     * here, so let's get that out of the way at the outset.
+     * here, and Cloudflare's copies of its page and the home page, so let's get that out of the
+     * way at the outset.
      */
-    if (MEMCACHED_SERVER != '') {
-        $mc = new Memcached();
-        $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
-        $sql = 'SELECT bill_id AS id
-                FROM comments
-                WHERE id = ' . $id;
-        $result = mysqli_query($GLOBALS['db'], $sql);
-        $bill = mysqli_fetch_array($result);
-        $mc->delete('comments-' . $bill['id']);
+    $sql = 'SELECT bill_id AS id
+            FROM comments
+            WHERE id = ?';
+    $result = mysqli_execute_query($GLOBALS['db'], $sql, [(int) $id]);
+    $bill = $result ? mysqli_fetch_array($result) : null;
+    if (!empty($bill['id'])) {
+        if (MEMCACHED_SERVER != '') {
+            $mc = new Memcached();
+            $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+            $mc->delete('comments-' . $bill['id']);
+        }
+        Cloudflare::purge_bills([$bill['id']]);
     }
 
     if ($op == 'spam') {

@@ -105,6 +105,7 @@ if (MEMCACHED_SERVER != '') {
     $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
     $mc->delete('bill-' . $bill_id);
 }
+Cloudflare::purge_bills([$bill_id]);
 
 $log = new Log();
 $result = $log->put('Tag deleted: ' . $tag . ' from bill ID ' . $bill_id, 2);

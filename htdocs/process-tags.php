@@ -93,6 +93,7 @@ if (empty($tags)) {
             $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
             $result = $mc->delete('bill-' . $bill_id);
         }
+        Cloudflare::purge_bills([$bill_id]);
 
         header('HTTP/1.0 201 Created');
         exit();
@@ -192,6 +193,7 @@ if (!empty($_SESSION['id'])) {// && !blacklisted())
         $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
         $result = $mc->delete('bill-' . $bill_id);
     }
+    Cloudflare::purge_bills([$bill_id]);
 
     $log = new Log();
     $referer = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '';

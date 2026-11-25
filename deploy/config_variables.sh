@@ -28,6 +28,8 @@ variables=(
 	MAPBOX_TOKEN
 	MEMCACHED_SERVER
 	OPENAI_KEY
+	CLOUDFLARE_API_TOKEN
+	CLOUDFLARE_ZONE_ID
 	SLACK_WEBHOOK
 	API_URL
 	AWS_SES_SMTP_USERNAME
@@ -36,13 +38,16 @@ variables=(
 	AWS_SECRET_KEY
 )
 
-# If this is our staging site, use the staging database, and don't use Memcached
+# If this is our staging site, use the staging database, and don't use Memcached or
+# purge Cloudflare's cache of the production site
 # shellcheck disable=SC2034 # read indirectly, via ${!i}, below
 if [[ "${GITHUB_REF_NAME:-}" == "master" ]]
 then
 	PDO_DSN="${PDO_DSN_STAGING:-}"
 	MYSQL_DATABASE="${MYSQL_DATABASE_STAGING:-}"
 	MEMCACHED_SERVER=
+	CLOUDFLARE_API_TOKEN=
+	CLOUDFLARE_ZONE_ID=
 fi
 
 # Escape a value for use in the replacement half of a sed s||| command

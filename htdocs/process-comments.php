@@ -341,13 +341,15 @@ if (isset($comment['subscribe']) && ($comment['subscribe'] == 'y')) {
 }
 
 /*
- * Clear the Memcached cache for comments on this bill.
+ * Clear the Memcached cache for comments on this bill, and Cloudflare's copies of its page and the
+ * home page.
  */
 if (MEMCACHED_SERVER != '') {
     $mc = new Memcached();
     $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
     $comments = $mc->delete('comments-' . $comment['bill_id']);
 }
+Cloudflare::purge_bills([$comment['bill_id']]);
 
 $log = new Log();
 $http_host = $_SERVER['HTTP_HOST'] ?? 'localhost';
