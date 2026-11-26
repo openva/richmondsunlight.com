@@ -1,7 +1,7 @@
 <?php
 
 ###
-# Each Day in the General Assembly RSS
+# Richmond Sunlight: Today (RSS)
 #
 # PURPOSE
 # Lists the most recent days that the legislature did anything, each published the morning after,

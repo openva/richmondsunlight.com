@@ -208,8 +208,7 @@ $html_head = '
 	<meta property="og:url" content="' . htmlspecialchars($day['url']) . '">
 	<meta property="og:type" content="website">
 	<meta property="og:site_name" content="Richmond Sunlight">
-	<link rel="alternate" type="application/rss+xml" href="/rss/days/" title="Each day in the General Assembly (RSS)">
-	<script src="/js/day.js" defer></script>';
+	<link rel="alternate" type="application/rss+xml" href="/rss/days/" title="Richmond Sunlight: Today (RSS)">
 	<script src="/js/day.js" defer></script>
 	<script src="/js/day-reel.js" defer></script>';
 
