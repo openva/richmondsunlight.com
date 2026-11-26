@@ -3,9 +3,9 @@ permissions:
   contents: read
 on:
   push:
-    branches: [master, deploy]
+    branches: [main, deploy]
   pull_request:
-    branches: [master, deploy]
+    branches: [main, deploy]
   workflow_dispatch:
   schedule:
     - cron: '0 4 * * *' # Redeploy at 4 AM every day
@@ -175,7 +175,7 @@ jobs:
 
       - name: Configure deployment type
         run: |
-          if [ "$GITHUB_REF_NAME" = "master" ]; then
+          if [ "$GITHUB_REF_NAME" = "main" ]; then
             ./deploy/increase_verbosity.sh
             cp appspec-staging.yml appspec.yml
             echo Deployment configured for staging
@@ -191,11 +191,11 @@ jobs:
       # public repository can be downloaded by anyone. They're added in the
       # deploy job, immediately before the code is pushed to AWS.
       - name: Compress codebase
-        if: env.GITHUB_REF_NAME == 'master' || env.GITHUB_REF_NAME == 'deploy'
+        if: env.GITHUB_REF_NAME == 'main' || env.GITHUB_REF_NAME == 'deploy'
         run: zip -r codebase.zip . -x ".git/*" ".pw-browsers/*" "deploy/browser-tests/*" "coverage/*"
 
       - name: Upload codebase
-        if: env.GITHUB_REF_NAME == 'master' || env.GITHUB_REF_NAME == 'deploy'
+        if: env.GITHUB_REF_NAME == 'main' || env.GITHUB_REF_NAME == 'deploy'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: codebase
@@ -292,7 +292,7 @@ jobs:
           aws-region: us-east-1
           
       - name: Deploy to staging
-        if: github.ref_name == 'master'
+        if: github.ref_name == 'main'
         run: |
           aws deploy push \
             --application-name RS-Web \

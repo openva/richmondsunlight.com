@@ -41,7 +41,7 @@ variables=(
 # If this is our staging site, use the staging database, and don't use Memcached or
 # purge Cloudflare's cache of the production site
 # shellcheck disable=SC2034 # read indirectly, via ${!i}, below
-if [[ "${GITHUB_REF_NAME:-}" == "master" ]]
+if [[ "${GITHUB_REF_NAME:-}" == "main" ]]
 then
 	PDO_DSN="${PDO_DSN_STAGING:-}"
 	MYSQL_DATABASE="${MYSQL_DATABASE_STAGING:-}"

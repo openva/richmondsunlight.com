@@ -105,8 +105,8 @@ grep -rnE '\bYYYY-1\b' htdocs deploy --include='*.php' | grep -v /vendor/
 
 ## 5. Deploy
 
-1. Commit to `master` and let CI pass.
-2. Merge `master` into the `deploy` branch. That deploys the site, and rs-api, rs-machine, and rs-video-processor all take their includes, including `settings-default.inc.php`, from the `deploy` branch.
+1. Commit to `main` and let CI pass.
+2. Merge `main` into the `deploy` branch. That deploys the site, and rs-api, rs-machine, and rs-video-processor all take their includes, including `settings-default.inc.php`, from the `deploy` branch.
 3. Check that the site shows the new session: the home page and `/bills/YYYY/`.
 4. Flush Memcached, so that no cached pages still show the old session. Deploys don't do this. On the web server, run `echo flush_all | nc -q1 localhost 11211`. PHP sessions are also stored in Memcached, so this logs everybody out.
 

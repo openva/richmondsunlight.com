@@ -220,7 +220,7 @@ For Docker, use `deploy/settings-docker.inc.php`.
 
 ### Branches
 
-- **master** → staging.richmondsunlight.com (auto-deployed)
+- **main** → staging.richmondsunlight.com (auto-deployed)
 - **deploy** → www.richmondsunlight.com (auto-deployed)
 
 ### CI/CD Pipeline
@@ -229,10 +229,10 @@ GitHub Actions workflow (`.github/workflows/deploy.yml`):
 
 1. **Lint and Build** - PHP syntax check, Composer install, Yarn build
 2. **Integration Tests** - Docker environment, unit tests, browser tests (Playwright), OWASP ZAP security scan
-3. **Deploy** - AWS CodeDeploy to staging (master) or production (deploy)
+3. **Deploy** - AWS CodeDeploy to staging (main) or production (deploy)
 
 The pipeline runs on:
-- Push to master or deploy
+- Push to main or deploy
 - Pull requests
 - Daily at 4 AM UTC (scheduled redeploy)
 
