@@ -287,7 +287,9 @@ if (count($highlights) > 0) {
             'action' => $highlight['action']['text']
                 . ($vote !== null && !$vote['voice'] ? ', ' . $vote['yes'] . '–' . $vote['no'] : ''),
             'mp4' => $clip['mp4'],
-            'captions' => !empty($clip['captions']) ? $local_url($clip['captions']) : null,
+            // Its video's slug, if it has captions (from which the script makes their URL).
+            'captions' => preg_match('#/video/([a-z0-9]{4})/captions\.vtt$#', (string) ($clip['captions'] ?? ''), $match)
+                ? $match[1] : null,
             'segments' => $clip['segments'],
         ];
         foreach ($clip['segments'] as $segment) {
