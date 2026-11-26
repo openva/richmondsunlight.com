@@ -1,5 +1,5 @@
 name: Session Update
-# Proposes, as a pull request against master, changing the session settings in
+# Proposes, as a pull request against main, changing the session settings in
 # htdocs/includes/settings-default.inc.php: to a new regular session once bills may be prefiled for
 # it, and otherwise to keep the current session's up to date (such as its end, once it adjourns).
 # The rules are in deploy/SessionSettings.php.
@@ -39,7 +39,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: master
+          ref: main
           persist-credentials: false
 
       - name: Setup PHP
@@ -93,5 +93,5 @@ jobs:
           if [ "$(gh pr list --head "$BRANCH" --state open --json number --jq length)" != "0" ]; then
             gh pr edit "$BRANCH" --title "$TITLE" --body-file "$BODY"
           else
-            gh pr create --base master --head "$BRANCH" --title "$TITLE" --body-file "$BODY"
+            gh pr create --base main --head "$BRANCH" --title "$TITLE" --body-file "$BODY"
           fi

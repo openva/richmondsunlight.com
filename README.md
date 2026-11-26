@@ -10,7 +10,7 @@ Richmond Sunlight started in 2005 as [a little RSS-based bill tracker](http://wa
 
 ## Branches
 
-* [`master`](https://github.com/openva/richmondsunlight.com/tree/master): The [staging site](https://staging.richmondsunlight.com/).
+* [`main`](https://github.com/openva/richmondsunlight.com/tree/main): The [staging site](https://staging.richmondsunlight.com/).
 * [`deploy`](https://github.com/openva/richmondsunlight.com/tree/deploy): The [production site](https://www.richmondsunlight.com/).
 
 ## Local development

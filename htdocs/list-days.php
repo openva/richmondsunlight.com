@@ -159,7 +159,7 @@ $page_sidebar .= '
 	</div>';
 
 $html_head = '
-	<link rel="alternate" type="application/rss+xml" href="/rss/days/" title="Each day in the General Assembly (RSS)">';
+	<link rel="alternate" type="application/rss+xml" href="/rss/days/" title="Richmond Sunlight: Today (RSS)">';
 
 # OUTPUT THE PAGE
 $page = new Page();

@@ -2,7 +2,7 @@
 #==================================================================================
 # Run the SonarQube Cloud analysis from here, before pushing. It analyzes the
 # working tree (uncommitted changes included) as a branch named "local-" plus the
-# current branch's name, which SonarQube Cloud compares with master and deletes
+# current branch's name, which SonarQube Cloud compares with main and deletes
 # after 30 days without an analysis. The results are at the URL printed at the end.
 #
 # For test coverage, run the PHPUnit tests in Docker first, with ./docker-run.sh

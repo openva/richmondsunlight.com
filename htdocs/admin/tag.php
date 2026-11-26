@@ -88,10 +88,14 @@ if (!empty($_POST)) {
                     if (MEMCACHED_SERVER != '') {
                         $mc->delete('bill-' . $bill_id);
                     }
+                    $tagged_bill_ids[] = $bill_id;
                 }
             }
         }
     }
+
+    # Expire Cloudflare's copies of these bills' pages, and of the home page, all at once.
+    Cloudflare::purge_bills($tagged_bill_ids ?? []);
 } else {
     if (empty($_SESSION['id'])) {
         die('Please log in before using this.');

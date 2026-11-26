@@ -70,7 +70,23 @@ class DayHighlights
     private const CLIP_GAP = 30;
 
     /** How much earlier than a discussion's first chyron its clip starts, in seconds. */
-    private const CLIP_LEAD = 10;
+    private const CLIP_LEAD = 3;
+
+    /**
+     * Legislators on screen this many seconds before or after a discussion's chyrons count as having
+     * spoken in it.
+     */
+    private const SPEAKER_MARGIN = 10;
+
+    /**
+     * How much of each clip the day's highlight reel plays, in seconds: the start of the clip (the
+     * patron presenting the bill), then this much from when another legislator first appears on
+     * screen (the debate, or a question), or, if nobody else spoke, only the start, for longer.
+     * The reel starts where the clip does, CLIP_LEAD seconds before the bill's first chyron.
+     */
+    public const REEL_OPENING = 30;
+    public const REEL_REPLY = 45;
+    public const REEL_ALONE = 45;
 
     /**
      * Run a prepared query, and return all of its rows (none, if it fails, as it does before
@@ -271,12 +287,14 @@ class DayHighlights
      * appeared on screen during each discussion.
      *
      * @param string $date
-     * @param array $bill_ids
+     * @param array $patrons Each bill's patron (people.id), by bill ID
      * @return array By bill ID: seconds (in all), speakers (people.id values), and clip (the
-     *               longest discussion: slug, start, duration, and label), or nothing
+     *               longest discussion: slug, start, duration, label, and reply, when a legislator
+     *               other than the patron first appeared on screen during it, or null), or nothing
      */
-    private static function discussions(string $date, array $bill_ids): array
+    private static function discussions(string $date, array $patrons): array
     {
+        $bill_ids = array_keys($patrons);
         if (count($bill_ids) === 0) {
             return [];
         }
@@ -325,16 +343,24 @@ class DayHighlights
                 foreach ($runs as [$start, $end]) {
                     $seconds += $end - $start;
                     foreach ($legislator_times[$file_id] ?? [] as [$time, $person_id]) {
-                        if ($time >= $start - self::CLIP_LEAD && $time <= $end + self::CLIP_LEAD) {
+                        if ($time >= $start - self::SPEAKER_MARGIN && $time <= $end + self::SPEAKER_MARGIN) {
                             $speakers[$person_id] = true;
                         }
                     }
                     if ($clip === null || $end - $start > $clip['duration']) {
+                        $reply = null;
+                        foreach ($legislator_times[$file_id] ?? [] as [$time, $person_id]) {
+                            if ($time >= $start && $time <= $end && $person_id !== $patrons[$bill_id]) {
+                                $reply = $time;
+                                break;
+                            }
+                        }
                         $clip = [
                             'slug' => $files[$file_id]['slug'],
                             'start' => max(0, $start - self::CLIP_LEAD),
                             'duration' => $end - $start + self::CLIP_LEAD,
                             'label' => Video::meeting_label($files[$file_id]['title'], $files[$file_id]['chamber']),
+                            'reply' => $reply,
                         ];
                     }
                 }
@@ -455,7 +481,7 @@ class DayHighlights
             }
         }
         $party_votes = self::party_votes(array_keys($vote_ids));
-        $discussions = self::discussions($date, $bill_ids);
+        $discussions = self::discussions($date, array_map(fn($bill) => $bill['patron_id'], $bills));
         $news = self::news_counts($date, $bill_ids);
         $interest = self::interest($date, $bill_ids);
 
@@ -747,10 +773,26 @@ class DayHighlights
      *
      * @param string $date
      * @return array highlights (each one's position, bill, chamber, score, action, reasons, and
-     *               clip), and updated (when the scores were last computed, or null)
+     *               clip: its url, start, duration, label, mp4 (or null, if the video can't be
+     *               played here), captions (a WebVTT URL, or null), and segments, for the
+     *               highlight reel), and updated (when the
+     *               scores were last computed, or null)
      */
     public static function for_api(string $date): array
     {
+        // The day's videos' files, which the highlight reel plays, and their captions (made from
+        // their transcripts, as on video pages).
+        $mp4s = [];
+        $captions = [];
+        foreach (self::rows('SELECT slug, path,
+                    EXISTS (SELECT 1 FROM video_transcript WHERE video_transcript.file_id = files.id) AS transcribed
+                FROM files
+                WHERE date = ? AND slug IS NOT NULL', 's', [$date]) as $row) {
+            $mp4s[$row['slug']] = Video::media_url($row['path']);
+            $captions[$row['slug']] = $row['transcribed']
+                ? 'https://www.richmondsunlight.com/video/' . $row['slug'] . '/captions.vtt' : null;
+        }
+
         $highlights = [];
         $updated = null;
         foreach (self::rows('SELECT position, chamber, score, hidden, reasons, date_modified
@@ -778,6 +820,9 @@ class DayHighlights
                     'start' => $clip['start'],
                     'duration' => $clip['duration'],
                     'label' => $clip['label'],
+                    'mp4' => $mp4s[$clip['slug']] ?? null,
+                    'captions' => $captions[$clip['slug']] ?? null,
+                    'segments' => self::reel_segments($clip),
                 ] : null,
             ];
         }
@@ -786,6 +831,115 @@ class DayHighlights
             'highlights' => $highlights,
             'updated' => $updated !== null ? date('c', strtotime($updated)) : null,
         ];
+    }
+
+    /**
+     * The parts of a highlight's clip that the day's highlight reel plays: its first REEL_OPENING
+     * seconds, then REEL_REPLY seconds from when another legislator first appeared on screen, or,
+     * if nobody else did, its first REEL_ALONE seconds. Never past the clip's end, so a short clip
+     * plays whole. Parts that overlap, or nearly meet, are played as one.
+     *
+     * @param array $clip start, duration, and reply (or null), in seconds
+     * @return array Each part's start and end, in seconds into the video
+     */
+    public static function reel_segments(array $clip): array
+    {
+        $start = (int) $clip['start'];
+        $end = $start + (int) $clip['duration'];
+        $reply = isset($clip['reply']) ? (int) $clip['reply'] : null;
+
+        $parts = $reply !== null
+            ? [[$start, $start + self::REEL_OPENING], [$reply, $reply + self::REEL_REPLY]]
+            : [[$start, $start + self::REEL_ALONE]];
+
+        $segments = [];
+        foreach ($parts as [$from, $to]) {
+            $to = min($to, $end);
+            if ($from >= $to) {
+                continue;
+            }
+            $last = count($segments) - 1;
+            if ($last >= 0 && $from <= $segments[$last]['end'] + 5) {
+                $segments[$last]['end'] = max($segments[$last]['end'], $to);
+            } else {
+                $segments[] = ['start' => $from, 'end' => $to];
+            }
+        }
+
+        return $segments;
+    }
+
+    /**
+     * The day's highlight reel, for its page: each highlight whose clip can be played here (not
+     * one only on YouTube), with its bill's number and title, what was done to it, its video's
+     * file, its video's slug (if it has captions), and the segments to play.
+     *
+     * @param array $highlights A day's highlights, from the API
+     * @return array
+     */
+    public static function reel(array $highlights): array
+    {
+        $reel = [];
+        foreach ($highlights as $highlight) {
+            $clip = $highlight['clip'] ?? null;
+            if (empty($clip['mp4']) || empty($clip['segments'])) {
+                continue;
+            }
+            $vote = $highlight['action']['vote'] ?? null;
+            $tally = $vote !== null && empty($vote['voice']) ? ', ' . $vote['yes'] . '–' . $vote['no'] : '';
+            $captioned = preg_match('#/video/([a-z0-9]{4})/captions\.vtt$#', (string) ($clip['captions'] ?? ''), $match);
+            $reel[] = [
+                'number' => mb_strtoupper(preg_replace('/^([a-z]+)/', '$1 ', $highlight['bill']['number'])),
+                'title' => $highlight['bill']['catch_line'],
+                'action' => $highlight['action']['text'] . $tally,
+                'mp4' => $clip['mp4'],
+                'captions' => $captioned ? $match[1] : null,
+                'segments' => $clip['segments'],
+            ];
+        }
+
+        return $reel;
+    }
+
+    /**
+     * The day's highlight reel, as HTML, or nothing if fewer than two highlights can be played.
+     * It needs JavaScript (/js/day-reel.js), so it's hidden until that shows it. Its highlights are
+     * given to that script in a script of their own (window.dayReel), not in the HTML.
+     *
+     * @param array $highlights A day's highlights, from the API
+     * @return string
+     */
+    public static function reel_html(array $highlights): string
+    {
+        $reel = self::reel($highlights);
+        if (count($reel) < 2) {
+            return '';
+        }
+        $seconds = 0;
+        foreach ($reel as $item) {
+            foreach ($item['segments'] as $segment) {
+                $seconds += $segment['end'] - $segment['start'];
+            }
+        }
+
+        $html = '
+		<script>window.dayReel = ' . json_encode($reel, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';</script>
+		<div class="day-reel" hidden>
+			<div class="video-player-stage day-reel-stage">
+				<video playsinline preload="none"></video>
+				<button type="button" class="day-reel-start">Watch the highlights
+					<small>(' . count($reel) . ' bills, ' . Video::clock($seconds) . ')</small></button>
+				<p class="day-reel-caption" aria-live="polite" hidden></p>
+			</div>
+			<ol class="day-reel-chapters" aria-label="In the highlight reel">';
+        foreach ($reel as $i => $item) {
+            $html .= '
+				<li><button type="button" data-chapter="' . $i . '">' . htmlspecialchars($item['number']) . '</button></li>';
+        }
+
+        return $html . '
+			</ol>
+		</div>';
     }
 
     /**

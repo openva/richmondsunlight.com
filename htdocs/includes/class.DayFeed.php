@@ -142,7 +142,7 @@ class DayFeed
         return '<?xml version="1.0" encoding="utf-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 	<channel>
-		<title>Richmond Sunlight: Each Day in the General Assembly</title>
+		<title>Richmond Sunlight: Today</title>
 		<link>https://www.richmondsunlight.com/day/</link>
 		<atom:link href="' . self::URL . '" rel="self" type="application/rss+xml" />
 		<description>What the Virginia General Assembly did each day, and its highlights, the morning after.</description>

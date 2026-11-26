@@ -118,6 +118,12 @@ rs_define('SLACK_WEBHOOK', '');
 # YouTube API key
 rs_define('YOUTUBE_API_KEY', '');
 
+# Cloudflare API token (with the Zone > Cache Purge permission) and zone ID. If both are set,
+# adding or removing a comment or a tag expires Cloudflare's copies of the bill's page and the home
+# page (see class.Cloudflare.php).
+rs_define('CLOUDFLARE_API_TOKEN', '');
+rs_define('CLOUDFLARE_ZONE_ID', '');
+
 # OpenAI API key
 rs_define('OPENAI_KEY', '');
 

@@ -353,8 +353,9 @@ EOD;
 		<li>highlights (up to ten of the day’s bills that are most likely to interest a reader, best
 		first, chosen automatically: each one’s bill, the most important thing done to it, the
 		reasons it was chosen, such as “Close vote, 45–52” or “2 news stories,” and a clip of its
-		discussion, if there is one), and highlights_updated (when they were chosen; a day’s
-		highlights can change for two weeks)</li>
+		discussion, if there is one: where it is in the video, the video’s file and captions, and
+		the parts of it that the day’s highlight reel plays), and highlights_updated (when they
+		were chosen; a day’s highlights can change for two weeks)</li>
 		<li>news (news stories about the day’s bills, from two days before to three days after)</li>
 		<li>brief (a few sentences about the day, written by a language model from the day’s
 		record alone, and checked against it, with the model that wrote it and when; null if there’s

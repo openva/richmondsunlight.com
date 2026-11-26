@@ -208,8 +208,9 @@ $html_head = '
 	<meta property="og:url" content="' . htmlspecialchars($day['url']) . '">
 	<meta property="og:type" content="website">
 	<meta property="og:site_name" content="Richmond Sunlight">
-	<link rel="alternate" type="application/rss+xml" href="/rss/days/" title="Each day in the General Assembly (RSS)">
-	<script src="/js/day.js" defer></script>';
+	<link rel="alternate" type="application/rss+xml" href="/rss/days/" title="Richmond Sunlight: Today (RSS)">
+	<script src="/js/day.js" defer></script>
+	<script src="/js/day-reel.js" defer></script>';
 
 # PAGE BODY
 $page_body = '
@@ -267,7 +268,12 @@ $highlights = $day['highlights'] ?? [];
 if (count($highlights) > 0) {
     $page_body .= '
 	<section id="highlights" class="day-section">
-		<h2>Highlights</h2>
+		<h2>Highlights</h2>';
+
+    // The highlight reel: a part of each highlight's clip, one after another.
+    $page_body .= DayHighlights::reel_html($highlights);
+
+    $page_body .= '
 		<ol class="day-highlights">';
     foreach ($highlights as $highlight) {
         $action = $highlight['action'];
