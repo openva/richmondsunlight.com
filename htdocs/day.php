@@ -298,7 +298,8 @@ if (count($highlights) > 0) {
     }
     if (count($reel) >= 2) {
         $page_body .= '
-		<div class="day-reel" data-reel="' . htmlspecialchars(json_encode($reel)) . '" hidden>
+		<script>window.dayReel = ' . json_encode($reel, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';</script>
+		<div class="day-reel" hidden>
 			<div class="video-player-stage day-reel-stage">
 				<video playsinline preload="none"></video>
 				<button type="button" class="day-reel-start">Watch the highlights
