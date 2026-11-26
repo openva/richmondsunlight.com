@@ -25,11 +25,32 @@
     var caption = reel.querySelector('.day-reel-caption');
     var chapters = reel.querySelectorAll('[data-chapter]');
 
-    // Every part, in order, with the highlight it belongs to.
+    // A video's file, only if it's on one of the hosts that video pages play from (as
+    // Video::media_url() requires), over https; otherwise null.
+    var hosts = /^(video\.richmondsunlight\.com|archive\.org|[a-z0-9-]+\.archive\.org|[a-z0-9-]+\.sliq\.net|archive-video\.granicus\.com)$/;
+    function mp4_url(url) {
+        var match = /^https:\/\/([a-z0-9.-]+)(\/[^\s"'<>]*)$/i.exec(String(url || ''));
+        if (!match || !hosts.test(match[1].toLowerCase())) {
+            return null;
+        }
+        return 'https://' + match[1] + match[2];
+    }
+
+    // A video's captions, on this site, from its slug.
+    function captions_url(slug) {
+        return /^[a-z0-9]{4}$/.test(String(slug || '')) ? '/video/' + slug + '/captions.vtt' : null;
+    }
+
+    // Every part, in order, with the highlight it belongs to. (A highlight whose video can't be
+    // played is left out.)
     var parts = [];
     items.forEach(function (item, i) {
+        var mp4 = mp4_url(item.mp4);
+        if (mp4 === null) {
+            return;
+        }
         item.segments.forEach(function (segment) {
-            parts.push({ item: i, mp4: item.mp4, captions: item.captions, start: segment.start, end: segment.end });
+            parts.push({ item: i, mp4: mp4, captions: captions_url(item.captions), start: Number(segment.start), end: Number(segment.end) });
         });
     });
     if (parts.length === 0) {
