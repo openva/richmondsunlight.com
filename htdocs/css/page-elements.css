@@ -1660,6 +1660,70 @@ div#content ul.day-videos {
 		background-color: #243a51;
 	}
 
+/* The day's highlight reel (see /js/day-reel.js) */
+.day-reel-stage {
+	position: relative;
+	margin-top: .5em;
+}
+	button.day-reel-start {
+		position: absolute;
+		top: 50%;
+		left: 50%;
+		transform: translate(-50%, -50%);
+		padding: .6em 1.1em;
+		border: 0;
+		border-radius: 4px;
+		background-color: #790806;
+		color: #fff;
+		font: inherit;
+		font-weight: bold;
+		cursor: pointer;
+	}
+	button.day-reel-start::before {
+		content: "▶ ";
+	}
+	button.day-reel-start small {
+		display: block;
+		font-weight: normal;
+	}
+	button.day-reel-start[hidden] {
+		display: none;
+	}
+	div#content .day-reel-caption {
+		margin: 0;
+		padding: .5em .75em;
+		color: #fff;
+		line-height: 1.35;
+	}
+	.day-reel-action {
+		display: block;
+		color: #d9e2ec;
+		font-size: .9em;
+	}
+div#content ol.day-reel-chapters {
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+	gap: .3em;
+	margin: 0 0 1em;
+	padding: 0;
+}
+	.day-reel-chapters button {
+		padding: .15em .55em;
+		border: 1px solid #dccbaf;
+		border-radius: 3px;
+		background-color: #fff;
+		color: #243a51;
+		font: inherit;
+		font-size: .85em;
+		cursor: pointer;
+	}
+	.day-reel-chapters button[aria-current] {
+		border-color: #790806;
+		background-color: #790806;
+		color: #fff;
+	}
+
 /* The day's highlights */
 div#content ol.day-highlights {
 	list-style: none;

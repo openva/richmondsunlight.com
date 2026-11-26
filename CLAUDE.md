@@ -74,6 +74,11 @@ pages (`/minutes/...` redirects to it). Like video pages, day pages get their da
   `php deploy/day-highlights.php 2026-01-26` scores a day; `docker-setup-site.sh` does the
   fixtures' day, which the tests expect. `/admin/day-highlights.php` shows the scores, and hides a
   highlight.
+- A day's highlight reel (`htdocs/js/day-reel.js`) plays part of each highlight's clip, one after
+  another: what `DayHighlights::reel_segments()` chooses, from the clip and when another
+  legislator first appears in it (its `reply`). Clips start `CLIP_LEAD` (3) seconds before the
+  bill's first chyron. A clip's start and `reply` are stored when a day is scored, so changing
+  `CLIP_LEAD` means scoring past days again; the reel's lengths (`REEL_*`) take effect at once.
 - A day's brief is written by a language model (rs-machine's `cron/day_briefs.php`), from what
   `DayBrief::input()` tells it, and shown only if `DayBrief::check()` finds every bill and number in
   it in the day's record.

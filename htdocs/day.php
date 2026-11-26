@@ -210,6 +210,8 @@ $html_head = '
 	<meta property="og:site_name" content="Richmond Sunlight">
 	<link rel="alternate" type="application/rss+xml" href="/rss/days/" title="Each day in the General Assembly (RSS)">
 	<script src="/js/day.js" defer></script>';
+	<script src="/js/day.js" defer></script>
+	<script src="/js/day-reel.js" defer></script>';
 
 # PAGE BODY
 $page_body = '
@@ -267,7 +269,52 @@ $highlights = $day['highlights'] ?? [];
 if (count($highlights) > 0) {
     $page_body .= '
 	<section id="highlights" class="day-section">
-		<h2>Highlights</h2>
+		<h2>Highlights</h2>';
+
+    // The highlight reel: a part of each highlight's clip, one after another. It needs JavaScript
+    // (see /js/day-reel.js), so it's hidden until that shows it, and it needs at least two clips
+    // that can be played here (not ones only on YouTube).
+    $reel = [];
+    $reel_seconds = 0;
+    foreach ($highlights as $highlight) {
+        $clip = $highlight['clip'] ?? null;
+        if (empty($clip['mp4']) || empty($clip['segments'])) {
+            continue;
+        }
+        $vote = $highlight['action']['vote'] ?? null;
+        $reel[] = [
+            'number' => $bill_number($highlight['bill']['number']),
+            'title' => $highlight['bill']['catch_line'],
+            'action' => $highlight['action']['text']
+                . ($vote !== null && !$vote['voice'] ? ', ' . $vote['yes'] . '–' . $vote['no'] : ''),
+            'mp4' => $clip['mp4'],
+            'captions' => !empty($clip['captions']) ? $local_url($clip['captions']) : null,
+            'segments' => $clip['segments'],
+        ];
+        foreach ($clip['segments'] as $segment) {
+            $reel_seconds += $segment['end'] - $segment['start'];
+        }
+    }
+    if (count($reel) >= 2) {
+        $page_body .= '
+		<div class="day-reel" data-reel="' . htmlspecialchars(json_encode($reel)) . '" hidden>
+			<div class="video-player-stage day-reel-stage">
+				<video playsinline preload="none"></video>
+				<button type="button" class="day-reel-start">Watch the highlights
+					<small>(' . count($reel) . ' bills, ' . Video::clock($reel_seconds) . ')</small></button>
+				<p class="day-reel-caption" aria-live="polite" hidden></p>
+			</div>
+			<ol class="day-reel-chapters" aria-label="In the highlight reel">';
+        foreach ($reel as $i => $item) {
+            $page_body .= '
+				<li><button type="button" data-chapter="' . $i . '">' . htmlspecialchars($item['number']) . '</button></li>';
+        }
+        $page_body .= '
+			</ol>
+		</div>';
+    }
+
+    $page_body .= '
 		<ol class="day-highlights">';
     foreach ($highlights as $highlight) {
         $action = $highlight['action'];

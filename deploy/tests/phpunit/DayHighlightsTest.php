@@ -153,12 +153,38 @@ class DayHighlightsTest extends TestCase
         $this->assertNull(DayHighlights::compute('2098-01-05'));
     }
 
+    /**
+     * The highlight reel plays the start of a clip, then another legislator, or the start alone.
+     */
+    public function testChoosesWhatTheHighlightReelPlays(): void
+    {
+        $clip = fn(int $duration, ?int $reply) => ['start' => 100, 'duration' => $duration, 'reply' => $reply];
+
+        // The patron, then another legislator.
+        $this->assertSame([['start' => 100, 'end' => 130], ['start' => 300, 'end' => 345]],
+            DayHighlights::reel_segments($clip(600, 300)));
+        // Nobody else spoke.
+        $this->assertSame([['start' => 100, 'end' => 145]], DayHighlights::reel_segments($clip(600, null)));
+        // Another legislator, soon after the start: one part.
+        $this->assertSame([['start' => 100, 'end' => 178]], DayHighlights::reel_segments($clip(600, 133)));
+        // A short clip plays whole.
+        $this->assertSame([['start' => 100, 'end' => 125]], DayHighlights::reel_segments($clip(25, null)));
+        $this->assertSame([['start' => 100, 'end' => 160]], DayHighlights::reel_segments($clip(60, 115)));
+        // A clip stored before replies were, has none.
+        $this->assertSame([['start' => 100, 'end' => 145]],
+            DayHighlights::reel_segments(['start' => 100, 'duration' => 600]));
+    }
+
     public function testStoresADaysHighlightsForTheApi(): void
     {
         $this->assertGreaterThan(0, DayHighlights::save(self::DATE));
         $day = DayHighlights::for_api(self::DATE);
         $this->assertSame('hb341', $day['highlights'][0]['bill']['number']);
         $this->assertStringStartsWith('https://www.richmondsunlight.com/video/b334/?t=', $day['highlights'][0]['clip']['url']);
+        $this->assertNotEmpty($day['highlights'][0]['clip']['mp4']);
+        $this->assertNotEmpty($day['highlights'][0]['clip']['segments']);
+        $this->assertSame('https://www.richmondsunlight.com/video/b334/captions.vtt', $day['highlights'][0]['clip']['captions']);
+        $this->assertArrayHasKey('reply', DayHighlights::compute(self::DATE)[self::HB341]['reasons']['clip']);
         $this->assertNotNull($day['updated']);
 
         // Hidden, it's gone, and stays gone when the day is scored again; shown, it's back.

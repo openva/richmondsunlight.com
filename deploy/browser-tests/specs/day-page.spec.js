@@ -98,6 +98,28 @@ test.describe('A day’s page', () => {
     await expect(first).toBeHidden();
   });
 
+  test('has a highlight reel of the highlights with clips', async ({ page }) => {
+    // The videos aren't fetched: their requests are left waiting.
+    await page.route('**/*.mp4', () => {});
+    await page.goto(day);
+    const reel = page.locator('.day-reel');
+    await expect(reel).toBeVisible();
+    await expect(reel.locator('.day-reel-start')).toContainText('Watch the highlights');
+    await expect(reel.locator('.day-reel-start')).toContainText('2 bills');
+    await expect(reel.locator('.day-reel-chapters button')).toHaveText(['HB 341', 'HB 288']);
+
+    await reel.locator('.day-reel-start').click();
+    await expect(reel.locator('.day-reel-start')).toBeHidden();
+    await expect(reel.locator('.day-reel-caption')).toContainText('HB 341');
+    await expect(reel.locator('.day-reel-caption')).toContainText('Read third time and defeated by House, 45–52');
+    await expect(reel.locator('video')).toHaveAttribute('src', /\.mp4$/);
+    await expect(reel.locator('video track')).toHaveAttribute('src', '/video/b334/captions.vtt');
+    await expect(reel.locator('[data-chapter="0"]')).toHaveAttribute('aria-current', 'true');
+
+    await reel.locator('[data-chapter="1"]').click();
+    await expect(reel.locator('.day-reel-caption')).toContainText('HB 288');
+  });
+
   test('starts with its brief, labeled as written by a language model', async ({ page }) => {
     await page.goto(day);
     const brief = page.locator('.day-brief');
