@@ -17,12 +17,48 @@ class Cloudflare
     const MAX_URLS = 30;
 
     /**
+     * Cloudflare's API.
+     */
+    const ENDPOINT = 'https://api.cloudflare.com/client/v4/zones/';
+
+    /**
+     * The token, zone, and API to use instead of CLOUDFLARE_API_TOKEN, CLOUDFLARE_ZONE_ID, and
+     * ENDPOINT, if they've been set by use() (only tests do that).
+     */
+    private static ?array $settings = null;
+
+    /**
+     * Use this token, zone, and API, instead of the site's settings, until use() is called again
+     * without them. For tests.
+     */
+    public static function use(?string $token = null, ?string $zone = null, ?string $endpoint = null): void
+    {
+        self::$settings = $token === null ? null : [
+            'token' => $token,
+            'zone' => (string) $zone,
+            'endpoint' => $endpoint ?? self::ENDPOINT,
+        ];
+    }
+
+    /**
+     * The token, zone, and API to use.
+     */
+    private static function settings(): array
+    {
+        return self::$settings ?? [
+            'token' => defined('CLOUDFLARE_API_TOKEN') ? (string) CLOUDFLARE_API_TOKEN : '',
+            'zone' => defined('CLOUDFLARE_ZONE_ID') ? (string) CLOUDFLARE_ZONE_ID : '',
+            'endpoint' => self::ENDPOINT,
+        ];
+    }
+
+    /**
      * Whether Cloudflare's cache can be purged here.
      */
     public static function enabled(): bool
     {
-        return defined('CLOUDFLARE_API_TOKEN') && CLOUDFLARE_API_TOKEN != ''
-            && defined('CLOUDFLARE_ZONE_ID') && CLOUDFLARE_ZONE_ID != '';
+        $settings = self::settings();
+        return $settings['token'] != '' && $settings['zone'] != '';
     }
 
     /**
@@ -121,15 +157,15 @@ class Cloudflare
      */
     private static function request(array $urls): ?string
     {
-        $ch = curl_init('https://api.cloudflare.com/client/v4/zones/' . rawurlencode(CLOUDFLARE_ZONE_ID)
-            . '/purge_cache');
+        $settings = self::settings();
+        $ch = curl_init($settings['endpoint'] . rawurlencode($settings['zone']) . '/purge_cache');
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 3);
         curl_setopt($ch, CURLOPT_TIMEOUT, 5);
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/json',
-            'Authorization: Bearer ' . CLOUDFLARE_API_TOKEN,
+            'Authorization: Bearer ' . $settings['token'],
         ]);
         curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode(['files' => $urls]));
 
