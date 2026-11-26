@@ -789,7 +789,8 @@ class DayHighlights
                 FROM files
                 WHERE date = ? AND slug IS NOT NULL', 's', [$date]) as $row) {
             $mp4s[$row['slug']] = Video::media_url($row['path']);
-            $captions[$row['slug']] = (bool) $row['transcribed'];
+            $captions[$row['slug']] = $row['transcribed']
+                ? 'https://www.richmondsunlight.com/video/' . $row['slug'] . '/captions.vtt' : null;
         }
 
         $highlights = [];
@@ -820,8 +821,7 @@ class DayHighlights
                     'duration' => $clip['duration'],
                     'label' => $clip['label'],
                     'mp4' => $mp4s[$clip['slug']] ?? null,
-                    'captions' => !empty($captions[$clip['slug']])
-                        ? 'https://www.richmondsunlight.com/video/' . $clip['slug'] . '/captions.vtt' : null,
+                    'captions' => $captions[$clip['slug']] ?? null,
                     'segments' => self::reel_segments($clip),
                 ] : null,
             ];
@@ -867,6 +867,79 @@ class DayHighlights
         }
 
         return $segments;
+    }
+
+    /**
+     * The day's highlight reel, for its page: each highlight whose clip can be played here (not
+     * one only on YouTube), with its bill's number and title, what was done to it, its video's
+     * file, its video's slug (if it has captions), and the segments to play.
+     *
+     * @param array $highlights A day's highlights, from the API
+     * @return array
+     */
+    public static function reel(array $highlights): array
+    {
+        $reel = [];
+        foreach ($highlights as $highlight) {
+            $clip = $highlight['clip'] ?? null;
+            if (empty($clip['mp4']) || empty($clip['segments'])) {
+                continue;
+            }
+            $vote = $highlight['action']['vote'] ?? null;
+            $tally = $vote !== null && empty($vote['voice']) ? ', ' . $vote['yes'] . '–' . $vote['no'] : '';
+            $captioned = preg_match('#/video/([a-z0-9]{4})/captions\.vtt$#', (string) ($clip['captions'] ?? ''), $match);
+            $reel[] = [
+                'number' => mb_strtoupper(preg_replace('/^([a-z]+)/', '$1 ', $highlight['bill']['number'])),
+                'title' => $highlight['bill']['catch_line'],
+                'action' => $highlight['action']['text'] . $tally,
+                'mp4' => $clip['mp4'],
+                'captions' => $captioned ? $match[1] : null,
+                'segments' => $clip['segments'],
+            ];
+        }
+
+        return $reel;
+    }
+
+    /**
+     * The day's highlight reel, as HTML, or nothing if fewer than two highlights can be played.
+     * It needs JavaScript (/js/day-reel.js), so it's hidden until that shows it. Its highlights are
+     * given to that script in a script of their own (window.dayReel), not in the HTML.
+     *
+     * @param array $highlights A day's highlights, from the API
+     * @return string
+     */
+    public static function reel_html(array $highlights): string
+    {
+        $reel = self::reel($highlights);
+        if (count($reel) < 2) {
+            return '';
+        }
+        $seconds = 0;
+        foreach ($reel as $item) {
+            foreach ($item['segments'] as $segment) {
+                $seconds += $segment['end'] - $segment['start'];
+            }
+        }
+
+        $html = '
+		<script>window.dayReel = ' . json_encode($reel, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';</script>
+		<div class="day-reel" hidden>
+			<div class="video-player-stage day-reel-stage">
+				<video playsinline preload="none"></video>
+				<button type="button" class="day-reel-start">Watch the highlights
+					<small>(' . count($reel) . ' bills, ' . Video::clock($seconds) . ')</small></button>
+				<p class="day-reel-caption" aria-live="polite" hidden></p>
+			</div>
+			<ol class="day-reel-chapters" aria-label="In the highlight reel">';
+        foreach ($reel as $i => $item) {
+            $html .= '
+				<li><button type="button" data-chapter="' . $i . '">' . htmlspecialchars($item['number']) . '</button></li>';
+        }
+
+        return $html . '
+			</ol>
+		</div>';
     }
 
     /**

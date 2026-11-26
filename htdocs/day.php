@@ -270,51 +270,8 @@ if (count($highlights) > 0) {
 	<section id="highlights" class="day-section">
 		<h2>Highlights</h2>';
 
-    // The highlight reel: a part of each highlight's clip, one after another. It needs JavaScript
-    // (see /js/day-reel.js), so it's hidden until that shows it, and it needs at least two clips
-    // that can be played here (not ones only on YouTube).
-    $reel = [];
-    $reel_seconds = 0;
-    foreach ($highlights as $highlight) {
-        $clip = $highlight['clip'] ?? null;
-        if (empty($clip['mp4']) || empty($clip['segments'])) {
-            continue;
-        }
-        $vote = $highlight['action']['vote'] ?? null;
-        $reel[] = [
-            'number' => $bill_number($highlight['bill']['number']),
-            'title' => $highlight['bill']['catch_line'],
-            'action' => $highlight['action']['text']
-                . ($vote !== null && !$vote['voice'] ? ', ' . $vote['yes'] . '–' . $vote['no'] : ''),
-            'mp4' => $clip['mp4'],
-            // Its video's slug, if it has captions (from which the script makes their URL).
-            'captions' => preg_match('#/video/([a-z0-9]{4})/captions\.vtt$#', (string) ($clip['captions'] ?? ''), $match)
-                ? $match[1] : null,
-            'segments' => $clip['segments'],
-        ];
-        foreach ($clip['segments'] as $segment) {
-            $reel_seconds += $segment['end'] - $segment['start'];
-        }
-    }
-    if (count($reel) >= 2) {
-        $page_body .= '
-		<script>window.dayReel = ' . json_encode($reel, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ';</script>
-		<div class="day-reel" hidden>
-			<div class="video-player-stage day-reel-stage">
-				<video playsinline preload="none"></video>
-				<button type="button" class="day-reel-start">Watch the highlights
-					<small>(' . count($reel) . ' bills, ' . Video::clock($reel_seconds) . ')</small></button>
-				<p class="day-reel-caption" aria-live="polite" hidden></p>
-			</div>
-			<ol class="day-reel-chapters" aria-label="In the highlight reel">';
-        foreach ($reel as $i => $item) {
-            $page_body .= '
-				<li><button type="button" data-chapter="' . $i . '">' . htmlspecialchars($item['number']) . '</button></li>';
-        }
-        $page_body .= '
-			</ol>
-		</div>';
-    }
+    // The highlight reel: a part of each highlight's clip, one after another.
+    $page_body .= DayHighlights::reel_html($highlights);
 
     $page_body .= '
 		<ol class="day-highlights">';
