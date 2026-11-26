@@ -175,6 +175,54 @@ class DayHighlightsTest extends TestCase
             DayHighlights::reel_segments(['start' => 100, 'duration' => 600]));
     }
 
+    /**
+     * A highlight, from the API, with a clip in a video that can be played here (or not).
+     */
+    private function highlight(string $number, ?string $mp4, ?string $captions = null, ?array $vote = null): array
+    {
+        return [
+            'bill' => ['number' => $number, 'catch_line' => 'Title of ' . $number . ' & more <b>.'],
+            'action' => ['text' => 'Passed', 'vote' => $vote],
+            'clip' => [
+                'mp4' => $mp4,
+                'captions' => $captions,
+                'segments' => [['start' => 100, 'end' => 130], ['start' => 200, 'end' => 245]],
+            ],
+        ];
+    }
+
+    public function testMakesTheHighlightReel(): void
+    {
+        $mp4 = 'https://archive.org/download/x/y.mp4';
+        $reel = DayHighlights::reel([
+            $this->highlight('hb1', $mp4, 'https://www.richmondsunlight.com/video/b334/captions.vtt',
+                ['yes' => 45, 'no' => 52, 'voice' => false]),
+            $this->highlight('sb20', $mp4, null, ['yes' => null, 'no' => null, 'voice' => true]),
+            // Only on YouTube: left out.
+            $this->highlight('hb3', null),
+            // No clip: left out.
+            ['bill' => ['number' => 'hb4', 'catch_line' => ''], 'action' => ['text' => ''], 'clip' => null],
+        ]);
+        $this->assertCount(2, $reel);
+        $this->assertSame('HB 1', $reel[0]['number']);
+        $this->assertSame('Passed, 45–52', $reel[0]['action']);
+        $this->assertSame('b334', $reel[0]['captions']);
+        $this->assertSame($mp4, $reel[0]['mp4']);
+        $this->assertSame('SB 20', $reel[1]['number']);
+        $this->assertSame('Passed', $reel[1]['action']);
+        $this->assertNull($reel[1]['captions']);
+
+        $html = DayHighlights::reel_html([$this->highlight('hb1', $mp4), $this->highlight('hb2', $mp4)]);
+        $this->assertStringContainsString('(2 bills, 2:30)', $html);
+        $this->assertStringContainsString('data-chapter="1">HB 2</button>', $html);
+        // Its data is in a script, where nothing in it can end the script.
+        $this->assertStringContainsString('<script>window.dayReel = [', $html);
+        $this->assertStringNotContainsString('<b>', $html);
+
+        // A reel needs two clips.
+        $this->assertSame('', DayHighlights::reel_html([$this->highlight('hb1', $mp4), $this->highlight('hb3', null)]));
+    }
+
     public function testStoresADaysHighlightsForTheApi(): void
     {
         $this->assertGreaterThan(0, DayHighlights::save(self::DATE));

@@ -8,10 +8,65 @@ use PHPUnit\Framework\TestCase;
  */
 class CloudflareTest extends TestCase
 {
+    /** A directory standing in for Cloudflare's API (see respond()). */
+    private string $api;
+
     protected function setUp(): void
     {
         $database = new Database();
         $database->connect_mysqli();
+        $this->api = sys_get_temp_dir() . '/cloudflare-test-' . bin2hex(random_bytes(4));
+        mkdir($this->api . '/zone1', 0777, true);
+    }
+
+    protected function tearDown(): void
+    {
+        Cloudflare::use();
+        foreach (glob($this->api . '/zone1/*') as $file) {
+            unlink($file);
+        }
+        rmdir($this->api . '/zone1');
+        rmdir($this->api);
+    }
+
+    /**
+     * Have Cloudflare's API give this response. Its requests go to a file (by a file:// URL),
+     * which holds the response, instead of to Cloudflare.
+     */
+    private function respond(?string $response): void
+    {
+        Cloudflare::use('token1', 'zone1', 'file://' . $this->api . '/');
+        if ($response !== null) {
+            file_put_contents($this->api . '/zone1/purge_cache', $response);
+        }
+    }
+
+    public function testPurgesThroughCloudflaresApi(): void
+    {
+        $this->respond('{"success":true,"errors":[],"result":{"id":"zone1"}}');
+        $this->assertTrue(Cloudflare::enabled());
+        $this->assertTrue(Cloudflare::purge(['/']));
+        $this->assertTrue(Cloudflare::purge_bills([72883]));
+
+        // More than 30 URLs take more than one request.
+        $this->assertTrue(Cloudflare::purge(array_map(fn($i) => '/bill/2024/hb' . $i . '/', range(1, 20))));
+    }
+
+    public function testSaysWhenAPurgeFails(): void
+    {
+        // Cloudflare refused.
+        $this->respond('{"success":false,"errors":[{"code":10000,"message":"Authentication error"}]}');
+        $this->assertFalse(Cloudflare::purge(['/']));
+
+        // Cloudflare's answer made no sense.
+        $this->respond('Bad gateway');
+        $this->assertFalse(Cloudflare::purge(['/']));
+    }
+
+    public function testSaysWhenCloudflareCantBeReached(): void
+    {
+        $this->respond(null);
+        $this->assertFalse(Cloudflare::purge(['/']));
     }
 
     public function testIsOffWithoutAnApiToken(): void
