@@ -4,7 +4,7 @@
  * Plays a part of each highlight's clip, one after another, in one <video>: when the video passes
  * the end of a part, it moves to the next part, loading the next video if that part is in another
  * one. The parts (each highlight's segments, and the video they're in) come from the day's API
- * record, by way of the page (data-reel). A caption says which bill is playing, and the chapters
+ * record, by way of the page (window.dayReel). A caption says which bill is playing, and the chapters
  * jump to a bill. See DayHighlights::reel_segments(), and docs/minutes-replacement.md.
  */
 (function () {
@@ -14,10 +14,9 @@
     if (!reel) {
         return;
     }
-    var items;
-    try {
-        items = JSON.parse(reel.getAttribute('data-reel'));
-    } catch (e) {
+    // The page gives the reel's highlights in a script (window.dayReel), not in its HTML.
+    var items = window.dayReel;
+    if (!Array.isArray(items)) {
         return;
     }
     var video = reel.querySelector('video');
