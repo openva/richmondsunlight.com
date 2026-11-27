@@ -1104,6 +1104,7 @@ CREATE TABLE `video_index` (
   KEY `Player` (`type`,`linked_id`),
   KEY `subquery` (`file_id`,`linked_id`),
   KEY `ignore` (`ignored`),
+  KEY `raw_text` (`raw_text`,`type`,`linked_id`),
   CONSTRAINT `video_index_ibfk_1` FOREIGN KEY (`file_id`) REFERENCES `files` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `video_index_ibfk_2` FOREIGN KEY (`file_id`) REFERENCES `files` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=1255366 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
