@@ -758,7 +758,35 @@ body#body-bills div#options ul {
 				font-size: .8em;
 				color: #900;
 			}
+		/* Each portfolio's name, above its bills */
+		#portfolio-list h6 {
+			font-size: 1em;
+			margin: 1em 0 .5em;
+		}
+			#portfolio-list h6:first-child {
+				margin-top: 0;
+			}
+			#portfolio-list h6 .private {
+				font-weight: normal;
+				font-size: .85em;
+				color: #555;
+			}
+		#portfolio-list .empty,
+		#portfolio-list .more {
+			font-size: .9em;
+			margin: 0;
+		}
 
+
+/* The bill page's checkboxes, one for each of the user's portfolios */
+#track-bill ul.track-portfolios {
+	list-style: none;
+	margin: 0 0 .5em;
+	padding: 0;
+}
+#track-bill .track-message {
+	color: #790806;
+}
 
 /*
  * The login form

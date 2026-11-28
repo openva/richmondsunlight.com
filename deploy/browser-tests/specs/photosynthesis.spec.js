@@ -23,6 +23,44 @@ async function loginTestUser(page) {
   ]);
 }
 
+// Log in as any test user (see deploy/mysql/test-users.sql).
+async function loginAs(page, email) {
+  const resp = await page.request.post('/account/login/', {
+    form: {
+      'form_data[email]': email,
+      'form_data[password]': 'password123',
+      submit: 'Log In',
+      'form_data[return_uri]': '/',
+    },
+    maxRedirects: 0,
+  });
+  const match = (resp.headers()['set-cookie'] || '').match(/PHPSESSID=([^;]+)/);
+  if (!match) {
+    throw new Error('Login did not return a PHPSESSID cookie');
+  }
+  await page.context().addCookies([
+    { name: 'PHPSESSID', value: match[1], domain: 'rs_web', path: '/', secure: false },
+  ]);
+}
+
+// Post to process-actions.php as a script does, with the session's CSRF token.
+async function act(page, form) {
+  await page.goto('/photosynthesis/');
+  const token = await page.locator('input[name="csrf_token"]').first().inputValue();
+  const resp = await page.request.post('/photosynthesis/process-actions.php', {
+    form: { ...form, csrf_token: token },
+    headers: { 'X-Requested-With': 'XMLHttpRequest' },
+  });
+  return resp.json();
+}
+
+// The hash of the newest of the logged-in user's portfolios with this name.
+async function hashOf(page, name) {
+  await page.goto('/photosynthesis/');
+  const portfolio = page.locator('.portfolio', { has: page.locator('h1', { hasText: name }) }).last();
+  return (await portfolio.getAttribute('id')).replace('portfolio-', '');
+}
+
 test.describe('Photosynthesis', () => {
   test('/photosynthesis/ loads for logged-in user and shows portfolio', async ({ page }) => {
     await loginTestUser(page);
@@ -116,6 +154,115 @@ test.describe('Photosynthesis', () => {
     page.once('dialog', dialog => dialog.accept());
     await Promise.all([page.waitForNavigation(), portfolio.locator('form.delete-portfolio button').click()]);
     await expect(page.locator('h1').filter({ hasText: name })).toHaveCount(0);
+  });
+
+  test('a user who never paid can make a second portfolio, and a smart portfolio', async ({ page }) => {
+    // tester@example.com is a "free" user.
+    await loginAs(page, 'tester@example.com');
+    await page.goto('/photosynthesis/');
+    const stamp = Date.now();
+
+    const normal = page.locator('form:has(input[name="add-portfolio"])');
+    await normal.locator('input[name="form_data[name]"]').fill(`Second ${stamp}`);
+    await Promise.all([page.waitForNavigation(), normal.locator('input[type="submit"]').click()]);
+    await expect(page.locator('h1', { hasText: `Second ${stamp}` })).toBeVisible();
+    // Bills can now be added to either.
+    await expect(page.locator('#add-bill-form select[name="portfolio"] option[value="pwt04"]')).toHaveCount(1);
+
+    await page.locator('a[href="#create-smart-portfolio"]').click();
+    const smart = page.locator('form:has(input[name="add-smart-portfolio"])');
+    await smart.locator('input[name="form_data[name]"]').fill(`Fish ${stamp}`);
+    await smart.locator('input[name="form_data[tag]"]').fill('fishery');
+    await Promise.all([page.waitForNavigation(), smart.locator('input[type="submit"]').click()]);
+
+    const fish = page.locator('.portfolio', { has: page.locator('h1', { hasText: `Fish ${stamp}` }) });
+    await expect(fish.locator('.type')).toHaveText('Smart Portfolio');
+    await expect(fish.locator('.criteria')).toContainText('Bills tagged fishery');
+    await expect(fish.getByRole('cell', { name: 'HB19' })).toBeVisible();
+    await expect(fish.locator('.visibility')).toContainText('Public');
+
+    for (const name of [`Second ${stamp}`, `Fish ${stamp}`]) {
+      expect((await act(page, { 'delete-portfolio': await hashOf(page, name) })).success).toBe(true);
+    }
+  });
+
+  test('a bill page has a checkbox for each portfolio, each adding or removing the bill', async ({ page }) => {
+    await loginAs(page, 'testuser@example.com');
+    const bill = '/bill/2025/hb33/';
+    const box = (hash) => page.locator(`#track-bill input.track-portfolio[data-portfolio="${hash}"]`);
+    const posted = () => page.waitForResponse(r => r.url().includes('/photosynthesis/process-actions.php'));
+
+    await page.goto(bill);
+    for (const hash of ['pwt01', 'pwtp1']) {
+      if (await box(hash).isChecked()) {
+        await Promise.all([posted(), box(hash).uncheck()]);
+      }
+    }
+
+    // Checking two puts it in both.
+    for (const hash of ['pwt01', 'pwtp1']) {
+      const [resp] = await Promise.all([posted(), box(hash).check()]);
+      expect(resp.status(), hash).toBe(200);
+    }
+    await page.reload();
+    await expect(box('pwt01')).toBeChecked();
+    await expect(box('pwtp1')).toBeChecked();
+    await page.goto('/photosynthesis/');
+    await expect(page.locator('#listing-pwt01').getByRole('cell', { name: 'HB33' })).toBeVisible();
+    await expect(page.locator('#listing-pwtp1').getByRole('cell', { name: 'HB33' })).toBeVisible();
+
+    // Unchecking one takes it out of that one only.
+    await page.goto(bill);
+    const [resp] = await Promise.all([posted(), box('pwt01').uncheck()]);
+    expect(resp.status()).toBe(200);
+    await page.reload();
+    await expect(box('pwt01')).not.toBeChecked();
+    await expect(box('pwtp1')).toBeChecked();
+
+    await Promise.all([posted(), box('pwtp1').uncheck()]);
+  });
+
+  test('a bill in a smart portfolio is listed with it, with no checkbox for it', async ({ page }) => {
+    await loginAs(page, 'testuser@example.com');
+    const name = `Fishery bills ${Date.now()}`;
+    expect((await act(page, { 'add-smart-portfolio': 'y', 'form_data[name]': name, 'form_data[tag]': 'fishery' })).success).toBe(true);
+    const hash = await hashOf(page, name);
+
+    await page.goto('/bill/2025/hb19/');
+    const tracker = page.locator('#track-bill');
+    await expect(tracker.locator('.track-smart', { hasText: name })).toContainText('tagged fishery');
+    await expect(tracker.locator(`input[data-portfolio="${hash}"]`)).toHaveCount(0);
+    await expect(tracker.locator('input[data-portfolio="pwt01"]')).toHaveCount(1);
+
+    expect((await act(page, { 'delete-portfolio': hash })).success).toBe(true);
+  });
+
+  test('the portfolio tab lists a private portfolio’s bills', async ({ page }) => {
+    await loginAs(page, 'testuser@example.com');
+    await page.goto('/bill/2025/hb41/');
+    const list = page.locator('#portfolio-list');
+    // pwt01, "Test Portfolio," is private, and has HB2049.
+    const heading = list.locator('h6', { hasText: /^Test Portfolio/ });
+    await expect(heading).toContainText('(private)');
+    await expect(list.locator('a[href="/bill/2025/hb2049/"]').first()).toHaveText('HB2049');
+    await expect(page.locator('#portfolio-sidebar')).toBeVisible();
+  });
+
+  test('a bill’s page lists each person tracking it once', async ({ page, request }) => {
+    await loginAs(page, 'testuser@example.com');
+    // A second public portfolio with HB2049, which pwtp1 has too.
+    const name = `Also public ${Date.now()}`;
+    expect((await act(page, { 'add-portfolio': 'y', 'form_data[name]': name, 'form_data[public]': 'y' })).success).toBe(true);
+    const hash = await hashOf(page, name);
+    expect((await act(page, { 'add-bill': 'HB2049', portfolio: hash })).success).toBe(true);
+
+    // As somebody who isn't logged in.
+    const html = await (await request.get('/bill/2025/hb2049/')).text();
+    const tracked = html.match(/This bill is being tracked by (.*?)<\/p>/s);
+    expect(tracked).not.toBeNull();
+    expect(tracked[1].match(/Test Organization/g)).toHaveLength(1);
+
+    expect((await act(page, { 'delete-portfolio': hash })).success).toBe(true);
   });
 
   test('public portfolio page shows pre-loaded bill', async ({ page }) => {

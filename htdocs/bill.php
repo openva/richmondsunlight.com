@@ -176,192 +176,107 @@ if (!empty($bill['summary'])) {
 // PAGE SIDEBAR
 $page_sidebar = '';
 
-// If the user has a type (either "free" or "paid") then they're a Photosynthesis user.
-// Determine whether they're tracking the bill, show the appropriate text, and save it to
-// a variable to be displayed later.
+// Photosynthesis, for bills of the current session: the user's own portfolios, with a checkbox for
+// each normal one (checked if the bill is in it), the smart portfolios that have it, and who else
+// is tracking it. See docs/portfolios.md.
 if ($bill['session_id'] == SESSION_ID) {
-    if (isset($user['type']) && !empty($user['type'])) {
-        // Find out if this bill is being tracked by this user.
-        $sql = 'SELECT DISTINCT dashboard_portfolios.name, dashboard_portfolios.hash,
-				dashboard_bills.id AS dashboard_bills_id, dashboard_bills.notes
-				FROM dashboard_bills
-					LEFT JOIN dashboard_portfolios
-					ON dashboard_bills.portfolio_id = dashboard_portfolios.id
-				WHERE dashboard_bills.bill_id = ?
-				AND dashboard_portfolios.user_id = ?';
-        $result = mysqli_execute_query($GLOBALS['db'], $sql, [(int) $bill['id'], (int) $user['id']]);
-        // The user's portfolios that bills can be added to.
-        $user_portfolios = Portfolio::for_user((int) $user['id'], true);
+    $ps_status = null;
+    if (Portfolio::can_use($user ?? null)) {
+        $user_portfolios = Portfolio::for_user((int) $user['id']);
+        $containing = Portfolio::containing((int) $user['id'], (int) $bill['id']);
 
-        // If this bill is being tracked, notify this user.
-        if (mysqli_num_rows($result) > 0) {
-            $portfolio = mysqli_fetch_array($result);
-            $portfolio = array_map('stripslashes_nullsafe', $portfolio);
-            $ps_status = '<div id="track-bill-container">
-                <button type="button" id="track-bill-btn"
-                    data-record-id="' . $portfolio['dashboard_bills_id'] . '"
-                    data-portfolio-hash="' . Portfolio::text($portfolio['hash']) . '"
-                    data-bill-number="' . $bill['number'] . '"
-                    data-state="tracking">Stop Tracking</button>
-            </div>';
-            // Set a tracked flag so we don't double-count this later.
-            $tracked = true;
+        $checkboxes = '';
+        $smart = '';
+        foreach ($user_portfolios as $portfolio) {
+            $name = Portfolio::text(stripslashes_nullsafe($portfolio['name']));
+            $hash = Portfolio::text($portfolio['hash']);
+            if ($portfolio['type'] == 'normal') {
+                $record = $containing[$portfolio['id']]['record_id'] ?? '';
+                $checkboxes .= '
+                <li><label><input type="checkbox" class="track-portfolio" data-portfolio="' . $hash . '"'
+                    . ' data-record="' . $record . '"' . ($record !== '' ? ' checked' : '') . ' /> ' . $name . '</label></li>';
+            } elseif (isset($containing[$portfolio['id']])) {
+                $smart .= '
+            <p class="track-smart">In <a href="/photosynthesis/#' . $hash . '"><em>' . $name . '</em></a> ('
+                    . lcfirst(Portfolio::describe($portfolio['criteria'] ?? [])) . ').</p>';
+            }
+        }
+        // Somebody with no portfolios yet gets "Bills" when they first check it.
+        if ($checkboxes === '') {
+            $checkboxes = '
+                <li><label><input type="checkbox" class="track-portfolio" data-portfolio="new" data-record="" /> Bills</label></li>';
         }
 
-        // If this bill isn't being tracked, but user has portfolios to which this bill
-        // could be added.
-        elseif (count($user_portfolios) > 0) {
-            $ps_status = '<div id="track-bill-container">';
-            // If there's just one portfolio.
-            if (count($user_portfolios) == 1) {
-                $ps_status .= '<input type="hidden" id="track-portfolio-hash" value="' . Portfolio::text($user_portfolios[0]['hash']) . '" />';
-            }
+        $ps_status = '
+        <div id="track-bill" data-bill="' . Portfolio::text($bill['number']) . '">
+            <p>Track this bill in:</p>
+            <ul class="track-portfolios">' . $checkboxes . '
+            </ul>' . $smart . '
+            <p class="track-message" aria-live="polite"></p>
+            <p><a href="/photosynthesis/">Your portfolios »</a></p>
+        </div>';
 
-            // Or, if there's multiple portfolios.
-            else {
-                $ps_status .= '<label for="portfolio-selector">Select a Portfolio</label>
-                <select id="portfolio-selector">';
-                foreach ($user_portfolios as $portfolio) {
-                    $ps_status .= '<option value="' . Portfolio::text($portfolio['hash']) . '">'
-                        . Portfolio::text(stripslashes_nullsafe($portfolio['name'])) . '</option>';
-                }
-                $ps_status .= '</select>';
-            }
-            $ps_status .= '<input type="hidden" id="track-bill-number" value="' . $bill['number'] . '" />
-                <button type="button" id="track-bill-btn" data-state="untracked">Track this Bill</button>
-            </div>';
-        }
-
-        if (isset($ps_status)) {
-            $is_single_portfolio = count($user_portfolios) == 1;
-            $html_head .= '<script>
+        $html_head .= '<script>
 $(document).ready(function() {
-    var isSinglePortfolio = ' . ($is_single_portfolio ? 'true' : 'false') . ';
     var csrfToken = ' . json_encode(Csrf::token()) . ';
-
-    $(document).on("click", "#track-bill-btn", function() {
-        var $btn = $(this);
-        var state = $btn.data("state");
-        $btn.prop("disabled", true);
-
-        if (state === "tracking") {
-            var recordId = $btn.data("record-id");
-            var portfolioHash = $btn.data("portfolio-hash");
-            var billNumber = $btn.data("bill-number");
-            $.ajax({
-                type: "POST",
-                url: "/photosynthesis/process-actions.php",
-                data: { "delete-bill": portfolioHash + "-" + recordId, "csrf_token": csrfToken },
-                dataType: "json"
-            }).done(function() {
-                if (isSinglePortfolio) {
-                    $("#track-bill-container").html(
-                        \'<input type="hidden" id="track-portfolio-hash" value="\' + portfolioHash + \'" />\' +
-                        \'<input type="hidden" id="track-bill-number" value="\' + billNumber + \'" />\' +
-                        \'<button type="button" id="track-bill-btn" data-state="untracked">Track this Bill</button>\'
-                    );
+    var $tracker = $("#track-bill");
+    $tracker.on("change", "input.track-portfolio", function() {
+        var $box = $(this);
+        var adding = $box.prop("checked");
+        var portfolio = String($box.attr("data-portfolio"));
+        var data = adding
+            ? { "add-bill": $tracker.attr("data-bill"), "portfolio": portfolio, "csrf_token": csrfToken }
+            : { "delete-bill": portfolio + "-" + $box.attr("data-record"), "csrf_token": csrfToken };
+        $box.prop("disabled", true);
+        $tracker.find(".track-message").text("");
+        $.ajax({ type: "POST", url: "/photosynthesis/process-actions.php", data: data, dataType: "json" })
+            .done(function(response) {
+                if (adding) {
+                    $box.attr("data-record", response.record_id);
+                    if (response.portfolio) {
+                        $box.attr("data-portfolio", response.portfolio);
+                    }
                 } else {
-                    location.reload();
+                    $box.attr("data-record", "");
                 }
-            }).fail(function() {
-                $btn.prop("disabled", false);
-                alert("Failed to stop tracking. Please try again.");
+            })
+            .fail(function() {
+                $box.prop("checked", !adding);
+                $tracker.find(".track-message").text(adding
+                    ? "Sorry: the bill couldn’t be added. Please reload the page and try again."
+                    : "Sorry: the bill couldn’t be removed. Please reload the page and try again.");
+            })
+            .always(function() {
+                $box.prop("disabled", false);
             });
-        } else {
-            var billNumber = $("#track-bill-number").val();
-            var portfolioHash = isSinglePortfolio
-                ? $("#track-portfolio-hash").val()
-                : $("#portfolio-selector").val();
-            $.ajax({
-                type: "POST",
-                url: "/photosynthesis/process-actions.php",
-                data: { "add-bill": billNumber, "portfolio": portfolioHash, "csrf_token": csrfToken },
-                dataType: "json"
-            }).done(function(response) {
-                $("#track-bill-container").html(
-                    \'<button type="button" id="track-bill-btn" \' +
-                    \'data-record-id="\' + response.record_id + \'" \' +
-                    \'data-portfolio-hash="\' + portfolioHash + \'" \' +
-                    \'data-bill-number="\' + billNumber + \'" \' +
-                    \'data-state="tracking">Stop Tracking</button>\'
-                );
-            }).fail(function() {
-                $btn.prop("disabled", false);
-                alert("Failed to track bill. Please try again.");
-            });
-        }
     });
 });
 </script>';
-        }
     }
 
-    // Find out if this bill is being tracked by anybody at all, excluding the current user. If
-    // it is, save the tracking data to a variable to be displayed below.
-    $sql = 'SELECT users.name AS user_name, dashboard_user_data.organization AS organization,
-			dashboard_portfolios.hash
-			FROM dashboard_bills
-			LEFT JOIN dashboard_portfolios
-				ON dashboard_bills.portfolio_id = dashboard_portfolios.id
-			LEFT JOIN users
-				ON dashboard_portfolios.user_id = users.id
-			LEFT JOIN dashboard_user_data
-				ON dashboard_user_data.user_id = users.id
-			WHERE dashboard_bills.bill_id =' . $bill['id'] . '
-			AND dashboard_portfolios.public = "y"';
-    if (!empty($user['id'])) {
-        $sql .= ' AND users.id != ' . $user['id'];
+    // Who else is tracking this bill, in public portfolios: each person or organization once.
+    $trackers = Portfolio::trackers((int) $bill['id'], Portfolio::can_use($user ?? null) ? (int) $user['id'] : null);
+    $ps_portfolios = null;
+    if (count($trackers) > 0) {
+        $links = array_map(
+            fn($tracker) => '<a href="/photosynthesis/' . Portfolio::text($tracker['hash']) . '/">'
+                . Portfolio::text($tracker['name']) . '</a>',
+            $trackers
+        );
+        if (count($links) == 1) {
+            $list = 'one member, ' . $links[0];
+        } else {
+            $last = array_pop($links);
+            $list = implode(', ', $links) . ' and ' . $last;
+        }
+        $ps_portfolios = '<p>This bill is being tracked by ' . $list . '.</p>';
     }
-    $sql .= ' ORDER BY dashboard_portfolios.id';
-    $result = mysqli_query($GLOBALS['db'], $sql);
-    $portfolio_count = mysqli_num_rows($result);
-
-    // If we've found anything, list them.
-    if ($portfolio_count > 0) {
-        $ps_portfolios = '<p>This bill is being tracked by ';
-        if ($portfolio_count == 1) {
-            $ps_portfolios .= 'one member, ';
-        }
-        $i = 2;
-        while ($portfolio = mysqli_fetch_array($result)) {
-            $portfolio = array_map('stripslashes_nullsafe', $portfolio);
-
-            // Quasi-anonymize the user.
-            $tmp = explode(' ', $portfolio['user_name']);
-            if (count($tmp) > 1) {
-                $portfolio['user_name'] = $tmp[0] . ' ' . $tmp[1][0] . '.';
-            } else {
-                $portfolio['user_name'] = $tmp[0];
-            }
-
-            $ps_portfolios .= '<a href="/photosynthesis/' . Portfolio::text($portfolio['hash']) . '/">' .
-                Portfolio::text(!empty($portfolio['organization']) ? $portfolio['organization'] : $portfolio['user_name']) . '</a>';
-            if ($i < $portfolio_count) {
-                $ps_portfolios .= ', ';
-            } elseif ($i == $portfolio_count) {
-                $ps_portfolios .= ' and ';
-            }
-            $i++;
-        }
-        if (mb_substr($ps_portfolios, -5) != '.</a>') {
-            $ps_portfolios .= '.';
-        }
-        $ps_portfolios .= '</p>';
-    }
-
 
     // If we have Photosynthesis status or portfolio data, display it in the sidebar.
-    if (isset($ps_status) || isset($ps_portfolios)) {
+    if ($ps_status !== null || $ps_portfolios !== null) {
         $page_sidebar .= '
 		<div class="box">
-			<h3>Photosynthesis</h3>';
-        if (isset($ps_portfolios)) {
-            $page_sidebar .= $ps_portfolios;
-        }
-        if (isset($ps_status)) {
-            $page_sidebar .= $ps_status;
-        }
-        $page_sidebar .= '
+			<h3>Photosynthesis</h3>' . ($ps_portfolios ?? '') . ($ps_status ?? '') . '
 		</div>';
     }
 }

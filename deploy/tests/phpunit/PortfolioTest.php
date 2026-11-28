@@ -248,6 +248,99 @@ class PortfolioTest extends TestCase
         $this->assertNotNull(Portfolio::find('pwt01', self::USER));
     }
 
+    public function testOnlyPeopleWithAccountsCanKeepPortfolios(): void
+    {
+        $this->assertTrue(Portfolio::can_use(['id' => 1, 'password' => 'x']));
+        // Commenting without an account makes a user with no password.
+        $this->assertFalse(Portfolio::can_use(['id' => 1, 'password' => null]));
+        $this->assertFalse(Portfolio::can_use(false));
+    }
+
+    public function testAUsersSettingsAreMadeWithTheirFirstPortfolio(): void
+    {
+        $user_id = 90098;
+        mysqli_execute_query($GLOBALS['db'], 'DELETE FROM users WHERE id = ?', [$user_id]);
+        mysqli_execute_query(
+            $GLOBALS['db'],
+            'INSERT INTO users SET id = ?, cookie_hash = ?, name = "New Person", email = "new@example.com", private_hash = "newpers1", date_created = NOW()',
+            [$user_id, 'portfoliotestportfoliotest000098']
+        );
+        $this->users[] = $user_id;
+        $this->assertSame(0, $this->rows('SELECT COUNT(*) FROM dashboard_user_data WHERE user_id = ?', [$user_id]));
+
+        $this->assertNotNull(Portfolio::create($user_id, ['name' => 'Bills']));
+        $result = mysqli_execute_query($GLOBALS['db'], 'SELECT email_active, type, unsub_hash FROM dashboard_user_data WHERE user_id = ?', [$user_id]);
+        $settings = mysqli_fetch_assoc($result);
+        $this->assertSame('y', $settings['email_active']);
+        $this->assertSame('free', $settings['type']);
+        $this->assertMatchesRegularExpression('/^[a-z0-9]{8}$/', $settings['unsub_hash']);
+
+        // Only once.
+        Portfolio::ensure_user_data($user_id);
+        $this->assertSame(1, $this->rows('SELECT COUNT(*) FROM dashboard_user_data WHERE user_id = ?', [$user_id]));
+    }
+
+    public function testDescribesASmartPortfoliosCriteria(): void
+    {
+        $this->assertSame('Bills tagged <em>education</em>', Portfolio::describe(['tag' => 'education']));
+        $this->assertSame(
+            'Bills tagged <em>&lt;b&gt;</em>, now in the Senate',
+            Portfolio::describe(['tag' => '<b>', 'current_chamber' => 'senate'])
+        );
+        $committee = mysqli_fetch_assoc(mysqli_query($GLOBALS['db'], 'SELECT id, name, chamber FROM committees WHERE parent_id IS NULL LIMIT 1'));
+        if ($committee) {
+            $this->assertStringContainsString(
+                'in the ' . ucfirst($committee['chamber']) . ' ' . $committee['name'] . ' Committee',
+                html_entity_decode(Portfolio::describe(['committee_id' => $committee['id']]), ENT_QUOTES)
+            );
+        }
+    }
+
+    public function testListsWhichPortfoliosHaveABill(): void
+    {
+        $pwt01 = Portfolio::find('pwt01', self::USER);
+        $pwtp1 = Portfolio::find('pwtp1', self::USER);
+        $containing = Portfolio::containing(self::USER, 77600);
+        $this->assertArrayHasKey($pwt01['id'], $containing);
+        $this->assertArrayHasKey($pwtp1['id'], $containing);
+        $this->assertSame([], Portfolio::containing(self::OTHER_USER, 77600));
+    }
+
+    public function testListsEachPersonTrackingABillOnce(): void
+    {
+        // pwtp1 is public and has HB2049; so will this.
+        $second = $this->make(self::USER, ['name' => 'Second public', 'public' => 'y']);
+        Portfolio::add_bill($second['hash'], self::USER, 'HB2049');
+
+        $trackers = array_filter(Portfolio::trackers(77600), fn($tracker) => $tracker['name'] == 'Test Organization');
+        $this->assertCount(1, $trackers);
+        $this->assertSame('pwtp1', array_values($trackers)[0]['hash']);
+
+        // Not the user who's looking.
+        $this->assertCount(0, array_filter(Portfolio::trackers(77600, self::USER), fn($tracker) => $tracker['name'] == 'Test Organization'));
+
+        $this->assertSame('Jane D.', Portfolio::public_name('Jane  Doe Smith'));
+        $this->assertSame('Cher', Portfolio::public_name('Cher'));
+        $this->assertSame('An Organization', Portfolio::public_name('Jane Doe', 'An Organization'));
+    }
+
+    public function testTheSidebarListsEveryPortfolioIncludingPrivateOnes(): void
+    {
+        $empty = $this->make(self::USER, ['name' => 'Nothing yet', 'public' => 'n']);
+        $sidebar = Portfolio::sidebar(self::USER);
+        $by_hash = array_column($sidebar, null, 'hash');
+        // pwt01 is private.
+        $this->assertSame('n', $by_hash['pwt01']['public']);
+        $this->assertContains('hb2049', array_column($by_hash['pwt01']['bills'], 'number'));
+        $this->assertSame(0, $by_hash[$empty['hash']]['count']);
+
+        $html = Portfolio::sidebar_html(self::USER);
+        $this->assertStringContainsString('Test Portfolio</a> <span class="private">(private)</span>', $html);
+        $this->assertStringContainsString('href="/bill/' . SESSION_YEAR . '/hb2049/"', $html);
+        $this->assertStringContainsString('No bills yet.', $html);
+        $this->assertSame('', Portfolio::sidebar_html(90097));
+    }
+
     public function testNotesAreCleanedForDisplay(): void
     {
         $html = Portfolio::notes_html('<a href="https://example.com/" onclick="steal()">Read <b onmouseover="x()">this</b></a>'

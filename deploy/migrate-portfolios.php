@@ -8,6 +8,8 @@
  *    now, deleting an account left them behind). Their notes on bills were shown among the bills'
  *    comments, so those go too.
  * 3. Deletes watch lists that no portfolio uses, and bills in portfolios that don't exist.
+ * 4. Gives users who have portfolios, but no Photosynthesis settings (dashboard_user_data), the
+ *    settings that email needs (phase 2).
  *
  * Run it from the site's root directory. By itself, it only says what it would do:
  *
@@ -85,6 +87,23 @@ $count = count_of($db, 'SELECT COUNT(*) FROM dashboard_bills WHERE ' . $where);
 echo $count . " bill(s) in portfolios that no longer exist\n";
 if ($apply && $count > 0) {
     mysqli_query($db, 'DELETE FROM dashboard_bills WHERE ' . $where);
+}
+
+# 5. Users with portfolios, but no Photosynthesis settings (which email needs).
+$result = mysqli_query(
+    $db,
+    'SELECT DISTINCT p.user_id
+    FROM dashboard_portfolios p
+    JOIN users ON users.id = p.user_id
+    LEFT JOIN dashboard_user_data d ON d.user_id = p.user_id
+    WHERE d.user_id IS NULL'
+);
+$without = array_column(mysqli_fetch_all($result, MYSQLI_ASSOC), 'user_id');
+echo count($without) . " user(s) with portfolios but no Photosynthesis settings\n";
+if ($apply) {
+    foreach ($without as $user_id) {
+        Portfolio::ensure_user_data((int) $user_id);
+    }
 }
 
 echo $apply ? "Done.\n" : "Nothing was changed.\n";

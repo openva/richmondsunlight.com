@@ -28,14 +28,9 @@ $site_section = 'photosynthesis';
 # INITIALIZE SESSION
 resume_session();
 
-# See if the user is logged in.
+# Anybody with an account can keep portfolios. Everybody else is asked to log in (or make one).
 $user = @get_user();
-if (
-        (@logged_in() === false)
-        ||
-        ((@logged_in() === true) && empty($user['type']))
-) {
-    # If the user isn't logged in, have the user create an account (or log in).
+if (@logged_in() === false || !Portfolio::can_use($user)) {
     header('Location: ' . SITE_BASE_URL . '/account/login/?return_uri=' . urlencode($_SERVER['REQUEST_URI']));
     exit;
 }
@@ -112,31 +107,41 @@ foreach (Portfolio::for_user((int) $user['id']) as $portfolio) {
     $portfolio = array_map('stripslashes_nullsafe', $portfolio);
     $hash = Portfolio::text($portfolio['hash']);
     $name = Portfolio::text($portfolio['name']);
+    $public_url = SITE_BASE_URL . '/photosynthesis/' . $hash . '/';
 
     $page_body .= '
-		<div class="portfolio">
+		<div class="portfolio" id="portfolio-' . $hash . '">
 			<a name="' . $hash . '"></a>
-			<div class="name">';
-
-    # Only show the portfolio editing options to paid users.
-    if ($user['type'] == 'paid') {
-        $page_body .= '
-				<a href="/photosynthesis/' . $hash . '/" title="View the public portfolio"><h1>' . $name . '</h1></a>
+			<div class="name">
+				<h1>' . $name . '</h1>
 				<div class="type">' . (($portfolio['type'] == 'smart') ? 'Smart ' : '') . 'Portfolio</div>
-				<div class="rss"><a href="/photosynthesis/rss/portfolio/' . $hash . '/" title="Subscribe to this portfolio via RSS"><img src="/images/rss-icon.png" alt="RSS" /></a></div>';
+				<div class="rss"><a href="/photosynthesis/rss/portfolio/' . $hash . '/" title="Subscribe to this portfolio via RSS"><img src="/images/rss-icon.png" alt="RSS" /></a></div>
+			</div>';
+
+    # Who can see it, and where.
+    if ($portfolio['public'] == 'y') {
+        $page_body .= '
+			<p class="visibility public">Public: anybody can see it at
+				<a href="/photosynthesis/' . $hash . '/">' . $public_url . '</a>, and follow it with
+				<a href="/photosynthesis/rss/portfolio/' . $hash . '/">its RSS feed</a>. Your notes on its
+				bills are shown on the bills’ pages.</p>';
     } else {
-        $page_body .= '<h1>' . $name . '</h1>
-				<div class="rss"><a href="/photosynthesis/rss/portfolio/' . $hash . '/" title="Subscribe to this portfolio via RSS"><img src="/images/rss-icon.png" alt="RSS" /></a></div>';
+        $page_body .= '
+			<p class="visibility private">Private: only you can see it. (Its
+				<a href="/photosynthesis/rss/portfolio/' . $hash . '/">RSS feed</a> works for anybody you
+				give the address to.)</p>';
     }
 
-    $page_body .= '</div>';
+    # A smart portfolio's criteria.
+    if ($portfolio['type'] == 'smart') {
+        $page_body .= '
+			<p class="criteria">' . Portfolio::describe($portfolio['criteria'] ?? []) . '.</p>';
+    }
 
     # Display the contents of the portfolio.
     $page_body .= show_portfolio($portfolio, $user['id']);
 
-    # Only show portfolio editing and deletion options to paid users.
-    if ($user['type'] == 'paid') {
-        $page_body .= '
+    $page_body .= '
 			<div class="modify">
 				<form method="post" action="/photosynthesis/process-actions.php" class="delete-portfolio"
 					onsubmit="return confirm(' . Portfolio::text(json_encode('Are you sure you want to remove ' . $portfolio['name'] . '?')) . ')">
@@ -145,21 +150,13 @@ foreach (Portfolio::for_user((int) $user['id']) as $portfolio) {
 					<button type="submit" title="Stop tracking these bills">delete</button>
 				</form>
 				<a href="/photosynthesis/portfolios/edit/' . $hash . '/" title="Modify this portfolio">edit</a> &nbsp;
-			</div>';
-    }
-
-    $page_body .= '
+			</div>
 			<div>' . Portfolio::notes_html($portfolio['notes']) . '</div>
 		</div>';
-
-    # Preserve the portfolio hash to use below, when presenting the user with the public URL
-    # for his portfolio.
-    $portfolio_hash = $hash;
 }
 
-# Give paid users the option to add a new portfolio.
-if ($user['type'] == 'paid') {
-    $page_body .= '
+# Making more portfolios, normal and smart.
+$page_body .= '
 	<div id="create-portfolios" class="tabs">
 		<h1>Create a Portfolio</h1>
 		<ul id="create-portfolios">
@@ -168,24 +165,20 @@ if ($user['type'] == 'paid') {
 		</ul>
 
 		<div id="create-portfolio">
+			<p>A list of bills that you choose.</p>
 			' . @portfolio_form() . '
 		</div>
 
 		<div id="create-smart-portfolio">
+			<p>A list that fills itself, with every bill that matches what you choose here, as bills
+			are filed, tagged, and referred.</p>
 			' . @smart_portfolio_form() . '
 		</div>
 	</div>';
-}
 
-
-# Inform free users that their portfolio is public.
-if ($user['type'] == 'free') {
-    $page_body .= '
-		<p>Share your Photosynthesis portfolio with others! Anybody can see the bills that
-		you’re tracking at <code><a href="https://www.richmondsunlight.com/photosynthesis/'
-        . $portfolio_hash . '/">https://www.richmondsunlight.com/photosynthesis/' . $portfolio_hash
-        . '/</a></code>.</p>';
-}
+$page_body .= '
+	<p class="preferences"><a href="/photosynthesis/preferences/">Your name, e-mail address, password,
+	and e-mail updates</a></p>';
 
 # The last thing that we do is up the last access date in the session data.
 $_SESSION['last_access'] = time();

@@ -74,14 +74,29 @@ if (!Csrf::valid()) {
     finish(false, 403, ['error' => 'This page is out of date. Please reload it and try again.']);
 }
 
+# Portfolios are for people with accounts (see Portfolio::can_use()).
+if (!Portfolio::can_use($user)) {
+    finish(false, 403, ['error' => 'You need an account to keep portfolios.']);
+}
+
 # Add a bill to a portfolio.
 if (isset($_POST['add-bill'])) {
-    $record = Portfolio::add_bill((string) ($_POST['portfolio'] ?? ''), $user_id, (string) $_POST['add-bill']);
+    $hash = (string) ($_POST['portfolio'] ?? '');
+
+    # A user without a portfolio yet gets one, "Bills," when they first add a bill (as from a bill's
+    # page, which offers it before it exists).
+    if ($hash === 'new') {
+        $normal = Portfolio::for_user($user_id, true);
+        $portfolio = count($normal) > 0 ? $normal[0] : Portfolio::create($user_id, ['name' => 'Bills', 'public' => 'y']);
+        $hash = $portfolio['hash'] ?? '';
+    }
+
+    $record = Portfolio::add_bill($hash, $user_id, (string) $_POST['add-bill']);
     if ($record === null) {
         finish(false, 422, ['error' => 'Bill could not be added.']);
     }
     Portfolio::expire_bills([$record['bill_id']]);
-    finish(true, 200, ['record_id' => $record['record_id']]);
+    finish(true, 200, ['record_id' => $record['record_id'], 'portfolio' => $hash]);
 }
 
 # Remove a bill from a portfolio. It's named by the portfolio's hash and the record's ID, like

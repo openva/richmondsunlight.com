@@ -87,19 +87,240 @@ class Portfolio
      */
     public static function for_user(int $user_id, bool $normal_only = false): array
     {
-        $sql = 'SELECT id, hash, name, notes, notify, public, watch_list_id
-                FROM dashboard_portfolios
-                WHERE user_id = ?' . ($normal_only ? ' AND watch_list_id IS NULL' : '') . '
-                ORDER BY name ASC, id ASC';
+        $sql = 'SELECT p.id, p.hash, p.name, p.notes, p.notify, p.public, p.watch_list_id,
+                w.' . implode(', w.', self::CRITERIA) . '
+                FROM dashboard_portfolios p
+                LEFT JOIN dashboard_watch_lists w ON w.id = p.watch_list_id AND w.user_id = p.user_id
+                WHERE p.user_id = ?' . ($normal_only ? ' AND p.watch_list_id IS NULL' : '') . '
+                ORDER BY p.name ASC, p.id ASC';
         $result = mysqli_execute_query($GLOBALS['db'], $sql, [$user_id]);
         if ($result === false) {
             return [];
         }
         $portfolios = [];
-        while ($portfolio = mysqli_fetch_assoc($result)) {
-            $portfolios[] = self::typed($portfolio);
+        while ($row = mysqli_fetch_assoc($result)) {
+            $criteria = array_intersect_key($row, array_flip(self::CRITERIA));
+            $portfolio = self::typed(array_diff_key($row, $criteria));
+            if ($portfolio['type'] == 'smart') {
+                $portfolio['criteria'] = $criteria;
+            }
+            $portfolios[] = $portfolio;
         }
         return $portfolios;
+    }
+
+    /**
+     * Whether this user (as get_user() gives them) can keep portfolios: anybody with an account.
+     * (Commenting without an account makes a user without a password, who can't log in again.)
+     */
+    public static function can_use($user): bool
+    {
+        return is_array($user) && !empty($user['id']) && !empty($user['password']);
+    }
+
+    /**
+     * Make sure that a user has Photosynthesis settings (a dashboard_user_data row), which email
+     * needs: whether it's on, and the hash in its unsubscribe link. They're made when a user first
+     * makes a portfolio or adds a bill.
+     */
+    public static function ensure_user_data(int $user_id): void
+    {
+        $result = mysqli_execute_query($GLOBALS['db'], 'SELECT 1 FROM dashboard_user_data WHERE user_id = ?', [$user_id]);
+        if ($result === false || mysqli_num_rows($result) > 0) {
+            return;
+        }
+        $hash = '';
+        for ($i = 0; $i < 8; $i++) {
+            $hash .= self::HASH_CHARACTERS[random_int(0, strlen(self::HASH_CHARACTERS) - 1)];
+        }
+        try {
+            mysqli_execute_query(
+                $GLOBALS['db'],
+                'INSERT IGNORE INTO dashboard_user_data
+                SET user_id = ?, email_active = "y", type = "free", last_access = NOW(), unsub_hash = ?,
+                date_created = NOW()',
+                [$user_id, $hash]
+            );
+        } catch (mysqli_sql_exception $e) {
+            // The user doesn't exist (a test, or a deleted account).
+        }
+    }
+
+    /**
+     * A smart portfolio's criteria, in words, as HTML: "Bills tagged <em>education</em>, in the
+     * House Education Committee".
+     */
+    public static function describe(array $criteria): string
+    {
+        $parts = [];
+        if (!empty($criteria['tag'])) {
+            $parts[] = 'tagged <em>' . self::text($criteria['tag']) . '</em>';
+        }
+        if (!empty($criteria['patron_id'])) {
+            $result = mysqli_execute_query(
+                $GLOBALS['db'],
+                'SELECT name FROM people WHERE id = ?',
+                [(int) $criteria['patron_id']]
+            );
+            $person = $result ? mysqli_fetch_assoc($result) : null;
+            $parts[] = 'introduced by ' . self::text($person ? $person['name'] : 'a legislator who’s no longer listed');
+        }
+        if (!empty($criteria['committee_id'])) {
+            $result = mysqli_execute_query(
+                $GLOBALS['db'],
+                'SELECT name, chamber FROM committees WHERE id = ?',
+                [(int) $criteria['committee_id']]
+            );
+            $committee = $result ? mysqli_fetch_assoc($result) : null;
+            $parts[] = $committee
+                ? 'in the ' . self::text(ucfirst($committee['chamber']) . ' ' . $committee['name']) . ' Committee'
+                : 'in a committee that no longer exists';
+        }
+        if (!empty($criteria['keyword'])) {
+            $parts[] = 'mentioning <em>' . self::text($criteria['keyword']) . '</em>';
+        }
+        if (!empty($criteria['status'])) {
+            $parts[] = 'with the status <em>' . self::text($criteria['status']) . '</em>';
+        }
+        if (!empty($criteria['current_chamber'])) {
+            $parts[] = 'now in the ' . ($criteria['current_chamber'] == 'house' ? 'House' : 'Senate');
+        }
+        return count($parts) > 0 ? 'Bills ' . implode(', ', $parts) : 'Bills matching nothing yet';
+    }
+
+    /**
+     * Which of a user's portfolios have this bill.
+     *
+     * @return array[] By portfolio ID: its record's ID (record_id), and whether it's hidden.
+     */
+    public static function containing(int $user_id, int $bill_id): array
+    {
+        $result = mysqli_execute_query(
+            $GLOBALS['db'],
+            'SELECT id, portfolio_id FROM dashboard_bills WHERE user_id = ? AND bill_id = ?',
+            [$user_id, $bill_id]
+        );
+        $records = [];
+        while ($result && ($row = mysqli_fetch_assoc($result))) {
+            $records[(int) $row['portfolio_id']] = ['record_id' => (int) $row['id']];
+        }
+        return $records;
+    }
+
+    /**
+     * The people (and organizations) tracking a bill in a public portfolio, each once, with the
+     * oldest of their public portfolios that has it.
+     *
+     * @return array[] Each with name (an organization's, or the person's first name and initial)
+     *     and hash.
+     */
+    public static function trackers(int $bill_id, ?int $except_user_id = null): array
+    {
+        $sql = 'SELECT p.user_id, SUBSTRING_INDEX(GROUP_CONCAT(p.hash ORDER BY p.id), ",", 1) AS hash,
+                users.name AS user_name, d.organization
+                FROM dashboard_bills b
+                JOIN dashboard_portfolios p ON p.id = b.portfolio_id
+                JOIN users ON users.id = p.user_id
+                LEFT JOIN dashboard_user_data d ON d.user_id = p.user_id
+                WHERE b.bill_id = ? AND p.public = "y"' . ($except_user_id !== null ? ' AND p.user_id != ?' : '') . '
+                GROUP BY p.user_id, users.name, d.organization
+                ORDER BY MIN(p.id)';
+        $params = $except_user_id !== null ? [$bill_id, $except_user_id] : [$bill_id];
+        $result = mysqli_execute_query($GLOBALS['db'], $sql, $params);
+        $trackers = [];
+        while ($result && ($row = mysqli_fetch_assoc($result))) {
+            $row = array_map('stripslashes_nullsafe', $row);
+            $trackers[] = ['name' => self::public_name($row['user_name'], $row['organization']), 'hash' => $row['hash']];
+        }
+        return $trackers;
+    }
+
+    /**
+     * How a portfolio's owner is named publicly: their organization, or their first name and the
+     * initial of their last.
+     */
+    public static function public_name($user_name, $organization = null): string
+    {
+        if (!empty($organization)) {
+            return (string) $organization;
+        }
+        $names = preg_split('/\s+/', trim((string) $user_name));
+        if (count($names) > 1) {
+            return $names[0] . ' ' . mb_substr($names[1], 0, 1) . '.';
+        }
+        return $names[0] ?? '';
+    }
+
+    /**
+     * What the "Your Bill Portfolio" tab lists: each of a user's portfolios, with its bills of
+     * the current session, most recently acted on first.
+     *
+     * @param int $limit The most bills to list from each portfolio.
+     * @return array[] Each portfolio's hash, name, type, public, bills (number, catch_line, date),
+     *     and how many bills it has (count).
+     */
+    public static function sidebar(int $user_id, int $limit = 15): array
+    {
+        $portfolios = [];
+        foreach (self::for_user($user_id) as $portfolio) {
+            $portfolio['bills'] = [];
+            $portfolio['count'] = 0;
+            $portfolios[$portfolio['id']] = $portfolio;
+        }
+        if (count($portfolios) == 0) {
+            return [];
+        }
+        $sql = 'SELECT b.portfolio_id, bills.number, bills.catch_line,
+                (SELECT MAX(date) FROM bills_status WHERE bill_id = bills.id) AS date
+                FROM dashboard_bills b
+                JOIN bills ON bills.id = b.bill_id
+                WHERE b.user_id = ? AND bills.session_id = ?
+                ORDER BY date DESC, bills.number ASC';
+        $result = mysqli_execute_query($GLOBALS['db'], $sql, [$user_id, SESSION_ID]);
+        while ($result && ($row = mysqli_fetch_assoc($result))) {
+            $id = (int) $row['portfolio_id'];
+            if (!isset($portfolios[$id])) {
+                continue;
+            }
+            $portfolios[$id]['count']++;
+            if (count($portfolios[$id]['bills']) < $limit) {
+                $portfolios[$id]['bills'][] = $row;
+            }
+        }
+        return array_values($portfolios);
+    }
+
+    /**
+     * The "Your Bill Portfolio" tab's contents, as HTML, or '' if the user has no portfolios.
+     */
+    public static function sidebar_html(int $user_id): string
+    {
+        $portfolios = self::sidebar($user_id);
+        if (count($portfolios) == 0) {
+            return '';
+        }
+        $html = '';
+        foreach ($portfolios as $portfolio) {
+            $html .= '<h6><a href="/photosynthesis/#' . self::text($portfolio['hash']) . '">'
+                . self::text(stripslashes_nullsafe($portfolio['name'])) . '</a>'
+                . ($portfolio['public'] == 'y' ? '' : ' <span class="private">(private)</span>') . '</h6>';
+            if ($portfolio['count'] == 0) {
+                $html .= '<p class="empty">No bills yet.</p>';
+                continue;
+            }
+            foreach ($portfolio['bills'] as $bill) {
+                $html .= '<div class="bill"><a href="/bill/' . SESSION_YEAR . '/' . self::text($bill['number']) . '/">'
+                    . self::text(strtoupper($bill['number'])) . '</a>: ' . $bill['catch_line']
+                    . ($bill['date'] ? ' <span class="last-updated">Updated&nbsp;' . date('n/j/Y', strtotime($bill['date'])) . '</span>' : '')
+                    . '</div>';
+            }
+            if ($portfolio['count'] > count($portfolio['bills'])) {
+                $more = $portfolio['count'] - count($portfolio['bills']);
+                $html .= '<p class="more"><a href="/photosynthesis/#' . self::text($portfolio['hash']) . '">and '
+                    . $more . ' more</a></p>';
+            }
+        }
+        return $html . '<p><a href="/photosynthesis/">View your portfolios »</a></p>';
     }
 
     /**
@@ -242,6 +463,7 @@ class Portfolio
                 $errno = $e->getCode();
             }
             if ($created) {
+                self::ensure_user_data($user_id);
                 return self::find($hash, $user_id);
             }
             if ($errno != self::DUPLICATE_KEY) {
@@ -436,7 +658,9 @@ class Portfolio
         if (!$added) {
             return null;
         }
-        return ['record_id' => mysqli_insert_id($GLOBALS['db']), 'bill_id' => (int) $bill['id']];
+        $record = ['record_id' => mysqli_insert_id($GLOBALS['db']), 'bill_id' => (int) $bill['id']];
+        self::ensure_user_data($user_id);
+        return $record;
     }
 
     /**

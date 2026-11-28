@@ -236,6 +236,18 @@ ul.tabs li a {
 	width: 100px;
 }
 
+/* Whether a portfolio is public, and a smart portfolio's criteria */
+div.portfolio p.visibility,
+div.portfolio p.criteria {
+	margin: 0;
+	padding: .5em 10px;
+	font-size: .9em;
+}
+	div.portfolio p.criteria {
+		padding-top: 0;
+		font-weight: bold;
+	}
+
 /* Delete buttons: forms (they're posted, with a CSRF token) that look like links */
 form.delete-bill,
 form.delete-portfolio {
