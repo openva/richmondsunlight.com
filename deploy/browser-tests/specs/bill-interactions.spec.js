@@ -211,17 +211,14 @@ test.describe('Bill interactions', () => {
     ]);
 
     // Clean up: if this bill was tracked in a previous test run, delete it first so the
-    // track button appears. The delete link has a confirm() dialog that must be accepted.
+    // track button appears. The remove button has a confirm() dialog that must be accepted.
     await page.goto('/photosynthesis/');
-    const deleteLink = page.locator('a[href*="/photosynthesis/delete/pwt04-"]').first();
-    if (await deleteLink.count() > 0) {
+    const removeButton = page.locator('form.delete-bill:has(input[value^="pwt04-"]) button').first();
+    if (await removeButton.count() > 0) {
       page.once('dialog', dialog => dialog.accept());
-      await deleteLink.click();
-      await page.waitForURL(/\/photosynthesis\//);
+      await Promise.all([page.waitForNavigation(), removeButton.click()]);
     }
 
-    // The login handler populates $_SESSION['portfolios'], so we can navigate directly to the
-    // bill page without visiting /photosynthesis/ first.
     await page.goto(billPath);
 
     const trackBtn = page.locator('#track-bill-btn');

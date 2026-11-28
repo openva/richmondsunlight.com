@@ -42,9 +42,9 @@ $database->connect_mysqli();
 # Query the database for information on this portfolio.
 $sql = 'SELECT id, name
 		FROM dashboard_portfolios
-		WHERE hash = "' . mysqli_real_escape_string($GLOBALS['db'], $hash) . '"';
-$result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) == 0) {
+		WHERE hash = ?';
+$result = mysqli_execute_query($GLOBALS['db'], $sql, [$hash]);
+if ($result === false || mysqli_num_rows($result) == 0) {
     die();
 }
 $portfolio = mysqli_fetch_array($result);
@@ -62,9 +62,9 @@ $sql = 'SELECT bills.number, bills.catch_line, bills.summary, bills.date_modifie
 			ON bills.id=dashboard_bills.bill_id
 		LEFT JOIN dashboard_portfolios
 			ON dashboard_bills.portfolio_id = dashboard_portfolios.id
-		WHERE dashboard_portfolios.id="' . $portfolio['id'] . '"
-		AND bills.session_id=' . SESSION_ID;
-$result = mysqli_query($GLOBALS['db'], $sql);
+		WHERE dashboard_portfolios.id = ?
+		AND bills.session_id = ?';
+$result = mysqli_execute_query($GLOBALS['db'], $sql, [(int) $portfolio['id'], SESSION_ID]);
 
 # Don't check to make sure the query was successful -- we want to make sure that people can
 # even subscribe to feeds for tags that have introduced nothing yet.

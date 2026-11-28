@@ -117,12 +117,15 @@ class Page
         /*
          * Inject a Javascript array of bill portfolio IDs into the HTML.
          */
-        if (isset($_SESSION['portfolios'])) {
-            $portfolio_js = '<script>var portfolios = [];';
-            foreach ($_SESSION['portfolios'] as $portfolio) {
-                $portfolio_js .= 'portfolios.push("' . $portfolio['hash'] . '");';
+        $portfolio_hashes = [];
+        if (!empty($_SESSION['id']) && isset($GLOBALS['db']) && $GLOBALS['db'] instanceof mysqli) {
+            $user = get_user();
+            if ($user !== false) {
+                $portfolio_hashes = array_column(Portfolio::for_user((int) $user['id'], true), 'hash');
             }
-            $portfolio_js .= '</script>';
+        }
+        if (count($portfolio_hashes) > 0) {
+            $portfolio_js = '<script>var portfolios = ' . json_encode($portfolio_hashes, JSON_HEX_TAG) . ';</script>';
 
             # Note that we retain the placeholder tag, because the actual replacement comes later.
             $page = str_replace('%html_head%', '%html_head% ' . $portfolio_js, $page);

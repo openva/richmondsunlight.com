@@ -57,8 +57,8 @@ if (mysqli_num_rows($result) == 0) {
     $page_body .= '<ul>';
     while ($portfolio = mysqli_fetch_array($result)) {
         $portfolio = array_map('stripslashes_nullsafe', $portfolio);
-        $page_body .= '<li><a href="/photosynthesis/' . $portfolio['hash'] . '/">'
-            . $portfolio['organization'] . '</a></li>';
+        $page_body .= '<li><a href="/photosynthesis/' . Portfolio::text($portfolio['hash']) . '/">'
+            . Portfolio::text($portfolio['organization']) . '</a></li>';
     }
     $page_body .= '</ul>';
 }

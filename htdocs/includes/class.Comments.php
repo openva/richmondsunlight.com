@@ -104,7 +104,7 @@ class Comments
                 while ($comment = mysqli_fetch_array($result)) {
                     // Clean up the data.
                     $comment = array_map('stripslashes_nullsafe', $comment);
-                    $comment['comment'] = nl2p($comment['comment']);
+                    $comment['comment'] = Portfolio::notes_html($comment['comment']);
 
                     // Convert $seconds_since to minutes, hours, days, weeks or months.
                     $comment['time_since'] = seconds_to_units($comment['seconds_since']);

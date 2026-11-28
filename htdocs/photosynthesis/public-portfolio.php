@@ -76,16 +76,21 @@ else {
     # Increment the view count.
     $sql = 'UPDATE dashboard_portfolios
 			SET view_count = view_count + 1
-			WHERE id = ' . (int) $portfolio['id'];
-    mysqli_query($GLOBALS['db'], $sql);
+			WHERE id = ?';
+    mysqli_execute_query($GLOBALS['db'], $sql, [(int) $portfolio['id']]);
 
     # Make the user closer to anonymous.
-    $tmp = explode(' ', $portfolio['user_name']);
+    $tmp = explode(' ', trim((string) $portfolio['user_name']));
     if (count($tmp) > 1) {
-        $portfolio['user_name'] = $tmp[0] . ' ' . $tmp[1][0] . '.';
+        $portfolio['user_name'] = $tmp[0] . ' ' . mb_substr($tmp[1], 0, 1) . '.';
     } else {
         $portfolio['user_name'] = $tmp[0];
     }
+
+    # Everything the owner typed is shown as text, and their link only if it's to a web page.
+    $portfolio['user_name'] = Portfolio::text($portfolio['user_name']);
+    $portfolio['organization'] = Portfolio::text($portfolio['organization']);
+    $portfolio['url'] = preg_match('#^https?://#i', (string) $portfolio['url']) ? Portfolio::text($portfolio['url']) : '';
 
     # Set the page title to the user's name.
     if (!empty($portfolio['organization'])) {
@@ -131,11 +136,11 @@ else {
 				ON dashboard_bills.bill_id=bills.id
 			LEFT JOIN sessions
 				ON bills.session_id = sessions.id
-			WHERE dashboard_bills.portfolio_id = ' . $portfolio['id'] . '
-			AND sessions.year=' . SESSION_YEAR . '
+			WHERE dashboard_bills.portfolio_id = ?
+			AND sessions.year = ?
 			GROUP BY tags.tag
 			ORDER BY tags.tag ASC';
-    $result = mysqli_query($GLOBALS['db'], $sql);
+    $result = mysqli_execute_query($GLOBALS['db'], $sql, [(int) $portfolio['id'], SESSION_YEAR]);
     if (mysqli_num_rows($result) > 0) {
         $page_sidebar .= '
 		<h3>These Bills Are About .&thinsp;.&thinsp;.</h3>
@@ -143,7 +148,7 @@ else {
 			<ul class="tag-list">';
         while ($tag = mysqli_fetch_array($result)) {
             $tag = array_map('stripslashes_nullsafe', $tag);
-            $page_sidebar .= '<li><a href="/bills/tags/' . urlencode($tag['tag']) . '/">' . $tag['tag'] . '</a></li>';
+            $page_sidebar .= '<li><a href="/bills/tags/' . urlencode($tag['tag']) . '/">' . Portfolio::text($tag['tag']) . '</a></li>';
         }
         $page_sidebar .= '
 			</ul>
@@ -166,12 +171,12 @@ else {
 				ON bills.chief_patron_id = representatives.id
 			LEFT JOIN dashboard_bills
 				ON dashboard_bills.bill_id = bills.id
-			WHERE dashboard_bills.portfolio_id = ' . $portfolio['id'] . '
-			AND sessions.year=' . SESSION_YEAR . '
+			WHERE dashboard_bills.portfolio_id = ?
+			AND sessions.year = ?
 			ORDER BY bills.chamber DESC,
 			SUBSTRING(bills.number FROM 1 FOR 2) ASC,
 			CAST(LPAD(SUBSTRING(bills.number FROM 3), 4, "0") AS unsigned) ASC';
-    $result = mysqli_query($GLOBALS['db'], $sql);
+    $result = mysqli_execute_query($GLOBALS['db'], $sql, [(int) $portfolio['id'], SESSION_YEAR]);
     $bill_count = mysqli_num_rows($result);
     if ($bill_count == 0) {
         $page_body = '<p>This portfolio has no bills.</p>';
@@ -211,7 +216,7 @@ else {
             if (!empty($bill['notes'])) {
                 $page_body .= '
 				<div class="notes">
-					' . nl2p($bill['notes']) . '
+					' . Portfolio::notes_html($bill['notes']) . '
 				</div>';
             }
             $page_body .= '<p class="comments">';

@@ -437,11 +437,15 @@ class User
         }
 
         $sql = 'DELETE FROM users
-                WHERE id=' . $this->id;
-        $result = mysqli_query($GLOBALS['db'], $sql);
+                WHERE id = ?';
+        $result = mysqli_execute_query($GLOBALS['db'], $sql, [(int) $this->id]);
         if ($result != true) {
             return false;
         }
+
+        # Their Photosynthesis portfolios go with them, and so do their notes on bills, which
+        # were shown among the bills' comments.
+        Portfolio::expire_bills(Portfolio::delete_user((int) $this->id));
 
         return true;
     }

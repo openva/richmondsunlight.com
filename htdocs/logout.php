@@ -28,7 +28,6 @@ if (MEMCACHED_SERVER != '') {
 $_SESSION['id'] = '';
 $_SESSION['name'] = '';
 $_SESSION['registered'] = '';
-$_SESSION['portfolios'] = '';
 $_SESSION = array();
 session_destroy();
 

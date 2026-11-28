@@ -212,16 +212,17 @@ function smart_portfolio_form($form_data = array())
     }
 
     $content = '
-			<form method="post" action="' . $action . '">
+			<form method="post" action="' . Portfolio::text($action) . '">
+				' . Csrf::field() . '
 
 				<fieldset id="create-smart-portfolio">
 					<table>
 						<tr><td><label for="name">Name</label></td></tr>
-						<tr><td><input type="text" size="20" maxlength="120" name="form_data[name]" id="name" value="' . $form_data['name'] . '" /></td></tr>
+						<tr><td><input type="text" size="20" maxlength="120" name="form_data[name]" id="name" value="' . Portfolio::text($form_data['name']) . '" /></td></tr>
 						<tr><td><label for="notes">Description</label></td></tr>
-						<tr><td><textarea name="form_data[notes]" id="notes">' . (!empty($form_data['notes']) ? $form_data['notes'] : '') . '</textarea></td></tr>
+						<tr><td><textarea name="form_data[notes]" id="notes">' . Portfolio::text($form_data['notes']) . '</textarea></td></tr>
 						<tr><td><label for="tag">Tag</label></td></tr>
-						<tr><td><input type="text" size="10" maxlength="30" name="form_data[tag]" id="tag" value="' . $form_data['tag'] . '" /><br /></td></tr>
+						<tr><td><input type="text" size="10" maxlength="30" name="form_data[tag]" id="tag" value="' . Portfolio::text($form_data['tag']) . '" /><br /></td></tr>
 						<tr><td><label for="patron">Patron</label></td></tr>
 						<tr><td>
 							<select name="form_data[patron_id]" id="patron" size="1">
@@ -408,7 +409,7 @@ function smart_portfolio_form($form_data = array())
 							</select>
 						</td></tr>
 						<tr><td><label for="keyword">Keyword</label></td></tr>
-						<tr><td><input type="text" size="20" maxlength="120" name="form_data[keyword]" id="keyword" value="' . $form_data['keyword'] . '" /><br /></td></tr>
+						<tr><td><input type="text" size="20" maxlength="120" name="form_data[keyword]" id="keyword" value="' . Portfolio::text($form_data['keyword']) . '" /><br /></td></tr>
 						<tr><td><label for="status">Status</label></td></tr>
 						<tr><td>
 							<select name="form_data[status]" id="status" />
@@ -450,7 +451,7 @@ function smart_portfolio_form($form_data = array())
     if (isset($form_data['id'])) {
         $content .= '
 				<input type="hidden" name="edit-smart-portfolio" value="y">
-				<input type="hidden" name="form_data[id]" id="portfolio-id" value="' . $form_data['id'] . '" />
+				<input type="hidden" name="form_data[id]" id="portfolio-id" value="' . (int) $form_data['id'] . '" />
 				<input type="hidden" name="form_data[type]" value="smart">
 				<input type="submit" name="submit" id="submit" value="Save Changes">';
     } else {
@@ -499,14 +500,15 @@ function portfolio_form($form_data = array())
         $action = '/photosynthesis/process-actions.php';
     }
     $content = '
-		<form method="post" action="' . $action . '">
+		<form method="post" action="' . Portfolio::text($action) . '">
+			' . Csrf::field() . '
 
 			<fieldset id="create-portfolio">
 				<table class="form">
 					<tr><td><label for="name">Name</label></td></tr>
-					<tr><td><input type="text" size="40" maxlength="120" id="name" name="form_data[name]" value="' . (!empty($form_data['name']) ? $form_data['name'] : '') . '" /></td></tr>
+					<tr><td><input type="text" size="40" maxlength="120" id="name" name="form_data[name]" value="' . Portfolio::text($form_data['name']) . '" /></td></tr>
 					<tr><td><label for="notes">Description</label></td></tr>
-					<tr><td><textarea name="form_data[notes]" id="notes">' . (!empty($form_data['notes']) ? $form_data['notes'] : '') . '</textarea></td></tr>
+					<tr><td><textarea name="form_data[notes]" id="notes">' . Portfolio::text($form_data['notes']) . '</textarea></td></tr>
 					<tr><td>
 						<fieldset id="public">
 							<legend>Public Visibility</legend>
@@ -527,7 +529,7 @@ function portfolio_form($form_data = array())
 			</fieldset>';
     if (isset($form_data['id'])) {
         $content .= '
-			<input type="hidden" name="form_data[id]" id="portfolio-id" value="' . $form_data['id'] . '" />';
+			<input type="hidden" name="form_data[id]" id="portfolio-id" value="' . (int) $form_data['id'] . '" />';
     } else {
         $content .= '
 			<input type="hidden" name="add-portfolio" value="y" />';
@@ -570,14 +572,14 @@ function show_portfolio($portfolio, $user_id)
 
 			FROM bills LEFT JOIN dashboard_bills
 			ON bills.id = dashboard_bills.bill_id
-			WHERE dashboard_bills.user_id=' . $user_id . '
-			AND dashboard_bills.portfolio_id = ' . $portfolio['id'] . '
-			AND bills.session_id = ' . SESSION_ID . '
+			WHERE dashboard_bills.user_id = ?
+			AND dashboard_bills.portfolio_id = ?
+			AND bills.session_id = ?
 			ORDER BY last_date DESC';
-    $result = mysqli_query($GLOBALS['db'], $sql);
-    if (mysqli_num_rows($result) > 0) {
+    $result = mysqli_execute_query($GLOBALS['db'], $sql, [(int) $user_id, (int) $portfolio['id'], SESSION_ID]);
+    if ($result !== false && mysqli_num_rows($result) > 0) {
         $content = '
-		<table style="clear: both;" class="sortable" id="listing-' . $portfolio['hash'] . '">
+		<table style="clear: both;" class="sortable" id="listing-' . Portfolio::text($portfolio['hash']) . '">
 			<thead>
 				<tr>
 					<th id="bill">Bill</th>
@@ -594,7 +596,7 @@ function show_portfolio($portfolio, $user_id)
 			<tbody>';
         while ($bill = mysqli_fetch_array($result)) {
             $bill = array_map('stripslashes_nullsafe', $bill);
-            $bill['timestamp'] = strtotime($bill['last_date']);
+            $bill['timestamp'] = strtotime((string) $bill['last_date']);
 
             $content .= '
 				<tr' . ((isset($_SESSION['last_access']) && $_SESSION['last_access'] < $bill['timestamp']) ? ' class="changed"' : '') . '>
@@ -606,23 +608,29 @@ function show_portfolio($portfolio, $user_id)
             if ($portfolio['type'] == 'normal') {
                 $content .= '
 					<td class="options">
-						<a class="delete-bill" href="/photosynthesis/delete/' . $portfolio['hash'] . '-' . $bill['record_id'] . '/" title="Stop tracking this bill"
-							onclick="return confirm(\'Are you sure you want to stop tracking ' . mb_strtoupper($bill['number']) . '?\')">&#x2715; Remove</a>
+						<form method="post" action="/photosynthesis/process-actions.php" class="delete-bill"
+							onsubmit="return confirm(\'Are you sure you want to stop tracking ' . mb_strtoupper($bill['number']) . '?\')">
+							' . Csrf::field() . '
+							<input type="hidden" name="delete-bill" value="' . Portfolio::text($portfolio['hash']) . '-' . (int) $bill['record_id'] . '" />
+							<button type="submit" title="Stop tracking this bill">&#x2715; Remove</button>
+						</form>
 					</td>';
             }
             $content .= '</tr>';
 
             if (empty($bill['notes'])) {
-                $bill['notes'] = 'Add your comments about this bill '
+                $notes = 'Add your comments about this bill '
                     . 'here—they’ll be listed on your public portfolio and on the bill’s page. '
                     . 'Should this pass or fail? Why?';
+            } else {
+                $notes = Portfolio::notes_html($bill['notes']);
             }
 
             $content .= '
-			<tr id="' . $bill['record_id'] . '-notes" class="notes">
+			<tr id="' . (int) $bill['record_id'] . '-notes" class="notes">
 				<td></td>
 				<td colspan="' . (($portfolio['type'] == 'normal') ? '4' : '3') . '">
-					<div class="edit" id="' . $bill['record_id'] . '">' . $bill['notes'] . '</div>
+					<div class="edit" id="' . (int) $bill['record_id'] . '">' . $notes . '</div>
 				</td>
 			</tr>';
         }

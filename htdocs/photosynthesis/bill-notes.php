@@ -29,13 +29,14 @@ $site_section = 'photosynthesis';
 $html_head = '<link rel="stylesheet" href="/css/photosynthesis.css" type="text/css" />';
 
 # CUSTOM PAGE FUNCTIONS
-function notes_form($notes)
+function notes_form($notes, $hash, $id)
 {
     $returned_data =
-    '<form method="post" action="/photosynthesis/notes/' . $GLOBALS['portfolio']['hash'] . '-' . $GLOBALS['id'] . '/">
-		<textarea rows="10" cols="80" name="notes">' . $notes['notes'] . '</textarea><br />
+    '<form method="post" action="/photosynthesis/notes/' . Portfolio::text($hash) . '-' . (int) $id . '/">
+		' . Csrf::field() . '
+		<textarea rows="10" cols="80" name="notes">' . Portfolio::text($notes['notes']) . '</textarea><br />
 		<small>(Limited HTML is OK: &lt;a&gt;, &lt;em&gt;, &lt;strong&gt;, &lt;blockquote&gt;,
-			&lt;embed&gt;, &lt;ol&gt;, &lt;ul&gt;, &lt;li&gt;)</small><br />
+			&lt;ol&gt;, &lt;ul&gt;, &lt;li&gt;)</small><br />
 		<input type="submit" name="submit" value="Save" />
 	</form>';
 
@@ -45,64 +46,47 @@ function notes_form($notes)
 # INITIALIZE SESSION
 resume_session();
 
-# Grab the user data. Bail if none is available.
+# Grab the user data. Send them to log in if they aren't.
 $user = get_user();
 if ($user === false) {
+    header('Location: /account/login/?return_uri=' . urlencode($_SERVER['REQUEST_URI']));
     exit();
 }
+$user_id = (int) $user['id'];
 
-if (!isset($_GET['id'])) {
-    header('Location: ' . $_SERVER['HTTP_REFERER']);
+$hash = (string) ($_GET['hash'] ?? '');
+$id = filter_var($_GET['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
+if ($id === false || Portfolio::find($hash, $user_id) === null) {
+    header('Location: /photosynthesis/');
     exit;
 }
 
-# Clean up and localize the portfolio and bill data.
-$portfolio['hash'] = mysqli_real_escape_string($GLOBALS['db'], $_GET['hash']);
-$id = mysqli_real_escape_string($GLOBALS['db'], $_GET['id']);
-
 # If the form is being posted, accept the updated notes and store them.
 if (isset($_POST['submit'])) {
-    # Strip out all tags other than the following.
-    $notes = strip_tags($_POST['notes'], '<a><em><strong><i><b><s><blockquote><embed><ol><ul><li>');
-    $notes = trim($notes);
-    $notes = mysqli_real_escape_string($GLOBALS['db'], $notes);
-
-    $sql = 'UPDATE dashboard_bills
-			SET notes = ' . (empty($notes) ? 'NULL' : '"' . $notes . '"') . '
-			WHERE id=' . $id . ' AND user_id = ' . $user['id'];
-    $result = mysqli_query($GLOBALS['db'], $sql);
-    if (!$result) {
+    # Strip out all tags other than the following. (They're cleaned again whenever they're shown.)
+    $notes = strip_tags((string) ($_POST['notes'] ?? ''), '<a><em><strong><i><b><s><blockquote><ol><ul><li>');
+    $bill_id = Csrf::valid() ? Portfolio::set_notes($user_id, $id, $notes) : null;
+    if ($bill_id === null) {
         $message = '<div id="messages" class="errors">Sorry: That note could not be saved.</div>';
     } else {
-        /*
-         * Clear the Memcached cache of comments on this bill, since Photosynthesis comments are
-         * among them.
-         */
-        if (MEMCACHED_SERVER != '') {
-            $sql = 'SELECT bill_id AS id
-                    FROM dashboard_bills
-                    WHERE id=' . $id . ' AND user_id = ' . $user['id'];
-            $result = mysqli_query($GLOBALS['db'], $sql);
-            $bill = mysqli_fetch_array($result);
-            $mc = new Memcached();
-            $mc->addServer(MEMCACHED_SERVER, 11211);
-            $comments = $mc->delete('comments-' . $bill['id']);
-        }
-
-        header('Location: https://www.richmondsunlight.com/photosynthesis/#' . $portfolio['hash']);
+        # Photosynthesis notes are among a bill's comments.
+        Portfolio::expire_bills([$bill_id]);
+        header('Location: /photosynthesis/#' . $hash);
         exit();
     }
 }
 
-# Assemble the SQL query.
+# The bill, which has to be in this portfolio of this user's.
 $sql = 'SELECT dashboard_bills.id, dashboard_bills.notes, bills.number, bills.catch_line
 		FROM dashboard_bills
 		LEFT JOIN bills
 		ON dashboard_bills.bill_id = bills.id
-		WHERE dashboard_bills.id=' . $id . ' AND user_id=' . $user['id'];
-$result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) == 0) {
-    header('Location: ' . $_SERVER['HTTP_REFERER']);
+		LEFT JOIN dashboard_portfolios
+		ON dashboard_bills.portfolio_id = dashboard_portfolios.id
+		WHERE dashboard_bills.id = ? AND dashboard_bills.user_id = ? AND dashboard_portfolios.hash = ?';
+$result = mysqli_execute_query($GLOBALS['db'], $sql, [$id, $user_id, $hash]);
+if ($result === false || mysqli_num_rows($result) == 0) {
+    header('Location: /photosynthesis/');
     exit;
 }
 $notes = mysqli_fetch_array($result);
@@ -117,10 +101,10 @@ if (isset($message)) {
 }
 
 $page_body .= '
-	<h2>' . $notes['number'] . ': ' . $notes['catch_line'] . '</h2>';
+	<h2>' . mb_strtoupper($notes['number']) . ': ' . $notes['catch_line'] . '</h2>';
 
 # Display the form.
-$page_body .= @notes_form($notes);
+$page_body .= @notes_form($notes, $hash, $id);
 
 $page_body .= '
 	<p style="margin-top: 2em; font-family: Georgia, Palatino, \'Times New Roman\', Times, sans-serif; margin-left: 1em; font-size: 1.2em;">

@@ -187,9 +187,11 @@ if ($bill['session_id'] == SESSION_ID) {
 				FROM dashboard_bills
 					LEFT JOIN dashboard_portfolios
 					ON dashboard_bills.portfolio_id = dashboard_portfolios.id
-				WHERE dashboard_bills.bill_id = ' . $bill['id'] . '
-				AND dashboard_portfolios.user_id= ' . $user['id'];
-        $result = mysqli_query($GLOBALS['db'], $sql);
+				WHERE dashboard_bills.bill_id = ?
+				AND dashboard_portfolios.user_id = ?';
+        $result = mysqli_execute_query($GLOBALS['db'], $sql, [(int) $bill['id'], (int) $user['id']]);
+        // The user's portfolios that bills can be added to.
+        $user_portfolios = Portfolio::for_user((int) $user['id'], true);
 
         // If this bill is being tracked, notify this user.
         if (mysqli_num_rows($result) > 0) {
@@ -198,7 +200,7 @@ if ($bill['session_id'] == SESSION_ID) {
             $ps_status = '<div id="track-bill-container">
                 <button type="button" id="track-bill-btn"
                     data-record-id="' . $portfolio['dashboard_bills_id'] . '"
-                    data-portfolio-hash="' . $portfolio['hash'] . '"
+                    data-portfolio-hash="' . Portfolio::text($portfolio['hash']) . '"
                     data-bill-number="' . $bill['number'] . '"
                     data-state="tracking">Stop Tracking</button>
             </div>';
@@ -208,19 +210,20 @@ if ($bill['session_id'] == SESSION_ID) {
 
         // If this bill isn't being tracked, but user has portfolios to which this bill
         // could be added.
-        elseif (isset($_SESSION['portfolios'])) {
+        elseif (count($user_portfolios) > 0) {
             $ps_status = '<div id="track-bill-container">';
             // If there's just one portfolio.
-            if (count($_SESSION['portfolios']) == 1) {
-                $ps_status .= '<input type="hidden" id="track-portfolio-hash" value="' . $_SESSION['portfolios'][0]['hash'] . '" />';
+            if (count($user_portfolios) == 1) {
+                $ps_status .= '<input type="hidden" id="track-portfolio-hash" value="' . Portfolio::text($user_portfolios[0]['hash']) . '" />';
             }
 
             // Or, if there's multiple portfolios.
             else {
                 $ps_status .= '<label for="portfolio-selector">Select a Portfolio</label>
                 <select id="portfolio-selector">';
-                foreach ($_SESSION['portfolios'] as $portfolio) {
-                    $ps_status .= '<option value="' . $portfolio['hash'] . '">' . $portfolio['name'] . '</option>';
+                foreach ($user_portfolios as $portfolio) {
+                    $ps_status .= '<option value="' . Portfolio::text($portfolio['hash']) . '">'
+                        . Portfolio::text(stripslashes_nullsafe($portfolio['name'])) . '</option>';
                 }
                 $ps_status .= '</select>';
             }
@@ -230,10 +233,11 @@ if ($bill['session_id'] == SESSION_ID) {
         }
 
         if (isset($ps_status)) {
-            $is_single_portfolio = isset($_SESSION['portfolios']) && count($_SESSION['portfolios']) == 1;
+            $is_single_portfolio = count($user_portfolios) == 1;
             $html_head .= '<script>
 $(document).ready(function() {
     var isSinglePortfolio = ' . ($is_single_portfolio ? 'true' : 'false') . ';
+    var csrfToken = ' . json_encode(Csrf::token()) . ';
 
     $(document).on("click", "#track-bill-btn", function() {
         var $btn = $(this);
@@ -247,7 +251,7 @@ $(document).ready(function() {
             $.ajax({
                 type: "POST",
                 url: "/photosynthesis/process-actions.php",
-                data: { "delete-bill": portfolioHash + "-" + recordId },
+                data: { "delete-bill": portfolioHash + "-" + recordId, "csrf_token": csrfToken },
                 dataType: "json"
             }).done(function() {
                 if (isSinglePortfolio) {
@@ -271,7 +275,7 @@ $(document).ready(function() {
             $.ajax({
                 type: "POST",
                 url: "/photosynthesis/process-actions.php",
-                data: { "add-bill": billNumber, "portfolio": portfolioHash },
+                data: { "add-bill": billNumber, "portfolio": portfolioHash, "csrf_token": csrfToken },
                 dataType: "json"
             }).done(function(response) {
                 $("#track-bill-container").html(
@@ -330,8 +334,8 @@ $(document).ready(function() {
                 $portfolio['user_name'] = $tmp[0];
             }
 
-            $ps_portfolios .= '<a href="/photosynthesis/' . $portfolio['hash'] . '/">' .
-                (!empty($portfolio['organization']) ? $portfolio['organization'] : $portfolio['user_name']) . '</a>';
+            $ps_portfolios .= '<a href="/photosynthesis/' . Portfolio::text($portfolio['hash']) . '/">' .
+                Portfolio::text(!empty($portfolio['organization']) ? $portfolio['organization'] : $portfolio['user_name']) . '</a>';
             if ($i < $portfolio_count) {
                 $ps_portfolios .= ', ';
             } elseif ($i == $portfolio_count) {
@@ -1438,7 +1442,7 @@ if (isset($comments) && is_array($comments)) {
         // If this is a Photosynthesis comment, rather than a comment directly on the bill.
         if (isset($comment['type']) && ($comment['type'] == 'photosynthesis')) {
             $page_body .= '
-			<a href="/photosynthesis/' . $comment['hash'] . '/"><cite>' . $comment['name'] . '</cite><strong>, tracking this bill in Photosynthesis</a>, notes</strong>:<br />';
+			<a href="/photosynthesis/' . Portfolio::text($comment['hash']) . '/"><cite>' . Portfolio::text($comment['name']) . '</cite><strong>, tracking this bill in Photosynthesis</a>, notes</strong>:<br />';
         }
 
         // Otherwise, credit it as a comment.
