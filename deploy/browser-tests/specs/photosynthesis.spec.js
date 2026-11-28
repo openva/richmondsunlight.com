@@ -171,24 +171,24 @@ test.describe('Photosynthesis', () => {
 
     await page.locator('a[href="#create-smart-portfolio"]').click();
     const smart = page.locator('form:has(input[name="add-smart-portfolio"])');
-    await smart.locator('input[name="form_data[name]"]').fill(`Fish ${stamp}`);
-    await smart.locator('input[name="form_data[tag]"]').fill('fishery');
+    await smart.locator('input[name="form_data[name]"]').fill(`Dogs ${stamp}`);
+    await smart.locator('input[name="form_data[tag]"]').fill('police dogs');
     await Promise.all([page.waitForNavigation(), smart.locator('input[type="submit"]').click()]);
 
-    const fish = page.locator('.portfolio', { has: page.locator('h1', { hasText: `Fish ${stamp}` }) });
-    await expect(fish.locator('.type')).toHaveText('Smart Portfolio');
-    await expect(fish.locator('.criteria')).toContainText('Bills tagged fishery');
-    await expect(fish.getByRole('cell', { name: 'HB19' })).toBeVisible();
-    await expect(fish.locator('.visibility')).toContainText('Public');
+    const dogs = page.locator('.portfolio', { has: page.locator('h1', { hasText: `Dogs ${stamp}` }) });
+    await expect(dogs.locator('.type')).toHaveText('Smart Portfolio');
+    await expect(dogs.locator('.criteria')).toContainText('Bills tagged police dogs');
+    await expect(dogs.getByRole('cell', { name: 'HB1591' })).toBeVisible();
+    await expect(dogs.locator('.visibility')).toContainText('Public');
 
-    for (const name of [`Second ${stamp}`, `Fish ${stamp}`]) {
+    for (const name of [`Second ${stamp}`, `Dogs ${stamp}`]) {
       expect((await act(page, { 'delete-portfolio': await hashOf(page, name) })).success).toBe(true);
     }
   });
 
   test('a bill page has a checkbox for each portfolio, each adding or removing the bill', async ({ page }) => {
     await loginAs(page, 'testuser@example.com');
-    const bill = '/bill/2025/hb33/';
+    const bill = '/bill/2025/hb1561/';
     const box = (hash) => page.locator(`#track-bill input.track-portfolio[data-portfolio="${hash}"]`);
     const posted = () => page.waitForResponse(r => r.url().includes('/photosynthesis/process-actions.php'));
 
@@ -208,8 +208,8 @@ test.describe('Photosynthesis', () => {
     await expect(box('pwt01')).toBeChecked();
     await expect(box('pwtp1')).toBeChecked();
     await page.goto('/photosynthesis/');
-    await expect(page.locator('#listing-pwt01').getByRole('cell', { name: 'HB33' })).toBeVisible();
-    await expect(page.locator('#listing-pwtp1').getByRole('cell', { name: 'HB33' })).toBeVisible();
+    await expect(page.locator('#listing-pwt01').getByRole('cell', { name: 'HB1561' })).toBeVisible();
+    await expect(page.locator('#listing-pwtp1').getByRole('cell', { name: 'HB1561' })).toBeVisible();
 
     // Unchecking one takes it out of that one only.
     await page.goto(bill);
@@ -224,13 +224,13 @@ test.describe('Photosynthesis', () => {
 
   test('a bill in a smart portfolio is listed with it, with no checkbox for it', async ({ page }) => {
     await loginAs(page, 'testuser@example.com');
-    const name = `Fishery bills ${Date.now()}`;
-    expect((await act(page, { 'add-smart-portfolio': 'y', 'form_data[name]': name, 'form_data[tag]': 'fishery' })).success).toBe(true);
+    const name = `Police dog bills ${Date.now()}`;
+    expect((await act(page, { 'add-smart-portfolio': 'y', 'form_data[name]': name, 'form_data[tag]': 'police dogs' })).success).toBe(true);
     const hash = await hashOf(page, name);
 
-    await page.goto('/bill/2025/hb19/');
+    await page.goto('/bill/2025/hb1591/');
     const tracker = page.locator('#track-bill');
-    await expect(tracker.locator('.track-smart', { hasText: name })).toContainText('tagged fishery');
+    await expect(tracker.locator('.track-smart', { hasText: name })).toContainText('tagged police dogs');
     await expect(tracker.locator(`input[data-portfolio="${hash}"]`)).toHaveCount(0);
     await expect(tracker.locator('input[data-portfolio="pwt01"]')).toHaveCount(1);
 
@@ -273,17 +273,17 @@ test.describe('Photosynthesis', () => {
     const form = page.locator('form:has(input[name="add-smart-portfolio"])');
     await form.locator('input[name="form_data[name]"]').fill(name);
     // The tag box suggests tags.
-    await expect(form.locator('datalist option[value="fishery"]')).toHaveCount(1);
-    await form.locator('input[name="form_data[tag]"]').fill('Fishery');
+    await expect(form.locator('datalist option[value="police dogs"]')).toHaveCount(1);
+    await form.locator('input[name="form_data[tag]"]').fill('Police Dogs');
     await Promise.all([page.waitForNavigation(), form.locator('input[type="submit"]').click()]);
 
     const portfolio = page.locator('.portfolio', { has: page.locator('h1', { hasText: name }) });
-    await expect(portfolio.locator('.criteria')).toHaveText('Bills tagged fishery.');
-    await expect(portfolio.getByRole('cell', { name: 'HB19' })).toBeVisible();
+    await expect(portfolio.locator('.criteria')).toHaveText('Bills tagged police dogs.');
+    await expect(portfolio.getByRole('cell', { name: 'HB1591' })).toBeVisible();
     const hash = await hashOf(page, name);
 
     await page.goto(`/photosynthesis/${hash}/`);
-    await expect(page.locator('#public-portfolio')).toContainText('HB19');
+    await expect(page.locator('#public-portfolio')).toContainText('HB1591');
 
     expect((await act(page, { 'delete-portfolio': hash })).success).toBe(true);
   });
@@ -316,11 +316,11 @@ test.describe('Photosynthesis', () => {
   test('a bill can be hidden from a smart portfolio, and shown again', async ({ page }) => {
     await loginAs(page, 'testuser@example.com');
     const name = `Hiding ${Date.now()}`;
-    expect((await act(page, { 'add-smart-portfolio': 'y', 'form_data[name]': name, 'form_data[tag]': 'fishery' })).success).toBe(true);
+    expect((await act(page, { 'add-smart-portfolio': 'y', 'form_data[name]': name, 'form_data[tag]': 'police dogs' })).success).toBe(true);
     const hash = await hashOf(page, name);
 
     // From the bill's page.
-    await page.goto('/bill/2025/hb19/');
+    await page.goto('/bill/2025/hb1591/');
     const line = page.locator('#track-bill .track-smart', { hasText: name });
     await expect(line).toContainText('In');
     await Promise.all([page.waitForNavigation(), line.locator('button').click()]);
@@ -330,19 +330,19 @@ test.describe('Photosynthesis', () => {
     await page.goto('/photosynthesis/');
     await expect(page.locator(`#listing-${hash}`)).toHaveCount(0);
     const hidden = page.locator(`#hidden-${hash}`);
-    await expect(hidden).toContainText('HB19');
+    await expect(hidden).toContainText('HB1591');
     let html = await (await page.request.get(`/photosynthesis/${hash}/`)).text();
-    expect(html).not.toContain('HB19');
+    expect(html).not.toContain('HB1591');
 
     // Shown again, from the private page.
     await Promise.all([page.waitForNavigation(), hidden.locator('button', { hasText: 'Show again' }).click()]);
-    await expect(page.locator(`#listing-${hash}`).getByRole('cell', { name: 'HB19' })).toBeVisible();
+    await expect(page.locator(`#listing-${hash}`).getByRole('cell', { name: 'HB1591' })).toBeVisible();
     html = await (await page.request.get(`/photosynthesis/${hash}/`)).text();
-    expect(html).toContain('HB19');
+    expect(html).toContain('HB1591');
 
     // And hidden from the private page.
     await Promise.all([page.waitForNavigation(), page.locator(`#listing-${hash} form.hide-bill button`).first().click()]);
-    await expect(page.locator(`#hidden-${hash}`)).toContainText('HB19');
+    await expect(page.locator(`#hidden-${hash}`)).toContainText('HB1591');
 
     expect((await act(page, { 'delete-portfolio': hash })).success).toBe(true);
   });

@@ -412,25 +412,25 @@ class PortfolioTest extends TestCase
 
     public function testACommitteeGathersBillsThatWereReferredToItAndMovedOn(): void
     {
-        // HB19 isn't in House Education; put it on a docket of one of its subcommittees (47), and
-        // HB20 on a referral to it.
-        $hb19 = $this->numbers_ids('hb19');
-        $hb20 = $this->numbers_ids('hb20');
-        mysqli_execute_query($GLOBALS['db'], 'INSERT INTO dockets SET date = "2025-01-15", committee_id = 47, bill_id = ?, date_created = NOW()', [$hb19]);
+        // HB1591 isn't in House Education; put it on a docket of one of its subcommittees (47), and
+        // HB2723 on a referral to it.
+        $hb1591 = $this->numbers_ids('hb1591');
+        $hb2723 = $this->numbers_ids('hb2723');
+        mysqli_execute_query($GLOBALS['db'], 'INSERT INTO dockets SET date = "2025-01-15", committee_id = 47, bill_id = ?, date_created = NOW()', [$hb1591]);
         mysqli_execute_query(
             $GLOBALS['db'],
             'INSERT INTO bills_status SET bill_id = ?, session_id = ?, status = "Referred to Committee on Education", date = "2025-01-08", chamber = "house", date_created = NOW()',
-            [$hb20, SESSION_ID]
+            [$hb2723, SESSION_ID]
         );
         try {
             Portfolio::forget_referrals();
             $committee = $this->make(self::USER, ['name' => 'Education committee'], Portfolio::criteria(['committee_id' => '6']));
             $in = $this->bills_in($committee['id']);
-            $this->assertArrayHasKey('hb19', $in);
-            $this->assertArrayHasKey('hb20', $in);
+            $this->assertArrayHasKey('hb1591', $in);
+            $this->assertArrayHasKey('hb2723', $in);
         } finally {
-            mysqli_execute_query($GLOBALS['db'], 'DELETE FROM dockets WHERE bill_id = ? AND committee_id = 47 AND date = "2025-01-15"', [$hb19]);
-            mysqli_execute_query($GLOBALS['db'], 'DELETE FROM bills_status WHERE bill_id = ? AND status = "Referred to Committee on Education" AND date = "2025-01-08"', [$hb20]);
+            mysqli_execute_query($GLOBALS['db'], 'DELETE FROM dockets WHERE bill_id = ? AND committee_id = 47 AND date = "2025-01-15"', [$hb1591]);
+            mysqli_execute_query($GLOBALS['db'], 'DELETE FROM bills_status WHERE bill_id = ? AND status = "Referred to Committee on Education" AND date = "2025-01-08"', [$hb2723]);
             Portfolio::forget_referrals();
         }
     }
@@ -443,20 +443,20 @@ class PortfolioTest extends TestCase
 
     public function testPopulatingOnlyAddsAndASecondRunAddsNothing(): void
     {
-        // A tag of the test's own, on HB19.
-        $hb19 = $this->numbers_ids('hb19');
-        mysqli_execute_query($GLOBALS['db'], 'INSERT IGNORE INTO tags SET bill_id = ?, tag = "portfolio test", date_created = NOW()', [$hb19]);
+        // A tag of the test's own, on HB1591.
+        $hb1591 = $this->numbers_ids('hb1591');
+        mysqli_execute_query($GLOBALS['db'], 'INSERT IGNORE INTO tags SET bill_id = ?, tag = "portfolio test", date_created = NOW()', [$hb1591]);
         try {
             $portfolio = $this->make(self::USER, ['name' => 'Test tag'], Portfolio::criteria(['tag' => 'portfolio test']));
-            $this->assertSame(['hb19' => 'n'], $this->bills_in($portfolio['id']));
+            $this->assertSame(['hb1591' => 'n'], $this->bills_in($portfolio['id']));
             $this->assertSame(['added' => 0, 'removed' => 0], Portfolio::populate($portfolio['id']));
 
             // It stops matching, and stays.
-            mysqli_execute_query($GLOBALS['db'], 'DELETE FROM tags WHERE bill_id = ? AND tag = "portfolio test"', [$hb19]);
+            mysqli_execute_query($GLOBALS['db'], 'DELETE FROM tags WHERE bill_id = ? AND tag = "portfolio test"', [$hb1591]);
             Portfolio::populate($portfolio['id']);
-            $this->assertSame(['hb19' => 'n'], $this->bills_in($portfolio['id']));
+            $this->assertSame(['hb1591' => 'n'], $this->bills_in($portfolio['id']));
         } finally {
-            mysqli_execute_query($GLOBALS['db'], 'DELETE FROM tags WHERE bill_id = ? AND tag = "portfolio test"', [$hb19]);
+            mysqli_execute_query($GLOBALS['db'], 'DELETE FROM tags WHERE bill_id = ? AND tag = "portfolio test"', [$hb1591]);
         }
 
         // A normal portfolio isn't populated.
