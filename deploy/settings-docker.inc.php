@@ -122,6 +122,19 @@ rs_define('SLACK_WEBHOOK', '');
 # OpenAI API key
 rs_define('OPENAI_KEY', '');
 
+# Portfolio email (rs-machine's portfolio_email task; see docs/portfolios.md). PORTFOLIO_EMAIL is
+# "off," "dry-run" (log who would get what, and send nothing), "allowlist" (send only to the user
+# IDs in PORTFOLIO_EMAIL_ALLOWLIST, separated by commas), or "on" (send to everybody).
+rs_define('PORTFOLIO_EMAIL', 'dry-run');
+rs_define('PORTFOLIO_EMAIL_ALLOWLIST', '');
+
+# The SMTP server that email is sent through, or '' to send with PHP's mail(). (In Docker, it's
+# Mailpit, which keeps what it's sent, for tests.)
+rs_define('SMTP_HOST', 'mailpit');
+rs_define('SMTP_PORT', 1025);
+rs_define('AWS_SES_SMTP_USERNAME', '');
+rs_define('AWS_SES_SMTP_PASSWORD', '');
+
 # AWS auth info
 # This is only used in some RS instances.
 rs_define('AWS_ACCESS_KEY', '');

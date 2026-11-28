@@ -106,10 +106,9 @@ function smart_portfolio_form($form_data = array())
 						</td></tr>
 						<tr><td>
 							<fieldset id="notify">
-								<legend>E-Mail Notification</legend>
-								<input type="radio" name="form_data[notify]" id="none" value="none"' . (($form_data['notify'] == 'none') ? ' checked="checked"' : '') . ' /><label for="none" class="label-radio">None</label>
-								<input type="radio" name="form_data[notify]" id="hourly" value="hourly"' . (($form_data['notify'] == 'hourly') ? ' checked="checked"' : '') . ' /><label for="hourly" class="label-radio">Hourly</label>
-								<input type="radio" name="form_data[notify]" id="daily" value="daily"' . (($form_data['notify'] == 'daily') ? ' checked="checked"' : '') . ' /><label for="daily" class="label-radio">Daily</label>
+								<legend>Email</legend>
+								<input type="radio" name="form_data[notify]" id="none" value="none"' . (($form_data['notify'] == 'none') ? ' checked="checked"' : '') . ' /><label for="none" class="label-radio">No email</label>
+								<input type="radio" name="form_data[notify]" id="daily" value="daily"' . (($form_data['notify'] == 'daily') ? ' checked="checked"' : '') . ' /><label for="daily" class="label-radio">Email me each morning when its bills have news</label>
 							</fieldset>
 						</td></tr>
 					</table>';
@@ -185,10 +184,9 @@ function portfolio_form($form_data = array())
 					</td></tr>
 					<tr><td>
 						<fieldset id="notify">
-							<legend>E-Mail Notification</legend>
-							<input type="radio" name="form_data[notify]" id="none" value="none"' . (($form_data['notify'] == 'none') ? ' checked="checked"' : '') . ' /><label for="none" class="label-radio">None</label>
-							<input type="radio" name="form_data[notify]" id="hourly" value="hourly"' . (($form_data['notify'] == 'hourly') ? ' checked="checked"' : '') . ' /><label for="hourly" class="label-radio">Hourly</label>
-							<input type="radio" name="form_data[notify]" id="daily" value="daily"' . (($form_data['notify'] == 'daily') ? ' checked="checked"' : '') . ' /><label for="daily" class="label-radio">Daily</label>
+							<legend>Email</legend>
+							<input type="radio" name="form_data[notify]" id="none" value="none"' . (($form_data['notify'] == 'none') ? ' checked="checked"' : '') . ' /><label for="none" class="label-radio">No email</label>
+							<input type="radio" name="form_data[notify]" id="daily" value="daily"' . (($form_data['notify'] == 'daily') ? ' checked="checked"' : '') . ' /><label for="daily" class="label-radio">Email me each morning when its bills have news</label>
 						</fieldset>
 					</td></tr>
 					<tr><td><input type="submit" name="submit" value="' . $submit_label . '" /></td></tr>

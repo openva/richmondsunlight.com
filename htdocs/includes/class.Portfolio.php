@@ -39,7 +39,7 @@ class Portfolio
         'name' => null,
         'notes' => null,
         'public' => ['y', 'n'],
-        'notify' => ['none', 'hourly', 'daily'],
+        'notify' => ['none', 'daily'],
     ];
 
     /**

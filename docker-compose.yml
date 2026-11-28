@@ -102,6 +102,16 @@ services:
       timeout: 5s
       retries: 3
 
+  # Catches the email that the site sends (SMTP on 1025), and lists it over HTTP (8025), for the
+  # portfolio email tests. Nothing sent to it leaves it.
+  mailpit:
+    image: axllent/mailpit:v1.33.1
+    ports:
+      - "8025:8025"
+    container_name: rs_mailpit
+    networks:
+      - rs_network
+
   # Headless browser for interaction tests. Also in the "tools" profile, for docker-tests.sh.
   playwright:
     profiles: [tools]

@@ -131,6 +131,20 @@ rs_define('OPENAI_KEY', '');
 rs_define('IA_ACCESS_KEY', '');
 rs_define('IA_SECRET_KEY', '');
 
+# Portfolio email (rs-machine's portfolio_email task; see docs/portfolios.md). PORTFOLIO_EMAIL is
+# "off," "dry-run" (log who would get what, and send nothing), "allowlist" (send only to the user
+# IDs in PORTFOLIO_EMAIL_ALLOWLIST, separated by commas), or "on" (send to everybody).
+rs_define('PORTFOLIO_EMAIL', 'dry-run');
+rs_define('PORTFOLIO_EMAIL_ALLOWLIST', '');
+
+# The SMTP server that PhpMailerMailer (portfolio email) sends through, or '' to send with PHP's
+# mail(): SES, with the SMTP credentials that deploy/config_variables.sh fills in. (The web server
+# relays mail() to SES through Postfix, with the same credentials; rs-machine has no Postfix.)
+rs_define('SMTP_HOST', 'email-smtp.us-east-1.amazonaws.com');
+rs_define('SMTP_PORT', 587);
+rs_define('AWS_SES_SMTP_USERNAME', '');
+rs_define('AWS_SES_SMTP_PASSWORD', '');
+
 # AWS auth info
 rs_define('AWS_REGION', 'us-east-1');
 rs_define('AWS_ACCESS_KEY', '');

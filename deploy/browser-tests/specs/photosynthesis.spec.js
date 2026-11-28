@@ -370,6 +370,29 @@ test.describe('Photosynthesis', () => {
     await expect(page.locator('text=This portfolio has no bills.')).toBeVisible();
   });
 
+  test('an email’s unsubscribe link asks, then stops the email, which preferences then show', async ({ page }) => {
+    // pwtest04 is tester@example.com's unsubscribe hash.
+    await page.goto('/photosynthesis/unsubscribe/pwtest04/');
+    await Promise.all([page.waitForNavigation(), page.locator('#unsubscribe input[type="submit"]').click()]);
+    await expect(page.locator('#messages')).toContainText('You won’t get any more email');
+
+    // Following it again says so.
+    await page.goto('/photosynthesis/unsubscribe/pwtest04/');
+    await expect(page.locator('#content, body').first()).toContainText('already unsubscribed');
+
+    await loginAs(page, 'tester@example.com');
+    await page.goto('/photosynthesis/preferences/');
+    await expect(page.locator('#email-active-n')).toBeChecked();
+
+    // Turned back on there.
+    await page.locator('#email-active-y').check();
+    await Promise.all([page.waitForNavigation(), page.locator('input[name="submit"]').click()]);
+    await expect(page.locator('#email-active-y')).toBeChecked();
+
+    // A link that isn't one is a 404.
+    expect((await page.request.get('/photosynthesis/unsubscribe/zzzzzzzz/')).status()).toBe(404);
+  });
+
   test('/photosynthesis/portfolios/ lists organizations with public portfolios', async ({ page }) => {
     await page.goto('/photosynthesis/portfolios/');
     await expect(page.locator('text=Test Organization')).toBeVisible({ timeout: 10000 });
