@@ -26,9 +26,9 @@ if (PHP_SAPI !== 'cli') {
     exit(1);
 }
 
-require __DIR__ . '/../htdocs/includes/settings.inc.php';
-require __DIR__ . '/../htdocs/includes/class.Database.php';
-require __DIR__ . '/../htdocs/includes/class.Portfolio.php';
+require_once __DIR__ . '/../htdocs/includes/settings.inc.php';
+require_once __DIR__ . '/../htdocs/includes/class.Database.php';
+require_once __DIR__ . '/../htdocs/includes/class.Portfolio.php';
 
 $apply = in_array('--apply', $argv, true);
 

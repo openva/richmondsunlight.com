@@ -332,3 +332,11 @@ form.delete-portfolio {
 		.tag-list li a:hover {
 			background-color: #dccbaf;
 		}
+
+/* A public portfolio's description, and a smart portfolio's criteria */
+#portfolio-about {
+	margin-bottom: 1.5em;
+}
+	#portfolio-about p.criteria {
+		font-style: italic;
+	}

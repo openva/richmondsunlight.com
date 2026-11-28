@@ -193,3 +193,47 @@ VALUES (90001, 77600, (SELECT id FROM dashboard_portfolios WHERE hash='pwt01'), 
 
 INSERT INTO dashboard_bills (user_id, bill_id, portfolio_id, date_created)
 VALUES (90001, 77600, (SELECT id FROM dashboard_portfolios WHERE hash='pwtp1'), NOW());
+
+-- Public portfolios of legislator@example.com, for the API's tests (rs-api's deploy/tests/api.sh):
+-- a smart portfolio of bills tagged "education" (pwts1), with those bills (as rs-machine would fill
+-- it), and an empty portfolio (pwte1).
+INSERT INTO dashboard_watch_lists (user_id, tag, date_created)
+VALUES (90003, 'education', NOW());
+
+INSERT INTO dashboard_portfolios (
+    user_id, name, hash, notes, notify, public, watch_list_id, view_count, date_created
+) VALUES (
+    90003,
+    'Education Bills',
+    'pwts1',
+    'Every bill tagged education',
+    'none',
+    'y',
+    (SELECT id FROM dashboard_watch_lists WHERE user_id = 90003 AND tag = 'education' ORDER BY id DESC LIMIT 1),
+    0,
+    NOW()
+);
+
+INSERT INTO dashboard_portfolios (
+    user_id, name, hash, notes, notify, public, watch_list_id, view_count, date_created
+) VALUES (
+    90003,
+    'Empty Portfolio',
+    'pwte1',
+    NULL,
+    'none',
+    'y',
+    NULL,
+    0,
+    NOW()
+);
+
+INSERT INTO dashboard_user_data (user_id, type, organization, email_active, last_access, unsub_hash, date_created)
+VALUES (90003, 'free', NULL, 'y', NOW(), 'pwtest03', NOW());
+
+INSERT INTO dashboard_bills (user_id, bill_id, portfolio_id, date_created)
+SELECT DISTINCT 90003, tags.bill_id, (SELECT id FROM dashboard_portfolios WHERE hash = 'pwts1'), NOW()
+FROM tags
+JOIN bills ON bills.id = tags.bill_id
+JOIN sessions ON sessions.id = bills.session_id
+WHERE tags.tag = 'education' AND sessions.year = 2025;

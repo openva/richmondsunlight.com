@@ -49,20 +49,11 @@ if (@logged_in()) {
 # Start displaying the main page.
 $page_body = '';
 
-# Get this portfolio's basic data.
-$sql = 'SELECT dashboard_portfolios.id, dashboard_portfolios.hash, dashboard_portfolios.name,
-		dashboard_portfolios.notes, users.name AS user_name, dashboard_user_data.organization,
-		users.url
-		FROM dashboard_portfolios
-		LEFT JOIN users
-			ON dashboard_portfolios.user_id = users.id
-		LEFT JOIN dashboard_user_data
-			ON users.id = dashboard_user_data.user_id
-		WHERE dashboard_portfolios.public = "y" AND dashboard_portfolios.hash = ?';
-$result = mysqli_execute_query($GLOBALS['db'], $sql, [$hash]);
+# Get this portfolio's basic data: its fields, its owner, and a smart portfolio's criteria.
+$portfolio = Portfolio::find_public($hash);
 
 # If this portfolio doesn't exist or isn't visible.
-if (mysqli_num_rows($result) == 0) {
+if ($portfolio === null) {
     http_response_code(404);
     include $_SERVER['DOCUMENT_ROOT'] . '/404.php';
     exit();
@@ -70,35 +61,32 @@ if (mysqli_num_rows($result) == 0) {
 
 # If this portfolio does exist.
 else {
-    $portfolio = mysqli_fetch_array($result);
-    $portfolio = array_map('stripslashes_nullsafe', $portfolio);
-
     # Increment the view count.
     $sql = 'UPDATE dashboard_portfolios
 			SET view_count = view_count + 1
 			WHERE id = ?';
-    mysqli_execute_query($GLOBALS['db'], $sql, [(int) $portfolio['id']]);
+    mysqli_execute_query($GLOBALS['db'], $sql, [$portfolio['id']]);
 
-    # Make the user closer to anonymous.
-    $tmp = explode(' ', trim((string) $portfolio['user_name']));
-    if (count($tmp) > 1) {
-        $portfolio['user_name'] = $tmp[0] . ' ' . mb_substr($tmp[1], 0, 1) . '.';
-    } else {
-        $portfolio['user_name'] = $tmp[0];
-    }
-
-    # Everything the owner typed is shown as text, and their link only if it's to a web page.
-    $portfolio['user_name'] = Portfolio::text($portfolio['user_name']);
+    # Everything the owner typed is shown as text.
+    $portfolio['user_name'] = Portfolio::text($portfolio['person']);
     $portfolio['organization'] = Portfolio::text($portfolio['organization']);
-    $portfolio['url'] = preg_match('#^https?://#i', (string) $portfolio['url']) ? Portfolio::text($portfolio['url']) : '';
+    $portfolio['url'] = Portfolio::text($portfolio['url']);
 
-    # Set the page title to the user's name.
-    if (!empty($portfolio['organization'])) {
-        $page_title .= ' » ' . $portfolio['organization'];
-    } else {
-        $page_title .= ' » ' . $portfolio['user_name'];
+    # The page is titled with the portfolio's name.
+    $page_title .= ' » ' . Portfolio::text($portfolio['name']);
+
+    # What the portfolio is: its owner's description of it, and what a smart portfolio gathers.
+    $about = '';
+    if (!empty($portfolio['notes'])) {
+        $about .= '<div class="portfolio-notes">' . Portfolio::notes_html($portfolio['notes']) . '</div>';
     }
-    $page_title .= '’s Portfolio';
+    if ($portfolio['type'] == 'smart') {
+        $about .= '<p class="criteria">' . Portfolio::describe($portfolio['criteria'])
+            . ' are added to this portfolio automatically.</p>';
+    }
+    if ($about !== '') {
+        $about = '<div id="portfolio-about">' . $about . '</div>';
+    }
 
     # Establish a sidebar.
     $page_sidebar = '
@@ -140,7 +128,7 @@ else {
 			AND sessions.year = ?
 			GROUP BY tags.tag
 			ORDER BY tags.tag ASC';
-    $result = mysqli_execute_query($GLOBALS['db'], $sql, [(int) $portfolio['id'], SESSION_YEAR]);
+    $result = mysqli_execute_query($GLOBALS['db'], $sql, [$portfolio['id'], SESSION_YEAR]);
     if (mysqli_num_rows($result) > 0) {
         $page_sidebar .= '
 		<h3>These Bills Are About .&thinsp;.&thinsp;.</h3>
@@ -176,15 +164,15 @@ else {
 			ORDER BY bills.chamber DESC,
 			SUBSTRING(bills.number FROM 1 FOR 2) ASC,
 			CAST(LPAD(SUBSTRING(bills.number FROM 3), 4, "0") AS unsigned) ASC';
-    $result = mysqli_execute_query($GLOBALS['db'], $sql, [(int) $portfolio['id'], SESSION_YEAR]);
+    $result = mysqli_execute_query($GLOBALS['db'], $sql, [$portfolio['id'], SESSION_YEAR]);
     $bill_count = mysqli_num_rows($result);
     if ($bill_count == 0) {
-        $page_body = '<p>This portfolio has no bills.</p>';
+        $page_body = $about . '<p>This portfolio has no bills.</p>';
     }
 
     # We've found bills in this portfolio.
     else {
-        $page_body = '<div id="public-portfolio">';
+        $page_body = $about . '<div id="public-portfolio">';
         if ($bill_count == 1) {
             $page_body .= '<p><em>Just one bill is being tracked.</em></p>';
         } else {

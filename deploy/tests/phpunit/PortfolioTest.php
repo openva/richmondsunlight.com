@@ -296,6 +296,81 @@ class PortfolioTest extends TestCase
         }
     }
 
+    public function testOnlyAPublicPortfolioIsFoundPublicly(): void
+    {
+        $portfolio = Portfolio::find_public('pwtp1');
+        $this->assertSame('Public Test Portfolio', $portfolio['name']);
+        $this->assertSame('normal', $portfolio['type']);
+        // An organization's portfolio is theirs, but made by a person.
+        $this->assertSame('Test Organization', $portfolio['owner']);
+        $this->assertSame('Test Organization', $portfolio['organization']);
+        $this->assertNotSame('Test Organization', $portfolio['person']);
+
+        $this->assertNull(Portfolio::find_public('pwt01'));
+        $this->assertNull(Portfolio::find_public('nope!'));
+        $this->assertNull(Portfolio::record_for_api('pwt01'));
+    }
+
+    public function testAPortfolioForTheApi(): void
+    {
+        $record = Portfolio::record_for_api('pwtp1');
+        $this->assertSame('pwtp1', $record['hash']);
+        $this->assertSame('Public Test Portfolio', $record['name']);
+        $this->assertSame('Public portfolio for browser testing', $record['notes']);
+        $this->assertSame('normal', $record['type']);
+        $this->assertNull($record['criteria']);
+        $this->assertSame('Test Organization', $record['owner']);
+        $this->assertSame('https://www.richmondsunlight.com/photosynthesis/pwtp1/', $record['page']);
+        $bills = array_column($record['bills'], null, 'number');
+        $this->assertArrayHasKey('hb2049', $bills);
+        $this->assertSame('https://www.richmondsunlight.com/bill/' . SESSION_YEAR . '/hb2049/', $bills['hb2049']['url']);
+        $this->assertSame((string) SESSION_YEAR, $bills['hb2049']['year']);
+
+        // An empty portfolio has no bills, rather than not being found.
+        $empty = $this->make(self::USER, ['name' => 'Empty', 'public' => 'y']);
+        $this->assertSame([], Portfolio::record_for_api($empty['hash'])['bills']);
+    }
+
+    public function testASmartPortfolioForTheApiHasItsCriteriaAndNotItsHiddenBills(): void
+    {
+        $portfolio = $this->make(
+            self::USER,
+            ['name' => 'Green’s education bills', 'notes' => '<p>Mostly &amp; <a href="https://example.com/">civics</a></p>', 'public' => 'y'],
+            Portfolio::criteria(['tag' => 'education', 'patron_id' => '506', 'committee_id' => '6'])
+        );
+        $committee = mysqli_fetch_assoc(mysqli_query($GLOBALS['db'], 'SELECT shortname, chamber, name FROM committees WHERE id = 6'));
+
+        $record = Portfolio::record_for_api($portfolio['hash']);
+        $this->assertSame('smart', $record['type']);
+        $this->assertSame('Mostly & civics', $record['notes']);
+        $this->assertSame('education', $record['criteria']['tag']);
+        $this->assertSame(['shortname' => 'wcgreen', 'name' => 'Green, Chad'], $record['criteria']['patron']);
+        $this->assertSame($committee, $record['criteria']['committee']);
+        $this->assertSame(
+            'Bills tagged education, patroned by Green, Chad, in the ' . ucfirst($committee['chamber']) . ' ' . $committee['name'] . ' Committee',
+            $record['criteria']['description']
+        );
+        $this->assertContains('hb41', array_column($record['bills'], 'number'));
+
+        // A bill hidden from it isn't listed.
+        $hb41 = Portfolio::containing(self::USER, $this->numbers_ids('hb41'))[$portfolio['id']]['record_id'];
+        Portfolio::exclude($portfolio['hash'], self::USER, $hb41);
+        $this->assertNotContains('hb41', array_column(Portfolio::record_for_api($portfolio['hash'])['bills'], 'number'));
+
+        // Nor is a private one found.
+        Portfolio::update($portfolio['hash'], self::USER, ['public' => 'n']);
+        $this->assertNull(Portfolio::record_for_api($portfolio['hash']));
+    }
+
+    public function testNotesAsPlainText(): void
+    {
+        $this->assertSame("One & two\n\nThree\nfour", Portfolio::plain_text('<p>One &amp; two</p><p>Three<br />four</p>'));
+        $this->assertSame('Bills tagged <b>', Portfolio::plain_text('Bills tagged <em>&lt;b&gt;</em>'));
+        $this->assertNull(Portfolio::plain_text('  '));
+        $this->assertNull(Portfolio::plain_text(null));
+        $this->assertNull(Portfolio::plain_text('<p></p>'));
+    }
+
     public function testListsWhichPortfoliosHaveABill(): void
     {
         $pwt01 = Portfolio::find('pwt01', self::USER);

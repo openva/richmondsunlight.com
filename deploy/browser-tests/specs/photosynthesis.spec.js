@@ -352,6 +352,24 @@ test.describe('Photosynthesis', () => {
     await expect(page.locator('text=HB2049').first()).toBeVisible({ timeout: 10000 });
   });
 
+  test('a public portfolio page shows its name, its description, and a smart portfolio’s criteria', async ({ page }) => {
+    await page.goto('/photosynthesis/pwtp1/');
+    await expect(page.locator('h1')).toContainText('Public Test Portfolio');
+    await expect(page.locator('#portfolio-about')).toContainText('Public portfolio for browser testing');
+    await expect(page.locator('#portfolio-about p.criteria')).toHaveCount(0);
+
+    // pwts1 is legislator@example.com's, of bills tagged "education."
+    await page.goto('/photosynthesis/pwts1/');
+    await expect(page.locator('h1')).toContainText('Education Bills');
+    await expect(page.locator('#portfolio-about p.criteria')).toHaveText('Bills tagged education are added to this portfolio automatically.');
+    await expect(page.locator('#public-portfolio')).toContainText('HB41');
+
+    // An empty portfolio is a page, saying so.
+    await page.goto('/photosynthesis/pwte1/');
+    await expect(page.locator('h1')).toContainText('Empty Portfolio');
+    await expect(page.locator('text=This portfolio has no bills.')).toBeVisible();
+  });
+
   test('/photosynthesis/portfolios/ lists organizations with public portfolios', async ({ page }) => {
     await page.goto('/photosynthesis/portfolios/');
     await expect(page.locator('text=Test Organization')).toBeVisible({ timeout: 10000 });

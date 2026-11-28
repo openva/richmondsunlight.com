@@ -8,11 +8,11 @@ error_reporting(E_ALL & ~E_DEPRECATED);
 ini_set('display_errors', '0');
 
 $root = realpath(__DIR__ . '/../htdocs');
-require $root . '/includes/settings.inc.php';
-require $root . '/includes/class.Database.php';
-require $root . '/includes/class.Legislator.php';
-require $root . '/includes/class.Log.php';
-require $root . '/includes/vendor/autoload.php';
+require_once $root . '/includes/settings.inc.php';
+require_once $root . '/includes/class.Database.php';
+require_once $root . '/includes/class.Legislator.php';
+require_once $root . '/includes/class.Log.php';
+require_once $root . '/includes/vendor/autoload.php';
 
 $database = new Database();
 $db = $database->connect_mysqli();
