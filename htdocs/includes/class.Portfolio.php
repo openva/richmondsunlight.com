@@ -347,6 +347,157 @@ class Portfolio
     }
 
     /**
+     * A public portfolio, by its hash, or null if there's none (or it's private): its fields, its
+     * owner as they're shown publicly (owner: their organization or, if none, their first name and
+     * initial; person: the latter; organization; and url, their link), and, for a smart portfolio,
+     * its criteria.
+     */
+    public static function find_public(string $hash): ?array
+    {
+        if (!self::is_hash($hash)) {
+            return null;
+        }
+        $sql = 'SELECT p.id, p.user_id, p.hash, p.name, p.notes, p.public, p.watch_list_id,
+                users.name AS user_name, users.url, d.organization,
+                w.' . implode(', w.', self::CRITERIA) . '
+                FROM dashboard_portfolios p
+                JOIN users ON users.id = p.user_id
+                LEFT JOIN dashboard_user_data d ON d.user_id = p.user_id
+                LEFT JOIN dashboard_watch_lists w ON w.id = p.watch_list_id AND w.user_id = p.user_id
+                WHERE p.hash = ? AND p.public = "y"';
+        $result = mysqli_execute_query($GLOBALS['db'], $sql, [$hash]);
+        $row = $result ? mysqli_fetch_assoc($result) : null;
+        if (!$row) {
+            return null;
+        }
+        $row = array_map('stripslashes_nullsafe', $row);
+        $criteria = array_intersect_key($row, array_flip(self::CRITERIA));
+        $portfolio = self::typed(array_diff_key($row, $criteria, array_flip(['user_name', 'organization', 'url'])));
+        $portfolio['user_id'] = (int) $portfolio['user_id'];
+        $portfolio['owner'] = self::public_name($row['user_name'], $row['organization']);
+        $portfolio['person'] = self::public_name($row['user_name']);
+        $portfolio['organization'] = empty($row['organization']) ? null : $row['organization'];
+        // The owner's link, only if it's to a web page.
+        $portfolio['url'] = preg_match('#^https?://#i', (string) $row['url']) ? $row['url'] : null;
+        if ($portfolio['type'] == 'smart') {
+            $portfolio['criteria'] = $criteria;
+        }
+        return $portfolio;
+    }
+
+    /**
+     * A public portfolio as the API gives it (rs-api's /1.1/photosynthesis/{hash}.json), or null
+     * if there's none (or it's private). An empty portfolio has no bills, rather than being null.
+     *
+     * Notes are plain text: the API's users show them as they like, and rs-api has no HTML
+     * Purifier to make their HTML safe.
+     *
+     * @return array|null hash, name, notes, type ("normal" or "smart"), criteria (a smart
+     *     portfolio's: tag, patron, committee, and description, in words; null for a normal one),
+     *     owner, organization, url (the owner's), page (the portfolio's), and bills (the current
+     *     session's, but those hidden from it: number, catch_line, year, notes, status, date, url).
+     */
+    public static function record_for_api(string $hash): ?array
+    {
+        $portfolio = self::find_public($hash);
+        if ($portfolio === null) {
+            return null;
+        }
+
+        return [
+            'hash' => $portfolio['hash'],
+            'name' => (string) $portfolio['name'],
+            'notes' => self::plain_text($portfolio['notes']),
+            'type' => $portfolio['type'],
+            'criteria' => $portfolio['type'] == 'smart' ? self::criteria_for_api($portfolio['criteria']) : null,
+            'owner' => $portfolio['owner'],
+            'organization' => $portfolio['organization'],
+            'url' => $portfolio['url'],
+            'page' => 'https://www.richmondsunlight.com/photosynthesis/' . $portfolio['hash'] . '/',
+            'bills' => self::bills_for_api($portfolio['id']),
+        ];
+    }
+
+    /**
+     * A smart portfolio's criteria, as the API gives them: the tag; the patron's shortname and
+     * name; the committee's shortname, chamber, and name; and all of them in words. Those not set
+     * (or a patron or committee that's gone) are null.
+     */
+    private static function criteria_for_api(array $criteria): array
+    {
+        $api = [
+            'tag' => empty($criteria['tag']) ? null : $criteria['tag'],
+            'patron' => null,
+            'committee' => null,
+            'description' => self::plain_text(self::describe($criteria)),
+        ];
+        $lookups = [
+            'patron' => ['patron_id', 'SELECT shortname, name FROM people WHERE id = ?'],
+            'committee' => ['committee_id', 'SELECT shortname, chamber, name FROM committees WHERE id = ?'],
+        ];
+        foreach ($lookups as $key => [$field, $sql]) {
+            if (empty($criteria[$field])) {
+                continue;
+            }
+            $result = mysqli_execute_query($GLOBALS['db'], $sql, [(int) $criteria[$field]]);
+            $row = $result ? mysqli_fetch_assoc($result) : null;
+            $api[$key] = $row ?: null;
+        }
+        return $api;
+    }
+
+    /**
+     * A portfolio's bills of the current session, but those hidden from it, as the API gives them.
+     */
+    private static function bills_for_api(int $portfolio_id): array
+    {
+        $sql = 'SELECT bills.number, bills.catch_line, sessions.year, b.notes,
+                (SELECT status FROM bills_status WHERE bill_id = bills.id
+                    ORDER BY date DESC, id DESC LIMIT 1) AS status,
+                (SELECT date FROM bills_status WHERE bill_id = bills.id
+                    ORDER BY date DESC, id DESC LIMIT 1) AS date
+                FROM dashboard_bills b
+                JOIN bills ON bills.id = b.bill_id
+                JOIN sessions ON sessions.id = bills.session_id
+                WHERE b.portfolio_id = ? AND b.excluded = "n" AND bills.session_id = ?
+                ORDER BY bills.chamber DESC,
+                SUBSTRING(bills.number FROM 1 FOR 2) ASC,
+                CAST(LPAD(SUBSTRING(bills.number FROM 3), 4, "0") AS unsigned) ASC';
+        $result = mysqli_execute_query($GLOBALS['db'], $sql, [$portfolio_id, SESSION_ID]);
+        $bills = [];
+        while ($result && ($bill = mysqli_fetch_assoc($result))) {
+            $bill = array_map('stripslashes_nullsafe', $bill);
+            $number = strtolower($bill['number']);
+            $bills[] = [
+                'number' => $number,
+                'catch_line' => $bill['catch_line'],
+                'year' => (string) $bill['year'],
+                'notes' => self::plain_text($bill['notes']),
+                'status' => $bill['status'],
+                'date' => $bill['date'],
+                'url' => 'https://www.richmondsunlight.com/bill/' . $bill['year'] . '/' . $number . '/',
+            ];
+        }
+        return $bills;
+    }
+
+    /**
+     * Notes (or describe()'s HTML) as plain text, or null if there are none: paragraphs and line
+     * breaks kept as line breaks, tags removed, and entities decoded.
+     */
+    public static function plain_text($html): ?string
+    {
+        $html = trim((string) $html);
+        if ($html === '') {
+            return null;
+        }
+        $text = preg_replace(['#<br\s*/?>#i', '#</p>\s*#i'], ["\n", "\n\n"], $html);
+        $text = html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = trim(preg_replace("/\n{3,}/", "\n\n", $text));
+        return $text === '' ? null : $text;
+    }
+
+    /**
      * Mark a portfolio row as normal or smart.
      */
     private static function typed(array $portfolio): array
