@@ -123,7 +123,7 @@ test.describe('Photosynthesis', () => {
     await expect(page.locator('#notes')).toHaveValue(notes);
   });
 
-  test('a smart portfolio can have quotes in its keyword', async ({ page }) => {
+  test('a smart portfolio can have quotes in its tag', async ({ page }) => {
     await loginTestUser(page);
     const name = `Smart Portfolio ${Date.now()}`;
     const token = await csrfToken(page);
@@ -133,13 +133,14 @@ test.describe('Photosynthesis', () => {
         csrf_token: token,
         'add-smart-portfolio': 'y',
         'form_data[name]': name,
-        'form_data[keyword]': '"school") OR SLEEP(3) #',
+        'form_data[tag]': '"school") OR SLEEP(3) #',
       },
       headers: { Referer: '/photosynthesis/' },
     });
     expect(resp.status()).toBe(200);
     expect(Date.now() - started).toBeLessThan(2500);
     await page.goto('/photosynthesis/');
-    await expect(page.locator('h1').filter({ hasText: name })).toBeVisible({ timeout: 15000 });
+    const portfolio = page.locator('.portfolio', { has: page.locator('h1', { hasText: name }) });
+    await expect(portfolio.locator('.criteria')).toContainText('"school") or sleep(3) #');
   });
 });

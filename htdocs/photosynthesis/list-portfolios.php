@@ -35,30 +35,41 @@
 		(Note that a great many individuals also use Photosynthesis to track legislation, but we
 		only list organizations here.)</p>';
 
-    # Select every public organizational portfolio.
-    $sql = 'SELECT DISTINCT dashboard_portfolios.hash, dashboard_user_data.organization
+    # Every organization's public portfolios with bills of this session, each organization once.
+    $sql = 'SELECT dashboard_user_data.organization, dashboard_portfolios.hash, dashboard_portfolios.name
 			FROM dashboard_user_data
-			LEFT JOIN dashboard_portfolios
+			JOIN dashboard_portfolios
 				ON dashboard_user_data.user_id = dashboard_portfolios.user_id
-			WHERE dashboard_user_data.organization IS NOT NULL AND dashboard_portfolios.public="y"
-			AND (
-				SELECT COUNT(*)
+			WHERE dashboard_user_data.organization IS NOT NULL AND dashboard_user_data.organization != ""
+			AND dashboard_portfolios.public = "y"
+			AND EXISTS (
+				SELECT 1
 				FROM dashboard_bills
-				LEFT JOIN bills ON dashboard_bills.bill_id = bills.id
-				LEFT JOIN sessions ON bills.session_id = sessions.id
-				WHERE portfolio_id = dashboard_portfolios.id
-				AND sessions.year = ' . SESSION_YEAR . ') > 0
-			ORDER BY dashboard_user_data.organization ASC';
-    $result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) == 0) {
+				JOIN bills ON dashboard_bills.bill_id = bills.id
+				JOIN sessions ON bills.session_id = sessions.id
+				WHERE dashboard_bills.portfolio_id = dashboard_portfolios.id
+				AND dashboard_bills.excluded = "n"
+				AND sessions.year = ?)
+			ORDER BY dashboard_user_data.organization ASC, dashboard_portfolios.name ASC';
+    $result = mysqli_execute_query($GLOBALS['db'], $sql, [SESSION_YEAR]);
+    $organizations = [];
+    while ($result && ($portfolio = mysqli_fetch_assoc($result))) {
+        $portfolio = array_map('stripslashes_nullsafe', $portfolio);
+        $organizations[$portfolio['organization']][] = $portfolio;
+    }
+
+if (count($organizations) == 0) {
     $page_body .= '<p>No organizations have yet added any bills to Photosynthesis for the current
 			General Assembly session.</p>';
 } else {
-    $page_body .= '<ul>';
-    while ($portfolio = mysqli_fetch_array($result)) {
-        $portfolio = array_map('stripslashes_nullsafe', $portfolio);
-        $page_body .= '<li><a href="/photosynthesis/' . Portfolio::text($portfolio['hash']) . '/">'
-            . Portfolio::text($portfolio['organization']) . '</a></li>';
+    $page_body .= '<ul class="organizations">';
+    foreach ($organizations as $organization => $portfolios) {
+        $links = array_map(
+            fn($portfolio) => '<a href="/photosynthesis/' . Portfolio::text($portfolio['hash']) . '/">'
+                . Portfolio::text($portfolio['name']) . '</a>',
+            $portfolios
+        );
+        $page_body .= '<li><strong>' . Portfolio::text($organization) . '</strong>: ' . implode(', ', $links) . '</li>';
     }
     $page_body .= '</ul>';
 }

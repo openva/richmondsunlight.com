@@ -54,8 +54,13 @@ $html_head = '
 		});
 	</script>';
 
-# Start displaying the main page.
+# Start displaying the main page, with why the last change failed, if it did (see
+# process-actions.php).
 $page_body = '';
+if (!empty($_SESSION['photosynthesis_error'])) {
+    $page_body = '<div id="messages" class="errors">' . Portfolio::text($_SESSION['photosynthesis_error']) . '</div>';
+    unset($_SESSION['photosynthesis_error']);
+}
 
 # Bills can be added to the user's normal portfolios. Everybody should have one, so if they don't,
 # make one.
@@ -69,7 +74,7 @@ if (count($normal) == 0) {
 
 if (count($normal) > 0) {
     # Display the header for the bill add form field.
-    $page_body = '
+    $page_body .= '
 		<div id="add-bill-form">
 			<form method="post" action="/photosynthesis/process-actions.php">
 				' . Csrf::field() . '
@@ -136,6 +141,12 @@ foreach (Portfolio::for_user((int) $user['id']) as $portfolio) {
     if ($portfolio['type'] == 'smart') {
         $page_body .= '
 			<p class="criteria">' . Portfolio::describe($portfolio['criteria'] ?? []) . '.</p>';
+        $tag = $portfolio['criteria']['tag'] ?? '';
+        if ($tag !== '' && $tag !== null && !Portfolio::tag_used($tag)) {
+            $page_body .= '
+			<p class="criteria-note">No bill of this session is tagged <em>' . Portfolio::text($tag) . '</em>
+				yet. Bills are tagged as the session goes, so this may gather some later.</p>';
+        }
     }
 
     # Display the contents of the portfolio.

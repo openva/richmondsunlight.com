@@ -196,9 +196,15 @@ if ($bill['session_id'] == SESSION_ID) {
                 <li><label><input type="checkbox" class="track-portfolio" data-portfolio="' . $hash . '"'
                     . ' data-record="' . $record . '"' . ($record !== '' ? ' checked' : '') . ' /> ' . $name . '</label></li>';
             } elseif (isset($containing[$portfolio['id']])) {
+                // A smart portfolio with this bill, which can hide it (or show it again).
+                $record = $containing[$portfolio['id']];
+                $hidden = $record['excluded'];
                 $smart .= '
-            <p class="track-smart">In <a href="/photosynthesis/#' . $hash . '"><em>' . $name . '</em></a> ('
-                    . lcfirst(Portfolio::describe($portfolio['criteria'] ?? [])) . ').</p>';
+            <p class="track-smart" data-record="' . $hash . '-' . $record['record_id'] . '">'
+                    . ($hidden ? 'Hidden from ' : 'In ') . '<a href="/photosynthesis/#' . $hash . '"><em>' . $name . '</em></a> ('
+                    . lcfirst(Portfolio::describe($portfolio['criteria'] ?? [])) . ').
+                <button type="button" class="track-smart-toggle" data-action="' . ($hidden ? 'show-bill' : 'hide-bill') . '">'
+                    . ($hidden ? 'Show it again' : 'Hide it from this portfolio') . '</button></p>';
             }
         }
         // Somebody with no portfolios yet gets "Bills" when they first check it.
@@ -220,6 +226,21 @@ if ($bill['session_id'] == SESSION_ID) {
 $(document).ready(function() {
     var csrfToken = ' . json_encode(Csrf::token()) . ';
     var $tracker = $("#track-bill");
+    $tracker.on("click", "button.track-smart-toggle", function() {
+        var $button = $(this);
+        var $line = $button.closest(".track-smart");
+        var data = { "csrf_token": csrfToken };
+        data[$button.attr("data-action")] = $line.attr("data-record");
+        $button.prop("disabled", true);
+        $.ajax({ type: "POST", url: "/photosynthesis/process-actions.php", data: data, dataType: "json" })
+            .done(function() {
+                location.reload();
+            })
+            .fail(function() {
+                $button.prop("disabled", false);
+                $tracker.find(".track-message").text("Sorry: that didn’t work. Please reload the page and try again.");
+            });
+    });
     $tracker.on("change", "input.track-portfolio", function() {
         var $box = $(this);
         var adding = $box.prop("checked");

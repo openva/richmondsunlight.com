@@ -83,10 +83,9 @@ class PortfolioTest extends TestCase
 
     public function testCreatingASmartPortfolio(): void
     {
-        $criteria = Portfolio::criteria(['tag' => 'education', 'status' => 'nonsense', 'patron_id' => '12x']);
-        $this->assertSame('education', $criteria['tag']);
-        $this->assertNull($criteria['status']);
-        $this->assertNull($criteria['patron_id']);
+        $criteria = Portfolio::criteria(['tag' => ' Education ', 'status' => 'introduced', 'patron_id' => '12x']);
+        // Tags are lowercase; only a tag, a patron, and a committee are criteria.
+        $this->assertSame(['tag' => 'education', 'patron_id' => null, 'committee_id' => null], $criteria);
 
         $portfolio = $this->make(self::USER, ['name' => 'Education'], $criteria);
         $this->assertSame('smart', $portfolio['type']);
@@ -191,7 +190,8 @@ class PortfolioTest extends TestCase
 
     public function testDeletingAPortfolioDeletesItsBillsAndWatchListAndNobodyElses(): void
     {
-        $smart = $this->make(self::USER, ['name' => 'Doomed'], Portfolio::criteria(['tag' => 'education']));
+        // (A tag that no bill has, so that it starts empty.)
+        $smart = $this->make(self::USER, ['name' => 'Doomed'], Portfolio::criteria(['tag' => 'no bill has this']));
         mysqli_execute_query(
             $GLOBALS['db'],
             'INSERT INTO dashboard_bills SET user_id = ?, bill_id = 77600, portfolio_id = ?, date_created = NOW()',
@@ -284,8 +284,8 @@ class PortfolioTest extends TestCase
     {
         $this->assertSame('Bills tagged <em>education</em>', Portfolio::describe(['tag' => 'education']));
         $this->assertSame(
-            'Bills tagged <em>&lt;b&gt;</em>, now in the Senate',
-            Portfolio::describe(['tag' => '<b>', 'current_chamber' => 'senate'])
+            'Bills tagged <em>&lt;b&gt;</em>, patroned by Green, Chad',
+            Portfolio::describe(['tag' => '<b>', 'patron_id' => 506])
         );
         $committee = mysqli_fetch_assoc(mysqli_query($GLOBALS['db'], 'SELECT id, name, chamber FROM committees WHERE parent_id IS NULL LIMIT 1'));
         if ($committee) {
@@ -339,6 +339,188 @@ class PortfolioTest extends TestCase
         $this->assertStringContainsString('href="/bill/' . SESSION_YEAR . '/hb2049/"', $html);
         $this->assertStringContainsString('No bills yet.', $html);
         $this->assertSame('', Portfolio::sidebar_html(90097));
+    }
+
+    /**
+     * The IDs of the current session's bills in a portfolio, by number, and whether each is
+     * hidden.
+     */
+    private function bills_in(int $portfolio_id): array
+    {
+        $result = mysqli_execute_query(
+            $GLOBALS['db'],
+            'SELECT bills.number, b.excluded FROM dashboard_bills b JOIN bills ON bills.id = b.bill_id
+            WHERE b.portfolio_id = ? AND bills.session_id = ? ORDER BY bills.number',
+            [$portfolio_id, SESSION_ID]
+        );
+        $bills = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $bills[$row['number']] = $row['excluded'];
+        }
+        return $bills;
+    }
+
+    /** The current session's bill numbers that this SQL (on `bills`) finds. */
+    private function numbers(string $where, array $params): array
+    {
+        $result = mysqli_execute_query(
+            $GLOBALS['db'],
+            'SELECT number FROM bills WHERE session_id = ? AND ' . $where . ' ORDER BY number',
+            [SESSION_ID, ...$params]
+        );
+        return array_column(mysqli_fetch_all($result, MYSQLI_ASSOC), 'number');
+    }
+
+    public function testReferralsAreMatchedToCommittees(): void
+    {
+        // HB41's tag is education, its patron wcgreen (506), and it's in House Education (6).
+        $this->assertSame(6, Day::referral_committee('house', 'Referred to Committee on Education', '2025-01-10'));
+        $this->assertSame(5, Day::referral_committee('house', 'Referred to Committee for Courts of Justice', '2025-01-10'));
+        // LIS's "Finance and Appropriations" is our Senate Finance.
+        $this->assertSame(19, Day::referral_committee('senate', 'Rereferred to Finance and Appropriations', '2025-02-10'));
+        $this->assertNull(Day::referral_committee('house', 'Read first time', '2025-01-10'));
+        $this->assertNull(Day::referral_committee('house', 'Referred to Committee on Nonexistent Things', '2025-01-10'));
+    }
+
+    public function testEachCriterionAloneAndTogetherGathersTheRightBills(): void
+    {
+        $tag = $this->make(self::USER, ['name' => 'Tag'], Portfolio::criteria(['tag' => 'education']));
+        $this->assertSame(
+            $this->numbers('id IN (SELECT bill_id FROM tags WHERE tag = ?)', ['education']),
+            array_keys($this->bills_in($tag['id']))
+        );
+        $this->assertArrayHasKey('hb41', $this->bills_in($tag['id']));
+
+        $patron = $this->make(self::USER, ['name' => 'Patron'], Portfolio::criteria(['patron_id' => '506']));
+        $this->assertSame($this->numbers('chief_patron_id = ?', [506]), array_keys($this->bills_in($patron['id'])));
+
+        // Committee: every bill there now, at least.
+        $committee = $this->make(self::USER, ['name' => 'Committee'], Portfolio::criteria(['committee_id' => '6']));
+        $in = array_keys($this->bills_in($committee['id']));
+        foreach ($this->numbers('last_committee_id = ?', [6]) as $number) {
+            $this->assertContains($number, $in);
+        }
+
+        $all = $this->make(self::USER, ['name' => 'All'], Portfolio::criteria(['tag' => 'education', 'patron_id' => '506', 'committee_id' => '6']));
+        $expected = $this->numbers(
+            'id IN (SELECT bill_id FROM tags WHERE tag = ?) AND chief_patron_id = ? AND last_committee_id = ?',
+            ['education', 506, 6]
+        );
+        $this->assertContains('hb41', $expected);
+        $this->assertSame($expected, array_keys($this->bills_in($all['id'])));
+    }
+
+    public function testACommitteeGathersBillsThatWereReferredToItAndMovedOn(): void
+    {
+        // HB19 isn't in House Education; put it on a docket of one of its subcommittees (47), and
+        // HB20 on a referral to it.
+        $hb19 = $this->numbers_ids('hb19');
+        $hb20 = $this->numbers_ids('hb20');
+        mysqli_execute_query($GLOBALS['db'], 'INSERT INTO dockets SET date = "2025-01-15", committee_id = 47, bill_id = ?, date_created = NOW()', [$hb19]);
+        mysqli_execute_query(
+            $GLOBALS['db'],
+            'INSERT INTO bills_status SET bill_id = ?, session_id = ?, status = "Referred to Committee on Education", date = "2025-01-08", chamber = "house", date_created = NOW()',
+            [$hb20, SESSION_ID]
+        );
+        try {
+            Portfolio::forget_referrals();
+            $committee = $this->make(self::USER, ['name' => 'Education committee'], Portfolio::criteria(['committee_id' => '6']));
+            $in = $this->bills_in($committee['id']);
+            $this->assertArrayHasKey('hb19', $in);
+            $this->assertArrayHasKey('hb20', $in);
+        } finally {
+            mysqli_execute_query($GLOBALS['db'], 'DELETE FROM dockets WHERE bill_id = ? AND committee_id = 47 AND date = "2025-01-15"', [$hb19]);
+            mysqli_execute_query($GLOBALS['db'], 'DELETE FROM bills_status WHERE bill_id = ? AND status = "Referred to Committee on Education" AND date = "2025-01-08"', [$hb20]);
+            Portfolio::forget_referrals();
+        }
+    }
+
+    private function numbers_ids(string $number): int
+    {
+        $result = mysqli_execute_query($GLOBALS['db'], 'SELECT id FROM bills WHERE number = ? AND session_id = ?', [$number, SESSION_ID]);
+        return (int) mysqli_fetch_row($result)[0];
+    }
+
+    public function testPopulatingOnlyAddsAndASecondRunAddsNothing(): void
+    {
+        // A tag of the test's own, on HB19.
+        $hb19 = $this->numbers_ids('hb19');
+        mysqli_execute_query($GLOBALS['db'], 'INSERT IGNORE INTO tags SET bill_id = ?, tag = "portfolio test", date_created = NOW()', [$hb19]);
+        try {
+            $portfolio = $this->make(self::USER, ['name' => 'Test tag'], Portfolio::criteria(['tag' => 'portfolio test']));
+            $this->assertSame(['hb19' => 'n'], $this->bills_in($portfolio['id']));
+            $this->assertSame(['added' => 0, 'removed' => 0], Portfolio::populate($portfolio['id']));
+
+            // It stops matching, and stays.
+            mysqli_execute_query($GLOBALS['db'], 'DELETE FROM tags WHERE bill_id = ? AND tag = "portfolio test"', [$hb19]);
+            Portfolio::populate($portfolio['id']);
+            $this->assertSame(['hb19' => 'n'], $this->bills_in($portfolio['id']));
+        } finally {
+            mysqli_execute_query($GLOBALS['db'], 'DELETE FROM tags WHERE bill_id = ? AND tag = "portfolio test"', [$hb19]);
+        }
+
+        // A normal portfolio isn't populated.
+        $this->assertNull(Portfolio::populate(Portfolio::find('pwt01', self::USER)['id']));
+    }
+
+    public function testAHiddenBillIsntAddedBack(): void
+    {
+        $portfolio = $this->make(self::USER, ['name' => 'Education'], Portfolio::criteria(['tag' => 'education']));
+        $record = Portfolio::containing(self::USER, $this->numbers_ids('hb41'))[$portfolio['id']]['record_id'];
+
+        // Only its owner, and only in a smart portfolio.
+        $this->assertNull(Portfolio::exclude($portfolio['hash'], self::OTHER_USER, $record));
+        $this->assertNull(Portfolio::exclude('pwt01', self::USER, $record));
+        $this->assertSame($this->numbers_ids('hb41'), Portfolio::exclude($portfolio['hash'], self::USER, $record));
+
+        $this->assertSame(['added' => 0, 'removed' => 0], Portfolio::populate($portfolio['id']));
+        $this->assertSame('y', $this->bills_in($portfolio['id'])['hb41']);
+
+        // Nor shown in the tab, nor as tracked.
+        $sidebar = array_column(Portfolio::sidebar(self::USER, 1000), null, 'hash');
+        $this->assertNotContains('hb41', array_column($sidebar[$portfolio['hash']]['bills'], 'number'));
+
+        // Shown again.
+        Portfolio::exclude($portfolio['hash'], self::USER, $record, false);
+        $this->assertSame('n', $this->bills_in($portfolio['id'])['hb41']);
+    }
+
+    public function testChangingTheCriteriaRemovesBillsThatNoLongerMatchUnlessTheyHaveNotes(): void
+    {
+        $portfolio = $this->make(self::USER, ['name' => 'Changing'], Portfolio::criteria(['tag' => 'education']));
+        $before = $this->bills_in($portfolio['id']);
+        $this->assertArrayHasKey('hb41', $before);
+        $this->assertArrayHasKey('sb738', $before);
+        // A note on SB738, which isn't Chad Green's.
+        $record = Portfolio::containing(self::USER, $this->numbers_ids('sb738'))[$portfolio['id']]['record_id'];
+        Portfolio::set_notes(self::USER, $record, 'Keep this one.');
+
+        $updated = Portfolio::update($portfolio['hash'], self::USER, ['name' => 'Changing'], Portfolio::criteria(['tag' => 'education', 'patron_id' => '506']));
+        $this->assertSame(506, (int) $updated['criteria']['patron_id']);
+        $after = array_keys($this->bills_in($portfolio['id']));
+        $expected = $this->numbers('id IN (SELECT bill_id FROM tags WHERE tag = ?) AND chief_patron_id = ?', ['education', 506]);
+        $expected[] = 'sb738';
+        sort($expected);
+        $this->assertSame($expected, $after);
+
+        // Saving the same criteria again changes nothing.
+        Portfolio::set_notes(self::USER, $record, '');
+        Portfolio::update($portfolio['hash'], self::USER, ['name' => 'Changing again'], Portfolio::criteria(['tag' => 'education', 'patron_id' => '506']));
+        $this->assertContains('sb738', array_keys($this->bills_in($portfolio['id'])));
+    }
+
+    public function testTheFormsChoicesComeFromTheDatabase(): void
+    {
+        $patrons = Portfolio::patrons();
+        $this->assertGreaterThan(0, count($patrons['house']));
+        $this->assertMatchesRegularExpression('/^.+, .+ \((D|R|I)-\d+\)$/', $patrons['house'][0]['label']);
+        $committees = Portfolio::committees();
+        $this->assertContains(6, array_column($committees['house'], 'id'));
+        $this->assertNotContains(47, array_column($committees['house'], 'id'));
+        $tags = Portfolio::tag_suggestions();
+        $this->assertContains('education', $tags);
+        $this->assertTrue(Portfolio::tag_used('education'));
+        $this->assertFalse(Portfolio::tag_used('no bill has this tag'));
     }
 
     public function testNotesAreCleanedForDisplay(): void

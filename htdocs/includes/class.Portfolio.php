@@ -43,15 +43,16 @@ class Portfolio
     ];
 
     /**
-     * A smart portfolio's criteria, as dashboard_watch_lists stores them. Phase 3 of
-     * docs/portfolios.md narrows these to tag, patron, and committee.
+     * A smart portfolio's criteria, as dashboard_watch_lists stores them: a tag, a patron (a
+     * people.id, as bills.chief_patron_id is, so it follows them from term to term), and a
+     * committee (a full committee's ID). A bill has to match all that are set.
      */
-    const CRITERIA = ['tag', 'keyword', 'status', 'current_chamber', 'patron_id', 'committee_id'];
+    const CRITERIA = ['tag', 'patron_id', 'committee_id'];
 
     /**
-     * The values that a watch list's status can have.
+     * The referrals of the current session's bills to each committee (see referrals()).
      */
-    const STATUSES = ['introduced', 'passed house', 'passed senate', 'passed', 'failed', 'continued', 'approved', 'vetoed'];
+    private static ?array $referrals = null;
 
     /**
      * The HTML Purifier that cleans notes (see notes_html()).
@@ -163,7 +164,7 @@ class Portfolio
                 [(int) $criteria['patron_id']]
             );
             $person = $result ? mysqli_fetch_assoc($result) : null;
-            $parts[] = 'introduced by ' . self::text($person ? $person['name'] : 'a legislator who’s no longer listed');
+            $parts[] = 'patroned by ' . self::text($person ? $person['name'] : 'a legislator who’s no longer listed');
         }
         if (!empty($criteria['committee_id'])) {
             $result = mysqli_execute_query(
@@ -176,33 +177,25 @@ class Portfolio
                 ? 'in the ' . self::text(ucfirst($committee['chamber']) . ' ' . $committee['name']) . ' Committee'
                 : 'in a committee that no longer exists';
         }
-        if (!empty($criteria['keyword'])) {
-            $parts[] = 'mentioning <em>' . self::text($criteria['keyword']) . '</em>';
-        }
-        if (!empty($criteria['status'])) {
-            $parts[] = 'with the status <em>' . self::text($criteria['status']) . '</em>';
-        }
-        if (!empty($criteria['current_chamber'])) {
-            $parts[] = 'now in the ' . ($criteria['current_chamber'] == 'house' ? 'House' : 'Senate');
-        }
         return count($parts) > 0 ? 'Bills ' . implode(', ', $parts) : 'Bills matching nothing yet';
     }
 
     /**
      * Which of a user's portfolios have this bill.
      *
-     * @return array[] By portfolio ID: its record's ID (record_id), and whether it's hidden.
+     * @return array[] By portfolio ID: its record's ID (record_id), and whether it's hidden from
+     *     that (smart) portfolio (excluded).
      */
     public static function containing(int $user_id, int $bill_id): array
     {
         $result = mysqli_execute_query(
             $GLOBALS['db'],
-            'SELECT id, portfolio_id FROM dashboard_bills WHERE user_id = ? AND bill_id = ?',
+            'SELECT id, portfolio_id, excluded FROM dashboard_bills WHERE user_id = ? AND bill_id = ?',
             [$user_id, $bill_id]
         );
         $records = [];
         while ($result && ($row = mysqli_fetch_assoc($result))) {
-            $records[(int) $row['portfolio_id']] = ['record_id' => (int) $row['id']];
+            $records[(int) $row['portfolio_id']] = ['record_id' => (int) $row['id'], 'excluded' => $row['excluded'] == 'y'];
         }
         return $records;
     }
@@ -222,7 +215,7 @@ class Portfolio
                 JOIN dashboard_portfolios p ON p.id = b.portfolio_id
                 JOIN users ON users.id = p.user_id
                 LEFT JOIN dashboard_user_data d ON d.user_id = p.user_id
-                WHERE b.bill_id = ? AND p.public = "y"' . ($except_user_id !== null ? ' AND p.user_id != ?' : '') . '
+                WHERE b.bill_id = ? AND b.excluded = "n" AND p.public = "y"' . ($except_user_id !== null ? ' AND p.user_id != ?' : '') . '
                 GROUP BY p.user_id, users.name, d.organization
                 ORDER BY MIN(p.id)';
         $params = $except_user_id !== null ? [$bill_id, $except_user_id] : [$bill_id];
@@ -274,7 +267,7 @@ class Portfolio
                 (SELECT MAX(date) FROM bills_status WHERE bill_id = bills.id) AS date
                 FROM dashboard_bills b
                 JOIN bills ON bills.id = b.bill_id
-                WHERE b.user_id = ? AND bills.session_id = ?
+                WHERE b.user_id = ? AND bills.session_id = ? AND b.excluded = "n"
                 ORDER BY date DESC, bills.number ASC';
         $result = mysqli_execute_query($GLOBALS['db'], $sql, [$user_id, SESSION_ID]);
         while ($result && ($row = mysqli_fetch_assoc($result))) {
@@ -397,13 +390,10 @@ class Portfolio
         foreach (self::CRITERIA as $field) {
             $value = isset($form[$field]) && is_string($form[$field]) ? trim($form[$field]) : '';
             if (in_array($field, ['patron_id', 'committee_id'])) {
-                $criteria[$field] = ctype_digit($value) ? (int) $value : null;
-            } elseif ($field == 'status') {
-                $criteria[$field] = in_array($value, self::STATUSES, true) ? $value : null;
-            } elseif ($field == 'current_chamber') {
-                $criteria[$field] = in_array($value, ['house', 'senate'], true) ? $value : null;
+                $criteria[$field] = ctype_digit($value) && $value !== '0' ? (int) $value : null;
             } else {
-                $value = mb_substr($value, 0, $field == 'tag' ? 30 : 120);
+                // Tags are lowercase, and at most 30 characters.
+                $value = mb_substr(mb_strtolower(preg_replace('/\s+/', ' ', $value)), 0, 30);
                 $criteria[$field] = $value === '' ? null : $value;
             }
         }
@@ -463,7 +453,11 @@ class Portfolio
                 $errno = $e->getCode();
             }
             if ($created) {
+                $portfolio_id = (int) mysqli_insert_id($GLOBALS['db']);
                 self::ensure_user_data($user_id);
+                if ($watch_list_id !== null) {
+                    self::populate($portfolio_id);
+                }
                 return self::find($hash, $user_id);
             }
             if ($errno != self::DUPLICATE_KEY) {
@@ -505,6 +499,12 @@ class Portfolio
         if (array_key_exists('notes', $fields) && $fields['notes'] === '') {
             $fields['notes'] = null;
         }
+        if ($criteria !== null && $portfolio['type'] == 'smart') {
+            $criteria = array_intersect_key($criteria, array_flip(self::CRITERIA));
+            if (count(array_filter($criteria, fn($value) => $value !== null)) == 0) {
+                return null;
+            }
+        }
 
         if (count($fields) > 0) {
             $sql = 'UPDATE dashboard_portfolios
@@ -515,21 +515,297 @@ class Portfolio
             }
         }
 
+        // Changing a smart portfolio's criteria fills it again, and takes out the bills that no
+        // longer match (except those with notes).
         if ($criteria !== null && $portfolio['type'] == 'smart') {
-            $criteria = array_intersect_key($criteria, array_flip(self::CRITERIA));
-            if (count(array_filter($criteria, fn($value) => $value !== null)) == 0) {
-                return null;
+            $changed = false;
+            foreach ($criteria as $field => $value) {
+                if ((string) ($portfolio['criteria'][$field] ?? '') !== (string) $value) {
+                    $changed = true;
+                }
             }
-            $sql = 'UPDATE dashboard_watch_lists
-                    SET ' . implode(' = ?, ', array_keys($criteria)) . ' = ?
-                    WHERE id = ? AND user_id = ?';
-            $params = [...array_values($criteria), $portfolio['watch_list_id'], $user_id];
-            if (!mysqli_execute_query($GLOBALS['db'], $sql, $params)) {
-                return null;
+            if ($changed) {
+                $sql = 'UPDATE dashboard_watch_lists
+                        SET ' . implode(' = ?, ', array_keys($criteria)) . ' = ?
+                        WHERE id = ? AND user_id = ?';
+                $params = [...array_values($criteria), $portfolio['watch_list_id'], $user_id];
+                if (!mysqli_execute_query($GLOBALS['db'], $sql, $params)) {
+                    return null;
+                }
+                self::populate($portfolio['id'], true);
             }
         }
 
         return self::find($hash, $user_id);
+    }
+
+    /**
+     * The SQL condition (on `bills`) for the bills of the current session that match a smart
+     * portfolio's criteria, and its parameters, or null if it has none.
+     *
+     * A bill matches a committee if it was referred to it this session, not only if it's there
+     * now: if it's there now (bills.last_committee_id), if it was on a docket of the committee or
+     * of one of its subcommittees, or if an action referred it there (see referrals()).
+     *
+     * @return array|null [string $sql, array $params]
+     */
+    public static function matching(array $criteria): ?array
+    {
+        $sql = ['bills.session_id = ?'];
+        $params = [SESSION_ID];
+        $any = false;
+        if (!empty($criteria['tag'])) {
+            $sql[] = 'EXISTS (SELECT 1 FROM tags WHERE tags.bill_id = bills.id AND tags.tag = ?)';
+            $params[] = (string) $criteria['tag'];
+            $any = true;
+        }
+        if (!empty($criteria['patron_id'])) {
+            $sql[] = 'bills.chief_patron_id = ?';
+            $params[] = (int) $criteria['patron_id'];
+            $any = true;
+        }
+        if (!empty($criteria['committee_id'])) {
+            $committee_id = (int) $criteria['committee_id'];
+            $referred = self::referrals()[$committee_id] ?? [];
+            $sql[] = '(bills.last_committee_id = ?
+                OR EXISTS (SELECT 1 FROM dockets JOIN committees ON committees.id = dockets.committee_id
+                    WHERE dockets.bill_id = bills.id AND (committees.id = ? OR committees.parent_id = ?))'
+                . (count($referred) > 0 ? ' OR bills.id IN (' . implode(', ', array_map('intval', $referred)) . ')' : '')
+                . ')';
+            array_push($params, $committee_id, $committee_id, $committee_id);
+            $any = true;
+        }
+        return $any ? [implode(' AND ', $sql), $params] : null;
+    }
+
+    /**
+     * The current session's bills that actions referred to each committee, by the committee's
+     * ID, from LIS's text ("Referred to Committee on Finance"; see Day::referral_committee()).
+     *
+     * @return array<int, int[]>
+     */
+    public static function referrals(): array
+    {
+        if (self::$referrals !== null) {
+            return self::$referrals;
+        }
+        self::$referrals = [];
+        $result = mysqli_execute_query(
+            $GLOBALS['db'],
+            'SELECT bills_status.bill_id, bills_status.status, bills_status.date,
+            COALESCE(bills_status.chamber, bills.chamber) AS chamber
+            FROM bills_status
+            JOIN bills ON bills.id = bills_status.bill_id
+            WHERE bills.session_id = ? AND bills_status.status REGEXP "^(re)?referred to"',
+            [SESSION_ID]
+        );
+        while ($result && ($row = mysqli_fetch_assoc($result))) {
+            $date = $row['date'] ? substr($row['date'], 0, 10) : date('Y-m-d');
+            $committee_id = Day::referral_committee((string) $row['chamber'], $row['status'], $date);
+            if ($committee_id !== null) {
+                self::$referrals[$committee_id][] = (int) $row['bill_id'];
+            }
+        }
+        foreach (self::$referrals as $committee_id => $bill_ids) {
+            self::$referrals[$committee_id] = array_values(array_unique($bill_ids));
+        }
+        return self::$referrals;
+    }
+
+    /**
+     * Forget the referrals that referrals() found, so that it looks again. (For a long-running
+     * process, and tests.)
+     */
+    public static function forget_referrals(): void
+    {
+        self::$referrals = null;
+    }
+
+    /**
+     * Fill a smart portfolio with the current session's bills that match its criteria, in one
+     * query. It only adds bills: a bill that stops matching stays, with its notes, and a bill
+     * hidden from the portfolio (excluded) keeps its row, so it isn't added again.
+     *
+     * @param bool $prune Also take out the current session's bills that no longer match, except
+     *     those with notes. For when the criteria have changed.
+     * @return array|null How many bills were added and removed, or null if it isn't a smart
+     *     portfolio.
+     */
+    public static function populate(int $portfolio_id, bool $prune = false): ?array
+    {
+        $sql = 'SELECT p.id, p.user_id, ' . implode(', ', array_map(fn($field) => 'w.' . $field, self::CRITERIA)) . '
+                FROM dashboard_portfolios p
+                JOIN dashboard_watch_lists w ON w.id = p.watch_list_id
+                WHERE p.id = ?';
+        $result = mysqli_execute_query($GLOBALS['db'], $sql, [$portfolio_id]);
+        $portfolio = $result ? mysqli_fetch_assoc($result) : null;
+        if (!$portfolio) {
+            return null;
+        }
+        $matching = self::matching($portfolio);
+        if ($matching === null) {
+            return ['added' => 0, 'removed' => 0];
+        }
+        [$condition, $params] = $matching;
+        $user_id = (int) $portfolio['user_id'];
+
+        $removed = 0;
+        if ($prune) {
+            $sql = 'DELETE dashboard_bills FROM dashboard_bills
+                    JOIN bills ON bills.id = dashboard_bills.bill_id
+                    WHERE dashboard_bills.portfolio_id = ? AND bills.session_id = ?
+                    AND (dashboard_bills.notes IS NULL OR dashboard_bills.notes = "")
+                    AND NOT (' . $condition . ')';
+            mysqli_execute_query($GLOBALS['db'], $sql, [$portfolio_id, SESSION_ID, ...$params]);
+            $removed = max(0, mysqli_affected_rows($GLOBALS['db']));
+        }
+
+        $sql = 'INSERT INTO dashboard_bills (user_id, bill_id, portfolio_id, date_created)
+                SELECT ?, bills.id, ?, NOW()
+                FROM bills
+                WHERE ' . $condition . '
+                ON DUPLICATE KEY UPDATE dashboard_bills.bill_id = dashboard_bills.bill_id';
+        mysqli_execute_query($GLOBALS['db'], $sql, [$user_id, $portfolio_id, ...$params]);
+        $added = max(0, mysqli_affected_rows($GLOBALS['db']));
+
+        return ['added' => $added, 'removed' => $removed];
+    }
+
+    /**
+     * Populate every smart portfolio (as rs-machine's photosynthesis task does, hourly).
+     *
+     * @return array How many portfolios were populated and failed, and bills added.
+     */
+    public static function populate_all(): array
+    {
+        self::forget_referrals();
+        $counts = ['portfolios' => 0, 'failed' => 0, 'added' => 0];
+        $result = mysqli_query($GLOBALS['db'], 'SELECT id FROM dashboard_portfolios WHERE watch_list_id IS NOT NULL');
+        while ($result && ($row = mysqli_fetch_assoc($result))) {
+            $populated = self::populate((int) $row['id']);
+            if ($populated === null) {
+                $counts['failed']++;
+                continue;
+            }
+            $counts['portfolios']++;
+            $counts['added'] += $populated['added'];
+        }
+        return $counts;
+    }
+
+    /**
+     * Hide a bill from a user's smart portfolio, or show it again. A hidden bill stays out, even
+     * though it still matches.
+     *
+     * @return int|null The bill's ID, or null if the record isn't in that smart portfolio of theirs.
+     */
+    public static function exclude(string $hash, int $user_id, int $record_id, bool $excluded = true): ?int
+    {
+        $portfolio = self::find($hash, $user_id);
+        if ($portfolio === null || $portfolio['type'] != 'smart') {
+            return null;
+        }
+        $result = mysqli_execute_query(
+            $GLOBALS['db'],
+            'SELECT bill_id FROM dashboard_bills WHERE id = ? AND portfolio_id = ? AND user_id = ?',
+            [$record_id, $portfolio['id'], $user_id]
+        );
+        $record = $result ? mysqli_fetch_assoc($result) : null;
+        if (!$record) {
+            return null;
+        }
+        mysqli_execute_query(
+            $GLOBALS['db'],
+            'UPDATE dashboard_bills SET excluded = ? WHERE id = ? AND portfolio_id = ? AND user_id = ?',
+            [$excluded ? 'y' : 'n', $record_id, $portfolio['id'], $user_id]
+        );
+        return (int) $record['bill_id'];
+    }
+
+    /**
+     * Whether any of the current session's bills has this tag (a smart portfolio's tag may not be
+     * used yet: bills are tagged as the session goes).
+     */
+    public static function tag_used(string $tag): bool
+    {
+        $result = mysqli_execute_query(
+            $GLOBALS['db'],
+            'SELECT 1 FROM tags JOIN bills ON bills.id = tags.bill_id WHERE tags.tag = ? AND bills.session_id = ? LIMIT 1',
+            [$tag, SESSION_ID]
+        );
+        return $result !== false && mysqli_num_rows($result) > 0;
+    }
+
+    /**
+     * The tags that a smart portfolio's form suggests: the current session's, most used first,
+     * then other sessions'.
+     *
+     * @return string[]
+     */
+    public static function tag_suggestions(int $limit = 1500): array
+    {
+        $result = mysqli_execute_query(
+            $GLOBALS['db'],
+            'SELECT tags.tag, MAX(bills.session_id = ?) AS current, COUNT(*) AS n
+            FROM tags JOIN bills ON bills.id = tags.bill_id
+            GROUP BY tags.tag
+            ORDER BY current DESC, n DESC, tags.tag ASC
+            LIMIT ' . (int) $limit,
+            [SESSION_ID]
+        );
+        $tags = [];
+        while ($result && ($row = mysqli_fetch_assoc($result))) {
+            $tags[] = mb_strtolower($row['tag']);
+        }
+        return array_values(array_unique($tags));
+    }
+
+    /**
+     * The legislators serving now, for a smart portfolio's form: by chamber, each with their
+     * person's ID (id) and a label, "McClure, Adele (D-2)".
+     *
+     * @return array<string, array[]> "house" and "senate"
+     */
+    public static function patrons(): array
+    {
+        $result = mysqli_query(
+            $GLOBALS['db'],
+            'SELECT people.id, people.name, terms.party, terms.chamber, districts.number
+            FROM terms
+            JOIN people ON people.id = terms.person_id
+            LEFT JOIN districts ON districts.id = terms.district_id
+            WHERE terms.date_started <= CURDATE() AND (terms.date_ended IS NULL OR terms.date_ended >= CURDATE())
+            ORDER BY terms.chamber ASC, people.name ASC'
+        );
+        $patrons = ['house' => [], 'senate' => []];
+        while ($result && ($row = mysqli_fetch_assoc($result))) {
+            $patrons[$row['chamber']][] = [
+                'id' => (int) $row['id'],
+                'label' => $row['name'] . ' (' . $row['party'] . ($row['number'] ? '-' . $row['number'] : '') . ')',
+            ];
+        }
+        return $patrons;
+    }
+
+    /**
+     * The full committees that exist now, for a smart portfolio's form, by chamber, each with its
+     * ID and name.
+     *
+     * @return array<string, array[]> "house" and "senate"
+     */
+    public static function committees(): array
+    {
+        $result = mysqli_query(
+            $GLOBALS['db'],
+            'SELECT id, name, chamber FROM committees
+            WHERE parent_id IS NULL AND date_ended IS NULL
+            ORDER BY chamber ASC, name ASC'
+        );
+        $committees = ['house' => [], 'senate' => []];
+        while ($result && ($row = mysqli_fetch_assoc($result))) {
+            $committees[$row['chamber']][] = ['id' => (int) $row['id'], 'label' => $row['name']];
+        }
+        return $committees;
     }
 
     /**

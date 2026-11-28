@@ -265,6 +265,88 @@ test.describe('Photosynthesis', () => {
     expect((await act(page, { 'delete-portfolio': hash })).success).toBe(true);
   });
 
+  test('a smart portfolio made by tag lists its bills, privately and publicly', async ({ page }) => {
+    await loginAs(page, 'testuser@example.com');
+    await page.goto('/photosynthesis/');
+    const name = `By tag ${Date.now()}`;
+    await page.locator('a[href="#create-smart-portfolio"]').click();
+    const form = page.locator('form:has(input[name="add-smart-portfolio"])');
+    await form.locator('input[name="form_data[name]"]').fill(name);
+    // The tag box suggests tags.
+    await expect(form.locator('datalist option[value="fishery"]')).toHaveCount(1);
+    await form.locator('input[name="form_data[tag]"]').fill('Fishery');
+    await Promise.all([page.waitForNavigation(), form.locator('input[type="submit"]').click()]);
+
+    const portfolio = page.locator('.portfolio', { has: page.locator('h1', { hasText: name }) });
+    await expect(portfolio.locator('.criteria')).toHaveText('Bills tagged fishery.');
+    await expect(portfolio.getByRole('cell', { name: 'HB19' })).toBeVisible();
+    const hash = await hashOf(page, name);
+
+    await page.goto(`/photosynthesis/${hash}/`);
+    await expect(page.locator('#public-portfolio')).toContainText('HB19');
+
+    expect((await act(page, { 'delete-portfolio': hash })).success).toBe(true);
+  });
+
+  test('a smart portfolio’s form shows what’s saved, and needs a criterion', async ({ page }) => {
+    await loginAs(page, 'testuser@example.com');
+    const name = `Saved ${Date.now()}`;
+    // Chad Green (506), and House Education (6).
+    expect((await act(page, { 'add-smart-portfolio': 'y', 'form_data[name]': name, 'form_data[patron_id]': '506', 'form_data[committee_id]': '6' })).success).toBe(true);
+    const hash = await hashOf(page, name);
+
+    await page.goto(`/photosynthesis/portfolios/edit/${hash}/`);
+    await expect(page.locator('#patron')).toHaveValue('506');
+    await expect(page.locator('#committee')).toHaveValue('6');
+    await expect(page.locator('#tag')).toHaveValue('');
+    await expect(page.locator('.warning')).toContainText('except those you’ve written notes on');
+
+    // Taking every criterion away is refused.
+    await page.locator('#patron').selectOption('');
+    await page.locator('#committee').selectOption('');
+    await Promise.all([page.waitForNavigation(), page.locator('#submit').click()]);
+    await expect(page.locator('#messages')).toContainText('needs a tag, a patron, or a committee');
+
+    // Without a criterion, it can't be made, either.
+    expect((await act(page, { 'add-smart-portfolio': 'y', 'form_data[name]': name })).success).toBe(false);
+    await page.goto('/photosynthesis/');
+    expect((await act(page, { 'delete-portfolio': hash })).success).toBe(true);
+  });
+
+  test('a bill can be hidden from a smart portfolio, and shown again', async ({ page }) => {
+    await loginAs(page, 'testuser@example.com');
+    const name = `Hiding ${Date.now()}`;
+    expect((await act(page, { 'add-smart-portfolio': 'y', 'form_data[name]': name, 'form_data[tag]': 'fishery' })).success).toBe(true);
+    const hash = await hashOf(page, name);
+
+    // From the bill's page.
+    await page.goto('/bill/2025/hb19/');
+    const line = page.locator('#track-bill .track-smart', { hasText: name });
+    await expect(line).toContainText('In');
+    await Promise.all([page.waitForNavigation(), line.locator('button').click()]);
+    await expect(page.locator('#track-bill .track-smart', { hasText: name })).toContainText('Hidden from');
+
+    // It's listed as hidden, and isn't on the public page.
+    await page.goto('/photosynthesis/');
+    await expect(page.locator(`#listing-${hash}`)).toHaveCount(0);
+    const hidden = page.locator(`#hidden-${hash}`);
+    await expect(hidden).toContainText('HB19');
+    let html = await (await page.request.get(`/photosynthesis/${hash}/`)).text();
+    expect(html).not.toContain('HB19');
+
+    // Shown again, from the private page.
+    await Promise.all([page.waitForNavigation(), hidden.locator('button', { hasText: 'Show again' }).click()]);
+    await expect(page.locator(`#listing-${hash}`).getByRole('cell', { name: 'HB19' })).toBeVisible();
+    html = await (await page.request.get(`/photosynthesis/${hash}/`)).text();
+    expect(html).toContain('HB19');
+
+    // And hidden from the private page.
+    await Promise.all([page.waitForNavigation(), page.locator(`#listing-${hash} form.hide-bill button`).first().click()]);
+    await expect(page.locator(`#hidden-${hash}`)).toContainText('HB19');
+
+    expect((await act(page, { 'delete-portfolio': hash })).success).toBe(true);
+  });
+
   test('public portfolio page shows pre-loaded bill', async ({ page }) => {
     await page.goto('/photosynthesis/pwtp1/');
     await expect(page.locator('text=HB2049').first()).toBeVisible({ timeout: 10000 });

@@ -248,13 +248,31 @@ div.portfolio p.criteria {
 		font-weight: bold;
 	}
 
+/* A smart portfolio's hidden bills, and notes about its criteria */
+div.portfolio div.hidden-bills,
+div.portfolio p.criteria-note {
+	padding: .5em 10px;
+	font-size: .9em;
+}
+	div.portfolio div.hidden-bills p {
+		margin: 0 0 .25em;
+	}
+	div.portfolio div.hidden-bills ul {
+		margin: 0;
+		padding-left: 1.5em;
+	}
+
 /* Delete buttons: forms (they're posted, with a CSRF token) that look like links */
 form.delete-bill,
+form.hide-bill,
+form.show-bill,
 form.delete-portfolio {
 	display: inline;
 	margin: 0;
 }
 	form.delete-bill button,
+	form.hide-bill button,
+	form.show-bill button,
 	form.delete-portfolio button {
 		background: none;
 		border: none;
@@ -263,7 +281,9 @@ form.delete-portfolio {
 		text-transform: inherit;
 		cursor: pointer;
 	}
-	form.delete-bill button {
+	form.delete-bill button,
+	form.hide-bill button,
+	form.show-bill button {
 		color: #790806;
 		font-size: 0.8em;
 	}
@@ -271,6 +291,8 @@ form.delete-portfolio {
 		color: #000;
 	}
 	form.delete-bill button:hover,
+	form.hide-bill button:hover,
+	form.show-bill button:hover,
 	form.delete-portfolio button:hover {
 		text-decoration: underline;
 	}

@@ -98,6 +98,7 @@ class Comments
 					LEFT JOIN dashboard_user_data
 						ON dashboard_user_data.user_id = users.id
 					WHERE dashboard_bills.bill_id=' . $billInfo['id'] . ' AND dashboard_bills.notes IS NOT NULL
+					AND dashboard_bills.excluded = "n"
 					ORDER BY date_modified ASC';
             $result = mysqli_query($GLOBALS['db'], $sql);
             if (mysqli_num_rows($result) > 0) {

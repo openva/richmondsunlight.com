@@ -46,6 +46,10 @@ function finish($success, $status = 200, $data = [])
         echo 'Sorry: That couldn’t be done. Please go back, reload the page, and try again.';
         exit;
     }
+    # Why it failed is shown on the next page (see index.php).
+    if (!$success && isset($data['error'])) {
+        $_SESSION['photosynthesis_error'] = $data['error'];
+    }
     $back = '/photosynthesis/';
     $referer = parse_url((string) ($_SERVER['HTTP_REFERER'] ?? ''));
     if (
@@ -121,6 +125,19 @@ if (isset($_POST['delete-portfolio'])) {
     finish(true);
 }
 
+# Hide a bill from a smart portfolio, or show it again. Named like a bill to remove ("abcde-123").
+foreach (['hide-bill' => true, 'show-bill' => false] as $action => $excluded) {
+    if (isset($_POST[$action])) {
+        $parts = explode('-', (string) $_POST[$action], 2);
+        $bill_id = Portfolio::exclude($parts[0], $user_id, (int) ($parts[1] ?? 0), $excluded);
+        if ($bill_id === null) {
+            finish(false, 404, ['error' => 'That bill isn’t in that smart portfolio.']);
+        }
+        Portfolio::expire_bills([$bill_id]);
+        finish(true);
+    }
+}
+
 $form_data = (isset($_POST['form_data']) && is_array($_POST['form_data'])) ? $_POST['form_data'] : [];
 
 # Create a portfolio.
@@ -129,13 +146,10 @@ if (isset($_POST['add-portfolio'])) {
     finish($portfolio !== null, 422, ['error' => 'A portfolio needs a name.']);
 }
 
-# Create a smart portfolio, and fill it.
+# Create a smart portfolio. (Portfolio::create() fills it.)
 if (isset($_POST['add-smart-portfolio'])) {
     $portfolio = Portfolio::create($user_id, $form_data, Portfolio::criteria($form_data));
-    if ($portfolio !== null) {
-        populate_smart_portfolio($portfolio['id']);
-    }
-    finish($portfolio !== null, 422, ['error' => 'A smart portfolio needs a name and at least one criterion.']);
+    finish($portfolio !== null, 422, ['error' => 'A smart portfolio needs a name, and a tag, a patron, or a committee.']);
 }
 
 finish(false, 400, ['error' => 'Nothing to do.']);

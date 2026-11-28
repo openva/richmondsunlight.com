@@ -285,6 +285,26 @@ class Day
     }
 
     /**
+     * The committee (not subcommittee) that a referral sent a bill to, from LIS's text: "Referred
+     * to Committee on Finance," "Rereferred to Finance and Appropriations," "Referred to Committee
+     * for Courts of Justice." For smart portfolios (see Portfolio::populate()).
+     *
+     * @param string $chamber The chamber the action was in
+     * @param string $status The action's text
+     * @param string $date YYYY-MM-DD
+     * @return int|null The committee's ID, or null if it isn't a referral, or names no committee
+     */
+    public static function referral_committee(string $chamber, string $status, string $date): ?int
+    {
+        if (!preg_match('/^(?:Re)?referred to (?:the )?(?:Committee (?:on|for) (?:the )?)?(.+?)\s*(?:\(|$)/i', trim($status), $matches)) {
+            return null;
+        }
+        $committee = self::committee_named($chamber, $matches[1], $date);
+
+        return $committee === null ? null : (int) $committee['id'];
+    }
+
+    /**
      * The committee (not subcommittee) with a name, in a chamber, preferring one that existed on
      * a date, and then one that still exists.
      *

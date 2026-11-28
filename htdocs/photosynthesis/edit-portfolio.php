@@ -60,15 +60,14 @@ if (isset($_POST['submit'])) {
 				</ul>
 			</div>';
     } else {
-        # A smart portfolio's criteria are changed too, and then it's filled again.
+        # A smart portfolio's criteria are changed too, and then it's filled again (by update()).
         $criteria = $portfolio['type'] == 'smart' ? Portfolio::criteria($form_data) : null;
         $updated = Portfolio::update($hash, $user_id, $form_data, $criteria);
-        if ($updated === null) {
+        if ($updated === null && $criteria !== null && count(array_filter($criteria, fn($value) => $value !== null)) == 0) {
+            $message = '<div id="messages" class="errors">A smart portfolio needs a tag, a patron, or a committee.</div>';
+        } elseif ($updated === null) {
             $message = '<div id="messages" class="errors">Sorry: This portfolio could not be edited.</div>';
         } else {
-            if ($updated['type'] == 'smart') {
-                populate_smart_portfolio($updated['id']);
-            }
             header('Location: /photosynthesis/#' . $updated['hash']);
             exit;
         }

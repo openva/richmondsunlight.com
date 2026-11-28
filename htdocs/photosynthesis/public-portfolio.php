@@ -136,7 +136,7 @@ else {
 				ON dashboard_bills.bill_id=bills.id
 			LEFT JOIN sessions
 				ON bills.session_id = sessions.id
-			WHERE dashboard_bills.portfolio_id = ?
+			WHERE dashboard_bills.portfolio_id = ? AND dashboard_bills.excluded = "n"
 			AND sessions.year = ?
 			GROUP BY tags.tag
 			ORDER BY tags.tag ASC';
@@ -171,7 +171,7 @@ else {
 				ON bills.chief_patron_id = representatives.id
 			LEFT JOIN dashboard_bills
 				ON dashboard_bills.bill_id = bills.id
-			WHERE dashboard_bills.portfolio_id = ?
+			WHERE dashboard_bills.portfolio_id = ? AND dashboard_bills.excluded = "n"
 			AND sessions.year = ?
 			ORDER BY bills.chamber DESC,
 			SUBSTRING(bills.number FROM 1 FOR 2) ASC,

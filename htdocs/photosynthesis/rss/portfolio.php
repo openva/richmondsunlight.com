@@ -62,7 +62,7 @@ $sql = 'SELECT bills.number, bills.catch_line, bills.summary, bills.date_modifie
 			ON bills.id=dashboard_bills.bill_id
 		LEFT JOIN dashboard_portfolios
 			ON dashboard_bills.portfolio_id = dashboard_portfolios.id
-		WHERE dashboard_portfolios.id = ?
+		WHERE dashboard_portfolios.id = ? AND dashboard_bills.excluded = "n"
 		AND bills.session_id = ?';
 $result = mysqli_execute_query($GLOBALS['db'], $sql, [(int) $portfolio['id'], SESSION_ID]);
 
