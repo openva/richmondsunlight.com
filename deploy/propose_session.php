@@ -13,7 +13,7 @@
 
 declare(strict_types=1);
 
-require __DIR__ . '/SessionSettings.php';
+require_once __DIR__ . '/SessionSettings.php';
 
 const SETTINGS_FILE = __DIR__ . '/../htdocs/includes/settings-default.inc.php';
 const SESSIONS_URL = 'https://downloads.richmondsunlight.com/sessions.json';

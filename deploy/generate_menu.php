@@ -12,10 +12,10 @@ error_reporting(E_ALL & ~E_DEPRECATED);
 ini_set('display_errors', '0');
 
 $root = realpath(__DIR__ . '/../htdocs');
-require $root . '/includes/settings.inc.php';
-require $root . '/includes/class.Database.php';
-require $root . '/includes/class.Legislator.php';
-require $root . '/includes/vendor/autoload.php';
+require_once $root . '/includes/settings.inc.php';
+require_once $root . '/includes/class.Database.php';
+require_once $root . '/includes/class.Legislator.php';
+require_once $root . '/includes/vendor/autoload.php';
 
 // Fail, printing nothing, if there's no database or no legislators, so that postdeploy.sh keeps
 // the menu it has, rather than replacing it with a broken one.

@@ -1,12 +1,12 @@
 <?php
 
-require __DIR__ . '/../htdocs/includes/settings.inc.php';
-require __DIR__ . '/../htdocs/includes/class.Database.php';
-require __DIR__ . '/../htdocs/includes/class.Legislator.php';
-require __DIR__ . '/../htdocs/includes/class.Log.php';
-require __DIR__ . '/../htdocs/includes/class.Places.php';
-require __DIR__ . '/../htdocs/includes/class.Video.php';
-require __DIR__ . '/../htdocs/includes/vendor/autoload.php';
+require_once __DIR__ . '/../htdocs/includes/settings.inc.php';
+require_once __DIR__ . '/../htdocs/includes/class.Database.php';
+require_once __DIR__ . '/../htdocs/includes/class.Legislator.php';
+require_once __DIR__ . '/../htdocs/includes/class.Log.php';
+require_once __DIR__ . '/../htdocs/includes/class.Places.php';
+require_once __DIR__ . '/../htdocs/includes/class.Video.php';
+require_once __DIR__ . '/../htdocs/includes/vendor/autoload.php';
 
 $database = new Database();
 $db = $database->connect_mysqli();

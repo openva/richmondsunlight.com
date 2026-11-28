@@ -22,9 +22,9 @@ if (PHP_SAPI !== 'cli') {
     exit(1);
 }
 
-require __DIR__ . '/../htdocs/includes/settings.inc.php';
-require __DIR__ . '/../htdocs/includes/class.Database.php';
-require __DIR__ . '/../htdocs/includes/class.Password.php';
+require_once __DIR__ . '/../htdocs/includes/settings.inc.php';
+require_once __DIR__ . '/../htdocs/includes/class.Database.php';
+require_once __DIR__ . '/../htdocs/includes/class.Password.php';
 
 $database = new Database();
 $db = $database->connect_mysqli();
