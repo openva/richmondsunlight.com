@@ -283,6 +283,7 @@ CREATE TABLE `bills_status` (
   KEY `session_id` (`session_id`),
   KEY `bill_id` (`bill_id`),
   KEY `date` (`date`) USING BTREE,
+  KEY `date_created` (`date_created`),
   KEY `chamber` (`id`),
   FULLTEXT KEY `status` (`status`)
 ) ENGINE=InnoDB AUTO_INCREMENT=128340368 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
@@ -504,7 +505,7 @@ CREATE TABLE `dashboard_portfolios` (
   `name` varchar(120) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
   `hash` char(5) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
   `notes` text CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
-  `notify` enum('hourly','daily','none') CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT 'none',
+  `notify` enum('daily','none') CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT 'none',
   `public` enum('y','n') CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL DEFAULT 'n',
   `watch_list_id` mediumint(8) unsigned DEFAULT NULL,
   `view_count` mediumint(8) unsigned NOT NULL DEFAULT 0,
@@ -535,6 +536,7 @@ CREATE TABLE `dashboard_user_data` (
   `last_access` datetime NOT NULL,
   `expires` date DEFAULT NULL,
   `unsub_hash` char(8) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
+  `last_notified` datetime DEFAULT NULL,
   `date_created` datetime NOT NULL,
   `date_modified` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`user_id`),
@@ -648,6 +650,27 @@ CREATE TABLE `dockets` (
   KEY `date` (`date`,`committee_id`,`bill_id`),
   KEY `bill_id` (`bill_id`,`date`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2033325 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `email_log`
+--
+
+DROP TABLE IF EXISTS `email_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8mb4 */;
+CREATE TABLE `email_log` (
+  `id` int(10) unsigned NOT NULL AUTO_INCREMENT,
+  `user_id` int(8) unsigned NOT NULL,
+  `bills` smallint(5) unsigned NOT NULL,
+  `actions` smallint(5) unsigned NOT NULL,
+  `success` enum('y','n') NOT NULL,
+  `error` varchar(255) DEFAULT NULL,
+  `date_created` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `user_id` (`user_id`,`date_created`),
+  KEY `date_created` (`date_created`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
