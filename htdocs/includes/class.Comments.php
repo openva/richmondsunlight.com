@@ -98,13 +98,14 @@ class Comments
 					LEFT JOIN dashboard_user_data
 						ON dashboard_user_data.user_id = users.id
 					WHERE dashboard_bills.bill_id=' . $billInfo['id'] . ' AND dashboard_bills.notes IS NOT NULL
+					AND dashboard_bills.excluded = "n"
 					ORDER BY date_modified ASC';
             $result = mysqli_query($GLOBALS['db'], $sql);
             if (mysqli_num_rows($result) > 0) {
                 while ($comment = mysqli_fetch_array($result)) {
                     // Clean up the data.
                     $comment = array_map('stripslashes_nullsafe', $comment);
-                    $comment['comment'] = nl2p($comment['comment']);
+                    $comment['comment'] = Portfolio::notes_html($comment['comment']);
 
                     // Convert $seconds_since to minutes, hours, days, weeks or months.
                     $comment['time_since'] = seconds_to_units($comment['seconds_since']);

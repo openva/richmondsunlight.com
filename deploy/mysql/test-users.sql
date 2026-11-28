@@ -6,6 +6,7 @@ DELETE FROM polls WHERE bill_id = 76483;
 
 -- Remove any previous copies of these test users
 DELETE FROM dashboard_bills WHERE user_id IN (90001, 90002, 90003, 90004);
+DELETE FROM dashboard_watch_lists WHERE user_id IN (90001, 90002, 90003, 90004);
 DELETE FROM dashboard_user_data WHERE user_id IN (90001, 90002, 90003, 90004);
 DELETE FROM dashboard_portfolios WHERE user_id IN (90001, 90002, 90003, 90004);
 

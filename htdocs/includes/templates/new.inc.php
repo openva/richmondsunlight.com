@@ -555,30 +555,12 @@
             });
         });
 
-        // Photosynthesis sidebar
+        // Photosynthesis sidebar: shown if the page listed the user's portfolios in it (see
+        // Portfolio::sidebar_html()).
         $(document).ready(function() {
-
-            // Show the sidebar if there's a portfolio hash
-            if (typeof portfolios !== 'undefined') {
-
+            if ($.trim($('#portfolio-list').html()) !== '') {
                 $('#portfolio-sidebar').show();
                 $('#portfolio-sidebar').tabSlideOut({'tabLocation':'right','action':'click'});
-
-                // List all bills in all portfolios
-                $.each( portfolios, function( index, portfolio_hash ) {
-                    url = '<?php echo API_URL; ?>1.1/photosynthesis/' + portfolio_hash + '.json';
-                    $.getJSON(url, function(data) {
-                        $.each( data.bills, function( index, bill ) {
-                            
-                            var d = new Date(bill.date);
-                            var date = (d.getMonth() + 1) + "/" + d.getDate() + "/" + d.getFullYear();
-
-                            $( "#portfolio-list" ).append( '<div class="bill"><a href="' + bill.url + '">'
-                                + bill.number.toUpperCase() + '</a>: ' + bill.catch_line + ' <span class="last-updated">Updated&nbsp;' + date + '</span></div>');
-                        });
-                    });
-                });
-                $( "#portfolio-list" ).append('<p><a href="/photosynthesis/">View your portfolio »</a></p>');
             }
         });
 

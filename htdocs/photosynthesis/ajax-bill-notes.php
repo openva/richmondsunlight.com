@@ -21,45 +21,29 @@ include_once '../includes/photosynthesis.inc.php';
 $database = new Database();
 $db = $database->connect_mysqli();
 
-# Make sure we have all of the appropriate data.
+# INITIALIZE SESSION
+resume_session();
+
+# The notes are the logged-in user's, on a bill in one of their portfolios, sent with the session's
+# CSRF token.
+$user = @get_user();
 $id = filter_var($_POST['id'] ?? null, FILTER_VALIDATE_INT, ['options' => ['min_range' => 1]]);
-if ($id === false || !is_string($_POST['user_hash'] ?? null) || !is_string($_POST['value'] ?? null)) {
+if ($user === false || !Csrf::valid() || $id === false || !is_string($_POST['value'] ?? null)) {
+    http_response_code(403);
     die(' ');
 }
 
-# Strip out all tags other than the following.
+# Strip out all tags other than the following. (They're cleaned again whenever they're shown.)
 $notes = trim(strip_tags($_POST['value'], '<a><em><strong><i><b><s><blockquote><ol><ul><li>'));
 
-# Update the database.
-$sql = 'UPDATE dashboard_bills
-		SET notes = ?
-		WHERE id = ?
-		AND user_id = (
-			SELECT id
-			FROM users
-			WHERE private_hash = ?
-			LIMIT 1)';
-$result = mysqli_execute_query($GLOBALS['db'], $sql, [($notes === '' ? null : $notes), $id, $_POST['user_hash']]);
-if ($result === false) {
+$bill_id = Portfolio::set_notes((int) $user['id'], $id, $notes);
+if ($bill_id === null) {
+    http_response_code(404);
     die(' ');
 }
 
-# If the query was successful, send the data back to the browser for display.
-else {
-    /*
-     * Clear the Memcached cache of comments on this bill, since Photosynthesis comments are
-     * among them.
-     */
-    if (MEMCACHED_SERVER != '') {
-        $sql = 'SELECT bill_id AS id
-                FROM dashboard_bills
-                WHERE id = ?';
-        $result = mysqli_execute_query($GLOBALS['db'], $sql, [$id]);
-        $bill = mysqli_fetch_array($result);
-        $mc = new Memcached();
-        $mc->addServer(MEMCACHED_SERVER, 11211);
-        $mc->delete('comments-' . $bill['id']);
-    }
+# Photosynthesis notes are among a bill's comments.
+Portfolio::expire_bills([$bill_id]);
 
-    echo $notes;
-}
+# Send the notes back to the browser for display.
+echo Portfolio::notes_html($notes);

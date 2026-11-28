@@ -210,56 +210,35 @@ test.describe('Bill interactions', () => {
       { name: 'PHPSESSID', value: match[1], domain: 'rs_web', path: '/' },
     ]);
 
-    // Clean up: if this bill was tracked in a previous test run, delete it first so the
-    // track button appears. The delete link has a confirm() dialog that must be accepted.
-    await page.goto('/photosynthesis/');
-    const deleteLink = page.locator('a[href*="/photosynthesis/delete/pwt04-"]').first();
-    if (await deleteLink.count() > 0) {
-      page.once('dialog', dialog => dialog.accept());
-      await deleteLink.click();
-      await page.waitForURL(/\/photosynthesis\//);
-    }
-
-    // The login handler populates $_SESSION['portfolios'], so we can navigate directly to the
-    // bill page without visiting /photosynthesis/ first.
     await page.goto(billPath);
 
-    const trackBtn = page.locator('#track-bill-btn');
-    await expect(trackBtn).toBeVisible({ timeout: 10000 });
-    await expect(trackBtn).toHaveText('Track this Bill');
+    // tester@example.com's portfolio, pwt04, has a checkbox.
+    const box = page.locator('#track-bill input.track-portfolio[data-portfolio="pwt04"]');
+    await expect(box).toBeVisible({ timeout: 10000 });
+    const posted = () => page.waitForResponse(r => r.url().includes('/photosynthesis/process-actions.php'));
 
-    // Click "Track this Bill" and verify AJAX response
-    const [trackResponse] = await Promise.all([
-      page.waitForResponse(
-        r => r.url().includes('/photosynthesis/process-actions.php') && r.status() === 200
-      ),
-      trackBtn.click(),
-    ]);
-    const trackBody = await trackResponse.json();
+    // If a previous run left the bill in it, take it out first.
+    if (await box.isChecked()) {
+      const [cleared] = await Promise.all([posted(), box.uncheck()]);
+      expect(cleared.status()).toBe(200);
+    }
+
+    // Checking it adds the bill, without leaving the page.
+    const [tracked] = await Promise.all([posted(), box.check()]);
+    expect(tracked.status()).toBe(200);
+    const trackBody = await tracked.json();
     expect(trackBody.success).toBe(true);
     expect(trackBody.record_id).toBeTruthy();
-
-    // Verify no page navigation occurred
     await expect(page).toHaveURL(new RegExp(escapeRegex(billPath)));
+    await expect(box).toHaveAttribute('data-record', String(trackBody.record_id));
+    await expect(box).toBeEnabled();
 
-    // Verify the button toggled to "Stop Tracking"
-    const stopBtn = page.locator('#track-bill-btn');
-    await expect(stopBtn).toHaveText('Stop Tracking');
-    await expect(stopBtn).toHaveAttribute('data-state', 'tracking');
-
-    // Click "Stop Tracking" and verify AJAX response
-    const [untrackResponse] = await Promise.all([
-      page.waitForResponse(
-        r => r.url().includes('/photosynthesis/process-actions.php') && r.status() === 200
-      ),
-      stopBtn.click(),
-    ]);
-    const untrackBody = await untrackResponse.json();
-    expect(untrackBody.success).toBe(true);
-
-    // Verify the button toggled back to "Track this Bill"
-    await expect(page.locator('#track-bill-btn')).toHaveText('Track this Bill');
-    await expect(page.locator('#track-bill-btn')).toHaveAttribute('data-state', 'untracked');
+    // Unchecking it removes it.
+    const [untracked] = await Promise.all([posted(), box.uncheck()]);
+    expect(untracked.status()).toBe(200);
+    expect((await untracked.json()).success).toBe(true);
+    await expect(box).not.toBeChecked();
+    await expect(box).toHaveAttribute('data-record', '');
   });
 
   test('bill detail page renders patron name', async ({ page }) => {

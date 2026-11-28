@@ -24,6 +24,12 @@ async function loginTestUser(page) {
   ]);
 }
 
+// The session's CSRF token, which Photosynthesis's forms include (see class.Csrf.php).
+async function csrfToken(page) {
+  await page.goto('/photosynthesis/');
+  return page.locator('input[name="csrf_token"]').first().inputValue();
+}
+
 test.describe('vote page', () => {
   // SB839's vote S07V270, in test-records.sql
   test('shows a vote', async ({ request }) => {
@@ -68,10 +74,12 @@ test.describe('code-section-json.php', () => {
 });
 
 test.describe('Photosynthesis', () => {
-  test('ajax-bill-notes.php refuses an ID that is not a number', async ({ request }) => {
+  test('ajax-bill-notes.php refuses an ID that is not a number', async ({ page }) => {
+    await loginTestUser(page);
+    const token = await csrfToken(page);
     const started = Date.now();
-    const resp = await request.post('/photosynthesis/ajax-bill-notes.php', {
-      form: { user_hash: 'testuser', id: '0 OR SLEEP(3)', value: 'Notes' },
+    const resp = await page.request.post('/photosynthesis/ajax-bill-notes.php', {
+      form: { csrf_token: token, id: '0 OR SLEEP(3)', value: 'Notes' },
     });
     expect(await resp.text()).toBe(' ');
     expect(Date.now() - started).toBeLessThan(2500);
@@ -80,8 +88,9 @@ test.describe('Photosynthesis', () => {
   test('a portfolio can be named with quotes', async ({ page }) => {
     await loginTestUser(page);
     const name = `O"Brien's Portfolio ${Date.now()}`;
+    const token = await csrfToken(page);
     const resp = await page.request.post('/photosynthesis/process-actions.php', {
-      form: { 'add-portfolio': 'y', 'form_data[name]': name },
+      form: { 'add-portfolio': 'y', 'form_data[name]': name, csrf_token: token },
       headers: { Referer: '/photosynthesis/' },
     });
     expect(resp.status()).toBe(200);
@@ -89,14 +98,14 @@ test.describe('Photosynthesis', () => {
     await expect(page.locator('h1').filter({ hasText: name })).toBeVisible({ timeout: 15000 });
   });
 
-  test('a portfolio can be edited, but not by an ID that is not a number', async ({ page }) => {
+  test('a portfolio can be edited, but only by its owner', async ({ page }) => {
     await loginTestUser(page);
     await page.goto('/photosynthesis/portfolios/edit/pwt01/');
-    const id = await page.locator('#portfolio-id').inputValue();
-    const edit = (portfolioId, notes) => page.request.post('/photosynthesis/portfolios/edit/pwt01/', {
+    const token = await page.locator('input[name="csrf_token"]').first().inputValue();
+    const edit = (hash, notes) => page.request.post(`/photosynthesis/portfolios/edit/${hash}/`, {
       form: {
         submit: 'y',
-        'form_data[id]': portfolioId,
+        csrf_token: token,
         'form_data[name]': 'Test Portfolio',
         'form_data[notes]': notes,
         'form_data[public]': 'n',
@@ -105,30 +114,33 @@ test.describe('Photosynthesis', () => {
       maxRedirects: 0,
     });
 
-    // A successful edit redirects to the list of portfolios.
+    // A successful edit redirects to the portfolio; another user's portfolio, to the list.
     const notes = `Notes with "quotes" ${Date.now()}`;
-    expect((await edit(id, notes)).status()).toBe(302);
-    expect((await edit(`${id} OR 1=1`, 'Not saved')).status()).toBe(200);
+    expect((await edit('pwt01', notes)).headers().location).toBe('/photosynthesis/#pwt01');
+    expect((await edit('pwt04', 'Not saved')).headers().location).toBe('/photosynthesis/');
 
     await page.goto('/photosynthesis/portfolios/edit/pwt01/');
     await expect(page.locator('#notes')).toHaveValue(notes);
   });
 
-  test('a smart portfolio can have quotes in its keyword', async ({ page }) => {
+  test('a smart portfolio can have quotes in its tag', async ({ page }) => {
     await loginTestUser(page);
     const name = `Smart Portfolio ${Date.now()}`;
+    const token = await csrfToken(page);
     const started = Date.now();
     const resp = await page.request.post('/photosynthesis/process-actions.php', {
       form: {
+        csrf_token: token,
         'add-smart-portfolio': 'y',
         'form_data[name]': name,
-        'form_data[keyword]': '"school") OR SLEEP(3) #',
+        'form_data[tag]': '"school") OR SLEEP(3) #',
       },
       headers: { Referer: '/photosynthesis/' },
     });
     expect(resp.status()).toBe(200);
     expect(Date.now() - started).toBeLessThan(2500);
     await page.goto('/photosynthesis/');
-    await expect(page.locator('h1').filter({ hasText: name })).toBeVisible({ timeout: 15000 });
+    const portfolio = page.locator('.portfolio', { has: page.locator('h1', { hasText: name }) });
+    await expect(portfolio.locator('.criteria')).toContainText('"school") or sleep(3) #');
   });
 });

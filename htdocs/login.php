@@ -109,25 +109,9 @@ if (isset($_POST['submit'])) {
                 $_SESSION['name'] = $user['name'];
             }
 
-            # Gather up the user's Photosynthesis portfolio data and store it in the session data,
-            # to be used throughout the site.
-            $sql = 'SELECT id, hash, name, watch_list_id
-					FROM dashboard_portfolios
-					WHERE watch_list_id IS NULL AND user_id=' . $user['id'] . '
-					ORDER BY name ASC';
-            $result = mysqli_query($GLOBALS['db'], $sql);
-            if (mysqli_num_rows($result) > 0) {
-                while ($portfolio = mysqli_fetch_array($result)) {
-                    $portfolio = array_map('stripslashes_nullsafe', $portfolio);
-
-                    # Store the name and ID of this portfolio in the session, for use on the
-                    # rest of the site.
-                    $_SESSION['portfolios'][] = $portfolio;
-                }
-
-                # Indicate via session data that this is a registered user.
-                $_SESSION['registered'] = 'y';
-            }
+            # Indicate via session data that this is a registered user. (Pages look up the
+            # user's portfolios when they need them.)
+            $_SESSION['registered'] = 'y';
 
             $log->put('User ' . $user['name'] . ' has logged in.', 2);
 

@@ -115,18 +115,17 @@ class Page
         }
 
         /*
-         * Inject a Javascript array of bill portfolio IDs into the HTML.
+         * The "Your Bill Portfolio" tab: the logged-in user's portfolios and their bills, from the
+         * database (see Portfolio::sidebar_html()). The template shows the tab if it has anything.
          */
-        if (isset($_SESSION['portfolios'])) {
-            $portfolio_js = '<script>var portfolios = [];';
-            foreach ($_SESSION['portfolios'] as $portfolio) {
-                $portfolio_js .= 'portfolios.push("' . $portfolio['hash'] . '");';
+        $portfolio_list = '';
+        if (!empty($_SESSION['id']) && isset($GLOBALS['db']) && $GLOBALS['db'] instanceof mysqli) {
+            $user = get_user();
+            if (Portfolio::can_use($user)) {
+                $portfolio_list = Portfolio::sidebar_html((int) $user['id']);
             }
-            $portfolio_js .= '</script>';
-
-            # Note that we retain the placeholder tag, because the actual replacement comes later.
-            $page = str_replace('%html_head%', '%html_head% ' . $portfolio_js, $page);
         }
+        $page = str_replace('<div id="portfolio-list"></div>', '<div id="portfolio-list">' . $portfolio_list . '</div>', $page);
 
         /*
          * By default, the page header says that the legislature is not in sesssion. But if they

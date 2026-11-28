@@ -236,13 +236,64 @@ ul.tabs li a {
 	width: 100px;
 }
 
-/* Delete bill button */
-a.delete-bill {
-	color: #790806;
-	font-size: 0.8em;
-	text-decoration: none;
+/* Whether a portfolio is public, and a smart portfolio's criteria */
+div.portfolio p.visibility,
+div.portfolio p.criteria {
+	margin: 0;
+	padding: .5em 10px;
+	font-size: .9em;
 }
-	a.delete-bill:hover {
+	div.portfolio p.criteria {
+		padding-top: 0;
+		font-weight: bold;
+	}
+
+/* A smart portfolio's hidden bills, and notes about its criteria */
+div.portfolio div.hidden-bills,
+div.portfolio p.criteria-note {
+	padding: .5em 10px;
+	font-size: .9em;
+}
+	div.portfolio div.hidden-bills p {
+		margin: 0 0 .25em;
+	}
+	div.portfolio div.hidden-bills ul {
+		margin: 0;
+		padding-left: 1.5em;
+	}
+
+/* Delete buttons: forms (they're posted, with a CSRF token) that look like links */
+form.delete-bill,
+form.hide-bill,
+form.show-bill,
+form.delete-portfolio {
+	display: inline;
+	margin: 0;
+}
+	form.delete-bill button,
+	form.hide-bill button,
+	form.show-bill button,
+	form.delete-portfolio button {
+		background: none;
+		border: none;
+		padding: 0;
+		font: inherit;
+		text-transform: inherit;
+		cursor: pointer;
+	}
+	form.delete-bill button,
+	form.hide-bill button,
+	form.show-bill button {
+		color: #790806;
+		font-size: 0.8em;
+	}
+	form.delete-portfolio button {
+		color: #000;
+	}
+	form.delete-bill button:hover,
+	form.hide-bill button:hover,
+	form.show-bill button:hover,
+	form.delete-portfolio button:hover {
 		text-decoration: underline;
 	}
 

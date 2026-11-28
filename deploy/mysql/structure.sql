@@ -480,6 +480,7 @@ CREATE TABLE `dashboard_bills` (
   `bill_id` mediumint(8) unsigned NOT NULL,
   `portfolio_id` mediumint(8) unsigned NOT NULL,
   `notes` text DEFAULT NULL,
+  `excluded` enum('y','n') NOT NULL DEFAULT 'n',
   `date_created` datetime NOT NULL,
   `date_modified` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
@@ -555,9 +556,6 @@ CREATE TABLE `dashboard_watch_lists` (
   `tag` varchar(30) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
   `patron_id` smallint(6) DEFAULT NULL,
   `committee_id` tinyint(3) unsigned DEFAULT NULL,
-  `keyword` varchar(120) CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
-  `status` enum('introduced','passed house','passed senate','passed','failed','continued','approved','vetoed') CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
-  `current_chamber` enum('house','senate') CHARACTER SET latin1 COLLATE latin1_swedish_ci DEFAULT NULL,
   `date_created` datetime NOT NULL,
   `date_modified` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`id`),
@@ -1104,6 +1102,7 @@ CREATE TABLE `video_index` (
   KEY `Player` (`type`,`linked_id`),
   KEY `subquery` (`file_id`,`linked_id`),
   KEY `ignore` (`ignored`),
+  KEY `raw_text` (`raw_text`,`type`,`linked_id`),
   CONSTRAINT `video_index_ibfk_1` FOREIGN KEY (`file_id`) REFERENCES `files` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION,
   CONSTRAINT `video_index_ibfk_2` FOREIGN KEY (`file_id`) REFERENCES `files` (`id`) ON DELETE CASCADE ON UPDATE NO ACTION
 ) ENGINE=InnoDB AUTO_INCREMENT=1255366 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_bin;

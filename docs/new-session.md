@@ -147,6 +147,11 @@ Once bills are arriving, check that:
 - [ ] A new-session bill appears at `/bill/YYYY/hb1/`, with its patron, summary, and full text.
 - [ ] The API returns it: `https://api.richmondsunlight.com/1.1/bills/YYYY.json`.
 - [ ] Bill status narratives and fiscal impact statements are being generated.
-- [ ] Photosynthesis portfolios and email alerts include new-session bills.
+- [ ] Photosynthesis portfolios and email alerts include new-session bills. Smart portfolios
+  gather only the current session's bills, so each starts the new session empty and fills as
+  bills are filed, tagged, and referred (rs-machine's `photosynthesis` task, hourly). Its
+  committee and patron choices list the committees and legislators of the new session once
+  they're in the database (steps 7 and 8). A smart portfolio whose committee no longer exists
+  gathers nothing by committee: its owner has to choose another.
 
 Once the session convenes, check that votes, dockets and meetings, and video (both chambers' pollers, then the video processor) are all being attributed to the new session.

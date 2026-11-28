@@ -34,114 +34,103 @@ resume_session();
 # DEFINE FUNCTIONS
 function show_form($form_data)
 {
-    global $user;
-    $content = '
-        <form method="post" action="' . $_SERVER['REQUEST_URI'] . '">
-
+    $active = ($form_data['email_active'] ?? 'y') ?: 'y';
+    return '
+        <form method="post" action="/photosynthesis/preferences/">
+            ' . Csrf::field() . '
             <table class="form">
                 <tr><td><label for="name">Name</label></td></tr>
-                <tr><td><input type="text" size="20" maxlength="60" id="name" name="form_data[name]" value="' . (!empty($form_data['name']) ? $form_data['name'] : '') . '" /></td></tr>
-                <tr><td><label for="name">E-Mail Address</label></td></tr>
-                <tr><td><input type="text" size="20" maxlength="60" id="email" name="form_data[email]" value="' . (!empty($form_data['email']) ? $form_data['email'] : '') . '" /></td></tr>
-                <tr><td><label for="name">Password</label></td></tr>
-                <tr><td><input type="password" size="20" maxlength="30" id="password" name="form_data[password]" value="' . (!empty($form_data['password']) ? $form_data['password'] : '') . '" /></td></tr>
-                <tr><td><small>Enter a password to switch to a new one.</small></td>';
-
-    if ($user['type'] == 'paid') {
-        $content .= '
+                <tr><td><input type="text" size="20" maxlength="60" id="name" name="form_data[name]" value="' . Portfolio::text($form_data['name'] ?? '') . '" /></td></tr>
+                <tr><td><label for="email">E-Mail Address</label></td></tr>
+                <tr><td><input type="email" size="20" maxlength="60" id="email" name="form_data[email]" value="' . Portfolio::text($form_data['email'] ?? '') . '" /></td></tr>
+                <tr><td><label for="password">Password</label></td></tr>
+                <tr><td><input type="password" size="20" maxlength="30" id="password" name="form_data[password]" value="" autocomplete="new-password" /></td></tr>
+                <tr><td><small>Enter a password to switch to a new one.</small></td></tr>
                 <tr><td>
                     <fieldset id="email-active">
                         <legend>Receive E-Mail Updates?</legend>
-                        <input type="radio" name="form_data[email_active]" id="email-active-y" value="y"' . (($form_data['email_active'] == 'y') ? ' checked="checked"' : '') . ' /><label for="email-active-y">Send e-mail updates as scheduled</label>
-                        <input type="radio" name="form_data[email_active]" id="email-active-n" value="n"' . (($form_data['email_active'] == 'n') ? ' checked="checked"' : '') . ' /><label for="email-active-n">Temporarily suspend e-mail updates for portfolios</label>
+                        <input type="radio" name="form_data[email_active]" id="email-active-y" value="y"' . ($active == 'y' ? ' checked="checked"' : '') . ' /><label for="email-active-y">Send e-mail updates about my portfolios, as each one is set to</label>
+                        <input type="radio" name="form_data[email_active]" id="email-active-n" value="n"' . ($active == 'n' ? ' checked="checked"' : '') . ' /><label for="email-active-n">Don’t send me any e-mail updates</label>
                     </fieldset>
-                </td></tr>';
-    }
-
-    $content .= '
+                </td></tr>
                 <tr><td><input type="submit" name="submit" value="Save Changes" /></td></tr>
             </table>
-
         </form>';
-
-    return $content;
 }
 
-# Grab the user data. Bail if none is available.
+# Grab the user data. Send them to log in if they aren't.
 $user = get_user();
+if (!Portfolio::can_use($user)) {
+    header('Location: /account/login/?return_uri=' . urlencode($_SERVER['REQUEST_URI']));
+    exit();
+}
+$user_id = (int) $user['id'];
 
 if (isset($_POST['submit'])) {
-    $form_data = array_map(function ($field) {
-        return mysqli_real_escape_string($GLOBALS['db'], $field);
-    }, $_POST['form_data']);
+    $form_data = (isset($_POST['form_data']) && is_array($_POST['form_data'])) ? $_POST['form_data'] : [];
+    $form_data = array_map(fn($field) => is_string($field) ? trim($field) : '', $form_data);
 
-    # Error correction.
-    if (empty($form_data['name'])) {
+    $errors = [];
+    if (($form_data['name'] ?? '') === '') {
         $errors[] = 'your name';
     }
-    if (empty($form_data['email'])) {
+    if (!filter_var($form_data['email'] ?? '', FILTER_VALIDATE_EMAIL)) {
         $errors[] = 'your e-mail address';
     }
-    if ($user['type'] == 'paid') {
-        if (empty($form_data['email_active'])) {
-            $form_data['email_active'] = 'n';
-        }
-    }
 
-    # Alert the user if any of these errors are show-stoppers.
-    if (isset($errors)) {
-        $error_text = implode('</li><li>', $errors);
+    if (!Csrf::valid()) {
+        $message = '<div id="messages" class="errors">Sorry: This page was out of date. Please make your changes again.</div>';
+    } elseif (count($errors) > 0) {
         $message = '<div id="messages" class="errors">
                 <ul>
-                    <li>' . $error_text . '</li>
+                    <li>' . implode('</li><li>', array_map([Portfolio::class, 'text'], $errors)) . '</li>
                 </ul>
             </div>';
     } else {
-        # Clean up the data.
-        $form_data = array_map(function ($field) {
-            return mysqli_real_escape_string($GLOBALS['db'], $field);
-        }, $_POST['form_data']);
+        $sql = 'UPDATE users SET name = ?, email = ?';
+        $params = [mb_substr($form_data['name'], 0, 60), mb_substr($form_data['email'], 0, 60)];
+        if (($_POST['form_data']['password'] ?? '') !== '' && is_string($_POST['form_data']['password'])) {
+            $sql .= ', password = ?';
+            $params[] = Password::hash($_POST['form_data']['password']);
+        }
+        $sql .= ' WHERE id = ?';
+        $params[] = $user_id;
+        $result = mysqli_execute_query($GLOBALS['db'], $sql, $params);
 
-        # Create a password hash from the password, exactly as typed, and store that.
-        if (!empty($form_data['password'])) {
-            $form_data['password_hash'] = Password::hash((string) $_POST['form_data']['password']);
+        # Email settings are in the user's Photosynthesis settings, made if they don't have them.
+        Portfolio::ensure_user_data($user_id);
+        $result = $result && mysqli_execute_query(
+            $GLOBALS['db'],
+            'UPDATE dashboard_user_data SET email_active = ? WHERE user_id = ?',
+            [($form_data['email_active'] ?? 'y') === 'n' ? 'n' : 'y', $user_id]
+        );
+
+        # get_user() keeps a copy of the user's record for an hour.
+        if (MEMCACHED_SERVER != '' && class_exists('Memcached')) {
+            $mc = new Memcached();
+            $mc->addServer(MEMCACHED_SERVER, MEMCACHED_PORT);
+            $mc->delete('user-' . $_SESSION['id']);
         }
 
-        # Conduct the actual query.
-        $sql = 'UPDATE users, dashboard_user_data
-                SET users.name = "' . $form_data['name'] . '", users.email = "' . $form_data['email'] . '"
-                ' . (!empty($form_data['password_hash']) ? ', users.password = "' . $form_data['password_hash'] . '"' : '') . '
-                ' . (!empty($form_data['email_active']) ? ', dashboard_user_data.email_active = "' . $form_data['email_active'] . '"' : '') . '
-                WHERE users.cookie_hash="' . $_SESSION['id'] . '"';
-        $result = mysqli_query($GLOBALS['db'], $sql);
-
-        # Report on the results.
-        if (!$result) {
-            $message = '<div id="messages" class="errors">Your preferences could not be saved.</div>';
-        } else {
-            $message = '<div id="messages" class="updated">Preferences updated successfully.</div>';
-        }
+        $message = $result
+            ? '<div id="messages" class="updated">Preferences updated successfully.</div>'
+            : '<div id="messages" class="errors">Your preferences could not be saved.</div>';
     }
 }
 
-# Display the result of the query, if there was one.
-if (isset($message)) {
-    $page_body = $message;
-}
-
-# Assemble the SQL query.
+# The user's preferences, as they are now.
 $sql = 'SELECT users.id, users.name, users.email, dashboard_user_data.email_active
         FROM users LEFT JOIN dashboard_user_data ON users.id = dashboard_user_data.user_id
-        WHERE users.cookie_hash="' . $_SESSION['id'] . '"';
-$result = mysqli_query($GLOBALS['db'], $sql);
-if (mysqli_num_rows($result) == 0) {
+        WHERE users.id = ?';
+$result = mysqli_execute_query($GLOBALS['db'], $sql, [$user_id]);
+$preferences = $result ? mysqli_fetch_assoc($result) : null;
+if (!$preferences) {
     login_redirect();
 }
-$preferences = mysqli_fetch_array($result);
 $preferences = array_map('stripslashes_nullsafe', $preferences);
 
-# Display the preferences form.
-$page_body = ($page_body ?? '') . @show_form($preferences);
+# Display the result of saving them, if they were, and the form.
+$page_body = ($message ?? '') . show_form($preferences);
 
 // OUTPUT THE PAGE
 $page = new Page();

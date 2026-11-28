@@ -193,7 +193,9 @@ if (isset($_POST['submit'])) {
             die('Your account could not be updated.');
         }
 
-        # Update the organization data.
+        # Update the organization data, in the user's Photosynthesis settings (made if they don't
+        # have them yet).
+        Portfolio::ensure_user_data((int) $user['id']);
         $sql = 'UPDATE dashboard_user_data
 				SET organization=' . (empty($form_data['organization']) ? 'NULL' : '"' . $form_data['organization'] . '"') . '
 				WHERE user_id=' . $user['id'];
